@@ -49,6 +49,7 @@ class Canvas:
         self.ink = []
         self.shadow = np.zeros((h, w), bool)
         self.blend_parts, self.blend_zone = (), np.zeros((h, w), bool)
+        self.blend_w = np.zeros((h, w))  # 1 = shade as one mass with the back, fading to 0 towards the armpit
 
     def _blend_ids(self):
         return [self.parts[n] for n in self.blend_parts if n in self.parts]
@@ -136,13 +137,16 @@ class Canvas:
     # --- output -------------------------------------------------------------------------------------------------
     def render(self, shadow_box=None):
         filled = self.mat >= 0
-        # shoulders and back read as one mass: shade the blend zone with a single cross-section normal
+        # shoulders and back read as one mass: blend arm/torso normals into a shared cross-section near the top
         u = np.isin(self.part, self._blend_ids()) & self.blend_zone
         for y in np.nonzero(u.any(1))[0]:
             xs = np.nonzero(u[y])[0]
             mid, half = (xs[0] + xs[-1] + 1) / 2.0, max((xs[-1] - xs[0] + 1) / 2.0, 0.5)
             nx = np.clip((self.X[y, xs] - mid) / half, -1, 1) * 0.85
-            self.n[y, xs] = np.stack([nx, np.full_like(nx, -0.12), np.sqrt(np.clip(1 - nx * nx - 0.0144, 0, 1)) + 0.05], -1)
+            cs = np.stack([nx, np.full_like(nx, -0.12), np.sqrt(np.clip(1 - nx * nx - 0.0144, 0, 1)) + 0.05], -1)
+            wt = self.blend_w[y, xs][:, None]
+            n = wt * cs + (1 - wt) * self.n[y, xs]
+            self.n[y, xs] = n / np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
         s = np.einsum("hwc,c->hw", self.n, LIGHT)
         v = 0.42 + 0.58 * s
         bay = np.tile(BAY, (self.h // 4 + 1, self.w // 4 + 1))[: self.h, : self.w]
@@ -152,7 +156,7 @@ class Canvas:
         pad = np.pad(filled, 1)
         inner = pad[:-2, 1:-1] & pad[2:, 1:-1] & pad[1:-1, :-2] & pad[1:-1, 2:]
         edge = filled & ~inner
-        tone = np.where(edge, np.where(s < 0.22, 0, tone - 1), tone)
+        tone = np.where(edge, np.where(s < 0.22, 0, np.minimum(tone - 1, 2)), tone)  # crisp outline even on lit edges
         # a part lying behind another part gets a darker seam where they meet
         pp = np.pad(self.part, 1, constant_values=-1)
         behind = np.zeros_like(filled)
@@ -247,7 +251,9 @@ def figure(spec, ps, fw=56, fh=80):
         return p
 
     c.blend_parts = ("torso", "arm1", "arm-1")
-    c.blend_zone = c.Y < base + (0.3 + dy - 1.0) * H
+    y_full, y_end = base + (0.29 + dy - 1.0) * H, base + (0.37 + dy - 1.0) * H  # cap .. armpit
+    c.blend_zone = c.Y < y_end
+    c.blend_w = np.clip((y_end - c.Y) / (y_end - y_full), 0, 1)
 
     def P(p):
         bx, by, bz = p
@@ -299,17 +305,26 @@ def figure(spec, ps, fw=56, fh=80):
 
     def trunk():
         hem_top = spec.get("top_hem", 0.45)
-        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.66, 0.05), (0.245, sw * 1.0, 0.064), (0.31, sw * 0.95, 0.07),
+        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.62, 0.05), (0.232, sw * 0.86, 0.058), (0.25, sw * 1.0, 0.064), (0.31, sw * 0.95, 0.07),
                   (0.40, waist, 0.058), (0.47, hipw, 0.064), (0.53, hipw * 0.86, 0.056)]
         left, right = [], []
         for y, ax, az in levels:
             cxy = P(body([shift * min(1.0, max(0.0, (y - 0.3) / 0.2)), y, 0.004]))
             k = 1.0 if y < 0.3 else BULK
             w = H * math.sqrt((ax * k * cp) ** 2 + (az * 1.25 * sp) ** 2)
-            tilt = math.copysign(1.0, cp) * ax * k * sp * H * PITCH  # far shoulder sits higher, as the arms do
+            tilt = 0.5 * math.copysign(1.0, cp) * ax * k * sp * H * PITCH  # far shoulder sits higher, as the arms do
             left.append((cxy[0] - w, cxy[1] + tilt))
             right.append((cxy[0] + w, cxy[1] - tilt))
-        c.put(c.poly(left + right[::-1], curve=0.9), torso, "torso")
+        shape = list(c.poly(left + right[::-1], curve=0.9))
+        for s in (1, -1):  # rounded shoulder caps centred on the arm joints, so the shoulder flows into the sleeve
+            cx_, cy_, cd_ = P(body([s * (sw + 0.004), 0.268, 0.0]))
+            cap = c.ellipse((cx_, cy_ - 0.5 * cd_ * H * PITCH), H * 0.035 * BULK, H * 0.032 * BULK)
+            new = cap[0] & ~shape[0]
+            blend = cap[0] & shape[0]
+            for i in (1, 2, 3):
+                shape[i] = np.where(new, cap[i], np.where(blend, (shape[i] + cap[i]) / 2, shape[i]))
+            shape[0] = shape[0] | cap[0]
+        c.put(tuple(shape), torso, "torso")
         if col.get("abdomen"):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
                       col["abdomen"])
@@ -323,7 +338,7 @@ def figure(spec, ps, fw=56, fh=80):
     arm_pts = {}
     for s in (1, -1):
         kind, f, o, e = ps["arms"][s]
-        sh = body([s * (sw + 0.01), 0.256, 0.0])
+        sh = body([s * (sw + 0.008), 0.284, 0.0])  # below the cap top: the torso's shoulder cap forms the contour
         if kind == "hip":
             el = body([s * (sw + 0.07), 0.345, -0.035])
             wr = body([s * (hipw - 0.005), 0.455, 0.0])
@@ -339,7 +354,7 @@ def figure(spec, ps, fw=56, fh=80):
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
-            el = sh + 0.17 * d1
+            el = sh + 0.142 * d1
             d2 = np.array([s * math.sin(orr) * 0.3, math.cos(fr + er), math.sin(fr + er)])
             d2 /= np.linalg.norm(d2)
             wr = el + 0.145 * d2

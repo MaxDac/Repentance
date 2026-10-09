@@ -31,7 +31,8 @@ public partial class Player : Node2D, ISpeaker
 
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 70 * Scale.Y);
+    /// <summary>Speech anchor: a few pixels above the top of the head (or hat), which sits ~83px above the feet.</summary>
+    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 92 * Scale.Y);
 
     public bool Talking
     {
