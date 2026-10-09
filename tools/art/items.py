@@ -1,7 +1,7 @@
 """Inventory icons (32x24)."""
 from PIL import Image, ImageDraw
 from .common import hx, save, text
-from .sprites import _shade, _outline
+from .iconfx import _shade, _outline
 
 
 def _icon(draw_fn):
@@ -48,7 +48,52 @@ def journal(d, im):
     d.line([(20, 2), (21, 23)], fill=hx("8a1a1a"))
 
 
+def key(d, im):
+    d.ellipse([3, 7, 13, 17], fill=hx("c8a040"))
+    d.ellipse([6, 10, 10, 14], fill=(0, 0, 0, 0))
+    d.rectangle([12, 11, 27, 13], fill=hx("c8a040"))
+    d.rectangle([22, 13, 24, 17], fill=hx("c8a040"))
+    d.rectangle([26, 13, 27, 16], fill=hx("c8a040"))
+    d.polygon([(14, 14), (22, 14), (22, 21), (14, 21)], fill=hx("8a1a2a"))
+    text(im, (18, 17), "4", hx("e8d8a0", 255), size=6)
+
+
+def diary(d, im):
+    d.polygon([(7, 3), (25, 3), (25, 21), (7, 21)], fill=hx("6a2a4a"))
+    d.rectangle([7, 3, 9, 21], fill=hx("4a1a32"))
+    d.rectangle([25, 4, 26, 20], fill=hx("e8dcc0"))
+    d.rectangle([13, 9, 21, 14], fill=hx("d8b050"))
+    d.rectangle([22, 10, 27, 13], fill=hx("b89040"))
+
+
+def ledger(d, im):
+    d.polygon([(4, 4), (28, 4), (28, 20), (4, 20)], fill=hx("2a3a2a"))
+    d.rectangle([4, 4, 7, 20], fill=hx("6a4a2a"))
+    d.rectangle([25, 4, 28, 20], fill=hx("6a4a2a"))
+    d.rectangle([12, 8, 22, 12], fill=hx("c8b890"))
+    d.line([(13, 10), (21, 10)], fill=hx("3a2a1a"))
+    d.line([(6, 20), (27, 20)], fill=hx("e0d4b0"))
+
+
+def map_(d, im):
+    d.polygon([(3, 5), (11, 3), (20, 6), (29, 3), (29, 19), (20, 22), (11, 19), (3, 21)], fill=hx("d8c898"))
+    d.line([(11, 3), (11, 19)], fill=hx("a89060"))
+    d.line([(20, 6), (20, 22)], fill=hx("a89060"))
+    d.line([(5, 16), (10, 12), (16, 14), (22, 9)], fill=hx("6a5a40"))
+    d.line([(22, 8), (26, 12)], fill=hx("b02020"), width=2)
+    d.line([(26, 8), (22, 12)], fill=hx("b02020"), width=2)
+
+
+def evidence(d, im):
+    d.rectangle([4, 7, 28, 20], fill=hx("5a5a62"))
+    d.rectangle([4, 7, 28, 10], fill=hx("74747c"))
+    d.rectangle([14, 11, 18, 15], fill=hx("c8a040"))
+    d.polygon([(7, 4), (14, 6), (13, 9), (6, 8)], fill=hx("e0d8c0"))
+    d.ellipse([20, 3, 25, 8], fill=hx("d8b050"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
-                     ("journal", journal)):
+                     ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger), ("map", map_),
+                     ("evidence", evidence)):
         save(_icon(fn), "items", f"{name}.png")

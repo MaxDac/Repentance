@@ -74,7 +74,9 @@ public class AutoPlay
             await Shot("lobby");
             await game.Perform(Verb.Talk, "concierge");
             await game.Perform(Verb.Walk, "revolving_door");
-            Check(game.Room?.Name == "Lobby", "revolving door is gated");
+            Check(game.Room?.Name == "Street", "revolving door leads to the street before the tip");
+            await game.Perform(Verb.Walk, "lobby_door");
+            Check(game.Room?.Name == "Lobby", "back in the lobby");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
             Check(gs.HasFlag("knows_lantern"), "bellboy tip");
@@ -89,10 +91,73 @@ public class AutoPlay
             await game.Perform(Verb.Talk, "sal");
             Check(gs.HasFlag("sal_passed"), "password accepted");
             await Shot("speakeasy_inside");
-            _ = game.Perform(Verb.Talk, "bartender");
+            await game.Perform(Verb.Talk, "bartender");
+            Check(gs.HasFlag("photo_shown") && gs.HasFlag("club_lead"), "bartender points to the Starlight");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "Street", "speakeasy door leads to the street");
+
+            // ---- the temporary story: every location in order
+            await Shot("street");
+            await game.Perform(Verb.Walk, "club_door");
+            Check(game.Room?.Name == "ClubHall", "entered the Starlight");
+            await Shot("club_hall");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "ClubLounge", "entered the lounge");
+            await Shot("club_lounge");
+            await game.Perform(Verb.Talk, "harrington");
+            Check(gs.HasFlag("harrington_met"), "met Teddy's father in the lounge");
+            await game.Perform(Verb.Walk, "stage_exit");
+            Check(game.Room?.Name == "ClubStage", "entered the stage room");
+            await Shot("club_stage");
+            await game.Perform(Verb.Talk, "eleanor");
+            Check(gs.HasItem("key"), "Eleanor gives Micah her key");
+            await Shot("club_stage_after");
+            await game.Perform(Verb.Walk, "lounge_exit");
+            await game.Perform(Verb.Walk, "hall_exit");
+            await game.Perform(Verb.Walk, "street_door");
+            Check(game.Room?.Name == "Street", "back on the street");
+
+            await game.Perform(Verb.Walk, "hotel_door");
+            Check(game.Room?.Name == "AurelianRoom", "entered Eleanor's suite");
+            await game.Perform(Verb.Hand, "vanity");
+            Check(gs.HasItem("diary"), "found the diary");
+            await Shot("aurelian_room");
+            await game.Perform(Verb.Walk, "exit");
+
+            await game.Perform(Verb.Walk, "church_door");
+            Check(game.Room?.Name == "ChurchExterior", "at the cathedral steps");
+            await Shot("church_exterior");
+            await game.Perform(Verb.Walk, "doors");
+            Check(game.Room?.Name == "ChurchInterior", "inside the cathedral");
+            await game.Perform(Verb.Talk, "caleb");
+            Check(gs.HasFlag("library_lead") && !gs.HasItem("diary"), "Caleb reads the diary");
+            await Shot("church_interior");
+            await game.Perform(Verb.Walk, "doors");
+            await game.Perform(Verb.Walk, "exit");
+
+            await game.Perform(Verb.Walk, "library_door");
+            Check(game.Room?.Name == "Library", "entered the library");
+            await game.Perform(Verb.Talk, "rose");
+            Check(gs.HasFlag("rose_tip"), "Rose remembers Eleanor");
+            await Shot("library");
+            await game.Perform(Verb.Hand, "shelves_right");
+            Check(gs.HasItem("ledger"), "found the ledger");
+            await game.Perform(Verb.Walk, "exit");
+
+            await game.Perform(Verb.Walk, "motel_door");
+            Check(game.Room?.Name == "MotelRoom", "entered the motel room");
+            await game.Perform(Verb.Hand, "bed");
+            Check(gs.HasItem("map"), "found the map");
+            await Shot("motel_room");
+            await game.Perform(Verb.Walk, "exit");
+
+            await game.Perform(Verb.Walk, "road_out");
+            Check(game.Room?.Name == "Outskirts", "drove out of town");
+            await Shot("outskirts");
+            _ = game.Perform(Verb.Hand, "disturbed_earth");
             for (int i = 0; i < 600 && !gs.HasFlag("ending"); i++) await game.Wait(0.1);
-            Check(gs.HasFlag("photo_shown"), "showed the photo");
-            await game.Wait(1.5);
+            Check(gs.HasItem("evidence"), "dug up the evidence");
+            await game.Wait(2.5);
             await Shot("ending_sal");
             for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
             Check(game.Hud.CaptionVisible, "reached 'To be continued'");
@@ -151,7 +216,9 @@ public class AutoPlay
     /// <summary>Right-click the journal in the satchel and choose the hand: reading it starts 1927.</summary>
     private async Task ReadJournal(Game game)
     {
+        await WaitIdle(game);
         Click(game.Hud.SatchelCenter, MouseButton.Left);
+        for (int i = 0; i < 40 && !game.Hud.InventoryOpen; i++) await game.Wait(0.05);
         await game.Wait(0.1);
         var slot = game.Hud.SlotCenter(0);
         Move(slot);

@@ -48,6 +48,11 @@ public partial class AurelianRoom : Room
                 await Say("It opened a crack. Enough for smoke. Not enough for escape.");
                 return true;
 
+            case ("vanity", Verb.Hand) when !State.HasFlag("found_diary"):
+                State.SetFlag("found_diary");
+                State.GiveItem("diary");
+                await Say("Powder on the tray, and behind the false back of the drawer... a lady's diary. Just where she said.");
+                return true;
             case ("vanity", Verb.Hand):
                 await Say("Powder on the tray. No lady at the mirror.");
                 return true;

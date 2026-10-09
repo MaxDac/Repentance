@@ -1,8 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
-[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Script" path="res://scripts/Rooms/ClubStage.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_stage.png" id="2_club_stage"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="91_eleanor"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(60, 108)
@@ -101,3 +103,16 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Seats"]
 position = Vector2(376.0, 164.0)
 shape = SubResource("Rect_4")
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(244, 176)
+script = ExtResource("90_Actor")
+Id = "eleanor"
+DisplayName = "the singer"
+LookText = "Brunette, sober black crepe, a single strand of pearls, eyes that had stopped expecting rescue. Eleanor Harrington, singing as Nora."
+WalkTo = Vector2(196, 196)
+monitoring = false
+monitorable = false
+Texture = ExtResource("91_eleanor")
+FlipH = true
+SpeechColor = Color(0.96, 0.78, 0.62, 1)

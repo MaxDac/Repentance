@@ -50,7 +50,20 @@ godot --path . -- --autoplay
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. There's a dollar in the top desk drawer.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory.
    The brass urn hides a matchbook from the Blue Lantern with a password inside.
-3. **Blue Lantern speakeasy**: give Sal the password, then show the bartender the photo... *To be continued.*
+3. **Blue Lantern speakeasy**: give Sal the password, then show the bartender the photo. He sends you to
+   the Starlight club after a singer called "Nora".
+
+The rest is a *temporary* storyline that strings together every location:
+
+4. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
+   is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
+   bookkeeper is dead. She gives you the key to her old suite.
+5. **Aurelian suite 4**: her diary is hidden in the vanity.
+6. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
+7. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
+   the shelves holds a motel receipt.
+8. **Motel room 6**: a map is hidden in the bed.
+9. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
 
 ## Project layout
 
@@ -76,7 +89,7 @@ tools/               Python art generator
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
 | `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |
-| `Actor` | An NPC: a hotspot with a 2-frame (idle/talk) sprite sheet, a speech colour and `MoveTo` |
+| `Actor` | An NPC: a hotspot with a 3-frame (idle + two talk frames) sprite strip, a speech colour, depth scaling and `MoveTo` |
 | `Player` | The player character (Micah, or Daniel in the prologue): 4-direction walk cycles, pathfinding along the walk polygon |
 | `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
@@ -108,16 +121,20 @@ Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main
 
 ### Regenerating the art
 
-All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed:
+All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed.
+The characters come from `tools/art/figure.py`, a small 3D-ish figure painter whose look is inspired by
+early-90s VGA adventures such as *Indiana Jones and the Fate of Atlantis*: tall, naturally proportioned
+bodies, shading lit from the top left, a darker outline on each material ("sel-out") and dithered fabric.
+Each character is a spec dict in `tools/art/sprites.py`.
 
 ```powershell
-py -3.14 -m pip install --upgrade pillow
+py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, speakeasy, ui
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, Micah's frames are 40×80 in an 8×3 sheet, NPCs are 2-frame strips, and items are 32×24.
+size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 3-frame 56×96 strips (idle, two talk frames), and items are 32×24.
 
 ## Credits
 

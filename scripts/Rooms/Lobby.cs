@@ -52,7 +52,7 @@ public partial class Lobby : Room
                 await Say("Under the sand and a dozen cigar stubs... a matchbook. Blue Lantern. Somebody wrote inside it.");
                 return true;
 
-            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern"):
+            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern") || State.HasFlag("club_lead"):
                 await Game.ChangeRoom("street", "lobby");
                 return true;
             case ("revolving_door", Verb.Kick):

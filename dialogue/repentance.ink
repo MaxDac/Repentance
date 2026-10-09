@@ -195,15 +195,150 @@ BARTENDER: What'll it be?
 = photo
 BARTENDER: ...
 BARTENDER: Put that away, pal. Put it away right now.
-BARTENDER: You know whose girl that is now? No, you don't. Nobody does. That's how it stays.
+BARTENDER: You want the canary? She don't sing here no more. She sings at the Starlight.
+BARTENDER: Calls herself Nora now. Unmarked door, State Street, next to the lunch counter.
+BARTENDER: Half of Moretti's boys are sweet on her. Mr. Moretti don't like sharing. You didn't hear it from me.
 ~ set_flag("photo_shown")
+~ set_flag("club_lead")
 -> END
 = after
-BARTENDER: I got nothing more to say to you, pal. Drink or leave.
+BARTENDER: The Starlight, pal. Now drink or leave.
 -> END
+
+// ---------------------------------------------------------------- THE STARLIGHT CLUB
+
+=== harrington ===
+{has_flag("harrington_met"): -> harrington.again}
+HARRINGTON: You're blocking my view of the curtain, young man.
+MICAH: Micah Jones. I work for your son.
+HARRINGTON: Then you have my sympathies. Theodore Harrington. The one who built the steel mill, not the one losing it.
+- (opts)
+* [What brings you to a place like this?]
+    HARRINGTON: The same thing as you, I expect. The singer.
+    HARRINGTON: I've known Eleanor since her debut. The blonde hair was Teddy's idea. Everything else was hers.
+    -> harrington.opts
+* [What do you think of your son?]
+    HARRINGTON: Teddy was a disappointment in short pants, and he has kept up the tradition.
+    HARRINGTON: If he's hired a detective, Mr. Jones, he's frightened. Find out of what.
+    -> harrington.opts
+* [Enjoy the show.]
+    HARRINGTON: At my age one enjoys everything. It might be the last time.
+    ~ set_flag("harrington_met")
+    -> END
+= again
+HARRINGTON: The singer is through the curtain, Mr. Jones. I'm only the audience.
+-> END
+
+=== eleanor ===
+{has_flag("eleanor_met"): -> eleanor.again}
+ELEANOR: Show's over, mister. Autographs are a dime, and I'm all out of pencils.
+MICAH: Evening, Mrs. Harrington.
+ELEANOR: ...Nobody's called me that in four days. They were four very nice days.
+- (opts)
+* [Your husband hired me to bring you home.]
+    ELEANOR: Teddy didn't hire you to find me. He hired you to find what I took.
+    MICAH: And what did you take?
+    ELEANOR: His other set of books.
+    -> eleanor.opts
+* [What's in the books?]
+    ELEANOR: Teddy owes Vincent Moretti more than Harrington Steel is worth. He's been paying with the company's money.
+    ELEANOR: When the company bookkeeper found out, he went for a drive past the city limits. He didn't drive back.
+    -> eleanor.opts
+* [Who's been hiding you?]
+    ELEANOR: A priest at the cathedral. Father Caleb Jones. He found me a bed and this job.
+    MICAH: Jones.
+    ELEANOR: A relative of yours?
+    MICAH: My kid brother. We haven't spoken in six years.
+    ELEANOR: He prays for you, you know. Every night. I've heard him.
+    -> eleanor.opts
+* [How do I help you?]
+    ELEANOR: I wrote everything down in my diary. I left it in the vanity at the Aurelian when I ran. Suite 4.
+    ELEANOR: Moretti's men watch the lobby. I can't go back. You can.
+    ~ give_item("key")
+    ELEANOR: Take my key. Bring the diary to Father Caleb. He'll know what to do with it.
+    MICAH: And you?
+    ELEANOR: I'll be here. Singing about men who never come back.
+    ~ set_flag("eleanor_met")
+    -> END
+= again
+ELEANOR: The Aurelian, suite 4. Then the cathedral. Please, Mr. Jones.
+-> END
+
+// ---------------------------------------------------------------- CATHEDRAL
+
+=== caleb ===
+{has_flag("library_lead"): -> caleb.after}
+{not has_flag("caleb_met"):
+    CALEB: Can I help you, my son?
+    CALEB: ...Micah?
+    MICAH: Hello, Caleb. Or is it "Father" now?
+    CALEB: Six years. You look like a man who sleeps in his coat.
+    MICAH: Only when it's raining.
+    ~ set_flag("caleb_met")
+- else:
+    CALEB: Back so soon? Careful, Micah. People will think you've found religion.
+}
+- (opts)
+* [How have you been?]
+    CALEB: I hear confessions, I bury the poor, I pray for my brother. Two out of three are going well.
+    -> caleb.opts
+* [How's Rose?]
+    CALEB: Ask her yourself. She's still at the library, still alphabetizing the world into making sense.
+    CALEB: She keeps your picture in her desk drawer. Face down. But she keeps it.
+    MICAH: That's something.
+    -> caleb.opts
+* {has_item("diary")} [Eleanor sent me with this.]
+    ~ take_item("diary")
+    CALEB: Her diary. She trusted you with it. That's more than she trusted me.
+    CALEB: ...Here. "Teddy's ledger is safe. Among a hundred thousand books, where nobody reads."
+    CALEB: The public library, Micah. Rose's library.
+    MICAH: Of all the bookshelves in Chicago.
+    CALEB: God has a sense of humor. Mostly at our family's expense.
+    ~ set_flag("library_lead")
+    -> END
++ [(Leave)]
+    CALEB: Go with God, Micah. He's been waiting for you longer than I have.
+    -> END
+= after
+CALEB: The library. And Micah... be kind to her.
+-> END
+
+// ---------------------------------------------------------------- LIBRARY
+
+=== rose ===
+{not has_flag("rose_met"):
+    ROSE: We're closing, sir, so unless you have a card-
+    ROSE: ...Micah.
+    MICAH: Hello, Rose.
+    ROSE: Eight months without a word, and you walk in here dripping on my floor.
+    ~ set_flag("rose_met")
+- else:
+    ROSE: You're still here. That's a first.
+}
+- (opts)
+* [I'm sorry.]
+    ROSE: You always are. It's the one thing you were ever reliable about.
+    -> rose.opts
+* [You look well.]
+    ROSE: I sleep now. Nobody calls at three in the morning to say you're in the hospital again.
+    -> rose.opts
+* {has_flag("library_lead")} [A woman hid something here. Dark hair, about this tall.]
+    ROSE: Last Tuesday. She asked for the county land records, then asked to be left alone.
+    ROSE: Right-hand stacks, top shelf. Nobody has touched those since the Taft administration.
+    ROSE: Is she in trouble?
+    MICAH: She's in the kind of trouble I'm good at.
+    ROSE: That's what worries me.
+    ~ set_flag("rose_tip")
+    -> END
++ [(Leave)]
+    ROSE: Goodbye, Micah. Try the front door this time. You used to prefer the window.
+    -> END
+
+// ---------------------------------------------------------------- THE OUTSKIRTS
 
 === ending ===
 SAL: Hey. Gumshoe.
-SAL: Mr. Moretti would like a word. In private.
+SAL: Nice night for digging.
+SAL: Mr. Moretti would like a word. In private. Bring the box.
 MICAH: Funny. I was just about to ask for one.
 -> END
