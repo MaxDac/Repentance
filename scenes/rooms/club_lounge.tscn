@@ -1,8 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
-[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Script" path="res://scripts/Rooms/ClubLounge.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_lounge.png" id="2_club_lounge"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/harrington.png" id="91_harrington"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(58, 104)
@@ -53,7 +55,7 @@ LookText = "The booths are back that way, soaking up whispers and perfume."
 WalkTo = Vector2(46, 196)
 Face = 2
 ExitTo = "club_hall"
-ExitEntry = "start"
+ExitEntry = "from_lounge"
 monitoring = false
 monitorable = false
 
@@ -90,3 +92,16 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/StageExit"]
 position = Vector2(434.0, 128.0)
 shape = SubResource("Rect_6")
+
+[node name="Harrington" type="Area2D" parent="World"]
+position = Vector2(318, 192)
+script = ExtResource("90_Actor")
+Id = "harrington"
+DisplayName = "old gentleman"
+LookText = "White hair, wing collar, black bow tie, a suit that cost more than my car. Old money, watching the curtain like he owned it. He probably did."
+WalkTo = Vector2(272, 204)
+monitoring = false
+monitorable = false
+Texture = ExtResource("91_harrington")
+FlipH = true
+SpeechColor = Color(0.82, 0.84, 0.9, 1)

@@ -20,6 +20,14 @@ public partial class MotelRoom : Room
     {
         switch (target.Id, verb)
         {
+            case ("bed", Verb.Hand) when State.HasItem("ledger") && !State.HasFlag("found_map"):
+                State.SetFlag(BedSearchedFlag);
+                State.SetFlag("found_map");
+                State.GiveItem("map");
+                Refresh();
+                await Say("Room 6. Teddy paid cash for a bed nobody slept in. Under the mattress, folded in four: a map.");
+                await Say("The county road east, the last fence post, and an X. Men don't draw maps to places they want to forget.");
+                return true;
             case ("bed", Verb.Hand) when !State.HasFlag(BedSearchedFlag):
                 State.SetFlag(BedSearchedFlag);
                 await Say("I turned the bed over. Nothing but motel lint, old smoke, and fresh disappointment.");

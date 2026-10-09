@@ -259,4 +259,5 @@ Face = 4
 monitoring = false
 monitorable = false
 Texture = ExtResource("7_bellboy")
+FlipH = true
 SpeechColor = Color(0.941, 0.659, 0.408, 1)

@@ -13,15 +13,19 @@ public interface ISpeaker
 
 /// <summary>
 /// A non-player character. It is also a hotspot; if it has no collision shape the sprite
-/// rectangle is used as the clickable area. Sprite sheet: one row, frame 0 = idle, frame 1 = talking.
-/// The node position is the character's feet.
+/// rectangle is used as the clickable area. Sprite sheet: one row, frame 0 = idle, then talk frames
+/// (1 for a two-frame strip; 1 and 2 for the three-frame strips painted by tools/art/sprites.py).
+/// The node position is the character's feet, which sit <see cref="Baseline"/> pixels above the frame bottom.
 /// </summary>
 [GlobalClass]
 public partial class Actor : Hotspot, ISpeaker
 {
     [Export] public Texture2D? Texture;
-    [Export] public int Frames = 2;
+    [Export] public int Frames = 3;
     [Export] public bool FlipH;
+    [Export] public int Baseline = 3;
+    /// <summary>Scale with depth like the player (<see cref="Room.ScaleAt"/>).</summary>
+    [Export] public bool DepthScale = true;
     [Export] public Color SpeechColor { get; set; } = Colors.White;
 
     private Sprite2D? _sprite;
@@ -49,9 +53,17 @@ public partial class Actor : Hotspot, ISpeaker
             Hframes = Frames,
             Centered = false,
             FlipH = FlipH,
-            Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y),
+            Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y + Baseline),
         };
         AddChild(_sprite);
+        ApplyDepthScale();
+    }
+
+    private void ApplyDepthScale()
+    {
+        if (!DepthScale) return;
+        for (Node? n = GetParent(); n != null; n = n.GetParent())
+            if (n is Room r) { Scale = Vector2.One * r.ScaleAt(Position.Y); return; }
     }
 
     public override void _Process(double delta)
@@ -64,6 +76,7 @@ public partial class Actor : Hotspot, ISpeaker
         if (_moveTarget is { } target)
         {
             Position = Position.MoveToward(target, _moveSpeed * (float)delta);
+            ApplyDepthScale();
             if (Position.DistanceTo(target) < 0.01f)
             {
                 _moveTarget = null;
@@ -84,13 +97,18 @@ public partial class Actor : Hotspot, ISpeaker
         return _moveDone.Task;
     }
 
+    private static readonly int[] TalkCycle = { 1, 2, 1, 0, 2, 1, 2, 0 };
+
     private void UpdateFrame()
     {
         if (_sprite == null) return;
-        _sprite.Frame = _talking && Frames > 1 && ((int)(_talkTime * 7) % 2 == 0) ? 1 : 0;
+        if (!_talking || Frames < 2) { _sprite.Frame = 0; return; }
+        int tick = (int)(_talkTime * 7);
+        _sprite.Frame = Frames >= 3 ? TalkCycle[tick % TalkCycle.Length] : (tick % 2 == 0 ? 1 : 0);
     }
 
-    private Rect2 SpriteRect => new(new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y), FrameSize);
+    private Rect2 SpriteRect => new(new Vector2(-Mathf.Floor(FrameSize.X / 2) + 8, -FrameSize.Y + Baseline + 8),
+        FrameSize - new Vector2(16, 8));
 
     public override bool Contains(Vector2 point)
     {

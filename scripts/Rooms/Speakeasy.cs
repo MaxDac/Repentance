@@ -12,7 +12,7 @@ public partial class Speakeasy : Room
 
     protected override void OnRefresh()
     {
-        if (FindActor("sal") is { } sal && State.HasFlag("sal_passed") && !State.HasFlag("ending"))
+        if (FindActor("sal") is { } sal && State.HasFlag("sal_passed"))
             sal.Position = SalAside;
     }
 
@@ -62,12 +62,9 @@ public partial class Speakeasy : Room
 
             case ("bartender", Verb.Talk):
                 await Talk("bartender");
-                if (State.HasFlag("photo_shown")) await Ending();
                 return true;
             case ("bartender", Verb.UseItem) when item == "photo":
-                if (State.HasFlag("photo_shown")) { await Talk("bartender"); return true; }
-                await Talk("bartender.photo");
-                await Ending();
+                await Talk(State.HasFlag("photo_shown") ? "bartender" : "bartender.photo");
                 return true;
             case ("bartender", Verb.UseItem) when item == "dollar":
                 await Say("bartender", "A buck buys you the bathtub gin. You want it? No? Smart man.");
@@ -90,19 +87,5 @@ public partial class Speakeasy : Room
                 return true;
         }
         return false;
-    }
-
-    private async Task Ending()
-    {
-        if (State.HasFlag("ending") || FindActor("sal") is not { } sal) return;
-        State.SetFlag("ending");
-        await Wait(0.6);
-        Player.FaceTowards(sal.Position);
-        await sal.MoveTo(Player.Position + new Vector2(-34, 2), 50);
-        await DialogueManager.Instance.Talk("ending");
-        await Game.Hud.Fade(1, 1.2);
-        Game.Hud.ShowCaption("To be continued...");
-        // The demo ends here; keep the game locked on the caption.
-        await new TaskCompletionSource().Task;
     }
 }

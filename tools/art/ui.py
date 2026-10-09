@@ -2,7 +2,7 @@
 import math
 from PIL import Image, ImageDraw
 from .common import hx, mix, vgrad, light, vignette, pixelize, text, city, save, sunburst, noise
-from .sprites import _shade, _outline
+from .iconfx import _shade, _outline
 
 GOLD, GOLD_D = hx("d8b050"), hx("8a6a28")
 
