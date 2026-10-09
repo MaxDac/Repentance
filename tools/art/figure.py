@@ -1,0 +1,601 @@
+"""Volumetric pixel-figure painter in the style of early-90s LucasArts VGA sprites.
+
+Figures are posed as a 3D skeleton (body frame: x = the character's own right, y = down, z = forward, all in
+fractions of the figure height), turned by a yaw angle and projected orthographically with a slight camera pitch.
+Every body part is a shaded volume (tapered capsules, ellipsoids, row-cylinder polygons) carrying a surface normal.
+Shading quantises the normals against an upper-left key light onto a 5-tone hue-shifted ramp per material, parts
+cast a one-pixel shadow onto what lies behind them, and the silhouette is "sel-out" (darkest tone of the material on
+the shadow side, one tone darker on the lit side) instead of a black outline.
+"""
+import math
+import numpy as np
+from PIL import Image, ImageDraw
+from .common import hx, BAYER
+
+LIGHT = np.array([-0.5, -0.65, 0.58])
+LIGHT /= np.linalg.norm(LIGHT)
+PITCH = 0.2  # how much nearer points drop on screen (camera looks slightly down at the floor)
+COOL = np.array(hx("241c3c"), float)
+WARM = np.array(hx("fff2cc"), float)
+FACT = (0.40, 0.60, 0.80, 1.0, 1.17)
+COOLT = (0.40, 0.24, 0.09, 0.0, 0.0)
+WARMT = (0.0, 0.0, 0.0, 0.0, 0.16)
+BAY = (np.array(BAYER, float) + 0.5) / 16.0
+
+
+def ramp(base):
+    b = np.array(hx(base), float)
+    tones = []
+    for f, c, w in zip(FACT, COOLT, WARMT):
+        v = b * f
+        v = v * (1 - c) + COOL * c
+        v = v * (1 - w) + WARM * w
+        tones.append(np.clip(v, 0, 255))
+    return np.array(tones).astype(np.uint8)
+
+
+class Canvas:
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+        self.mat = np.full((h, w), -1, int)
+        self.n = np.zeros((h, w, 3))
+        self.part = np.full((h, w), -1, int)
+        self.bias = np.zeros((h, w), int)
+        yy, xx = np.mgrid[0:h, 0:w]
+        self.X, self.Y = xx + 0.5, yy + 0.5
+        self.ramps, self.dith, self.mats, self.parts = [], [], {}, {}
+        self.ink = []
+        self.shadow = np.zeros((h, w), bool)
+
+    def m(self, col, dither=True):
+        key = (col, dither)
+        if key not in self.mats:
+            self.mats[key] = len(self.ramps)
+            self.ramps.append(ramp(col))
+            self.dith.append(dither)
+        return self.mats[key]
+
+    def pid(self, part):
+        return self.parts.setdefault(part, len(self.parts))
+
+    def put(self, shape, col, part, dither=True, cast=True, clip=None):
+        mask, nx, ny, nz = shape
+        if clip is not None:
+            mask = mask & clip
+        if not mask.any():
+            return mask
+        p = self.pid(part)
+        if cast:
+            sh = np.zeros_like(mask)
+            sh[1:, 1:] = mask[:-1, :-1]
+            sh &= ~mask & (self.mat >= 0) & (self.part != p)
+            self.bias[sh] -= 1
+        self.mat[mask] = self.m(col, dither)
+        n = np.stack([nx, ny, nz], -1)
+        n /= np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
+        self.n[mask] = n[mask]
+        self.part[mask] = p
+        self.bias[mask] = 0
+        return mask
+
+    def parts_mask(self, *names):
+        ids = [self.parts[n] for n in names if n in self.parts]
+        return np.isin(self.part, ids)
+
+    def recolor(self, mask, col, dither=True, bias=0):
+        mask = mask & (self.mat >= 0)
+        self.mat[mask] = self.m(col, dither)
+        self.bias[mask] += bias
+
+    def dot(self, x, y, col):
+        self.ink.append((int(math.floor(x)), int(math.floor(y)), col))
+
+    # --- shapes -------------------------------------------------------------------------------------------------
+    def capsule(self, a, b, ra, rb):
+        ax, ay = a[0], a[1]
+        dx, dy = b[0] - ax, b[1] - ay
+        l2 = max(dx * dx + dy * dy, 1e-6)
+        t = np.clip(((self.X - ax) * dx + (self.Y - ay) * dy) / l2, 0, 1)
+        ex, ey = self.X - (ax + t * dx), self.Y - (ay + t * dy)
+        r = ra + (rb - ra) * t
+        d = np.sqrt(ex * ex + ey * ey)
+        q = np.clip(d / np.maximum(r, 0.3), 0, 1)
+        dd = np.maximum(d, 1e-6)
+        return d <= r + 0.2, ex / dd * q, ey / dd * q, np.sqrt(1 - q * q) + 0.05
+
+    def ellipse(self, c, rx, ry, ang=0.0):
+        ca, sa = math.cos(ang), math.sin(ang)
+        dx, dy = self.X - c[0], self.Y - c[1]
+        u = (dx * ca + dy * sa) / np.maximum(rx, 0.4)
+        v = (-dx * sa + dy * ca) / max(ry, 0.4)
+        q = u * u + v * v
+        mask = q <= 1.0 + 0.25 / max(min(np.min(rx), ry), 0.5)
+        qn = np.clip(q, 0, 1)
+        return mask, u * ca - v * sa, u * sa + v * ca, np.sqrt(1 - qn) + 0.05
+
+    def poly(self, pts, curve=0.85):
+        im = Image.new("L", (self.w, self.h), 0)
+        ImageDraw.Draw(im).polygon([(float(x), float(y)) for x, y in pts], fill=255)
+        mask = np.array(im) > 0
+        nx = np.zeros((self.h, self.w))
+        for y in np.nonzero(mask.any(1))[0]:
+            xs = np.nonzero(mask[y])[0]
+            mid, half = (xs[0] + xs[-1] + 1) / 2.0, max((xs[-1] - xs[0] + 1) / 2.0, 0.5)
+            nx[y] = np.clip((self.X[y] - mid) / half, -1, 1) * curve
+        ny = np.full_like(nx, -0.12)
+        return mask, nx, ny, np.sqrt(np.clip(1 - nx * nx - ny * ny, 0, 1)) + 0.05
+
+    # --- output -------------------------------------------------------------------------------------------------
+    def render(self, shadow_box=None):
+        filled = self.mat >= 0
+        s = np.einsum("hwc,c->hw", self.n, LIGHT)
+        v = 0.42 + 0.58 * s
+        bay = np.tile(BAY, (self.h // 4 + 1, self.w // 4 + 1))[: self.h, : self.w]
+        dith = np.array(self.dith + [False])[self.mat]
+        thr = np.where(dith, 0.5 + (bay - 0.5) * 0.12, 0.5)
+        tone = np.floor(v * 4 + thr).astype(int) + np.maximum(self.bias, -2)
+        pad = np.pad(filled, 1)
+        inner = pad[:-2, 1:-1] & pad[2:, 1:-1] & pad[1:-1, :-2] & pad[1:-1, 2:]
+        edge = filled & ~inner
+        tone = np.where(edge, np.where(s < 0.22, 0, tone - 1), tone)
+        # a part lying behind another part gets a darker seam where they meet
+        pp = np.pad(self.part, 1, constant_values=-1)
+        behind = np.zeros_like(filled)
+        for nb in (pp[:-2, 1:-1], pp[2:, 1:-1], pp[1:-1, :-2], pp[1:-1, 2:]):
+            behind |= (nb > self.part)
+        tone = np.where(filled & ~edge & behind, tone - 1, tone)
+        tone = np.clip(tone, 0, 4)
+        out = np.zeros((self.h, self.w, 4), np.uint8)
+        if shadow_box is not None:
+            m, _, _, _ = self.ellipse(*shadow_box)
+            out[m & ~filled] = (12, 8, 16, 90)
+        ramps = np.array(self.ramps) if self.ramps else np.zeros((1, 5, 3), np.uint8)
+        ys, xs = np.nonzero(filled)
+        out[ys, xs, :3] = ramps[self.mat[ys, xs], tone[ys, xs]]
+        out[ys, xs, 3] = 255
+        for x, y, col in self.ink:
+            if 0 <= x < self.w and 0 <= y < self.h and (out[y, x, 3] == 255 or len(col) == 7):
+                out[y, x, :3] = hx(col.lstrip("+"))
+                out[y, x, 3] = 255
+        return Image.fromarray(out, "RGBA")
+
+
+# =====================================================================================================================
+# Poses
+# =====================================================================================================================
+# Side walk, near (right) leg: thigh swing forward (deg), knee flex (deg), foot pitch (deg, toe up > 0).
+# The far leg runs the same table four frames later; arms counter-swing.
+WALK8 = [(27, 4, 14), (17, 14, 0), (3, 6, 0), (-12, 3, 0), (-25, 8, -16), (-17, 36, -38), (5, 55, -18), (21, 28, 6)]
+
+
+def _walk_leg(phase, amp=1.0):
+    """Interpolates WALK8 at a fractional frame position (0..8)."""
+    i = int(math.floor(phase)) % 8
+    t = phase - math.floor(phase)
+    a, b = WALK8[i], WALK8[(i + 1) % 8]
+    return tuple((a[k] + (b[k] - a[k]) * t) * amp for k in range(3))
+
+
+def pose(phi, **kw):
+    p = dict(phi=phi, legs={1: (3, 2, 0), -1: (-3, 6, -6)}, arms={1: ("swing", 4, 6, 10), -1: ("swing", -2, 6, 12)},
+             lean=0.0, shift=0.0, spread=0.012, mouth=0, nod=0.0, tilt=0.0)
+    p.update(kw)
+    return p
+
+
+def walk_pose(phi, phase, amp=1.0, arm_amp=0.75):
+    legs = {1: _walk_leg(phase, amp), -1: _walk_leg(phase + 4, amp)}
+    arms = {s: ("swing", -legs[s][0] * arm_amp, 5, 12 + max(0.0, -legs[s][0] * arm_amp) * 0.9) for s in (1, -1)}
+    return pose(phi, legs=legs, arms=arms, lean=3.0 * amp, spread=0.004)
+
+
+# =====================================================================================================================
+# Figure assembly
+# =====================================================================================================================
+def _rot_x(v, ang):
+    """Rotates (y, z) of v about the x axis; positive angle lifts +z upwards (towards -y)."""
+    c, s = math.cos(ang), math.sin(ang)
+    return np.array([v[0], v[1] * c - v[2] * s, v[1] * s + v[2] * c])
+
+
+def figure(spec, ps, fw=56, fh=80):
+    H = spec["h"]
+    c = Canvas(fw, fh)
+    phi = math.radians(ps["phi"])
+    cp, sp = math.cos(phi), math.sin(phi)
+    cx, base = fw / 2.0 + spec.get("dx", 0), fh - 3.0
+    sw, hw = spec.get("sw", 0.135), spec.get("hw", 0.052)
+    lean = math.radians(ps["lean"])
+    shift = ps["shift"]
+
+    # ---- skeleton (body frame) ----
+    legs = {}
+    for s in (1, -1):
+        a, k, pitch = (math.radians(x) for x in ps["legs"][s])
+        hip = np.array([s * hw + shift, 0.5, 0.0])
+        knee = hip + 0.235 * np.array([s * ps["spread"], math.cos(a), math.sin(a)])
+        ank = knee + 0.215 * np.array([s * ps["spread"], math.cos(a - k), math.sin(a - k)])
+        heel = ank + _rot_x(np.array([0, 0.026, -0.022]), pitch)
+        toe = ank + _rot_x(np.array([0, 0.03, spec.get("foot", 0.072)]), pitch)
+        legs[s] = [hip, knee, ank, heel, toe]
+    sole = max(max(l[3][1], l[4][1]) for l in legs.values()) + 0.018
+    dy = 1.0 - sole
+
+    def body(p):
+        p = np.array(p, float)
+        if p[1] < 0.5:
+            p[2] += (0.5 - p[1]) * math.tan(lean)
+        p[1] += dy
+        return p
+
+    def P(p):
+        bx, by, bz = p
+        X = -bx * cp + bz * sp
+        D = bx * sp + bz * cp
+        return (cx + X * H, base + (by - 1.0) * H + D * H * PITCH, D)
+
+    for s in legs:
+        legs[s] = [l + np.array([0, dy, 0]) for l in legs[s]]
+
+    def ell3(center, ax, ay, az):
+        x, y, _ = P(center)
+        return (x, y), H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2), H * ay
+
+    prims = []  # (key, fn)
+
+    def add(key, fn):
+        prims.append((key, fn))
+
+    col = spec
+    skin = col["skin"]
+    pants = col.get("pants")
+    boots = col.get("boots")
+    shoes = col["shoes"]
+    leg_r = spec.get("leg_r", 1.0)
+
+    # ---- legs ----
+    for s in (1, -1):
+        hip, knee, ank, heel, toe = legs[s]
+        Dk = P(knee)[2]
+
+        def leg(s=s, hip=hip, knee=knee, ank=ank, heel=heel, toe=toe):
+            part = f"leg{s}"
+            thigh = pants or col.get("stockings", skin)
+            shin = boots or col.get("stockings") or pants or skin
+            c.put(c.capsule(P(hip), P(knee), H * 0.05 * leg_r, H * 0.037 * leg_r), thigh, part)
+            c.put(c.capsule(P(knee), P(ank), H * 0.037 * leg_r, H * 0.027 * leg_r), shin, part)
+            if pants and not boots:  # trouser cuff falls over the shoe
+                c.put(c.capsule(P(ank - np.array([0, 0.02, 0])), P(ank + np.array([0, 0.012, 0])),
+                                H * 0.03 * leg_r, H * 0.031 * leg_r), pants, part)
+            c.put(c.capsule(P(heel), P(toe), H * 0.021, H * 0.017), shoes, f"shoe{s}", dither=False)
+        add(1.0 + Dk, leg)
+
+    # ---- torso ----
+    torso = col["torso"]
+    pelvis_col = col.get("pelvis", pants or torso)
+    waist = spec.get("waist", 0.085)
+    hipw = spec.get("hipw", 0.098)
+
+    def trunk():
+        hem_top = spec.get("top_hem", 0.45)
+        levels = [(0.19, 0.04, 0.034), (0.214, sw - 0.012, 0.05), (0.25, sw * 0.97, 0.066), (0.31, sw * 0.84, 0.07),
+                  (0.40, waist, 0.058), (0.47, hipw, 0.064), (0.53, hipw * 0.86, 0.056)]
+        left, right = [], []
+        for y, ax, az in levels:
+            cxy = P(body([shift * min(1.0, max(0.0, (y - 0.3) / 0.2)), y, 0.004]))
+            w = H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2)
+            left.append((cxy[0] - w, cxy[1]))
+            right.append((cxy[0] + w, cxy[1]))
+        c.put(c.poly(left + right[::-1], curve=0.9), torso, "torso")
+        if col.get("abdomen"):
+            c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
+                      col["abdomen"])
+        c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, hem_top, 0]))[1]), pelvis_col)
+        coat = col.get("coat")
+        if coat:
+            _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp)
+    add(2.0, trunk)
+
+    # ---- arms ----
+    arm_pts = {}
+    for s in (1, -1):
+        kind, f, o, e = ps["arms"][s]
+        sh = body([s * (sw - 0.014), 0.24, 0.0])
+        if kind == "hip":
+            el = body([s * (sw + 0.07), 0.345, -0.035])
+            wr = body([s * (hipw - 0.005), 0.455, 0.0])
+            hand = body([s * (hipw - 0.02), 0.475, 0.01])
+        elif kind == "pocket":
+            el = body([s * (sw + 0.012), 0.385, -0.015])
+            wr = body([s * (hipw + 0.004), 0.51, 0.02])
+            hand = None
+        elif kind == "fold":  # hands clasped in front (priest, concierge)
+            el = body([s * (sw + 0.005), 0.39, 0.012])
+            wr = body([s * 0.022, 0.45, 0.075])
+            hand = body([s * 0.004, 0.462, 0.085])
+        else:
+            fr, orr, er = (math.radians(x) for x in (f, o, e))
+            d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
+            el = sh + 0.17 * d1
+            d2 = np.array([s * math.sin(orr) * 0.3, math.cos(fr + er), math.sin(fr + er)])
+            d2 /= np.linalg.norm(d2)
+            wr = el + 0.145 * d2
+            hand = wr + 0.045 * d2
+        arm_pts[s] = (sh, el, wr, hand)
+        Ds = P(sh)[2]
+
+        def arm(s=s, sh=sh, el=el, wr=wr, hand=hand):
+            sleeve = col.get("sleeves", torso)
+            fore = col.get("forearm", sleeve)
+            part = f"arm{s}"
+            c.put(c.capsule(P(sh), P(el), H * 0.037, H * 0.033), sleeve, part)
+            c.put(c.capsule(P(el), P(wr), H * 0.033, H * 0.028), fore, part)
+            if col.get("cuff") and fore != skin:
+                c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
+            if hand is not None:
+                c.put(c.capsule(P(wr), P(hand), H * 0.024, H * 0.022), skin, f"hand{s}", dither=False)
+        add(2.0 + Ds + 0.05 * abs(cp), arm)
+
+    # ---- head ----
+    nod = ps["nod"]
+    hc = body([0.0, 0.077 + nod, 0.008])
+    hx_, hy_, _ = P(hc)
+    hrx = H * math.sqrt((0.05 * cp) ** 2 + (0.06 * sp) ** 2)
+    hry = H * 0.077
+    fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
+    facing = cp > -0.25
+
+    def head():
+        neck_col = col.get("neck", skin)
+        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.222, -0.004])), H * 0.029, H * 0.032), neck_col, "neck")
+        if col.get("collar"):
+            n0 = P(body([0, 0.19, 0.0]))
+            c.recolor(c.parts_mask("neck") & (c.Y >= n0[1]), col["collar"])
+        c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
+        jc, jrx, jry = ell3(body([0, 0.112 + nod, 0.016]), 0.04, 0.042, 0.046)
+        c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
+        if abs(sp) > 0.3:
+            c.put(c.capsule(P(body([0, 0.088 + nod, 0.058])), P(body([0, 0.102 + nod, 0.07])), 0.55, 0.6),
+                  skin, "head", dither=False)
+        if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
+            ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
+            ear_side = -1 if sp > 0 else 1
+            ex, ey, ed = P(body([ear_side * 0.05, 0.088 + nod, -0.008]))
+            if ed > -0.02 and col.get("hair_style") not in ("long", "bob"):
+                c.put(c.ellipse((ex, ey), H * 0.011, H * 0.017), skin, "ear", dither=False)
+        _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+        if col.get("soft_face"):
+            # Lift the jaw shadow so it does not read as stubble on women's faces.
+            c.bias[c.parts_mask("head", "neck") & (c.Y > hy_ - 1)] += 1
+        _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+    add(2.6, head)
+    if col.get("hair_style") == "long":
+        # The mane falls behind the neck and shoulders unless the figure is seen from the back.
+        add(1.9 if facing else 2.7, lambda: _long_hair_back(c, col, P, body, H, cp, sp, nod))
+
+    for _, fn in sorted(prims, key=lambda kv: kv[0]):
+        fn()
+
+    _decals(c, col, P, body, H, cp, sp, legs, ps)
+    if facing:
+        _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
+    shx = (P(legs[1][2])[0] + P(legs[-1][2])[0]) / 2
+    return c.render(shadow_box=((shx, base + 0.6), H * 0.15, 1.7))
+
+
+def _leg_at(leg, y):
+    """Point on a leg's thigh/shin chain at body height y (or None)."""
+    pts = leg[:3]
+    for a, b in zip(pts, pts[1:]):
+        if (a[1] - y) * (b[1] - y) <= 0 and abs(b[1] - a[1]) > 1e-6:
+            t = (y - a[1]) / (b[1] - a[1])
+            return a + (b - a) * t
+    return None
+
+
+def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
+    """Coat tails / dress: a row-shaded polygon from the waist to the hem following both legs."""
+    top, hem = body([0, coat.get("top", 0.42), 0])[1], body([0, coat["hem"], 0])[1]
+    flare = coat.get("flare", 0.03)
+
+    def width(ax, az):
+        return H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2)
+
+    tc = P(body([0, coat.get("top", 0.42), 0]))
+    hc = P(body([0, 0.5, 0]))
+    wt, wh = width(waist + 0.012, 0.064), width(hipw + 0.016, 0.07)
+    xs = []
+    for s, leg in legs.items():
+        p = _leg_at(leg, hem)
+        if p is None:
+            p = leg[2]
+        q = P(p)
+        xs += [q[0] - H * (0.045 + flare), q[0] + H * (0.045 + flare)]
+    hem_y = P(np.array([0, hem, 0]))[1]
+    lo, hi = min(xs + [hc[0] - wh * 1.05]), max(xs + [hc[0] + wh * 1.05])
+    pts = [(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (lo, hem_y), (hi, hem_y), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]
+    c.put(c.poly(pts), coat["col"], "coat")
+
+
+def _long_hair_back(c, col, P, body, H, cp, sp, nod):
+    """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
+    hc = P(body([0, 0.15 + nod, -0.03]))
+    rx = H * math.sqrt((0.085 * cp) ** 2 + (0.07 * sp) ** 2)
+    m, nx, ny, nz = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx, H * 0.125)
+    wave = np.sin(c.Y / 1.7) * 0.9
+    m2, _, _, _ = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx + wave, H * 0.125)
+    top = P(body([0, 0.02 + nod, 0]))[1]
+    keep = m2 & (c.Y > top)
+    if abs(sp) > 0.15 and cp > -0.25:
+        # In profile/3-4 the mane must stay behind the jaw, never under the chin.
+        hx0, hy0 = P(body([0, 0.077 + nod, 0.0]))[:2]
+        keep &= ~(((c.X - hx0) * math.copysign(1.0, sp) > -1.5) & (c.Y > hy0 + 1))
+    c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False)
+
+
+def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
+    style = col.get("hair_style", "short")
+    hair = col["hair"]
+    fs = sp
+    vol = {"short": 0.6, "bald": 0.2, "long": 1.6, "bob": 1.4, "slick": 0.4}[style]
+    m, nx, ny, nz = c.ellipse((hx_ - 0.25 * fs, hy_ - 0.6), hrx + vol, hry + vol * 0.8)
+    u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
+    front = hy_ - hry * 0.45 + (0.7 if style == "slick" else 0)
+    nape = hy_ + hry * (0.55 if style != "bob" else 0.95)
+    if style == "long":
+        nape = hy_ + hry * 1.15
+    # how much a column is "back of the head" vs face
+    back = np.clip(-u * fs * 1.8 + 0.15, 0, 1)
+    sides = np.clip((np.abs(u) - 0.72) * 4.0, 0, 1) * abs(cp)
+    if style in ("long", "bob"):
+        sides = np.clip((np.abs(u) - 0.55) * 3.0, 0, 1) * max(abs(cp), 0.3)
+        sides *= np.where(u * fs > 0, np.clip(1 - abs(sp) * (5.0 if style == "long" else 2.4), 0, 1), 1.0)
+        side_line = hy_ + hry * (0.95 if style == "long" else 0.75)
+    else:
+        side_line = hy_ + hry * 0.15
+    line = front + (nape - front) * back
+    line = np.maximum(line, front + (side_line - front) * sides)
+    if cp < -0.25:  # seen from behind: all hair
+        line = np.full_like(line, nape)
+    mask = m & (c.Y < line)
+    if style == "bald":
+        mask &= (c.Y > hy_ - hry * 0.1) & (back > 0.3 if cp > -0.25 else True)
+    c.put((mask, nx, ny, nz), hair, "hair", dither=False)
+    if style in ("long", "bob"):
+        stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
+        c.bias[c.parts_mask("hair", "hairback") & stripe] -= 1
+
+
+def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
+    hat = col.get("hat")
+    if not hat:
+        return
+    hc = col["hat_col"]
+    if hat == "fedora":
+        by = hy_ - hry * 0.42
+        brx = H * 0.092
+        bry = 1.0 + H * 0.092 * PITCH * abs(cp) * 0.9
+        snap = 0.12 * sp
+        m = c.put(c.ellipse((hx_ + 0.6 * sp, by), brx, bry, snap), hc, "brim")
+        crx = H * math.sqrt((0.054 * cp) ** 2 + (0.062 * sp) ** 2)
+        ccy = by - H * 0.035
+        crown = c.ellipse((hx_ - 0.4 * sp, ccy), crx, H * 0.045)
+        c.put(crown, hc, "crown", clip=c.Y < by + 0.4)
+        band = c.parts_mask("crown") & (c.Y >= by - 2.2) & (c.Y < by - 0.4)
+        c.recolor(band, col.get("band", "1a120e"), dither=False)
+        dent = c.parts_mask("crown") & (c.Y < ccy - H * 0.03) & (np.abs(c.X - (hx_ - 0.4 * sp)) < 1.0)
+        c.bias[dent] -= 1
+        c.bias[c.parts_mask("head", "ear", "hair") & (c.Y > by) & (c.Y < by + 2.6)] -= 1
+        c.hat_line = by
+    elif hat == "pillbox":
+        cc = (hx_ + 0.5 * sp, hy_ - hry * 0.75)
+        c.put(c.ellipse(cc, H * 0.045, H * 0.03, -0.25 * (1 if sp >= 0 else -1)), hc, "crown")
+        c.recolor(c.parts_mask("crown") & (c.Y > cc[1] + 0.5), col.get("band", "e8c050"), dither=False)
+    elif hat == "cap":
+        c.put(c.ellipse((hx_ - 0.3 * sp, hy_ - hry * 0.5), hrx + 1.4, hry * 0.62), hc, "crown",
+              clip=c.Y < hy_ - hry * 0.2)
+        bill = P(body([0, 0.04 + nod, 0.07]))
+        c.put(c.capsule((hx_ + 0.5 * sp, hy_ - hry * 0.3), (bill[0] + 0.5 * sp, bill[1]), 1.2, 1.0), hc, "bill")
+        c.bias[c.parts_mask("head") & (c.Y > hy_ - hry * 0.3) & (c.Y < hy_ - hry * 0.3 + 2)] -= 1
+
+
+def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dither=True, bias=0):
+    """Recolours a vertical band down the front of the body (lapels, shirt, tie, apron, buttons)."""
+    if cp < -0.2:
+        return
+    mask = c.parts_mask(*parts)
+    out = np.zeros_like(mask)
+    for yy in np.arange(y0, y1, 0.004):
+        t = (yy - y0) / max(y1 - y0, 1e-6)
+        w = w0 + (w1 - w0) * t
+        a, b = P(body([-w, yy, z])), P(body([w, yy, z]))
+        row = int(math.floor(a[1]))
+        if 0 <= row < c.h:
+            lo, hi = sorted((a[0], b[0]))
+            lo, hi = lo - 0.0, hi + (0.0 if hi - lo > 0.6 else 0.6)
+            out[row] |= (c.X[row] >= lo) & (c.X[row] <= hi + 0.5)
+    c.recolor(mask & out, col, dither=dither, bias=bias)
+
+
+def _decals(c, col, P, body, H, cp, sp, legs, ps):
+    body_parts = ("torso", "coat", "hips")
+    for d in col.get("decals", []):
+        kind = d[0]
+        if kind == "strip":  # (strip, y0, y1, w0, w1, colour, parts?)
+            _, y0, y1, w0, w1, colour = d[:6]
+            parts = d[6] if len(d) > 6 else body_parts
+            _front_strip(c, P, body, H, y0, y1, w0, w1, parts, colour, cp, sp)
+        elif kind == "line":  # dark seam down the front
+            _, y0, y1 = d[:3]
+            seam = col["coat"]["col"] if col.get("coat") else col["torso"]
+            _front_strip(c, P, body, H, y0, y1, 0, 0, body_parts, seam, cp, sp, bias=-1)
+        elif kind == "belt":
+            _, y, colour = d
+            yb = P(body([0, y, 0]))[1]
+            c.recolor(c.parts_mask(*body_parts) & (c.Y >= yb) & (c.Y < yb + max(1.0, H * 0.022)), colour, dither=False)
+        elif kind == "buttons":
+            _, y0, y1, n, colour = d[:5]
+            if cp > 0.05:
+                for i in range(n):
+                    yy = y0 + (y1 - y0) * i / max(n - 1, 1)
+                    for s in ((-1, 1) if len(d) > 5 and d[5] else (0,)):
+                        p = P(body([s * 0.025, yy, 0.072]))
+                        c.dot(p[0], p[1], colour)
+
+
+def _face(c, col, P, body, H, cp, sp, nod, mouth):
+    eye = col.get("eye", "2a1a14")
+    brow = col.get("brow", None)
+    for s in (1, -1):
+        nD = s * 0.4 * sp + 0.92 * cp
+        if nD < 0.12:
+            continue
+        p = P(body([s * 0.021, 0.075 + nod, 0.055]))
+        ex, ey = p[0], p[1]
+        if abs(sp) > 0.85:
+            ex = ex - 0.6 * math.copysign(1, sp)
+        c.dot(ex, ey, eye)
+        bc = brow or _dark(col["hair"])
+        c.dot(ex, ey - 1.6, bc)
+        if abs(cp) > 0.4:
+            c.dot(ex + s * -1 * (1 if cp > 0 else -1), ey - 1.6, bc)
+        if col.get("glasses"):
+            c.dot(ex - 1, ey - 1, col["glasses"])
+            c.dot(ex + 1, ey - 1, col["glasses"])
+            c.dot(ex, ey - 1, col["glasses"])
+    if cp > -0.05:
+        mp = P(body([0, 0.121 + nod, 0.058]))
+        mx, my = mp[0], mp[1]
+        if abs(sp) > 0.85:
+            mx -= 0.7 * math.copysign(1, sp)
+        wid = 1 if abs(cp) < 0.5 else 2
+        lip = col.get("lips") or _dark(col["skin"], 1)
+        xs = [mx - 0.5 * (wid - 1) + i for i in range(wid)]
+        if col.get("mustache"):
+            for x in xs + [xs[-1] + 1 if sp >= 0 else xs[0] - 1]:
+                c.dot(x - (0.5 if sp < 0 else 0), my - 1, _dark(col["hair"], 1))
+        if mouth == 0:
+            for x in xs:
+                c.dot(x, my, lip)
+        elif mouth == 1:
+            for x in xs:
+                c.dot(x, my, "3a1410")
+                c.dot(x, my + 1, "5a2018")
+        else:
+            for x in xs:
+                c.dot(x, my, _dark(col["skin"], 0))
+    if col.get("beard_shadow"):
+        pass
+
+
+def _dark(colour, tone=0):
+    return "%02x%02x%02x" % tuple(int(v) for v in ramp(colour)[tone])
+
+
+def sheet(rows, fw, fh, cols=None):
+    cols = cols or max(len(r) for r in rows)
+    out = Image.new("RGBA", (cols * fw, len(rows) * fh))
+    for r, row in enumerate(rows):
+        for i, im in enumerate(row):
+            out.paste(im, (i * fw, r * fh))
+    return out

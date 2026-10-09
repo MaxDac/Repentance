@@ -48,6 +48,9 @@ polygon = PackedVector2Array(8, 258, 472, 258, 472, 152, 370, 152, 340, 176, 154
 position = Vector2(88, 208)
 metadata/facing = 4
 
+[node name="from_lounge" type="Marker2D" parent="Entries"]
+position = Vector2(414, 208)
+
 [node name="from_street" type="Marker2D" parent="Entries"]
 position = Vector2(40, 232)
 metadata/facing = 4

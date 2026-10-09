@@ -76,8 +76,8 @@ DisplayName = "steel door"
 LookText = "The way back to State Street. And to the rain."
 WalkTo = Vector2(48, 176)
 Face = 2
-ExitTo = "lobby"
-ExitEntry = "street"
+ExitTo = "street"
+ExitEntry = "lobby"
 monitoring = false
 monitorable = false
 
@@ -241,6 +241,7 @@ Face = 4
 monitoring = false
 monitorable = false
 Texture = ExtResource("6_sal")
+FlipH = true
 SpeechColor = Color(0.878, 0.439, 0.376, 1)
 
 [node name="Bartender" type="Area2D" parent="World"]
@@ -254,4 +255,5 @@ Face = 2
 monitoring = false
 monitorable = false
 Texture = ExtResource("7_bartender")
+FlipH = true
 SpeechColor = Color(0.565, 0.753, 0.941, 1)

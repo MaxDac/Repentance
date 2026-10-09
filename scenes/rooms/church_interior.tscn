@@ -1,8 +1,10 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Church.cs" id="1_Church"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/church_interior.png" id="2_church_interior"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/caleb.png" id="91_caleb"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(88, 66)
@@ -154,3 +156,16 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Doors"]
 position = Vector2(240, 240)
 shape = SubResource("Rect_7")
+
+[node name="Caleb" type="Area2D" parent="World"]
+position = Vector2(286, 168)
+script = ExtResource("90_Actor")
+Id = "caleb"
+DisplayName = "the priest"
+LookText = "Father Caleb Jones. My little brother, in a collar. Last time I saw him he was wearing my shirts."
+WalkTo = Vector2(250, 182)
+monitoring = false
+monitorable = false
+Texture = ExtResource("91_caleb")
+FlipH = true
+SpeechColor = Color(0.9, 0.9, 0.82, 1)

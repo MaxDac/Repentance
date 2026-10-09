@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
-[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Script" path="res://scripts/Rooms/Outskirts.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/outskirts.png" id="2_outskirts"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="91_sal"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(188, 26)
@@ -140,3 +142,17 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
 position = Vector2(443.0, 200.0)
 shape = SubResource("Rect_6")
+
+[node name="Sal" type="Area2D" parent="World"]
+position = Vector2(472, 236)
+script = ExtResource("90_Actor")
+Id = "sal"
+DisplayName = "Sal"
+LookText = "Sal. A long way from his steel door, and not here for the fresh air."
+WalkTo = Vector2(430, 236)
+ShowIfFlags = "ending"
+monitoring = false
+monitorable = false
+Texture = ExtResource("91_sal")
+FlipH = true
+SpeechColor = Color(0.95, 0.66, 0.5, 1)

@@ -5,14 +5,19 @@ using System.Threading.Tasks;
 namespace Repentance;
 
 /// <summary>
-/// The playable character (Micah, or Daniel in the prologue). Sprite sheet (40x80 frames, 8 columns):
-/// row 0 side view: idle, walk x6, talk · row 1 front: idle, walk x4, talk · row 2 back: idle, walk x4.
-/// Side frames face right and are flipped for left. Position is the feet.
+/// The playable character (Micah, or Daniel in the prologue). Sprite sheet (56x80 frames, 10 columns, painted by
+/// tools/art/figure.py): row 0 side view: idle, walk x8, talk · row 1 front 3/4: idle, walk x6, talk A, talk B ·
+/// row 2 back 3/4: idle, walk x6. Side frames face right and are flipped for left. Position is the feet, which sit
+/// <see cref="Baseline"/> pixels above the bottom of each frame.
 /// </summary>
 public partial class Player : Node2D, ISpeaker
 {
-    private const int Cols = 8;
-    private static readonly Vector2 FrameSize = new(40, 80);
+    private const int Cols = 10;
+    private const int Baseline = 3;
+    private static readonly Vector2 FrameSize = new(56, 80);
+    /// <summary>Ground covered by one side-walk frame at scale 1 (an 8-frame cycle is two steps of ~0.39 x height).</summary>
+    private const float SideStridePerFrame = 6.4f;
+    private const float FrontWalkFps = 8f;
 
     [Export] public float Speed = 62f;
     public Color SpeechColor { get; set; } = new("f0e0a0");
@@ -26,7 +31,7 @@ public partial class Player : Node2D, ISpeaker
 
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 74 * Scale.Y);
+    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 70 * Scale.Y);
 
     public bool Talking
     {
@@ -43,7 +48,7 @@ public partial class Player : Node2D, ISpeaker
             Hframes = Cols,
             Vframes = 3,
             Centered = false,
-            Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + 1),
+            Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + Baseline),
         };
         AddChild(_sprite);
         SetCharacter(Character);
@@ -130,6 +135,8 @@ public partial class Player : Node2D, ISpeaker
             if (n is Room r) { Scale = Vector2.One * r.ScaleAt(Position.Y); return; }
     }
 
+    private static readonly int[] TalkFrontCols = { 7, 8, 7, 0 };
+
     private void UpdateFrame()
     {
         if (_sprite == null) return;
@@ -139,15 +146,16 @@ public partial class Player : Node2D, ISpeaker
         {
             case Facing.Up:
                 row = 2;
-                col = walking ? 1 + (int)(_animTime * 7) % 4 : 0;
+                col = walking ? 1 + (int)(_animTime * FrontWalkFps) % 6 : 0;
                 break;
             case Facing.Down:
                 row = 1;
-                col = walking ? 1 + (int)(_animTime * 7) % 4 : (_talking && (int)(_animTime * 7) % 2 == 0 ? 5 : 0);
+                col = walking ? 1 + (int)(_animTime * FrontWalkFps) % 6 : (_talking ? TalkFrontCols[(int)(_animTime * 7) % 4] : 0);
                 break;
             default:
                 row = 0;
-                col = walking ? 1 + (int)(_animTime * 10) % 6 : (_talking && (int)(_animTime * 7) % 2 == 0 ? 7 : 0);
+                col = walking ? 1 + (int)(_animTime * Speed / SideStridePerFrame) % 8
+                    : (_talking && (int)(_animTime * 7) % 2 == 0 ? 9 : 0);
                 break;
         }
         _sprite.FlipH = _facing == Facing.Left;

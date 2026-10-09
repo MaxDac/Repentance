@@ -53,7 +53,7 @@ LookText = "The booths are back that way, soaking up whispers and perfume."
 WalkTo = Vector2(46, 196)
 Face = 2
 ExitTo = "club_hall"
-ExitEntry = "start"
+ExitEntry = "from_lounge"
 monitoring = false
 monitorable = false
 
