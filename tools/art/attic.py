@@ -1,8 +1,8 @@
 """Present day: the dusty attic of an old family house, lit by a round gable window."""
 from PIL import Image, ImageDraw
 import random
-from .common import (W, FULL_H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
-                     text, save, floor_boards)
+from .common import (W, FULL_H, hx, mix, vgrad, noise, light, shadow, vignette, pixelize, palette_of, text, save,
+                     floor_boards)
 
 H = FULL_H
 VP = (260, 95)  # vanishing point; the attic recedes towards the gable wall
@@ -14,6 +14,78 @@ DUST = hx("f0d8a0")
 SPILL_BOX = (262, 184, 390, 222)
 SHEET_BOX = (108, 118, 204, 196)
 TRUNK_BOX = (388, 150, 476, 236)
+
+ACTS = {
+    1: dict(
+        window_top=hx("e8f0f8"),
+        window_bottom=hx("b8d0e0"),
+        foliage=(hx("c86a2a"), hx("d8902a"), hx("a8501e")),
+        glint=hx("ffffff"),
+        shaft_beam=hx("ffe0a0"),
+        shaft_beam_k=0.32,
+        shaft_floor=hx("ffd890"),
+        shaft_floor_k=0.35,
+        shaft_halo=hx("fff0d0"),
+        shaft_halo_k=0.25,
+        dust=DUST,
+        dust_ratio=0.7,
+        dust_count=70,
+        desat=0.0,
+        room_tint=None,
+        storm_shadows=(),
+        vignette_k=0.5,
+        vignette_tint=(40, 30, 30),
+        vignette_blur=40,
+    ),
+    2: dict(
+        window_top=hx("d8e1e8"),
+        window_bottom=hx("a5b0bc"),
+        foliage=(hx("96725a"), hx("aa8464"), hx("6f594c")),
+        glint=hx("d8e2ec"),
+        shaft_beam=hx("d8e6ef"),
+        shaft_beam_k=0.18,
+        shaft_floor=hx("c7d1de"),
+        shaft_floor_k=0.2,
+        shaft_halo=hx("eef2f5"),
+        shaft_halo_k=0.12,
+        dust=hx("d8d8d0"),
+        dust_ratio=0.55,
+        dust_count=48,
+        desat=0.18,
+        room_tint=hx("88909a"),
+        storm_shadows=(
+            ("ellipse", [130, 122, 354, 274], 0.12, 12, hx("5a6270")),
+        ),
+        vignette_k=0.58,
+        vignette_tint=(34, 36, 46),
+        vignette_blur=42,
+    ),
+    3: dict(
+        window_top=hx("7c8798"),
+        window_bottom=hx("4e586c"),
+        foliage=(hx("495160"), hx("5f6672"), hx("39404e")),
+        glint=hx("bcc8da"),
+        shaft_beam=hx("aebfd8"),
+        shaft_beam_k=0.12,
+        shaft_floor=hx("8fa2be"),
+        shaft_floor_k=0.14,
+        shaft_halo=hx("d7deee"),
+        shaft_halo_k=0.08,
+        dust=hx("c8ccd6"),
+        dust_ratio=0.45,
+        dust_count=36,
+        desat=0.28,
+        room_tint=hx("66718a"),
+        storm_shadows=(
+            ("polygon", [(0, 92), (140, 88), (220, 180), (0, 270)], 0.22, 16, hx("344055")),
+            ("polygon", [(296, 98), (480, 84), (480, 270), (360, 270), (272, 176)], 0.18, 18, hx("2c3446")),
+            ("ellipse", [120, 112, 360, 274], 0.18, 14, hx("4a556c")),
+        ),
+        vignette_k=0.72,
+        vignette_tint=(18, 24, 44),
+        vignette_blur=46,
+    ),
+}
 
 
 def along(p, t):
@@ -89,17 +161,18 @@ def floor(img):
     noise(img, (128, 214, 262, 246), 6, 47)
 
 
-def window(img):
+def window(img, act=1):
+    mood = ACTS[act]
     d = ImageDraw.Draw(img)
     cx, cy, r = 260, 80, 19
     d.ellipse([cx - r - 5, cy - r - 5, cx + r + 5, cy + r + 5], fill=WOOD_D)
     d.ellipse([cx - r - 3, cy - r - 3, cx + r + 3, cy + r + 3], fill=hx("8a7a64"))
     glass = Image.new("RGB", img.size)
-    vgrad(glass, (cx - r, cy - r, cx + r, cy + r), hx("e8f0f8"), hx("b8d0e0"))
+    vgrad(glass, (cx - r, cy - r, cx + r, cy + r), mood["window_top"], mood["window_bottom"])
     gd = ImageDraw.Draw(glass)
     # the neighbour's maple outside, in autumn
-    for (lx, ly, lr, col) in ((cx - 12, cy + 6, 9, hx("c86a2a")), (cx + 8, cy + 10, 11, hx("d8902a")),
-                              (cx - 2, cy + 16, 8, hx("a8501e"))):
+    for (lx, ly, lr, col) in ((cx - 12, cy + 6, 9, mood["foliage"][0]), (cx + 8, cy + 10, 11, mood["foliage"][1]),
+                              (cx - 2, cy + 16, 8, mood["foliage"][2])):
         gd.ellipse([lx - lr, ly - lr, lx + lr, ly + lr], fill=col)
     m = Image.new("L", img.size, 0)
     ImageDraw.Draw(m).ellipse([cx - r, cy - r, cx + r, cy + r], fill=255)
@@ -108,23 +181,26 @@ def window(img):
     d.line([(cx - r, cy), (cx + r, cy)], fill=WOOD_D, width=2)
     d.line([(cx, cy - r), (cx, cy + r)], fill=WOOD_D, width=2)
     d.arc([cx - r, cy - r, cx + r, cy + r], 0, 360, fill=WOOD_D, width=2)
-    d.line([(cx - 10, cy - 12), (cx - 4, cy - 15)], fill=hx("ffffff"))
+    d.line([(cx - 10, cy - 12), (cx - 4, cy - 15)], fill=mood["glint"])
 
 
-def shaft(img, seed=5):
+def shaft(img, act=1, seed=5):
     """Afternoon sunlight pouring through the round window, full of dust motes."""
+    mood = ACTS[act]
     pts = [(246, 72), (276, 72), (322, 266), (178, 266)]
-    light(img, "polygon", pts, hx("ffe0a0"), 0.32, 6)
-    light(img, "ellipse", [196, 220, 322, 270], hx("ffd890"), 0.35, 10)
-    light(img, "ellipse", [200, 40, 320, 120], hx("fff0d0"), 0.25, 18)
+    light(img, "polygon", pts, mood["shaft_beam"], mood["shaft_beam_k"], 6)
+    light(img, "ellipse", [196, 220, 322, 270], mood["shaft_floor"], mood["shaft_floor_k"], 10)
+    light(img, "ellipse", [200, 40, 320, 120], mood["shaft_halo"], mood["shaft_halo_k"], 18)
+    for shape, pts, k, blur, tint in mood["storm_shadows"]:
+        shadow(img, shape, pts, k, blur, tint=tint)
     d = ImageDraw.Draw(img)
     rnd = random.Random(seed)
-    for _ in range(70):
+    for _ in range(mood["dust_count"]):
         y = rnd.uniform(80, 250)
         t = (y - 72) / 194
         x0, x1 = 246 + (178 - 246) * t, 276 + (322 - 276) * t
         x = rnd.uniform(x0 + 3, x1 - 3)
-        d.point((x, y), fill=DUST if rnd.random() < 0.7 else hx("ffffff"))
+        d.point((x, y), fill=mood["dust"] if rnd.random() < mood["dust_ratio"] else hx("ffffff"))
 
 
 def hatch(img):
@@ -266,11 +342,12 @@ def clutter(img):
     d.line([(262, 36), (264, 52)], fill=hx("c8c4b0"))
 
 
-def paint(spill=False, lifted=False, opened=False):
+def paint(act=1, spill=False, lifted=False, opened=False):
+    mood = ACTS[act]
     img = Image.new("RGB", (W, H))
     shell(img)
     floor(img)
-    window(img)
+    window(img, act)
     clutter(img)
     boxes(img)
     sheet_furniture(img, lifted)
@@ -278,17 +355,34 @@ def paint(spill=False, lifted=False, opened=False):
     if spill:
         spilled(img)
     hatch(img)
-    shaft(img)
-    vignette(img, 0.5, tint=(40, 30, 30))
+    shaft(img, act)
+    if mood["desat"] > 0:
+        grey = img.convert("L").convert("RGB")
+        img = Image.blend(img, grey, mood["desat"])
+    if mood["room_tint"] is not None:
+        shadow(img, "rect", [0, 0, W - 1, H - 1], 0.12 if act == 2 else 0.18, 18 if act == 2 else 24,
+               tint=mood["room_tint"])
+    vignette(img, mood["vignette_k"], tint=mood["vignette_tint"], blur=mood["vignette_blur"])
     return img
 
 
 def build():
-    base = paint()
-    pal = palette_of(Image.blend(base, paint(True, True, True), 0.5), 128)
-    px = pixelize(base, pal)
-    save(px, "rooms", "attic.png")
-    alt = pixelize(paint(True, True, True), pal)
-    for name, box in (("attic_papers", SPILL_BOX), ("attic_chair", SHEET_BOX), ("attic_trunk_open", TRUNK_BOX)):
-        save(alt.crop(box), "rooms", f"{name}.png")
-    return px
+    act1 = paint(1)
+    act1_alt = paint(1, True, True, True)
+    pal = palette_of(Image.blend(act1, act1_alt, 0.5), 128)
+
+    outputs = {}
+    for act in (1, 2, 3):
+        px = pixelize(paint(act), pal)
+        outputs[act] = px
+        save(px, "rooms", f"attic_act{act}.png")
+        if act == 1:
+            save(px, "rooms", "attic.png")
+
+    overlay_boxes = (("attic_papers", SPILL_BOX), ("attic_chair", SHEET_BOX), ("attic_trunk_open", TRUNK_BOX))
+    for act in (1, 2, 3):
+        alt = pixelize(paint(act, True, True, True), pal)
+        for name, box in overlay_boxes:
+            suffix = "" if act == 1 else f"_act{act}"
+            save(alt.crop(box), "rooms", f"{name}{suffix}.png")
+    return outputs[1]

@@ -1,3 +1,4 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -10,7 +11,51 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Attic : Room
 {
+    private static readonly Texture2D[] ActBackgrounds =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_act1.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_act3.png"),
+    };
+
+    private static readonly Texture2D[] PapersTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_act3.png"),
+    };
+
+    private static readonly Texture2D[] ChairTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_chair.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_act3.png"),
+    };
+
+    private static readonly Texture2D[] TrunkOpenTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_act3.png"),
+    };
+
     private Task Hint(string text) => Say("hint", text);
+
+    protected override void OnRefresh()
+    {
+        int actIndex = Mathf.Clamp(State.StoryAct, 1, ActBackgrounds.Length) - 1;
+        if (GetNodeOrNull<Sprite2D>("Background") is { } background)
+            background.Texture = ActBackgrounds[actIndex];
+        SetTexture("Papers", PapersTextures[actIndex]);
+        SetTexture("Chair", ChairTextures[actIndex]);
+        SetTexture("TrunkOpen", TrunkOpenTextures[actIndex]);
+    }
+
+    private void SetTexture(string nodePath, Texture2D texture)
+    {
+        if (GetNodeOrNull<Sprite2D>(nodePath) is { } sprite)
+            sprite.Texture = texture;
+    }
 
     public override async Task OnEnter(string entry)
     {
