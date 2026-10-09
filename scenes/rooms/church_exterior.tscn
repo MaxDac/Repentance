@@ -5,27 +5,27 @@
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(58, 40)
+size = Vector2(54, 54)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(110, 122)
+size = Vector2(72, 96)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(42, 128)
+size = Vector2(64, 84)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(60, 62)
+size = Vector2(48, 38)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(476, 64)
+size = Vector2(476, 14)
 
 [node name="ChurchExterior" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Cathedral Steps"
-FarY = 174
-NearY = 264
-FarScale = 0.9
-NearScale = 1.06
+FarY = 200
+NearY = 262
+FarScale = 0.66
+NearScale = 0.86
 PlayerCharacter = "micah"
 
 [node name="Background" type="Sprite2D" parent="."]
@@ -35,12 +35,12 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(2, 264, 478, 264, 478, 188, 360, 188, 360, 174, 118, 174, 118, 188, 2, 188)
+polygon = PackedVector2Array(2, 262, 478, 262, 478, 236, 392, 236, 392, 200, 88, 200, 88, 236, 2, 236)
 
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
-position = Vector2(240, 204)
+position = Vector2(240, 206)
 metadata/facing = 1
 
 [node name="Hotspots" type="Node2D" parent="."]
@@ -53,13 +53,13 @@ script = ExtResource("3_Hotspot")
 Id = "rose_window"
 DisplayName = "rose window"
 LookText = "A stone flower big enough to make a sinner feel personally addressed."
-WalkTo = Vector2(240, 186)
+WalkTo = Vector2(240, 204)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/RoseWindow"]
-position = Vector2(240, 72)
+position = Vector2(240, 32)
 shape = SubResource("Rect_1")
 
 [node name="Doors" type="Area2D" parent="Hotspots"]
@@ -67,7 +67,7 @@ script = ExtResource("3_Hotspot")
 Id = "doors"
 DisplayName = "main doors"
 LookText = "Oak doors banded in iron. They looked like they could keep out weather, vice, or me."
-WalkTo = Vector2(240, 194)
+WalkTo = Vector2(240, 202)
 Face = 2
 ExitTo = "church_interior"
 ExitEntry = "start"
@@ -75,7 +75,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Doors"]
-position = Vector2(240, 126)
+position = Vector2(240, 150)
 shape = SubResource("Rect_2")
 
 [node name="Spire" type="Area2D" parent="Hotspots"]
@@ -83,13 +83,13 @@ script = ExtResource("3_Hotspot")
 Id = "spire"
 DisplayName = "spire"
 LookText = "It stabbed at the clouds like a finger looking for somebody to blame."
-WalkTo = Vector2(164, 188)
+WalkTo = Vector2(130, 206)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Spire"]
-position = Vector2(124, 70)
+position = Vector2(112, 38)
 shape = SubResource("Rect_3")
 
 [node name="NoticeBoard" type="Area2D" parent="Hotspots"]
@@ -97,13 +97,13 @@ script = ExtResource("3_Hotspot")
 Id = "notice_board"
 DisplayName = "notice board"
 LookText = "Mass times, bake sales, and redemption in tidy little letters. The city did the opposite."
-WalkTo = Vector2(340, 198)
+WalkTo = Vector2(366, 206)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/NoticeBoard"]
-position = Vector2(364, 160)
+position = Vector2(367, 163)
 shape = SubResource("Rect_4")
 
 [node name="Exit" type="Area2D" parent="Hotspots"]
@@ -111,7 +111,7 @@ script = ExtResource("3_Hotspot")
 Id = "exit"
 DisplayName = "street"
 LookText = "Chicago waited at the curb, wet and impatient."
-WalkTo = Vector2(240, 246)
+WalkTo = Vector2(240, 258)
 Face = 1
 ExitTo = "street"
 ExitEntry = "church"
@@ -120,5 +120,5 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
-position = Vector2(240, 238)
+position = Vector2(240, 263)
 shape = SubResource("Rect_5")

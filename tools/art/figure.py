@@ -206,7 +206,7 @@ def figure(spec, ps, fw=56, fh=80):
     phi = math.radians(ps["phi"])
     cp, sp = math.cos(phi), math.sin(phi)
     cx, base = fw / 2.0 + spec.get("dx", 0), fh - 3.0
-    sw, hw = spec.get("sw", 0.135) * 0.74, spec.get("hw", 0.052)  # FOTA shoulders are narrow and sloping
+    sw, hw = spec.get("sw", 0.135) * 0.8, spec.get("hw", 0.052)  # FOTA shoulders are narrow and sloping
     lean = math.radians(ps["lean"])
     shift = ps["shift"]
 
@@ -303,7 +303,7 @@ def figure(spec, ps, fw=56, fh=80):
     arm_pts = {}
     for s in (1, -1):
         kind, f, o, e = ps["arms"][s]
-        sh = body([s * (sw - 0.012), 0.258, 0.0])
+        sh = body([s * (sw - 0.002), 0.256, 0.0])
         if kind == "hip":
             el = body([s * (sw + 0.07), 0.345, -0.035])
             wr = body([s * (hipw - 0.005), 0.455, 0.0])
@@ -579,6 +579,11 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
                 px, py, _ = P(body([u, y + 0.012 * (1 - (u / 0.03) ** 2), 0.055]))
                 if i % 2 == 0 or abs(cp) > 0.7:
                     c.dot(px, py, colour)
+        elif kind == "patch" and cp > 0.05:  # small square on the chest (pocket square): (patch, x, y, colour)
+            _, x, y, colour = d
+            px, py, _ = P(body([x, y, 0.07]))
+            for ddx, ddy in ((0, 0), (1, 0), (0, -1)):
+                c.dot(px + ddx, py + ddy, colour)
         elif kind == "buttons":
             _, y0, y1, n, colour = d[:5]
             if cp > 0.05:
