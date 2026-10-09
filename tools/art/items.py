@@ -33,6 +33,22 @@ def matchbook(d, im):
     d.line([(7, 18), (25, 18)], fill=hx("a08060"))
 
 
+def crowbar(d, im):
+    d.line([(6, 20), (24, 5)], fill=hx("8a2a20"), width=3)
+    d.line([(24, 5), (27, 4), (28, 7)], fill=hx("8a2a20"), width=3)
+    d.line([(6, 20), (3, 18)], fill=hx("8a2a20"), width=3)
+    d.line([(8, 17), (22, 6)], fill=hx("c85a40"))
+
+
+def journal(d, im):
+    d.polygon([(6, 3), (25, 2), (27, 21), (8, 22)], fill=hx("4a2a1c"))
+    d.line([(9, 3), (10, 22)], fill=hx("2a160c"), width=2)
+    d.polygon([(25, 3), (27, 3), (28, 20), (27, 21)], fill=hx("e0d4b0"))
+    d.rectangle([14, 8, 22, 12], fill=hx("c8a050"))
+    d.line([(20, 2), (21, 23)], fill=hx("8a1a1a"))
+
+
 def build():
-    for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook)):
+    for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
+                     ("journal", journal)):
         save(_icon(fn), "items", f"{name}.png")

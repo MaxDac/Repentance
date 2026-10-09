@@ -1,7 +1,7 @@
 """The Aurelian: a gleaming art-deco hotel lobby."""
 from PIL import Image, ImageDraw
 import math
-from .common import (W, H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
+from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
                      text, save, cut, frieze, sunburst)
 
 FLOOR = 138
@@ -198,8 +198,26 @@ def paint(include_desk=True):
     if include_desk:
         desk(img)
     light(img, "polygon", [(0, 0), (W, 0), (W, 60), (0, 60)], hx("fff8e0"), 0.1, 20)
+    img = tall(img, ceiling)
     vignette(img, 0.4, tint=(40, 30, 40))
     return img
+
+
+def ceiling(img):
+    d = ImageDraw.Draw(img)
+    vgrad(img, (0, 0, W - 1, TOP), hx("1e140c"), hx("3a2a1a"))
+    # coffered ceiling with gold rosettes
+    for x in range(-8, W, 40):
+        d.rectangle([x + 3, 2, x + 36, TOP - 4], fill=hx("2a1e12"), outline=GOLD_D)
+        d.rectangle([x + 6, 5, x + 33, TOP - 7], outline=hx("4a3620"))
+        cx = x + 20
+        sunburst(d, cx, 14, 6, 8, GOLD_D, hx("5a4220"), 0, 2 * math.pi)
+        d.point((cx, 14), fill=GOLD)
+    d.line([(0, TOP - 2), (W, TOP - 2)], fill=GOLD_D)
+    for x in (340, 172):
+        d.ellipse([x - 7, 0, x + 7, 6], fill=GOLD_D)
+        d.line([(x, 0), (x, TOP)], fill=GOLD_D)
+        light(img, "ellipse", [x - 60, -10, x + 60, 70], hx("fff0c0"), 0.3, 14)
 
 
 def build():
@@ -207,11 +225,11 @@ def build():
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "lobby.png")
-    mask = Image.new("L", (W, H), 0)
+    mask = Image.new("L", (W, H + TOP), 0)
     md = ImageDraw.Draw(mask)
-    md.rectangle([10, 98, 146, 152], fill=255)
-    md.rectangle([86, 74, 100, 98], fill=255)
-    md.rectangle([114, 90, 128, 98], fill=255)
-    md.rectangle([36, 94, 68, 98], fill=255)
+    md.rectangle([10, 98 + TOP, 146, 152 + TOP], fill=255)
+    md.rectangle([86, 74 + TOP, 100, 98 + TOP], fill=255)
+    md.rectangle([114, 90 + TOP, 128, 98 + TOP], fill=255)
+    md.rectangle([36, 94 + TOP, 68, 98 + TOP], fill=255)
     save(cut(px, mask), "rooms", "lobby_fg.png")
     return px

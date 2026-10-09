@@ -1,7 +1,7 @@
 """Micah Jones' office: a cramped, lamp-lit detective office on a rainy night."""
 from PIL import Image, ImageDraw
 import math
-from .common import (W, H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
+from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
                      text, city, save, floor_boards, sunburst)
 
 FLOOR = 128
@@ -225,8 +225,30 @@ def paint(drawer=None):
     desk_props(img)
     if drawer:
         open_drawer(img, drawer)
+    img = tall(img, ceiling)
     vignette(img, 0.55)
     return img
+
+
+def ceiling(img):
+    d = ImageDraw.Draw(img)
+    vgrad(img, (0, 0, W - 1, TOP), hx("1e1c16"), hx("3c3a2c"))
+    for x in range(0, W, 8):
+        d.line([(x, 9), (x, TOP)], fill=hx("2e2c24"))
+        d.line([(x + 3, 9), (x + 3, TOP)], fill=hx("38362a"))
+    noise(img, (0, 0, W - 1, TOP), 4, 41)
+    # crown moulding
+    d.rectangle([0, 0, W - 1, 4], fill=hx("16120c"))
+    d.rectangle([0, 5, W - 1, 7], fill=hx("4a3424"))
+    d.line([(0, 5), (W, 5)], fill=hx("6a4c34"))
+    d.line([(0, 8), (W, 8)], fill=hx("24160e"))
+    # the water stain started up here
+    shadow(img, "ellipse", [244, 8, 306, 44], 0.3, 8, hx("806040"))
+    d.line([(424, 6), (420, 14), (423, 22), (420, 30)], fill=hx("26241c"))
+    # ceiling bulb on a cord, switched off
+    d.line([(300, 0), (300, 14)], fill=hx("16120c"))
+    d.ellipse([297, 14, 303, 21], fill=hx("6a6858"))
+    d.point((299, 16), fill=hx("a8a690"))
 
 
 def open_drawer(img, contents):
@@ -249,7 +271,7 @@ def build():
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "office.png")
-    box = (276, 126, 342, 156)
+    box = (276, 126 + TOP, 342, 156 + TOP)
     for v in ("full", "empty"):
         save(pixelize(paint(v), pal).crop(box), "rooms", f"office_drawer_{v}.png")
     return px

@@ -44,7 +44,10 @@ size = Vector2(146, 44)
 [node name="Speakeasy" type="Node2D"]
 script = ExtResource("1_Speakeasy")
 RoomName = "The Blue Lantern"
-FarY = 146
+FarY = 176
+NearY = 262
+FarScale = 0.86
+NearScale = 1.1
 
 [node name="Background" type="Sprite2D" parent="."]
 z_index = -10
@@ -53,12 +56,12 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(4, 146, 476, 146, 476, 198, 4, 198)
+polygon = PackedVector2Array(4, 176, 476, 176, 476, 262, 4, 262)
 
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="door" type="Marker2D" parent="Entries"]
-position = Vector2(48, 152)
+position = Vector2(48, 182)
 metadata/facing = 4
 
 [node name="Hotspots" type="Node2D" parent="."]
@@ -71,7 +74,7 @@ script = ExtResource("3_Hotspot")
 Id = "door"
 DisplayName = "steel door"
 LookText = "The way back to State Street. And to the rain."
-WalkTo = Vector2(48, 146)
+WalkTo = Vector2(48, 176)
 Face = 2
 ExitTo = "lobby"
 ExitEntry = "street"
@@ -79,7 +82,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(48.0, 89.5)
+position = Vector2(48.0, 119.5)
 shape = SubResource("Rect_1")
 
 [node name="Crates" type="Area2D" parent="Hotspots"]
@@ -87,13 +90,13 @@ script = ExtResource("3_Hotspot")
 Id = "crates"
 DisplayName = "crates"
 LookText = "Crates of 'soap'. Smells like Canadian whisky."
-WalkTo = Vector2(110, 150)
+WalkTo = Vector2(110, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Crates"]
-position = Vector2(111.0, 108.0)
+position = Vector2(111.0, 138.0)
 shape = SubResource("Rect_2")
 
 [node name="Bulb" type="Area2D" parent="Hotspots"]
@@ -106,7 +109,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bulb"]
-position = Vector2(91.0, 21.0)
+position = Vector2(91.0, 51.0)
 shape = SubResource("Rect_3")
 
 [node name="Curtain" type="Area2D" parent="Hotspots"]
@@ -114,13 +117,13 @@ script = ExtResource("3_Hotspot")
 Id = "curtain"
 DisplayName = "velvet curtain"
 LookText = "Red velvet. It's the most expensive thing on this side of the joint."
-WalkTo = Vector2(160, 150)
+WalkTo = Vector2(160, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Curtain"]
-position = Vector2(160.0, 67.0)
+position = Vector2(160.0, 97.0)
 shape = SubResource("Rect_4")
 
 [node name="Stage" type="Area2D" parent="Hotspots"]
@@ -128,13 +131,13 @@ script = ExtResource("3_Hotspot")
 Id = "stage"
 DisplayName = "stage"
 LookText = "The stage. Empty tonight. Even the band knows when to lay low."
-WalkTo = Vector2(210, 150)
+WalkTo = Vector2(210, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Stage"]
-position = Vector2(211.0, 123.0)
+position = Vector2(211.0, 153.0)
 shape = SubResource("Rect_5")
 
 [node name="Mic" type="Area2D" parent="Hotspots"]
@@ -142,14 +145,14 @@ script = ExtResource("3_Hotspot")
 Id = "mic"
 DisplayName = "microphone"
 LookText = "A microphone. Somewhere a torch singer is missing her stand."
-WalkTo = Vector2(210, 150)
+WalkTo = Vector2(210, 180)
 Face = 2
 ClickPriority = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Mic"]
-position = Vector2(211.0, 76.0)
+position = Vector2(211.0, 106.0)
 shape = SubResource("Rect_6")
 
 [node name="Piano" type="Area2D" parent="Hotspots"]
@@ -157,13 +160,13 @@ script = ExtResource("3_Hotspot")
 Id = "piano"
 DisplayName = "piano"
 LookText = "An upright piano. Half the keys work. The other half have seen things."
-WalkTo = Vector2(264, 150)
+WalkTo = Vector2(264, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Piano"]
-position = Vector2(264.0, 105.0)
+position = Vector2(264.0, 135.0)
 shape = SubResource("Rect_7")
 
 [node name="PrivateDoor" type="Area2D" parent="Hotspots"]
@@ -171,13 +174,13 @@ script = ExtResource("3_Hotspot")
 Id = "private_door"
 DisplayName = "PRIVATE door"
 LookText = "PRIVATE. In my experience, that word is a promise somebody's breaking behind it."
-WalkTo = Vector2(310, 150)
+WalkTo = Vector2(310, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/PrivateDoor"]
-position = Vector2(310.0, 92.0)
+position = Vector2(310.0, 122.0)
 shape = SubResource("Rect_8")
 
 [node name="Shelves" type="Area2D" parent="Hotspots"]
@@ -185,13 +188,13 @@ script = ExtResource("3_Hotspot")
 Id = "shelves"
 DisplayName = "bottles"
 LookText = "Gin, rye and bathtub gin. Volstead would weep."
-WalkTo = Vector2(408, 150)
+WalkTo = Vector2(408, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Shelves"]
-position = Vector2(408.0, 61.0)
+position = Vector2(408.0, 91.0)
 shape = SubResource("Rect_9")
 
 [node name="Neon" type="Area2D" parent="Hotspots"]
@@ -204,7 +207,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Neon"]
-position = Vector2(409.0, 16.0)
+position = Vector2(409.0, 46.0)
 shape = SubResource("Rect_10")
 
 [node name="Bar" type="Area2D" parent="Hotspots"]
@@ -212,28 +215,28 @@ script = ExtResource("3_Hotspot")
 Id = "bar"
 DisplayName = "bar"
 LookText = "Mahogany. Sticky with sins."
-WalkTo = Vector2(408, 150)
+WalkTo = Vector2(408, 180)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bar"]
-position = Vector2(407.0, 118.0)
+position = Vector2(407.0, 148.0)
 shape = SubResource("Rect_11")
 
 [node name="BarFront" type="Sprite2D" parent="World"]
-position = Vector2(0, 140)
+position = Vector2(0, 170)
 texture = ExtResource("4_speakeasy_fg")
 centered = false
-offset = Vector2(0, -140)
+offset = Vector2(0, -170)
 
 [node name="Sal" type="Area2D" parent="World"]
-position = Vector2(156, 162)
+position = Vector2(156, 192)
 script = ExtResource("5_Actor")
 Id = "sal"
 DisplayName = "Sal"
 LookText = "Sal. Six and a half feet of reasons not to argue."
-WalkTo = Vector2(124, 160)
+WalkTo = Vector2(124, 190)
 Face = 4
 monitoring = false
 monitorable = false
@@ -241,12 +244,12 @@ Texture = ExtResource("6_sal")
 SpeechColor = Color(0.878, 0.439, 0.376, 1)
 
 [node name="Bartender" type="Area2D" parent="World"]
-position = Vector2(410, 128)
+position = Vector2(410, 158)
 script = ExtResource("5_Actor")
 Id = "bartender"
 DisplayName = "bartender"
 LookText = "The bartender. Polishes the same glass the way a man prays: without much hope."
-WalkTo = Vector2(408, 152)
+WalkTo = Vector2(408, 182)
 Face = 2
 monitoring = false
 monitorable = false

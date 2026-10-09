@@ -9,7 +9,7 @@ namespace Repentance;
 /// Base class for a room. Expected scene layout:
 /// <code>
 /// Room (this script or a subclass)
-///   Background   Sprite2D (480x200, Centered off)
+///   Background   Sprite2D (480x270, Centered off)
 ///   WalkArea     Polygon2D - walkable floor (hidden at runtime)
 ///   Entries      Node2D with Marker2D children (entry names)
 ///   Hotspots     Node2D with Hotspot children (each with CollisionShape2D/Polygon2D)
@@ -26,6 +26,8 @@ public partial class Room : Node2D
     [Export] public float FarY = 130;
     [Export] public float NearY = 198;
     [Export] public string RoomName = "";
+    /// <summary>Sprite sheet / speaker the player uses in this room ("micah" or "daniel").</summary>
+    [Export] public string PlayerCharacter = "micah";
 
     public WalkArea? Walk { get; private set; }
     public Node2D World { get; private set; } = null!;
@@ -71,6 +73,10 @@ public partial class Room : Node2D
 
     public Actor? FindActor(string id) => FindAll<Actor>(this).FirstOrDefault(a => a.Id == id);
 
+    /// <summary>An actor or an off-screen <see cref="Voice"/> with this id.</summary>
+    public ISpeaker? FindSpeaker(string id) =>
+        (ISpeaker?)FindActor(id) ?? FindAll<Voice>(this).FirstOrDefault(v => v.Id == id);
+
     public Hotspot? FindHotspot(string id) => Hotspots.FirstOrDefault(h => h.Id == id);
 
     /// <summary>The topmost active hotspot under a point.</summary>
@@ -104,6 +110,9 @@ public partial class Room : Node2D
 
     /// <summary>Handle "Use item with other item" inside the inventory.</summary>
     public virtual Task<bool> OnCombine(string item, string other) => Task.FromResult(false);
+
+    /// <summary>Handle a wheel verb on an inventory item (e.g. Hand on a journal = read it). Look falls back to the description.</summary>
+    public virtual Task<bool> OnItemVerb(Verb verb, string item) => Task.FromResult(false);
 
     private static IEnumerable<T> FindAll<T>(Node root) where T : Node
     {

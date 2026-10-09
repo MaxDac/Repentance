@@ -7,7 +7,9 @@ import random
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ART = os.path.join(ROOT, "assets", "art")
 FONT = os.path.join(ROOT, "assets", "fonts", "Silkscreen-Regular.ttf")
-W, H = 480, 200  # room area
+W, H = 480, 240  # painting area of the 1920s rooms (floor extended towards the camera)
+TOP = 30  # ceiling band painted above them; rooms are W x (H + TOP) = 480x270, the full screen
+FULL_H = H + TOP
 BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 
 
@@ -164,6 +166,14 @@ def city(img, box, seed=7, lit=0.3, haze=hx("3a2a4a")):
     for _ in range(int((x1 - x0) * (y1 - y0) / 60)):
         rx, ry = rnd.randint(x0 + 1, x1), rnd.randint(y0, y1 - 4)
         d.line([(rx, ry), (rx - 1, ry + 3)], fill=hx("4a5a7a"))
+
+
+def tall(img, band):
+    """Places a W x H room painting below a TOP-pixel ceiling band painted by band(canvas)."""
+    out = Image.new("RGB", (W, FULL_H))
+    out.paste(img, (0, TOP))
+    band(out)
+    return out
 
 
 def save(img, *parts):

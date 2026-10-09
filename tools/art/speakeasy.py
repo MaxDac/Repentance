@@ -1,7 +1,7 @@
 """The Blue Lantern: a smoky mob-run speakeasy below a laundry."""
 from PIL import Image, ImageDraw
 import random
-from .common import (W, H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
+from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
                      text, save, cut, floor_boards)
 
 FLOOR = 134
@@ -191,8 +191,34 @@ def paint():
     lanterns(img)
     haze(img)
     light(img, "ellipse", [20, FLOOR - 10, 140, H], hx("f0c070"), 0.18, 16)
+    img = tall(img, ceiling)
     vignette(img, 0.6, tint=(10, 10, 30))
     return img
+
+
+def ceiling(img):
+    d = ImageDraw.Draw(img)
+    vgrad(img, (182, 0, W - 1, TOP), hx("0a0c14"), hx("1a2034"))
+    bricks(img, (0, 0, 136, TOP), hx("4a2218"), hx("2e1410"), hx("180f0c"), seed=35)
+    d.rectangle([136, 0, 182, TOP], fill=hx("120808"))
+    # floor joists of the laundry upstairs
+    for x in range(-10, W, 34):
+        d.rectangle([x, 0, x + 8, 5], fill=hx("2a1c14"))
+        d.line([(x, 5), (x + 8, 5)], fill=hx("120a06"))
+    # pipes: cold water, steam, and a dripping waste pipe
+    d.rectangle([0, 8, W - 1, 11], fill=hx("3a3c42"))
+    d.line([(0, 8), (W, 8)], fill=hx("6a6e76"))
+    d.rectangle([0, 16, W - 1, 20], fill=hx("5a3a26"))
+    d.line([(0, 16), (W, 16)], fill=hx("8a5a3a"))
+    for x in range(30, W, 96):
+        d.rectangle([x, 6, x + 3, 13], fill=hx("2a2c30"))
+        d.rectangle([x + 40, 14, x + 44, 22], fill=hx("3a2416"))
+    d.line([(260, 20), (260, 24)], fill=hx("6a8ab0"))
+    for x in (90, 210, 300, 380):
+        d.line([(x, 0), (x, TOP)], fill=hx("101010"))
+    for x in (210, 300, 380):
+        light(img, "ellipse", [x - 36, 0, x + 36, 80], BLUE, 0.35, 12)
+    light(img, "ellipse", [40, 0, 140, 80], hx("f0c070"), 0.3, 14)
 
 
 def build():
@@ -200,7 +226,7 @@ def build():
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "speakeasy.png")
-    mask = Image.new("L", (W, H), 0)
-    ImageDraw.Draw(mask).rectangle([334, 88, 480, 140], fill=255)
+    mask = Image.new("L", (W, H + TOP), 0)
+    ImageDraw.Draw(mask).rectangle([334, 88 + TOP, 480, 140 + TOP], fill=255)
     save(cut(px, mask), "rooms", "speakeasy_fg.png")
     return px

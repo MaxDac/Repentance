@@ -1,6 +1,7 @@
 // REPENTANCE - all game dialogue.
-// Lines are "SPEAKER: text" where SPEAKER is an actor id in upper case (MICAH = the player).
-// Choice text is spoken by Micah unless it starts with "(".
+// Lines are "SPEAKER: text" where SPEAKER is an actor/voice id in upper case. MICAH and DANIEL are the
+// player character (DANIEL in the present-day prologue). Unprefixed lines are spoken by the player.
+// Choice text is spoken by the player unless it starts with "(".
 // Room scripts start conversations with DialogueManager.Instance.Talk("knot").
 
 EXTERNAL has_item(id)
@@ -9,6 +10,44 @@ EXTERNAL give_item(id)
 EXTERNAL take_item(id)
 EXTERNAL set_flag(flag)
 
+-> END
+
+// ---------------------------------------------------------------- PROLOGUE: THE ATTIC (present day)
+
+=== attic_intro ===
+DANIEL: Leo! LEO! Come up and give me a hand!
+LEO: In a minute!
+DANIEL: That's what you said an hour ago.
+DANIEL: "Sold as is, including contents." I should have asked what the contents were.
+DANIEL: Three generations of somebody else's junk. Right. One box at a time.
+-> END
+
+=== leo_call ===
+DANIEL: Leo!
+LEO: Whaaat?
++ [Come up here and help me sort the attic!]
+    LEO: I'm in the middle of a match! Five minutes!
+    DANIEL: Five minutes. Sure. See you at Christmas.
++ [The old owners left a lot of stuff up here. Could be treasure.]
+    LEO: Unless it's a gaming PC, I'm good.
+    DANIEL: It's mostly tax returns and a creepy mannequin.
+    LEO: Definitely good.
++ [Did you finish your homework?]
+    LEO: ...
+    LEO: Sorry, can't hear you! Bad signal!
+    DANIEL: We live in the same house.
++ [(Never mind)]
+- -> END
+
+=== journal ===
+DANIEL: "Property of Micah Jones. Private Investigator. Chicago."
+DANIEL: The first entry is dated October 1927. The ink has faded, but the handwriting is steady.
+DANIEL: "If you're reading this, I'm either dead, or I finally found the nerve to confess."
+DANIEL: "Either way, somebody ought to know what happened to Eleanor Harrington. And what I did about it."
+DANIEL: "God forgive me. I'm not sure I ever will."
+DANIEL: ...Leo! You've GOT to see this!
+LEO: In a minute!
+DANIEL: Fine. More for me.
 -> END
 
 // ---------------------------------------------------------------- OFFICE

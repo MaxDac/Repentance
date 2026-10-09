@@ -1,0 +1,316 @@
+[gd_scene load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Attic.cs" id="1_Attic"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic.png" id="2_attic"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_papers.png" id="3_attic_papers"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_chair.png" id="5_attic_chair"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_trunk_open.png" id="6_attic_trunk_open"]
+[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="8_Hotspot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(88, 54)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(88, 70)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(96, 78)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(26, 74)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(80, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(119, 31)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(72, 50)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(58, 36)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(48, 70)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(32, 22)
+
+[sub_resource type="RectangleShape2D" id="Rect_11"]
+size = Vector2(22, 26)
+
+[sub_resource type="RectangleShape2D" id="Rect_12"]
+size = Vector2(38, 38)
+
+[sub_resource type="RectangleShape2D" id="Rect_13"]
+size = Vector2(12, 32)
+
+[sub_resource type="RectangleShape2D" id="Rect_14"]
+size = Vector2(134, 32)
+
+[node name="Attic" type="Node2D"]
+script = ExtResource("1_Attic")
+RoomName = "Attic"
+FarY = 190
+NearY = 264
+FarScale = 0.9
+NearScale = 1.07
+PlayerCharacter = "daniel"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_attic")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(104, 194, 392, 194, 392, 232, 470, 236, 470, 264, 100, 264)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(236, 232)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Papers" type="Sprite2D" parent="."]
+position = Vector2(262, 184)
+z_index = -5
+texture = ExtResource("3_attic_papers")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "boxes_spilled"
+
+[node name="Chair" type="Sprite2D" parent="."]
+position = Vector2(108, 118)
+z_index = -5
+texture = ExtResource("5_attic_chair")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "sheet_lifted"
+
+[node name="TrunkOpen" type="Sprite2D" parent="."]
+position = Vector2(388, 150)
+z_index = -5
+texture = ExtResource("6_attic_trunk_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "trunk_open"
+
+[node name="Leo" type="Node2D" parent="."]
+position = Vector2(55, 200)
+script = ExtResource("7_Voice")
+Id = "leo"
+SpeechColor = Color(0.941, 0.690, 0.439, 1)
+
+[node name="Hint" type="Node2D" parent="."]
+position = Vector2(240, 16)
+script = ExtResource("7_Voice")
+Id = "hint"
+SpeechColor = Color(0.659, 0.659, 0.690, 1)
+
+[node name="Hatch" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "hatch"
+DisplayName = "hatch"
+LookText = "The hatch down to the landing. Somewhere below it, Leo is \"coming in a minute\"."
+WalkTo = Vector2(110, 244)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Hatch"]
+position = Vector2(54.0, 239.0)
+shape = SubResource("Rect_1")
+
+[node name="Sheet" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "sheet"
+DisplayName = "dust sheet"
+LookText = "Something big under a dust sheet. A chair, maybe. Or a ghost on a budget."
+WalkTo = Vector2(156, 202)
+Face = 2
+HideIfFlags = "sheet_lifted"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Sheet"]
+position = Vector2(156.0, 157.0)
+shape = SubResource("Rect_2")
+
+[node name="Chair" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "chair"
+DisplayName = "rocking chair"
+LookText = "A rocking chair, carved by hand. Somebody sat in it for a long, long time."
+WalkTo = Vector2(156, 202)
+Face = 2
+ShowIfFlags = "sheet_lifted"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chair"]
+position = Vector2(156.0, 157.0)
+shape = SubResource("Rect_3")
+
+[node name="DressForm" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "dress_form"
+DisplayName = "dress form"
+LookText = "A dressmaker's dummy. She's been watching me since I came up here."
+WalkTo = Vector2(225, 200)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/DressForm"]
+position = Vector2(225.0, 155.0)
+shape = SubResource("Rect_4")
+
+[node name="Boxes" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "boxes"
+DisplayName = "boxes"
+LookText = "MISC. TAXES 87-94. XMAS. The previous owners were organised. Just not tidy."
+WalkTo = Vector2(336, 200)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Boxes"]
+position = Vector2(336.0, 152.0)
+shape = SubResource("Rect_5")
+
+[node name="Papers" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "papers"
+DisplayName = "papers"
+LookText = "Thirty years of somebody else's paperwork."
+WalkTo = Vector2(326, 228)
+Face = 2
+ShowIfFlags = "boxes_spilled"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Papers"]
+position = Vector2(327.5, 205.5)
+shape = SubResource("Rect_6")
+
+[node name="Trunk" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "trunk"
+DisplayName = "steamer trunk"
+WalkTo = Vector2(384, 224)
+Face = 4
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Trunk"]
+position = Vector2(432.0, 205.0)
+shape = SubResource("Rect_7")
+
+[node name="Painting" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "painting"
+DisplayName = "old portraits"
+LookText = "A family portrait. Nobody in it is smiling. It was that kind of century."
+WalkTo = Vector2(384, 224)
+Face = 4
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Painting"]
+position = Vector2(447.0, 164.0)
+shape = SubResource("Rect_8")
+
+[node name="Radio" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "radio"
+DisplayName = "old radio"
+LookText = "A cathedral radio. Older than my parents. Probably older than their parents."
+WalkTo = Vector2(106, 232)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Radio"]
+position = Vector2(64.0, 191.0)
+shape = SubResource("Rect_9")
+
+[node name="Suitcase" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "suitcase"
+DisplayName = "suitcase"
+LookText = "A battered suitcase. Empty. Somebody unpacked a long time ago."
+WalkTo = Vector2(106, 232)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Suitcase"]
+position = Vector2(20.0, 195.0)
+shape = SubResource("Rect_10")
+
+[node name="HatBox" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "hatbox"
+DisplayName = "hat box"
+LookText = "A hat box. The hat inside has seen better centuries."
+WalkTo = Vector2(112, 204)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/HatBox"]
+position = Vector2(97.0, 177.0)
+shape = SubResource("Rect_11")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "window"
+DisplayName = "round window"
+LookText = "The only window up here. The sun comes in like it's looking for something."
+WalkTo = Vector2(260, 198)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(260.0, 80.0)
+shape = SubResource("Rect_12")
+
+[node name="Bulb" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "bulb"
+DisplayName = "light bulb"
+LookText = "A bare bulb. It works, which makes it the most reliable thing up here."
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bulb"]
+position = Vector2(260.0, 36.0)
+shape = SubResource("Rect_13")
+
+[node name="Rug" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "rug"
+DisplayName = "rag rug"
+LookText = "A rag rug. Hand-made, by the look of it. Moths have been eating well."
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Rug"]
+position = Vector2(195.0, 230.0)
+shape = SubResource("Rect_14")

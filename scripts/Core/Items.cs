@@ -15,6 +15,10 @@ public static class Items
             "One whole dollar. My entire operating budget."),
         ["matchbook"] = new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
             "A blue lantern on the cover. Inside someone scribbled: \"Sweet Caroline's sister\"."),
+        ["crowbar"] = new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
+            "A rusty crowbar. Every attic has one. Nobody knows why."),
+        ["journal"] = new("journal", "journal", "res://assets/art/items/journal.png",
+            "Cracked leather, stamped \"M. Jones\". Somebody wrote a lot in this, and pressed hard."),
     };
 
     public static ItemDef Get(string id) => All[id];

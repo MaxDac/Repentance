@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 namespace Repentance;
 
 /// <summary>
-/// Main scene controller: owns the current room, the player and the HUD, turns clicks into
-/// "verb + object" commands and provides the scripting helpers rooms use (Say, WalkTo, ChangeRoom...).
+/// Main scene controller: owns the current room, the player and the HUD, turns clicks (left = walk /
+/// default action, right = verb wheel, held inventory item = use it) into commands and provides the
+/// scripting helpers rooms use (Say, WalkTo, ChangeRoom...).
 /// </summary>
 public partial class Game : Node
 {
     public static Game Instance { get; private set; } = null!;
 
-    [Export] public string StartRoom = "office";
+    [Export] public string StartRoom = "attic";
     [Export] public string StartEntry = "start";
 
     public Player Player { get; private set; } = null!;
@@ -21,8 +22,7 @@ public partial class Game : Node
     public Room? Room { get; private set; }
 
     private Node2D _roomHost = null!;
-    private Verb _verb = Verb.WalkTo;
-    private string? _item;          // first object of "Use X with" / "Give X to"
+    private string? _carried;
     private string? _hoverItem;
     private int _busy;               // > 0 while a scripted sequence runs
     private int _actionId;
@@ -41,7 +41,6 @@ public partial class Game : Node
         Player = new Player { Name = "Player" };
         Hud = new Hud { Name = "Hud" };
         AddChild(Hud);
-        Hud.VerbClicked += OnVerbClicked;
         Hud.ItemClicked += OnItemClicked;
         Hud.ItemHovered += id => _hoverItem = id;
         Hud.TitleClicked += () => _onTitle = false;
@@ -72,6 +71,9 @@ public partial class Game : Node
 
     // ------------------------------------------------------------------ input
 
+    /// <summary>Inventory item currently held as the mouse cursor (left click a hotspot to use it there).</summary>
+    public string? Carried => _carried;
+
     public override void _UnhandledInput(InputEvent e)
     {
         if (e is not InputEventMouseButton { Pressed: true } mb) return;
@@ -83,93 +85,93 @@ public partial class Game : Node
             _skipSpeech.TrySetResult();
             return;
         }
-        if (Busy || Room == null || _onTitle) return;
+        if (Busy || Room == null || _onTitle || Hud.Wheel.IsOpen) return;
         var pos = mb.Position;
-        if (pos.Y >= Hud.Top) return;
-
         var target = Room.HotspotAt(pos);
+
         if (mb.ButtonIndex == MouseButton.Right)
         {
-            _item = null;
-            if (target == null) return;
-            _ = Execute(DefaultVerb(target), target, null, pos);
+            if (_carried != null) { SetCarried(null); return; }
+            if (target != null) _ = OpenWheel(target, pos);
+            return;
         }
-        else
+        if (_carried != null && target != null)
         {
-            var verb = target == null ? Verb.WalkTo : _verb;
-            var item = _item;
-            if (verb == Verb.Give && item == null)
-            {
-                ResetVerb();
-                _ = Run(() => Say(Pick("Give what? I should pick something from my pockets first.", "Give what?")));
-                return;
-            }
-            _ = Execute(verb, target, item, pos);
+            var item = _carried;
+            SetCarried(null);
+            _ = Execute(Verb.UseItem, target, item, pos);
+            return;
         }
-        ResetVerb();
+        _ = Execute(target == null ? Verb.Walk : DefaultVerb(target), target, null, pos);
     }
 
+    /// <summary>Left click on a hotspot: exits are walked through, people are talked to, the rest is looked at.</summary>
     private static Verb DefaultVerb(Hotspot h) => h switch
     {
-        { IsExit: true } => Verb.WalkTo,
-        Actor => Verb.TalkTo,
-        _ => Verb.LookAt,
+        { IsExit: true } => Verb.Walk,
+        Actor => Verb.Talk,
+        _ => Verb.Look,
     };
 
-    private void OnVerbClicked(Verb v)
+    private async Task OpenWheel(Hotspot target, Vector2 pos)
     {
-        if (Busy) return;
-        _verb = v;
-        _item = null;
-        Hud.HighlightVerb(v);
+        var verb = await Hud.Wheel.Open(pos, target.Title);
+        if (verb is { } v && !Busy && Room != null && target.Visible) await Execute(v, target, null, pos);
     }
 
-    private void OnItemClicked(string item, bool right)
+    private void SetCarried(string? item)
+    {
+        _carried = item;
+        Hud.SetCursorItem(item);
+    }
+
+    private async void OnItemClicked(string item, bool right, Vector2 pos)
     {
         if (_skipSpeech != null) { _skipSpeech.TrySetResult(); return; }
-        if (Busy) return;
-        if (right || _verb == Verb.LookAt)
+        if (Busy || Hud.Wheel.IsOpen) return;
+        if (right)
         {
-            ResetVerb();
-            _ = Run(() => Say(Items.Get(item).Description));
+            SetCarried(null);
+            if (await Hud.Wheel.Open(pos, Items.Get(item).Name) is { } verb) await ItemVerb(verb, item);
             return;
         }
-        if (_item != null && Verbs.IsTwoObject(_verb))
+        if (_carried == null)
         {
-            var first = _item;
-            ResetVerb();
-            if (first == item) return;
-            _ = Run(async () =>
-            {
-                if (Room == null || !await Room.OnCombine(first, item))
-                    await Say(Pick("That doesn't work.", "I can't see how those go together."));
-            });
+            SetCarried(item);
+            Hud.ShowInventory(false);
             return;
         }
-        if (_verb is Verb.WalkTo or Verb.Use or Verb.Give)
+        var first = _carried;
+        SetCarried(null);
+        if (first == item) return;
+        await Run(async () =>
         {
-            if (_verb == Verb.WalkTo) _verb = Verb.Use;
-            _item = item;
-            Hud.HighlightVerb(_verb);
-            return;
-        }
-        var verb = _verb;
-        ResetVerb();
-        _ = Run(() => Say(verb switch
-        {
-            Verb.PickUp => "I've already got it.",
-            Verb.Open => "It doesn't open.",
-            Verb.TalkTo => "I'm not that lonely. Yet.",
-            _ => "That won't help.",
-        }));
+            if (Room == null || !await Room.OnCombine(first, item))
+                await Say(Pick("That doesn't work.", "I can't see how those go together."));
+        });
     }
 
-    private void ResetVerb()
+    /// <summary>Applies a wheel verb to an inventory item (also used by the autoplay test).</summary>
+    public Task ItemVerb(Verb verb, string item) => Run(async () =>
     {
-        _verb = Verb.WalkTo;
-        _item = null;
-        Hud.HighlightVerb(null);
-    }
+        if (Room != null && await Room.OnItemVerb(verb, item)) return;
+        switch (verb)
+        {
+            case Verb.Look:
+                await Say(Items.Get(item).Description);
+                break;
+            case Verb.Hand:
+                Hud.ShowInventory(false);
+                SetCarried(item);
+                break;
+            case Verb.Talk:
+                await Say(Pick("I'm not that lonely. Yet.", "It doesn't answer. Thankfully."));
+                break;
+            default:
+                await Say("I'd rather not break my own things.");
+                break;
+        }
+    });
 
     public override void _Process(double delta)
     {
@@ -177,19 +179,21 @@ public partial class Game : Node
         if (Busy) { Hud.SetInterfaceVisible(false); return; }
         Hud.SetInterfaceVisible(true);
 
-        var mouse = GetViewport().GetMousePosition();
+        var mouse = Hud.MousePos;
+        if (Hud.Wheel.IsOpen) { Hud.SetHover(null, mouse); return; }
         string? obj = null;
+        Hotspot? spot = null;
         if (_hoverItem != null) obj = Items.Get(_hoverItem).Name;
-        else if (mouse.Y < Hud.Top) obj = Room.HotspotAt(mouse)?.Title;
+        else if (!Hud.InventoryOpen && (spot = Room.HotspotAt(mouse)) != null) obj = spot.Title;
 
-        var s = Verbs.Label(_verb);
-        if (_item != null)
+        string? text = obj;
+        if (_carried != null)
         {
-            s += " " + Items.Get(_item).Name + " " + Verbs.Preposition(_verb);
-            if (obj != null && obj != Items.Get(_item).Name) s += " " + obj;
+            var name = Items.Get(_carried).Name;
+            text = obj == null || obj == name ? null
+                : spot is Actor ? $"Give {name} to {obj}" : $"Use {name} with {obj}";
         }
-        else if (obj != null) s += " " + obj;
-        Hud.SetSentence(s);
+        Hud.SetHover(text, mouse);
     }
 
     // ------------------------------------------------------------------ command execution
@@ -222,58 +226,43 @@ public partial class Game : Node
         await Run(async () =>
         {
             if (Room != null && await Room.OnInteract(verb, target, item)) return;
-            if (verb == Verb.WalkTo)
+            if (verb is Verb.Walk or Verb.Hand && target.IsExit)
             {
-                if (target.IsExit) await ChangeRoom(target.ExitTo, target.ExitEntry);
+                await ChangeRoom(target.ExitTo, target.ExitEntry);
                 return;
             }
+            if (verb == Verb.Walk) return;
             await DefaultResponse(verb, target, item);
         });
     }
 
     private async Task DefaultResponse(Verb verb, Hotspot target, string? item)
     {
+        bool person = target is Actor;
         switch (verb)
         {
-            case Verb.LookAt:
+            case Verb.Look:
                 await Say(target.LookText != "" ? target.LookText : $"It's {Article(target.Title)}.");
                 break;
-            case Verb.Open when target.IsExit:
-                await ChangeRoom(target.ExitTo, target.ExitEntry);
-                break;
-            case Verb.Open:
-                await Say(Pick("It doesn't open.", "There's nothing to open."));
-                break;
-            case Verb.Close:
-                await Say(Pick("It doesn't close.", "It's as closed as it gets."));
-                break;
-            case Verb.PickUp:
-                await Say(target is Actor
+            case Verb.Hand:
+                await Say(person
                     ? "Let's keep our relationship professional."
-                    : Pick("I don't need that.", "I'll leave it where it is.", "It's fine where it is."));
+                    : Pick("I don't need that.", "I'll leave it where it is.", "It's fine where it is.", "Nothing happens."));
                 break;
-            case Verb.TalkTo:
-                await Say(target is Actor ? "They don't seem to want to talk." : Pick("It's not much of a talker.", "I've had better conversations with a lamppost. But not with this."));
+            case Verb.Talk:
+                await Say(person ? "They don't seem to want to talk." : Pick("It's not much of a talker.", "I've had better conversations with a lamppost."));
                 break;
-            case Verb.Push:
-            case Verb.Pull:
-                await Say(Pick("It won't budge.", "Nothing happens.", "I'd only hurt my back."));
+            case Verb.Kick:
+                await Say(person ? "Tempting. But no." : Pick("It won't budge.", "Ow.", "Kicking things never solved anything. Mostly."));
                 break;
-            case Verb.Give when item != null:
-                await Say(target is Actor ? "I don't think they'd want that." : "I can't give things to inanimate objects. Not anymore.");
-                break;
-            case Verb.Use when item != null:
-                await Say(Pick("That doesn't work.", "I don't think so."));
-                break;
-            case Verb.Use:
-                await Say(Pick("I can't use that.", "What would I use that for?"));
+            case Verb.UseItem when item != null:
+                await Say(person ? "I don't think they'd want that." : Pick("That doesn't work.", "I don't think so."));
                 break;
             default:
                 await Say("Hmm.");
                 break;
         }
     }
-
     private static string Article(string name) =>
         "aeiou".Contains(char.ToLowerInvariant(name[0])) ? "an " + name : "a " + name;
 
@@ -302,9 +291,10 @@ public partial class Game : Node
 
     public Task Say(string actorId, string text)
     {
-        ISpeaker who = actorId.Equals("micah", StringComparison.OrdinalIgnoreCase)
+        var id = actorId.ToLowerInvariant();
+        ISpeaker who = id == "micah" || id == "daniel" || id == Player.Character
             ? Player
-            : (ISpeaker?)Room?.FindActor(actorId.ToLowerInvariant()) ?? Player;
+            : Room?.FindSpeaker(id) ?? Player;
         return Say(who, text);
     }
 
@@ -346,10 +336,13 @@ public partial class Game : Node
             Room = scene.Instantiate<Room>();
             _roomHost.AddChild(Room);
             Room.World.AddChild(Player);
+            Player.SetCharacter(Room.PlayerCharacter);
             var marker = Room.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);
-            ResetVerb();
+            SetCarried(null);
+            Hud.ShowInventory(false);
+            Hud.Wheel.Close();
             await Hud.Fade(0, 0.35);
         }
         finally { _busy--; }

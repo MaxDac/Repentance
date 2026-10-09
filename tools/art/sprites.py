@@ -267,6 +267,10 @@ BARTENDER = dict(skin=hx("d8a888"), bald=True, hair=hx("3a2a20"), mustache=True,
                  shirt=hx("e8e4d8"), tie=hx("2a1a1a"), apron=hx("e0dcd0"), pants=hx("2a2424"), shoes=hx("141414"))
 
 
+DANIEL = dict(skin=hx("e0b090"), hair=hx("5a4636"), coat=hx("3e5a4e"), coat_len=0, shirt=hx("c8c4b8"),
+              pants=hx("3a4a6a"), shoes=hx("d8d4cc"), buttons=None)
+
+
 def sheet(frames, cols, fw, fh, rows):
     out = Image.new("RGBA", (cols * fw, rows * fh))
     for r, row in enumerate(frames):
@@ -275,14 +279,20 @@ def sheet(frames, cols, fw, fh, rows):
     return out
 
 
-def build():
+def player_sheet(spec, name):
+    """Walkable character: side (idle, 6 walk, talk), front (idle, 4 walk, talk), back (idle, 4 walk)."""
     two_pi = 2 * math.pi
-    side = [frame(MICAH, "side")] + [frame(MICAH, "side", two_pi * i / 6, True) for i in range(6)] + \
-           [frame(MICAH, "side", talk=True)]
-    front = [frame(MICAH, "front")] + [frame(MICAH, "front", two_pi * i / 4 + 0.8, True) for i in range(4)] + \
-            [frame(MICAH, "front", talk=True)]
-    back = [frame(MICAH, "back")] + [frame(MICAH, "back", two_pi * i / 4 + 0.8, True) for i in range(4)]
-    save(sheet([side, front, back], 8, 40, 80, 3), "sprites", "micah.png")
+    side = [frame(spec, "side")] + [frame(spec, "side", two_pi * i / 6, True) for i in range(6)] + \
+           [frame(spec, "side", talk=True)]
+    front = [frame(spec, "front")] + [frame(spec, "front", two_pi * i / 4 + 0.8, True) for i in range(4)] + \
+            [frame(spec, "front", talk=True)]
+    back = [frame(spec, "back")] + [frame(spec, "back", two_pi * i / 4 + 0.8, True) for i in range(4)]
+    save(sheet([side, front, back], 8, 40, 80, 3), "sprites", f"{name}.png")
+
+
+def build():
+    player_sheet(MICAH, "micah")
+    player_sheet(DANIEL, "daniel")
     for name, spec, view in (("teddy", TEDDY, "front"), ("concierge", CONCIERGE, "front"),
                              ("bellboy", BELLBOY, "front"), ("sal", SAL, "front"),
                              ("bartender", BARTENDER, "front")):

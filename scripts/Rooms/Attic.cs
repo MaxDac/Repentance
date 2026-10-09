@@ -1,0 +1,134 @@
+using System.Threading.Tasks;
+
+namespace Repentance.Rooms;
+
+/// <summary>
+/// Prologue, present day. Daniel sorts the attic of the house he just bought, full of the previous
+/// owners' family junk. Doubles as the tutorial: look (left click), the verb wheel (right click),
+/// kick, the satchel and using an item on something. Opening the trunk finds Micah's journal; reading
+/// it takes the story back to Chicago, 1927.
+/// </summary>
+public partial class Attic : Room
+{
+    private Task Hint(string text) => Say("hint", text);
+
+    public override async Task OnEnter(string entry)
+    {
+        if (State.HasFlag("attic_intro")) return;
+        State.SetFlag("attic_intro");
+        await Game.Run(async () =>
+        {
+            await Wait(0.6);
+            await Talk("attic_intro");
+            await Hint("(Left-click to walk or look at things. Right-click on something for the action wheel.)");
+        });
+    }
+
+    public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
+    {
+        switch (target.Id, verb)
+        {
+            case ("hatch", Verb.Talk):
+                await Talk("leo_call");
+                return true;
+            case ("hatch", Verb.Walk or Verb.Hand):
+                await Say("Not before I've made a dent in this mess. I promised.");
+                return true;
+            case ("hatch", Verb.Kick):
+                await Say("Kicking the hatch shut would only trap me up here. With the dress form.");
+                return true;
+
+            case ("sheet", Verb.Hand):
+                State.SetFlag("sheet_lifted");
+                await Say("A rocking chair. Under a sheet. In an attic. Not creepy at all.");
+                return true;
+            case ("chair", Verb.Kick):
+                await Say("It rocks. All by itself. For way too long.");
+                return true;
+            case ("chair", Verb.Hand):
+                await Say("I'm not sitting in it. Whoever sat in it last is probably still sitting in it.");
+                return true;
+
+            case ("boxes", Verb.Hand or Verb.Kick) when !State.HasFlag("boxes_spilled"):
+                State.SetFlag("boxes_spilled");
+                await Say(verb == Verb.Kick ? "Oops." : "Let's start with the top one... whoa, whoa, WHOA!");
+                await Say("Great. Thirty years of tax returns, all over the floor.");
+                return true;
+            case ("boxes", Verb.Hand or Verb.Kick):
+                await Say("I've done enough damage to those boxes for one day.");
+                return true;
+
+            case ("papers", Verb.Look) when !State.HasFlag("got_crowbar"):
+                await Say("Receipts, bank statements, a 1994 Pizza Hut menu... and something heavy underneath.");
+                return true;
+            case ("papers", Verb.Hand) when !State.HasFlag("got_crowbar"):
+                State.SetFlag("got_crowbar");
+                State.GiveItem("crowbar");
+                await Say("A crowbar! Hidden in a box marked MISC. Fair enough.");
+                await Hint("(Your things go in the satchel, bottom right. Click an item to hold it, then click where to use it.)");
+                return true;
+            case ("papers", Verb.Hand):
+                await Say("I'll file them later. In the recycling bin.");
+                return true;
+
+            case ("trunk", Verb.Look):
+                await Say(State.HasFlag("trunk_open")
+                    ? "Mothballs and an old overcoat. Whoever packed this wanted it forgotten."
+                    : "A steamer trunk. Brass corners, and initials on the lid: M. J. It's locked.");
+                return true;
+            case ("trunk", Verb.Hand) when !State.HasFlag("trunk_open"):
+                await Say("Locked. The key's probably been at the bottom of Lake Michigan for decades.");
+                return true;
+            case ("trunk", Verb.Kick) when !State.HasFlag("trunk_open"):
+                State.SetFlag("trunk_kicked");
+                await Say("OW! Solid oak. I need some leverage, not a broken toe.");
+                return true;
+            case ("trunk", Verb.UseItem) when item == "crowbar" && !State.HasFlag("trunk_open"):
+                State.TakeItem("crowbar");
+                State.SetFlag("trunk_open");
+                await Say("Come on... come on...");
+                await Say("*CRACK*");
+                await Say("Mothballs. An overcoat that's seen better decades. And under it...");
+                State.GiveItem("journal");
+                await Say("A journal. Leather, really old. \"M. Jones\" stamped on the cover.");
+                await Hint("(Right-click the journal in your satchel and use the hand to read it.)");
+                return true;
+            case ("trunk", Verb.Hand or Verb.Kick):
+                await Say("It's open. Nothing else in there but mothballs.");
+                return true;
+
+            case ("radio", Verb.Hand):
+                await Say("Click... nothing. It hasn't played a note since before my grandfather was born.");
+                return true;
+            case ("radio", Verb.Kick):
+                await Say("The \"percussive maintenance\" approach. Still nothing.");
+                return true;
+            case ("dress_form", Verb.Talk):
+                await Say("Hi. Nice to meet you. ...Leo's right, I need to get out more.");
+                return true;
+            case ("dress_form", Verb.Hand or Verb.Kick):
+                await Say("I'd rather not touch her. It. I'd rather not touch it.");
+                return true;
+            case ("window", Verb.Hand):
+                await Say("Painted shut. Like every other window in this house.");
+                return true;
+            case ("painting", Verb.Hand):
+                await Say("Some stern-looking people in very stiff collars. They can stay up here.");
+                return true;
+        }
+        return false;
+    }
+
+    public override async Task<bool> OnItemVerb(Verb verb, string item)
+    {
+        if (item != "journal" || verb != Verb.Hand) return false;
+        await Talk("journal");
+        State.TakeItem("journal");
+        await Game.Hud.Fade(1, 1.5);
+        Game.Hud.ShowCaption("Chicago, 1927.");
+        await Wait(2.8);
+        Game.Hud.ShowCaption(null);
+        await Game.ChangeRoom("office", "start");
+        return true;
+    }
+}

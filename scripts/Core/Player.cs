@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Repentance;
 
 /// <summary>
-/// Micah. Sprite sheet (40x80 frames, 8 columns):
+/// The playable character (Micah, or Daniel in the prologue). Sprite sheet (40x80 frames, 8 columns):
 /// row 0 side view: idle, walk x6, talk · row 1 front: idle, walk x4, talk · row 2 back: idle, walk x4.
 /// Side frames face right and are flipped for left. Position is the feet.
 /// </summary>
@@ -33,17 +33,29 @@ public partial class Player : Node2D, ISpeaker
         set { _talking = value; _animTime = 0; }
     }
 
+    /// <summary>Who the player controls: "micah" (1927) or "daniel" (the present-day prologue).</summary>
+    public string Character { get; private set; } = "micah";
+
     public override void _Ready()
     {
         _sprite = new Sprite2D
         {
-            Texture = GD.Load<Texture2D>("res://assets/art/sprites/micah.png"),
             Hframes = Cols,
             Vframes = 3,
             Centered = false,
             Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + 1),
         };
         AddChild(_sprite);
+        SetCharacter(Character);
+    }
+
+    /// <summary>Swaps the sprite sheet (assets/art/sprites/{id}.png) and speech colour.</summary>
+    public void SetCharacter(string id)
+    {
+        Character = id;
+        SpeechColor = id == "daniel" ? new Color("b8d8e8") : new Color("f0e0a0");
+        if (_sprite == null) return;
+        _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
         UpdateFrame();
     }
 

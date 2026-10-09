@@ -6,43 +6,53 @@ using System.Threading.Tasks;
 namespace Repentance;
 
 /// <summary>
-/// The SCUMM-style interface: sentence line, 3x3 verb grid, scrolling inventory, dialogue choices,
-/// speech text and screen fades. Built in code so the layout lives in one place.
+/// Full-screen point-and-click interface: hover label next to the cursor, right-click verb wheel,
+/// satchel button + inventory case, dialogue choices, speech text, fades and the custom cursor.
+/// Built in code so the layout lives in one place.
 /// </summary>
 public partial class Hud : CanvasLayer
 {
-    public const int Top = 200;
-    private const int SlotW = 38, SlotH = 27, InvCols = 7, InvRows = 2, InvX = 184, InvY = 213;
+    public const int ScreenW = 480, ScreenH = 270;
+    private const int SlotW = 40, SlotH = 28, InvCols = 6, InvRows = 2;
+    private static readonly Vector2 InvPos = new(110, 186);
+    private static readonly Vector2 SatchelPos = new(444, 234);
 
     public static readonly Color VerbColor = new("b89a58");
     public static readonly Color VerbHover = new("f8e8b0");
-    public static readonly Color VerbActive = new("ffffff");
-    public static readonly Color SentenceColor = new("9ec0e0");
+    public static readonly Color ChoiceColor = new("8ab0d8");
 
-    public event Action<Verb>? VerbClicked;
-    public event Action<string, bool>? ItemClicked;
+    public event Action<string, bool, Vector2>? ItemClicked;
     public event Action<string?>? ItemHovered;
     public event Action? TitleClicked;
 
-    public Font Font { get; private set; } = null!;
+    public static Font Font { get; private set; } = null!;
+    public VerbWheel Wheel { get; private set; } = null!;
 
-    private Label _sentence = null!;
-    private Control _verbsAndInv = null!;
-    private VBoxContainer _choices = null!;
-    private readonly Dictionary<Verb, Button> _verbButtons = new();
+    private Control _interface = null!;
+    private Label _hover = null!;
+    private TextureButton _satchel = null!;
+    private Control _inventory = null!;
     private readonly List<Button> _slots = new();
-    private Button _up = null!, _down = null!;
-    private int _invRow;
-    private Verb? _highlight;
+    private ColorRect _choicesBg = null!;
+    private VBoxContainer _choices = null!;
     private Label _speech = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
     private TextureRect _title = null!;
     private Label _titleHint = null!;
+    private TextureRect _cursor = null!;
+    private Texture2D _cursorTex = null!;
     private TaskCompletionSource<int>? _choiceTcs;
 
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
+    public bool InventoryOpen => _inventory.Visible;
+
+    public static Label MakeOutlinedLabel(Color color) => new()
+    {
+        LabelSettings = new LabelSettings { Font = Font, FontSize = 8, FontColor = color, OutlineSize = 4, OutlineColor = new Color(0, 0, 0) },
+        MouseFilter = Control.MouseFilterEnum.Ignore,
+    };
 
     public override void _Ready()
     {
@@ -51,37 +61,34 @@ public partial class Hud : CanvasLayer
         var theme = new Theme { DefaultFont = Font, DefaultFontSize = 8 };
 
         var root = new Control { Theme = theme, MouseFilter = Control.MouseFilterEnum.Ignore };
-        root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        root.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         AddChild(root);
+        root.Size = new Vector2(ScreenW, ScreenH);
 
-        root.AddChild(new TextureRect
-        {
-            Texture = GD.Load<Texture2D>("res://assets/art/ui/panel.png"),
-            Position = new Vector2(0, Top),
-            MouseFilter = Control.MouseFilterEnum.Stop,
-        });
+        _interface = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
+        _interface.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        root.AddChild(_interface);
 
-        _sentence = new Label
+        _hover = MakeOutlinedLabel(VerbHover);
+        _interface.AddChild(_hover);
+
+        _satchel = new TextureButton
         {
-            Position = new Vector2(0, Top + 2),
-            Size = new Vector2(480, 10),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = 8, FontColor = SentenceColor },
-            MouseFilter = Control.MouseFilterEnum.Ignore,
+            TextureNormal = GD.Load<Texture2D>("res://assets/art/ui/satchel.png"),
+            Position = SatchelPos,
+            FocusMode = Control.FocusModeEnum.None,
+            TooltipText = "",
         };
-        root.AddChild(_sentence);
+        _satchel.Pressed += () => ShowInventory(!_inventory.Visible);
+        _satchel.MouseEntered += () => _satchel.Modulate = new Color(1.3f, 1.2f, 1f);
+        _satchel.MouseExited += () => _satchel.Modulate = Colors.White;
+        _interface.AddChild(_satchel);
 
-        _verbsAndInv = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
-        root.AddChild(_verbsAndInv);
-        BuildVerbs();
-        BuildInventory();
+        BuildInventory(root);
 
-        _choices = new VBoxContainer
-        {
-            Position = new Vector2(8, Top + 6),
-            Size = new Vector2(464, 62),
-            Visible = false,
-        };
+        _choicesBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.06f, 0.88f), Visible = false };
+        root.AddChild(_choicesBg);
+        _choices = new VBoxContainer { Visible = false };
         _choices.AddThemeConstantOverride("separation", 1);
         root.AddChild(_choices);
 
@@ -91,13 +98,15 @@ public partial class Hud : CanvasLayer
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
             LabelSettings = new LabelSettings
             {
-                Font = Font, FontSize = 8, OutlineSize = 4, OutlineColor = new Color(0, 0, 0),
-                LineSpacing = 1,
+                Font = Font, FontSize = 8, OutlineSize = 4, OutlineColor = new Color(0, 0, 0), LineSpacing = 1,
             },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
         root.AddChild(_speech);
+
+        Wheel = new VerbWheel { Name = "VerbWheel" };
+        root.AddChild(Wheel);
 
         _title = new TextureRect
         {
@@ -110,7 +119,7 @@ public partial class Hud : CanvasLayer
         {
             Text = "Click to begin",
             Position = new Vector2(0, 150),
-            Size = new Vector2(480, 10),
+            Size = new Vector2(ScreenW, 10),
             HorizontalAlignment = HorizontalAlignment.Center,
             LabelSettings = new LabelSettings { Font = Font, FontSize = 8, FontColor = VerbColor },
         };
@@ -121,13 +130,13 @@ public partial class Hud : CanvasLayer
         };
 
         _fade = new ColorRect { Color = new Color(0, 0, 0, 1), MouseFilter = Control.MouseFilterEnum.Ignore };
-        _fade.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         root.AddChild(_fade);
 
         _caption = new Label
         {
             Position = new Vector2(0, 126),
-            Size = new Vector2(480, 16),
+            Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
             LabelSettings = new LabelSettings { Font = Font, FontSize = 16, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
@@ -135,62 +144,57 @@ public partial class Hud : CanvasLayer
         };
         root.AddChild(_caption);
 
+        _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
+        _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
+        root.AddChild(_cursor);
+        Input.MouseMode = Input.MouseModeEnum.Hidden;
+
         GameState.Instance.Changed += RefreshInventory;
         RefreshInventory();
+    }
+
+    /// <summary>Last mouse position in game pixels (tracked from motion events, so synthetic input works too).</summary>
+    public Vector2 MousePos { get; private set; } = new(ScreenW / 2f, ScreenH / 2f);
+
+    public override void _Input(InputEvent e)
+    {
+        if (e is InputEventMouse m) MousePos = m.Position;
     }
 
     public override void _Process(double delta)
     {
         if (_title.Visible)
             _titleHint.Modulate = new Color(1, 1, 1, 0.55f + 0.45f * Mathf.Sin(Time.GetTicksMsec() / 300f));
+        _cursor.Position = (MousePos - _cursor.Texture.GetSize() / 2).Round();
     }
 
-    private Button MakeTextButton(string text, Color color)
+    private void BuildInventory(Control root)
     {
-        var b = new Button
+        // full-screen catcher: clicking outside the case closes it
+        _inventory = new Control { Visible = false, MouseFilter = Control.MouseFilterEnum.Stop };
+        _inventory.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _inventory.GuiInput += e =>
         {
-            Text = text,
-            Flat = true,
-            Alignment = HorizontalAlignment.Left,
-            FocusMode = Control.FocusModeEnum.None,
-            ButtonMask = MouseButtonMask.Left | MouseButtonMask.Right,
+            if (e is InputEventMouseButton { Pressed: true }) ShowInventory(false);
         };
-        b.AddThemeColorOverride("font_color", color);
-        b.AddThemeColorOverride("font_hover_color", VerbHover);
-        b.AddThemeColorOverride("font_pressed_color", VerbActive);
-        b.AddThemeColorOverride("font_hover_pressed_color", VerbActive);
-        var empty = new StyleBoxEmpty();
-        foreach (var s in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
-            b.AddThemeStyleboxOverride(s, empty);
-        return b;
-    }
-
-    private void BuildVerbs()
-    {
-        for (int i = 0; i < Verbs.Grid.Length; i++)
+        root.AddChild(_inventory);
+        _inventory.AddChild(new TextureRect
         {
-            var v = Verbs.Grid[i];
-            var b = MakeTextButton(Verbs.Label(v), VerbColor);
-            b.Position = new Vector2(8 + (i % 3) * 58, Top + 14 + (i / 3) * 16);
-            b.Size = new Vector2(56, 14);
-            b.Pressed += () => VerbClicked?.Invoke(v);
-            _verbsAndInv.AddChild(b);
-            _verbButtons[v] = b;
-        }
-    }
+            Texture = GD.Load<Texture2D>("res://assets/art/ui/inventory.png"),
+            Position = InvPos,
+            MouseFilter = Control.MouseFilterEnum.Stop,
+        });
 
-    private void BuildInventory()
-    {
-        var normal = new StyleBoxFlat { BgColor = new Color("140f18"), BorderColor = new Color("3a2c40") };
+        var normal = new StyleBoxFlat { BgColor = new Color("140c08"), BorderColor = new Color("3a2814") };
         normal.SetBorderWidthAll(1);
-        var hover = new StyleBoxFlat { BgColor = new Color("241a2a"), BorderColor = new Color("b89a58") };
+        var hover = new StyleBoxFlat { BgColor = new Color("2a1c10"), BorderColor = new Color("d8b050") };
         hover.SetBorderWidthAll(1);
         for (int r = 0; r < InvRows; r++)
         for (int c = 0; c < InvCols; c++)
         {
             var b = new Button
             {
-                Position = new Vector2(InvX + c * SlotW, InvY + r * SlotH),
+                Position = InvPos + new Vector2(10 + c * SlotW, 7 + r * SlotH),
                 Size = new Vector2(SlotW - 2, SlotH - 2),
                 FocusMode = Control.FocusModeEnum.None,
                 IconAlignment = HorizontalAlignment.Center,
@@ -205,69 +209,68 @@ public partial class Hud : CanvasLayer
             b.GuiInput += e => OnSlotInput(slot, e);
             b.MouseEntered += () => ItemHovered?.Invoke(ItemInSlot(slot));
             b.MouseExited += () => ItemHovered?.Invoke(null);
-            _verbsAndInv.AddChild(b);
+            _inventory.AddChild(b);
             _slots.Add(b);
         }
-        _up = MakeTextButton("^", VerbColor);
-        _up.Position = new Vector2(InvX + InvCols * SlotW + 4, InvY + 4);
-        _up.Size = new Vector2(20, 16);
-        _up.Pressed += () => { _invRow = Math.Max(0, _invRow - 1); RefreshInventory(); };
-        _down = MakeTextButton("v", VerbColor);
-        _down.Position = new Vector2(InvX + InvCols * SlotW + 4, InvY + SlotH + 6);
-        _down.Size = new Vector2(20, 16);
-        _down.Pressed += () => { _invRow++; RefreshInventory(); };
-        _verbsAndInv.AddChild(_up);
-        _verbsAndInv.AddChild(_down);
     }
 
-    private string? ItemInSlot(int slot)
+    private static string? ItemInSlot(int slot)
     {
         var inv = GameState.Instance.Inventory;
-        int i = _invRow * InvCols + slot;
-        return i < inv.Count ? inv[i] : null;
+        return slot < inv.Count ? inv[slot] : null;
     }
+
+    /// <summary>Screen position of an inventory slot (used by the autoplay test).</summary>
+    public Vector2 SlotCenter(int slot) => _slots[slot].Position + _slots[slot].Size / 2;
+
+    public Vector2 SatchelCenter => SatchelPos + _satchel.Size / 2;
 
     private void OnSlotInput(int slot, InputEvent e)
     {
-        if (e is InputEventMouseButton { Pressed: true } mb && ItemInSlot(slot) is { } item &&
-            mb.ButtonIndex is MouseButton.Left or MouseButton.Right)
-        {
-            ItemClicked?.Invoke(item, mb.ButtonIndex == MouseButton.Right);
-            GetViewport().SetInputAsHandled();
-        }
+        if (e is not InputEventMouseButton { Pressed: true } mb) return;
+        _slots[slot].AcceptEvent();
+        if (ItemInSlot(slot) is not { } item || mb.ButtonIndex is not (MouseButton.Left or MouseButton.Right)) return;
+        ItemClicked?.Invoke(item, mb.ButtonIndex == MouseButton.Right, mb.GlobalPosition);
     }
 
     public void RefreshInventory()
     {
-        var inv = GameState.Instance.Inventory;
-        int maxRow = Math.Max(0, (inv.Count - 1) / InvCols - (InvRows - 1));
-        _invRow = Math.Clamp(_invRow, 0, maxRow);
         for (int s = 0; s < _slots.Count; s++)
         {
             var id = ItemInSlot(s);
             _slots[s].Icon = id == null ? null : GD.Load<Texture2D>(Items.Get(id).IconPath);
-            _slots[s].TooltipText = "";
         }
-        _up.Visible = _invRow > 0;
-        _down.Visible = _invRow < maxRow;
+        _satchel.Disabled = false;
     }
 
-    public void SetSentence(string text) => _sentence.Text = text;
-
-    public void HighlightVerb(Verb? verb)
+    public void ShowInventory(bool show)
     {
-        if (_highlight is { } old && _verbButtons.TryGetValue(old, out var ob))
-            ob.AddThemeColorOverride("font_color", VerbColor);
-        _highlight = verb;
-        if (verb is { } v && _verbButtons.TryGetValue(v, out var nb))
-            nb.AddThemeColorOverride("font_color", VerbHover);
+        _inventory.Visible = show;
+        if (!show) ItemHovered?.Invoke(null);
     }
 
-    /// <summary>Hides verbs/inventory during cutscenes (MI style).</summary>
+    /// <summary>Label shown just above the cursor ("Trunk", "Use crowbar on trunk").</summary>
+    public void SetHover(string? text, Vector2 mouse)
+    {
+        _hover.Visible = !string.IsNullOrEmpty(text);
+        if (!_hover.Visible) return;
+        _hover.Text = text;
+        var size = _hover.GetMinimumSize();
+        var pos = new Vector2(mouse.X - size.X / 2, mouse.Y - size.Y - 8);
+        if (pos.Y < 2) pos.Y = mouse.Y + 10;
+        pos.X = Mathf.Clamp(pos.X, 2, ScreenW - size.X - 2);
+        _hover.Position = pos.Round();
+    }
+
+    /// <summary>Shows an inventory icon as the cursor while the player carries an item (null = crosshair).</summary>
+    public void SetCursorItem(string? item) =>
+        _cursor.Texture = item == null ? _cursorTex : GD.Load<Texture2D>(Items.Get(item).IconPath);
+
+    /// <summary>Hides the satchel and labels during cutscenes (MI style).</summary>
     public void SetInterfaceVisible(bool visible)
     {
-        _verbsAndInv.Visible = visible && !_choices.Visible;
-        _sentence.Visible = visible;
+        _interface.Visible = visible && !_choices.Visible;
+        if (!visible && _inventory.Visible) ShowInventory(false);
     }
 
     public Task<int> ShowChoices(IReadOnlyList<string> options)
@@ -276,24 +279,41 @@ public partial class Hud : CanvasLayer
         for (int i = 0; i < options.Count; i++)
         {
             int idx = i;
-            var b = MakeTextButton(options[i], new Color("8ab0d8"));
-            b.CustomMinimumSize = new Vector2(464, 12);
-            b.ClipText = true;
+            var b = new Button
+            {
+                Text = options[i],
+                Flat = true,
+                Alignment = HorizontalAlignment.Left,
+                FocusMode = Control.FocusModeEnum.None,
+                CustomMinimumSize = new Vector2(ScreenW - 16, 12),
+                ClipText = true,
+            };
+            b.AddThemeColorOverride("font_color", ChoiceColor);
+            b.AddThemeColorOverride("font_hover_color", VerbHover);
+            b.AddThemeColorOverride("font_pressed_color", Colors.White);
+            b.AddThemeColorOverride("font_hover_pressed_color", Colors.White);
+            var empty = new StyleBoxEmpty();
+            foreach (var s in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
+                b.AddThemeStyleboxOverride(s, empty);
             b.Pressed += () =>
             {
-                _choices.Visible = false;
+                HideChoices();
                 _choiceTcs?.TrySetResult(idx);
             };
             _choices.AddChild(b);
         }
-        _choices.Visible = true;
-        _verbsAndInv.Visible = false;
-        _sentence.Visible = false;
+        float h = options.Count * 13 + 8;
+        _choicesBg.Position = new Vector2(0, ScreenH - h);
+        _choicesBg.Size = new Vector2(ScreenW, h);
+        _choices.Position = new Vector2(8, ScreenH - h + 4);
+        _choices.Size = new Vector2(ScreenW - 16, h - 8);
+        _choices.Visible = _choicesBg.Visible = true;
+        _interface.Visible = false;
         _choiceTcs = new TaskCompletionSource<int>();
         return _choiceTcs.Task;
     }
 
-    public void HideChoices() => _choices.Visible = false;
+    public void HideChoices() => _choices.Visible = _choicesBg.Visible = false;
 
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
     public void ShowSpeech(string text, Vector2 head, Color color)
@@ -308,9 +328,9 @@ public partial class Hud : CanvasLayer
         float textHalf = Mathf.Min(width, size.X) / 2f + 3;
         float shift = 0;
         if (head.X - textHalf < 2) shift = 2 - (head.X - textHalf);
-        if (head.X + textHalf > 478) shift = 478 - (head.X + textHalf);
+        if (head.X + textHalf > ScreenW - 2) shift = ScreenW - 2 - (head.X + textHalf);
         pos.X += shift;
-        pos.Y = Mathf.Clamp(pos.Y, 2, Top - size.Y - 2);
+        pos.Y = Mathf.Clamp(pos.Y, 2, ScreenH - size.Y - 2);
         _speech.Position = pos.Round();
         _speech.Visible = true;
     }

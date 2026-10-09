@@ -9,8 +9,8 @@ namespace Repentance;
 
 /// <summary>
 /// Runs Ink conversations. All dialogue lives in res://dialogue/repentance.ink, one knot per
-/// conversation. Lines are written "SPEAKER: text" (speaker = actor Id, MICAH for the player).
-/// Choice text is spoken by Micah; wrap it in parentheses, e.g. "(Leave)", to keep him quiet.
+/// conversation. Lines are written "SPEAKER: text" (speaker = actor/voice Id; MICAH or DANIEL for the player).
+/// Choice text is spoken by the player; wrap it in parentheses, e.g. "(Leave)", to keep them quiet.
 /// Ink can call give_item/take_item/has_item/set_flag/has_flag to touch the game state.
 /// </summary>
 public partial class DialogueManager : Node

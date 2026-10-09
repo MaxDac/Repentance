@@ -39,40 +39,59 @@ public class AutoPlay
 
         try
         {
-            await game.ChangeRoom("office", "start");
-            Check(GameState.Instance.HasFlag("teddy_gone"), "Teddy left the office");
-            Check(GameState.Instance.HasItem("photo"), "got the photo");
+            var gs = GameState.Instance;
+
+            // ---- prologue: the attic, played through the real mouse input where it matters
+            await game.ChangeRoom("attic", "start");
+            Check(game.Player.Character == "daniel", "prologue plays as Daniel");
+            await Shot("attic");
+            await WheelTest(game);
+            await game.Perform(Verb.Talk, "hatch");
+            await game.Perform(Verb.Hand, "sheet");
+            Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
+            await game.Perform(Verb.Hand, "boxes");
+            Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
+            await game.Perform(Verb.Hand, "papers");
+            Check(gs.HasItem("crowbar"), "found the crowbar");
+            await Shot("attic_mess");
+            await InventoryTest(game);
+            await ReadJournal(game);
+
+            // ---- 1927
+            Check(game.Room?.Name == "Office", "journal leads to the office");
+            Check(game.Player.Character == "micah", "story continues as Micah");
+            Check(gs.HasFlag("teddy_gone"), "Teddy left the office");
+            Check(gs.HasItem("photo"), "got the photo");
             await Shot("office");
-            await game.Perform(Verb.Open, "drawer");
+            await game.Perform(Verb.Hand, "drawer");
             await Shot("office_drawer");
-            await game.Perform(Verb.PickUp, "dollar");
-            Check(GameState.Instance.HasItem("dollar"), "got the dollar");
-            await game.Perform(Verb.LookAt, "window");
+            await game.Perform(Verb.Hand, "dollar");
+            Check(gs.HasItem("dollar"), "got the dollar");
             await MouseTest(game);
-            await game.Perform(Verb.WalkTo, "door");
+            await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "Lobby", "entered the lobby");
 
             await Shot("lobby");
-            await game.Perform(Verb.TalkTo, "concierge");
-            await game.Perform(Verb.WalkTo, "revolving_door");
+            await game.Perform(Verb.Talk, "concierge");
+            await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room?.Name == "Lobby", "revolving door is gated");
-            await game.Perform(Verb.TalkTo, "bellboy");
-            await game.Perform(Verb.Give, "bellboy", "dollar");
-            Check(GameState.Instance.HasFlag("knows_lantern"), "bellboy tip");
-            await game.Perform(Verb.PickUp, "urn");
-            Check(GameState.Instance.HasItem("matchbook"), "got the matchbook");
-            await game.Perform(Verb.WalkTo, "revolving_door");
+            await game.Perform(Verb.Talk, "bellboy");
+            await game.Perform(Verb.UseItem, "bellboy", "dollar");
+            Check(gs.HasFlag("knows_lantern"), "bellboy tip");
+            await game.Perform(Verb.Hand, "urn");
+            Check(gs.HasItem("matchbook"), "got the matchbook");
+            await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room?.Name == "Speakeasy", "entered the speakeasy");
 
             await Shot("speakeasy");
-            await game.Perform(Verb.TalkTo, "bartender");
-            Check(!GameState.Instance.HasFlag("photo_shown"), "Sal blocks the bar");
-            await game.Perform(Verb.TalkTo, "sal");
-            Check(GameState.Instance.HasFlag("sal_passed"), "password accepted");
+            await game.Perform(Verb.Talk, "bartender");
+            Check(!gs.HasFlag("photo_shown"), "Sal blocks the bar");
+            await game.Perform(Verb.Talk, "sal");
+            Check(gs.HasFlag("sal_passed"), "password accepted");
             await Shot("speakeasy_inside");
-            _ = game.Perform(Verb.TalkTo, "bartender");
-            for (int i = 0; i < 600 && !GameState.Instance.HasFlag("ending"); i++) await game.Wait(0.1);
-            Check(GameState.Instance.HasFlag("photo_shown"), "showed the photo");
+            _ = game.Perform(Verb.Talk, "bartender");
+            for (int i = 0; i < 600 && !gs.HasFlag("ending"); i++) await game.Wait(0.1);
+            Check(gs.HasFlag("photo_shown"), "showed the photo");
             await game.Wait(1.5);
             await Shot("ending_sal");
             for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
@@ -89,17 +108,90 @@ public class AutoPlay
         game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 
-    /// <summary>Drives the real input path: click the floor, then right-click the window (default verb Look at).</summary>
+    /// <summary>Right-click the trunk to open the verb wheel, then click the boot.</summary>
+    private async Task WheelTest(Game game)
+    {
+        var trunk = new Vector2(432, 205);
+        Move(trunk);
+        Click(trunk, MouseButton.Right);
+        await game.Wait(0.1);
+        Check(game.Hud.Wheel.IsOpen, "right click opens the verb wheel");
+        Move(game.Hud.Wheel.SlotCenter(Verb.Kick));
+        await game.Wait(0.1);
+        GD.Print($"[probe] wheel rect {game.Hud.Wheel.GetGlobalRect()} vis {game.Hud.Wheel.IsVisibleInTree()} hovered {game.GetViewport().GuiGetHoveredControl()?.GetPath()} mouse {game.GetViewport().GetMousePosition()} slot {game.Hud.Wheel.SlotCenter(Verb.Kick)}");
+        await Shot("attic_wheel");
+        Click(game.Hud.Wheel.SlotCenter(Verb.Kick), MouseButton.Left);
+        for (int i = 0; i < 200 && !GameState.Instance.HasFlag("trunk_kicked"); i++) await game.Wait(0.05);
+        await WaitIdle(game);
+        Check(!game.Hud.Wheel.IsOpen && GameState.Instance.HasFlag("trunk_kicked"), "wheel 'Kick' on the trunk");
+    }
+
+    /// <summary>Open the satchel, pick up the crowbar as the cursor and click it on the trunk.</summary>
+    private async Task InventoryTest(Game game)
+    {
+        Click(game.Hud.SatchelCenter, MouseButton.Left);
+        await game.Wait(0.1);
+        Check(game.Hud.InventoryOpen, "satchel opens the inventory");
+        Move(game.Hud.SlotCenter(0));
+        await Shot("attic_inventory");
+        Click(game.Hud.SlotCenter(0), MouseButton.Left);
+        await game.Wait(0.1);
+        Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
+        var trunk = new Vector2(432, 205);
+        Move(trunk);
+        await Shot("attic_carry_crowbar");
+        Click(trunk, MouseButton.Left);
+        for (int i = 0; i < 100 && !game.Busy; i++) await game.Wait(0.05);
+        await game.Wait(1.2);
+        await Shot("attic_trunk_open");
+        await WaitIdle(game);
+        Check(GameState.Instance.HasFlag("trunk_open") && GameState.Instance.HasItem("journal"), "crowbar opens the trunk");
+    }
+
+    /// <summary>Right-click the journal in the satchel and choose the hand: reading it starts 1927.</summary>
+    private async Task ReadJournal(Game game)
+    {
+        Click(game.Hud.SatchelCenter, MouseButton.Left);
+        await game.Wait(0.1);
+        var slot = game.Hud.SlotCenter(0);
+        Move(slot);
+        Click(slot, MouseButton.Right);
+        await game.Wait(0.1);
+        Check(game.Hud.Wheel.IsOpen, "right click on an item opens the wheel");
+        Move(game.Hud.Wheel.SlotCenter(Verb.Hand));
+        await Shot("journal_wheel");
+        Click(game.Hud.Wheel.SlotCenter(Verb.Hand), MouseButton.Left);
+        for (int i = 0; i < 400 && !game.Hud.CaptionVisible; i++) await game.Wait(0.05);
+        await Shot("chicago_1927");
+        for (int i = 0; i < 1200 && (game.Room?.Name != "Office" || !GameState.Instance.HasFlag("teddy_gone") || game.Busy); i++)
+            await game.Wait(0.1);
+    }
+
+    /// <summary>Drives the real input path in 1927: left click the floor walks, left click the window looks at it.</summary>
     private async Task MouseTest(Game game)
     {
-        Click(new Vector2(420, 180), MouseButton.Left);
-        for (int i = 0; i < 100 && game.Player.Position.DistanceTo(new Vector2(420, 180)) > 1; i++) await game.Wait(0.1);
-        Check(game.Player.Position.DistanceTo(new Vector2(420, 180)) <= 1, "left click walks to the floor point");
-        Click(new Vector2(400, 50), MouseButton.Right);
+        var floor = new Vector2(420, 220);
+        Click(floor, MouseButton.Left);
+        for (int i = 0; i < 100 && game.Player.Position.DistanceTo(floor) > 1; i++) await game.Wait(0.1);
+        Check(game.Player.Position.DistanceTo(floor) <= 1, "left click walks to the floor point");
+        Move(new Vector2(400, 80));
+        Click(new Vector2(400, 80), MouseButton.Left);
         for (int i = 0; i < 100 && !game.Busy; i++) await game.Wait(0.05);
-        Check(game.Busy, "right click on the window starts 'Look at'");
+        Check(game.Busy, "left click on the window looks at it");
         await Shot("office_look_window");
-        for (int i = 0; i < 200 && game.Busy; i++) await game.Wait(0.1);
+        await WaitIdle(game);
+    }
+
+    private async Task WaitIdle(Game game)
+    {
+        await game.Wait(0.2);
+        for (int i = 0; i < 300 && game.Busy; i++) await game.Wait(0.1);
+    }
+
+    private void Move(Vector2 pos)
+    {
+        _game.GetViewport().PushInput(new InputEventMouseMotion { Position = pos, GlobalPosition = pos }, true);
+        _game.GetViewport().WarpMouse(pos);
     }
 
     private void Click(Vector2 pos, MouseButton button)

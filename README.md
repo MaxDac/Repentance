@@ -3,8 +3,9 @@
 *Chicago, 1927. The neon says HOTEL. The rain says nothing at all.*
 
 A point-and-click noir adventure in the spirit of *Monkey Island 2*: a 480×270 pixel-art
-game with a nine-verb SCUMM interface. You play Micah Jones, a private eye. Teddy Harrington III,
-heir to Harrington Steel, hires him to find his missing wife, Eleanor.
+game with a right-click verb wheel. Today, Daniel is clearing out the attic of the old house he just
+bought when he finds the journal of Micah Jones, a private eye. In 1927, Teddy Harrington III, heir to
+Harrington Steel, hired Micah to find his missing wife, Eleanor.
 
 Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (via GodotInk).
 
@@ -32,13 +33,20 @@ godot --path . -- --autoplay
 
 ### Controls
 
-- **Left click**: perform the sentence shown above the verbs. The default verb is *Walk to*.
-- **Right click** on an object: its default verb (*Talk to* for people, *Walk to* for exits, *Look at* for everything else).
-- **Inventory**: right-click an item to look at it. To use an item, click *Use* or *Give*, then the item, then the target.
+- **Left click** on the floor to walk. Left click on an object does the obvious thing: talk to people,
+  go through exits, look at everything else.
+- **Right click** on an object opens the **verb wheel**: 👁 *Look*, ✋ *Hand* (take, use, open, push),
+  👄 *Talk*, 🥾 *Kick*. Click an icon, or hold the right button and release it over one.
+- **Satchel** (bottom right) opens the inventory. Left-click an item to hold it as the cursor, then click
+  it on an object or person to use or give it (or on another item to combine them). Right-click
+  anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
 
 ## The demo
 
+0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
+   over the boxes, find the crowbar in the papers and use it on the steamer trunk. Inside is Micah's journal.
+   Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. There's a dollar in the top desk drawer.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory.
    The brass urn hides a matchbook from the Blue Lantern with a password inside.
@@ -54,7 +62,7 @@ scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
 scripts/Rooms/       per-room puzzle scripts
-scripts/UI/Hud.cs    verbs, inventory, dialogue choices, speech text, fades
+scripts/UI/          Hud (hover label, satchel, inventory, choices, speech, fades, cursor) and VerbWheel
 scripts/Debug/       AutoPlay smoke test
 tools/               Python art generator
 ```
@@ -63,20 +71,22 @@ tools/               Python art generator
 
 | Type | Role |
 |---|---|
-| `Game` | Main controller. Handles input, builds the sentence line, executes verbs and changes rooms. Exposes the script helpers `Say`, `WalkTo`, `Wait`, `Run` and `ChangeRoom` |
+| `Game` | Main controller. Handles input (left click, right-click wheel, held item), executes verbs and changes rooms. Exposes the script helpers `Say`, `WalkTo`, `Wait`, `Run` and `ChangeRoom` |
 | `GameState` (autoload) | Story flags and inventory; emits `Changed` |
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
-| `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Override `OnEnter`, `OnInteract`, `OnCombine` and `ClampWalkTarget` |
+| `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |
 | `Actor` | An NPC: a hotspot with a 2-frame (idle/talk) sprite sheet, a speech colour and `MoveTo` |
-| `Player` | Micah: 4-direction walk cycles, pathfinding along the walk polygon |
+| `Player` | The player character (Micah, or Daniel in the prologue): 4-direction walk cycles, pathfinding along the walk polygon |
+| `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
+| `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
 
 ### Adding a room
 
-1. Draw a 480×200 background (or add a generator in `tools/art/`) into `assets/art/rooms/`.
+1. Draw a 480×270 background (or add a generator in `tools/art/`) into `assets/art/rooms/`.
 2. Duplicate a scene in `scenes/rooms/`. The node layout is:
    - `Background` (Sprite2D)
    - `WalkArea` (Polygon2D, hidden at runtime)
