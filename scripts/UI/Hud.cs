@@ -63,7 +63,6 @@ public partial class Hud : CanvasLayer
         var root = new Control { Theme = theme, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         AddChild(root);
-        root.Size = new Vector2(ScreenW, ScreenH);
 
         _interface = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
         _interface.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
