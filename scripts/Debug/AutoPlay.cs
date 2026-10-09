@@ -104,6 +104,8 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room?.Name == "ClubLounge", "entered the lounge");
             await Shot("club_lounge");
+            await game.Perform(Verb.Talk, "harrington");
+            Check(gs.HasFlag("harrington_met"), "met Teddy's father in the lounge");
             await game.Perform(Verb.Walk, "stage_exit");
             Check(game.Room?.Name == "ClubStage", "entered the stage room");
             await Shot("club_stage");
@@ -214,7 +216,9 @@ public class AutoPlay
     /// <summary>Right-click the journal in the satchel and choose the hand: reading it starts 1927.</summary>
     private async Task ReadJournal(Game game)
     {
+        await WaitIdle(game);
         Click(game.Hud.SatchelCenter, MouseButton.Left);
+        for (int i = 0; i < 40 && !game.Hud.InventoryOpen; i++) await game.Wait(0.05);
         await game.Wait(0.1);
         var slot = game.Hud.SlotCenter(0);
         Move(slot);

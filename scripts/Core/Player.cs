@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Repentance;
 
 /// <summary>
-/// The playable character (Micah, or Daniel in the prologue). Sprite sheet (56x80 frames, 10 columns, painted by
+/// The playable character (Micah, or Daniel in the prologue). Sprite sheet (64x96 frames, 10 columns, painted by
 /// tools/art/figure.py): row 0 side view: idle, walk x8, talk · row 1 front 3/4: idle, walk x6, talk A, talk B ·
 /// row 2 back 3/4: idle, walk x6. Side frames face right and are flipped for left. Position is the feet, which sit
 /// <see cref="Baseline"/> pixels above the bottom of each frame.
@@ -14,9 +14,9 @@ public partial class Player : Node2D, ISpeaker
 {
     private const int Cols = 10;
     private const int Baseline = 3;
-    private static readonly Vector2 FrameSize = new(56, 80);
+    private static readonly Vector2 FrameSize = new(64, 96);
     /// <summary>Ground covered by one side-walk frame at scale 1 (an 8-frame cycle is two steps of ~0.39 x height).</summary>
-    private const float SideStridePerFrame = 6.4f;
+    private const float SideStridePerFrame = 7.7f;
     private const float FrontWalkFps = 8f;
 
     [Export] public float Speed = 62f;

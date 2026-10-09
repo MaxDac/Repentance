@@ -14,6 +14,8 @@ from .common import hx, BAYER
 
 LIGHT = np.array([-0.5, -0.65, 0.58])
 LIGHT /= np.linalg.norm(LIGHT)
+BULK = 1.16  # FOTA figures are solid and broad-shouldered, not wiry
+HEAD = 1.17  # ...with large heads that read at a distance
 PITCH = 0.2  # how much nearer points drop on screen (camera looks slightly down at the floor)
 COOL = np.array(hx("241c3c"), float)
 WARM = np.array(hx("fff2cc"), float)
@@ -132,7 +134,7 @@ class Canvas:
         v = 0.42 + 0.58 * s
         bay = np.tile(BAY, (self.h // 4 + 1, self.w // 4 + 1))[: self.h, : self.w]
         dith = np.array(self.dith + [False])[self.mat]
-        thr = np.where(dith, 0.5 + (bay - 0.5) * 0.12, 0.5)
+        thr = np.where(dith, 0.5 + (bay - 0.5) * 0.04, 0.5)
         tone = np.floor(v * 4 + thr).astype(int) + np.maximum(self.bias, -2)
         pad = np.pad(filled, 1)
         inner = pad[:-2, 1:-1] & pad[2:, 1:-1] & pad[1:-1, :-2] & pad[1:-1, 2:]
@@ -204,7 +206,7 @@ def figure(spec, ps, fw=56, fh=80):
     phi = math.radians(ps["phi"])
     cp, sp = math.cos(phi), math.sin(phi)
     cx, base = fw / 2.0 + spec.get("dx", 0), fh - 3.0
-    sw, hw = spec.get("sw", 0.135), spec.get("hw", 0.052)
+    sw, hw = spec.get("sw", 0.135) * 0.86, spec.get("hw", 0.052)  # FOTA shoulders are narrow and sloping
     lean = math.radians(ps["lean"])
     shift = ps["shift"]
 
@@ -262,12 +264,12 @@ def figure(spec, ps, fw=56, fh=80):
             part = f"leg{s}"
             thigh = pants or col.get("stockings", skin)
             shin = boots or col.get("stockings") or pants or skin
-            c.put(c.capsule(P(hip), P(knee), H * 0.05 * leg_r, H * 0.037 * leg_r), thigh, part)
-            c.put(c.capsule(P(knee), P(ank), H * 0.037 * leg_r, H * 0.027 * leg_r), shin, part)
+            c.put(c.capsule(P(hip), P(knee), H * 0.05 * leg_r * BULK, H * 0.037 * leg_r * BULK), thigh, part)
+            c.put(c.capsule(P(knee), P(ank), H * 0.037 * leg_r * BULK, H * 0.029 * leg_r * BULK), shin, part)
             if pants and not boots:  # trouser cuff falls over the shoe
                 c.put(c.capsule(P(ank - np.array([0, 0.02, 0])), P(ank + np.array([0, 0.012, 0])),
-                                H * 0.03 * leg_r, H * 0.031 * leg_r), pants, part)
-            c.put(c.capsule(P(heel), P(toe), H * 0.021, H * 0.017), shoes, f"shoe{s}", dither=False)
+                                H * 0.03 * leg_r * BULK, H * 0.031 * leg_r * BULK), pants, part)
+            c.put(c.capsule(P(heel), P(toe), H * 0.024, H * 0.02), shoes, f"shoe{s}", dither=False)
         add(1.0 + Dk, leg)
 
     # ---- torso ----
@@ -278,12 +280,13 @@ def figure(spec, ps, fw=56, fh=80):
 
     def trunk():
         hem_top = spec.get("top_hem", 0.45)
-        levels = [(0.19, 0.04, 0.034), (0.214, sw - 0.012, 0.05), (0.25, sw * 0.97, 0.066), (0.31, sw * 0.84, 0.07),
+        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.62, 0.05), (0.245, sw * 0.9, 0.064), (0.31, sw * 0.86, 0.07),
                   (0.40, waist, 0.058), (0.47, hipw, 0.064), (0.53, hipw * 0.86, 0.056)]
         left, right = [], []
         for y, ax, az in levels:
             cxy = P(body([shift * min(1.0, max(0.0, (y - 0.3) / 0.2)), y, 0.004]))
-            w = H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2)
+            k = 1.0 if y < 0.3 else BULK
+            w = H * math.sqrt((ax * k * cp) ** 2 + (az * 1.25 * sp) ** 2)
             left.append((cxy[0] - w, cxy[1]))
             right.append((cxy[0] + w, cxy[1]))
         c.put(c.poly(left + right[::-1], curve=0.9), torso, "torso")
@@ -300,7 +303,7 @@ def figure(spec, ps, fw=56, fh=80):
     arm_pts = {}
     for s in (1, -1):
         kind, f, o, e = ps["arms"][s]
-        sh = body([s * (sw - 0.014), 0.24, 0.0])
+        sh = body([s * (sw - 0.018), 0.258, 0.0])
         if kind == "hip":
             el = body([s * (sw + 0.07), 0.345, -0.035])
             wr = body([s * (hipw - 0.005), 0.455, 0.0])
@@ -328,34 +331,34 @@ def figure(spec, ps, fw=56, fh=80):
             sleeve = col.get("sleeves", torso)
             fore = col.get("forearm", sleeve)
             part = f"arm{s}"
-            c.put(c.capsule(P(sh), P(el), H * 0.037, H * 0.033), sleeve, part)
-            c.put(c.capsule(P(el), P(wr), H * 0.033, H * 0.028), fore, part)
+            c.put(c.capsule(P(sh), P(el), H * 0.037 * BULK, H * 0.033 * BULK), sleeve, part)
+            c.put(c.capsule(P(el), P(wr), H * 0.033 * BULK, H * 0.028 * BULK), fore, part)
             if col.get("cuff") and fore != skin:
                 c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
             if hand is not None:
-                c.put(c.capsule(P(wr), P(hand), H * 0.024, H * 0.022), skin, f"hand{s}", dither=False)
+                c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.025), skin, f"hand{s}", dither=False)
         add(2.0 + Ds + 0.05 * abs(cp), arm)
 
     # ---- head ----
     nod = ps["nod"]
-    hc = body([0.0, 0.077 + nod, 0.008])
+    hc = body([0.0, 0.074 + nod, 0.008])
     hx_, hy_, _ = P(hc)
-    hrx = H * math.sqrt((0.05 * cp) ** 2 + (0.06 * sp) ** 2)
-    hry = H * 0.077
+    hrx = H * HEAD * math.sqrt((0.05 * cp) ** 2 + (0.06 * sp) ** 2)
+    hry = H * 0.077 * HEAD
     fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
     facing = cp > -0.25
 
     def head():
         neck_col = col.get("neck", skin)
-        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.222, -0.004])), H * 0.029, H * 0.032), neck_col, "neck")
+        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.222, -0.004])), H * 0.031 * BULK, H * 0.034 * BULK), neck_col, "neck")
         if col.get("collar"):
             n0 = P(body([0, 0.19, 0.0]))
             c.recolor(c.parts_mask("neck") & (c.Y >= n0[1]), col["collar"])
         c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
-        jc, jrx, jry = ell3(body([0, 0.112 + nod, 0.016]), 0.04, 0.042, 0.046)
+        jc, jrx, jry = ell3(body([0, 0.114 + nod, 0.016]), 0.04 * HEAD, 0.045 * HEAD, 0.05 * HEAD)
         c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
         if abs(sp) > 0.3:
-            c.put(c.capsule(P(body([0, 0.088 + nod, 0.058])), P(body([0, 0.102 + nod, 0.07])), 0.55, 0.6),
+            c.put(c.capsule(P(body([0, 0.074 + 0.012 * HEAD + nod, 0.058 * HEAD])), P(body([0, 0.074 + 0.03 * HEAD + nod, 0.07 * HEAD])), 0.6, 0.7),
                   skin, "head", dither=False)
         if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
             ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
@@ -420,10 +423,10 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
 def _long_hair_back(c, col, P, body, H, cp, sp, nod):
     """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
     hc = P(body([0, 0.15 + nod, -0.03]))
-    rx = H * math.sqrt((0.085 * cp) ** 2 + (0.07 * sp) ** 2)
-    m, nx, ny, nz = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx, H * 0.125)
+    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2)
+    m, nx, ny, nz = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx, H * 0.14)
     wave = np.sin(c.Y / 1.7) * 0.9
-    m2, _, _, _ = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx + wave, H * 0.125)
+    m2, _, _, _ = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx + wave, H * 0.14)
     top = P(body([0, 0.02 + nod, 0]))[1]
     keep = m2 & (c.Y > top)
     if abs(sp) > 0.15 and cp > -0.25:
@@ -437,7 +440,7 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     style = col.get("hair_style", "short")
     hair = col["hair"]
     fs = sp
-    vol = {"short": 0.6, "bald": 0.2, "long": 1.6, "bob": 1.4, "slick": 0.4}[style]
+    vol = {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5}[style]
     m, nx, ny, nz = c.ellipse((hx_ - 0.25 * fs, hy_ - 0.6), hrx + vol, hry + vol * 0.8)
     u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
     front = hy_ - hry * 0.45 + (0.7 if style == "slick" else 0)
@@ -533,6 +536,20 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
             _, y, colour = d
             yb = P(body([0, y, 0]))[1]
             c.recolor(c.parts_mask(*body_parts) & (c.Y >= yb) & (c.Y < yb + max(1.0, H * 0.022)), colour, dither=False)
+        elif kind == "bow" and cp > 0.05:  # bow tie at the throat: (bow, y, colour)
+            _, y, colour = d
+            bx, by_, _ = P(body([0, y, 0.05]))
+            bx, by_ = math.floor(bx), math.floor(by_)
+            for ddx, ddy in ((-2, -1), (-2, 0), (-2, 1), (-1, 0), (0, 0), (1, 0), (2, -1), (2, 0), (2, 1)):
+                c.dot(bx + ddx, by_ + ddy, colour)
+            c.dot(bx - 1, by_ - 1, colour)
+            c.dot(bx + 1, by_ + 1, colour)
+        elif kind == "pearls" and cp > 0.05:  # a single strand: (pearls, y, colour)
+            _, y, colour = d
+            for i, u in enumerate((-0.03, -0.015, 0.0, 0.015, 0.03)):
+                px, py, _ = P(body([u, y + 0.012 * (1 - (u / 0.03) ** 2), 0.055]))
+                if i % 2 == 0 or abs(cp) > 0.7:
+                    c.dot(px, py, colour)
         elif kind == "buttons":
             _, y0, y1, n, colour = d[:5]
             if cp > 0.05:
@@ -544,48 +561,97 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
 
 
 def _face(c, col, P, body, H, cp, sp, nod, mouth):
+    """Paints FOTA-style features: white-and-iris eyes under a lash line, shaped brows, a shaded nose with a
+    nostril, two-tone lips and a chin shadow. Women get dark lashes and a touch of blush; "old" adds lines."""
+    K = HEAD
+    sk = ramp(col["skin"])
+    tone = lambda i: "%02x%02x%02x" % tuple(int(v) for v in sk[i])
+    female = bool(col.get("soft_face"))
     eye = col.get("eye", "2a1a14")
-    brow = col.get("brow", None)
+    brow = col.get("brow") or _dark(col["hair"], 0 if not col.get("old") else 2)
+    fs = 0 if abs(sp) < 0.12 else (1 if sp > 0 else -1)
+    side = abs(sp) > 0.85
+
+    def pt(x, y, z):
+        p = P(body([x * K, 0.074 + nod + y * K, z * K]))
+        return math.floor(p[0]), math.floor(p[1]), p[2]
+
+    # ---- eyes and brows ----
     for s in (1, -1):
         nD = s * 0.4 * sp + 0.92 * cp
-        if nD < 0.12:
+        if nD < 0.1:
             continue
-        p = P(body([s * 0.021, 0.075 + nod, 0.055]))
-        ex, ey = p[0], p[1]
-        if abs(sp) > 0.85:
-            ex = ex - 0.6 * math.copysign(1, sp)
+        ex, ey, _ = pt(s * 0.022, 0.0, 0.056)
+        if side:
+            ex -= fs
+        near = nD > 0.55 and not side
+        look = fs or -s  # iris sits towards where the character looks; front view: towards the nose
         c.dot(ex, ey, eye)
-        bc = brow or _dark(col["hair"])
-        c.dot(ex, ey - 1.6, bc)
-        if abs(cp) > 0.4:
-            c.dot(ex + s * -1 * (1 if cp > 0 else -1), ey - 1.6, bc)
-        if col.get("glasses"):
-            c.dot(ex - 1, ey - 1, col["glasses"])
-            c.dot(ex + 1, ey - 1, col["glasses"])
-            c.dot(ex, ey - 1, col["glasses"])
-    if cp > -0.05:
-        mp = P(body([0, 0.121 + nod, 0.058]))
-        mx, my = mp[0], mp[1]
-        if abs(sp) > 0.85:
-            mx -= 0.7 * math.copysign(1, sp)
-        wid = 1 if abs(cp) < 0.5 else 2
-        lip = col.get("lips") or _dark(col["skin"], 1)
-        xs = [mx - 0.5 * (wid - 1) + i for i in range(wid)]
-        if col.get("mustache"):
-            for x in xs + [xs[-1] + 1 if sp >= 0 else xs[0] - 1]:
-                c.dot(x - (0.5 if sp < 0 else 0), my - 1, _dark(col["hair"], 1))
-        if mouth == 0:
-            for x in xs:
-                c.dot(x, my, lip)
-        elif mouth == 1:
-            for x in xs:
-                c.dot(x, my, "3a1410")
-                c.dot(x, my + 1, "5a2018")
+        if near or abs(cp) > 0.85:
+            c.dot(ex - look, ey, "e6ded4")
+        lash = "2a1612" if female else tone(1)
+        c.dot(ex, ey - 1, lash)
+        if near:
+            c.dot(ex - look, ey - 1, lash)
+        if female:
+            c.dot(ex + (s if fs == 0 else (fs if s * fs > 0 else -fs)), ey - 1, lash)  # outer lash flick
         else:
-            for x in xs:
-                c.dot(x, my, _dark(col["skin"], 0))
-    if col.get("beard_shadow"):
-        pass
+            c.dot(ex, ey + 1, tone(2))  # lower lid / bag
+        by = ey - (3 if female else 2)
+        c.dot(ex, by, brow)
+        c.dot(ex - look, by + (0 if female else 0), brow)
+        if not female and near:
+            c.dot(ex + look, by, brow)
+        if female and near:
+            c.dot(ex + (1 if s > 0 else -1) * (1 if fs == 0 else 0), by + 1, brow)
+
+    # ---- nose ----
+    nx_, ny_, _ = pt(0.0, 0.03, 0.072)
+    if side:
+        nx_ -= fs
+    if not side:
+        c.dot(nx_ + 1, ny_ - 2, tone(2))  # shadow down the right flank (key light from the left)
+        c.dot(nx_ + 1, ny_ - 1, tone(2))
+        c.dot(nx_ - 1 if fs >= 0 else nx_, ny_ - 2, tone(4))  # bridge highlight
+    c.dot(nx_ + (1 if fs >= 0 else 0), ny_, tone(1))  # nostril / underside
+    c.dot(nx_ + (0 if fs >= 0 else 1), ny_ + 1, tone(2))
+
+    # ---- mouth ----
+    mx, my, _ = pt(0.0, 0.05, 0.062)
+    if side:
+        mx -= fs
+    wid = 1 if side else (2 if abs(cp) < 0.7 or not female else 3)
+    xs = [mx - (wid // 2) + i for i in range(wid)]
+    lip = col.get("lips") or tone(1)
+    lip_lo = col.get("lips_lo") or (_dark(lip, 4) if col.get("lips") else tone(2))
+    if col.get("mustache"):
+        for x in xs + [xs[-1] + 1, xs[0] - 1]:
+            c.dot(x, my - 1, _dark(col["hair"], 1))
+    if mouth == 0:
+        for x in xs:
+            c.dot(x, my, lip if female else tone(1))
+            if female:
+                c.dot(x, my + 1, lip_lo)
+    elif mouth == 1:
+        for x in xs:
+            c.dot(x, my, "3a1410")
+            c.dot(x, my + 1, lip if female else tone(1))
+    else:
+        for x in xs:
+            c.dot(x, my, lip if female else tone(1))
+            c.dot(x, my + 1, "4a1a14")
+    c.dot(mx, my + 3, tone(2))  # chin shadow
+    if female and not side:
+        c.dot(mx + (2 if fs >= 0 else -2), my - 2, _dark(lip, 4))
+    if col.get("old"):
+        c.dot(nx_ + 2, ny_ + 1, tone(1))  # nasolabial fold
+        c.dot(nx_ + 2, ny_ + 2, tone(2))
+        if not side:
+            c.dot(nx_ - 2, ny_ + 1, tone(2))
+            fx, fy, _ = pt(0.0, -0.045, 0.06)
+            c.dot(fx - 1, fy, tone(2))
+            c.dot(fx + 1, fy, tone(2))
+            c.dot(fx, fy, tone(2))
 
 
 def _dark(colour, tone=0):

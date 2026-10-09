@@ -55,7 +55,8 @@ godot --path . -- --autoplay
 
 The rest is a *temporary* storyline that strings together every location:
 
-4. **Starlight club** (street → hall → lounge → stage): "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
+4. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
+   is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
    bookkeeper is dead. She gives you the key to her old suite.
 5. **Aurelian suite 4**: her diary is hidden in the vanity.
 6. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
@@ -133,7 +134,7 @@ py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lo
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, player frames are 56×80 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 3-frame 48×80 strips (idle, two talk frames), and items are 32×24.
+size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 3-frame 56×96 strips (idle, two talk frames), and items are 32×24.
 
 ## Credits
 

@@ -1,16 +1,21 @@
 """Character sprites, painted by figure.py in the manner of Fate of Atlantis-era VGA adventures.
 
-Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 56x80 frames:
+Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
   row 0  side view, facing right : idle, walk 1-8, talk
   row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
   row 2  back 3/4 view           : idle, walk 1-6
-NPCs get a 3-frame strip of 48x80 frames (idle, talk A, talk B) in a 3/4 view facing screen-right; scenes flip them.
+NPCs get a 3-frame strip of 56x96 frames (idle, talk A, talk B) in a 3/4 view facing screen-right; scenes flip them.
 """
 from .common import save
-from .figure import figure, pose, walk_pose, sheet
+from .figure import figure as _figure, pose, walk_pose, sheet
 
-FW, FH = 56, 80
-NPC_W = 48
+
+def figure(spec, ps, fw, fh):
+    return _figure(dict(spec, h=spec["h"] * SCALE), ps, fw, fh)
+
+FW, FH = 64, 96
+NPC_W = 56
+SCALE = 1.2  # FOTA-sized: about a third of the play area tall
 STRIDE_FRAMES = 8
 
 
@@ -45,15 +50,24 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  decals=_vee(0.30, 0.03, "ebe6d8", "2a1818") +
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
                   ("belt", 0.42, "d8d0c0")])
-ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.068, hipw=0.09, leg_r=0.86, foot=0.06, skin="e8bc98",
-               hair="4a2a1c", hair_style="long", soft_face=True, lips="b04a42", eye="241410", brow="2e1a12",
-               torso="7c4c2c", abdomen="2e706c", pelvis="2e706c", pants="2e706c", boots="6a4026", shoes="4a2a1a",
-               decals=[("strip", 0.215, 0.385, 0.026, 0.04, "ece2cc"), ("belt", 0.395, "5a3820")])
+# Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, white collar, a single strand of pearls.
+ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
+               hair="4a2a1c", hair_style="long", soft_face=True, lips="a83e3c", eye="3a2416", brow="2e1a12",
+               torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
+               shoes="141014",
+               decals=[("strip", 0.205, 0.235, 0.03, 0.022, "ece6da"), ("strip", 0.235, 0.6, 0.0, 0.0, "2c2830"),
+                       ("pearls", 0.222, "f4efe4"), ("belt", 0.40, "1e1a20")])
 ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c49a52",
             hair_style="bob", soft_face=True, glasses="b09a6a", lips="b06a64", torso="9a6672", abdomen="34465e", pelvis="34465e",
             coat=dict(col="34465e", top=0.40, hem=0.80, flare=0.012), stockings="c49c84", shoes="3a2620",
             decals=[("strip", 0.215, 0.235, 0.032, 0.026, "f0eadc"), ("strip", 0.235, 0.42, 0.02, 0.026, "34465e"),
                     ("buttons", 0.27, 0.38, 3, "e8dcc8")])
+# Theodore Harrington Jr., Teddy's father: old money in evening dress, white wing collar and a black bow tie.
+HARRINGTON = dict(h=63, sw=0.13, waist=0.09, hipw=0.096, skin="e2bca2", hair="e4e0d8", hair_style="bald", old=True,
+                  eye="3a4a5a", brow="cfcac0", torso="1e1c24", collar="f2eee4",
+                  coat=dict(col="1e1c24", top=0.40, hem=0.6, flare=0.0), pants="1e1c24", shoes="0e0c10",
+                  decals=_vee(0.33, 0.036, "f2eee4") + [("bow", 0.205, "121016"), ("buttons", 0.25, 0.31, 2, "d8d2c4"),
+                                                        ("strip", 0.34, 0.4, 0.05, 0.06, "3a3440")])
 CALEB = dict(h=65, sw=0.138, skin="d2a07c", hair="2e2018", torso="38363e", collar="38363e",
              coat=dict(col="38363e", top=0.40, hem=0.95, flare=0.02), pants="26252b", shoes="1a1618",
              decals=[("strip", 0.19, 0.215, 0.009, 0.009, "f2f0ea", ("neck",)),
@@ -102,7 +116,8 @@ def npc_strip(spec, name, arms, phi=35, gesture=True):
 NPCS = (("teddy", TEDDY, _arms("down"), True), ("concierge", CONCIERGE, _arms("fold"), False),
         ("bellboy", BELLBOY, _arms("down"), True), ("sal", SAL, _arms("pocket"), False),
         ("bartender", BARTENDER, _arms("down"), True), ("eleanor", ELEANOR, _arms("down", "hip"), True),
-        ("rose", ROSE, _arms("fold"), False), ("caleb", CALEB, _arms("fold"), False))
+        ("rose", ROSE, _arms("fold"), False), ("caleb", CALEB, _arms("fold"), False),
+        ("harrington", HARRINGTON, _arms("down", "pocket"), True))
 
 
 def build():

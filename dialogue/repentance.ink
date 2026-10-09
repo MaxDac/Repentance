@@ -207,6 +207,28 @@ BARTENDER: The Starlight, pal. Now drink or leave.
 
 // ---------------------------------------------------------------- THE STARLIGHT CLUB
 
+=== harrington ===
+{has_flag("harrington_met"): -> harrington.again}
+HARRINGTON: You're blocking my view of the curtain, young man.
+MICAH: Micah Jones. I work for your son.
+HARRINGTON: Then you have my sympathies. Theodore Harrington. The one who built the steel mill, not the one losing it.
+- (opts)
+* [What brings you to a place like this?]
+    HARRINGTON: The same thing as you, I expect. The singer.
+    HARRINGTON: I've known Eleanor since her debut. The blonde hair was Teddy's idea. Everything else was hers.
+    -> harrington.opts
+* [What do you think of your son?]
+    HARRINGTON: Teddy was a disappointment in short pants, and he has kept up the tradition.
+    HARRINGTON: If he's hired a detective, Mr. Jones, he's frightened. Find out of what.
+    -> harrington.opts
+* [Enjoy the show.]
+    HARRINGTON: At my age one enjoys everything. It might be the last time.
+    ~ set_flag("harrington_met")
+    -> END
+= again
+HARRINGTON: The singer is through the curtain, Mr. Jones. I'm only the audience.
+-> END
+
 === eleanor ===
 {has_flag("eleanor_met"): -> eleanor.again}
 ELEANOR: Show's over, mister. Autographs are a dime, and I'm all out of pencils.
