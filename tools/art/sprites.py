@@ -81,18 +81,14 @@ def _arms(kind_r, kind_l=None):
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
-GESTURE_A = ("swing", 30, 10, 62)
-GESTURE_B = ("swing", 16, 8, 38)
-
-
 def player_sheet(spec, name):
     side = [figure(spec, pose(90), FW, FH)]
     side += [figure(spec, walk_pose(90, i), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, pose(90, mouth=1, nod=0.004, arms={1: GESTURE_B, -1: ("swing", -3, 6, 12)}), FW, FH)]
+    side += [figure(spec, pose(90, mouth=1, nod=0.004), FW, FH)]
     front = [figure(spec, pose(16), FW, FH)]
     front += [figure(spec, walk_pose(16, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
-    front += [figure(spec, pose(16, mouth=1, arms={1: GESTURE_A, -1: ("swing", 2, 6, 12)}), FW, FH),
-              figure(spec, pose(16, mouth=2, nod=0.004, arms={1: GESTURE_B, -1: ("swing", 2, 6, 12)}), FW, FH)]
+    # talking only moves the mouth and nods the head; the arms stay where they are
+    front += [figure(spec, pose(16, mouth=1), FW, FH), figure(spec, pose(16, mouth=2, nod=0.004), FW, FH)]
     back = [figure(spec, pose(164), FW, FH)]
     back += [figure(spec, walk_pose(164, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
@@ -100,28 +96,24 @@ def player_sheet(spec, name):
     return img
 
 
-def npc_strip(spec, name, arms, phi=35, gesture=True):
-    a_talk = dict(arms)
-    b_talk = dict(arms)
-    if gesture:
-        a_talk[1], b_talk[1] = GESTURE_A, GESTURE_B
+def npc_strip(spec, name, arms, phi=35):
     frames = [figure(spec, pose(phi, arms=arms), NPC_W, FH),
-              figure(spec, pose(phi, arms=a_talk, mouth=1), NPC_W, FH),
-              figure(spec, pose(phi, arms=b_talk, mouth=2, nod=0.004), NPC_W, FH)]
+              figure(spec, pose(phi, arms=arms, mouth=1), NPC_W, FH),
+              figure(spec, pose(phi, arms=arms, mouth=2, nod=0.004), NPC_W, FH)]
     img = sheet([frames], NPC_W, FH)
     save(img, "sprites", f"{name}.png")
     return img
 
 
-NPCS = (("teddy", TEDDY, _arms("down"), True), ("concierge", CONCIERGE, _arms("fold"), False),
-        ("bellboy", BELLBOY, _arms("down"), True), ("sal", SAL, _arms("pocket"), False),
-        ("bartender", BARTENDER, _arms("down"), True), ("eleanor", ELEANOR, _arms("down", "hip"), True),
-        ("rose", ROSE, _arms("fold"), False), ("caleb", CALEB, _arms("fold"), False),
-        ("harrington", HARRINGTON, _arms("down", "pocket"), True))
+NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold")),
+        ("bellboy", BELLBOY, _arms("down")), ("sal", SAL, _arms("pocket")),
+        ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR, _arms("down", "hip")),
+        ("rose", ROSE, _arms("fold")), ("caleb", CALEB, _arms("fold")),
+        ("harrington", HARRINGTON, _arms("down", "pocket")))
 
 
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
-    for name, spec, arms, gesture in NPCS:
-        npc_strip(spec, name, arms, gesture=gesture)
+    for name, spec, arms in NPCS:
+        npc_strip(spec, name, arms)

@@ -206,7 +206,7 @@ def figure(spec, ps, fw=56, fh=80):
     phi = math.radians(ps["phi"])
     cp, sp = math.cos(phi), math.sin(phi)
     cx, base = fw / 2.0 + spec.get("dx", 0), fh - 3.0
-    sw, hw = spec.get("sw", 0.135) * 0.86, spec.get("hw", 0.052)  # FOTA shoulders are narrow and sloping
+    sw, hw = spec.get("sw", 0.135) * 0.74, spec.get("hw", 0.052)  # FOTA shoulders are narrow and sloping
     lean = math.radians(ps["lean"])
     shift = ps["shift"]
 
@@ -280,7 +280,7 @@ def figure(spec, ps, fw=56, fh=80):
 
     def trunk():
         hem_top = spec.get("top_hem", 0.45)
-        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.62, 0.05), (0.245, sw * 0.9, 0.064), (0.31, sw * 0.86, 0.07),
+        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.66, 0.05), (0.245, sw * 0.93, 0.064), (0.31, sw * 0.9, 0.07),
                   (0.40, waist, 0.058), (0.47, hipw, 0.064), (0.53, hipw * 0.86, 0.056)]
         left, right = [], []
         for y, ax, az in levels:
@@ -303,7 +303,7 @@ def figure(spec, ps, fw=56, fh=80):
     arm_pts = {}
     for s in (1, -1):
         kind, f, o, e = ps["arms"][s]
-        sh = body([s * (sw - 0.018), 0.258, 0.0])
+        sh = body([s * (sw - 0.012), 0.258, 0.0])
         if kind == "hip":
             el = body([s * (sw + 0.07), 0.345, -0.035])
             wr = body([s * (hipw - 0.005), 0.455, 0.0])
@@ -331,8 +331,8 @@ def figure(spec, ps, fw=56, fh=80):
             sleeve = col.get("sleeves", torso)
             fore = col.get("forearm", sleeve)
             part = f"arm{s}"
-            c.put(c.capsule(P(sh), P(el), H * 0.037 * BULK, H * 0.033 * BULK), sleeve, part)
-            c.put(c.capsule(P(el), P(wr), H * 0.033 * BULK, H * 0.028 * BULK), fore, part)
+            c.put(c.capsule(P(sh), P(el), H * 0.034 * BULK, H * 0.031 * BULK), sleeve, part)
+            c.put(c.capsule(P(el), P(wr), H * 0.031 * BULK, H * 0.027 * BULK), fore, part)
             if col.get("cuff") and fore != skin:
                 c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
             if hand is not None:
@@ -343,22 +343,42 @@ def figure(spec, ps, fw=56, fh=80):
     nod = ps["nod"]
     hc = body([0.0, 0.074 + nod, 0.008])
     hx_, hy_, _ = P(hc)
-    hrx = H * HEAD * math.sqrt((0.05 * cp) ** 2 + (0.06 * sp) ** 2)
+    hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
     hry = H * 0.077 * HEAD
     fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
     facing = cp > -0.25
 
+    neck_r = H * 0.029 * BULK
+
+    def neck():
+        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.228, -0.004])), neck_r, neck_r * 1.08),
+              col.get("neck", skin), "neck")
+    add(1.95, neck)
+
+    def collar():
+        if not col.get("collar"):
+            return
+        nx0, ny0, _ = P(body([0, 0.2, 0.0]))
+        band = c.parts_mask("torso") & (c.Y < ny0 + H * 0.02) & (np.abs(c.X - nx0) < neck_r * 1.55)
+        c.recolor(band, col["collar"])
+        c.bias[band & (c.Y < ny0 + H * 0.012)] += 1
+    add(2.05, collar)
+
     def head():
-        neck_col = col.get("neck", skin)
-        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.222, -0.004])), H * 0.031 * BULK, H * 0.034 * BULK), neck_col, "neck")
-        if col.get("collar"):
-            n0 = P(body([0, 0.19, 0.0]))
-            c.recolor(c.parts_mask("neck") & (c.Y >= n0[1]), col["collar"])
+        if abs(sp) > 0.3:  # back of the skull: heads are deeper than they are wide
+            oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
+            c.put(c.ellipse(oc, orx, ory), skin, "head", dither=False)
         c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
-        jc, jrx, jry = ell3(body([0, 0.114 + nod, 0.016]), 0.04 * HEAD, 0.045 * HEAD, 0.05 * HEAD)
+        jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), 0.039 * HEAD, 0.047 * HEAD, 0.05 * HEAD)
         c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
         if abs(sp) > 0.3:
-            c.put(c.capsule(P(body([0, 0.074 + 0.012 * HEAD + nod, 0.058 * HEAD])), P(body([0, 0.074 + 0.03 * HEAD + nod, 0.07 * HEAD])), 0.6, 0.7),
+            ys = 0.074 + nod
+            # brow ridge, nose and chin give the profile its shape
+            c.put(c.capsule(P(body([0, ys - 0.012 * HEAD, 0.058 * HEAD])), P(body([0, ys - 0.004 * HEAD, 0.06 * HEAD])), 0.5, 0.5),
+                  skin, "head", dither=False)
+            c.put(c.capsule(P(body([0, ys + 0.008 * HEAD, 0.058 * HEAD])), P(body([0, ys + 0.028 * HEAD, 0.066 * HEAD])), 0.55, 0.7),
+                  skin, "head", dither=False)
+            c.put(c.capsule(P(body([0, ys + 0.066 * HEAD, 0.05 * HEAD])), P(body([0, ys + 0.078 * HEAD, 0.046 * HEAD])), 0.8, 0.8),
                   skin, "head", dither=False)
         if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
             ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
@@ -367,9 +387,12 @@ def figure(spec, ps, fw=56, fh=80):
             if ed > -0.02 and col.get("hair_style") not in ("long", "bob"):
                 c.put(c.ellipse((ex, ey), H * 0.011, H * 0.017), skin, "ear", dither=False)
         _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+        # Faces are lit from the front: lift the jaw shadow so it does not read as stubble, and keep only a
+        # one-tone shade on the far cheek.
+        face = c.parts_mask("head") & (c.Y > hy_ - 1)
+        c.bias[face] += 1
         if col.get("soft_face"):
-            # Lift the jaw shadow so it does not read as stubble on women's faces.
-            c.bias[c.parts_mask("head", "neck") & (c.Y > hy_ - 1)] += 1
+            c.bias[c.parts_mask("neck") & (c.Y > hy_ - 1)] += 1
         _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
     add(2.6, head)
     if col.get("hair_style") == "long":
@@ -441,9 +464,9 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     hair = col["hair"]
     fs = sp
     vol = {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5}[style]
-    m, nx, ny, nz = c.ellipse((hx_ - 0.25 * fs, hy_ - 0.6), hrx + vol, hry + vol * 0.8)
+    m, nx, ny, nz = c.ellipse((hx_ - (0.25 + 0.012 * H) * fs, hy_ - 0.6), hrx + vol + 0.008 * H * abs(fs), hry + vol * 0.8)
     u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
-    front = hy_ - hry * 0.45 + (0.7 if style == "slick" else 0)
+    front = hy_ - hry * (0.5 if style in ("long", "bob") else 0.64) + (0.5 if style == "slick" else 0)
     nape = hy_ + hry * (0.55 if style != "bob" else 0.95)
     if style == "long":
         nape = hy_ + hry * 1.15
@@ -464,6 +487,12 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     if style == "bald":
         mask &= (c.Y > hy_ - hry * 0.1) & (back > 0.3 if cp > -0.25 else True)
     c.put((mask, nx, ny, nz), hair, "hair", dither=False)
+    if style != "bald":
+        # FOTA hair has a lit crown and a darker underside rather than a flat helmet
+        top = hy_ - hry - vol * 0.8
+        hm = c.parts_mask("hair")
+        c.bias[hm & (c.Y > top + 1.2) & (c.Y < top + 3.2) & ((c.X - hx_) * (1 if fs >= 0 else -1) < hrx * 0.4)] += 1
+        c.bias[hm & (c.Y > hy_ + hry * 0.05)] -= 1
     if style in ("long", "bob"):
         stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
         c.bias[c.parts_mask("hair", "hairback") & stripe] -= 1
@@ -589,13 +618,11 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
         c.dot(ex, ey, eye)
         if near or abs(cp) > 0.85:
             c.dot(ex - look, ey, "e6ded4")
-        lash = "2a1612" if female else tone(1)
+        lash = _dark(col.get("brow") or col["hair"], 1) if female else tone(1)
         c.dot(ex, ey - 1, lash)
-        if near:
+        if near and not female:
             c.dot(ex - look, ey - 1, lash)
-        if female:
-            c.dot(ex + (s if fs == 0 else (fs if s * fs > 0 else -fs)), ey - 1, lash)  # outer lash flick
-        else:
+        if not female:
             c.dot(ex, ey + 1, tone(2))  # lower lid / bag
         by = ey - (3 if female else 2)
         c.dot(ex, by, brow)
