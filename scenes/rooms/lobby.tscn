@@ -1,0 +1,259 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Lobby.cs" id="1_Lobby"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/lobby.png" id="2_lobby"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/lobby_fg.png" id="4_lobby_fg"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/concierge.png" id="6_concierge"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/bellboy.png" id="7_bellboy"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(100, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(112, 52)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(136, 54)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(14, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(90, 99)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(30, 78)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(30, 78)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(38, 30)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(38, 30)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(24, 46)
+
+[sub_resource type="RectangleShape2D" id="Rect_11"]
+size = Vector2(90, 113)
+
+[node name="Lobby" type="Node2D"]
+script = ExtResource("1_Lobby")
+RoomName = "Aurelian Hotel"
+FarY = 146
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_lobby")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(6, 198, 474, 198, 474, 146, 150, 146, 150, 156, 6, 156)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="office" type="Marker2D" parent="Entries"]
+position = Vector2(230, 166)
+metadata/facing = 1
+
+[node name="street" type="Marker2D" parent="Entries"]
+position = Vector2(430, 160)
+metadata/facing = 3
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Plaque" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "plaque"
+DisplayName = "brass plaque"
+LookText = "THE AURELIAN, est. 1923. Older than my last relationship. Younger than my debts."
+WalkTo = Vector2(78, 164)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Plaque"]
+position = Vector2(78.0, 28.0)
+shape = SubResource("Rect_1")
+
+[node name="Cubbies" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cubbies"
+DisplayName = "key cubbies"
+LookText = "Room keys and messages. One slot holds a lady's glove. None of my business. Yet."
+WalkTo = Vector2(78, 164)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cubbies"]
+position = Vector2(78.0, 66.0)
+shape = SubResource("Rect_2")
+
+[node name="Desk" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "desk"
+DisplayName = "front desk"
+LookText = "Marble and brass. You could perform surgery on it. Somebody probably has."
+WalkTo = Vector2(78, 164)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
+position = Vector2(78.0, 125.0)
+shape = SubResource("Rect_3")
+
+[node name="Bell" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bell"
+DisplayName = "service bell"
+LookText = "A brass bell. It's begging to be rung."
+WalkTo = Vector2(121, 164)
+Face = 2
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bell"]
+position = Vector2(121.0, 96.0)
+shape = SubResource("Rect_4")
+
+[node name="Elevator" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "elevator"
+DisplayName = "elevator"
+LookText = "Brass doors with a sunburst. An 'Out of order' sign hangs from the handle."
+WalkTo = Vector2(235, 152)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Elevator"]
+position = Vector2(235.0, 87.5)
+shape = SubResource("Rect_5")
+
+[node name="Palm1" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "palm"
+DisplayName = "potted palm"
+LookText = "A palm tree. In Chicago. In November. Money can do anything."
+WalkTo = Vector2(173, 156)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Palm1"]
+position = Vector2(173.0, 103.0)
+shape = SubResource("Rect_6")
+
+[node name="Palm2" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "palm"
+DisplayName = "potted palm"
+LookText = "Another palm. They come in pairs, like cops and bad news."
+WalkTo = Vector2(291, 152)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Palm2"]
+position = Vector2(291.0, 103.0)
+shape = SubResource("Rect_7")
+
+[node name="Chandelier1" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "chandelier"
+DisplayName = "chandelier"
+LookText = "Crystal. If it fell, it'd make a hell of a noise and a hell of a mess."
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chandelier1"]
+position = Vector2(173.0, 15.0)
+shape = SubResource("Rect_8")
+
+[node name="Chandelier2" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "chandelier"
+DisplayName = "chandelier"
+LookText = "Crystal. If it fell, it'd make a hell of a noise and a hell of a mess."
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chandelier2"]
+position = Vector2(341.0, 15.0)
+shape = SubResource("Rect_9")
+
+[node name="Urn" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "urn"
+DisplayName = "brass urn"
+LookText = "A brass urn full of sand. Where cigars come to die."
+WalkTo = Vector2(356, 160)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Urn"]
+position = Vector2(356.0, 129.0)
+shape = SubResource("Rect_10")
+
+[node name="RevolvingDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "revolving_door"
+DisplayName = "revolving door"
+LookText = "Out to State Street. It's raining. It's always raining."
+WalkTo = Vector2(434, 152)
+Face = 2
+ExitTo = "speakeasy"
+ExitEntry = "door"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/RevolvingDoor"]
+position = Vector2(435.0, 80.5)
+shape = SubResource("Rect_11")
+
+[node name="DeskFront" type="Sprite2D" parent="World"]
+position = Vector2(0, 152)
+texture = ExtResource("4_lobby_fg")
+centered = false
+offset = Vector2(0, -152)
+
+[node name="Concierge" type="Area2D" parent="World"]
+position = Vector2(70, 128)
+script = ExtResource("5_Actor")
+Id = "concierge"
+DisplayName = "concierge"
+LookText = "The concierge. A face like a closed door, and a moustache to guard it."
+WalkTo = Vector2(78, 164)
+Face = 2
+monitoring = false
+monitorable = false
+Texture = ExtResource("6_concierge")
+SpeechColor = Color(0.659, 0.847, 0.784, 1)
+
+[node name="Bellboy" type="Area2D" parent="World"]
+position = Vector2(300, 168)
+script = ExtResource("5_Actor")
+Id = "bellboy"
+DisplayName = "bellboy"
+LookText = "A bellboy. Sixteen going on forty. Knows everything that happens in this building."
+WalkTo = Vector2(268, 172)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("7_bellboy")
+SpeechColor = Color(0.941, 0.659, 0.408, 1)

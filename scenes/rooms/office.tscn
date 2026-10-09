@@ -1,0 +1,405 @@
+[gd_scene load_steps=28 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Office.cs" id="1_Office"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office.png" id="2_office"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_drawer_full.png" id="3_office_drawer_full"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_drawer_empty.png" id="5_office_drawer_empty"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="6_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/teddy.png" id="8_teddy"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(72, 109)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(38, 67)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(22, 23)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(34, 15)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(22, 105)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(24, 24)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(34, 38)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(180, 51)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(50, 17)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(50, 15)
+
+[sub_resource type="RectangleShape2D" id="Rect_11"]
+size = Vector2(27, 24)
+
+[sub_resource type="RectangleShape2D" id="Rect_12"]
+size = Vector2(31, 24)
+
+[sub_resource type="RectangleShape2D" id="Rect_13"]
+size = Vector2(26, 21)
+
+[sub_resource type="RectangleShape2D" id="Rect_14"]
+size = Vector2(28, 12)
+
+[sub_resource type="RectangleShape2D" id="Rect_15"]
+size = Vector2(19, 10)
+
+[sub_resource type="RectangleShape2D" id="Rect_16"]
+size = Vector2(19, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_17"]
+size = Vector2(118, 82)
+
+[sub_resource type="RectangleShape2D" id="Rect_18"]
+size = Vector2(80, 22)
+
+[sub_resource type="RectangleShape2D" id="Rect_19"]
+size = Vector2(274, 40)
+
+[node name="Office" type="Node2D"]
+script = ExtResource("1_Office")
+RoomName = "Office"
+FarY = 134
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_office")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(10, 198, 470, 198, 470, 134, 346, 134, 346, 154, 170, 154, 170, 134, 10, 134)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(372, 174)
+metadata/facing = 3
+
+[node name="door" type="Marker2D" parent="Entries"]
+position = Vector2(58, 142)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="DrawerFull" type="Sprite2D" parent="."]
+position = Vector2(276, 126)
+z_index = -5
+texture = ExtResource("3_office_drawer_full")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "drawer_open"
+HideIfFlags = "took_dollar"
+
+[node name="DrawerEmpty" type="Sprite2D" parent="."]
+position = Vector2(276, 126)
+z_index = -5
+texture = ExtResource("5_office_drawer_empty")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "drawer_open,took_dollar"
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "door"
+DisplayName = "door"
+LookText = "My door. My name on the glass, backwards from in here. Like my life."
+WalkTo = Vector2(58, 138)
+Face = 2
+ExitTo = "lobby"
+ExitEntry = "office"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(58.0, 72.5)
+shape = SubResource("Rect_1")
+
+[node name="Filing" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "filing"
+DisplayName = "filing cabinet"
+LookText = "Every case I ever closed. It's a very small cabinet."
+WalkTo = Vector2(127, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Filing"]
+position = Vector2(127.0, 93.5)
+shape = SubResource("Rect_2")
+
+[node name="Bottle" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "bottle"
+DisplayName = "bottle"
+LookText = "Bourbon. What's left of it, which is nothing."
+WalkTo = Vector2(124, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bottle"]
+position = Vector2(123.0, 47.5)
+shape = SubResource("Rect_3")
+
+[node name="Diploma" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "diploma"
+DisplayName = "framed certificate"
+LookText = "Chicago Police Academy, class of '12. They gave me the paper. Later they took back the badge."
+WalkTo = Vector2(127, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Diploma"]
+position = Vector2(127.0, 27.5)
+shape = SubResource("Rect_4")
+
+[node name="Coat" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "coat"
+DisplayName = "coat rack"
+LookText = "My spare hat and coat. The hat has a bullet hole. The coat has opinions."
+WalkTo = Vector2(161, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Coat"]
+position = Vector2(161.0, 74.5)
+shape = SubResource("Rect_5")
+
+[node name="Clock" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "clock"
+DisplayName = "clock"
+LookText = "Nine o'clock. When honest folks go home, and the rest of us go to work."
+WalkTo = Vector2(230, 160)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Clock"]
+position = Vector2(230.0, 38.0)
+shape = SubResource("Rect_6")
+
+[node name="Chair" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "chair"
+DisplayName = "chair"
+LookText = "My chair. It's seen more of me than any woman has."
+WalkTo = Vector2(250, 160)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chair"]
+position = Vector2(249.0, 85.0)
+shape = SubResource("Rect_7")
+
+[node name="Desk" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "desk"
+DisplayName = "desk"
+LookText = "Solid oak. Bought it when business was good. Business was good once."
+WalkTo = Vector2(258, 160)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
+position = Vector2(258.0, 126.5)
+shape = SubResource("Rect_8")
+
+[node name="Drawer" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "drawer"
+DisplayName = "drawer"
+LookText = "The top drawer. Where I keep the important things."
+WalkTo = Vector2(309, 162)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Drawer"]
+position = Vector2(309.0, 122.5)
+shape = SubResource("Rect_9")
+
+[node name="Drawer2" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "drawer2"
+DisplayName = "drawer"
+LookText = "The bottom drawer. Where I keep the things I'd rather forget."
+WalkTo = Vector2(309, 162)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Drawer2"]
+position = Vector2(309.0, 140.5)
+shape = SubResource("Rect_10")
+
+[node name="Revolver" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "revolver"
+DisplayName = "revolver"
+LookText = "My .38. Loaded, oiled, and as reluctant as its owner."
+WalkTo = Vector2(309, 162)
+Face = 2
+ShowIfFlags = "drawer_open"
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Revolver"]
+position = Vector2(293.5, 142.0)
+shape = SubResource("Rect_11")
+
+[node name="Dollar" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "dollar"
+DisplayName = "dollar bill"
+LookText = "A dollar. My life savings, in a single convenient note."
+WalkTo = Vector2(309, 162)
+Face = 2
+ShowIfFlags = "drawer_open"
+HideIfFlags = "took_dollar"
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Dollar"]
+position = Vector2(322.5, 142.0)
+shape = SubResource("Rect_12")
+
+[node name="Lamp" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "lamp"
+DisplayName = "lamp"
+LookText = "A green banker's lamp. The only thing in here that still works for me."
+WalkTo = Vector2(197, 160)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lamp"]
+position = Vector2(197.0, 90.5)
+shape = SubResource("Rect_13")
+
+[node name="Papers" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "papers"
+DisplayName = "papers"
+LookText = "Bills, threats, and a menu from Wong's. Mostly bills."
+WalkTo = Vector2(250, 160)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Papers"]
+position = Vector2(250.0, 96.0)
+shape = SubResource("Rect_14")
+
+[node name="Ashtray" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "ashtray"
+DisplayName = "ashtray"
+LookText = "A monument to every case I didn't solve."
+WalkTo = Vector2(300, 160)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Ashtray"]
+position = Vector2(301.5, 97.0)
+shape = SubResource("Rect_15")
+
+[node name="Phone" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "phone"
+DisplayName = "telephone"
+LookText = "Hasn't rung in a week. When it does, it's never good news."
+WalkTo = Vector2(324, 160)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Phone"]
+position = Vector2(323.5, 94.0)
+shape = SubResource("Rect_16")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "window"
+DisplayName = "window"
+LookText = "The Aurelian's neon sign across the street. HOTEL. Blinking at me for six years like it knows something."
+WalkTo = Vector2(410, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(411.0, 57.0)
+shape = SubResource("Rect_17")
+
+[node name="Radiator" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "radiator"
+DisplayName = "radiator"
+LookText = "Cold in summer, colder in winter. A true professional."
+WalkTo = Vector2(412, 140)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Radiator"]
+position = Vector2(412.0, 115.0)
+shape = SubResource("Rect_18")
+
+[node name="Rug" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "rug"
+DisplayName = "rug"
+LookText = "Persian. Or at least the fella who sold it to me was."
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Rug"]
+position = Vector2(255.0, 178.0)
+shape = SubResource("Rect_19")
+
+[node name="Teddy" type="Area2D" parent="World"]
+position = Vector2(150, 172)
+script = ExtResource("7_Actor")
+Id = "teddy"
+DisplayName = "Teddy Harrington"
+LookText = "Theodore Harrington III. His suit costs more than my car. I don't have a car."
+WalkTo = Vector2(196, 174)
+Face = 3
+HideIfFlags = "teddy_gone"
+monitoring = false
+monitorable = false
+Texture = ExtResource("8_teddy")
+SpeechColor = Color(0.847, 0.722, 0.941, 1)

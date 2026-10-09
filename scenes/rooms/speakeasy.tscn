@@ -1,0 +1,254 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Speakeasy.cs" id="1_Speakeasy"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/speakeasy.png" id="2_speakeasy"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/speakeasy_fg.png" id="4_speakeasy_fg"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="6_sal"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/bartender.png" id="7_bartender"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(60, 87)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(34, 52)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(14, 22)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(48, 134)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(54, 22)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(18, 72)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(52, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(36, 84)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(140, 66)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(138, 20)
+
+[sub_resource type="RectangleShape2D" id="Rect_11"]
+size = Vector2(146, 44)
+
+[node name="Speakeasy" type="Node2D"]
+script = ExtResource("1_Speakeasy")
+RoomName = "The Blue Lantern"
+FarY = 146
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_speakeasy")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(4, 146, 476, 146, 476, 198, 4, 198)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="door" type="Marker2D" parent="Entries"]
+position = Vector2(48, 152)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "steel door"
+LookText = "The way back to State Street. And to the rain."
+WalkTo = Vector2(48, 146)
+Face = 2
+ExitTo = "lobby"
+ExitEntry = "street"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(48.0, 89.5)
+shape = SubResource("Rect_1")
+
+[node name="Crates" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "crates"
+DisplayName = "crates"
+LookText = "Crates of 'soap'. Smells like Canadian whisky."
+WalkTo = Vector2(110, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Crates"]
+position = Vector2(111.0, 108.0)
+shape = SubResource("Rect_2")
+
+[node name="Bulb" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bulb"
+DisplayName = "light bulb"
+LookText = "A bare bulb. The interior decorator was a fan of interrogations."
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bulb"]
+position = Vector2(91.0, 21.0)
+shape = SubResource("Rect_3")
+
+[node name="Curtain" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "curtain"
+DisplayName = "velvet curtain"
+LookText = "Red velvet. It's the most expensive thing on this side of the joint."
+WalkTo = Vector2(160, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Curtain"]
+position = Vector2(160.0, 67.0)
+shape = SubResource("Rect_4")
+
+[node name="Stage" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "stage"
+DisplayName = "stage"
+LookText = "The stage. Empty tonight. Even the band knows when to lay low."
+WalkTo = Vector2(210, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Stage"]
+position = Vector2(211.0, 123.0)
+shape = SubResource("Rect_5")
+
+[node name="Mic" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "mic"
+DisplayName = "microphone"
+LookText = "A microphone. Somewhere a torch singer is missing her stand."
+WalkTo = Vector2(210, 150)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Mic"]
+position = Vector2(211.0, 76.0)
+shape = SubResource("Rect_6")
+
+[node name="Piano" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "piano"
+DisplayName = "piano"
+LookText = "An upright piano. Half the keys work. The other half have seen things."
+WalkTo = Vector2(264, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Piano"]
+position = Vector2(264.0, 105.0)
+shape = SubResource("Rect_7")
+
+[node name="PrivateDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "private_door"
+DisplayName = "PRIVATE door"
+LookText = "PRIVATE. In my experience, that word is a promise somebody's breaking behind it."
+WalkTo = Vector2(310, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/PrivateDoor"]
+position = Vector2(310.0, 92.0)
+shape = SubResource("Rect_8")
+
+[node name="Shelves" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shelves"
+DisplayName = "bottles"
+LookText = "Gin, rye and bathtub gin. Volstead would weep."
+WalkTo = Vector2(408, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Shelves"]
+position = Vector2(408.0, 61.0)
+shape = SubResource("Rect_9")
+
+[node name="Neon" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "neon"
+DisplayName = "neon sign"
+LookText = "BLUE LANTERN. Subtle. For an illegal bar."
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Neon"]
+position = Vector2(409.0, 16.0)
+shape = SubResource("Rect_10")
+
+[node name="Bar" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bar"
+DisplayName = "bar"
+LookText = "Mahogany. Sticky with sins."
+WalkTo = Vector2(408, 150)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bar"]
+position = Vector2(407.0, 118.0)
+shape = SubResource("Rect_11")
+
+[node name="BarFront" type="Sprite2D" parent="World"]
+position = Vector2(0, 140)
+texture = ExtResource("4_speakeasy_fg")
+centered = false
+offset = Vector2(0, -140)
+
+[node name="Sal" type="Area2D" parent="World"]
+position = Vector2(156, 162)
+script = ExtResource("5_Actor")
+Id = "sal"
+DisplayName = "Sal"
+LookText = "Sal. Six and a half feet of reasons not to argue."
+WalkTo = Vector2(124, 160)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("6_sal")
+SpeechColor = Color(0.878, 0.439, 0.376, 1)
+
+[node name="Bartender" type="Area2D" parent="World"]
+position = Vector2(410, 128)
+script = ExtResource("5_Actor")
+Id = "bartender"
+DisplayName = "bartender"
+LookText = "The bartender. Polishes the same glass the way a man prays: without much hope."
+WalkTo = Vector2(408, 152)
+Face = 2
+monitoring = false
+monitorable = false
+Texture = ExtResource("7_bartender")
+SpeechColor = Color(0.565, 0.753, 0.941, 1)

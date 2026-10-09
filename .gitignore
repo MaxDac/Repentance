@@ -1,0 +1,20 @@
+# Godot
+.godot/
+/android/
+export_presets.cfg
+*.translation
+
+# .NET
+.mono/
+bin/
+obj/
+*.user
+.vs/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local screenshots from --screenshot mode
+/screenshots/
