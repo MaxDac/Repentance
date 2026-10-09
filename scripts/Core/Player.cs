@@ -17,9 +17,9 @@ public partial class Player : Node2D, ISpeaker
     private static readonly Vector2 FrameSize = new(64, 96);
     /// <summary>Ground covered by one side-walk frame at scale 1 (an 8-frame cycle is two steps of ~0.39 x height).</summary>
     private const float SideStridePerFrame = 7.7f;
-    private const float FrontWalkFps = 8f;
+    private const float FrontWalkFps = 11f;
 
-    [Export] public float Speed = 62f;
+    [Export] public float Speed = 90f;
     public Color SpeechColor { get; set; } = new("f0e0a0");
 
     private Sprite2D _sprite = null!;
@@ -31,7 +31,8 @@ public partial class Player : Node2D, ISpeaker
 
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 70 * Scale.Y);
+    /// <summary>Speech anchor: a few pixels above the top of the head (or hat), which sits ~83px above the feet.</summary>
+    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 92 * Scale.Y);
 
     public bool Talking
     {

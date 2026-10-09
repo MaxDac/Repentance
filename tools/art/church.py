@@ -1,332 +1,1066 @@
-"""Grand Catholic cathedral interior and exterior, inspired by St. Patrick's Cathedral."""
+"""Gothic-revival cathedral after Chicago's Holy Name: the rain-soaked facade at night and the candlelit nave."""
 from PIL import Image, ImageDraw
 import math
-from .common import W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, pixelize, palette_of, save
+import random
+from .common import W, FULL_H, hx, mix, mul, noise, light, shadow, vignette, pixelize, palette_of, save, city
 
 H = FULL_H
-VP = (240, 90)
-STONE = hx("8d887f")
-STONE_D = hx("5b5752")
-STONE_L = hx("b8b1a5")
-WOOD = hx("6b4124")
-WOOD_D = hx("3a2416")
-GOLD = hx("c6a25a")
+WARM = hx("ffc46e")
+GLASS = [hx("b0283a"), hx("2a4fa8"), hx("d9a640"), hx("3d8a5a"), hx("7a3a9a"), hx("e0d8b0")]
 
 
-def along(p, t, vp=VP):
-    return (vp[0] + (p[0] - vp[0]) * t, vp[1] + (p[1] - vp[1]) * t)
+# ---------------------------------------------------------------- shared helpers
+
+def arch_curve(a, b, spring, k=0.6, n=14, up=-1, sq=1.0):
+    """Pointed arch from (a, spring) over the apex to (b, spring). up=-1 for screen y, +1 for world heights."""
+    span = b - a
+    r = max(span * k, span / 2 + 1e-6)
+    mid = (a + b) / 2
+    c = a + r
+    ae = math.acos(max(-1.0, min(1.0, (mid - c) / r)))
+    pts = []
+    for i in range(n + 1):
+        t = math.pi + (ae - math.pi) * i / n
+        pts.append((c + r * math.cos(t), spring + up * r * math.sin(t) * sq))
+    return pts + [(2 * mid - x, y) for x, y in reversed(pts[:-1])]
 
 
-def lerp(a, b, t):
-    return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+def arch_poly(a, b, spring, base, k=0.6, n=14):
+    return [(a, base)] + arch_curve(a, b, spring, k, n) + [(b, base)]
 
 
-def pointed_shape(x0, x1, y0, y1, apex=None):
-    apex = apex if apex is not None else y0 - (x1 - x0) * 0.42
+def mask_of(size, polys, holes=()):
+    m = Image.new("L", size, 0)
+    d = ImageDraw.Draw(m)
+    for p in polys:
+        d.polygon(p, fill=255)
+    for p in holes:
+        d.polygon(p, fill=0)
+    return m
+
+
+def ashlar(size, box, base, seed, course=6, lo=9, hi=20, var=0.09, mortar=0.7):
+    """Screen-space coursed stonework: blocks of slightly varying tone with dark joints."""
+    layer = Image.new("RGB", size, base)
+    d = ImageDraw.Draw(layer)
+    rnd = random.Random(seed)
+    x0, y0, x1, y1 = box
+    y = y0
+    while y < y1:
+        x = x0 - rnd.randint(0, hi)
+        while x < x1:
+            w = rnd.randint(lo, hi)
+            c = mul(base, 1 + rnd.uniform(-var, var))
+            d.rectangle([x, y, x + w - 1, y + course - 1], fill=c)
+            d.line([(x, y), (x + w - 2, y)], fill=mul(c, 1.07))
+            d.line([(x + w - 1, y), (x + w - 1, y + course - 1)], fill=mul(base, mortar))
+            x += w
+        d.line([(x0, y + course - 1), (x1, y + course - 1)], fill=mul(base, mortar))
+        y += course
+    return layer
+
+
+def stone(img, polys, base, seed, holes=(), **kw):
+    xs = [p[0] for poly in polys for p in poly]
+    ys = [p[1] for poly in polys for p in poly]
+    box = (int(min(xs)) - 2, int(min(ys)) - 2, int(max(xs)) + 2, int(max(ys)) + 2)
+    img.paste(ashlar(img.size, box, base, seed, **kw), (0, 0), mask_of(img.size, polys, holes))
+
+
+def blend_px(img, x, y, col, k):
+    if 0 <= x < img.width and 0 <= y < img.height:
+        img.putpixel((x, y), mix(img.getpixel((x, y)), col, k))
+
+
+def rain(img, seed, n=700, box=(0, 0, W, H), col=hx("8fa4c8"), k=0.32):
+    rnd = random.Random(seed)
+    for _ in range(n):
+        x, y = rnd.randint(box[0], box[2]), rnd.randint(box[1], box[3])
+        ln = rnd.randint(3, 7)
+        for i in range(ln):
+            blend_px(img, x - i // 3, y + i, col, k * (1 - i / (ln + 1)))
+
+
+def glass_cells(d, poly_fn, u0, u1, v0, v1, nu, nv, cols, rnd, lead):
+    """Fills a (u, v) window panel with jewel-coloured cells separated by leading."""
+    for i in range(nu):
+        for j in range(nv):
+            ua, ub = u0 + (u1 - u0) * i / nu, u0 + (u1 - u0) * (i + 1) / nu
+            va, vb = v0 + (v1 - v0) * j / nv, v0 + (v1 - v0) * (j + 1) / nv
+            c = rnd.choice(cols)
+            d.polygon([poly_fn(ua, va), poly_fn(ub, va), poly_fn(ub, vb), poly_fn(ua, vb)], fill=c, outline=lead)
+
+
+# ---------------------------------------------------------------- exterior: the facade at night
+
+STONE = hx("575862")
+STONE_D = hx("33343e")
+STONE_L = hx("8a8a92")
+TOWERS = ((72, 152), (328, 408))
+PORCH = 198
+STEP_BOTTOM = 234
+
+
+def tenement(img, x0, x1, top, seed, ground):
+    d = ImageDraw.Draw(img)
+    base = hx("4c2b24")
+    layer = Image.new("RGB", img.size, base)
+    ld = ImageDraw.Draw(layer)
+    rnd = random.Random(seed)
+    for y in range(top, STEP_BOTTOM, 3):
+        off = 3 if (y // 3) % 2 else 0
+        for x in range(x0 - off, x1 + 6, 6):
+            ld.rectangle([x, y, x + 5, y + 2], fill=mul(base, 1 + rnd.uniform(-0.14, 0.12)))
+        ld.line([(x0, y + 2), (x1, y + 2)], fill=mul(base, 0.55))
+    img.paste(layer, (0, 0), mask_of(img.size, [[(x0, top), (x1, top), (x1, STEP_BOTTOM), (x0, STEP_BOTTOM)]]))
+    d.rectangle([x0, top - 7, x1, top - 1], fill=hx("26222a"))
+    d.line([(x0, top - 7), (x1, top - 7)], fill=hx("5c5664"))
+    for x in range(x0, x1, 4):
+        d.rectangle([x, top - 1, x + 1, top + 1], fill=hx("1c181e"))
+    cols = [x0 + 9 + i * 26 for i in range((x1 - x0 - 6) // 26)]
+    for y in range(top + 14, ground - 30, 34):
+        for x in cols:
+            d.rectangle([x - 2, y - 3, x + 15, y - 1], fill=hx("6e625a"))
+            d.rectangle([x - 1, y + 24, x + 14, y + 25], fill=hx("6e625a"))
+            lit = rnd.random() < 0.45
+            pane = hx("e2a456") if lit else hx("161a2a")
+            d.rectangle([x, y, x + 13, y + 23], fill=pane)
+            if lit:
+                d.rectangle([x, y, x + 13, y + rnd.randint(4, 12)], fill=hx("b8763a"))
+                light(img, "rect", [x - 4, y - 4, x + 17, y + 27], hx("ffb050"), 0.18, 4)
+            else:
+                d.line([(x + 1, y + 1), (x + 6, y + 6)], fill=hx("3a4466"))
+            d.line([(x, y + 11), (x + 13, y + 11)], fill=hx("2a1c18"))
+            d.line([(x + 6, y), (x + 6, y + 23)], fill=hx("2a1c18"))
+    d.rectangle([x0, ground - 4, x1, ground], fill=hx("2c2428"))
+    d.rectangle([x0 + 4, ground + 6, x1 - 4, STEP_BOTTOM - 2], fill=hx("141620"))
+    d.rectangle([x0 + 6, ground + 8, x1 - 6, ground + 18], fill=hx("6a4a2a"))
+    light(img, "rect", [x0 + 6, ground + 8, x1 - 6, ground + 18], hx("ffcc80"), 0.4, 2)
+    for x in range(x0 + 8, x1 - 6, 8):
+        d.line([(x, ground + 20), (x, STEP_BOTTOM - 2)], fill=hx("26283a"))
+
+
+def sky_and_street_back(img):
+    city(img, (0, 0, W - 1, 130), seed=19, lit=0.2, haze=hx("3a3450"))
+    rnd = random.Random(5)
+    for _ in range(12):
+        x, y = rnd.randint(-40, 520), rnd.randint(-10, 60)
+        light(img, "ellipse", [x - 80, y - 9, x + 80, y + 11], hx("4c4a6a"), 0.22, 10)
+    light(img, "ellipse", [444, 10, 466, 32], hx("dfe4f4"), 0.55, 5)
+    light(img, "ellipse", [410, -20, 500, 70], hx("8090c0"), 0.2, 20)
+    d = ImageDraw.Draw(img)
+    d.rectangle([60, 40, 76, STEP_BOTTOM], fill=hx("0b0c14"))
+    d.rectangle([404, 40, 422, STEP_BOTTOM], fill=hx("0b0c14"))
+    tenement(img, -6, 64, 74, 3, 186)
+    tenement(img, 416, W + 6, 88, 4, 186)
+    # a fire escape zig-zagging down the left tenement
+    for y in (108, 142, 176):
+        d.rectangle([2, y, 58, y + 1], fill=hx("16141a"))
+        for x in range(2, 58, 3):
+            d.line([(x, y - 7), (x, y)], fill=hx("16141a"))
+        d.line([(2, y - 7), (58, y - 7)], fill=hx("16141a"))
+        d.line([(50, y), (14, y + 33)], fill=hx("201c22"), width=2)
+
+
+def buttress(img, x0, x1, top, side, seed):
+    """A stepped buttress: lit front face plus a receding side face toward the centre of the facade."""
+    d = ImageDraw.Draw(img)
+    stone(img, [[(x0, top), (x1, top), (x1, PORCH), (x0, PORCH)]], mul(STONE, 1.08), seed, course=6, lo=7, hi=14)
+    stages = ((150, PORCH, 8), (96, 150, 5), (top, 96, 3))
+    for y0, y1, wd in stages:
+        if side > 0:
+            face = [(x1, y0), (x1 + wd, y0 + wd // 2), (x1 + wd, y1), (x1, y1)]
+        else:
+            face = [(x0, y0), (x0 - wd, y0 + wd // 2), (x0 - wd, y1), (x0, y1)]
+        d.polygon(face, fill=STONE_D)
+        for y in range(y0 + 6, y1, 6):
+            d.line([face[0][0], y, face[1][0], y + wd // 2], fill=mul(STONE_D, 0.8))
+        # weathering (sloped set-off) catching the city glow
+        if y0 > top:
+            d.polygon([(x0 - 1, y0 - 3), (x1 + 1, y0 - 3), (x1 + 2, y0 + 1), (x0 - 2, y0 + 1)], fill=STONE_L)
+            d.line([(x0 - 2, y0 + 2), (x1 + 2, y0 + 2)], fill=STONE_D)
+    d.line([(x0, top), (x0, PORCH)], fill=mul(STONE, 0.7))
+
+
+def pinnacle(d, cx, base, tip, w):
+    d.rectangle([cx - w, base - 10, cx + w, base], fill=STONE)
+    d.line([(cx - w, base - 10), (cx - w, base)], fill=STONE_L)
+    d.polygon([(cx - w - 1, base - 10), (cx + w + 1, base - 10), (cx + w, base - 12), (cx - w, base - 12)], fill=STONE_L)
+    d.polygon([(cx - w, base - 12), (cx, tip), (cx + w, base - 12)], fill=STONE)
+    d.polygon([(cx, base - 12), (cx, tip), (cx + w, base - 12)], fill=STONE_D)
+    for y in range(base - 15, tip + 2, -4):
+        t = (base - 12 - y) / max(1, base - 12 - tip)
+        hw = w * (1 - t)
+        d.point((int(cx - hw - 1), y), fill=STONE_L)
+        d.point((int(cx + hw + 1), y), fill=STONE_L)
+    d.line([(cx, tip), (cx, tip - 4)], fill=STONE_L)
+    d.line([(cx - 1, tip - 2), (cx + 1, tip - 2)], fill=STONE_L)
+
+
+def spire(img, x0, x1, base):
+    d = ImageDraw.Draw(img)
     cx = (x0 + x1) / 2
-    return [(x0, y1), (x0, y0), (cx, apex), (x1, y0), (x1, y1)]
+    tip = (cx, base - 120)
+    q = (x1 - x0) / 4
+    faces = [((x0, base), (cx - q, base), mul(STONE_D, 0.9)), ((cx - q, base), (cx + q, base), mul(STONE, 0.92)),
+             ((cx + q, base), (x1, base), mul(STONE, 1.1))]
+    for a, b, col in faces:
+        d.polygon([a, b, tip], fill=col)
+        for y in range(base - 4, -1, -4):
+            t = (base - y) / (base - tip[1])
+            xa, xb = a[0] + (cx - a[0]) * t, b[0] + (cx - b[0]) * t
+            d.line([(xa, y), (xb, y)], fill=mul(col, 0.8))
+    for ex in (x0, cx - q, cx + q, x1):
+        d.line([(ex, base), tip], fill=STONE_L if ex > cx else mul(STONE, 0.75))
+        for y in range(base - 5, -1, -6):
+            t = (base - y) / (base - tip[1])
+            x = ex + (cx - ex) * t
+            d.point((int(x) + (1 if ex > cx else -1), y), fill=STONE_L)
+    # lucarne (gabled spire light)
+    lx = int(cx)
+    d.polygon([(lx - 8, base), (lx - 8, base - 10), (lx, base - 19), (lx + 8, base - 10), (lx + 8, base)], fill=STONE)
+    d.polygon([(lx - 8, base - 10), (lx, base - 19), (lx + 8, base - 10)], outline=STONE_L)
+    d.polygon(arch_poly(lx - 4, lx + 4, base - 8, base, 0.7, 6), fill=hx("0c0d14"))
+    for y in range(base - 8, base, 2):
+        d.line([(lx - 3, y), (lx + 3, y)], fill=hx("34343e"))
 
 
-def rose_window(d, cx, cy, r, frame, glass):
-    d.ellipse([cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4], fill=frame)
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=glass)
-    d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=frame)
+def tower(img, x0, x1, seed, right):
+    d = ImageDraw.Draw(img)
+    stone(img, [[(x0, 40), (x1, 40), (x1, PORCH), (x0, PORCH)]], STONE, seed)
+    spire(img, x0 + 14, x1 - 14, 34)
+    # parapet with pierced quatrefoils
+    d.rectangle([x0 + 10, 30, x1 - 10, 42], fill=STONE)
+    d.line([(x0 + 10, 30), (x1 - 10, 30)], fill=STONE_L)
+    d.rectangle([x0 + 10, 42, x1 - 10, 44], fill=STONE_D)
+    for x in range(x0 + 18, x1 - 14, 9):
+        d.ellipse([x - 3, 33, x + 3, 39], fill=hx("1a1b26"))
+        d.point((x, 36), fill=STONE)
+    cx = (x0 + x1) // 2
+    # belfry: a pair of tall louvred lancets under one hood
+    d.polygon(arch_poly(cx - 24, cx + 24, 66, 112, 0.62), fill=mul(STONE, 0.82))
+    d.line(arch_curve(cx - 25, cx + 25, 66, 0.62), fill=STONE_L)
+    for a in (cx - 20, cx + 3):
+        d.polygon(arch_poly(a, a + 17, 70, 110, 0.75), fill=hx("0a0b12"))
+        for y in range(64, 110, 3):
+            d.line([(a + 1, y), (a + 16, y)], fill=hx("2a2a36"))
+            d.line([(a + 1, y + 1), (a + 16, y + 1)], fill=hx("14141c"))
+        d.line(arch_curve(a, a + 17, 70, 0.75, 8), fill=STONE_L)
+        d.line([(a + 17, 70), (a + 17, 110)], fill=STONE_L)
+        d.line([(a, 70), (a, 110)], fill=STONE_D)
+    d.ellipse([cx - 4, 52, cx + 4, 60], fill=hx("0a0b12"), outline=STONE_L)
+    d.rectangle([cx - 24, 110, cx + 24, 113], fill=STONE_L)
+    # string course
+    d.rectangle([x0 + 4, 114, x1 - 4, 117], fill=STONE_L)
+    d.line([(x0 + 4, 118), (x1 - 4, 118)], fill=hx("1c1c26"))
+    if not right:
+        # tall lower lancet, faintly lit from a side chapel
+        d.polygon(arch_poly(cx - 13, cx + 13, 140, 182, 0.7), fill=mul(STONE, 0.75))
+        d.polygon(arch_poly(cx - 10, cx + 10, 141, 180, 0.72), fill=hx("2a2030"))
+        rnd = random.Random(seed)
+        glass_cells(ImageDraw.Draw(img), lambda u, v: (u, v), cx - 10, cx + 10, 128, 180, 4, 9,
+                    [hx("7a3020"), hx("8a6a30"), hx("2a3a6a"), hx("6a2a40")], rnd, hx("1a1418"))
+        d.polygon(arch_poly(cx - 13, cx + 13, 140, 128, 0.7)[1:-1] + [(cx + 13, 128), (cx + 13, 120), (cx - 13, 120),
+                                                                    (cx - 13, 128)], fill=mul(STONE, 0.75))
+        d.line(arch_curve(cx - 13, cx + 13, 140, 0.7), fill=STONE_L, width=2)
+        d.line([(cx, 128), (cx, 180)], fill=hx("4a4a52"))
+        d.rectangle([cx - 14, 181, cx + 14, 184], fill=STONE_L)
+        light(img, "rect", [cx - 10, 128, cx + 10, 180], hx("ff9a50"), 0.22, 3)
+    else:
+        # small lancet over the glass-fronted parish notice case
+        d.polygon(arch_poly(cx - 7, cx + 7, 130, 144, 0.7), fill=hx("181a26"))
+        d.line(arch_curve(cx - 8, cx + 8, 130, 0.7), fill=STONE_L)
+        d.rectangle([cx - 22, 148, cx + 22, 180], fill=hx("2a1a12"))
+        d.rectangle([cx - 20, 150, cx + 20, 178], fill=hx("4a3828"))
+        d.rectangle([cx - 18, 152, cx + 18, 176], fill=hx("d8ccb0"))
+        rnd = random.Random(8)
+        for i, (px, py, pw, ph) in enumerate(((cx - 16, 154, 14, 10), (cx + 1, 154, 15, 7), (cx - 16, 166, 10, 8),
+                                               (cx - 4, 164, 9, 10), (cx + 7, 163, 9, 11))):
+            d.rectangle([px, py, px + pw, py + ph], fill=(hx("f2ead8"), hx("e8d090"), hx("c8d8e8"))[i % 3])
+            for yy in range(py + 2, py + ph - 1, 2):
+                d.line([(px + 2, yy), (px + rnd.randint(4, pw - 1), yy)], fill=hx("6a5a4a"))
+        d.line([(cx - 18, 152), (cx - 6, 176)], fill=hx("f8f4ff"))
+        d.rectangle([cx - 24, 145, cx + 24, 148], fill=hx("3a2416"))
+        light(img, "rect", [cx - 18, 152, cx + 18, 176], hx("fff0c0"), 0.2, 3)
+    d.rectangle([x0 + 2, 186, x1 - 2, PORCH], fill=mul(STONE, 0.85))
+    d.line([(x0 + 2, 186), (x1 - 2, 186)], fill=STONE_L)
+    buttress(img, x0, x0 + 14, 44, 1 if not right else -1, seed + 1)
+    buttress(img, x1 - 14, x1, 44, 1 if not right else -1, seed + 2)
+    pinnacle(d, x0 + 7, 44, 4, 6)
+    pinnacle(d, x1 - 7, 44, 4, 6)
+
+
+def rose_window(img, cx, cy, r):
+    s = 4
+    big = Image.new("RGBA", (r * 2 * s + 16 * s, r * 2 * s + 16 * s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    c = big.width / 2
+    R = r * s
+    frame = hx("6e6e78") + (255,)
+    lead = hx("22202a") + (255,)
+    d.ellipse([c - R - 5 * s, c - R - 5 * s, c + R + 5 * s, c + R + 5 * s], fill=hx("3e3e48") + (255,))
+    d.ellipse([c - R - 3 * s, c - R - 3 * s, c + R + 3 * s, c + R + 3 * s], fill=frame)
+    d.ellipse([c - R, c - R, c + R, c + R], fill=lead)
+    rnd = random.Random(12)
+    for ring, (r0, r1, n) in enumerate(((0.36, 0.62, 12), (0.64, 0.98, 24))):
+        for i in range(n):
+            a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
+            col = (GLASS[0], GLASS[1], GLASS[2], GLASS[1], GLASS[0], GLASS[4])[(i + ring) % 6]
+            pts = [(c + math.cos(a0 + (a1 - a0) * t) * R * rr, c + math.sin(a0 + (a1 - a0) * t) * R * rr)
+                   for rr, rng in ((r0, range(7)), (r1, range(6, -1, -1))) for t in [k / 6 for k in rng]]
+            d.polygon(pts, fill=mix(col, hx("ffe0a0"), rnd.uniform(0.15, 0.45)) + (255,))
+    d.ellipse([c - R * 0.34, c - R * 0.34, c + R * 0.34, c + R * 0.34], fill=hx("f0c060") + (255,))
     for i in range(12):
-        a = i * math.pi / 6
-        x = cx + math.cos(a) * r
-        y = cy + math.sin(a) * r
-        d.line([(cx, cy), (x, y)], fill=frame)
-        d.ellipse([cx + math.cos(a) * (r * 0.55) - 4, cy + math.sin(a) * (r * 0.55) - 4,
-                   cx + math.cos(a) * (r * 0.55) + 4, cy + math.sin(a) * (r * 0.55) + 4], outline=frame)
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=frame, width=2)
-    d.ellipse([cx - int(r * 0.58), cy - int(r * 0.58), cx + int(r * 0.58), cy + int(r * 0.58)],
-              outline=frame, width=2)
+        a = 2 * math.pi * i / 12
+        d.line([(c + math.cos(a) * R * 0.34, c + math.sin(a) * R * 0.34), (c + math.cos(a) * R, c + math.sin(a) * R)],
+               fill=frame, width=int(1.6 * s))
+        ex, ey = c + math.cos(a + math.pi / 12) * R * 0.8, c + math.sin(a + math.pi / 12) * R * 0.8
+        d.ellipse([ex - R * 0.17, ey - R * 0.17, ex + R * 0.17, ey + R * 0.17], outline=frame, width=s)
+    d.ellipse([c - R * 0.63, c - R * 0.63, c + R * 0.63, c + R * 0.63], outline=frame, width=int(1.6 * s))
+    d.ellipse([c - R * 0.34, c - R * 0.34, c + R * 0.34, c + R * 0.34], outline=frame, width=int(1.6 * s))
+    for i in range(4):
+        a = math.pi / 4 + i * math.pi / 2
+        ex, ey = c + math.cos(a) * R * 0.15, c + math.sin(a) * R * 0.15
+        d.ellipse([ex - R * 0.12, ey - R * 0.12, ex + R * 0.12, ey + R * 0.12], outline=frame, width=s)
+    d.ellipse([c - 2 * s, c - 2 * s, c + 2 * s, c + 2 * s], fill=frame)
+    small = big.resize((big.width // s, big.height // s), Image.Resampling.LANCZOS)
+    light(img, "ellipse", [cx - r - 14, cy - r - 14, cx + r + 14, cy + r + 14], hx("ff9a40"), 0.3, 12)
+    img.paste(small, (int(cx - small.width / 2), int(cy - small.height / 2)), small)
 
 
-def stone_tiles(img, poly, base, seam, seed):
+def portal(img):
     d = ImageDraw.Draw(img)
-    d.polygon(poly, fill=base)
-    top_l, top_r, bot_r, bot_l = poly
-    for i in range(-6, 7):
-        xb = bot_l[0] + (bot_r[0] - bot_l[0]) * (i + 6) / 12
-        xt = top_l[0] + (top_r[0] - top_l[0]) * (i + 6) / 12
-        d.line([(xt, top_l[1]), (xb, bot_l[1])], fill=seam)
-    y, step = top_l[1], 4.0
-    while y < bot_l[1]:
-        left = lerp(top_l, bot_l, (y - top_l[1]) / max(1, bot_l[1] - top_l[1]))
-        right = lerp(top_r, bot_r, (y - top_r[1]) / max(1, bot_r[1] - top_r[1]))
-        d.line([left, right], fill=mix(base, seam, 0.6))
-        y += step
-        step *= 1.23
-    noise(img, (int(min(p[0] for p in poly)), int(min(p[1] for p in poly)),
-                int(max(p[0] for p in poly)), int(max(p[1] for p in poly))), 5, seed)
+    spring = 124
+    orders = [(186, 294), (192, 288), (198, 282), (204, 276), (210, 270)]
+    # recessed jambs: each order steps further into the wall and deeper into shadow
+    for i, (a, b) in enumerate(orders):
+        depth = i / (len(orders) - 1)
+        roll = i % 2 == 0
+        col = mix(mul(STONE, 1.15 if roll else 0.72), STONE_D, depth * 0.55)
+        d.polygon(arch_poly(a, b, spring, PORCH - 2, 0.58, 18), fill=col)
+        if roll:
+            d.line(arch_curve(a + 1, b - 1, spring, 0.58, 18), fill=mix(STONE_L, col, depth * 0.5))
+            d.line([(a + 1, spring), (a + 1, PORCH - 6)], fill=mix(STONE_L, col, depth * 0.5))
+            d.line([(b - 2, spring), (b - 2, PORCH - 6)], fill=mul(col, 0.7))
+    # tympanum with a carved Christ in majesty
+    d.polygon(arch_poly(212, 268, spring, 112, 0.58, 16), fill=mul(STONE, 0.9))
+    stone(img, [arch_poly(213, 267, spring, 112, 0.58, 16)], mul(STONE, 0.95), 61, course=4, lo=5, hi=9)
+    d.ellipse([230, 90, 250, 112], fill=mul(STONE, 1.25), outline=STONE_D)
+    d.ellipse([237, 92, 243, 98], fill=STONE_L)
+    d.polygon([(235, 98), (245, 98), (247, 111), (233, 111)], fill=mul(STONE, 1.1))
+    d.line([(240, 99), (240, 110)], fill=STONE_D)
+    for ax in (222, 258):
+        d.polygon([(ax - 4, 112), (ax, 100), (ax + 4, 112)], fill=mul(STONE, 1.05))
+        d.ellipse([ax - 2, 98, ax + 2, 102], fill=STONE_L)
+    # lintel and the iron-banded oak doors (one leaf ajar - candlelight leaks through)
+    d.rectangle([209, 112, 271, 116], fill=STONE_L)
+    d.line([(209, 116), (271, 116)], fill=STONE_D)
+    d.rectangle([212, 117, 268, PORCH - 2], fill=hx("2a1a10"))
+    for x in range(213, 268, 4):
+        d.line([(x, 117), (x, PORCH - 3)], fill=hx("1c110a"))
+        d.line([(x + 1, 117), (x + 1, PORCH - 3)], fill=hx("3a2416"))
+    for y in (126, 152, 180):
+        for x0, x1, s in ((214, 238, 1), (242, 266, -1)):
+            d.rectangle([x0, y, x1, y + 2], fill=hx("16161a"))
+            d.line([(x0, y), (x1, y)], fill=hx("4a4a52"))
+            ex = x1 if s > 0 else x0
+            d.arc([ex - 4, y - 3, ex + 4, y + 5], 270 if s > 0 else 90, 90 if s > 0 else 270, fill=hx("16161a"))
+    d.rectangle([239, 117, 241, PORCH - 2], fill=hx("ffd890"))
+    light(img, "rect", [238, 117, 242, PORCH - 2], WARM, 0.55, 3)
+    for hx_ in (233, 247):
+        d.ellipse([hx_ - 3, 160, hx_ + 3, 166], outline=hx("8a7a50"))
+    d.rectangle([212, PORCH - 3, 268, PORCH - 2], fill=hx("ffcf80"))
+    # capitals band and hood-mould with crockets and a finial
+    d.rectangle([184, spring - 4, 296, spring], fill=mul(STONE, 1.2))
+    for x in range(186, 296, 3):
+        d.point((x, spring - 2), fill=STONE_D)
+    hood = arch_curve(182, 298, spring - 2, 0.58, 22)
+    d.line(hood, fill=STONE_L, width=2)
+    for x, y in hood[2:-2:3]:
+        d.ellipse([x - 1.5, y - 2.5, x + 1.5, y + 0.5], fill=STONE_L)
+    ax, ay = min(hood, key=lambda p: p[1])
+    d.polygon([(ax - 3, ay), (ax, ay - 10), (ax + 3, ay)], fill=STONE_L)
+    d.ellipse([ax - 3, ay - 9, ax + 3, ay - 5], fill=STONE_L)
 
 
-def interior_shell(img):
+def statue_niche(img, x0, x1, seed):
     d = ImageDraw.Draw(img)
-    vgrad(img, (0, 0, W - 1, H - 1), hx("433d3e"), hx("1e1a18"))
-    vault = [(0, 0), (W - 1, 0), (360, 146), (120, 146)]
-    d.polygon(vault, fill=hx("645f5b"))
-    left_wall = [(0, 0), (120, 0), (164, 146), (0, 220)]
-    right_wall = [(W - 1, 0), (360, 0), (316, 146), (W - 1, 220)]
-    d.polygon(left_wall, fill=hx("777068"))
-    d.polygon(right_wall, fill=hx("726c66"))
-    side_left = [(0, 220), (164, 146), (184, H - 1), (0, H - 1)]
-    side_right = [(W - 1, 220), (316, 146), (296, H - 1), (W - 1, H - 1)]
-    d.polygon(side_left, fill=hx("584b42"))
-    d.polygon(side_right, fill=hx("564940"))
-    stone_tiles(img, [(184, 146), (296, 146), (400, H - 1), (80, H - 1)], hx("82786d"), hx("5c534c"), 71)
-    noise(img, (0, 0, W - 1, 160), 6, 17)
-    for t in (1.0, 1.28, 1.62, 2.02, 2.55, 3.22):
-        lx, ly = along((174, 66), t)
-        rx, ry = along((306, 66), t)
-        ax, ay = along((240, 22), t)
-        width = max(1, int(5 / t))
-        for off in range(width):
-            d.line([(lx, ly + off), (ax, ay)], fill=STONE_D)
-            d.line([(ax, ay), (rx, ry + off)], fill=STONE_D)
-        d.line([along((132, 28), t), (ax, ay)], fill=hx("8d8579"))
-        d.line([along((348, 28), t), (ax, ay)], fill=hx("8d8579"))
-    d.line([(240, 12), VP], fill=hx("938c80"), width=3)
+    cx = (x0 + x1) / 2
+    d.polygon(arch_poly(x0, x1, 128, 178, 0.7), fill=hx("23242e"))
+    d.line(arch_curve(x0 - 1, x1 + 1, 128, 0.7), fill=STONE_L)
+    d.polygon([(cx - 8, 112), (cx, 100), (cx + 8, 112)], outline=STONE_L)
+    d.rectangle([x0 - 2, 178, x1 + 2, 182], fill=STONE_L)
+    d.polygon([(x0, 182), (x1, 182), (cx + 4, 188), (cx - 4, 188)], fill=STONE)
+    fig = mul(STONE, 1.3)
+    d.ellipse([cx - 3, 132, cx + 3, 139], fill=fig)
+    d.polygon([(cx - 5, 140), (cx + 5, 140), (cx + 6, 177), (cx - 6, 177)], fill=fig)
+    d.line([(cx + 1, 142), (cx + 3, 176)], fill=mul(fig, 0.7))
+    d.line([(cx - 5, 150), (cx + 2, 156)], fill=mul(fig, 0.8))
+    d.arc([cx - 6, 128, cx + 6, 140], 180, 360, fill=hx("c8a860"))
 
 
-def stained_window(img, side, t, cols):
+def lantern(img, x, y):
     d = ImageDraw.Draw(img)
-    if side == "left":
-        outer = [along((116, 126), t), along((116, 72), t), along((128, 54), t), along((140, 72), t),
-                 along((140, 126), t)]
-        inset = [along((120, 122), t), along((120, 78), t), along((128, 62), t), along((136, 78), t),
-                 along((136, 122), t)]
-        glow = [along((110, 128), t), along((110, 68), t), along((128, 48), t), along((146, 68), t),
-                along((146, 128), t)]
-    else:
-        outer = [along((340, 126), t), along((340, 72), t), along((352, 54), t), along((364, 72), t),
-                 along((364, 126), t)]
-        inset = [along((344, 122), t), along((344, 78), t), along((352, 62), t), along((360, 78), t),
-                 along((360, 122), t)]
-        glow = [along((334, 128), t), along((334, 68), t), along((352, 48), t), along((370, 68), t),
-                along((370, 128), t)]
-    light(img, "polygon", glow, mix(cols[1], hx("ffffff"), 0.35), 0.18, 8)
-    d.polygon(outer, fill=STONE_D)
-    d.polygon(inset, fill=cols[1])
-    bx0 = int(min(p[0] for p in inset))
-    bx1 = int(max(p[0] for p in inset))
-    by0 = int(min(p[1] for p in inset))
-    by1 = int(max(p[1] for p in inset))
-    for i, col in enumerate(cols):
-        x0 = bx0 + (bx1 - bx0) * i / len(cols)
-        x1 = bx0 + (bx1 - bx0) * (i + 1) / len(cols)
-        d.rectangle([x0, by0, x1, by1], fill=col)
-    d.line([inset[0], inset[2], inset[4]], fill=hx("f4ead2"))
-    d.line([((inset[0][0] + inset[4][0]) / 2, inset[1][1]), ((inset[0][0] + inset[4][0]) / 2, inset[4][1])],
-           fill=hx("f4ead2"))
-    d.polygon(outer, outline=STONE_L)
-
-
-def interior_columns(img):
-    d = ImageDraw.Draw(img)
-    depths = [1.0, 1.28, 1.62, 2.02, 2.55, 3.22]
-    for t in reversed(depths):
-        for x0, x1 in ((152, 170), (310, 328)):
-            pts = [along((x0, 154), t), along((x0, 68), t), along((x1, 68), t), along((x1, 154), t)]
-            d.polygon(pts, fill=STONE)
-            d.polygon([along((x0 - 4, 68), t), along((x1 + 4, 68), t), along((x1 + 3, 74), t),
-                       along((x0 - 3, 74), t)], fill=STONE_L)
-            d.polygon([along((x0 - 5, 154), t), along((x1 + 5, 154), t), along((x1 + 7, 160), t),
-                       along((x0 - 7, 160), t)], fill=STONE_D)
-            d.line([along((x0 + 2, 70), t), along((x0 + 2, 154), t)], fill=STONE_L)
-            d.line([along((x1 - 2, 70), t), along((x1 - 2, 154), t)], fill=STONE_D)
-        for x0, x1 in ((108, 124), (356, 372)):
-            pts = [along((x0, 150), t), along((x0, 72), t), along((x1, 72), t), along((x1, 150), t)]
-            d.polygon(pts, fill=hx("6a645e"))
-            d.line([along((x0 + 2, 74), t), along((x0 + 2, 150), t)], fill=STONE_L)
-        lx, ly = along((170, 74), t)
-        rx, ry = along((310, 74), t)
-        ax, ay = along((240, 28), t)
-        d.line([(lx, ly), (ax, ay), (rx, ry)], fill=STONE_L, width=max(1, int(6 / t)))
-
-
-def pew(img, side, t):
-    d = ImageDraw.Draw(img)
-    if side == "left":
-        top = [along((104, 156), t), along((170, 156), t), along((178, 166), t), along((94, 166), t)]
-        front = [along((94, 166), t), along((178, 166), t), along((182, 184), t), along((88, 184), t)]
-        back = [along((104, 144), t), along((170, 144), t), along((170, 156), t), along((104, 156), t)]
-        cap = [along((160, 144), t), along((170, 144), t), along((178, 184), t), along((168, 184), t)]
-    else:
-        top = [along((310, 156), t), along((376, 156), t), along((386, 166), t), along((302, 166), t)]
-        front = [along((302, 166), t), along((386, 166), t), along((392, 184), t), along((298, 184), t)]
-        back = [along((310, 144), t), along((376, 144), t), along((376, 156), t), along((310, 156), t)]
-        cap = [along((310, 144), t), along((320, 144), t), along((312, 184), t), along((302, 184), t)]
-    d.polygon(front, fill=WOOD_D)
-    d.polygon(back, fill=mul(WOOD, 1.18))
-    d.polygon(top, fill=WOOD)
-    d.polygon(cap, fill=mul(WOOD, 1.12))
-    d.line([top[0], top[1]], fill=hx("9a6a44"))
-    d.line([back[0], back[1]], fill=hx("a87a54"))
-
-
-def interior_pews(img):
-    for t in reversed((1.15, 1.38, 1.68, 2.02, 2.42, 2.9)):
-        pew(img, "left", t)
-        pew(img, "right", t)
-    shadow(img, "polygon", [(66, 186), (182, 168), (188, H - 1), (44, H - 1)], 0.22, 8, hx("403838"))
-    shadow(img, "polygon", [(298, 168), (414, 186), (436, H - 1), (292, H - 1)], 0.22, 8, hx("403838"))
-
-
-def altar(img):
-    d = ImageDraw.Draw(img)
-    d.polygon([(194, 146), (286, 146), (294, 164), (186, 164)], fill=hx("4f443d"))
-    d.polygon([(204, 138), (276, 138), (282, 146), (198, 146)], fill=hx("d8d1c0"))
-    d.rectangle([214, 146, 266, 172], fill=hx("a98e72"))
-    d.line([(214, 146), (266, 146)], fill=hx("eadfb8"))
-    d.rectangle([233, 100, 247, 138], fill=hx("836548"))
-    d.rectangle([236, 84, 244, 104], fill=GOLD)
-    d.rectangle([228, 92, 252, 98], fill=GOLD)
-    d.ellipse([180, 126, 188, 136], fill=GOLD)
-    d.ellipse([292, 126, 300, 136], fill=GOLD)
-    d.rectangle([183, 132, 185, 150], fill=hx("e7ddb2"))
-    d.rectangle([295, 132, 297, 150], fill=hx("e7ddb2"))
-    light(img, "ellipse", [172, 126, 194, 154], hx("ffd88a"), 0.28, 6)
-    light(img, "ellipse", [286, 126, 308, 154], hx("ffd88a"), 0.28, 6)
-    light(img, "ellipse", [202, 82, 278, 156], hx("f4d694"), 0.18, 16)
-
-
-def stained_light(img):
-    colors = [
-        (hx("7a3040"), [(86, 148), (126, 138), (162, H - 1), (88, H - 1)]),
-        (hx("385a9a"), [(114, 156), (150, 146), (206, H - 1), (132, H - 1)]),
-        (hx("b48a30"), [(138, 164), (170, 154), (238, H - 1), (166, H - 1)]),
-        (hx("b48a30"), [(242, 154), (312, 146), (350, H - 1), (272, H - 1)]),
-        (hx("305894"), [(274, 144), (332, 136), (392, H - 1), (316, H - 1)]),
-        (hx("803040"), [(306, 136), (352, 128), (430, H - 1), (348, H - 1)])
-    ]
-    for col, pts in colors:
-        light(img, "polygon", pts, col, 0.24, 12)
-    light(img, "ellipse", [176, 182, 310, 266], hx("e4be76"), 0.18, 24)
-
-
-def interior_candles(img):
-    d = ImageDraw.Draw(img)
-    for x, y in ((154, 176), (326, 176), (128, 194), (352, 194)):
-        d.rectangle([x, y, x + 2, y + 10], fill=hx("e6dcc0"))
-        d.point((x + 1, y - 1), fill=hx("fff4a0"))
-        light(img, "ellipse", [x - 6, y - 8, x + 10, y + 12], hx("ffd890"), 0.24, 6)
-
-
-def paint_interior():
-    img = Image.new("RGB", (W, H))
-    interior_shell(img)
-    for t, cols in ((1.04, [hx("6a3058"), hx("2f62a5"), hx("d9a84c")]),
-                    (1.42, [hx("8f3434"), hx("3c5fb0"), hx("d2a250")]),
-                    (2.04, [hx("7b2e52"), hx("3e63a8"), hx("bf9540")])):
-        stained_window(img, "left", t, cols)
-        stained_window(img, "right", t, cols[::-1])
-    altar(img)
-    interior_columns(img)
-    interior_pews(img)
-    interior_candles(img)
-    stained_light(img)
-    shadow(img, "ellipse", [150, 116, 330, 154], 0.18, 14, hx("56504a"))
-    vignette(img, 0.5, tint=(54, 40, 26), blur=44)
-    return img
-
-
-def exterior_bg(img):
-    d = ImageDraw.Draw(img)
-    vgrad(img, (0, 0, W - 1, 184), hx("c9d7e5"), hx("eff1e6"))
-    d.rectangle([0, 184, W - 1, H - 1], fill=hx("7e7468"))
-    d.rectangle([0, 210, W - 1, H - 1], fill=hx("675b50"))
-    for x0, x1, top, col in ((0, 54, 82, hx("958a84")), (24, 76, 72, hx("8a8078")), (404, W - 1, 88, hx("91857f")),
-                             (370, 430, 74, hx("847872"))):
-        d.rectangle([x0, top, x1, 184], fill=col)
-        for y in range(top + 12, 170, 22):
-            d.line([(x0 + 6, y), (x1 - 6, y)], fill=mul(col, 0.72))
-    d.rectangle([0, 184, W - 1, 188], fill=hx("5c544e"))
-    d.line([(0, 232), (W - 1, 232)], fill=hx("8c8277"))
-
-
-def pointed_portal(d, x0, x1, top, bottom, stone, door):
-    d.polygon(pointed_shape(x0, x1, top, bottom), fill=stone)
-    d.polygon(pointed_shape(x0 + 5, x1 - 5, top + 6, bottom - 2, top - 12), fill=door)
-    d.line([(x0 + 5, bottom - 8), (x1 - 5, bottom - 8)], fill=mul(door, 0.7))
-
-
-def tower_openings(d, x0, y0):
-    for yy in (y0 + 16, y0 + 34):
-        d.polygon(pointed_shape(x0 + 8, x0 + 26, yy, yy + 20, yy - 10), fill=hx("38404c"))
-        d.line([(x0 + 17, yy + 2), (x0 + 17, yy + 18)], fill=hx("9ca7b4"))
+    d.line([(x, y - 6), (x, y - 2)], fill=hx("101014"))
+    d.polygon([(x - 5, y - 1), (x + 5, y - 1), (x, y - 6)], fill=hx("16161c"))
+    d.rectangle([x - 4, y, x + 4, y + 11], fill=hx("ffd890"))
+    d.line([(x, y), (x, y + 11)], fill=hx("2a2620"))
+    d.line([(x - 4, y + 5), (x + 4, y + 5)], fill=hx("2a2620"))
+    d.rectangle([x - 4, y, x + 4, y + 11], outline=hx("16161c"))
+    d.polygon([(x - 3, y + 12), (x + 3, y + 12), (x, y + 16)], fill=hx("16161c"))
+    light(img, "ellipse", [x - 30, y - 24, x + 30, y + 36], WARM, 0.32, 14)
+    light(img, "ellipse", [x - 7, y - 3, x + 7, y + 14], hx("fff4c0"), 0.6, 3)
 
 
 def facade(img):
     d = ImageDraw.Draw(img)
-    d.polygon([(156, 74), (324, 74), (352, 196), (128, 196)], fill=STONE)
-    d.polygon([(156, 74), (240, 42), (324, 74)], fill=hx("7b746c"))
-    d.polygon([(104, 92), (156, 92), (168, 214), (92, 214)], fill=hx("858079"))
-    d.polygon([(324, 92), (376, 92), (388, 214), (312, 214)], fill=hx("848079"))
-    d.polygon([(92, 214), (168, 214), (176, 240), (84, 240)], fill=hx("6a625a"))
-    d.polygon([(312, 214), (388, 214), (396, 240), (304, 240)], fill=hx("6a625a"))
-    d.polygon([(96, 92), (132, 12), (164, 92)], fill=hx("767069"))
-    d.polygon([(316, 92), (348, 12), (384, 92)], fill=hx("757068"))
-    d.rectangle([122, 94, 138, 132], fill=hx("68615a"))
-    d.rectangle([342, 94, 358, 132], fill=hx("68615a"))
-    d.polygon([(128, 12), (132, 2), (136, 12)], fill=STONE_L)
-    d.polygon([(344, 12), (348, 2), (352, 12)], fill=STONE_L)
-    d.line([(132, 0), (132, 16)], fill=STONE_L)
-    d.line([(348, 0), (348, 16)], fill=STONE_L)
-    d.line([(126, 8), (138, 8)], fill=STONE_L)
-    d.line([(342, 8), (354, 8)], fill=STONE_L)
-    d.polygon([(72, 188), (104, 136), (110, 140), (88, 206)], fill=hx("8a847d"))
-    d.polygon([(408, 188), (376, 136), (370, 140), (392, 206)], fill=hx("8a847d"))
-    d.polygon([(52, 214), (76, 150), (86, 150), (68, 224)], fill=hx("7c7670"))
-    d.polygon([(428, 214), (404, 150), (394, 150), (412, 224)], fill=hx("7c7670"))
-    d.line([(156, 74), (146, 194)], fill=STONE_D)
-    d.line([(324, 74), (334, 194)], fill=STONE_D)
-    d.line([(240, 42), (240, 196)], fill=STONE_L)
-    for x in (176, 208, 272, 304):
-        d.line([(x, 82), (x, 198)], fill=mul(STONE, 0.75))
-    for y in (108, 132, 156):
-        d.line([(152, y), (328, y)], fill=mul(STONE, 0.78))
-    noise(img, (84, 0, 396, 240), 6, 121)
-    rose_window(d, 240, 112, 30, hx("635d56"), hx("6f85b0"))
-    tower_openings(d, 116, 94)
-    tower_openings(d, 336, 94)
-    pointed_portal(d, 164, 212, 148, 206, hx("5d5852"), hx("3a2b20"))
-    pointed_portal(d, 216, 264, 136, 210, hx("655e58"), hx("3a2b20"))
-    pointed_portal(d, 268, 316, 148, 206, hx("5d5852"), hx("3a2b20"))
-    d.polygon(pointed_shape(204, 276, 84, 142, 62), outline=STONE_L)
-    for x in (162, 214, 266, 318):
-        d.polygon(pointed_shape(x, x + 26, 98, 138, 82), fill=hx("6f87aa"), outline=hx("ccc6ba"))
-    d.rectangle([170, 206, 310, 214], fill=hx("5e5650"))
-    d.polygon([(170, 214), (310, 214), (322, 246), (158, 246)], fill=hx("71675e"))
-    for i in range(7):
-        y = 214 + i * 4
-        d.line([(170 - i * 2, y), (310 + i * 2, y)], fill=hx("8f8376"))
-    light(img, "ellipse", [184, 78, 298, 150], hx("f5efdf"), 0.12, 18)
+    stone(img, [[(150, 0), (330, 0), (330, PORCH), (150, PORCH)]], STONE, 31)
+    # soot streaks running down from every ledge
+    rnd = random.Random(44)
+    for _ in range(46):
+        x = rnd.randint(60, 420)
+        y = rnd.choice((44, 62, 118, 124, 186)) + rnd.randint(-2, 2)
+        shadow(img, "rect", [x, y, x + rnd.randint(2, 6), y + rnd.randint(14, 50)], 0.22, 2, hx("20202a"))
+    # rose window in a pointed surround above a gallery string course
+    d.polygon(arch_poly(206, 274, 40, 62, 0.75), fill=mul(STONE, 0.78))
+    d.line(arch_curve(205, 275, 40, 0.75), fill=STONE_L, width=2)
+    d.line([(205, 40), (205, 62)], fill=STONE_L)
+    d.line([(274, 40), (274, 62)], fill=STONE_D)
+    rose_window(img, 240, 34, 23)
+    d.rectangle([150, 62, 330, 65], fill=STONE_L)
+    d.line([(150, 66), (330, 66)], fill=hx("1c1c26"))
+    for x in range(156, 326, 10):
+        if 178 < x < 298:
+            continue
+        d.polygon(arch_poly(x, x + 7, 72, 82, 0.7, 4), fill=hx("2a2b36"))
+    for x0 in (156, 300):
+        d.polygon(arch_poly(x0, x0 + 24, 20, 56, 0.7), fill=mul(STONE, 0.8))
+        d.polygon(arch_poly(x0 + 4, x0 + 20, 24, 54, 0.75), fill=hx("16181f"))
+        d.line([(x0 + 12, 22), (x0 + 12, 54)], fill=mul(STONE, 0.9))
+    portal(img)
+    statue_niche(img, 160, 178, 1)
+    statue_niche(img, 302, 320, 2)
+    lantern(img, 178, 128)
+    lantern(img, 302, 128)
+    d.rectangle([150, 186, 330, PORCH], fill=mul(STONE, 0.85))
+    d.line([(150, 186), (184, 186)], fill=STONE_L)
+    d.line([(296, 186), (330, 186)], fill=STONE_L)
+    for (x0, x1), seed, right in ((TOWERS[0], 71, False), (TOWERS[1], 73, True)):
+        tower(img, x0, x1, seed, right)
 
 
-def street_details(img):
+def steps(img):
     d = ImageDraw.Draw(img)
-    d.rectangle([0, 246, W - 1, H - 1], fill=hx("5e5349"))
-    d.line([(0, 246), (W - 1, 246)], fill=hx("988c7e"))
-    for x in range(0, W, 34):
-        d.line([(x, 258), (x + 16, 258)], fill=hx("86796d"))
-    shadow(img, "rect", [94, 206, 388, H - 1], 0.18, 10, hx("4c4743"))
+    d.rectangle([60, PORCH, 420, PORCH + 3], fill=hx("6e6c72"))
+    n = 6
+    for i in range(n):
+        y0 = PORCH + 3 + i * (STEP_BOTTOM - PORCH - 3) / n
+        y1 = PORCH + 3 + (i + 1) * (STEP_BOTTOM - PORCH - 3) / n
+        x0, x1 = 84 - i * 1.5, 396 + i * 1.5
+        d.rectangle([x0, y0, x1, y0 + 1], fill=hx("7a7880"))
+        d.rectangle([x0, y0 + 2, x1, y1], fill=hx("3c3c46"))
+        d.line([(x0, y1 - 1), (x1, y1 - 1)], fill=hx("26262e"))
+    noise(img, (60, PORCH, 420, STEP_BOTTOM), 6, 9)
+    # cheek walls with iron lamp standards
+    for x0, x1 in ((58, 86), (394, 422)):
+        stone(img, [[(x0, 182), (x1, 182), (x1, STEP_BOTTOM), (x0, STEP_BOTTOM)]], mul(STONE, 0.95), x0, course=7)
+        d.rectangle([x0 - 2, 179, x1 + 2, 183], fill=STONE_L)
+        d.line([(x0 - 2, 184), (x1 + 2, 184)], fill=STONE_D)
+        cx = (x0 + x1) // 2
+        d.rectangle([cx - 4, 172, cx + 4, 179], fill=hx("16161c"))
+        d.rectangle([cx - 1, 120, cx + 1, 172], fill=hx("1a1a20"))
+        d.line([(cx - 1, 120), (cx - 1, 172)], fill=hx("3a3a46"))
+        for y in (140, 160):
+            d.rectangle([cx - 2, y, cx + 2, y + 2], fill=hx("16161c"))
+        d.line([(cx - 8, 116), (cx + 8, 116)], fill=hx("16161c"))
+        for gx in (cx - 7, cx + 7):
+            d.ellipse([gx - 4, 106, gx + 4, 116], fill=hx("fff0c0"))
+            light(img, "ellipse", [gx - 24, 88, gx + 24, 134], WARM, 0.35, 12)
+            d.line([(gx, 103), (gx, 106)], fill=hx("16161c"))
+        d.ellipse([cx - 3, 100, cx + 3, 104], fill=hx("16161c"))
+        light(img, "ellipse", [cx - 60, 176, cx + 60, 262], WARM, 0.18, 18)
+    light(img, "polygon", [(212, PORCH), (268, PORCH), (300, STEP_BOTTOM), (180, STEP_BOTTOM)], WARM, 0.22, 10)
+
+
+def pavement(img):
+    d = ImageDraw.Draw(img)
+    top, curb = STEP_BOTTOM, 262
+    # reflections of everything above in the wet paving
+    src = img.crop((0, top - (curb - top) * 3, W, top)).resize((W, curb - top)).transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    d.rectangle([0, top, W, curb], fill=hx("1c1e28"))
+    for y in range(top, curb, 9):
+        d.line([(0, y), (W, y)], fill=hx("2c2e3a"))
+    for i in range(-20, 21):
+        x = 240 + i * 26
+        d.line([(x + (x - 240) * 0.0, top), (x + (x - 240) * 0.25, curb)], fill=hx("2a2c38"))
+    refl = Image.blend(img.crop((0, top, W, curb)), src, 0.42)
+    img.paste(refl, (0, top))
+    rnd = random.Random(3)
+    for _ in range(9):
+        x, y = rnd.randint(0, W), rnd.randint(top + 4, curb - 4)
+        shadow(img, "ellipse", [x - 26, y - 3, x + 26, y + 3], 0.25, 2, hx("8090c0"))
+    for x in (72, 408, 178, 302, 240):
+        light(img, "rect", [x - 3, top + 2, x + 3, curb], WARM, 0.25, 3)
+    d.rectangle([0, curb, W, curb + 2], fill=hx("6a6a72"))
+    d.rectangle([0, curb + 3, W, H], fill=hx("101218"))
+    for x in range(0, W, 7):
+        d.point((x, curb + 5), fill=hx("2a2c38"))
+    light(img, "rect", [0, curb + 3, W, H], hx("4a5a8a"), 0.15, 2)
+
+
+def shade(img, y0, y1, f0, f1, tint=(0, 0, 0), keep=170):
+    """Darken rows y0..y1 by a factor ramping f0 -> f1, sparing glowing pixels brighter than `keep`."""
+    px = img.load()
+    for y in range(max(0, y0), min(H, y1)):
+        t = (y - y0) / max(1, y1 - y0)
+        f = f0 + (f1 - f0) * t
+        for x in range(W):
+            r, g, b = px[x, y]
+            if max(r, g, b) > keep and (r > b + 30):
+                continue
+            px[x, y] = (int(r * f + tint[0] * (1 - f)), int(g * f + tint[1] * (1 - f)),
+                        int(b * f + tint[2] * (1 - f)))
 
 
 def paint_exterior():
     img = Image.new("RGB", (W, H))
-    exterior_bg(img)
+    sky_and_street_back(img)
     facade(img)
-    street_details(img)
-    vignette(img, 0.38, tint=(26, 28, 34), blur=38)
+    steps(img)
+    pavement(img)
+    shade(img, 0, 150, 0.55, 1.0, tint=(14, 16, 34))
+    shade(img, 150, 200, 1.0, 0.92, tint=(14, 16, 34))
+    light(img, "ellipse", [0, -60, W, 130], hx("3a3a70"), 0.12, 40)
+    rain(img, 77, 900)
+    vignette(img, 0.45, tint=(20, 22, 44), blur=40)
+    return img
+
+
+# ---------------------------------------------------------------- interior: down the nave to the altar
+
+HY, F, E = 112, 240.0, 3.5  # horizon, focal length (px), eye height (m): 1 m at the near floor edge ~ 43 px
+COLS = (5.2, 10.6, 16.0, 21.4, 26.8)
+NAVE_X, AISLE_X, APSE_Z = 5.0, 8.6, 29.0
+ARC_SPRING, ARC_APEX, V_SPRING = 4.3, 7.0, 9.6
+RAIL_Z, STEP_Z, ALTAR_Z, REREDOS_Z = 22.6, 23.2, 26.0, 27.3
+I_STONE = hx("6c6660")
+I_STONE_D = hx("36302e")
+I_STONE_L = hx("a49a8a")
+OAK = hx("4a2c1a")
+OAK_D = hx("24140c")
+OAK_L = hx("8a5a34")
+
+
+def P(X, Y, Z):
+    s = F / Z
+    return (240 + X * s, HY + (E - Y) * s)
+
+
+def wall_pt(x):
+    return lambda z, y: P(x, y, z)
+
+
+def quad_blocks(d, fn, u0, u1, v0, v1, du, dv, color, seed, mortar=0.72):
+    rnd = random.Random(seed)
+    v, row = v0, 0
+    while v < v1 - 1e-6:
+        vb = min(v1, v + dv)
+        u = u0 - (du / 2 if row % 2 else 0)
+        while u < u1 - 1e-6:
+            ua, ub = max(u0, u), min(u1, u + du)
+            c = color(rnd, row, u)
+            q = [fn(ua, v), fn(ub, v), fn(ub, vb), fn(ua, vb)]
+            big = abs(q[2][1] - q[1][1]) > 3 and abs(q[1][0] - q[0][0]) + abs(q[1][1] - q[0][1]) > 4
+            d.polygon(q, fill=c, outline=mul(c, mortar) if big else None)
+            u += du
+        v, row = vb, row + 1
+
+
+def stone_color(base, var=0.08):
+    return lambda rnd, row, u: mul(base, 1 + rnd.uniform(-var, var))
+
+
+def vault(img):
+    d = ImageDraw.Draw(img)
+    prof = arch_curve(-NAVE_X, NAVE_X, V_SPRING, 0.62, 16, up=1, sq=0.45)
+    bays = list(zip(COLS[:-1], COLS[1:])) + [(COLS[-1], APSE_Z)]
+    for z0, z1 in reversed(bays):
+        steps_ = 10
+        for j in range(steps_):
+            za, zb = z0 + (z1 - z0) * j / steps_, z0 + (z1 - z0) * (j + 1) / steps_
+            t = (j + 0.5) / steps_
+            for i in range(len(prof) - 1):
+                (xa, ya), (xb, yb) = prof[i], prof[i + 1]
+                lateral = abs((xa + xb) / 2) / NAVE_X > abs(2 * t - 1)
+                h = ((ya + yb) / 2 - V_SPRING) / 2.7
+                col = mix(hx("7a7064"), hx("4a4446"), h * 0.8)
+                col = mul(col, 0.82 if lateral else 1.0)
+                if (xa + xb) / 2 < 0 and lateral:
+                    col = mul(col, 0.9)
+                d.polygon([P(xa, ya, za), P(xb, yb, za), P(xb, yb, zb), P(xa, ya, zb)], fill=col)
+    rib = hx("b0a490")
+    rib_d = hx("2e2826")
+    for z0, z1 in bays:
+        n = 24
+        diag1 = [P(-NAVE_X + 2 * NAVE_X * t / n, _arch_y(prof, -NAVE_X + 2 * NAVE_X * t / n), z0 + (z1 - z0) * t / n)
+                 for t in range(n + 1)]
+        diag2 = [P(NAVE_X - 2 * NAVE_X * t / n, _arch_y(prof, NAVE_X - 2 * NAVE_X * t / n), z0 + (z1 - z0) * t / n)
+                 for t in range(n + 1)]
+        w = max(1, int(0.22 * F / ((z0 + z1) / 2)))
+        for line in (diag1, diag2):
+            d.line([(x, y + 1) for x, y in line], fill=rib_d, width=w)
+            d.line(line, fill=rib, width=w)
+        d.line([P(0, _arch_y(prof, 0), z0), P(0, _arch_y(prof, 0), z1)], fill=rib, width=max(1, w - 1))
+        boss = P(0, _arch_y(prof, 0), (z0 + z1) / 2)
+        r = max(1, w)
+        d.ellipse([boss[0] - r - 1, boss[1] - r, boss[0] + r + 1, boss[1] + r], fill=hx("c8a050"))
+    for z in COLS:
+        w = max(1, int(0.32 * F / z))
+        line = [P(x, y, z) for x, y in prof]
+        d.line([(x, y + w) for x, y in line], fill=rib_d, width=w)
+        d.line(line, fill=rib, width=w)
+
+
+def _arch_y(prof, x):
+    for (xa, ya), (xb, yb) in zip(prof, prof[1:]):
+        if min(xa, xb) <= x <= max(xa, xb) and xa != xb:
+            return ya + (yb - ya) * (x - xa) / (xb - xa)
+    return prof[len(prof) // 2][1]
+
+
+def apse(img):
+    d = ImageDraw.Draw(img)
+    prof = arch_curve(-NAVE_X, NAVE_X, V_SPRING, 0.62, 16, up=1, sq=0.45)
+    poly = [P(-NAVE_X, 0.45, APSE_Z)] + [P(x, y, APSE_Z) for x, y in prof] + [P(NAVE_X, 0.45, APSE_Z)]
+    d.polygon(poly, fill=hx("4a4240"))
+    quad_blocks(d, lambda x, y: P(x, y, APSE_Z), -NAVE_X, NAVE_X, 0.45, V_SPRING, 0.9, 0.5,
+                stone_color(hx("5a524c")), 5)
+    rnd = random.Random(21)
+    for x0, cols in ((-3.2, [hx("2a4fa8"), hx("b0283a"), hx("3a2a8a")]), (-0.8, [hx("d9a640"), hx("b0283a"), hx("2a4fa8")]),
+                     (1.6, [hx("2a4fa8"), hx("3d8a5a"), hx("b0283a")])):
+        x1 = x0 + 1.6
+        outline = [P(x, y, APSE_Z) for x, y in arch_poly(x0, x1, 9.0, 4.2, 0.7, 8)[1:-1]]
+        poly = [P(x0, 4.2, APSE_Z)] + outline + [P(x1, 4.2, APSE_Z)]
+        d.polygon(poly, fill=hx("101018"))
+        layer = img.copy()
+        glass_cells(ImageDraw.Draw(layer), lambda u, v: P(u, v, APSE_Z), x0, x1, 4.2, 10.2, 2, 8, cols, rnd,
+                    hx("101018"))
+        img.paste(layer, (0, 0), mask_of(img.size, [poly]))
+        d = ImageDraw.Draw(img)
+        d.line(outline, fill=hx("8a8070"))
+        light(img, "polygon", poly, hx("8098e0"), 0.25, 4)
+
+
+def side_aisle(img, side):
+    d = ImageDraw.Draw(img)
+    s = side
+    X = s * AISLE_X
+    z0, z1 = COLS[0], COLS[-1]
+    # ceiling of the aisle, its outer wall and the floor beyond the arcade
+    d.polygon([P(s * NAVE_X, 6.4, z0), P(X, 6.4, z0), P(X, 6.4, z1), P(s * NAVE_X, 6.4, z1)], fill=hx("24201e"))
+    wall = [P(X, 0, z0), P(X, 6.4, z0), P(X, 6.4, z1), P(X, 0, z1)]
+    d.polygon(wall, fill=hx("4a4440"))
+    quad_blocks(d, wall_pt(X), z0, z1, 0, 6.4, 0.9, 0.45, stone_color(hx("4e4842")), 30 + s)
+    cols = [hx("b0283a"), hx("c8402a"), hx("d9a640"), hx("7a2040"), hx("2a4fa8")] if s < 0 else \
+        [hx("2a4fa8"), hx("1e3a8a"), hx("4a78c8"), hx("d9a640"), hx("7a3a9a")]
+    rnd = random.Random(40 + s)
+    for za, zb in zip(COLS[:-1], COLS[1:]):
+        wa, wb = za + 1.0, zb - 1.0
+        d.line([P(X, 0, za), P(X, 6.4, za)], fill=hx("2a2420"), width=max(1, int(0.5 * F / za)))
+        outline = arch_curve(wa, wb, 4.6, 0.7, 10, up=1)
+        poly = [P(X, 1.5, wa)] + [P(X, y, z) for z, y in outline] + [P(X, 1.5, wb)]
+        d.polygon(poly, fill=hx("2a2228"))
+        lead = hx("140e12")
+        m = mask_of(img.size, [poly])
+        layer = img.copy()
+        ld = ImageDraw.Draw(layer)
+        glass_cells(ld, lambda u, v: P(X, v, u), wa, wb, 1.5, 6.4, 4, 12, cols, rnd, lead)
+        img.paste(layer, (0, 0), m)
+        d = ImageDraw.Draw(img)
+        mid = (wa + wb) / 2
+        d.line([P(X, 1.5, mid), P(X, 4.6, mid)], fill=hx("6a6058"), width=max(1, int(0.14 * F / mid)))
+        d.line(poly + [poly[0]], fill=hx("7a7064"), width=max(1, int(0.12 * F / mid)))
+        d.line([P(X, 1.45, wa - 0.2), P(X, 1.45, wb + 0.2)], fill=hx("8a8070"), width=max(1, int(0.12 * F / mid)))
+        light(img, "polygon", poly, cols[0], 0.35, 3)
+        light(img, "polygon", poly, hx("fff0e0"), 0.12, 2)
+    d.polygon([P(s * NAVE_X, 0, z0), P(X, 0, z0), P(X, 0, z1), P(s * NAVE_X, 0, z1)], fill=hx("2e2826"))
+
+
+def nave_wall(img, side):
+    s = side
+    X = s * NAVE_X
+    z0, z1 = COLS[0], APSE_Z
+    layer = Image.new("RGB", img.size, I_STONE)
+    d = ImageDraw.Draw(layer)
+    quad_blocks(d, wall_pt(X), z0, z1, 0, V_SPRING, 0.9, 0.45, stone_color(hx("6a645c")), 50 + s)
+    holes = []
+    for za, zb in zip(COLS[:-1], COLS[1:]):
+        a, b = za + 0.45, zb - 0.45
+        curve = arch_curve(a, b, ARC_SPRING, 0.62, 16, up=1)
+        holes.append([P(X, 0, a)] + [P(X, y, z) for z, y in curve] + [P(X, 0, b)])
+        # moulded arch orders around the opening
+        for off, col, wd in ((0.35, hx("8a8274"), 0.16), (0.12, hx("3a3432"), 0.1)):
+            c2 = arch_curve(a - off, b + off, ARC_SPRING, 0.62, 16, up=1)
+            d.line([P(X, y, z) for z, y in c2], fill=col, width=max(1, int(wd * F / ((za + zb) / 2))))
+        # triforium: a dark blind arcade
+        for k in range(5):
+            ta = a + (b - a) * k / 5 + 0.12
+            tb = a + (b - a) * (k + 1) / 5 - 0.12
+            tri = [P(X, 7.2, ta)] + [P(X, y, z) for z, y in arch_curve(ta, tb, 7.75, 0.7, 6, up=1)] + [P(X, 7.2, tb)]
+            d.polygon(tri, fill=hx("1c1818"))
+        d.line([P(X, 7.15, a), P(X, 7.15, b)], fill=hx("9a9282"), width=max(1, int(0.1 * F / za)))
+        d.line([P(X, 8.05, a), P(X, 8.05, b)], fill=hx("9a9282"), width=max(1, int(0.1 * F / za)))
+        # clerestory: a pair of glowing lancets per bay
+        rnd = random.Random(int(za * 10) + s)
+        for k in range(2):
+            ca = a + (b - a) * (0.12 + 0.46 * k)
+            cb = ca + (b - a) * 0.3
+            cl = [P(X, 8.2, ca)] + [P(X, y, z) for z, y in arch_curve(ca, cb, 9.1, 0.7, 6, up=1)] + [P(X, 8.2, cb)]
+            d.polygon(cl, fill=hx("101018"))
+            sub = mask_of(img.size, [cl])
+            gl = layer.copy()
+            glass_cells(ImageDraw.Draw(gl), lambda u, v: P(X, v, u), ca, cb, 8.2, 9.9, 2, 4,
+                        [hx("2a4fa8"), hx("b0283a"), hx("d9a640"), hx("3a2a7a")], rnd, hx("101018"))
+            layer.paste(gl, (0, 0), sub)
+    poly = [P(X, 0, z0), P(X, V_SPRING, z0), P(X, V_SPRING, z1), P(X, 0, z1)]
+    img.paste(layer, (0, 0), mask_of(img.size, [poly], holes))
+
+
+def floor(img):
+    d = ImageDraw.Draw(img)
+    marble = (hx("6a625a"), hx("3a3230"))
+
+    def tile(rnd, row, u):
+        c = marble[(row + int(math.floor(u / 0.9 + 100))) % 2]
+        return mul(c, 1 + rnd.uniform(-0.06, 0.06))
+
+    fn = lambda x, z: P(x, 0, z)
+    quad_blocks(d, fn, -AISLE_X, AISLE_X, 4.2, STEP_Z, 0.9, 0.9, tile, 3, mortar=0.85)
+    # crimson runner down the central aisle
+    d.polygon([P(-0.75, 0, 4.0), P(0.75, 0, 4.0), P(0.75, 0, STEP_Z), P(-0.75, 0, STEP_Z)], fill=hx("6a1418"))
+    for x in (-0.62, 0.62):
+        d.line([P(x, 0, 4.0), P(x, 0, STEP_Z)], fill=hx("b08a3a"))
+    for x in (-0.75, 0.75):
+        d.line([P(x, 0, 4.0), P(x, 0, STEP_Z)], fill=hx("2a0a0c"))
+    noise(img, (180, 140, 300, H), 5, 7)
+    # sanctuary: two steps up to a pale marble floor
+    for z, y0, y1 in ((STEP_Z, 0, 0.22), (STEP_Z + 0.35, 0.22, 0.45)):
+        d.polygon([P(-NAVE_X, y0, z), P(NAVE_X, y0, z), P(NAVE_X, y1, z), P(-NAVE_X, y1, z)], fill=hx("8a8274"))
+        d.polygon([P(-NAVE_X, y1, z), P(NAVE_X, y1, z), P(NAVE_X, y1, z + 0.35), P(-NAVE_X, y1, z + 0.35)],
+                  fill=hx("c8beaa"))
+    quad_blocks(d, lambda x, z: P(x, 0.45, z), -NAVE_X, NAVE_X, STEP_Z + 0.7, APSE_Z, 1.0, 1.0,
+                lambda rnd, row, u: (hx("b4ab98"), hx("8a3a30"))[(row + int(u + 100)) % 2], 8, mortar=0.9)
+
+
+def column(img, X, Z, near=False):
+    d = ImageDraw.Draw(img)
+    s = F / Z
+    r = 0.45
+    xa, xb = 240 + (X - r) * s, 240 + (X + r) * s
+    yb = HY + E * s
+    yc = HY + (E - ARC_SPRING) * s
+    top = HY + (E - V_SPRING) * s
+    # clustered shafts: a core with four attached colonnettes, lit warmly from the sanctuary side
+    toward = -1 if X > 0 else 1
+    n = 7
+    for i in range(n):
+        t = (i + 0.5) / n
+        x0, x1 = xa + (xb - xa) * i / n, xa + (xb - xa) * (i + 1) / n
+        lit = t if toward > 0 else 1 - t
+        shade = 0.45 + 0.75 * lit * (1 - abs(2 * t - 1) * 0.3)
+        col = mul(hx("7a7268"), shade)
+        if i % 2 == 0:
+            col = mul(col, 1.08)
+        d.rectangle([x0, yc, x1, yb], fill=col)
+        if i % 2 == 0 and x1 - x0 >= 2:
+            d.line([(x0, yc), (x0, yb)], fill=mul(col, 0.7))
+    # vaulting shaft carried up the nave wall to the springing of the ribs
+    vx0, vx1 = 240 + (X + toward * r * 0.2 - 0.14) * s, 240 + (X + toward * r * 0.2 + 0.14) * s
+    d.rectangle([vx0, top, vx1, yc], fill=hx("8a8274"))
+    d.line([(vx0, top), (vx0, yc)], fill=hx("4a4440") if toward > 0 else hx("b8ae9c"))
+    d.rectangle([vx0 - 0.1 * s, top - 0.2 * s, vx1 + 0.1 * s, top], fill=hx("c0b49c"))
+    # foliage capital and abacus
+    d.rectangle([xa - 0.12 * s, yc - 0.12 * s, xb + 0.12 * s, yc + 0.35 * s], fill=hx("8a8070"))
+    rnd = random.Random(int(Z * 7))
+    for _ in range(int(s * 1.2)):
+        px = rnd.uniform(xa - 0.1 * s, xb + 0.1 * s)
+        py = rnd.uniform(yc, yc + 0.33 * s)
+        d.point((px, py), fill=rnd.choice((hx("b8aa90"), hx("5a5248"), hx("c8a860"))))
+    d.rectangle([xa - 0.18 * s, yc - 0.2 * s, xb + 0.18 * s, yc - 0.05 * s], fill=hx("b8ae9c"))
+    # moulded plinth
+    if not near:
+        d.rectangle([xa - 0.15 * s, yb - 0.55 * s, xb + 0.15 * s, yb], fill=hx("5a524a"))
+        d.line([(xa - 0.15 * s, yb - 0.55 * s), (xb + 0.15 * s, yb - 0.55 * s)], fill=hx("a49a8a"))
+        d.rectangle([xa - 0.05 * s, yb - 0.75 * s, xb + 0.05 * s, yb - 0.55 * s], fill=hx("6a6258"))
+
+
+def pews(img):
+    d = ImageDraw.Draw(img)
+    rows = []
+    z = 9.8
+    while z < RAIL_Z - 0.8:
+        rows.append(z)
+        z += 0.95
+    for z in reversed(rows):
+        s = F / z
+        for side in (-1, 1):
+            xi, xo = side * 1.0, side * 4.4
+            top, bot = 0.95, 0.05
+            back = [P(xi, top, z), P(xo, top, z), P(xo, bot, z), P(xi, bot, z)]
+            d.polygon(back, fill=OAK)
+            # panelled back
+            if s > 14:
+                for k in range(1, 6):
+                    px = xi + (xo - xi) * k / 6
+                    d.line([P(px, top - 0.12, z), P(px, bot + 0.1, z)], fill=OAK_D)
+            d.line([P(xi, bot + 0.02, z), P(xo, bot + 0.02, z)], fill=OAK_D, width=max(1, int(0.08 * s)))
+            # moulded top rail catching the candlelight
+            d.polygon([P(xi, top + 0.04, z), P(xo, top + 0.04, z), P(xo, top + 0.04, z + 0.12),
+                       P(xi, top + 0.04, z + 0.12)], fill=OAK_L)
+            d.line([P(xi, top, z), P(xo, top, z)], fill=hx("b07a48"))
+            # aisle-facing pew end with a carved poppy-head
+            end = [P(xi, 0, z - 0.05), P(xi, 1.0, z - 0.05), P(xi, 1.12, z + 0.25), P(xi, 1.0, z + 0.6),
+                   P(xi, 0, z + 0.6)]
+            d.polygon(end, fill=mul(OAK, 1.25))
+            d.line([end[0], end[1], end[2], end[3]], fill=OAK_L)
+            if s > 16:
+                c = P(xi, 0.6, z + 0.27)
+                d.point(c, fill=OAK_D)
+    # deep shadow between rows and under the benches
+    shadow(img, "polygon", [P(-4.6, 0, 9.6), P(-1.0, 0, 9.6), P(-1.0, 0, RAIL_Z), P(-4.6, 0, RAIL_Z)], 0.35, 3)
+    shadow(img, "polygon", [P(1.0, 0, 9.6), P(4.6, 0, 9.6), P(4.6, 0, RAIL_Z), P(1.0, 0, RAIL_Z)], 0.35, 3)
+
+
+def sanctuary(img):
+    d = ImageDraw.Draw(img)
+    # reredos: a gilded Gothic screen with a great crucifix
+    z = REREDOS_Z
+    rx = 3.1
+    d.polygon([P(-rx, 0.45, z), P(-rx, 5.0, z), P(rx, 5.0, z), P(rx, 0.45, z)], fill=hx("6a5030"))
+    for k in range(7):
+        x0 = -rx + 2 * rx * k / 7 + 0.08
+        x1 = -rx + 2 * rx * (k + 1) / 7 - 0.08
+        tall = k == 3
+        top = 7.6 if tall else (6.0 if k in (2, 4) else 5.4)
+        d.polygon([P(x0, 1.6, z), P(x0, top - 0.8, z), P((x0 + x1) / 2, top, z), P(x1, top - 0.8, z), P(x1, 1.6, z)],
+                  fill=hx("8a6a34") if not tall else hx("4a2a20"))
+        d.line([P(x0, top - 0.8, z), P((x0 + x1) / 2, top, z), P(x1, top - 0.8, z)], fill=hx("e8c870"))
+        d.line([P((x0 + x1) / 2, top, z), P((x0 + x1) / 2, top + 0.5, z)], fill=hx("e8c870"))
+        if not tall:
+            n = P((x0 + x1) / 2, 2.0, z)
+            m = P((x0 + x1) / 2, 3.6, z)
+            d.polygon(arch_poly(n[0] - 2, n[0] + 2, m[1], n[1], 0.7, 4), fill=hx("2a1a14"))
+            d.line([(n[0], m[1] + 1), (n[0], n[1] - 1)], fill=hx("e0d0b0"))
+    for x in (-rx, rx):
+        d.line([P(x, 0.45, z), P(x, 6.8, z)], fill=hx("e8c870"))
+        pa = P(x, 6.8, z)
+        d.polygon([(pa[0] - 2, pa[1]), (pa[0], pa[1] - 8), (pa[0] + 2, pa[1])], fill=hx("c8a050"))
+    d.line([P(-rx, 1.6, z), P(rx, 1.6, z)], fill=hx("e8c870"))
+    cx, cy0 = P(0, 2.3, z)
+    _, cy1 = P(0, 6.4, z)
+    _, ca = P(0, 5.5, z)
+    hw = 0.8 * F / z
+    d.rectangle([cx - 1, cy1, cx + 1, cy0], fill=hx("3a2014"))
+    d.rectangle([cx - hw, ca - 1, cx + hw, ca + 1], fill=hx("3a2014"))
+    d.line([(cx, ca + 1), (cx, ca + 10)], fill=hx("e8d8c0"))
+    d.line([(cx - hw + 2, ca), (cx + hw - 2, ca)], fill=hx("e8d8c0"))
+    d.point((cx, ca - 2), fill=hx("f0e0c8"))
+    light(img, "polygon", [P(-rx, 0.45, z), P(-rx, 7.6, z), P(rx, 7.6, z), P(rx, 0.45, z)], hx("ffc060"), 0.28, 6)
+    # the high altar: white linen over marble, six tall candles
+    za = ALTAR_Z
+    ax = 1.7
+    d.polygon([P(-ax, 0.45, za), P(-ax, 1.45, za), P(ax, 1.45, za), P(ax, 0.45, za)], fill=hx("d8d0bc"))
+    d.polygon([P(-ax, 1.45, za), P(ax, 1.45, za), P(ax, 1.45, za + 0.8), P(-ax, 1.45, za + 0.8)], fill=hx("f4eedc"))
+    d.polygon([P(-ax, 1.45, za), P(ax, 1.45, za), P(ax, 1.15, za), P(-ax, 1.15, za)], fill=hx("f8f4e8"))
+    d.line([P(-0.5, 1.12, za), P(0.5, 1.12, za)], fill=hx("c8a040"))
+    for k in range(3):
+        x = -1.2 + 1.2 * k
+        p0, p1 = P(x - 0.25, 0.6, za), P(x + 0.25, 1.05, za)
+        d.rectangle([p0[0], p1[1], p1[0], p0[1]], fill=hx("b8ae98"), outline=hx("8a8070"))
+    d.rectangle([P(-0.3, 1.45, za + 0.4)[0], P(0, 2.1, za + 0.4)[1], P(0.3, 1.45, za + 0.4)[0],
+                 P(0, 1.45, za + 0.4)[1]], fill=hx("d8b050"))
+    for x in (-1.5, -1.0, -0.55, 0.55, 1.0, 1.5):
+        b = P(x, 1.45, za + 0.5)
+        t = P(x, 2.6 - abs(x) * 0.25, za + 0.5)
+        d.line([b, (b[0], t[1])], fill=hx("f0e8d0"))
+        d.point((b[0], t[1] - 1), fill=hx("fff8c0"))
+        light(img, "ellipse", [b[0] - 4, t[1] - 5, b[0] + 4, t[1] + 3], hx("ffd070"), 0.7, 2)
+    # communion rail of white marble
+    zr = RAIL_Z
+    for side in (-1, 1):
+        x0, x1 = side * 0.9, side * NAVE_X
+        d.polygon([P(x0, 0, zr), P(x0, 0.85, zr), P(x1, 0.85, zr), P(x1, 0, zr)], fill=hx("a49a88"))
+        k = 0.3
+        x = x0
+        while abs(x) < NAVE_X - 0.1:
+            p0, p1 = P(x, 0.1, zr), P(x, 0.75, zr)
+            d.line([p0, p1], fill=hx("3e3632"))
+            x += side * k
+        d.polygon([P(x0, 0.85, zr), P(x1, 0.85, zr), P(x1, 0.95, zr + 0.2), P(x0, 0.95, zr + 0.2)], fill=hx("e0d8c8"))
+    # sanctuary lamp burning red
+    lp = P(1.4, 4.4, 24.5)
+    d.line([P(1.4, 9, 24.5), lp], fill=hx("6a5030"))
+    d.ellipse([lp[0] - 1, lp[1], lp[0] + 2, lp[1] + 3], fill=hx("ff4030"))
+    light(img, "ellipse", [lp[0] - 8, lp[1] - 6, lp[0] + 9, lp[1] + 10], hx("ff3020"), 0.4, 4)
+
+
+def confessional(img):
+    d = ImageDraw.Draw(img)
+    z0, z1 = 7.9, 8.9
+    x0, x1 = 5.3, 7.9
+    h = 2.75
+    side = [P(x0, 0, z0), P(x0, h, z0), P(x0, h, z1), P(x0, 0, z1)]
+    d.polygon(side, fill=OAK_D)
+    for k in (0.33, 0.66):
+        zz = z0 + (z1 - z0) * k
+        d.line([P(x0, 0.1, zz), P(x0, h - 0.2, zz)], fill=hx("140a06"))
+    d.polygon([P(x0, h, z0), P(x1, h, z0), P(x1, h, z1), P(x0, h, z1)], fill=hx("2a1a10"))
+    front = [P(x0, 0, z0), P(x0, h, z0), P(x1, h, z0), P(x1, 0, z0)]
+    d.polygon(front, fill=OAK)
+    s = F / z0
+    w = (x1 - x0) / 3
+    for k in range(3):
+        a, b = x0 + w * k + 0.1, x0 + w * (k + 1) - 0.1
+        top = 2.25 if k == 1 else 2.05
+        pa, pb = P(a, 0.1, z0), P(b, top, z0)
+        curve = [P(x, y, z0) for x, y in arch_curve(a, b, top - 0.35, 0.7, 8, up=1)]
+        opening = [P(a, 0.1, z0)] + curve + [P(b, 0.1, z0)]
+        if k == 1:
+            d.polygon(opening, fill=hx("3a2416"))
+            for yy in (0.4, 1.2):
+                d.rectangle([P(a + 0.12, yy + 0.6, z0)[0], P(a, yy + 0.6, z0)[1], P(b - 0.12, yy, z0)[0],
+                             P(b, yy, z0)[1]], outline=hx("24140c"))
+            g = P((a + b) / 2, 1.75, z0)
+            d.rectangle([g[0] - 4, g[1] - 5, g[0] + 4, g[1] + 3], fill=hx("140a06"))
+            for gx in range(int(g[0]) - 3, int(g[0]) + 4, 2):
+                d.line([(gx, g[1] - 4), (gx, g[1] + 2)], fill=hx("8a6a40"))
+            d.point((g[0] + 5, P(0, 1.0, z0)[1]), fill=hx("c8a050"))
+        else:
+            d.polygon(opening, fill=hx("4a0e14"))
+            for i in range(1, 5):
+                xx = a + (b - a) * i / 5
+                d.line([P(xx, 0.15, z0), P(xx, top - 0.4, z0)], fill=hx("300810"))
+                d.line([P(xx + 0.05, 0.15, z0), P(xx + 0.05, top - 0.45, z0)], fill=hx("6a1a22"))
+            d.line([P(a, top - 0.35, z0), P(b, top - 0.35, z0)], fill=hx("c8a050"))
+        d.line(curve, fill=OAK_L)
+    for x in (x0, x0 + w, x0 + 2 * w, x1):
+        d.line([P(x, 0, z0), P(x, h, z0)], fill=hx("24140c"), width=max(1, int(0.08 * s)))
+    # carved cornice with Gothic cresting and a cross
+    d.polygon([P(x0 - 0.05, h, z0), P(x1 + 0.05, h, z0), P(x1 + 0.05, h - 0.18, z0), P(x0 - 0.05, h - 0.18, z0)],
+              fill=OAK_L)
+    for i in range(14):
+        xx = x0 + (x1 - x0) * (i + 0.5) / 14
+        b = P(xx, h, z0)
+        d.line([b, (b[0], b[1] - 3)], fill=OAK_L)
+    cx = P((x0 + x1) / 2, h, z0)
+    d.line([cx, (cx[0], cx[1] - 12)], fill=hx("c8a050"), width=2)
+    d.line([(cx[0] - 4, cx[1] - 8), (cx[0] + 4, cx[1] - 8)], fill=hx("c8a050"), width=2)
+    light(img, "polygon", front, hx("ff9a50"), 0.12, 8)
+
+
+def votives(img):
+    d = ImageDraw.Draw(img)
+    # Our Lady on a pedestal, the votive rack burning at her feet
+    sx, sz = -6.1, 10.0
+    s = F / sz
+    p0 = P(sx - 0.45, 1.25, sz)
+    p1 = P(sx + 0.45, 0, sz)
+    d.rectangle([p0[0], p0[1], p1[0], p1[1]], fill=hx("8a8274"))
+    d.rectangle([p0[0] - 0.1 * s, p0[1] - 0.1 * s, p1[0] + 0.1 * s, p0[1] + 0.05 * s], fill=hx("b8ae9c"))
+    head = P(sx, 2.9, sz)
+    feet = P(sx, 1.3, sz)
+    hw = 0.3 * s
+    d.polygon([(head[0] - hw * 0.6, head[1] + 0.25 * s), (head[0] + hw * 0.6, head[1] + 0.25 * s), (feet[0] + hw, feet[1]),
+               (feet[0] - hw, feet[1])], fill=hx("3a5a9a"))
+    d.polygon([(head[0] - hw * 0.35, head[1] + 0.4 * s), (head[0] + hw * 0.35, head[1] + 0.4 * s),
+               (feet[0] + hw * 0.4, feet[1]), (feet[0] - hw * 0.4, feet[1])], fill=hx("e8e0d0"))
+    d.ellipse([head[0] - 0.13 * s, head[1] - 0.05 * s, head[0] + 0.13 * s, head[1] + 0.28 * s], fill=hx("e8d0b8"))
+    d.arc([head[0] - 0.24 * s, head[1] - 0.2 * s, head[0] + 0.24 * s, head[1] + 0.28 * s], 180, 360, fill=hx("e8c860"))
+    d.polygon([(head[0] - 3, head[1] + 0.55 * s), (head[0] + 3, head[1] + 0.55 * s), (head[0], head[1] + 0.75 * s)],
+              fill=hx("e8d0b8"))
+    # three-tier iron rack of red glass votives
+    rz = 8.9
+    xa, xb = -7.0, -5.0
+    rs = F / rz
+    for tier, (y, dz) in enumerate(((0.55, 0.3), (0.72, 0.15), (0.89, 0.0))):
+        z = rz + dz
+        a, b = P(xa, y, z), P(xb, y, z)
+        d.rectangle([a[0], a[1], b[0], a[1] + 0.06 * rs], fill=hx("1a1414"))
+        n = 9
+        rnd = random.Random(tier)
+        for k in range(n):
+            x = xa + (xb - xa) * (k + 0.5) / n
+            c = P(x, y + 0.06, z)
+            lit = rnd.random() < 0.7
+            d.rectangle([c[0] - 1, c[1] - 2, c[0] + 1, c[1]], fill=hx("c02028") if lit else hx("5a1018"))
+            if lit:
+                d.point((c[0], c[1] - 3), fill=hx("fff0a0"))
+    for x in (xa, xb):
+        d.line([P(x, 0, rz), P(x, 0.92, rz)], fill=hx("1a1414"))
+    d.line([P(xa - 0.1, 0.92, rz), P(xb + 0.1, 0.92, rz)], fill=hx("2a2220"))
+    g0, g1 = P(xa, 1.0, rz), P(xb, 0.5, rz)
+    light(img, "ellipse", [g0[0] - 18, g0[1] - 30, g1[0] + 18, g1[1] + 14], hx("ffa040"), 0.45, 10)
+    light(img, "ellipse", [head[0] - 22, head[1] - 10, head[0] + 22, feet[1] + 30], hx("ffb060"), 0.22, 10)
+    stand = P(-4.3, 0, 9.2)
+    top = P(-4.3, 1.1, 9.2)
+    d.line([stand, top], fill=hx("2a2220"))
+    d.rectangle([top[0] - 4, top[1] - 1, top[0] + 4, top[1] + 1], fill=hx("6a4a28"))
+
+
+def light_and_haze(img):
+    # moonlight through the left windows, falling across the nave in coloured shafts
+    for za, zb in zip(COLS[1:-1], COLS[2:]):
+        wa, wb = za + 1.0, zb - 1.0
+        top_a, top_b = P(-AISLE_X, 5.6, wa), P(-AISLE_X, 5.6, wb)
+        dx = 2.6
+        floor_a, floor_b = P(-AISLE_X + dx * 2.2, 0, wa + 1.2), P(-AISLE_X + dx * 2.2, 0, wb + 1.2)
+        pts = [top_a, top_b, floor_b, floor_a]
+        for col, k in ((hx("c04048"), 0.14), (hx("d8b060"), 0.1)):
+            light(img, "polygon", pts, col, k, 9)
+        light(img, "ellipse", [floor_a[0] - 18, floor_b[1] - 4, floor_a[0] + 26, floor_a[1] + 6], hx("d05050"), 0.18, 6)
+    for za, zb in zip(COLS[1:-1], COLS[2:]):
+        wa, wb = za + 1.0, zb - 1.0
+        top_a, top_b = P(AISLE_X, 5.6, wa), P(AISLE_X, 5.6, wb)
+        floor_a, floor_b = P(AISLE_X - 5.7, 0, wa + 1.2), P(AISLE_X - 5.7, 0, wb + 1.2)
+        light(img, "polygon", [top_a, top_b, floor_b, floor_a], hx("4a70d0"), 0.12, 9)
+    # candle warmth gathering at the altar, incense hanging in the air
+    light(img, "ellipse", [170, 60, 310, 170], hx("ffb050"), 0.3, 26)
+    light(img, "ellipse", [200, 96, 280, 150], hx("ffd890"), 0.22, 12)
+    rnd = random.Random(9)
+    for _ in range(16):
+        x, y = rnd.randint(150, 330), rnd.randint(60, 150)
+        light(img, "ellipse", [x - 40, y - 7, x + 40, y + 7], hx("a89880"), 0.1, 8)
+    shadow(img, "rect", [0, 0, W, 40], 0.35, 30, hx("302830"))
+
+
+def paint_interior():
+    img = Image.new("RGB", (W, H), hx("141012"))
+    vault(img)
+    apse(img)
+    for side in (-1, 1):
+        side_aisle(img, side)
+    floor(img)
+    for side in (-1, 1):
+        nave_wall(img, side)
+    sanctuary(img)
+    for z in reversed(COLS[1:]):
+        for side in (-1, 1):
+            column(img, side * NAVE_X, z)
+    pews(img)
+    votives(img)
+    confessional(img)
+    for side in (-1, 1):
+        column(img, side * NAVE_X, COLS[0], near=True)
+    light_and_haze(img)
+    shade(img, 0, 70, 0.6, 1.0, tint=(16, 12, 14))
+    shade(img, 214, H, 1.0, 0.72, tint=(16, 12, 14))
+    vignette(img, 0.55, tint=(40, 28, 30), blur=44)
     return img
 
 
 def build():
     interior = paint_interior()
     exterior = paint_exterior()
-    pal = palette_of(Image.blend(interior, exterior, 0.5), 128)
-    save(pixelize(interior, pal), "rooms", "church_interior.png")
-    save(pixelize(exterior, pal), "rooms", "church_exterior.png")
+    save(pixelize(interior, palette_of(interior, 128)), "rooms", "church_interior.png")
+    save(pixelize(exterior, palette_of(exterior, 128)), "rooms", "church_exterior.png")
     return interior, exterior

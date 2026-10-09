@@ -2,10 +2,12 @@
 from PIL import Image, ImageDraw
 from .common import (W, H, TOP, tall, hx, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
                      floor_boards)
+from .furniture import Room3D
 
 FLOOR = 136
 WOOD = hx("6a5038")
 WOOD_D = hx("342418")
+R = Room3D(FLOOR, 250, -250)
 
 
 def shell(img):
@@ -27,7 +29,7 @@ def shell(img):
 
     # Peeling wallpaper
     peel = (
-        [(44, 30), (70, 26), (84, 42), (78, 65), (56, 70), (40, 52)],
+        [(128, 18), (148, 14), (160, 26), (156, 44), (138, 48), (124, 34)],
         [(368, 20), (398, 18), (416, 32), (406, 54), (378, 56), (362, 38)],
         [(214, 54), (242, 48), (256, 66), (248, 86), (222, 88), (206, 72)],
     )
@@ -48,15 +50,33 @@ def shell(img):
 def floor(img):
     floor_boards(img, FLOOR, H - 1, (250, -250), 20, hx("6a5138"), hx("503b28"), hx("2a1a12"), 405)
     noise(img, (0, FLOOR, W - 1, H - 1), 6, 406)
+    # threadbare rug lying flat in the middle of the room
+    R.quad(img, [(150, 0, 60), (350, 0, 60), (350, 0, 150), (150, 0, 150)], hx("666046"))
+    R.quad(img, [(158, 0, 66), (342, 0, 66), (342, 0, 144), (158, 0, 144)], None, hx("968460"))
+    for z in range(72, 144, 8):
+        R.line(img, (154, 0, z), (346, 0, z), hx("575139"))
+    a, b = R.P(150, 0, 60), R.P(350, 0, 150)
+    noise(img, (int(a[0]) - 30, int(a[1]), int(b[0]) + 10, int(b[1])), 7, 407)
+
+
+def door(img):
+    """Room 6's door, on the back wall at the far left; it leads back out to the street."""
     d = ImageDraw.Draw(img)
-    rug = [(148, 162), (292, 162), (316, 198), (128, 198)]
-    d.polygon(rug, fill=hx("666046"))
-    d.polygon([(156, 166), (286, 166), (306, 194), (138, 194)], outline=hx("968460"))
-    for y in range(170, 194, 5):
-        d.line([(144, y), (302, y)], fill=hx("575139"))
-    noise(img, (128, 162, 316, 198), 7, 407)
-    for x in (72, 76, 80, 392, 396):
-        d.line([(x, 160), (x + 20, 238)], fill=hx("433224"))
+    x0, x1, top = 8, 44, FLOOR - 88
+    d.rectangle([x0 - 4, top - 4, x1 + 4, FLOOR], fill=WOOD_D)
+    d.rectangle([x0 - 2, top - 2, x1 + 2, FLOOR], fill=hx("57412d"))
+    vgrad(img, (x0, top, x1, FLOOR - 1), hx("6e5440"), hx("4e3a2a"))
+    for (a, b) in ((top + 6, top + 38), (top + 46, FLOOR - 8)):
+        d.rectangle([x0 + 5, a, x1 - 5, b], outline=hx("3a2a1c"))
+        d.line([(x0 + 6, a + 1), (x1 - 6, a + 1)], fill=hx("7c6049"))
+    d.ellipse([x1 - 9, top + 44, x1 - 5, top + 48], fill=hx("b89a58"))
+    d.rectangle([x0 + 14, top + 14, x0 + 22, top + 22], fill=hx("a88a4c"))
+    d.text((x0 + 16, top + 13), "6", fill=hx("2a1a10"))
+    noise(img, (x0, top, x1, FLOOR), 4, 412)
+    shadow(img, "rect", [x0 - 2, FLOOR - 2, x1 + 8, FLOOR + 6], 0.4, 3)
+
+
+IRON, IRON_L, BRASS = hx("2a2422"), hx("4a403a"), hx("a49470")
 
 
 def window(img):
@@ -96,85 +116,104 @@ def window(img):
 
 
 def bed(img, unmade=False):
-    d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 46, 74, 194, 146
-    shadow(img, "ellipse", [40, 144, 204, 156], 0.5, 4)
-    # iron frame
-    for x in (52, 186):
-        d.line([(x, 62), (x, 146)], fill=hx("2a2422"), width=3)
-        d.point((x, 60), fill=hx("8e8470"))
-    d.line([(52, 68), (186, 68)], fill=hx("3a302c"), width=3)
-    d.line([(52, 82), (186, 82)], fill=hx("3a302c"), width=2)
-    for x in range(64, 178, 18):
-        d.line([(x, 68), (x, 82)], fill=hx("5e5448"))
-
-    d.rectangle([58, 82, 180, 142], fill=hx("b7ae95"))
-    hgrad(img, (58, 82, 180, 142), hx("bfb59a"), hx("968c73"))
-    d.rectangle([58, 82, 180, 142], outline=hx("5a4b3a"))
-    noise(img, (58, 82, 180, 142), 4, 409)
-
+    """A narrow iron bed pushed lengthways against the back wall: knee-high mattress, head end on the right."""
+    X0, X1, Z0, Z1 = 52, 140, 4, 42
+    a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z0)
+    shadow(img, "rect", [a[0] - 2, b[1] - 2, b[0] + 6, a[1] + 3], 0.45, 3)
+    # back posts and end panels (behind the mattress)
+    for x, top in ((X0, 30), (X1, 46)):
+        R.line(img, (x, 0, Z0), (x, top, Z0), IRON, 2)
+    # mattress on a sagging spring frame
+    R.box(img, X0 + 2, X1 - 2, 12, 15, Z0 + 2, Z1 - 2, IRON_L)
+    sheet, sheet_d = hx("cfc6ad"), hx("a59c84")
+    R.box(img, X0 + 2, X1 - 2, 15, 24, Z0 + 2, Z1 - 2, sheet, top=hx("ddd4bc"), side=sheet_d)
+    blanket, blanket_l = hx("6f7558"), hx("8c9270")
     if not unmade:
-        d.polygon([(60, 98), (180, 98), (174, 142), (66, 142)], fill=hx("6f7558"))
-        d.line([(60, 104), (180, 104)], fill=hx("8c9270"))
-        d.line([(70, 140), (170, 140)], fill=hx("5b6148"))
-        d.rectangle([68, 84, 118, 98], fill=hx("d5ccb3"))
-        d.line([(72, 90), (114, 90)], fill=hx("b7ad96"))
-        light(img, "polygon", [(60, 98), (120, 98), (114, 142), (66, 142)], hx("aab08a"), 0.12, 4)
+        R.box(img, X0 + 1, X1 - 22, 12, 24.6, Z0 + 1, Z1 - 1, blanket, top=blanket_l, side=hx("565b44"))
+        R.line(img, (X1 - 22, 24.6, Z0 + 1), (X1 - 22, 24.6, Z1 - 1), hx("e6dfca"))  # turned-down sheet
+        R.box(img, X1 - 18, X1 - 5, 24, 28, Z0 + 7, Z1 - 7, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
+        for x in range(X0 + 12, X1 - 24, 14):
+            R.line(img, (x, 24.6, Z1 - 1), (x - 1, 12, Z1 - 1), hx("5f644b"))
     else:
-        d.polygon([(58, 98), (170, 98), (152, 116), (182, 132), (166, 144), (72, 144), (62, 132)], fill=hx("d4cab1"))
-        d.polygon([(82, 102), (180, 102), (176, 126), (136, 122), (144, 142), (90, 140), (74, 120)], fill=hx("6d7355"))
-        d.polygon([(66, 84), (116, 82), (126, 97), (72, 102)], fill=hx("d7cfb8"))
-        d.line([(74, 90), (108, 88)], fill=hx("b3aa94"))
-        d.line([(94, 108), (148, 116)], fill=hx("c8bea5"))
-        d.line([(118, 124), (154, 136)], fill=hx("4f5640"))
-        d.line([(150, 100), (176, 114)], fill=hx("8b916c"))
-        shadow(img, "polygon", [(136, 122), (182, 132), (166, 144), (144, 142)], 0.18, 3)
-    d.rectangle([58, 142, 180, 146], fill=hx("4c3a2a"))
+        R.box(img, X0 + 1, X0 + 26, 12, 29, Z0 + 3, Z1 - 1, blanket, top=blanket_l, side=hx("565b44"))
+        R.quad(img, [(X0 + 26, 24.2, Z0 + 8), (X0 + 46, 24.2, Z0 + 14), (X0 + 40, 24.2, Z1 - 4), (X0 + 26, 24.2, Z1 - 2)],
+               blanket_l)
+        R.box(img, X1 - 26, X1 - 12, 24, 28, Z0 + 14, Z1 - 3, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
+        for (p, q) in (((X0 + 50, 24.1, Z0 + 10), (X0 + 70, 24.1, Z1 - 8)), ((X0 + 62, 24.1, Z0 + 6), (X1 - 30, 24.1, Z0 + 20))):
+            R.line(img, p, q, hx("aaa088"))
+    # side rail, front posts and end panels (in front of the mattress)
+    R.line(img, (X0, 12, Z1), (X1, 12, Z1), IRON, 2)
+    for x, top, mid in ((X0, 30, 20), (X1, 46, 32)):
+        R.line(img, (x, 0, Z1), (x, top, Z1), IRON, 2)
+        R.line(img, (x, top, Z0), (x, top, Z1), IRON, 2)
+        R.line(img, (x, mid, Z0), (x, mid, Z1), IRON)
+        for z in range(Z0 + 6, Z1 - 3, 6):
+            R.line(img, (x, mid, z), (x, top, z), IRON_L)
+        for z in (Z0, Z1):
+            px, py = R.P(x, top + 1.5, z)
+            ImageDraw.Draw(img).ellipse([px - 1.5, py - 1.5, px + 1.5, py + 1.5], fill=BRASS)
+    if unmade:  # the top sheet dragged half off, hanging over the rail
+        R.quad(img, [(X0 + 30, 24, Z1 - 1), (X0 + 52, 24, Z1 - 1), (X0 + 56, 6, Z1 + 1), (X0 + 27, 8, Z1 + 1)], sheet)
+        R.line(img, (X0 + 40, 22, Z1), (X0 + 42, 8, Z1 + 1), sheet_d)
 
 
 def nightstand(img):
-    d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 208, 94, 244, 138
-    vgrad(img, (x0, y0, x1, y1), hx("674b35"), hx("453021"))
-    d.rectangle([x0, y0, x1, y1], outline=hx("23170f"))
-    d.rectangle([x0 + 3, y0 + 4, x1 - 3, y0 + 18], outline=hx("302014"))
-    d.rectangle([x0 + 3, y0 + 24, x1 - 3, y1 - 4], outline=hx("302014"))
-    d.rectangle([x0 + 15, 112, x0 + 21, 114], fill=hx("ac8a4a"))
-    d.rectangle([x0 + 15, 128, x0 + 21, 130], fill=hx("ac8a4a"))
-    d.rectangle([214, 88, 230, 94], fill=hx("a79d86"))
-    d.line([(216, 90), (228, 90)], fill=hx("6b6458"))
-    shadow(img, "rect", [206, 138, 248, 148], 0.45, 3)
+    X0, X1, Z0, Z1 = 148, 172, 3, 22
+    R.box(img, X0, X1, 0, 30, Z0, Z1, hx("5a4130"), top=hx("74563e"), side=hx("3c2a1d"))
+    R.quad(img, [(X0 + 2, 18, Z1), (X1 - 2, 18, Z1), (X1 - 2, 27, Z1), (X0 + 2, 27, Z1)], None, hx("2a1c12"))
+    R.quad(img, [(X0 + 2, 3, Z1), (X1 - 2, 3, Z1), (X1 - 2, 15, Z1), (X0 + 2, 15, Z1)], None, hx("2a1c12"))
+    for y in (22, 9):
+        px, py = R.P((X0 + X1) / 2, y, Z1)
+        ImageDraw.Draw(img).rectangle([px - 2, py, px + 2, py + 1], fill=hx("ac8a4a"))
+    # ashtray and a water glass
+    R.box(img, 152, 160, 30, 31.5, 9, 16, hx("5e5a52"), top=hx("8a857a"))
+    R.box(img, 164, 167, 30, 36, 10, 13, hx("a9b2a6"), top=hx("d8e0d4"))
 
 
 def chair(img):
+    X0, X1, Z0, Z1 = 236, 258, 6, 24
+    sh = R.P(X0, 0, Z1), R.P(X1, 0, Z0)
+    shadow(img, "rect", [sh[0][0] - 1, sh[1][1], sh[1][0] + 3, sh[0][1] + 2], 0.4, 2)
+    dark, mid = hx("3a281b"), hx("5a3c27")
+    for x in (X0 + 1, X1 - 1):
+        R.line(img, (x, 0, Z0 + 1), (x, 46, Z0 + 1), dark, 2)
+    for y in (32, 38, 44):
+        R.line(img, (X0 + 1, y, Z0 + 1), (X1 - 1, y, Z0 + 1), mid, 2)
+    R.box(img, X0, X1, 18, 21, Z0, Z1, hx("6a4830"), top=hx("7e5a3c"), side=hx("4a311f"))
+    for x in (X0 + 1, X1 - 1):
+        R.line(img, (x, 0, Z1 - 1), (x, 18, Z1 - 1), dark, 2)
+    R.line(img, (X0 + 1, 7, Z1 - 1), (X1 - 1, 7, Z1 - 1), dark)
+
+
+def bottle(img):
+    """The rotgut bottle, standing on the floor by the chair leg."""
     d = ImageDraw.Draw(img)
-    shadow(img, "ellipse", [316, 150, 382, 160], 0.45, 3)
-    d.line([(330, 104), (326, 152)], fill=hx("3a281b"), width=3)
-    d.line([(360, 104), (364, 152)], fill=hx("3a281b"), width=3)
-    d.line([(330, 104), (360, 104)], fill=hx("533825"), width=4)
-    d.line([(334, 118), (356, 118)], fill=hx("63422c"), width=3)
-    d.line([(338, 104), (338, 152)], fill=hx("4a321f"), width=2)
-    d.line([(352, 104), (352, 152)], fill=hx("4a321f"), width=2)
-    d.polygon([(324, 150), (366, 150), (374, 162), (318, 162)], fill=hx("6a4830"))
-    d.line([(330, 150), (326, 188)], fill=hx("352216"), width=3)
-    d.line([(360, 150), (364, 188)], fill=hx("352216"), width=3)
-    d.line([(334, 154), (340, 188)], fill=hx("40291a"), width=2)
-    d.line([(352, 154), (348, 188)], fill=hx("40291a"), width=2)
-    d.line([(326, 174), (364, 174)], fill=hx("4a311f"))
-    d.line([(338, 112), (352, 144)], fill=hx("2a1c12"))
+    bx, by = R.P(270, 0, 14)
+    bx, by = int(bx), int(by)
+    d.ellipse([bx - 4, by - 1, bx + 5, by + 2], fill=hx("3e2e20"))
+    d.rectangle([bx - 2, by - 9, bx + 2, by], fill=hx("6a4a1c"))
+    d.rectangle([bx - 1, by - 13, bx + 1, by - 9], fill=hx("5a3e18"))
+    d.rectangle([bx - 2, by - 7, bx + 2, by - 4], fill=hx("d8ccaa"))
+    d.point((bx - 1, by - 8), fill=hx("c49a52"))
+    d.rectangle([bx - 1, by - 14, bx + 1, by - 13], fill=hx("2a1a10"))
 
 
 def dresser(img):
+    X0, X1, Z0, Z1 = 410, 466, 2, 22
+    R.box(img, X0, X1, 0, 42, Z0, Z1, hx("4c3a2a"), top=hx("6a5038"), side=hx("2e2218"))
+    for i, y in enumerate((30, 17, 4)):
+        R.quad(img, [(X0 + 3, y, Z1), (X1 - 3, y, Z1), (X1 - 3, y + 10, Z1), (X0 + 3, y + 10, Z1)], None, hx("2a1a10"))
+        R.line(img, (X0 + 4, y + 9, Z1), (X1 - 4, y + 9, Z1), hx("6e5440"))
+        px, py = R.P((X0 + X1) / 2, y + 5, Z1)
+        ImageDraw.Draw(img).rectangle([px - 3, py, px + 3, py + 1], fill=hx("b28a46"))
+    a, b = R.P(X0, 42, Z0), R.P(X1, 0, Z1)
+    noise(img, (int(a[0]), int(a[1]), int(b[0]), int(b[1])), 4, 410)
+    # a clouded mirror hung over it
     d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 404, 92, 466, 142
-    hgrad(img, (x0, y0, x1, y1), hx("5c4733"), hx("342518"))
-    d.rectangle([x0, y0, x1, y1], outline=hx("1e130c"))
-    for y in (98, 114, 130):
-        d.rectangle([x0 + 4, y, x1 - 4, y + 12], outline=hx("2a1a10"))
-        d.line([(x0 + 5, y + 1), (x1 - 5, y + 1)], fill=hx("72563d"))
-        d.rectangle([x0 + 26, y + 5, x0 + 34, y + 7], fill=hx("b28a46"))
-    noise(img, (x0, y0, x1, y1), 4, 410)
-    shadow(img, "rect", [402, 142, 470, 152], 0.5, 3)
+    d.rectangle([420, 54, 456, 88], fill=WOOD_D)
+    vgrad(img, (423, 57, 453, 85), hx("a7ad98"), hx("6d7266"))
+    d.line([(428, 60), (436, 70)], fill=hx("c8ccb8"))
+    shadow(img, "ellipse", [424, 58, 452, 84], 0.2, 6, hx("8a7a5a"))
 
 
 def bulb(img):
@@ -189,16 +228,16 @@ def bulb(img):
 def details(img):
     d = ImageDraw.Draw(img)
     # Crooked motel print
-    d.polygon([(246, 34), (286, 32), (288, 62), (244, 64)], fill=hx("6c5237"))
-    d.polygon([(250, 36), (282, 35), (284, 59), (248, 60)], fill=hx("cabf9f"))
-    d.rectangle([254, 40, 278, 54], fill=hx("8a8f6b"))
-    d.rectangle([254, 50, 278, 54], fill=hx("7f684b"))
-    d.line([(255, 42), (266, 47), (276, 41)], fill=hx("9ea47f"))
-    d.line([(252, 62), (280, 60)], fill=hx("2c2018"))
+    d.polygon([(78, 34), (118, 32), (120, 62), (76, 64)], fill=hx("6c5237"))
+    d.polygon([(82, 36), (114, 35), (116, 59), (80, 60)], fill=hx("cabf9f"))
+    d.rectangle([86, 40, 110, 54], fill=hx("8a8f6b"))
+    d.rectangle([86, 50, 110, 54], fill=hx("7f684b"))
+    d.line([(87, 42), (98, 47), (108, 41)], fill=hx("9ea47f"))
+    d.line([(84, 62), (112, 60)], fill=hx("2c2018"))
     # Scuffs and grime around the baseboards
     for x in range(18, W, 28):
         d.line([(x, FLOOR - 8), (x + 8, FLOOR - 4)], fill=hx("271b13"))
-    for (x, y) in ((264, 146), (278, 154), (292, 164), (418, 152)):
+    for (x, y) in ((304, 168), (318, 176), (380, 190), (196, 200)):
         d.ellipse([x, y, x + 10, y + 4], fill=hx("4a392b"))
 
 
@@ -207,11 +246,13 @@ def paint(unmade=False):
     shell(img)
     floor(img)
     window(img)
+    details(img)
+    door(img)
     bed(img, unmade)
     nightstand(img)
     chair(img)
     dresser(img)
-    details(img)
+    bottle(img)
     bulb(img)
     img = tall(img, ceiling)
     vignette(img, 0.62, tint=(34, 32, 20), blur=46)

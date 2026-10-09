@@ -7,11 +7,15 @@ public partial class Street : Room
 {
     private static readonly Texture2D DayBackground = GD.Load<Texture2D>("res://assets/art/rooms/street_day.png");
     private static readonly Texture2D NightBackground = GD.Load<Texture2D>("res://assets/art/rooms/street_night.png");
+    private static readonly Texture2D DayFront = GD.Load<Texture2D>("res://assets/art/rooms/street_day_fg.png");
+    private static readonly Texture2D NightFront = GD.Load<Texture2D>("res://assets/art/rooms/street_night_fg.png");
 
     protected override void OnRefresh()
     {
-        if (GetNodeOrNull<Sprite2D>("Background") is not { } background) return;
-        background.Texture = State.HasFlag("is_night") || !State.HasFlag("is_day") ? NightBackground : DayBackground;
+        var night = State.HasFlag("is_night") || !State.HasFlag("is_day");
+        if (GetNodeOrNull<Sprite2D>("Background") is { } background) background.Texture = night ? NightBackground : DayBackground;
+        // Lamp posts, hydrant and the parked car stand at the kerb, in front of anyone on the sidewalk.
+        if (GetNodeOrNull<Sprite2D>("World/StreetFront") is { } front) front.Texture = night ? NightFront : DayFront;
     }
 
     // The hub is open, but each door only matters once the case has pointed Micah at it.

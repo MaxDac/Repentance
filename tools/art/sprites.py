@@ -32,9 +32,12 @@ MICAH = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="fedora", hat_col
              decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
               shoes="ddd7ca", hipw=0.094, top_hem=0.47)
-TEDDY = dict(h=65, sw=0.14, skin="e7c1a3", hair="9f7430", hair_style="slick", mustache=True, torso="dccfa4",
-             coat=dict(col="dccfa4", top=0.40, hem=0.565, flare=0.0), pants="cbb68c", shoes="efe7d5",
-             decals=_vee(0.32, 0.034, "f5efe2", "3e7cad") + [("buttons", 0.42, 0.5, 2, "8f8466")])
+# Teddy Harrington: a rich man's son in a tailored double-breasted grey suit with peaked lapels, a burgundy tie,
+# a white pocket square and polished brown oxfords.
+TEDDY = dict(h=65, sw=0.14, skin="e7c1a3", hair="9f7430", hair_style="slick", mustache=True, torso="5f6672",
+             coat=dict(col="5f6672", top=0.40, hem=0.58, flare=0.0), pants="5f6672", shoes="5a3420",
+             decals=[("strip", 0.212, 0.36, 0.05, 0.004, "474d58")] + _vee(0.31, 0.028, "f2ede2", "8a2632") +
+             [("patch", -0.06, 0.27, "f4f0e6"), ("buttons", 0.37, 0.47, 2, "2e323a", True)])
 CONCIERGE = dict(h=63, sw=0.13, skin="e0b090", hair="9a9890", hair_style="slick", mustache=True, torso="7a1f31",
                  coat=dict(col="7a1f31", top=0.40, hem=0.62, flare=0.0), pants="2a1b24", shoes="181213",
                  decals=_vee(0.32, 0.03, "f6efe2", "171717") + [("buttons", 0.35, 0.5, 3, "e8c050", True)])
@@ -81,18 +84,14 @@ def _arms(kind_r, kind_l=None):
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
-GESTURE_A = ("swing", 30, 10, 62)
-GESTURE_B = ("swing", 16, 8, 38)
-
-
 def player_sheet(spec, name):
     side = [figure(spec, pose(90), FW, FH)]
     side += [figure(spec, walk_pose(90, i), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, pose(90, mouth=1, nod=0.004, arms={1: GESTURE_B, -1: ("swing", -3, 6, 12)}), FW, FH)]
+    side += [figure(spec, pose(90, mouth=1, nod=0.004), FW, FH)]
     front = [figure(spec, pose(16), FW, FH)]
     front += [figure(spec, walk_pose(16, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
-    front += [figure(spec, pose(16, mouth=1, arms={1: GESTURE_A, -1: ("swing", 2, 6, 12)}), FW, FH),
-              figure(spec, pose(16, mouth=2, nod=0.004, arms={1: GESTURE_B, -1: ("swing", 2, 6, 12)}), FW, FH)]
+    # talking only moves the mouth and nods the head; the arms stay where they are
+    front += [figure(spec, pose(16, mouth=1), FW, FH), figure(spec, pose(16, mouth=2, nod=0.004), FW, FH)]
     back = [figure(spec, pose(164), FW, FH)]
     back += [figure(spec, walk_pose(164, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
@@ -100,28 +99,24 @@ def player_sheet(spec, name):
     return img
 
 
-def npc_strip(spec, name, arms, phi=35, gesture=True):
-    a_talk = dict(arms)
-    b_talk = dict(arms)
-    if gesture:
-        a_talk[1], b_talk[1] = GESTURE_A, GESTURE_B
+def npc_strip(spec, name, arms, phi=35):
     frames = [figure(spec, pose(phi, arms=arms), NPC_W, FH),
-              figure(spec, pose(phi, arms=a_talk, mouth=1), NPC_W, FH),
-              figure(spec, pose(phi, arms=b_talk, mouth=2, nod=0.004), NPC_W, FH)]
+              figure(spec, pose(phi, arms=arms, mouth=1), NPC_W, FH),
+              figure(spec, pose(phi, arms=arms, mouth=2, nod=0.004), NPC_W, FH)]
     img = sheet([frames], NPC_W, FH)
     save(img, "sprites", f"{name}.png")
     return img
 
 
-NPCS = (("teddy", TEDDY, _arms("down"), True), ("concierge", CONCIERGE, _arms("fold"), False),
-        ("bellboy", BELLBOY, _arms("down"), True), ("sal", SAL, _arms("pocket"), False),
-        ("bartender", BARTENDER, _arms("down"), True), ("eleanor", ELEANOR, _arms("down", "hip"), True),
-        ("rose", ROSE, _arms("fold"), False), ("caleb", CALEB, _arms("fold"), False),
-        ("harrington", HARRINGTON, _arms("down", "pocket"), True))
+NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold")),
+        ("bellboy", BELLBOY, _arms("down")), ("sal", SAL, _arms("pocket")),
+        ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR, _arms("down")),
+        ("rose", ROSE, _arms("fold")), ("caleb", CALEB, _arms("fold")),
+        ("harrington", HARRINGTON, _arms("down", "pocket")))
 
 
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
-    for name, spec, arms, gesture in NPCS:
-        npc_strip(spec, name, arms, gesture=gesture)
+    for name, spec, arms in NPCS:
+        npc_strip(spec, name, arms)
