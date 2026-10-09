@@ -1,0 +1,246 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Street.cs" id="1_Street"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/street_day.png" id="2_street_day"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(48, 96)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(58, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(64, 92)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(72, 112)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(72, 104)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(18, 124)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(48, 72)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(118, 42)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(28, 70)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(32, 70)
+
+[node name="Street" type="Node2D"]
+script = ExtResource("1_Street")
+RoomName = "State Street"
+FarY = 158
+NearY = 262
+FarScale = 0.9
+NearScale = 1.06
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_street_day")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(6, 262, 474, 262, 474, 170, 406, 170, 356, 158, 90, 158, 18, 176, 6, 196)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(240, 228)
+metadata/facing = 1
+
+[node name="hotel" type="Marker2D" parent="Entries"]
+position = Vector2(82, 212)
+metadata/facing = 1
+
+[node name="motel" type="Marker2D" parent="Entries"]
+position = Vector2(156, 216)
+metadata/facing = 1
+
+[node name="library" type="Marker2D" parent="Entries"]
+position = Vector2(238, 218)
+metadata/facing = 1
+
+[node name="church" type="Marker2D" parent="Entries"]
+position = Vector2(332, 216)
+metadata/facing = 1
+
+[node name="outskirts" type="Marker2D" parent="Entries"]
+position = Vector2(430, 226)
+metadata/facing = 3
+
+[node name="club" type="Marker2D" parent="Entries"]
+position = Vector2(30, 180)
+metadata/facing = 3
+
+[node name="lobby" type="Marker2D" parent="Entries"]
+position = Vector2(30, 240)
+metadata/facing = 3
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="HotelDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "hotel_door"
+DisplayName = "hotel entrance"
+LookText = "The Aurelian glows over the door like it still believes in first impressions."
+WalkTo = Vector2(82, 206)
+Face = 2
+ExitTo = "aurelian_room"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/HotelDoor"]
+position = Vector2(82.0, 112.0)
+shape = SubResource("Rect_1")
+
+[node name="MotelDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "motel_door"
+DisplayName = "motel office"
+LookText = "The motel sign sags over the door like even the bulbs have given up."
+WalkTo = Vector2(156, 208)
+Face = 2
+ExitTo = "motel_room"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/MotelDoor"]
+position = Vector2(156.0, 128.0)
+shape = SubResource("Rect_2")
+
+[node name="LibraryDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "library_door"
+DisplayName = "library doors"
+LookText = "An old stone library, keeping its secrets alphabetized and behind heavy doors."
+WalkTo = Vector2(238, 210)
+Face = 2
+ExitTo = "library"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/LibraryDoor"]
+position = Vector2(238.0, 120.0)
+shape = SubResource("Rect_3")
+
+[node name="ChurchDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "church_door"
+DisplayName = "church steps"
+LookText = "The cathedral waits down the block, all stone, shadow, and uncollected prayers."
+WalkTo = Vector2(332, 208)
+Face = 2
+ExitTo = "church_exterior"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ChurchDoor"]
+position = Vector2(332.0, 108.0)
+shape = SubResource("Rect_4")
+
+[node name="RoadOut" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "road_out"
+DisplayName = "road out of town"
+LookText = "The road east slips out of the city limits like a man leaving before the questions start."
+WalkTo = Vector2(434, 220)
+Face = 4
+ExitTo = "outskirts"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/RoadOut"]
+position = Vector2(434.0, 178.0)
+shape = SubResource("Rect_5")
+
+[node name="Lamppost" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lamppost"
+DisplayName = "lamppost"
+LookText = "A lamppost doing its best against the fog and losing by a nose."
+WalkTo = Vector2(116, 214)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lamppost"]
+position = Vector2(116.0, 110.0)
+shape = SubResource("Rect_6")
+
+[node name="Newsstand" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "newsstand"
+DisplayName = "newsstand"
+LookText = "The evening edition. Same bad headlines, fresher ink."
+WalkTo = Vector2(204, 214)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Newsstand"]
+position = Vector2(204.0, 156.0)
+shape = SubResource("Rect_7")
+
+[node name="ParkedCar" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "parked_car"
+DisplayName = "parked car"
+LookText = "A sedan sleeping at the curb. In this town, even parked cars look guilty."
+WalkTo = Vector2(304, 230)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ParkedCar"]
+position = Vector2(304.0, 214.0)
+shape = SubResource("Rect_8")
+
+[node name="ClubDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "club_door"
+DisplayName = "unmarked door"
+LookText = "No sign, no number. Just a door that knows exactly who it's for."
+WalkTo = Vector2(30, 195)
+Face = 2
+ExitTo = "club_hall"
+ExitEntry = "from_street"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ClubDoor"]
+position = Vector2(30.0, 140.0)
+shape = SubResource("Rect_9")
+
+[node name="LobbyDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lobby_door"
+DisplayName = "the Aurelian's entrance"
+LookText = "Round the corner, back to the Aurelian's revolving door."
+WalkTo = Vector2(30, 240)
+Face = 2
+ExitTo = "lobby"
+ExitEntry = "street"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/LobbyDoor"]
+position = Vector2(30.0, 225.0)
+shape = SubResource("Rect_10")

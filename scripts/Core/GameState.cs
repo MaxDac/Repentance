@@ -12,8 +12,10 @@ public partial class GameState : Node
 
     private readonly HashSet<string> _flags = new();
     private readonly List<string> _inventory = new();
+    private int _storyAct = 1;
 
     public IReadOnlyList<string> Inventory => _inventory;
+    public int StoryAct => _storyAct;
 
     public override void _EnterTree() => Instance = this;
 
@@ -23,6 +25,14 @@ public partial class GameState : Node
     {
         if (value ? _flags.Add(flag) : _flags.Remove(flag))
             EmitSignal(SignalName.Changed);
+    }
+
+    public void SetStoryAct(int act)
+    {
+        act = Mathf.Clamp(act, 1, 3);
+        if (_storyAct == act) return;
+        _storyAct = act;
+        EmitSignal(SignalName.Changed);
     }
 
     public bool HasItem(string id) => _inventory.Contains(id);
@@ -44,6 +54,7 @@ public partial class GameState : Node
     {
         _flags.Clear();
         _inventory.Clear();
+        _storyAct = 1;
         EmitSignal(SignalName.Changed);
     }
 }

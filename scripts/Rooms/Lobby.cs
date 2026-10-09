@@ -53,7 +53,7 @@ public partial class Lobby : Room
                 return true;
 
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern"):
-                await Say("Back out into the rain? Not until I know where I'm going.");
+                await Game.ChangeRoom("street", "lobby");
                 return true;
             case ("revolving_door", Verb.Kick):
                 await Say("It's a revolving door. It only goes round in circles. Like this case.");

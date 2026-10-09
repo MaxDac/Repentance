@@ -1,0 +1,193 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/library.png" id="2_library"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(42, 96)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(108, 132)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(94, 82)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(138, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(74, 70)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(36, 56)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(74, 116)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(30, 126)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(74, 126)
+
+[node name="Library" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Library"
+FarY = 172
+NearY = 262
+FarScale = 0.88
+NearScale = 1.08
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_library")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(12, 174, 468, 174, 468, 262, 12, 262)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(250, 220)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Exit" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "exit"
+DisplayName = "hall door"
+LookText = "The hall door. Polished brass, old money, no welcome."
+WalkTo = Vector2(42, 182)
+Face = 2
+ExitTo = "street"
+ExitEntry = "library"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
+position = Vector2(31.0, 112.0)
+shape = SubResource("Rect_1")
+
+[node name="ShelvesLeft" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shelves_left"
+DisplayName = "bookshelves"
+LookText = "Law books, sermons, dead Romans. The Harringtons liked their reading respectable and deceased."
+WalkTo = Vector2(108, 184)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ShelvesLeft"]
+position = Vector2(88.0, 92.0)
+shape = SubResource("Rect_2")
+
+[node name="Fireplace" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "fireplace"
+DisplayName = "fireplace"
+LookText = "Marble, carved, and cold. Even the fire in this house learned some restraint."
+WalkTo = Vector2(208, 188)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Fireplace"]
+position = Vector2(208.0, 108.0)
+shape = SubResource("Rect_3")
+
+[node name="Desk" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "desk"
+DisplayName = "writing desk"
+LookText = "Walnut and brass. Big enough to sign away a fortune, or a daughter."
+WalkTo = Vector2(250, 204)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
+position = Vector2(252.0, 168.0)
+shape = SubResource("Rect_4")
+
+[node name="Armchair" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "armchair"
+DisplayName = "leather armchair"
+LookText = "Leather gone soft with age and money. A good chair for bad family news."
+WalkTo = Vector2(144, 214)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Armchair"]
+position = Vector2(144.0, 176.0)
+shape = SubResource("Rect_5")
+
+[node name="Globe" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "globe"
+DisplayName = "globe"
+LookText = "The world in lacquer and brass. Even in miniature, it still belongs to somebody rich."
+WalkTo = Vector2(324, 198)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Globe"]
+position = Vector2(324.0, 142.0)
+shape = SubResource("Rect_6")
+
+[node name="ShelvesRight" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shelves_right"
+DisplayName = "glass-front shelves"
+LookText = "First editions behind glass. In this town, even the books live in witness protection."
+WalkTo = Vector2(376, 184)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ShelvesRight"]
+position = Vector2(386.0, 86.0)
+shape = SubResource("Rect_7")
+
+[node name="Ladder" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "ladder"
+DisplayName = "rolling ladder"
+LookText = "A rolling ladder for books nobody trusted the help to touch."
+WalkTo = Vector2(350, 190)
+Face = 2
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Ladder"]
+position = Vector2(350.0, 116.0)
+shape = SubResource("Rect_8")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "draped window"
+LookText = "Heavy drapes, tall glass, and a strip of Chicago trying to get in."
+WalkTo = Vector2(428, 186)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(434.0, 88.0)
+shape = SubResource("Rect_9")

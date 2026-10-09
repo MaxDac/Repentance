@@ -1,0 +1,142 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/outskirts.png" id="2_outskirts"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(188, 26)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(98, 44)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(146, 92)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(42, 74)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(56, 30)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(72, 88)
+
+[node name="Outskirts" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Outskirts"
+FarY = 154
+NearY = 262
+FarScale = 0.88
+NearScale = 1.04
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_outskirts")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 164, 88, 156, 186, 152, 292, 154, 392, 164, 479, 176, 479, 269, 0, 269)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(292, 226)
+metadata/facing = 3
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Skyline" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "skyline"
+DisplayName = "skyline"
+LookText = "Chicago on the horizon. Even from out here it looked like trouble with better tailoring."
+WalkTo = Vector2(282, 198)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Skyline"]
+position = Vector2(274.0, 118.0)
+shape = SubResource("Rect_1")
+
+[node name="HedgeGap" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "hedge_gap"
+DisplayName = "gap in the hedge"
+LookText = "The hedge had a parting in it. Small, but not accidental."
+WalkTo = Vector2(176, 194)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/HedgeGap"]
+position = Vector2(166.0, 150.0)
+shape = SubResource("Rect_2")
+
+[node name="Road" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "road"
+DisplayName = "dirt road"
+LookText = "A dirt road worn flat by tires, boots, and people leaving things behind."
+WalkTo = Vector2(292, 226)
+Face = 2
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Road"]
+position = Vector2(286.0, 210.0)
+shape = SubResource("Rect_3")
+
+[node name="FencePost" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "fence_post"
+DisplayName = "fence post"
+LookText = "One fence post left standing. The fence had given up before it did."
+WalkTo = Vector2(392, 198)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/FencePost"]
+position = Vector2(404.0, 158.0)
+shape = SubResource("Rect_4")
+
+[node name="DisturbedEarth" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "disturbed_earth"
+DisplayName = "disturbed earth"
+LookText = "A patch of earth that had been turned once and told to forget it."
+WalkTo = Vector2(236, 230)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/DisturbedEarth"]
+position = Vector2(236.0, 226.0)
+shape = SubResource("Rect_5")
+
+[node name="Exit" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "exit"
+DisplayName = "road back to the city"
+LookText = "Back toward the city. It never misses me long."
+WalkTo = Vector2(440, 228)
+Face = 1
+ExitTo = "street"
+ExitEntry = "outskirts"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
+position = Vector2(443.0, 200.0)
+shape = SubResource("Rect_6")

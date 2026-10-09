@@ -1,0 +1,103 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_stage.png" id="2_club_stage"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(60, 108)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(116, 46)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(34, 88)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(174, 72)
+
+[node name="ClubStage" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Club Stage"
+FarY = 142
+NearY = 256
+FarScale = 0.88
+NearScale = 1.07
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_club_stage")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(12, 256, 468, 256, 468, 154, 380, 154, 336, 170, 140, 170, 102, 154, 12, 154)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(86, 208)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="LoungeExit" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lounge_exit"
+DisplayName = "lounge archway"
+LookText = "Back through the curtain to the sofas and smoke."
+WalkTo = Vector2(42, 198)
+Face = 2
+ExitTo = "club_lounge"
+ExitEntry = "from_hall"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/LoungeExit"]
+position = Vector2(40.0, 128.0)
+shape = SubResource("Rect_1")
+
+[node name="Stage" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "stage"
+DisplayName = "stage"
+LookText = "A low stage under a hard white beam. Every lie looks honest in the right light."
+WalkTo = Vector2(228, 188)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Stage"]
+position = Vector2(236.0, 154.0)
+shape = SubResource("Rect_2")
+
+[node name="Spotlight" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "spotlight"
+DisplayName = "spotlight"
+LookText = "A spotlight hot enough to melt the polish off a man's alibi."
+WalkTo = Vector2(312, 188)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Spotlight"]
+position = Vector2(326.0, 86.0)
+shape = SubResource("Rect_3")
+
+[node name="Seats" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "seats"
+DisplayName = "amphitheatre seats"
+LookText = "Rows of seats vanishing into shadow. The darkness always gets the best box."
+WalkTo = Vector2(396, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Seats"]
+position = Vector2(376.0, 164.0)
+shape = SubResource("Rect_4")
