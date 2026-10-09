@@ -48,6 +48,10 @@ class Canvas:
         self.ramps, self.dith, self.mats, self.parts = [], [], {}, {}
         self.ink = []
         self.shadow = np.zeros((h, w), bool)
+        self.blend_parts, self.blend_zone = (), np.zeros((h, w), bool)
+
+    def _blend_ids(self):
+        return [self.parts[n] for n in self.blend_parts if n in self.parts]
 
     def m(self, col, dither=True):
         key = (col, dither)
@@ -71,6 +75,8 @@ class Canvas:
             sh = np.zeros_like(mask)
             sh[1:, 1:] = mask[:-1, :-1]
             sh &= ~mask & (self.mat >= 0) & (self.part != p)
+            if part in self.blend_parts:
+                sh &= ~(self.blend_zone & np.isin(self.part, self._blend_ids()))
             self.bias[sh] -= 1
         self.mat[mask] = self.m(col, dither)
         n = np.stack([nx, ny, nz], -1)
@@ -130,6 +136,13 @@ class Canvas:
     # --- output -------------------------------------------------------------------------------------------------
     def render(self, shadow_box=None):
         filled = self.mat >= 0
+        # shoulders and back read as one mass: shade the blend zone with a single cross-section normal
+        u = np.isin(self.part, self._blend_ids()) & self.blend_zone
+        for y in np.nonzero(u.any(1))[0]:
+            xs = np.nonzero(u[y])[0]
+            mid, half = (xs[0] + xs[-1] + 1) / 2.0, max((xs[-1] - xs[0] + 1) / 2.0, 0.5)
+            nx = np.clip((self.X[y, xs] - mid) / half, -1, 1) * 0.85
+            self.n[y, xs] = np.stack([nx, np.full_like(nx, -0.12), np.sqrt(np.clip(1 - nx * nx - 0.0144, 0, 1)) + 0.05], -1)
         s = np.einsum("hwc,c->hw", self.n, LIGHT)
         v = 0.42 + 0.58 * s
         bay = np.tile(BAY, (self.h // 4 + 1, self.w // 4 + 1))[: self.h, : self.w]
@@ -143,8 +156,11 @@ class Canvas:
         # a part lying behind another part gets a darker seam where they meet
         pp = np.pad(self.part, 1, constant_values=-1)
         behind = np.zeros_like(filled)
-        for nb in (pp[:-2, 1:-1], pp[2:, 1:-1], pp[1:-1, :-2], pp[1:-1, 2:]):
-            behind |= (nb > self.part)
+        bl = np.isin(self.part, self._blend_ids()) & self.blend_zone
+        bp = np.pad(bl, 1)
+        for nb, nbl in ((pp[:-2, 1:-1], bp[:-2, 1:-1]), (pp[2:, 1:-1], bp[2:, 1:-1]),
+                        (pp[1:-1, :-2], bp[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:])):
+            behind |= (nb > self.part) & ~(bl & nbl)
         tone = np.where(filled & ~edge & behind, tone - 1, tone)
         tone = np.clip(tone, 0, 4)
         out = np.zeros((self.h, self.w, 4), np.uint8)
@@ -230,6 +246,9 @@ def figure(spec, ps, fw=56, fh=80):
         p[1] += dy
         return p
 
+    c.blend_parts = ("torso", "arm1", "arm-1")
+    c.blend_zone = c.Y < base + (0.3 + dy - 1.0) * H
+
     def P(p):
         bx, by, bz = p
         X = -bx * cp + bz * sp
@@ -280,15 +299,16 @@ def figure(spec, ps, fw=56, fh=80):
 
     def trunk():
         hem_top = spec.get("top_hem", 0.45)
-        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.66, 0.05), (0.245, sw * 0.93, 0.064), (0.31, sw * 0.9, 0.07),
+        levels = [(0.19, 0.04, 0.034), (0.212, sw * 0.66, 0.05), (0.245, sw * 1.0, 0.064), (0.31, sw * 0.95, 0.07),
                   (0.40, waist, 0.058), (0.47, hipw, 0.064), (0.53, hipw * 0.86, 0.056)]
         left, right = [], []
         for y, ax, az in levels:
             cxy = P(body([shift * min(1.0, max(0.0, (y - 0.3) / 0.2)), y, 0.004]))
             k = 1.0 if y < 0.3 else BULK
             w = H * math.sqrt((ax * k * cp) ** 2 + (az * 1.25 * sp) ** 2)
-            left.append((cxy[0] - w, cxy[1]))
-            right.append((cxy[0] + w, cxy[1]))
+            tilt = math.copysign(1.0, cp) * ax * k * sp * H * PITCH  # far shoulder sits higher, as the arms do
+            left.append((cxy[0] - w, cxy[1] + tilt))
+            right.append((cxy[0] + w, cxy[1] - tilt))
         c.put(c.poly(left + right[::-1], curve=0.9), torso, "torso")
         if col.get("abdomen"):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
@@ -303,7 +323,7 @@ def figure(spec, ps, fw=56, fh=80):
     arm_pts = {}
     for s in (1, -1):
         kind, f, o, e = ps["arms"][s]
-        sh = body([s * (sw - 0.002), 0.256, 0.0])
+        sh = body([s * (sw + 0.01), 0.256, 0.0])
         if kind == "hip":
             el = body([s * (sw + 0.07), 0.345, -0.035])
             wr = body([s * (hipw - 0.005), 0.455, 0.0])
