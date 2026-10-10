@@ -141,6 +141,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     -> END
 = after
 BELLBOY: Blue Lantern, mister. Steel door, State Street alley. You didn't hear it from me.
+BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
 -> END
 
 === bellboy_tip ===
@@ -152,6 +153,11 @@ MICAH: The Blue Lantern?
 BELLBOY: Speakeasy. Down the alley, steel door. You'll need the password.
 BELLBOY: And no, I don't know it. But a guy like that leaves matches everywhere. Butts too. Like a chimney with legs.
 ~ set_flag("knows_lantern")
+MICAH: Her room. The one she had Tuesday. I want a look.
+BELLBOY: Front desk won't give you the time of day, never mind a key. But that dollar buys you the back way.
+BELLBOY: Staff door, by the palm. Service elevator to five, room 507. Maids leave it on the latch.
+BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
+~ set_flag("staff_elevator")
 -> END
 
 // ---------------------------------------------------------------- SPEAKEASY

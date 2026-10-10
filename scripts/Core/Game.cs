@@ -155,6 +155,16 @@ public partial class Game : Node
     public Task ItemVerb(Verb verb, string item) => Run(async () =>
     {
         if (Room != null && await Room.OnItemVerb(verb, item)) return;
+        if (verb == Verb.Hand && item == "brass_box")
+        {
+            var state = GameState.Instance;
+            state.TakeItem("brass_box");
+            state.GiveItem("card");
+            state.GiveItem("matchbook");
+            await Say("The clasp gave with a click. Inside: a calling card, blank but for the curlicues, and a perfume that wasn't hers.");
+            await Say("And a matchbook. A blue lantern on the cover. The Blue Lantern, then. That's where her trail goes next.");
+            return;
+        }
         switch (verb)
         {
             case Verb.Look:

@@ -154,8 +154,6 @@ def urn(img):
     d.ellipse([346, 108, 366, 118], fill=hx("c0a050"))
     d.ellipse([349, 110, 363, 115], fill=hx("4a4048"))
     d.rectangle([348, 148, 364, 152], fill=GOLD_D)
-    d.point((355, 112), fill=hx("2a3a8a"))
-    d.point((356, 112), fill=hx("4a7ad8"))
     shadow(img, "ellipse", [344, 150, 372, 156], 0.45, 2)
 
 
@@ -181,6 +179,22 @@ def revolving_door(img):
     light(img, "rect", [x0, y0, x1, y1], hx("6080c0"), 0.12, 4)
 
 
+def service_door(img):
+    """Plain staff door to the service elevator, tucked between the palm and the urn."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = 312, 66, 342, 137
+    d.rectangle([x0 - 3, y0 - 3, x1 + 3, y1], fill=hx("8a7a5a"))
+    vgrad(img, (x0, y0, x1, y1), hx("c8b894"), hx("a89874"))
+    d.rectangle([x0, y0, x1, y1], outline=hx("6a5a3a"))
+    for py0, py1 in ((y0 + 5, y0 + 30), (y0 + 36, y1 - 6)):
+        d.rectangle([x0 + 4, py0, x1 - 4, py1], outline=hx("8a7a5a"))
+        d.line([(x0 + 5, py0 + 1), (x1 - 5, py0 + 1)], fill=hx("e0d4b4"))
+    d.rectangle([x0 + 3, y0 + 14, x1 - 3, y0 + 21], fill=hx("2a2018"))
+    text(img, ((x0 + x1) // 2, y0 + 18), "STAFF", GOLD, size=6)
+    d.ellipse([x1 - 7, 102, x1 - 3, 106], fill=GOLD)
+    shadow(img, "rect", [x0, y1 - 2, x1, y1], 0.4, 2)
+
+
 def paint(include_desk=True):
     img = Image.new("RGB", (W, H))
     walls(img)
@@ -189,6 +203,7 @@ def paint(include_desk=True):
     for x in (146, 300, 384):
         pilaster(img, x)
     elevator(img)
+    service_door(img)
     palm(img, 172, 140)
     palm(img, 290, 140)
     urn(img)

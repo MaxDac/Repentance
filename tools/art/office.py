@@ -223,7 +223,7 @@ def paint(drawer=None):
     window(img)
     desk(img)
     desk_props(img)
-    if drawer:
+    if drawer is not None:
         open_drawer(img, drawer)
     img = tall(img, ceiling)
     vignette(img, 0.55)
@@ -251,19 +251,32 @@ def ceiling(img):
     d.point((299, 16), fill=hx("a8a690"))
 
 
+DRAWER_BOX = (276, 109 + TOP, 342, 139 + TOP)
+# per-item crops inside the open drawer (screen coords, i.e. art y + TOP)
+ITEM_BOXES = {
+    "revolver": (289, 118 + TOP, 307, 128 + TOP),
+    "dollar": (307, 118 + TOP, 321, 128 + TOP),
+    "lockpick": (321, 118 + TOP, 332, 128 + TOP),
+}
+
+
 def open_drawer(img, contents):
     d = ImageDraw.Draw(img)
-    # drawer pulled out towards the camera
-    d.polygon([(286, 133), (332, 133), (336, 146), (282, 146)], fill=hx("6a4024"))
-    d.rectangle([282, 146, 336, 152], fill=hx("4a2a16"))
-    d.rectangle([304, 148, 312, 150], fill=hx("b8904a"))
-    d.polygon([(289, 135), (329, 135), (332, 144), (286, 144)], fill=hx("24140a"))
-    # revolver always there (flavour)
-    d.line([(292, 140), (304, 139)], fill=hx("4a4a52"), width=2)
-    d.polygon([(302, 138), (308, 138), (309, 143), (304, 143)], fill=hx("3a2416"))
-    if contents == "full":
-        d.polygon([(314, 137), (326, 136), (327, 142), (315, 143)], fill=hx("8aa878"))
-        d.line([(316, 139), (324, 138)], fill=hx("4a6a48"))
+    # top drawer pulled out towards the camera
+    d.polygon([(286, 116), (332, 116), (336, 129), (282, 129)], fill=hx("6a4024"))
+    d.rectangle([282, 129, 336, 135], fill=hx("4a2a16"))
+    d.rectangle([304, 131, 312, 133], fill=hx("b8904a"))
+    d.polygon([(289, 118), (329, 118), (332, 127), (286, 127)], fill=hx("24140a"))
+    if "revolver" in contents:
+        d.line([(291, 123), (302, 122)], fill=hx("4a4a52"), width=2)
+        d.polygon([(300, 121), (305, 121), (306, 126), (302, 126)], fill=hx("3a2416"))
+    if "dollar" in contents:
+        d.polygon([(309, 120), (318, 119), (319, 125), (310, 126)], fill=hx("8aa878"))
+        d.line([(311, 122), (317, 121)], fill=hx("4a6a48"))
+    if "lockpick" in contents:
+        d.rectangle([322, 121, 326, 125], fill=hx("4a2a1a"))
+        d.line([(325, 121), (330, 120)], fill=hx("a8a8b0"))
+        d.line([(325, 123), (330, 123)], fill=hx("a8a8b0"))
 
 
 def build():
@@ -271,7 +284,7 @@ def build():
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "office.png")
-    box = (276, 126 + TOP, 342, 156 + TOP)
-    for v in ("full", "empty"):
-        save(pixelize(paint(v), pal).crop(box), "rooms", f"office_drawer_{v}.png")
+    save(pixelize(paint(()), pal).crop(DRAWER_BOX), "rooms", "office_drawer_open.png")
+    for item, box in ITEM_BOXES.items():
+        save(pixelize(paint((item,)), pal).crop(box), "rooms", f"office_drawer_{item}.png")
     return px

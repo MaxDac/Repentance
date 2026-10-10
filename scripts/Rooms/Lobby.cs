@@ -42,14 +42,18 @@ public partial class Lobby : Room
                 return true;
 
             case ("urn", Verb.Hand or Verb.Kick):
-                if (State.HasItem("matchbook") || State.HasFlag("found_matchbook"))
-                {
-                    await Say("Nothing left in there but sand and cigar stubs.");
-                    return true;
-                }
-                State.SetFlag("found_matchbook");
-                State.GiveItem("matchbook");
-                await Say("Under the sand and a dozen cigar stubs... a matchbook. Blue Lantern. Somebody wrote inside it.");
+                await Say("Nothing in there but sand and cigar stubs.");
+                return true;
+
+            case ("service_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator"):
+                await Say("Staff elevator. Fifth floor, room 507. Nobody looks twice at a man who uses the back door.");
+                await Game.ChangeRoom("eleanor_room", "lobby");
+                return true;
+            case ("service_door", Verb.Walk or Verb.Hand):
+                await Say("Staff only. And the concierge is watching it like it owes him money.");
+                return true;
+            case ("service_door", Verb.Kick):
+                await Say("Kicking down a door in the lobby. Subtle, Micah.");
                 return true;
 
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern") || State.HasFlag("club_lead"):

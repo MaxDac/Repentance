@@ -45,25 +45,30 @@ godot --path . -- --autoplay
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
-   over the boxes, find the crowbar in the papers and use it on the steamer trunk. Inside is Micah's journal.
+   over the boxes, find the crowbar in the papers and use it on the steamer trunk (the key in the suitcase
+   doesn't fit it). Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
-1. **Office**: Teddy briefs you and hands over Eleanor's photograph. There's a dollar in the top desk drawer.
-2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory.
-   The brass urn hides a matchbook from the Blue Lantern with a password inside.
-3. **Blue Lantern speakeasy**: give Sal the password, then show the bartender the photo. He sends you to
+1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
+   a dollar and a set of lockpicks. Micah won't leave without all three.
+2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
+   staff elevator up to Eleanor's room.
+3. **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
+   open the closet to find the safe, and take the brass box. Open it in the satchel with the hand: a
+   perfumed, blank calling card and a matchbook from the Blue Lantern with a password inside.
+4. **Blue Lantern speakeasy**: give Sal the password, then show the bartender the photo. He sends you to
    the Starlight club after a singer called "Nora".
 
 The rest is a *temporary* storyline that strings together every location:
 
-4. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
+5. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
    is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
    bookkeeper is dead. She gives you the key to her old suite.
-5. **Aurelian suite 4**: her diary is hidden in the vanity.
-6. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
-7. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
+6. **Aurelian suite 4**: her diary is hidden in the vanity.
+7. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
+8. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
    the shelves holds a motel receipt.
-8. **Motel room 6**: a map is hidden in the bed.
-9. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
+9. **Motel room 6**: a map is hidden in the bed.
+10. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
 
 ## Project layout
 
@@ -130,7 +135,7 @@ Each character is a spec dict in `tools/art/sprites.py`.
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
-py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, speakeasy, ui
+py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, ui
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same

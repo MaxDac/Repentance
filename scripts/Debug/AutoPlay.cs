@@ -51,6 +51,10 @@ public class AutoPlay
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
             await game.Perform(Verb.Hand, "boxes");
             Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
+            await game.Perform(Verb.Hand, "suitcase");
+            Check(gs.HasItem("suitcase_key"), "found the key in the suitcase");
+            await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
+            Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
             await game.Perform(Verb.Hand, "papers");
             Check(gs.HasItem("crowbar"), "found the crowbar");
             await Shot("attic_mess");
@@ -65,8 +69,13 @@ public class AutoPlay
             await Shot("office");
             await game.Perform(Verb.Hand, "drawer");
             await Shot("office_drawer");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "Office", "can't leave without the drawer things");
+            await game.Perform(Verb.Hand, "revolver");
             await game.Perform(Verb.Hand, "dollar");
-            Check(gs.HasItem("dollar"), "got the dollar");
+            await game.Perform(Verb.Hand, "lockpick");
+            Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
+            await Shot("office_drawer_empty");
             await MouseTest(game);
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "Lobby", "entered the lobby");
@@ -79,9 +88,30 @@ public class AutoPlay
             Check(game.Room?.Name == "Lobby", "back in the lobby");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
-            Check(gs.HasFlag("knows_lantern"), "bellboy tip");
-            await game.Perform(Verb.Hand, "urn");
-            Check(gs.HasItem("matchbook"), "got the matchbook");
+            Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
+            await game.Perform(Verb.Walk, "service_door");
+            Check(game.Room?.Name == "EleanorRoom", "staff elevator up to Eleanor's room");
+
+            await Shot("eleanor_room");
+            await game.Perform(Verb.Hand, "desk_drawer");
+            Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
+            await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
+            Check(gs.HasFlag("eleanor_drawer_open"), "lockpicked the drawer");
+            await Shot("eleanor_drawer");
+            await game.Perform(Verb.Hand, "paper");
+            Check(gs.HasItem("combination"), "got the combination");
+            await game.Perform(Verb.Hand, "closet");
+            Check(gs.HasFlag("closet_open"), "opened the closet");
+            await game.Perform(Verb.UseItem, "safe", "combination");
+            Check(gs.HasFlag("safe_open"), "opened the safe");
+            await Shot("eleanor_safe");
+            await game.Perform(Verb.Hand, "brass_box");
+            Check(gs.HasItem("brass_box"), "took the brass box");
+            await Shot("eleanor_safe_empty");
+            await game.ItemVerb(Verb.Hand, "brass_box");
+            Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "Lobby", "back down in the lobby");
             await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room?.Name == "Speakeasy", "entered the speakeasy");
 
@@ -197,9 +227,10 @@ public class AutoPlay
         Click(game.Hud.SatchelCenter, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Hud.InventoryOpen, "satchel opens the inventory");
-        Move(game.Hud.SlotCenter(0));
+        var slot = game.Hud.SlotCenter(IndexOf("crowbar"));
+        Move(slot);
         await Shot("attic_inventory");
-        Click(game.Hud.SlotCenter(0), MouseButton.Left);
+        Click(slot, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
         var trunk = new Vector2(432, 205);
@@ -220,7 +251,7 @@ public class AutoPlay
         Click(game.Hud.SatchelCenter, MouseButton.Left);
         for (int i = 0; i < 40 && !game.Hud.InventoryOpen; i++) await game.Wait(0.05);
         await game.Wait(0.1);
-        var slot = game.Hud.SlotCenter(0);
+        var slot = game.Hud.SlotCenter(IndexOf("journal"));
         Move(slot);
         Click(slot, MouseButton.Right);
         await game.Wait(0.1);
@@ -247,6 +278,14 @@ public class AutoPlay
         Check(game.Busy, "left click on the window looks at it");
         await Shot("office_look_window");
         await WaitIdle(game);
+    }
+
+    private static int IndexOf(string item)
+    {
+        var inv = GameState.Instance.Inventory;
+        for (int i = 0; i < inv.Count; i++)
+            if (inv[i] == item) return i;
+        return 0;
     }
 
     private async Task WaitIdle(Game game)

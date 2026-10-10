@@ -29,6 +29,18 @@ public static class Items
             "A hand-drawn map of the county road. An X past the last fence post, east of town."),
         ["evidence"] = new("evidence", "tin box", "res://assets/art/items/evidence.png",
             "A rusted tin box: Moretti's IOUs, signed by Teddy, and a gold cufflink. T.H."),
+        ["suitcase_key"] = new("suitcase_key", "small key", "res://assets/art/items/suitcase_key.png",
+            "A small brass key from the lining of an old suitcase. It opens something. Something small."),
+        ["revolver"] = new("revolver", "revolver", "res://assets/art/items/revolver.png",
+            "My .38. Loaded, oiled, and as reluctant as its owner."),
+        ["lockpick"] = new("lockpick", "lockpicks", "res://assets/art/items/lockpick.png",
+            "A roll of lockpicks. A souvenir from a burglar I once let off easy. He said I'd need them more than him."),
+        ["combination"] = new("combination", "slip of paper", "res://assets/art/items/combination.png",
+            "Hotel stationery, in Eleanor's hand: \"R 12 - L 31 - R 7\". Not a phone number."),
+        ["brass_box"] = new("brass_box", "brass box", "res://assets/art/items/brass_box.png",
+            "A little brass box, engraved with lilies. Something slides around inside."),
+        ["card"] = new("card", "business card", "res://assets/art/items/card.png",
+            "A calling card, heavy stock, gilt edges. No name, no address. Just curlicues, and a perfume that isn't Eleanor's."),
     };
 
     public static ItemDef Get(string id) => All[id];

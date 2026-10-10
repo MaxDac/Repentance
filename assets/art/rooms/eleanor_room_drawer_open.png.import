@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cd844bctm6jkk"
-path="res://.godot/imported/office_drawer_full.png-08f6a8d5603a7497bbe5b2743a79883f.ctex"
+uid="uid://yjnaakejgp7r"
+path="res://.godot/imported/eleanor_room_drawer_open.png-9e29243cc699e84719f892143cf764e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_full.png"
-dest_files=["res://.godot/imported/office_drawer_full.png-08f6a8d5603a7497bbe5b2743a79883f.ctex"]
+source_file="res://assets/art/rooms/eleanor_room_drawer_open.png"
+dest_files=["res://.godot/imported/eleanor_room_drawer_open.png-9e29243cc699e84719f892143cf764e3.ctex"]
 
 [params]
 

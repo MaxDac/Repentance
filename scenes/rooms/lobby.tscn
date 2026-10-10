@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Lobby.cs" id="1_Lobby"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/lobby.png" id="2_lobby"]
@@ -41,6 +41,9 @@ size = Vector2(24, 46)
 [sub_resource type="RectangleShape2D" id="Rect_11"]
 size = Vector2(90, 113)
 
+[sub_resource type="RectangleShape2D" id="Rect_12"]
+size = Vector2(34, 74)
+
 [node name="Lobby" type="Node2D"]
 script = ExtResource("1_Lobby")
 RoomName = "Aurelian Hotel"
@@ -67,6 +70,10 @@ metadata/facing = 1
 [node name="street" type="Marker2D" parent="Entries"]
 position = Vector2(430, 190)
 metadata/facing = 3
+
+[node name="eleanor_room" type="Marker2D" parent="Entries"]
+position = Vector2(327, 182)
+metadata/facing = 1
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -212,6 +219,20 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Urn"]
 position = Vector2(356.0, 159.0)
 shape = SubResource("Rect_10")
+
+[node name="ServiceDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "service_door"
+DisplayName = "staff door"
+LookText = "STAFF. Behind it, the service elevator: the Aurelian's back stairs for maids, bags and secrets."
+WalkTo = Vector2(327, 180)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ServiceDoor"]
+position = Vector2(327.0, 131.5)
+shape = SubResource("Rect_12")
 
 [node name="RevolvingDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

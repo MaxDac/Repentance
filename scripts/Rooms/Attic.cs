@@ -41,6 +41,13 @@ public partial class Attic : Room
 
     private Task Hint(string text) => Say("hint", text);
 
+    private Task SatchelHint()
+    {
+        if (State.HasFlag("satchel_hint")) return Task.CompletedTask;
+        State.SetFlag("satchel_hint");
+        return Hint("(Your things go in the satchel, bottom right. Click an item to hold it, then click where to use it.)");
+    }
+
     protected override void OnRefresh()
     {
         int actIndex = Mathf.Clamp(State.StoryAct, 1, ActBackgrounds.Length) - 1;
@@ -110,7 +117,7 @@ public partial class Attic : Room
                 State.SetFlag("got_crowbar");
                 State.GiveItem("crowbar");
                 await Say("A crowbar! Hidden in a box marked MISC. Fair enough.");
-                await Hint("(Your things go in the satchel, bottom right. Click an item to hold it, then click where to use it.)");
+                await SatchelHint();
                 return true;
             case ("papers", Verb.Hand):
                 await Say("I'll file them later. In the recycling bin.");
@@ -123,6 +130,10 @@ public partial class Attic : Room
                 return true;
             case ("trunk", Verb.Hand) when !State.HasFlag("trunk_open"):
                 await Say("Locked. The key's probably been at the bottom of Lake Michigan for decades.");
+                return true;
+            case ("trunk", Verb.UseItem) when item == "suitcase_key" && !State.HasFlag("trunk_open"):
+                await Say("It slides in... and won't turn. Not even a little. Wrong lock.");
+                await Say("Figures. The small key opens some small thing. This is a big thing.");
                 return true;
             case ("trunk", Verb.Kick) when !State.HasFlag("trunk_open"):
                 State.SetFlag("trunk_kicked");
@@ -140,6 +151,20 @@ public partial class Attic : Room
                 return true;
             case ("trunk", Verb.Hand or Verb.Kick):
                 await Say("It's open. Nothing else in there but mothballs.");
+                return true;
+
+            case ("suitcase", Verb.Look) when !State.HasFlag("got_suitcase_key"):
+                await Say("A battered suitcase. Something rattles inside it when I nudge it with my foot.");
+                return true;
+            case ("suitcase", Verb.Hand) when !State.HasFlag("got_suitcase_key"):
+                State.SetFlag("got_suitcase_key");
+                State.GiveItem("suitcase_key");
+                await Say("Empty... no, wait. Something's sewn into the lining.");
+                await Say("A key! Small, brass. Maybe it fits that trunk.");
+                await SatchelHint();
+                return true;
+            case ("suitcase", Verb.Hand):
+                await Say("Empty now. Even the lining.");
                 return true;
 
             case ("radio", Verb.Hand):
@@ -169,6 +194,7 @@ public partial class Attic : Room
         if (item != "journal" || verb != Verb.Hand) return false;
         await Talk("journal");
         State.TakeItem("journal");
+        State.TakeItem("suitcase_key");
         await Game.Hud.Fade(1, 1.5);
         Game.Hud.ShowCaption("Chicago, 1927.");
         await Wait(2.8);
