@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3]
 
-[ext_resource type="Script" path="res://scripts/Core/Room.cs" id="1_Room"]
+[ext_resource type="Script" path="res://scripts/Rooms/ChurchExterior.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/church_exterior.png" id="2_church_exterior"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 

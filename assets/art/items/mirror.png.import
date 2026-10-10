@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6jdyd4mqbmux"
-path="res://.godot/imported/office_drawer_empty.png-a3d8a46e794b7c33ee53a58ccfd88b33.ctex"
+uid="uid://i6ehi21y1wyl"
+path="res://.godot/imported/mirror.png-72995c054771ce48c599142d45eb8c85.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_empty.png"
-dest_files=["res://.godot/imported/office_drawer_empty.png-a3d8a46e794b7c33ee53a58ccfd88b33.ctex"]
+source_file="res://assets/art/items/mirror.png"
+dest_files=["res://.godot/imported/mirror.png-72995c054771ce48c599142d45eb8c85.ctex"]
 
 [params]
 

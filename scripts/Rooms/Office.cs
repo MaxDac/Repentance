@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -26,6 +27,11 @@ public partial class Office : Room
         await Say("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
     }
 
+    private static readonly string[] DrawerFlags = { "took_revolver", "took_dollar", "took_lockpick" };
+
+    /// <summary>How many of the drawer's things (revolver, dollar, lockpicks) Micah hasn't taken yet.</summary>
+    private int DrawerLeft() => DrawerFlags.Count(f => !State.HasFlag(f));
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
@@ -41,6 +47,12 @@ public partial class Office : Room
             case ("door", Verb.Walk or Verb.Hand) when !State.HasFlag("teddy_gone"):
                 await Say("Walking out on a paying client? Not this month.");
                 return true;
+            case ("door", Verb.Walk or Verb.Hand) when DrawerLeft() > 0:
+                await Say("Not without my things from the top drawer. A man goes out at night in this town, he goes prepared.");
+                return true;
+            case ("door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                await Game.ChangeRoom("chicago_map", "start");
+                return true;
 
             case ("drawer", Verb.Hand):
                 if (State.HasFlag("drawer_open"))
@@ -49,9 +61,12 @@ public partial class Office : Room
                     return true;
                 }
                 State.SetFlag("drawer_open");
-                await Say(State.HasFlag("took_dollar")
-                    ? "A revolver. Nothing else. The story of my life."
-                    : "My revolver, and my entire savings: one dollar.");
+                await Say(DrawerLeft() switch
+                {
+                    0 => "Empty. The story of my life.",
+                    3 => "My revolver, my entire savings: one dollar, and my picks.",
+                    _ => "What's left of the important things.",
+                });
                 return true;
             case ("drawer", Verb.Kick):
                 await Say("Kicking my own desk. That's a new low, even for me.");
@@ -66,7 +81,14 @@ public partial class Office : Room
                 await Say("Don't spend it all at once, Micah.");
                 return true;
             case ("revolver", Verb.Hand):
-                await Say("It stays in the drawer. Last time I carried it, I shot a mailbox.");
+                State.GiveItem("revolver");
+                State.SetFlag("took_revolver");
+                await Say("Last time I carried it, I shot a mailbox. Let's hope the mailboxes behave tonight.");
+                return true;
+            case ("lockpick", Verb.Hand):
+                State.GiveItem("lockpick");
+                State.SetFlag("took_lockpick");
+                await Say("My picks. A locked door is just a question nobody's asked politely yet.");
                 return true;
 
             case ("bottle", Verb.Hand):
@@ -92,5 +114,23 @@ public partial class Office : Room
                 return true;
         }
         return false;
+    }
+
+    public override async Task<bool> OnItemVerb(Verb verb, string item)
+    {
+        if (item != "book" || verb != Verb.Hand) return false;
+        if (State.HasFlag("read_book"))
+        {
+            await Say("Groves, wells, bonfires on the hills. I've read enough of it for one lifetime.");
+            return true;
+        }
+        State.SetFlag("read_book");
+        await Say("\"Rites of the Old Isles.\" Midsummer fires. Oak groves. Wells you whisper your sins into.");
+        await Say("Druids and dew and the turning of the seasons. Pretty, if you're a farmer. I'm not.");
+        await Say("Wait. Something slipped out from between the pages. A little sheet of paper.");
+        State.GiveItem("address");
+        State.SetFlag("club_unlocked");
+        await Say("An address, in a woman's hand. \"The Starlight, 18 W. Hubbard.\" A nightclub.");
+        return true;
     }
 }

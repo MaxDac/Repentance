@@ -50,6 +50,25 @@ LEO: In a minute!
 DANIEL: Fine. More for me.
 -> END
 
+=== dinner_call ===
+LEO: DAD! DINNER!
+DANIEL: ...Dinner? It's dark out already.
+LEO: Mom says if you're not down in two minutes, your plate goes to the dog!
+DANIEL: Coming! I'm coming.
+DANIEL: "I won't tell anyone where they can find you." Then why write it all down, Micah?
+-> END
+
+=== attic_act2 ===
+DANIEL: Morning, attic. Morning, dress form.
+DANIEL: I barely slept. Kept seeing a man on his knees in an alley, a hundred years ago.
+DANIEL: Right. Where were we, Micah?
+-> END
+
+=== journal_act2 ===
+DANIEL: The next entry. Same steady hand, but the ink is darker. Pressed harder into the page.
+DANIEL: "I told myself I was done with the Harringtons. Chicago had other plans."
+-> END
+
 // ---------------------------------------------------------------- OFFICE
 
 === teddy ===
@@ -141,6 +160,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     -> END
 = after
 BELLBOY: Blue Lantern, mister. Steel door, State Street alley. You didn't hear it from me.
+BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
 -> END
 
 === bellboy_tip ===
@@ -152,6 +172,11 @@ MICAH: The Blue Lantern?
 BELLBOY: Speakeasy. Down the alley, steel door. You'll need the password.
 BELLBOY: And no, I don't know it. But a guy like that leaves matches everywhere. Butts too. Like a chimney with legs.
 ~ set_flag("knows_lantern")
+MICAH: Her room. The one she had Tuesday. I want a look.
+BELLBOY: Front desk won't give you the time of day, never mind a key. But that dollar buys you the back way.
+BELLBOY: Staff door, by the palm. Service elevator to five, room 507. Maids leave it on the latch.
+BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
+~ set_flag("staff_elevator")
 -> END
 
 // ---------------------------------------------------------------- SPEAKEASY
@@ -167,12 +192,31 @@ SAL: Password.
 * [Open sesame?]
     SAL: Get lost.
     -> sal.opts
-* {has_item("matchbook")} [Sweet Caroline's sister.]
+* [All right. I don't know the password.]
+    -> sal.bribe
++ [(Leave)]
+    -> END
+= bribe
+SAL: Then you don't know nothin', and nothin' don't get in.
+MICAH: Matchbook says the Blue Lantern. Doesn't say a word about a password.
+SAL: Matches are free. The door ain't.
+- (bribe_opts)
+* [(Fold a ten into his paw)]
+    MICAH: Maybe Mr. Hamilton here knows the password.
     SAL: ...
+    SAL: Yeah. Hamilton's a member.
     SAL: Go on in. Keep your hands where I can see 'em.
     ~ set_flag("sal_passed")
     -> END
-+ [(Leave)]
+* [What's the matter, big fella? Forgot it yourself?]
+    SAL: ...
+    SAL: You're a funny guy. I like funny guys. I like 'em out back.
+    ~ set_flag("thrown_out")
+    -> END
+* [I don't pay to get into a gin joint.]
+    SAL: You don't pay, you don't drink. You don't drink, you don't stay.
+    SAL: Out back. Now.
+    ~ set_flag("thrown_out")
     -> END
 = after
 SAL: You're in, ain't you? Don't make me regret it.
@@ -188,18 +232,115 @@ BARTENDER: What'll it be?
 * [Nice place.]
     BARTENDER: It's a dump. But it's a dump with a band on Fridays.
     -> bartender.opts
-* {has_item("photo")} [Seen her around?]
+* [I'm looking for a woman. Eleanor Harrington.]
     -> bartender.photo
 + [(Leave)]
     -> END
 = photo
 BARTENDER: ...
-BARTENDER: Put that away, pal. Put it away right now.
-BARTENDER: You want the canary? She don't sing here no more. She sings at the Starlight.
-BARTENDER: Calls herself Nora now. Unmarked door, State Street, next to the lunch counter.
-BARTENDER: Half of Moretti's boys are sweet on her. Mr. Moretti don't like sharing. You didn't hear it from me.
-~ set_flag("photo_shown")
-~ set_flag("club_lead")
+BARTENDER: Never heard of her. And I got a real bad memory for faces, pal. Especially faces that ask questions.
+- (photo_opts)
+* [She was seen leaving the Aurelian with one of your regulars.]
+    BARTENDER: Lots of people get seen. Then one day they stop getting seen. Funny how that works.
+    -> bartender.photo_opts
+* [I could make it worth your while.]
+    BARTENDER: Your money's no good here, mister. Your questions neither.
+    -> bartender.photo_opts
++ [(Drop it)]
+    -> END
+= after
+BARTENDER: The Starlight, pal. Now drink or leave.
+-> END
+
+=== bartender_dislike ===
+BARTENDER: Hey. Gumshoe.
+BARTENDER: You know what, I think I don't really like you at all.
+-> END
+
+// ---------------------------------------------------------------- THE ALLEY BEHIND THE BLUE LANTERN
+
+=== alley ===
+BARTENDER: Stay down, gumshoe. You look good down there.
+MICAH: ...I've been worse. I just can't remember when.
+SAL: Want I should give him another, Tony?
+BARTENDER: Nah. He's listening now. Ain't you listening?
+MICAH: I'm all ears. The rest of me's on the pavement.
+BARTENDER: The dame. Eleanor. She's hot stuff, see? Too hot for this joint, too hot for this town.
+BARTENDER: She come in here a few nights back, scared out of her mind. I sent her to the nuns. The convent up on the North Side.
+BARTENDER: That's it. That's all I know. I don't know nothin' else, and I don't wanna.
+MICAH: Why tell me at all?
+BARTENDER: 'Cause a mug who takes a beating like that and keeps asking is gonna find out anyway. Better from me than from Moretti.
+SAL: Come back here again and we bury you. Capisce?
+-> END
+
+// ---------------------------------------------------------------- THE CONVENT
+
+=== nun ===
+{has_flag("nun_talked"): -> nun.again}
+NUN: This is a house of God, not a waiting room. What are you doing here, young man?
+MICAH: Looking for someone. Eleanor Harrington.
+NUN: And what would you want with her?
+* [Her husband hired me to find her.]
+    NUN: Her husband. Yes. I am sure he is very worried. About something.
+* [I just want to know she's safe.]
+    NUN: Men always say that. Usually just before they make a woman less safe.
+- NUN: What is your name?
+MICAH: Micah. Micah Jones.
+NUN: Micah. Like the prophet. "He hath shewed thee, O man, what is good." Do you remember the rest?
+MICAH: My mother did. I stopped listening somewhere around "walk humbly".
+NUN: Then listen now, Micah. You would be better off finish the search now, and never have anything to do with that Jezebel.
+MICAH: Jezebel? What do you mean by that?
+NUN: ...
+NUN: I have said too much already. It is not my place to judge. Only to pray.
+NUN: Her room is the last door, at the end of the corridor. If you really want, you can have a look at it.
+NUN: Then go. And God be with you, Micah Jones. You will need Him.
+~ set_flag("nun_talked")
+-> END
+= again
+NUN: The last door, at the end. Look if you must. Then go.
+-> END
+
+// ---------------------------------------------------------------- OUTSIDE THE CONVENT
+
+=== eleanor_road ===
+ELEANOR: Sister Agatha said a man came asking for me. A man with a split lip and a prophet's name.
+ELEANOR: Why are you looking for me, Mr. Jones?
+MICAH: Your husband hired me to bring you home.
+ELEANOR: Teddy. Of course. And what do you get, if you bring me home?
+* [Twenty dollars a day, plus expenses.]
+    ELEANOR: Twenty a day. I used to spend that on gloves.
+* [Right now? I'm not so sure anymore.]
+    ELEANOR: That's the first honest thing a man has said to me in a month.
+- ELEANOR: You're bleeding. Hold still.
+MICAH: You do this for every man who comes looking for you?
+ELEANOR: Only the ones who get beaten on my account. It's a short list. You're at the top of it.
+MICAH: The sister called you a Jezebel.
+ELEANOR: And what do you call me, Mr. Jones?
+MICAH: I haven't decided yet. I'm not sure I want to.
+ELEANOR: You could tell Teddy you never found me.
+MICAH: I could. I'm a lousy liar.
+ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
+MICAH: Come away from here. Not back to Teddy. Anywhere.
+ELEANOR: I can't return back there...
+-> END
+
+// ---------------------------------------------------------------- MOTEL, NIGHT
+
+=== motel_night ===
+ELEANOR: Putting your shoes on already? Most men at least wait for the sun.
+MICAH: Most men aren't working for your husband.
+ELEANOR: Were. You were working for him.
+MICAH: ...
+ELEANOR: This was a mistake, wasn't it?
+MICAH: Probably. The best one I ever made, but still a mistake.
+ELEANOR: We should never see each other again, Micah.
+MICAH: I know.
+MICAH: I won't tell anyone where they can find you. Not Teddy, not Moretti, not the nuns.
+MICAH: And I'm giving up the job. Teddy can keep his twenty a day.
+ELEANOR: He'll hate you for it.
+MICAH: He'll have to get in line.
+ELEANOR: Goodbye, Micah Jones.
+MICAH: Goodbye, Eleanor.
 -> END
 = after
 BARTENDER: The Starlight, pal. Now drink or leave.
@@ -266,6 +407,26 @@ ELEANOR: The Aurelian, suite 4. Then the cathedral. Please, Mr. Jones.
 
 // ---------------------------------------------------------------- CATHEDRAL
 
+=== caleb_act2 ===
+CALEB: Can I help you, my son?
+CALEB: ...Micah?
+MICAH: Hello, Caleb. Or is it "Father" now?
+CALEB: Six years. You look like a man who hasn't slept for most of them.
+~ set_flag("caleb_met")
+MICAH: I didn't come to confess. I came to talk. There's a difference, isn't there?
+CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
+MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
+MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
+MICAH: Right now, Caleb... I'm too far off to be saved.
+CALEB: That's crap, Micah.
+CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
+CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
+CALEB: That's the Devil's work, brother. It's the oldest trick he has.
+MICAH: I'll think about that.
+MICAH: ...Coming here was a mistake.
+CALEB: Micah, wait-
+-> END
+
 === caleb ===
 {has_flag("library_lead"): -> caleb.after}
 {not has_flag("caleb_met"):
@@ -304,6 +465,46 @@ CALEB: The library. And Micah... be kind to her.
 -> END
 
 // ---------------------------------------------------------------- LIBRARY
+
+=== librarian ===
+{has_flag("librarian_refused"): -> librarian.again}
+{not has_flag("librarian_met"):
+    LIBRARIAN: Shh. The reading room closes at ten, sir. What can I do for you?
+    ~ set_flag("librarian_met")
+- else:
+    LIBRARIAN: Yes?
+}
+- (opts)
+* {has_item("mirror")} [I want to know about a symbol.]
+    MICAH: Three loops in one knot. Scratched into the back of a lady's mirror.
+    IMAGE: triquetra
+    LIBRARIAN: ...
+    LIBRARIAN: Where did you get that mirror?
+    MICAH: That's between me and the mirror.
+    LIBRARIAN: Then what that knot means is between me and my books. Good evening, sir.
+    ~ set_flag("librarian_refused")
+    -> END
+* [Where's the day librarian? Mrs. Jones.]
+    LIBRARIAN: Mrs. Jones keeps Christian hours, sir. I keep the other kind.
+    -> librarian.opts
++ [(Leave)]
+    LIBRARIAN: Mind the step. And the silence.
+    -> END
+= again
+LIBRARIAN: I've nothing to say to a man who won't tell me where he gets his mirrors.
+-> END
+
+=== librarian_threat ===
+MICAH: Let's try that again. Slower, this time.
+LIBRARIAN: Good Lord. Put that away! This is a library!
+MICAH: Then keep your voice down. The knot.
+LIBRARIAN: C-Celtic. A triquetra. Old, very old, from before the saints ever reached Ireland.
+LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
+LIBRARIAN: There's a book. "Rites of the Old Isles." A rare thing. We had a request for it just last month.
+LIBRARIAN: Take it. Take it and go away, and please don't come back.
+~ give_item("book")
+MICAH: Pleasure doing business. Late fees are on me.
+-> END
 
 === rose ===
 {not has_flag("rose_met"):

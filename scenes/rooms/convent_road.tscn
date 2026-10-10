@@ -1,0 +1,118 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/ConventRoad.cs" id="1_ConventRoad"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_road.png" id="2_convent_road"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="5_eleanor"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(44, 72)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(182, 44)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(48, 100)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(70, 180)
+
+[node name="ConventRoad" type="Node2D"]
+script = ExtResource("1_ConventRoad")
+RoomName = "Outside the Convent"
+FarY = 194
+NearY = 266
+FarScale = 0.92
+NearScale = 1.06
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_convent_road")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 194, 480, 194, 480, 266, 0, 266)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(110, 200)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "convent door"
+LookText = "Oak and iron. Sister Agatha's already bolted it behind me."
+WalkTo = Vector2(110, 200)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(110, 141)
+shape = SubResource("Rect_1")
+
+[node name="Fence" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "fence"
+DisplayName = "iron fence"
+LookText = "Spikes on top. To keep the world out, or the girls in."
+WalkTo = Vector2(240, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Fence"]
+position = Vector2(243, 170)
+shape = SubResource("Rect_2")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "stained glass"
+LookText = "Some saint in red and gold, glowing like he's got the last warm room in Chicago."
+WalkTo = Vector2(286, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(286, 112)
+shape = SubResource("Rect_3")
+
+[node name="Tree" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "tree"
+DisplayName = "bare tree"
+LookText = "Not a leaf on it. It knows something about this winter I don't."
+WalkTo = Vector2(400, 225)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Tree"]
+position = Vector2(424, 130)
+shape = SubResource("Rect_4")
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(300, 214)
+script = ExtResource("4_Actor")
+Id = "eleanor"
+DisplayName = "Eleanor"
+LookText = "Eleanor Harrington, all in black, like she's already been to her own funeral."
+WalkTo = Vector2(256, 218)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("5_eleanor")
+FlipH = true
+SpeechColor = Color(0.96, 0.78, 0.62, 1)

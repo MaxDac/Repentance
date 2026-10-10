@@ -45,25 +45,50 @@ godot --path . -- --autoplay
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
-   over the boxes, find the crowbar in the papers and use it on the steamer trunk. Inside is Micah's journal.
+   over the boxes, find the crowbar in the papers and use it on the steamer trunk (the key in the suitcase
+   doesn't fit it). Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
-1. **Office**: Teddy briefs you and hands over Eleanor's photograph. There's a dollar in the top desk drawer.
-2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory.
-   The brass urn hides a matchbook from the Blue Lantern with a password inside.
-3. **Blue Lantern speakeasy**: give Sal the password, then show the bartender the photo. He sends you to
-   the Starlight club after a singer called "Nora".
+1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
+   a dollar and a set of lockpicks. Micah won't leave without all three.
+2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
+   staff elevator up to Eleanor's room.
+3. **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
+   open the closet to find the safe, and take the brass box. Open it in the satchel with the hand: a
+   perfumed, blank calling card and a matchbook from the Blue Lantern.
+4. **Blue Lantern speakeasy**: Micah doesn't know the password and has to bribe Sal (mock him or refuse and
+   you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
+   like you, and nods to Sal.
+5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
+   him Eleanor is "hot stuff" and that he sent her to the nuns.
+6. **The convent** (corridor → cell): Sister Agatha questions Micah, warns him off "that Jezebel", then lets
+   him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
+   the back. Micah won't leave without the mirror.
+7. **Outside the convent**: Eleanor, in black, is waiting for him.
+8. **Motel, that night**: Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
+   and Micah drops the case.
+9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
+10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
+11. **Cathedral steps**: Micah couldn't turn Eleanor in, and can't think of anything but her. He goes in.
+12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
+   Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
+13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
+14. **Library, after hours**: ask the night librarian about the knot (shown full screen). He wants to know where
+   the mirror came from; Micah won't say, so neither will he, until Micah uses the revolver on him. He hands
+   over a book of Celtic rituals, and the library is off limits from then on.
+15. **Office**: read the book (hand on it in the satchel) and an address slips out: the Starlight club is now
+   on the map.
 
-The rest is a *temporary* storyline that strings together every location:
+From the Starlight the *temporary* storyline strings together every remaining location:
 
-4. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
+16. **Starlight club** (hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
    is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
    bookkeeper is dead. She gives you the key to her old suite.
-5. **Aurelian suite 4**: her diary is hidden in the vanity.
-6. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
-7. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
+17. **Aurelian suite 4** (out on the street): her diary is hidden in the vanity.
+18. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
+19. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
    the shelves holds a motel receipt.
-8. **Motel room 6**: a map is hidden in the bed.
-9. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
+20. **Motel room 6**: a map is hidden in the bed.
+21. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
 
 ## Project layout
 
@@ -130,7 +155,7 @@ Each character is a spec dict in `tools/art/sprites.py`.
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
-py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, speakeasy, ui
+py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same

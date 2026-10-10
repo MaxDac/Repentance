@@ -75,6 +75,10 @@ polygon = PackedVector2Array(104, 194, 392, 194, 392, 232, 470, 236, 470, 264, 1
 position = Vector2(236, 232)
 metadata/facing = 4
 
+[node name="night" type="Marker2D" parent="Entries"]
+position = Vector2(236, 214)
+metadata/facing = 4
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]

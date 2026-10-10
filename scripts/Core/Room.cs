@@ -28,6 +28,8 @@ public partial class Room : Node2D
     [Export] public string RoomName = "";
     /// <summary>Sprite sheet / speaker the player uses in this room ("micah" or "daniel").</summary>
     [Export] public string PlayerCharacter = "micah";
+    /// <summary>False for screens like the city map, where the player character isn't drawn.</summary>
+    [Export] public bool ShowPlayer = true;
 
     public WalkArea? Walk { get; private set; }
     public Node2D World { get; private set; } = null!;

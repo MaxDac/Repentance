@@ -7,7 +7,7 @@ Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
 NPCs get a 3-frame strip of 56x96 frames (idle, talk A, talk B) in a 3/4 view facing screen-right; scenes flip them.
 """
 from .common import save
-from .figure import figure as _figure, pose, walk_pose, sheet
+from .figure import figure as _figure, pose, walk_pose, sheet, kneel_figure as _kneel
 
 
 def figure(spec, ps, fw, fh):
@@ -75,6 +75,31 @@ CALEB = dict(h=65, sw=0.138, skin="d2a07c", hair="2e2018", torso="38363e", colla
              coat=dict(col="38363e", top=0.40, hem=0.95, flare=0.02), pants="26252b", shoes="1a1618",
              decals=[("strip", 0.19, 0.215, 0.009, 0.009, "f2f0ea", ("neck",)),
                      ("buttons", 0.25, 0.9, 9, "5c2a32")])
+# An older, stern nun in a 1920s habit: floor-length black tunic, black veil over a white coif and wimple, a white
+# guimpe over the chest and a rosary with a cross hanging from the cincture.
+NUN = dict(h=61, sw=0.122, hw=0.046, waist=0.084, hipw=0.096, skin="dcb49a", hair="e8e4dc", hair_style="bald",
+           old=True, soft_face=True, lips="a07468", lips_lo="8a5e54", eye="3a3a44", brow="5a4a44", hat="veil",
+           hat_col="1a181e", coif="e8e4dc", torso="2a2830", sleeves="2a2830",
+           coat=dict(col="2a2830", top=0.40, hem=0.97, flare=0.03), pants="2a2830", shoes="141216",
+           decals=[("strip", 0.205, 0.285, 0.05, 0.072, "e6e2da"), ("strip", 0.285, 0.315, 0.072, 0.03, "e6e2da"),
+                   ("belt", 0.415, "16141a"), ("rosary", 0.045, 0.43, 0.62, "6a4a34", "c8b070")])
+# The old librarian: thin and a little stooped, bald on top with grey at the sides, round wire spectacles, a
+# grey-brown buttoned cardigan over a white shirt with a small burgundy bow tie.
+LIBRARIAN = dict(h=63, sw=0.118, hw=0.044, waist=0.07, hipw=0.082, skin="dcb496", hair="b4b0a8", hair_style="bald",
+                 old=True, specs="c8b070", eye="3a3a44", brow="a8a49c", torso="6e6252", sleeves="6e6252",
+                 cuff="6e6252", collar="ece8de", coat=dict(col="6e6252", top=0.40, hem=0.53, flare=0.0),
+                 pants="3e3a38", shoes="2a1e18",
+                 decals=_vee(0.33, 0.034, "ece8de") + [("bow", 0.205, "7a2030"),
+                                                       ("buttons", 0.34, 0.51, 3, "3a3228")])
+# Micah getting dressed: no hat or coat, an open white shirt with the tie hanging loose round the collar, braces
+# unclipped and hanging in loops at the hips.
+MICAH_DRESSING = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="e4ddcc", sleeves="e4ddcc",
+                      cuff="e4ddcc", collar="ece6d6", pants="4a433b", shoes="2b1b14", top_hem=0.43,
+                      decals=[("strip", 0.205, 0.29, 0.03, 0.0, "d8a480"),
+                              ("ribbon", 0.03, 0.212, 0.37, 0.005, "7b1f2a"),
+                              ("ribbon", -0.026, 0.212, 0.31, 0.005, "7b1f2a"),
+                              ("buttons", 0.31, 0.41, 3, "b8ae9a"), ("belt", 0.43, "3a342e"),
+                              ("hang", 0.44, 0.17, "6a3e22")])
 
 
 def _arms(kind_r, kind_l=None):
@@ -99,10 +124,12 @@ def player_sheet(spec, name):
     return img
 
 
-def npc_strip(spec, name, arms, phi=35):
-    frames = [figure(spec, pose(phi, arms=arms), NPC_W, FH),
-              figure(spec, pose(phi, arms=arms, mouth=1), NPC_W, FH),
-              figure(spec, pose(phi, arms=arms, mouth=2, nod=0.004), NPC_W, FH)]
+def npc_strip(spec, name, arms, phi=35, **extra):
+    """extra: pose overrides (e.g. lean for a stoop); a "nod" here adds to the talk-frame nod."""
+    nod = extra.pop("nod", 0.0)
+    frames = [figure(spec, pose(phi, arms=arms, nod=nod, **extra), NPC_W, FH),
+              figure(spec, pose(phi, arms=arms, mouth=1, nod=nod, **extra), NPC_W, FH),
+              figure(spec, pose(phi, arms=arms, mouth=2, nod=nod + 0.004, **extra), NPC_W, FH)]
     img = sheet([frames], NPC_W, FH)
     save(img, "sprites", f"{name}.png")
     return img
@@ -112,11 +139,21 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("bellboy", BELLBOY, _arms("down")), ("sal", SAL, _arms("pocket")),
         ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR, _arms("down")),
         ("rose", ROSE, _arms("fold")), ("caleb", CALEB, _arms("fold")),
-        ("harrington", HARRINGTON, _arms("down", "pocket")))
+        ("harrington", HARRINGTON, _arms("down", "pocket")), ("nun", NUN, _arms("fold")),
+        ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)))
+
+
+def kneel_frame(spec, name):
+    """Single 64x96 frame of a character down on hands and knees, soles' baseline shared with the player sheet."""
+    img, head = _kneel(dict(spec, h=spec["h"] * SCALE), FW, FH)
+    save(img, "sprites", f"{name}.png")
+    return img, head
 
 
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
-    for name, spec, arms in NPCS:
-        npc_strip(spec, name, arms)
+    player_sheet(MICAH_DRESSING, "micah_dressing")
+    kneel_frame(MICAH, "micah_kneel")
+    for name, spec, arms, *extra in NPCS:
+        npc_strip(spec, name, arms, **(extra[0] if extra else {}))

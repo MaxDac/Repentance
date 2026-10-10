@@ -32,7 +32,7 @@ public partial class Player : Node2D, ISpeaker
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
     /// <summary>Speech anchor: a few pixels above the top of the head (or hat), which sits ~83px above the feet.</summary>
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, 92 * Scale.Y);
+    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, (_pose != null ? 62 : 92) * Scale.Y);
 
     public bool Talking
     {
@@ -61,8 +61,28 @@ public partial class Player : Node2D, ISpeaker
         Character = id;
         SpeechColor = id == "daniel" ? new Color("b8d8e8") : new Color("f0e0a0");
         if (_sprite == null) return;
+        _pose = null;
         _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
+        _sprite.Hframes = Cols;
+        _sprite.Vframes = 3;
         UpdateFrame();
+    }
+
+    private string? _pose;
+
+    /// <summary>
+    /// Holds a single-frame pose (assets/art/sprites/{id}.png, one 64x96 frame, e.g. "micah_kneel") instead of the
+    /// sheet animation. Null goes back to the normal sheet.
+    /// </summary>
+    public void SetPose(string? id)
+    {
+        if (id == null) { SetCharacter(Character); return; }
+        _pose = id;
+        _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
+        _sprite.Hframes = 1;
+        _sprite.Vframes = 1;
+        _sprite.Frame = 0;
+        _sprite.FlipH = _facing == Facing.Left;
     }
 
     /// <summary>Walks along a path. Resolves to false if interrupted by another walk.</summary>
@@ -140,7 +160,7 @@ public partial class Player : Node2D, ISpeaker
 
     private void UpdateFrame()
     {
-        if (_sprite == null) return;
+        if (_sprite == null || _pose != null) return;
         bool walking = _path.Count > 0;
         int row, col;
         switch (_facing)

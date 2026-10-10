@@ -1,0 +1,198 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer.png" id="5_drawer"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(70, 136)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(115, 85)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(18, 72)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(26, 13)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(42, 40)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(15, 12)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(22, 45)
+
+[node name="ConventCell" type="Node2D"]
+script = ExtResource("1_ConventCell")
+RoomName = "Eleanor's Cell"
+FarY = 197
+NearY = 265
+FarScale = 0.92
+NearScale = 1.06
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_convent_cell")
+centered = false
+
+[node name="Drawer" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(306, 180)
+texture = ExtResource("5_drawer")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "cell_drawer_open"
+HideIfFlags = "got_mirror"
+
+[node name="DrawerComb" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(306, 180)
+texture = ExtResource("6_drawer_comb")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "cell_drawer_open,got_mirror"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(20, 265, 55, 240, 95, 206, 110, 197, 266, 197, 266, 206, 296, 213, 345, 213, 392, 262)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(90, 232)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Exit" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "exit"
+DisplayName = "door"
+LookText = "The door back to the corridor. And the street. And whatever's waiting on it."
+WalkTo = Vector2(90, 232)
+Face = 3
+ExitTo = "convent_road"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
+position = Vector2(40, 198)
+shape = SubResource("Rect_1")
+
+[node name="Bed" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bed"
+DisplayName = "bed"
+LookText = "An iron cot made up tight as a drum. Nobody's slept in it since she left."
+WalkTo = Vector2(340, 228)
+Face = 4
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
+position = Vector2(392, 205)
+shape = SubResource("Rect_2")
+
+[node name="Lampstand" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lampstand"
+DisplayName = "lampstand"
+LookText = "The only light in the room, and it's not doing much of a job."
+WalkTo = Vector2(262, 210)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lampstand"]
+position = Vector2(278, 165)
+shape = SubResource("Rect_3")
+
+[node name="Book" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "book"
+DisplayName = "book"
+LookText = "A little black book on the nightstand. Prayers, not phone numbers."
+WalkTo = Vector2(315, 214)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Book"]
+position = Vector2(315, 172)
+shape = SubResource("Rect_4")
+
+[node name="Nightstand" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "nightstand"
+DisplayName = "nightstand"
+LookText = "A plain pine nightstand with one drawer."
+WalkTo = Vector2(315, 214)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Nightstand"]
+position = Vector2(317, 188)
+shape = SubResource("Rect_5")
+
+[node name="Comb" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "comb"
+DisplayName = "comb"
+LookText = "A tortoiseshell comb. The only vanity allowed in the place."
+WalkTo = Vector2(315, 214)
+Face = 2
+ClickPriority = 2
+ShowIfFlags = "cell_drawer_open"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Comb"]
+position = Vector2(317, 188)
+shape = SubResource("Rect_6")
+
+[node name="Mirror" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "mirror"
+DisplayName = "little mirror"
+LookText = "A little hand mirror with a wooden back. A funny thing for a nun's guest to keep."
+WalkTo = Vector2(315, 214)
+Face = 2
+ClickPriority = 2
+ShowIfFlags = "cell_drawer_open"
+HideIfFlags = "got_mirror"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Mirror"]
+position = Vector2(333, 189)
+shape = SubResource("Rect_7")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "window"
+LookText = "Barred. A sliver of moon gets in. Nothing else does."
+WalkTo = Vector2(241, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(241, 90)
+shape = SubResource("Rect_8")

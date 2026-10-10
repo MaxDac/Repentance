@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cd844bctm6jkk"
-path="res://.godot/imported/office_drawer_full.png-08f6a8d5603a7497bbe5b2743a79883f.ctex"
+uid="uid://cs8uhaguoakfq"
+path="res://.godot/imported/micah_kneel.png-7b5d2886e28f2e74909546c9c1c5ef53.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_full.png"
-dest_files=["res://.godot/imported/office_drawer_full.png-08f6a8d5603a7497bbe5b2743a79883f.ctex"]
+source_file="res://assets/art/sprites/micah_kneel.png"
+dest_files=["res://.godot/imported/micah_kneel.png-7b5d2886e28f2e74909546c9c1c5ef53.ctex"]
 
 [params]
 

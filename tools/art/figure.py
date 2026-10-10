@@ -135,7 +135,7 @@ class Canvas:
         return mask, nx, ny, np.sqrt(np.clip(1 - nx * nx - ny * ny, 0, 1)) + 0.05
 
     # --- output -------------------------------------------------------------------------------------------------
-    def render(self, shadow_box=None):
+    def render(self, shadow_box=None, light=None):
         filled = self.mat >= 0
         # shoulders and back read as one mass: blend arm/torso normals into a shared cross-section near the top
         u = np.isin(self.part, self._blend_ids()) & self.blend_zone
@@ -147,7 +147,7 @@ class Canvas:
             wt = self.blend_w[y, xs][:, None]
             n = wt * cs + (1 - wt) * self.n[y, xs]
             self.n[y, xs] = n / np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
-        s = np.einsum("hwc,c->hw", self.n, LIGHT)
+        s = np.einsum("hwc,c->hw", self.n, LIGHT if light is None else light)
         v = 0.42 + 0.58 * s
         bay = np.tile(BAY, (self.h // 4 + 1, self.w // 4 + 1))[: self.h, : self.w]
         dith = np.array(self.dith + [False])[self.mat]
@@ -376,18 +376,12 @@ def figure(spec, ps, fw=56, fh=80):
 
     # ---- head ----
     nod = ps["nod"]
-    hc = body([0.0, 0.074 + nod, 0.008])
-    hx_, hy_, _ = P(hc)
-    hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
-    hry = H * 0.077 * HEAD
-    fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
     facing = cp > -0.25
 
     neck_r = H * 0.029 * BULK
 
     def neck():
-        c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.228, -0.004])), neck_r, neck_r * 1.08),
-              col.get("neck", skin), "neck")
+        _neck(c, col, P, body, H)
     add(1.95, neck)
 
     def collar():
@@ -400,39 +394,13 @@ def figure(spec, ps, fw=56, fh=80):
     add(2.05, collar)
 
     def head():
-        if abs(sp) > 0.3:  # back of the skull: heads are deeper than they are wide
-            oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
-            c.put(c.ellipse(oc, orx, ory), skin, "head", dither=False)
-        c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
-        jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), 0.039 * HEAD, 0.047 * HEAD, 0.05 * HEAD)
-        c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
-        if abs(sp) > 0.3:
-            ys = 0.074 + nod
-            # brow ridge, nose and chin give the profile its shape
-            c.put(c.capsule(P(body([0, ys - 0.012 * HEAD, 0.058 * HEAD])), P(body([0, ys - 0.004 * HEAD, 0.06 * HEAD])), 0.5, 0.5),
-                  skin, "head", dither=False)
-            c.put(c.capsule(P(body([0, ys + 0.008 * HEAD, 0.058 * HEAD])), P(body([0, ys + 0.028 * HEAD, 0.066 * HEAD])), 0.55, 0.7),
-                  skin, "head", dither=False)
-            c.put(c.capsule(P(body([0, ys + 0.066 * HEAD, 0.05 * HEAD])), P(body([0, ys + 0.078 * HEAD, 0.046 * HEAD])), 0.8, 0.8),
-                  skin, "head", dither=False)
-        if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
-            ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
-            ear_side = -1 if sp > 0 else 1
-            ex, ey, ed = P(body([ear_side * 0.05, 0.088 + nod, -0.008]))
-            if ed > -0.02 and col.get("hair_style") not in ("long", "bob"):
-                c.put(c.ellipse((ex, ey), H * 0.011, H * 0.017), skin, "ear", dither=False)
-        _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
-        # Faces are lit from the front: lift the jaw shadow so it does not read as stubble, and keep only a
-        # one-tone shade on the far cheek.
-        face = c.parts_mask("head") & (c.Y > hy_ - 1)
-        c.bias[face] += 1
-        if col.get("soft_face"):
-            c.bias[c.parts_mask("neck") & (c.Y > hy_ - 1)] += 1
-        _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+        _head(c, col, P, body, H, cp, sp, nod)
     add(2.6, head)
     if col.get("hair_style") == "long":
         # The mane falls behind the neck and shoulders unless the figure is seen from the back.
         add(1.9 if facing else 2.7, lambda: _long_hair_back(c, col, P, body, H, cp, sp, nod))
+    if col.get("hat") == "veil":
+        add(1.9 if facing else 2.7, lambda: _veil_back(c, col, P, body, H, cp, sp, nod))
 
     for _, fn in sorted(prims, key=lambda kv: kv[0]):
         fn()
@@ -442,6 +410,56 @@ def figure(spec, ps, fw=56, fh=80):
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
     shx = (P(legs[1][2])[0] + P(legs[-1][2])[0]) / 2
     return c.render(shadow_box=((shx, base + 0.6), H * 0.15, 1.7))
+
+
+def _neck(c, col, P, body, H):
+    neck_r = H * 0.029 * BULK
+    c.put(c.capsule(P(body([0, 0.13, 0.0])), P(body([0, 0.228, -0.004])), neck_r, neck_r * 1.08),
+          col.get("neck", col["skin"]), "neck")
+
+
+def _head(c, col, P, body, H, cp, sp, nod):
+    """Skull, jaw, profile features, ear, hair and hat (the painted face dots come later from _face)."""
+    skin = col["skin"]
+    hx_, hy_, _ = P(body([0.0, 0.074 + nod, 0.008]))
+    hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
+    hry = H * 0.077 * HEAD
+    fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
+    facing = cp > -0.25
+
+    def ell3(center, ax, ay, az):
+        x, y, _ = P(center)
+        return (x, y), H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2), H * ay
+
+    if abs(sp) > 0.3:  # back of the skull: heads are deeper than they are wide
+        oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
+        c.put(c.ellipse(oc, orx, ory), skin, "head", dither=False)
+    c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
+    jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), 0.039 * HEAD, 0.047 * HEAD, 0.05 * HEAD)
+    c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
+    if abs(sp) > 0.3:
+        ys = 0.074 + nod
+        # brow ridge, nose and chin give the profile its shape
+        c.put(c.capsule(P(body([0, ys - 0.012 * HEAD, 0.058 * HEAD])), P(body([0, ys - 0.004 * HEAD, 0.06 * HEAD])), 0.5, 0.5),
+              skin, "head", dither=False)
+        c.put(c.capsule(P(body([0, ys + 0.008 * HEAD, 0.058 * HEAD])), P(body([0, ys + 0.028 * HEAD, 0.066 * HEAD])), 0.55, 0.7),
+              skin, "head", dither=False)
+        c.put(c.capsule(P(body([0, ys + 0.066 * HEAD, 0.05 * HEAD])), P(body([0, ys + 0.078 * HEAD, 0.046 * HEAD])), 0.8, 0.8),
+              skin, "head", dither=False)
+    if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
+        ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
+        ear_side = -1 if sp > 0 else 1
+        ex, ey, ed = P(body([ear_side * 0.05, 0.088 + nod, -0.008]))
+        if ed > -0.02 and col.get("hair_style") not in ("long", "bob"):
+            c.put(c.ellipse((ex, ey), H * 0.011, H * 0.017), skin, "ear", dither=False)
+    _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+    # Faces are lit from the front: lift the jaw shadow so it does not read as stubble, and keep only a
+    # one-tone shade on the far cheek.
+    face = c.parts_mask("head") & (c.Y > hy_ - 1)
+    c.bias[face] += 1
+    if col.get("soft_face"):
+        c.bias[c.parts_mask("neck") & (c.Y > hy_ - 1)] += 1
+    _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
 
 
 def _leg_at(leg, y):
@@ -564,9 +582,35 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         bill = P(body([0, 0.04 + nod, 0.07]))
         c.put(c.capsule((hx_ + 0.5 * sp, hy_ - hry * 0.3), (bill[0] + 0.5 * sp, bill[1]), 1.2, 1.0), hc, "bill")
         c.bias[c.parts_mask("head") & (c.Y > hy_ - hry * 0.3) & (c.Y < hy_ - hry * 0.3 + 2)] -= 1
+    elif hat == "veil":
+        # Religious habit: a white coif/wimple framing the face and wrapping the throat, under a black veil.
+        coif = col.get("coif", "e8e4dc")
+        fx, fy, _ = P(body([0, 0.086 + nod, 0.045]))
+        frx, fry = max(hrx * (0.5 + 0.18 * abs(cp)), 2.2), hry * 0.74
+        face = c.ellipse((fx, fy), frx, fry)[0]
+        wrap = c.ellipse((hx_ + 0.3 * sp, hy_ + 0.6), hrx + 1.5, hry + 1.3)
+        throat = c.capsule(P(body([0, 0.14 + nod, 0.004])), P(body([0, 0.222, -0.004])), H * 0.046, H * 0.056)
+        c.put(throat, coif, "coif", clip=~face)
+        c.put(wrap, coif, "coif", clip=~face)
+        frame = c.ellipse((fx, fy + 0.6), frx + 1.6, fry + 1.4)[0] | ((c.Y > fy) & (np.abs(c.X - fx) < frx + 1.6))
+        hood = c.ellipse((hx_ - 0.9 * sp, hy_ - 0.4), hrx + 2.4, hry + 2.0)
+        c.put(hood, hc, "veil", clip=~frame & (c.Y < hy_ + hry * 0.55))
+        c.bias[c.parts_mask("veil") & (c.Y < hy_ - hry * 0.6) & ((c.X - hx_) * (1 if sp >= 0 else -1) < 0)] += 1
 
 
-def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dither=True, bias=0):
+def _veil_back(c, col, P, body, H, cp, sp, nod):
+    """The black veil falling from the crown over the shoulders and down the back."""
+    hx_, hy_, _ = P(body([0, 0.074 + nod, -0.02]))
+    lo = P(body([0, 0.36, -0.05]))
+    top_w = H * math.sqrt((0.062 * cp) ** 2 + (0.06 * sp) ** 2)
+    bot_w = H * math.sqrt((0.12 * cp) ** 2 + (0.08 * sp) ** 2)
+    back = -H * 0.02 * sp
+    pts = [(hx_ - top_w + back * 0.5, hy_ - H * 0.04), (hx_ + top_w + back * 0.5, hy_ - H * 0.04),
+           (lo[0] + bot_w + back, lo[1]), (lo[0] - bot_w + back, lo[1])]
+    c.put(c.poly(pts), col["hat_col"], "veilback")
+
+
+def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dither=True, bias=0, x0=0.0):
     """Recolours a vertical band down the front of the body (lapels, shirt, tie, apron, buttons)."""
     if cp < -0.2:
         return
@@ -575,7 +619,7 @@ def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dith
     for yy in np.arange(y0, y1, 0.004):
         t = (yy - y0) / max(y1 - y0, 1e-6)
         w = w0 + (w1 - w0) * t
-        a, b = P(body([-w, yy, z])), P(body([w, yy, z]))
+        a, b = P(body([x0 - w, yy, z])), P(body([x0 + w, yy, z]))
         row = int(math.floor(a[1]))
         if 0 <= row < c.h:
             lo, hi = sorted((a[0], b[0]))
@@ -627,6 +671,36 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
                     for s in ((-1, 1) if len(d) > 5 and d[5] else (0,)):
                         p = P(body([s * 0.025, yy, 0.072]))
                         c.dot(p[0], p[1], colour)
+        elif kind == "ribbon":  # off-centre front band (an untied tie end): (ribbon, x, y0, y1, w, colour, parts?)
+            _, x, y0, y1, w, colour = d[:6]
+            parts = d[6] if len(d) > 6 else body_parts
+            _front_strip(c, P, body, H, y0, y1, w, w, parts, colour, cp, sp, x0=x, dither=False)
+        elif kind == "rosary" and cp > 0.05:  # beads hanging from the belt to a cross: (rosary, x, y0, y1, bead, cross)
+            _, x, y0, y1, bead, cross = d
+            last = None
+            for i, yy in enumerate(np.arange(y0, y1, 0.008)):
+                sway = 0.01 * math.sin((yy - y0) / max(y1 - y0, 1e-6) * math.pi)
+                px, py, _ = P(body([x + sway, yy, 0.075]))
+                pos = (math.floor(px), math.floor(py))
+                if pos != last and i % 2 == 0:
+                    c.dot(px, py, bead)
+                last = pos
+            px, py, _ = P(body([x, y1, 0.075]))
+            px, py = math.floor(px), math.floor(py)
+            for ddx, ddy in ((0, 0), (0, 1), (0, 2), (0, 3), (-1, 1), (1, 1)):
+                c.dot(px + ddx, py + ddy, "+" + cross)
+        elif kind == "hang":  # braces unclipped behind, looping down beside the hips: (hang, y_top, drop, colour)
+            _, top, drop, colour = d
+            for s in (1, -1):
+                ok = c.parts_mask("torso", f"leg{s}")
+                xo, xw = 0.05, col.get("hipw", 0.098) + 0.012
+                for u in np.linspace(-1, 1, 90):
+                    k = 1 - u * u
+                    p = P(body([s * (xo + (xw - xo) * k), top + drop * k ** 0.7, -0.07 * u]))
+                    nD = s * k * sp + (-u) * cp
+                    ix, iy = math.floor(p[0]), math.floor(p[1])
+                    if nD > -0.05 and 0 <= ix < c.w and 0 <= iy < c.h and ok[iy, ix]:
+                        c.dot(p[0], p[1], colour)
 
 
 def _face(c, col, P, body, H, cp, sp, nod, mouth):
@@ -671,6 +745,14 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             c.dot(ex + look, by, brow)
         if female and near:
             c.dot(ex + (1 if s > 0 else -1) * (1 if fs == 0 else 0), by + 1, brow)
+        if col.get("specs"):  # round wire rims round the eye and its white, with a bridge over the nose
+            rim = col["specs"]
+            x0, x1 = min(ex, ex - look), max(ex, ex - look)
+            for x in range(x0, x1 + 1):
+                c.dot(x, ey - 1, rim)
+                c.dot(x, ey + 1, rim)
+            c.dot(x0 - 1, ey, rim)
+            c.dot(x1 + 1, ey, rim)
 
     # ---- nose ----
     nx_, ny_, _ = pt(0.0, 0.03, 0.072)
@@ -732,3 +814,186 @@ def sheet(rows, fw, fh, cols=None):
         for i, im in enumerate(row):
             out.paste(im, (i * fw, r * fh))
     return out
+
+def kneel_figure(spec, fw=64, fh=96, phi=80, head_turn=105, reach=0.95, floor=None):
+    """A figure down on hands and knees (beaten to the ground), seen from the side: vertical thighs, shins flat on
+    the floor, the spine bowed forward from the hips until the hands are planted under the shoulders, and the
+    head hanging. The head is painted upright on its own canvas (hair and hats are shaped in screen space) and
+    turned onto the end of the neck. Returns (image, head centre in frame pixels)."""
+    H = spec["h"]
+    col = spec
+    c = Canvas(fw, fh)
+    ph = math.radians(phi)
+    cp, sp = math.cos(ph), math.sin(ph)
+    cx, base = fw / 2.0 + spec.get("dx", 0), fh - 3.0
+    sw, hw = spec.get("sw", 0.135) * 0.8, spec.get("hw", 0.052)
+    leg_r = spec.get("leg_r", 1.0)
+    skin, torso, pants, shoes = col["skin"], col["torso"], col.get("pants"), col["shoes"]
+
+    def P(p):
+        bx, by, bz = p
+        X = -bx * cp + bz * sp
+        D = bx * sp + bz * cp
+        return (cx + X * H, base + (by - 1.0) * H + D * H * PITCH, D)
+
+    # ---- legs: knees on the floor, thighs upright, shins and insteps flat behind ----
+    kr, ar = 0.037 * leg_r * BULK, 0.029 * leg_r * BULK
+    legs = {}
+    for s in (1, -1):
+        knee = np.array([s * hw, 1.0 - kr, 0.0 if s > 0 else -0.018])
+        hip = knee + np.array([0, -0.232, -0.03])
+        ank = np.array([s * hw, 1.0 - ar, knee[2] - 0.212])
+        heel = ank + np.array([0, -0.024, -0.008])
+        toe = np.array([s * hw, 1.0 - 0.02, ank[2] - 0.07])
+        legs[s] = (hip, knee, ank, heel, toe)
+    hipc = (legs[1][0] + legs[-1][0]) / 2
+    hipc[0] = 0.0
+
+    def bodyk(p, bow):
+        return hipc + _rot_x(np.array([p[0], p[1] - 0.5, p[2]], float), -bow)
+
+    # ---- bow the spine until the straightened arms reach the floor ----
+    l1, l2 = 0.142, 0.145
+    best = None
+    for deg in np.arange(30, 89, 0.5):
+        b = math.radians(deg)
+        sh = bodyk([sw + 0.008, 0.284, 0.0], b)
+        wr = np.array([sh[0], 1.0 - 0.042, sh[2] + 0.025])
+        err = abs(np.linalg.norm(wr - sh) - reach * (l1 + l2))
+        if best is None or err < best[0]:
+            best = (err, b)
+    bow = best[1]
+    body = lambda p: bodyk(p, bow)
+
+    arms = {}
+    for s in (1, -1):
+        sh = body([s * (sw + 0.008), 0.284, 0.0])
+        wr = np.array([sh[0] + s * 0.01, 1.0 - 0.042, sh[2] + (0.025 if s > 0 else 0.045)])
+        d = wr - sh
+        L = min(np.linalg.norm(d), l1 + l2 - 1e-4)
+        a = math.acos(np.clip((l1 * l1 + L * L - l2 * l2) / (2 * l1 * L), -1, 1))
+        u = d / np.linalg.norm(d)
+        # elbows bend backwards (towards -z): rotate the shoulder->wrist direction in the y/z plane
+        cands = [_rot_x(u, ang) for ang in (a, -a)]
+        e = min(cands, key=lambda v: v[2])
+        el = sh + l1 * e
+        hand = wr + np.array([0, 0.016, 0.05])
+        arms[s] = (sh, el, wr, hand)
+
+    def leg(s):
+        hip, knee, ank, heel, toe = legs[s]
+        part = f"leg{s}"
+        thigh = pants or skin
+        c.put(c.capsule(P(hip), P(knee), H * 0.05 * leg_r * BULK, H * kr), thigh, part)
+        c.put(c.capsule(P(knee), P(ank), H * kr, H * ar), thigh, part)
+        c.put(c.capsule(P(heel), P(toe), H * 0.024, H * 0.02), shoes, f"shoe{s}", dither=False)
+
+    def arm(s):
+        sh, el, wr, hand = arms[s]
+        sleeve = col.get("sleeves", torso)
+        fore = col.get("forearm", sleeve)
+        part = f"arm{s}"
+        c.put(c.capsule(P(sh), P(el), H * 0.034 * BULK, H * 0.031 * BULK), sleeve, part)
+        c.put(c.capsule(P(el), P(wr), H * 0.031 * BULK, H * 0.027 * BULK), fore, part)
+        if col.get("cuff") and fore != skin:
+            c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
+        c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.024), skin, f"hand{s}", dither=False)
+
+    def half(ax, az):
+        return math.sqrt((ax * cp) ** 2 + (az * 1.25 * sp) ** 2)
+
+    def trunk():
+        waist, hipw = spec.get("waist", 0.085), spec.get("hipw", 0.098)
+        levels = [(0.53, half(hipw * 0.86, 0.056)), (0.47, half(hipw, 0.064)), (0.40, half(waist, 0.058)),
+                  (0.31, half(sw * 0.95, 0.07)), (0.25, half(sw, 0.064)), (0.215, half(sw * 0.7, 0.052))]
+        for (y0, r0), (y1, r1) in zip(levels, levels[1:]):
+            c.put(c.capsule(P(body([0, y0, 0.004])), P(body([0, y1, 0.004])), H * r0, H * r1), torso, "torso")
+        for s in (1, -1):
+            c.put(c.ellipse(P(body([s * (sw + 0.004), 0.268, 0.0]))[:2], H * 0.035 * BULK, H * 0.032 * BULK),
+                  torso, "torso")
+        hem = col.get("pelvis", pants or torso)
+        a, b = np.array(P(body([0, 0.45, 0]))[:2]), np.array(P(body([0, 0.2, 0]))[:2])
+        ax = (b - a) / np.linalg.norm(b - a)
+        t = (c.X - a[0]) * ax[0] + (c.Y - a[1]) * ax[1]
+        if not col.get("coat"):
+            c.recolor(c.parts_mask("torso") & (t < 0), hem)
+        for d in col.get("decals", []):
+            if d[0] == "belt":
+                yb = np.array(P(body([0, d[1], 0]))[:2])
+                tb = (c.X - yb[0]) * ax[0] + (c.Y - yb[1]) * ax[1]
+                c.recolor(c.parts_mask("torso", "coat") & (tb > -max(1.0, H * 0.022)) & (tb <= 0), d[2], dither=False)
+
+    def coat():
+        cc = col.get("coat")
+        if not cc:
+            return
+        hip, knee = legs[1][0], legs[1][1]
+        wb = body([0, 0.40, -0.068])
+        bb = body([0, 0.54, -0.08])
+        wf = body([0, 0.43, 0.066])
+        hem_y = min(1.0 - 0.05, hipc[1] + (cc["hem"] - 0.5) * 0.9)
+        hb = np.array([0, hem_y - 0.07, min(bb[2] + 0.01, knee[2] - 0.065)])
+        hf = np.array([0, hem_y, knee[2] + 0.05 + cc.get("flare", 0.0)])
+        mid = np.array([0, (wf[1] + hem_y) / 2, (wf[2] + hf[2]) / 2 + 0.012])
+        c.put(c.poly([P(p)[:2] for p in (wb, bb, hb, hf, mid, wf)]), cc["col"], "coat")
+
+    def neck():
+        nr = H * 0.029 * BULK
+        c.put(c.capsule(P(body([0, 0.2, -0.004])), P(body([0, 0.12, 0.0])), nr * 1.08, nr), col.get("neck", skin),
+              "neck")
+
+    arm(-1)
+    leg(-1)
+    leg(1)
+    coat()
+    trunk()
+    neck()
+    arm(1)
+
+    xs = [P(p)[0] for l in legs.values() for p in l] + [P(arms[1][3])[0]]
+    img = c.render(shadow_box=(((min(xs) + max(xs)) / 2, base + 0.6), H * 0.32, 1.7))
+
+    # ---- the hanging head ----
+    hs = 64
+    hc = Canvas(hs, hs)
+    pivot_y = hs * 0.7
+
+    def Ph(p):
+        bx, by, bz = p
+        X = -bx * cp + bz * sp
+        D = bx * sp + bz * cp
+        return (hs / 2.0 + X * H, pivot_y + (by - 0.2) * H + D * H * PITCH, D)
+    ident = lambda p: np.array(p, float)
+    _neck(hc, col, Ph, ident, H)
+    if col.get("collar"):  # turned-up coat collar round the base of the neck
+        nr = H * 0.029 * BULK
+        hc.put(hc.capsule(Ph([0, 0.205, -0.01]), Ph([0, 0.24, -0.01]), nr * 1.45, nr * 1.7), col["collar"], "collar")
+    _head(hc, col, Ph, ident, H, cp, sp, 0.0)
+    _face(hc, col, Ph, ident, H, cp, sp, 0.0, 0)
+    th = math.radians(head_turn)
+    ct, st = math.cos(th), math.sin(th)
+    lt = np.array([ct * LIGHT[0] + st * LIGHT[1], -st * LIGHT[0] + ct * LIGHT[1], LIGHT[2]])
+    himg = hc.render(light=lt)
+    pv = Ph([0, 0.2, -0.004])[:2]
+    k = 4
+    big = himg.resize((hs * k, hs * k), Image.NEAREST)
+    big = big.rotate(-head_turn, resample=Image.NEAREST, center=(pv[0] * k, pv[1] * k))
+    small = big.resize((hs, hs), Image.NEAREST)
+    nk = P(body([0, 0.2, -0.004]))
+    ox, oy = int(round(nk[0] - pv[0])), int(round(nk[1] - pv[1]))
+    layer = Image.new("RGBA", img.size)
+    layer.paste(small, (ox, oy))
+    img = Image.alpha_composite(img, layer)
+    hcx, hcy = Ph([0, 0.074, 0.008])[:2]
+    rx, ry = hcx - pv[0], hcy - pv[1]
+    head_pos = (ox + pv[0] + rx * ct - ry * st, oy + pv[1] + rx * st + ry * ct)
+
+    # ---- land the lowest point on the standing frames' sole line and centre the pose ----
+    a = np.array(img)[:, :, 3] == 255
+    rows, cols = np.nonzero(a.any(1))[0], np.nonzero(a.any(0))[0]
+    want = floor if floor is not None else int(base)
+    dy = want - rows[-1]
+    dx = int(round(fw / 2 - (cols[0] + cols[-1] + 1) / 2))
+    out = Image.new("RGBA", img.size)
+    out.paste(img, (dx, dy))
+    return out, (head_pos[0] + dx, head_pos[1] + dy)

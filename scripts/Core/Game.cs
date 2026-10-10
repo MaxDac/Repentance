@@ -155,6 +155,27 @@ public partial class Game : Node
     public Task ItemVerb(Verb verb, string item) => Run(async () =>
     {
         if (Room != null && await Room.OnItemVerb(verb, item)) return;
+        if (verb == Verb.Hand && item == "brass_box")
+        {
+            var state = GameState.Instance;
+            state.TakeItem("brass_box");
+            state.GiveItem("card");
+            state.GiveItem("matchbook");
+            await Say("The clasp gave with a click. Inside: a calling card, blank but for the curlicues, and a perfume that wasn't hers.");
+            await Say("And a matchbook. A blue lantern on the cover. The Blue Lantern, then. That's where her trail goes next.");
+            return;
+        }
+        if (verb == Verb.Hand && item == "mirror")
+        {
+            await Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
+            await Say("Three loops tied in one knot. No beginning, no end. It looks old. Older than the convent.");
+            return;
+        }
+        if (verb == Verb.Hand && item == "book")
+        {
+            await Say("Not here. A book like that wants a locked door and a desk lamp. My office has both.");
+            return;
+        }
         switch (verb)
         {
             case Verb.Look:
@@ -337,6 +358,7 @@ public partial class Game : Node
             _roomHost.AddChild(Room);
             Room.World.AddChild(Player);
             Player.SetCharacter(Room.PlayerCharacter);
+            Player.Visible = Room.ShowPlayer;
             var marker = Room.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);

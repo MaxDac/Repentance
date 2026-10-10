@@ -1,0 +1,137 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/ConventCorridor.cs" id="1_ConventCorridor"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_corridor.png" id="2_convent_corridor"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="5_nun"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(42, 90)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(42, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(34, 96)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(42, 34)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(70, 42)
+
+[node name="ConventCorridor" type="Node2D"]
+script = ExtResource("1_ConventCorridor")
+RoomName = "Convent Corridor"
+FarY = 190
+NearY = 268
+FarScale = 0.9
+NearScale = 1.06
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_convent_corridor")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 190, 480, 190, 480, 268, 0, 268)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(60, 215)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Entrance" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "entrance"
+DisplayName = "front door"
+LookText = "The way I came in. The way out, too, if I had any sense."
+WalkTo = Vector2(42, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Entrance"]
+position = Vector2(41, 139)
+shape = SubResource("Rect_1")
+
+[node name="CellDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cell_door"
+DisplayName = "cell door"
+LookText = "A plain oak door at the end of the corridor. Eleanor's, if the sister was telling the truth."
+WalkTo = Vector2(410, 200)
+Face = 2
+ExitTo = "convent_cell"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CellDoor"]
+position = Vector2(410, 148)
+shape = SubResource("Rect_2")
+
+[node name="Statue" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "statue"
+DisplayName = "Madonna"
+LookText = "The Virgin in her niche, eyes down. She's heard every confession in this building and kept her mouth shut."
+WalkTo = Vector2(188, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Statue"]
+position = Vector2(188, 78)
+shape = SubResource("Rect_3")
+
+[node name="Candles" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "candles"
+DisplayName = "votive candles"
+LookText = "A penny a prayer. Cheaper than a bribe, and about as reliable."
+WalkTo = Vector2(188, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Candles"]
+position = Vector2(185, 171)
+shape = SubResource("Rect_4")
+
+[node name="Bench" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bench"
+DisplayName = "bench"
+LookText = "A hard oak bench. Designed by somebody who thought comfort was a sin."
+WalkTo = Vector2(338, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bench"]
+position = Vector2(338, 165)
+shape = SubResource("Rect_5")
+
+[node name="Nun" type="Area2D" parent="World"]
+position = Vector2(250, 214)
+script = ExtResource("4_Actor")
+Id = "nun"
+DisplayName = "Sister Agatha"
+LookText = "A nun with a face like a closed door and a rosary she could probably strangle a man with."
+WalkTo = Vector2(206, 216)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("5_nun")
+FlipH = true
+SpeechColor = Color(0.85, 0.85, 0.92, 1)

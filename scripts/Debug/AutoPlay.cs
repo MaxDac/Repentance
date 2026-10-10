@@ -51,6 +51,10 @@ public class AutoPlay
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
             await game.Perform(Verb.Hand, "boxes");
             Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
+            await game.Perform(Verb.Hand, "suitcase");
+            Check(gs.HasItem("suitcase_key"), "found the key in the suitcase");
+            await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
+            Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
             await game.Perform(Verb.Hand, "papers");
             Check(gs.HasItem("crowbar"), "found the crowbar");
             await Shot("attic_mess");
@@ -65,8 +69,13 @@ public class AutoPlay
             await Shot("office");
             await game.Perform(Verb.Hand, "drawer");
             await Shot("office_drawer");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "Office", "can't leave without the drawer things");
+            await game.Perform(Verb.Hand, "revolver");
             await game.Perform(Verb.Hand, "dollar");
-            Check(gs.HasItem("dollar"), "got the dollar");
+            await game.Perform(Verb.Hand, "lockpick");
+            Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
+            await Shot("office_drawer_empty");
             await MouseTest(game);
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "Lobby", "entered the lobby");
@@ -79,27 +88,137 @@ public class AutoPlay
             Check(game.Room?.Name == "Lobby", "back in the lobby");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
-            Check(gs.HasFlag("knows_lantern"), "bellboy tip");
-            await game.Perform(Verb.Hand, "urn");
-            Check(gs.HasItem("matchbook"), "got the matchbook");
+            Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
+            await game.Perform(Verb.Walk, "service_door");
+            Check(game.Room?.Name == "EleanorRoom", "staff elevator up to Eleanor's room");
+
+            await Shot("eleanor_room");
+            await game.Perform(Verb.Hand, "desk_drawer");
+            Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
+            await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
+            Check(gs.HasFlag("eleanor_drawer_open"), "lockpicked the drawer");
+            await Shot("eleanor_drawer");
+            await game.Perform(Verb.Hand, "paper");
+            Check(gs.HasItem("combination"), "got the combination");
+            await game.Perform(Verb.Hand, "closet");
+            Check(gs.HasFlag("closet_open"), "opened the closet");
+            await game.Perform(Verb.UseItem, "safe", "combination");
+            Check(gs.HasFlag("safe_open"), "opened the safe");
+            await Shot("eleanor_safe");
+            await game.Perform(Verb.Hand, "brass_box");
+            Check(gs.HasItem("brass_box"), "took the brass box");
+            await Shot("eleanor_safe_empty");
+            await game.ItemVerb(Verb.Hand, "brass_box");
+            Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "Lobby", "back down in the lobby");
             await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room?.Name == "Speakeasy", "entered the speakeasy");
 
             await Shot("speakeasy");
             await game.Perform(Verb.Talk, "bartender");
-            Check(!gs.HasFlag("photo_shown"), "Sal blocks the bar");
+            Check(game.Room?.Name == "Speakeasy", "Sal blocks the bar");
             await game.Perform(Verb.Talk, "sal");
-            Check(gs.HasFlag("sal_passed"), "password accepted");
+            Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out"), "no password, but Sal takes the bribe");
             await Shot("speakeasy_inside");
-            await game.Perform(Verb.Talk, "bartender");
-            Check(gs.HasFlag("photo_shown") && gs.HasFlag("club_lead"), "bartender points to the Starlight");
+            var bar = game.Perform(Verb.Talk, "bartender");
+            await Until(() => game.Room?.Name == "Alley");
+            Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
+            await game.Wait(2.5);
+            await Shot("alley");
+            await bar;
+
+            // ---- the convent
+            Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_talked"), "the nun questions Micah in the corridor");
+            await Shot("convent_corridor");
+            await game.Perform(Verb.Walk, "cell_door");
+            Check(game.Room?.Name == "ConventCell", "entered Eleanor's cell");
+            await Shot("convent_cell");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "ConventCell", "can't leave the cell without the mirror");
+            await game.Perform(Verb.Hand, "nightstand");
+            Check(gs.HasFlag("cell_drawer_open"), "opened the nightstand drawer");
+            await Shot("convent_cell_drawer");
+            var take = game.Perform(Verb.Hand, "mirror");
+            await Until(() => game.Hud.ImageVisible);
+            Check(game.Hud.ImageVisible, "the symbol behind the mirror is shown full screen");
+            await Shot("triquetra");
+            game.Hud.CloseImage();
+            await take;
+            await game.Perform(Verb.Hand, "comb");
+            Check(gs.HasItem("mirror") && !gs.HasItem("comb"), "took only the mirror");
+            await Shot("convent_cell_after");
+
+            var leave = game.Perform(Verb.Walk, "exit");
+            await Until(() => game.Room?.Name == "ConventRoad");
+            Check(game.Room?.Name == "ConventRoad", "Eleanor is waiting outside the convent");
+            await game.Wait(3);
+            await Shot("convent_road");
+            await Until(() => game.Room?.Name == "MotelNight");
+            Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
+            await game.Wait(2);
+            await Shot("motel_night");
+            await Until(() => game.Room?.Name == "Attic");
+            await game.Wait(2.5);
+            await Shot("attic_night");
+            await leave;
+
+            // ---- end of Act 1, then Act 2 the next day
+            Check(gs.StoryAct == 2 && gs.HasItem("journal") && game.Player.Character == "daniel", "Act 2: Daniel is back with the journal");
+            await Shot("attic_act2");
+            var read = game.ItemVerb(Verb.Hand, "journal");
+
+            // ---- Act 2, 1927: the cathedral, then the map of Chicago
+            await Until(() => game.Room?.Name == "ChurchExterior");
+            Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+            await game.Wait(1.5);
+            await Shot("church_exterior_act2");
+            await Until(() => game.Room?.Name == "ChurchInterior");
+            Check(gs.HasFlag("act2_church_thought"), "Micah thinks about Eleanor outside the cathedral, then goes in");
+            await game.Wait(2);
+            await Shot("church_act2");
+            await Until(() => game.Room?.Name == "ChicagoMap");
+            Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
+            Check(!game.Player.Visible, "the player isn't drawn on the map");
+            await read;
+            await WaitIdle(game);
+            await Shot("map");
+            Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
+            await game.Perform(Verb.Walk, "church");
+            Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
+
+            await game.Perform(Verb.Walk, "library");
+            Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the night librarian is there, not Rose");
+            await Shot("library_night");
+            await game.Perform(Verb.UseItem, "librarian", "revolver");
+            Check(!gs.HasFlag("library_banned"), "no gun before asking");
+            var ask = game.Perform(Verb.Talk, "librarian");
+            await Until(() => game.Hud.ImageVisible);
+            Check(game.Hud.ImageVisible, "the symbol is shown full screen during the talk");
+            await Shot("librarian_symbol");
+            game.Hud.CloseImage();
+            await ask;
+            Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
+            await game.Perform(Verb.UseItem, "librarian", "revolver");
+            Check(gs.HasItem("book") && gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "threatened the librarian into giving up the book");
+            await game.Perform(Verb.Walk, "library");
+            Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
+
+            await game.ItemVerb(Verb.Hand, "book");
+            Check(!gs.HasItem("address"), "the book is only read at the office");
+            await game.Perform(Verb.Walk, "office");
+            Check(game.Room?.Name == "Office", "back at the office");
+            await game.ItemVerb(Verb.Hand, "book");
+            Check(gs.HasItem("address") && gs.HasFlag("club_unlocked"), "an address slipped out of the book");
+            await Shot("office_book");
             await game.Perform(Verb.Walk, "door");
-            Check(game.Room?.Name == "Street", "speakeasy door leads to the street");
+            Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("club")?.Visible == true, "the club is on the map now");
+            await Shot("map_club");
+            await game.Perform(Verb.Walk, "club");
 
             // ---- the temporary story: every location in order
-            await Shot("street");
-            await game.Perform(Verb.Walk, "club_door");
-            Check(game.Room?.Name == "ClubHall", "entered the Starlight");
+            Check(game.Room?.Name == "ClubHall" && !gs.HasFlag("on_map"), "entered the Starlight");
             await Shot("club_hall");
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room?.Name == "ClubLounge", "entered the lounge");
@@ -116,6 +235,7 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "hall_exit");
             await game.Perform(Verb.Walk, "street_door");
             Check(game.Room?.Name == "Street", "back on the street");
+            await Shot("street");
 
             await game.Perform(Verb.Walk, "hotel_door");
             Check(game.Room?.Name == "AurelianRoom", "entered Eleanor's suite");
@@ -197,9 +317,10 @@ public class AutoPlay
         Click(game.Hud.SatchelCenter, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Hud.InventoryOpen, "satchel opens the inventory");
-        Move(game.Hud.SlotCenter(0));
+        var slot = game.Hud.SlotCenter(IndexOf("crowbar"));
+        Move(slot);
         await Shot("attic_inventory");
-        Click(game.Hud.SlotCenter(0), MouseButton.Left);
+        Click(slot, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
         var trunk = new Vector2(432, 205);
@@ -220,7 +341,7 @@ public class AutoPlay
         Click(game.Hud.SatchelCenter, MouseButton.Left);
         for (int i = 0; i < 40 && !game.Hud.InventoryOpen; i++) await game.Wait(0.05);
         await game.Wait(0.1);
-        var slot = game.Hud.SlotCenter(0);
+        var slot = game.Hud.SlotCenter(IndexOf("journal"));
         Move(slot);
         Click(slot, MouseButton.Right);
         await game.Wait(0.1);
@@ -249,6 +370,14 @@ public class AutoPlay
         await WaitIdle(game);
     }
 
+    private static int IndexOf(string item)
+    {
+        var inv = GameState.Instance.Inventory;
+        for (int i = 0; i < inv.Count; i++)
+            if (inv[i] == item) return i;
+        return 0;
+    }
+
     private async Task WaitIdle(Game game)
     {
         await game.Wait(0.2);
@@ -270,6 +399,11 @@ public class AutoPlay
                 Position = pos, GlobalPosition = pos, ButtonIndex = button, Pressed = pressed,
             }, true);
         }
+    }
+
+    private async Task Until(Func<bool> done, double timeout = 90)
+    {
+        for (double t = 0; t < timeout && !done(); t += 0.1) await _game.Wait(0.1);
     }
 
     private void Check(bool ok, string what)

@@ -1,0 +1,92 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="4_Voice"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(100, 64)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(114, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(38, 58)
+
+[node name="MotelNight" type="Node2D"]
+script = ExtResource("1_MotelNight")
+RoomName = "Motel Room, Night"
+FarY = 182
+NearY = 264
+FarScale = 0.88
+NearScale = 1.06
+PlayerCharacter = "micah_dressing"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_motel_night")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(6, 264, 474, 264, 474, 182, 146, 182, 146, 192, 34, 192, 34, 186, 6, 186)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(206, 206)
+metadata/facing = 3
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Eleanor" type="Node2D" parent="."]
+position = Vector2(125, 136)
+script = ExtResource("4_Voice")
+Id = "eleanor"
+SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="Bed" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bed"
+DisplayName = "Eleanor"
+LookText = "She's pulled the sheet up to her chin, like it could keep the morning out."
+WalkTo = Vector2(150, 200)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
+position = Vector2(91, 153)
+shape = SubResource("Rect_1")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "window"
+LookText = "MOTEL. VACANCY. The neon blinks red and blue on the curtains, like a conscience that won't shut up."
+WalkTo = Vector2(340, 200)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(349, 86)
+shape = SubResource("Rect_2")
+
+[node name="Chair" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "chair"
+DisplayName = "chair"
+LookText = "My coat and my hat, waiting for me to remember who I am."
+WalkTo = Vector2(248, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chair"]
+position = Vector2(247, 148)
+shape = SubResource("Rect_3")

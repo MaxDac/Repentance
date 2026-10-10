@@ -1,0 +1,98 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/ChicagoMap.cs" id="1_ChicagoMap"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map.png" id="2_map"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_club.png" id="5_map_club"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(50, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(62, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(41, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(79, 28)
+
+[node name="ChicagoMap" type="Node2D"]
+script = ExtResource("1_ChicagoMap")
+RoomName = "Chicago"
+PlayerCharacter = "micah"
+ShowPlayer = false
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_map")
+centered = false
+
+[node name="ClubMarker" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(274, 202)
+texture = ExtResource("5_map_club")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "club_unlocked"
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(240, 262)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Library" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "library"
+DisplayName = "the public library"
+LookText = "The public library. Rose's library. Books, dust, and people who know things."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Library"]
+position = Vector2(323, 61)
+shape = SubResource("Rect_1")
+
+[node name="Church" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "church"
+DisplayName = "the cathedral"
+LookText = "Holy Name. Caleb's church. I've been there once already this week."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Church"]
+position = Vector2(119, 125)
+shape = SubResource("Rect_2")
+
+[node name="Office" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "office"
+DisplayName = "my office"
+LookText = "My office. A desk, an empty bottle, and my name on the glass."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Office"]
+position = Vector2(292, 159)
+shape = SubResource("Rect_3")
+
+[node name="Club" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "club"
+DisplayName = "the Starlight"
+LookText = "The Starlight. A nightclub on Hubbard, from the slip in the book."
+ShowIfFlags = "club_unlocked"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Club"]
+position = Vector2(312, 215)
+shape = SubResource("Rect_4")

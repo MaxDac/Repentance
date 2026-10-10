@@ -38,6 +38,8 @@ public partial class Hud : CanvasLayer
     private Label _speech = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
+    private TextureRect _image = null!;
+    private TaskCompletionSource? _imageTcs;
     private TextureRect _title = null!;
     private Label _titleHint = null!;
     private TextureRect _cursor = null!;
@@ -142,6 +144,14 @@ public partial class Hud : CanvasLayer
             Visible = false,
         };
         root.AddChild(_caption);
+
+        _image = new TextureRect { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        _image.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _image.GuiInput += e =>
+        {
+            if (e is InputEventMouseButton { Pressed: true }) CloseImage();
+        };
+        root.AddChild(_image);
 
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
@@ -354,5 +364,28 @@ public partial class Hud : CanvasLayer
     {
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
+    }
+
+    public bool ImageVisible => _image.Visible;
+
+    /// <summary>Shows a full-screen picture (a close-up) until the player clicks.</summary>
+    public Task ShowImage(Texture2D texture)
+    {
+        _imageTcs?.TrySetResult();
+        _image.Texture = texture;
+        _image.Visible = true;
+        _image.MouseFilter = Control.MouseFilterEnum.Stop;
+        _interface.Visible = false;
+        _imageTcs = new TaskCompletionSource();
+        return _imageTcs.Task;
+    }
+
+    public void CloseImage()
+    {
+        _image.Visible = false;
+        _image.MouseFilter = Control.MouseFilterEnum.Ignore;
+        _interface.Visible = true;
+        _imageTcs?.TrySetResult();
+        _imageTcs = null;
     }
 }

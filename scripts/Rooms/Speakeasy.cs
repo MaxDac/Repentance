@@ -49,6 +49,8 @@ public partial class Speakeasy : Room
                 await Talk("sal");
                 if (!wasPassed && State.HasFlag("sal_passed") && FindActor("sal") is { } sal)
                     await sal.MoveTo(SalAside, 45);
+                else if (State.HasFlag("thrown_out"))
+                    await ThrownOut();
                 return true;
             case ("sal", Verb.UseItem) when item == "matchbook":
                 await Say("sal", "I don't smoke. And I don't read. Password.");
@@ -62,9 +64,11 @@ public partial class Speakeasy : Room
 
             case ("bartender", Verb.Talk):
                 await Talk("bartender");
+                await BartenderDislikes();
                 return true;
             case ("bartender", Verb.UseItem) when item == "photo":
                 await Talk(State.HasFlag("photo_shown") ? "bartender" : "bartender.photo");
+                await BartenderDislikes();
                 return true;
             case ("bartender", Verb.UseItem) when item == "dollar":
                 await Say("bartender", "A buck buys you the bathtub gin. You want it? No? Smart man.");
@@ -87,5 +91,31 @@ public partial class Speakeasy : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>Wise guys and tightwads get walked out the back by Sal.</summary>
+    private async Task ThrownOut()
+    {
+        if (FindActor("sal") is { } sal)
+        {
+            await sal.MoveTo(Game.Player.Position + new Vector2(18, 0), 60);
+        }
+        await Say("Hey, easy with the suit, it's rented--");
+        await Game.ChangeRoom("alley", "start");
+    }
+
+    /// <summary>
+    /// In 1927 the bartender won't budge on Eleanor. When the talk is over he calls Micah back, and nods at Sal.
+    /// (In Act 2, the old Starlight lead is already known and he just pours.)
+    /// </summary>
+    private async Task BartenderDislikes()
+    {
+        if (State.HasFlag("photo_shown")) return;
+        await Talk("bartender_dislike");
+        await Say("He nods at the bouncer by the door. That's never a good nod.");
+        if (FindActor("sal") is { } sal)
+            await sal.MoveTo(Game.Player.Position + new Vector2(-18, 0), 70);
+        await Say("sal", "Out back, pal. Tony wants a word. Several, actually.");
+        await Game.ChangeRoom("alley", "start");
     }
 }
