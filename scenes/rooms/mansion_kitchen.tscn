@@ -1,0 +1,163 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/MansionKitchen.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_kitchen.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_kitchen_gas.png" id="10_mansion_kitchen_gas"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_kitchen_candle.png" id="11_mansion_kitchen_candle"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="12_eleanor_sheet"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(48, 104)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(48, 106)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(120, 80)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(52, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(142, 66)
+
+[node name="MansionKitchen" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Harrington Kitchen"
+FarY = 206
+NearY = 262
+FarScale = 0.94
+NearScale = 1.04
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 208, 479, 208, 479, 269, 0, 269)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(52, 226)
+metadata/facing = 4
+
+[node name="study" type="Marker2D" parent="Entries"]
+position = Vector2(432, 226)
+metadata/facing = 3
+
+[node name="escape" type="Marker2D" parent="Entries"]
+position = Vector2(432, 226)
+metadata/facing = 3
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="BackDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "back_door"
+DisplayName = "back door"
+LookText = "The back door to the yard. Moonlight through the glass."
+WalkTo = Vector2(52, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/BackDoor"]
+position = Vector2(48.0, 150.0)
+shape = SubResource("Rect_1")
+
+[node name="BaizeDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "baize_door"
+DisplayName = "green baize door"
+LookText = "Green baize and brass studs: the line between the servants and the served."
+WalkTo = Vector2(432, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/BaizeDoor"]
+position = Vector2(434.0, 149.0)
+shape = SubResource("Rect_2")
+
+[node name="Range" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "range"
+DisplayName = "gas range"
+LookText = "A big black gas range, with a row of brass taps along the front."
+WalkTo = Vector2(176, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Range"]
+position = Vector2(174.0, 160.0)
+shape = SubResource("Rect_3")
+
+[node name="Candle" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "candle"
+DisplayName = "candle"
+LookText = "A candlestick and a box of kitchen matches on the table."
+WalkTo = Vector2(322, 222)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Candle"]
+position = Vector2(332.0, 148.0)
+shape = SubResource("Rect_4")
+
+[node name="Dresser" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "dresser"
+DisplayName = "dresser"
+LookText = "Enough china to feed a regiment. Copper pans above, polished by somebody paid too little."
+WalkTo = Vector2(320, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Dresser"]
+position = Vector2(319.0, 99.0)
+shape = SubResource("Rect_5")
+
+[node name="Gas" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(124, 132)
+texture = ExtResource("10_mansion_kitchen_gas")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "gas_on"
+
+[node name="Candle" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(218, 70)
+texture = ExtResource("11_mansion_kitchen_candle")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "candle_lit"
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(396, 232)
+script = ExtResource("5_Actor")
+Id = "eleanor"
+DisplayName = "Eleanor"
+LookText = "Eleanor, in a bedsheet. She keeps looking at the baize door."
+WalkTo = Vector2(396, 232)
+ShowIfFlags = "escaping,eleanor_convinced"
+monitoring = false
+monitorable = false
+Texture = ExtResource("12_eleanor_sheet")
+FlipH = true
+SpeechColor = Color(0.96, 0.78, 0.62, 1)

@@ -396,7 +396,7 @@ public partial class Game : Node
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
-        Player.Visible = Room.ShowPlayer;
+        Player.Visible = Room.PlayerVisibleOnLoad;
     }
 
     private void UnloadRoom()

@@ -118,6 +118,19 @@ public partial class Actor : Hotspot, ISpeaker
         if (_sprite != null) _sprite.FlipH = left;
     }
 
+    /// <summary>Swaps the actor's sprite (e.g. a single-frame pose like lying on the ground); feet stay where they are.</summary>
+    public void SetTexture(Texture2D texture, int frames = 1)
+    {
+        Texture = texture;
+        Frames = frames;
+        _talking = false;
+        if (_sprite == null) { _Ready(); return; }
+        _sprite.Texture = texture;
+        _sprite.Hframes = frames;
+        _sprite.Frame = 0;
+        _sprite.Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y + Baseline);
+    }
+
     private static readonly int[] TalkCycle = { 1, 2, 1, 0, 2, 1, 2, 0 };
 
     private void UpdateFrame()

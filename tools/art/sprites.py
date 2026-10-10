@@ -139,6 +139,18 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 # Eleanor on stage: the same short dress as the club's women, but no mask.
 ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
                      eye="3a2416", brow="2e1a12", mask=None)
+# Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
+HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
+                       coat=dict(col="5a1e26", top=0.40, hem=0.86, flare=0.02), pants="2a1a1e",
+                       decals=[("strip", 0.21, 0.36, 0.05, 0.004, "3a1018"), ("belt", 0.42, "d8b860")])
+# Eleanor out of Harrington's bed, wrapped in the white sheet from the armpits down, bare shoulders and arms.
+ELEANOR_SHEET = dict(ELEANOR, torso="e8e4dc", sleeves="ecc4a2", neckline=0.262,
+                     coat=dict(col="e8e4dc", top=0.40, hem=0.97, flare=0.03), stockings="e8e4dc", shoes="ecc4a2",
+                     decals=[("strip", 0.30, 0.95, 0.01, 0.01, "c8c4bc")])
+# Micah in Joliet: a faded tan prison coverall buttoned to the throat.
+MICAH_INMATE = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="b8743a", collar="b8743a", sleeves="b8743a",
+                    cuff="b8743a", pants="b8743a", shoes="2b1b14",
+                    decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
 
 
 def _arms(kind_r, kind_l=None):
@@ -193,21 +205,68 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
         ("moc", MOC, _arms("fold")), ("brute", BRUTE, _arms("fold")), ("watchman", WATCHMAN, _arms("down", "pocket")),
         ("masked_man", MASKED_MAN, _arms("fold")), ("masked_woman", MASKED_WOMAN, _arms("hip", "down")),
-        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("down")))
+        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("down")),
+        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))
 
 
-def supine_frame(spec, name):
+def supine_frame(spec, name, wound=None):
     """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
-    with the body resting on the row the standing figure's soles touch."""
-    from PIL import Image
+    with the body resting on the row the standing figure's soles touch. wound: where along the body (0 = head, 1 = feet)
+    a gunshot has soaked the clothes, with a pool of blood on the ground beneath it."""
+    from PIL import Image, ImageDraw, ImageChops
     stand = figure(spec, pose(90), FW, FH)
     a = stand.getchannel("A").point(lambda v: 255 if v >= 250 else 0)  # drop the soft ground shadow
     stand.putalpha(a)
     box = stand.getbbox()
     body = stand.crop(box).rotate(90, expand=True)
-    w = max(FW, body.width + 6)
+    w = max(FW, body.width + 6) + (20 if wound is not None else 0)
     img = Image.new("RGBA", (w, FH), (0, 0, 0, 0))
-    img.alpha_composite(body, ((w - body.width) // 2, box[3] - body.height))
+    x0, y0 = (w - body.width) // 2, box[3] - body.height
+    if wound is not None:
+        wx = x0 + int(body.width * wound)
+        ImageDraw.Draw(img).ellipse([wx - 14, box[3] - 3, wx + 12, box[3] + 1], fill=(112, 14, 18, 255))
+    img.alpha_composite(body, (x0, y0))
+    if wound is not None:
+        stain = Image.new("RGBA", body.size, (0, 0, 0, 0))
+        sd = ImageDraw.Draw(stain)
+        bx = int(body.width * wound)
+        sd.ellipse([bx - 5, -2, bx + 5, body.height // 2], fill=(138, 18, 22, 255))
+        sd.ellipse([bx - 2, 0, bx + 1, 3], fill=(176, 30, 30, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), body.getchannel("A")))
+        img.alpha_composite(stain, (x0, y0))
+    save(img, "sprites", f"{name}.png")
+    return img
+
+
+def falling_frame(spec, name):
+    """Single frame of a character facing right, hit and toppling backwards, arms flung up."""
+    from PIL import Image
+    ps = pose(90, arms={1: ("swing", -70, 30, 20), -1: ("swing", -40, 20, 30)}, legs={1: (14, 10, 0), -1: (-6, 18, 0)},
+              lean=-6.0)
+    fig = figure(spec, ps, FW + 16, FH)
+    fig.putalpha(fig.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
+    tilted = fig.rotate(24, resample=Image.NEAREST, center=(fig.width // 2, FH - 4))
+    save(tilted, "sprites", f"{name}.png")
+    return tilted
+
+
+def seated_frame(spec, name, flip=False):
+    """Single 64x96 frame of a character sitting on a chair in profile (facing right; flipped to face left), forearms
+    forward as if resting on a table. The seat itself is painted into the room."""
+    from PIL import ImageOps
+    ps = pose(90, legs={1: (88, 92, 0), -1: (86, 90, 0)}, arms={1: ("swing", 36, 4, 70), -1: ("swing", 30, 4, 74)})
+    img = figure(spec, ps, FW, FH)
+    if flip:
+        img = ImageOps.mirror(img)
+    save(img, "sprites", f"{name}.png")
+    return img
+
+
+def desk_frame(spec, name, cut=0.5):
+    """Head and shoulders of a character facing the camera, cut off at a fraction of the frame height: sitting behind
+    a desk that hides the rest."""
+    img = figure(spec, pose(16, arms=_arms("fold")), FW, FH)
+    img = img.crop((0, 0, FW, int(FH * cut)))
     save(img, "sprites", f"{name}.png")
     return img
 
@@ -237,3 +296,15 @@ def build():
     aim_frame(MICAH, "micah_aim")
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
+    build_act3()
+
+
+def build_act3():
+    supine_frame(SAL, "sal_supine")
+    supine_frame(BARTENDER, "bartender_shot", wound=0.74)
+    falling_frame(HARRINGTON_GOWN, "harrington_falling")
+    supine_frame(HARRINGTON_GOWN, "harrington_shot", wound=0.44)
+    desk_frame(MICAH, "micah_desk")
+    seated_frame(MICAH_INMATE, "micah_inmate_seated")
+    seated_frame(ELEANOR, "eleanor_seated", flip=True)
+    seated_frame(CALEB, "caleb_seated", flip=True)

@@ -1,10 +1,12 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Outskirts.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/outskirts.png" id="2_outskirts"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="91_sal"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="91_eleanor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/car.png" id="92_car"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="93_FlagSprite"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(188, 26)
@@ -17,9 +19,6 @@ size = Vector2(146, 92)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
 size = Vector2(42, 74)
-
-[sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(56, 30)
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
 size = Vector2(72, 88)
@@ -46,6 +45,10 @@ polygon = PackedVector2Array(0, 164, 88, 156, 186, 152, 292, 154, 392, 164, 479,
 
 [node name="start" type="Marker2D" parent="Entries"]
 position = Vector2(292, 226)
+metadata/facing = 3
+
+[node name="ending" type="Marker2D" parent="Entries"]
+position = Vector2(292, 250)
 metadata/facing = 3
 
 [node name="Hotspots" type="Node2D" parent="."]
@@ -111,21 +114,6 @@ monitorable = false
 position = Vector2(404.0, 158.0)
 shape = SubResource("Rect_4")
 
-[node name="DisturbedEarth" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "disturbed_earth"
-DisplayName = "disturbed earth"
-LookText = "A patch of earth that had been turned once and told to forget it."
-WalkTo = Vector2(236, 230)
-Face = 2
-ClickPriority = 1
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/DisturbedEarth"]
-position = Vector2(236.0, 226.0)
-shape = SubResource("Rect_5")
-
 [node name="Exit" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "exit"
@@ -143,16 +131,24 @@ monitorable = false
 position = Vector2(443.0, 200.0)
 shape = SubResource("Rect_6")
 
-[node name="Sal" type="Area2D" parent="World"]
-position = Vector2(472, 236)
+[node name="Car" type="Sprite2D" parent="World"]
+position = Vector2(404, 244)
+texture = ExtResource("92_car")
+centered = false
+offset = Vector2(-62, -58)
+script = ExtResource("93_FlagSprite")
+ShowIfFlags = "outskirts_car"
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(318, 250)
 script = ExtResource("90_Actor")
-Id = "sal"
-DisplayName = "Sal"
-LookText = "Sal. A long way from his steel door, and not here for the fresh air."
-WalkTo = Vector2(430, 236)
-ShowIfFlags = "ending"
+Id = "eleanor"
+DisplayName = "Eleanor"
+LookText = "Eleanor, in a bedsheet, looking back at the city."
+WalkTo = Vector2(320, 252)
+ShowIfFlags = "ending_2"
 monitoring = false
 monitorable = false
-Texture = ExtResource("91_sal")
+Texture = ExtResource("91_eleanor")
 FlipH = true
-SpeechColor = Color(0.95, 0.66, 0.5, 1)
+SpeechColor = Color(0.96, 0.78, 0.62, 1)
