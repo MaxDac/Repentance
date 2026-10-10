@@ -14,14 +14,21 @@ public interface ISpeaker
 /// <summary>
 /// A non-player character. It is also a hotspot; if it has no collision shape the sprite
 /// rectangle is used as the clickable area. Sprite sheet: one row, frame 0 = idle, then talk frames
-/// (1 for a two-frame strip; 1 and 2 for the three-frame strips painted by tools/art/sprites.py).
-/// The node position is the character's feet, which sit <see cref="Baseline"/> pixels above the frame bottom.
+/// (1 for a two-frame strip; 1 and 2 for the strips painted by tools/art/sprites.py), then — in the 11-frame strips
+/// painted by tools/art/sprites.py — frames 3-10 are a side-view walk cycle facing screen-right, played by
+/// <see cref="MoveTo"/>. The node position is the character's feet, which sit <see cref="Baseline"/> pixels above
+/// the frame bottom.
 /// </summary>
 [GlobalClass]
 public partial class Actor : Hotspot, ISpeaker
 {
+    private const int WalkStart = 3;
+    private const int WalkFrames = 8;
+    /// <summary>Unscaled distance covered per walk frame; matches the player's side stride.</summary>
+    private const float StridePerFrame = 7.7f;
+
     [Export] public Texture2D? Texture;
-    [Export] public int Frames = 3;
+    [Export] public int Frames = WalkStart + WalkFrames;
     [Export] public bool FlipH;
     [Export] public int Baseline = 3;
     /// <summary>Scale with depth like the player (<see cref="Room.ScaleAt"/>).</summary>
@@ -34,6 +41,9 @@ public partial class Actor : Hotspot, ISpeaker
     private Vector2? _moveTarget;
     private float _moveSpeed;
     private TaskCompletionSource? _moveDone;
+    private float _walkDistance;
+
+    private bool CanWalk => Frames >= WalkStart + WalkFrames;
 
     public Vector2 FrameSize => Texture == null ? new Vector2(16, 40) : new Vector2(Texture.GetWidth() / Frames, Texture.GetHeight());
 
@@ -75,23 +85,27 @@ public partial class Actor : Hotspot, ISpeaker
         }
         if (_moveTarget is { } target)
         {
+            var from = Position;
             Position = Position.MoveToward(target, _moveSpeed * (float)delta);
+            _walkDistance += from.DistanceTo(Position) / Mathf.Max(Scale.Y, 0.01f);
             ApplyDepthScale();
             if (Position.DistanceTo(target) < 0.01f)
             {
                 _moveTarget = null;
                 _moveDone?.TrySetResult();
             }
+            UpdateFrame();
         }
     }
 
-    /// <summary>Slides the actor to a point (room coordinates). Simple, but enough for cutscenes.</summary>
+    /// <summary>Walks the actor in a straight line to a point (room coordinates). Simple, but enough for cutscenes.</summary>
     public Task MoveTo(Vector2 target, float speed = 40)
     {
         _moveDone?.TrySetResult();
         _moveDone = new TaskCompletionSource();
         _moveTarget = target;
         _moveSpeed = speed;
+        _walkDistance = 0;
         if (_sprite != null && Mathf.Abs(target.X - Position.X) > 1)
             _sprite.FlipH = target.X < Position.X;
         return _moveDone.Task;
@@ -102,6 +116,11 @@ public partial class Actor : Hotspot, ISpeaker
     private void UpdateFrame()
     {
         if (_sprite == null) return;
+        if (_moveTarget != null && CanWalk)
+        {
+            _sprite.Frame = WalkStart + (1 + (int)(_walkDistance / StridePerFrame)) % WalkFrames;
+            return;
+        }
         if (!_talking || Frames < 2) { _sprite.Frame = 0; return; }
         int tick = (int)(_talkTime * 7);
         _sprite.Frame = Frames >= 3 ? TalkCycle[tick % TalkCycle.Length] : (tick % 2 == 0 ? 1 : 0);
