@@ -127,7 +127,7 @@ tools/               Python art generator
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
 | `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |
-| `Actor` | An NPC: a hotspot with a 3-frame (idle + two talk frames) sprite strip, a speech colour, depth scaling and `MoveTo` |
+| `Actor` | An NPC: a hotspot with an 11-frame sprite strip (idle, two talk frames, an 8-frame walk cycle), a speech colour, depth scaling and `MoveTo` (which plays the walk cycle) |
 | `Player` | The player character (Micah, or Daniel in the prologue): 4-direction walk cycles, pathfinding along the walk polygon |
 | `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
@@ -172,7 +172,7 @@ py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lo
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 3-frame 56×96 strips (idle, two talk frames), and items are 32×24.
+size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
 
 ## Credits
 

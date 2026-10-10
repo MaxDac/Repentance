@@ -4,7 +4,8 @@ Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
   row 0  side view, facing right : idle, walk 1-8, talk
   row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
   row 2  back 3/4 view           : idle, walk 1-6
-NPCs get a 3-frame strip of 56x96 frames (idle, talk A, talk B) in a 3/4 view facing screen-right; scenes flip them.
+NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view facing screen-right, then walk 1-8 in
+side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 """
 from .common import save
 from .figure import figure as _figure, pose, walk_pose, sheet, kneel_figure as _kneel
@@ -124,12 +125,23 @@ def player_sheet(spec, name):
     return img
 
 
+def npc_walk_pose(arms, i, **extra):
+    """Side-view stride frame facing screen-right. Arms the character holds still (folded, in a pocket, on the hip)
+    stay put; hanging arms counter-swing like the player's."""
+    p = walk_pose(90, i)
+    p["arms"] = {s: (p["arms"][s] if arms[s][0] == "swing" else arms[s]) for s in (1, -1)}
+    p["lean"] += extra.get("lean", 0.0)
+    p["nod"] = extra.get("nod", 0.0)
+    return p
+
+
 def npc_strip(spec, name, arms, phi=35, **extra):
     """extra: pose overrides (e.g. lean for a stoop); a "nod" here adds to the talk-frame nod."""
     nod = extra.pop("nod", 0.0)
     frames = [figure(spec, pose(phi, arms=arms, nod=nod, **extra), NPC_W, FH),
               figure(spec, pose(phi, arms=arms, mouth=1, nod=nod, **extra), NPC_W, FH),
               figure(spec, pose(phi, arms=arms, mouth=2, nod=nod + 0.004, **extra), NPC_W, FH)]
+    frames += [figure(spec, npc_walk_pose(arms, i, nod=nod, **extra), NPC_W, FH) for i in range(STRIDE_FRAMES)]
     img = sheet([frames], NPC_W, FH)
     save(img, "sprites", f"{name}.png")
     return img
