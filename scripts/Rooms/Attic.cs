@@ -165,13 +165,20 @@ public partial class Attic : Room
                 await Say("Receipts, bank statements, a 1994 Pizza Hut menu... and something heavy underneath.");
                 return true;
             case ("papers", Verb.Hand) when !State.HasFlag("got_crowbar"):
-                State.SetFlag("got_crowbar");
-                State.GiveItem("crowbar");
-                await Say("A crowbar! Hidden in a box marked MISC. Fair enough.");
-                await SatchelHint();
+                State.SetFlag("tool_tin_found");
+                await Say("A locked tool tin under the papers. Somebody stamped a small key beside the lock. Not much of a riddle, but I'll take it.");
                 return true;
             case ("papers", Verb.Hand):
                 await Say("I'll file them later. In the recycling bin.");
+                return true;
+            case ("tool_tin", Verb.Look or Verb.Hand):
+                await Say(State.HasFlag("got_crowbar") ? "The tin is empty now." : "A small locked tool tin. That little suitcase key might fit.");
+                return true;
+            case ("tool_tin", Verb.UseItem) when item == "suitcase_key" && !State.HasFlag("got_crowbar"):
+                State.SetFlag("got_crowbar");
+                State.GiveItem("crowbar");
+                await Say("The small key turns. Inside, a crowbar. A small lock gets me into the big one.");
+                await SatchelHint();
                 return true;
 
             case ("trunk", Verb.Look):
@@ -211,7 +218,7 @@ public partial class Attic : Room
                 State.SetFlag("got_suitcase_key");
                 State.GiveItem("suitcase_key");
                 await Say("Empty... no, wait. Something's sewn into the lining.");
-                await Say("A key! Small, brass. Maybe it fits that trunk.");
+                await Say("A key! Small, brass. Maybe it fits something among the papers.");
                 await SatchelHint();
                 return true;
             case ("suitcase", Verb.Hand):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ChicagoMap.cs" id="1_ChicagoMap"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map.png" id="2_map"]
@@ -9,6 +9,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_club.png" id="m_club"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_convent.png" id="m_convent"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_harrington.png" id="m_harrington"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_hotel.png" id="m_hotel"]
+
+[sub_resource type="RectangleShape2D" id="Rect_hotel"]
+size = Vector2(64, 28)
 
 [sub_resource type="RectangleShape2D" id="Rect_library"]
 size = Vector2(50, 28)
@@ -71,6 +75,11 @@ position = Vector2(137, 174)
 texture = ExtResource("m_harrington")
 centered = false
 
+[node name="Hotel" type="Sprite2D" parent="Markers"]
+position = Vector2(45, 194)
+texture = ExtResource("m_hotel")
+centered = false
+
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
@@ -121,7 +130,7 @@ shape = SubResource("Rect_office")
 script = ExtResource("3_Hotspot")
 Id = "club"
 DisplayName = "the Club"
-LookText = "The Club. 18 W. Hubbard, from the slip in the book. No sign on the door, no name on the bell."
+LookText = "The Club. 18 W. Hubbard, deciphered from the calling card. No sign on the door, no name on the bell."
 monitoring = false
 monitorable = false
 
@@ -152,3 +161,15 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Harrington"]
 position = Vector2(170, 187)
 shape = SubResource("Rect_harrington")
+
+[node name="Hotel" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "hotel"
+DisplayName = "Aurelian Hotel - missed clues"
+LookText = "Room 507. I left before collecting its clues; I can return through the staff entrance."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Hotel"]
+position = Vector2(77, 208)
+shape = SubResource("Rect_hotel")

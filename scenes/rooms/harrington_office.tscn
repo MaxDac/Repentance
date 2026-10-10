@@ -74,7 +74,7 @@ position = Vector2(358, 52)
 texture = ExtResource("7_harrington_office_closet")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "closet_open"
+ShowIfFlags = "harrington_closet_open"
 
 [node name="Secret" type="Sprite2D" parent="."]
 z_index = -8
@@ -82,7 +82,7 @@ position = Vector2(382, 152)
 texture = ExtResource("8_harrington_office_secret")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "closet_open,secret_open"
+ShowIfFlags = "harrington_closet_open,secret_open"
 HideIfFlags = "took_mask"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
@@ -166,7 +166,7 @@ DisplayName = "closet"
 LookText = "A tall walnut closet. Too tall for coats, unless Harrington's coats are taller than he is."
 WalkTo = Vector2(414, 216)
 Face = 2
-HideIfFlags = "closet_open"
+HideIfFlags = "harrington_closet_open"
 monitoring = false
 monitorable = false
 
@@ -181,7 +181,7 @@ DisplayName = "closet"
 LookText = "Three overcoats and a smell of cedar. The back panel doesn't sit flush with the sides."
 WalkTo = Vector2(414, 216)
 Face = 2
-ShowIfFlags = "closet_open"
+ShowIfFlags = "harrington_closet_open"
 monitoring = false
 monitorable = false
 
@@ -197,7 +197,7 @@ LookText = "The back of the closet. There's a gap down one side you could slide 
 WalkTo = Vector2(414, 216)
 Face = 2
 ClickPriority = 2
-ShowIfFlags = "closet_open"
+ShowIfFlags = "harrington_closet_open"
 HideIfFlags = "secret_open"
 monitoring = false
 monitorable = false
@@ -214,7 +214,7 @@ LookText = "A white mask, blank as a new moon, and a black hooded cloak folded u
 WalkTo = Vector2(414, 216)
 Face = 2
 ClickPriority = 2
-ShowIfFlags = "closet_open,secret_open"
+ShowIfFlags = "harrington_closet_open,secret_open"
 HideIfFlags = "took_mask"
 monitoring = false
 monitorable = false

@@ -11,7 +11,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Daniel (the dad) is in the attic, calling his son Leo, but Leo doesn't come over ("In a minute!").
 - Daniel can lift the dust sheet and knock over the boxes, spilling the old papers.
 - In the suitcase there is a key, but it can't open the large steamer trunk.
-- Only the crowbar hidden in the papers from the boxes can open the trunk.
+- **Puzzle 1 - Tool tin:** searching the spilled papers uncovers a locked tool tin with a small-key outline
+  stamped beside its lock. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
 - In the trunk Daniel finds Micah Jones's journal and starts reading it (hand on the journal in the satchel).
   The caption "Chicago, 1927." leads to Micah's office.
 
@@ -34,13 +35,23 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah has to bribe the bellboy with the dollar; the bellboy lets him take the staff elevator up to
   Eleanor's room (and mentions the Blue Lantern).
 - Before the bribe, the revolving door leads out to the street.
+- **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
+  The close-up shows three junctions: at A, upper goes to laundry and lower to B; at B, upper goes to C and
+  lower to the kitchen; at C, upper goes to room 507 and lower to the roof. Set **lower, upper, upper** and
+  dispatch the lift. A wrong route stays in the lobby and highlights where it went wrong.
+  Once solved, the lift works normally on return visits.
+- After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
+  room 507. Older saves that already passed the hotel without these clues get a temporary Hotel map
+  marker to retrieve them; returning to the lobby then leads back to the Act 2 map.
 
 #### Eleanor's room at the hotel (room 507)
 
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination (key number).
-- Micah opens the closet to reveal the safe, and opens the safe using the combination on it.
+- **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
+  its graphical controls, not the safe itself. Enter **R 12 / L 31 / R 7** in the three direction/number rows
+  and submit. The paper remains readable; wrong settings can be reset or retried.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for some decorations;
   - a matchbook with the name of the club, the Blue Lantern (next location).
@@ -72,10 +83,13 @@ described here (other verbs, flavour lines) is left to the implementation.
   search now, and never have anything to do with that Jezebel". Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
-- Behind the little mirror there is a strange symbol, a Celtic triquetra (trinity knot), shown as a full-screen
-  image when Micah takes the mirror (and again with the hand on the mirror in the inventory).
-- Micah only takes the little mirror; the comb stays in the drawer.
-- If the player tries to leave the cell before taking the mirror, Micah says "There is still something to be
+- **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
+  lamp explains that gentle warmth softens wax; searching the bed supplies a borrowed clean cloth.
+  Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax
+  and returns the cloth to the bed, revealing a Celtic triquetra (trinity knot).
+  The symbol is shown full screen, and can then be inspected again from the inventory.
+- Micah keeps the revealed mirror; the comb stays in the drawer.
+- If the player tries to leave the cell before revealing the symbol, Micah says "There is still something to be
   found in this room."
 
 #### Road outside the convent
@@ -134,8 +148,13 @@ described here (other verbs, flavour lines) is left to the implementation.
   returns to both Micah and the librarian.
 - The librarian asks him where he got that mirror. Micah won't tell him, so the librarian answers that he won't
   tell him anything either.
+- **Puzzle 5 - Restricted catalogue:** after the refusal, inspect the desk catalogue. Compare the mirror's
+  connected triquetra with the motif plates: select Celtic traditions, whose index lists **A. R. Bell**.
+  The author listings identify **Rites of the Old Isles, shelf C-17**. Select that entry.
+  The volume is behind locked glass; Micah cannot simply take it from the shelves or ladder.
 - Micah has to threaten the librarian with the revolver (use the revolver on him; before asking about the symbol
-  Micah refuses to do it). The librarian tells him there's a book describing ancient Celtic rituals and gives it
+  Micah refuses to do it, and before the lookup he needs a precise title). He requests the identified book.
+  The librarian confirms that it describes ancient Celtic rituals and gives it
   to him if he goes away. The scene returns to the map.
 - After this the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -144,9 +163,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office
 
 - Leaving the office returns to the map.
-- In his office, if Micah opens the book (hand on it in the inventory), he finds some naturalistic rituals he
-  doesn't care about, and a little sheet of paper with an address: the Starlight club.
-  Opening the book anywhere else, Micah says he'll read it at the office.
+- **Puzzle 6 - Concealed calling card:** read the book at the office for instructions about gentle heat,
+  reflected writing and ornament order: **lily, leaf, feather**. Use the hotel calling card on the radiator,
+  then combine it with the revealed convent mirror in either order.
+  The reflection reveals three labelled fragments: feather = "Hubbard", lily = "The Club", leaf = "18 W.".
+  Arrange them using the book's ornament order in the close-up to obtain the existing address slip.
+  Heating, reflection and book-reading can happen in different orders; the last prerequisite offers the
+  deciphering panel. The complete address and map destination appear only when the order is correct.
+  The book, card and mirror remain available. Reading the book outside the office still receives a refusal.
 - A new location is now available on the map: the club (the Starlight).
 
 #### Club (remove Starlight, the location will be called only Club)
@@ -229,11 +253,19 @@ described here (other verbs, flavour lines) is left to the implementation.
   - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
-  - Step 3: climb the fire escape (hand on it, or on the window) and go in through the window: the office.
+  - **Puzzle 7 - Ladder catch:** after the distraction, take the tapered packing wedge visible among the
+    crates. Stack the crates to reach the jammed ladder catch, whose illustration shows the obstruction.
+    Use the wedge on the catch, then climb the fire escape (hand on it, or on the window).
+    Both stacked crates and a freed catch are necessary; the wedge stays installed and the guard never
+    returns on a gameplay timer.
 - Once in the office, the player will have to search for clues, and it will have to open at least two drawers and a
   closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
 - In the drawer, he will find an invitation card to the Club.
-- In the closet, he will have to find a double door inside the closet, hiding a white mask and a cloak.
+- **Puzzle 8 - Disguise compartment:** the invitation shows an ordered procession of crests:
+  raven, lion, stag. The portrait's heraldic key associates raven with star, lion with sun and stag with moon.
+  Open the closet and inspect its false-back panel. Set the three graphical wheels to
+  **STAR / SUN / MOON** and submit. Neither a hand nor lockpicks bypasses the lock.
+  The double doors reveal the original white mask and cloak.
 
 #### Map of Chicago
 
@@ -288,6 +320,20 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 The existing temporary storyline strings together the remaining locations:
 
-- **Motel room 6**: a map is hidden in the bed.
-- **Outskirts**: digging where the map says reveals the bookkeeper's tin box... and Sal is waiting.
+- **Puzzle 9 - Motel room 6, map overlay:** searching the bed yields a county-map fragment; the dresser
+  yields a transparent tracing. Combine them in either order to open the alignment close-up.
+  Move the tracing on the discrete grid and rotate it in quarter turns until its windmill, creek and fence
+  registration marks all match the base map. The asymmetric arrangement has one solution: one clockwise
+  turn and offset (6, 3). Correct alignment merges the pieces into the map and reveals the bearing notes.
+  A fragment alone cannot unlock the road out of town; cancellation retains both pieces.
+- **Puzzle 10 - Outskirts, survey:** use the completed map on the fence post. The notes specify thirty paces
+  east of that post and ten paces north of the creek bend. In the north-up survey, each grid step is five paces;
+  the fence is at column 2, row 8 and the creek bend at column 5, row 10. Mark column **8**, row **8**.
+  This identifies the burial hotspot; digging at a suspicious patch beforehand cannot grant evidence.
+  Digging at the identified spot reveals the bookkeeper's tin box... and Sal is waiting.
   *To be continued.*
+
+All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful inventory
+items. Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
+The satchel has pages so every collected item remains accessible. Completed discoveries in older saves
+remain completed; an unfinished new puzzle does not complete merely by saving and loading.

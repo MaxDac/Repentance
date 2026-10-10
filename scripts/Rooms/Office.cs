@@ -112,6 +112,12 @@ public partial class Office : Room
             case ("radiator", Verb.Hand or Verb.Kick):
                 await Say("It knocks all night. Like a creditor. Or a conscience.");
                 return true;
+            case ("radiator", Verb.UseItem) when item == "card":
+                State.SetFlag("card_warmed");
+                await Say("In the radiator's warmth, ink rises between the curlicues. Backward writing. I'll need a reflection.");
+                await Game.Hud.ShowImage(Godot.GD.Load<Godot.Texture2D>("res://assets/art/ui/card_reversed.png"));
+                await Game.TryDecodeCard();
+                return true;
         }
         return false;
     }
@@ -121,16 +127,16 @@ public partial class Office : Room
         if (item != "book" || verb != Verb.Hand) return false;
         if (State.HasFlag("read_book"))
         {
-            await Say("Groves, wells, bonfires on the hills. I've read enough of it for one lifetime.");
+            await Say("Concealed messages: gentle warmth, then a reflection. Ornament order: lily, leaf, feather.");
+            await Game.TryDecodeCard();
             return true;
         }
         State.SetFlag("read_book");
         await Say("\"Rites of the Old Isles.\" Midsummer fires. Oak groves. Wells you whisper your sins into.");
         await Say("Druids and dew and the turning of the seasons. Pretty, if you're a farmer. I'm not.");
-        await Say("Wait. Something slipped out from between the pages. A little sheet of paper.");
-        State.GiveItem("address");
-        State.SetFlag("club_unlocked");
-        await Say("An address, in a woman's hand. \"The Club, 18 W. Hubbard.\" Just that. A place that doesn't need a name.");
+        await Say("A page about concealed messages. Gentle warmth brings up the ink; a mirror turns the writing back.");
+        await Say("The ornaments give the order: lily first, leaf second, feather last. Those curlicues on the hotel card weren't just decoration.");
+        await Game.TryDecodeCard();
         return true;
     }
 }

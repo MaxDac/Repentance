@@ -168,9 +168,70 @@ public partial class Game : Node
         if (first == item) return;
         await Run(async () =>
         {
-            if (Room == null || !await Room.OnCombine(first, item))
+            if (!await CombineItems(first, item) && (Room == null || !await Room.OnCombine(first, item)))
                 await Say(Pick("That doesn't work.", "I can't see how those go together."));
         });
+    }
+
+    private async Task<bool> CombineItems(string first, string second)
+    {
+        var state = GameState.Instance;
+        if (Room?.PlayerCharacter != "micah" || !state.HasItem(first) || !state.HasItem(second)) return false;
+        if (PuzzleRules.Pair(first, second, "cloth", "mirror_waxed"))
+        {
+            if (!state.HasFlag("mirror_warmed"))
+            {
+                await Say("The cloth won't shift cold wax. Gentle warmth first.");
+                return true;
+            }
+            state.TakeItem("mirror_waxed");
+            state.TakeItem("cloth");
+            state.GiveItem("mirror");
+            state.SetFlag("got_mirror");
+            await Say("The wax lifts cleanly. I put the borrowed cloth back on the bed.");
+            await Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
+            await Say("Three loops tied in one knot. No beginning, no end. Scratched deep, on purpose.");
+            return true;
+        }
+        if (PuzzleRules.Pair(first, second, "card", "mirror"))
+        {
+            if (!state.HasFlag("card_warmed"))
+            {
+                await Say("Blank paper in a mirror is still blank paper.");
+                return true;
+            }
+            state.SetFlag("card_reflected");
+            if (!state.HasFlag("read_book"))
+                await Say("Words among the ornaments, in no sensible order. I need a guide to those markings.");
+            await TryDecodeCard();
+            return true;
+        }
+        if (PuzzleRules.Pair(first, second, "map_base", "map_tracing"))
+        {
+            if (await Hud.Puzzle.Open(PuzzleKind.Alignment))
+            {
+                state.TakeItem("map_base");
+                state.TakeItem("map_tracing");
+                state.GiveItem("map");
+                state.SetFlag("found_map");
+                await Say("All three landmarks line up. The X has notes: thirty paces east of the fence post, ten north of the creek bend.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public async Task TryDecodeCard()
+    {
+        var state = GameState.Instance;
+        if (state.HasFlag("card_decoded") || !state.HasItem("card") || !state.HasItem("mirror") ||
+            !PuzzleRules.CipherReady(state.HasFlag("read_book"), state.HasFlag("card_warmed"), state.HasFlag("card_reflected")))
+            return;
+        if (!await Hud.Puzzle.Open(PuzzleKind.Cipher)) return;
+        state.SetFlag("card_decoded");
+        state.GiveItem("address");
+        state.SetFlag("club_unlocked");
+        await Say("Lily, leaf, feather. The Club, 18 W. Hubbard. I copy it onto a slip. A place that doesn't need a name.");
     }
 
     /// <summary>Applies a wheel verb to an inventory item (also used by the autoplay test).</summary>
@@ -196,6 +257,14 @@ public partial class Game : Node
         if (verb == Verb.Hand && item == "book")
         {
             await Say("Not here. A book like that wants a locked door and a desk lamp. My office has both.");
+            return;
+        }
+        if (item == "card" && GameState.Instance.HasFlag("card_warmed") && verb is Verb.Hand or Verb.Look)
+        {
+            await Say(GameState.Instance.HasFlag("card_reflected")
+                ? "Feather: Hubbard. Lily: The Club. Leaf: 18 W. The book's ornament legend should put them in order."
+                : "The ink came up in the warmth, but every letter is backward. A reflection might help.");
+            await TryDecodeCard();
             return;
         }
         switch (verb)
@@ -442,6 +511,7 @@ public partial class Game : Node
         try
         {
             await Hud.Fade(1, 0.35);
+            PuzzleMigration.Normalize(data);
             GameState.Instance.Restore(data.Flags, data.Inventory, data.StoryAct);
             DialogueManager.Instance.LoadInk(data.Ink);
             _playtime = data.PlaytimeSeconds;

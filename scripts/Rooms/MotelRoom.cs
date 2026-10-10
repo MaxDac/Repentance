@@ -20,13 +20,12 @@ public partial class MotelRoom : Room
     {
         switch (target.Id, verb)
         {
-            case ("bed", Verb.Hand) when !State.HasFlag("found_map"):
+            case ("bed", Verb.Hand) when !State.HasFlag("map_base_taken") && !State.HasFlag("found_map"):
                 State.SetFlag(BedSearchedFlag);
-                State.SetFlag("found_map");
-                State.GiveItem("map");
+                State.SetFlag("map_base_taken");
+                State.GiveItem("map_base");
                 Refresh();
-                await Say("Room 6. Teddy paid cash for a bed nobody slept in. Under the mattress, folded in four: a map.");
-                await Say("The county road east, the last fence post, and an X. Men don't draw maps to places they want to forget.");
+                await Say("Under the mattress: part of a county map. Windmill, creek bend, fence gate. Three registration marks for another sheet.");
                 return true;
             case ("bed", Verb.Hand) when !State.HasFlag(BedSearchedFlag):
                 State.SetFlag(BedSearchedFlag);
@@ -56,7 +55,13 @@ public partial class MotelRoom : Room
                 return true;
 
             case ("dresser", Verb.Hand):
-                await Say("Nothing in there but splinters and the smell of damp wood.");
+                if (!State.HasFlag("map_tracing_taken") && !State.HasFlag("found_map"))
+                {
+                    State.SetFlag("map_tracing_taken");
+                    State.GiveItem("map_tracing");
+                    await Say("Transparent tracing paper behind the drawer. Three registration marks and an X. It needs the rest of the map.");
+                }
+                else await Say("Nothing more behind the drawer. I've got the tracing.");
                 return true;
 
             case ("bottle", Verb.Hand):

@@ -6,6 +6,12 @@ namespace Repentance.Rooms;
 /// <summary>Past the city limits: the field where the bookkeeper's drive ended. The demo ends here.</summary>
 public partial class Outskirts : Room
 {
+    protected override void OnRefresh()
+    {
+        if (FindHotspot("disturbed_earth") is { } spot)
+            spot.DisplayName = State.HasFlag("burial_surveyed") ? "marked burial spot" : "unverified disturbed earth";
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_outskirts")) return;
@@ -17,10 +23,25 @@ public partial class Outskirts : Room
     {
         switch (target.Id, verb)
         {
-            case ("disturbed_earth", Verb.Hand) or ("disturbed_earth", Verb.UseItem) when item is null or "map":
-                if (!State.HasItem("map"))
+            case ("fence_post", Verb.UseItem) when item == "map":
+                if (State.HasFlag("burial_surveyed"))
                 {
-                    await Say("Somebody dug here. I'm not about to dig up the whole county on a hunch.");
+                    await Say("Thirty paces east of this post, ten north of the creek. I've marked the place.");
+                    return true;
+                }
+                if (await Game.Hud.Puzzle.Open(PuzzleKind.Survey))
+                {
+                    State.SetFlag("burial_surveyed");
+                    await Say("Column eight, row eight. Both bearings agree. That's the patch to dig.");
+                }
+                return true;
+            case ("fence_post", Verb.Hand):
+                await Say("The map's bearing notes start at this fence post. I should use it here and count, not guess.");
+                return true;
+            case ("disturbed_earth", Verb.Hand) or ("disturbed_earth", Verb.UseItem) when item is null or "map":
+                if (!State.HasItem("map") || !State.HasFlag("burial_surveyed"))
+                {
+                    await Say("Somebody dug here, but a hunch isn't enough. Use the completed map at the fence post and check both bearings.");
                     return true;
                 }
                 if (State.HasFlag("found_evidence")) return false;
