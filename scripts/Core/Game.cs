@@ -395,7 +395,7 @@ public partial class Game : Node
         _roomScene = name;
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
-        Player.SetCharacter(Room.PlayerCharacter);
+        Player.SetCharacter(Room.ResolvePlayerCharacter());
         Player.Visible = Room.ShowPlayer;
     }
 

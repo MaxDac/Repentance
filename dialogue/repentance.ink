@@ -10,6 +10,8 @@ EXTERNAL give_item(id)
 EXTERNAL take_item(id)
 EXTERNAL set_flag(flag)
 
+VAR pushes = 0
+
 -> END
 
 // ---------------------------------------------------------------- PROLOGUE: THE ATTIC (present day)
@@ -249,7 +251,7 @@ BARTENDER: Never heard of her. And I got a real bad memory for faces, pal. Espec
 + [(Drop it)]
     -> END
 = after
-BARTENDER: The Starlight, pal. Now drink or leave.
+BARTENDER: The Club, on Hubbard. No sign on the door. Now drink or leave.
 -> END
 
 === bartender_dislike ===
@@ -343,67 +345,58 @@ ELEANOR: Goodbye, Micah Jones.
 MICAH: Goodbye, Eleanor.
 -> END
 = after
-BARTENDER: The Starlight, pal. Now drink or leave.
+BARTENDER: The Club, on Hubbard. No sign on the door. Now drink or leave.
 -> END
 
-// ---------------------------------------------------------------- THE STARLIGHT CLUB
+// ---------------------------------------------------------------- THE CLUB
 
-=== harrington ===
-{has_flag("harrington_met"): -> harrington.again}
-HARRINGTON: You're blocking my view of the curtain, young man.
-MICAH: Micah Jones. I work for your son.
-HARRINGTON: Then you have my sympathies. Theodore Harrington. The one who built the steel mill, not the one losing it.
+=== moc ===
+MOC: Good evening, sir. This is a private club, and I don't believe you were invited.
+MICAH: I was in the neighbourhood. Doing some reading.
+MOC: How edifying. And what does a gentleman like you read?
 - (opts)
-* [What brings you to a place like this?]
-    HARRINGTON: The same thing as you, I expect. The singer.
-    HARRINGTON: I've known Eleanor since her debut. The blonde hair was Teddy's idea. Everything else was hers.
-    -> harrington.opts
-* [What do you think of your son?]
-    HARRINGTON: Teddy was a disappointment in short pants, and he has kept up the tradition.
-    HARRINGTON: If he's hired a detective, Mr. Jones, he's frightened. Find out of what.
-    -> harrington.opts
-* [Enjoy the show.]
-    HARRINGTON: At my age one enjoys everything. It might be the last time.
-    ~ set_flag("harrington_met")
-    -> END
-= again
-HARRINGTON: The singer is through the curtain, Mr. Jones. I'm only the audience.
+* [Midsummer fires. Oak groves. Wells you whisper your sins into.]
+    MOC: Farmers' tales. Why would a man like you care what farmers did on the longest night of the year?
+    -> opts
+* [A book from the public library. Your address was tucked inside it.]
+    MOC: We are a club. People who like us write our address down. Why are you asking, Mr...?
+    MICAH: Jones. Micah Jones.
+    -> opts
+* [Do the bonfires burn here too? Is that what the robe is for?]
+    MOC: The robe is for the members, Mr. Jones. The questions, apparently, are for you. Why are you asking?
+    -> opts
+* -> done
+- (done) MOC: Enough. I know why you are asking, Mr. Jones. And it has nothing to do with druids.
+MOC: You are here because of Eleanor.
 -> END
 
-=== eleanor ===
-{has_flag("eleanor_met"): -> eleanor.again}
-ELEANOR: Show's over, mister. Autographs are a dime, and I'm all out of pencils.
-MICAH: Evening, Mrs. Harrington.
-ELEANOR: ...Nobody's called me that in four days. They were four very nice days.
-- (opts)
-* [Your husband hired me to bring you home.]
-    ELEANOR: Teddy didn't hire you to find me. He hired you to find what I took.
-    MICAH: And what did you take?
-    ELEANOR: His other set of books.
-    -> eleanor.opts
-* [What's in the books?]
-    ELEANOR: Teddy owes Vincent Moretti more than Harrington Steel is worth. He's been paying with the company's money.
-    ELEANOR: When the company bookkeeper found out, he went for a drive past the city limits. He didn't drive back.
-    -> eleanor.opts
-* [Who's been hiding you?]
-    ELEANOR: A priest at the cathedral. Father Caleb Jones. He found me a bed and this job.
-    MICAH: Jones.
-    ELEANOR: A relative of yours?
-    MICAH: My kid brother. We haven't spoken in six years.
-    ELEANOR: He prays for you, you know. Every night. I've heard him.
-    -> eleanor.opts
-* [How do I help you?]
-    ELEANOR: I wrote everything down in my diary. I left it in the vanity at the Aurelian when I ran. Suite 4.
-    ELEANOR: Moretti's men watch the lobby. I can't go back. You can.
-    ~ give_item("key")
-    ELEANOR: Take my key. Bring the diary to Father Caleb. He'll know what to do with it.
-    MICAH: And you?
-    ELEANOR: I'll be here. Singing about men who never come back.
-    ~ set_flag("eleanor_met")
-    -> END
-= again
-ELEANOR: The Aurelian, suite 4. Then the cathedral. Please, Mr. Jones.
+=== moc_eleanor ===
+MICAH: Do you know where she is?
+MOC: Of course! Thanks to your efforts, she is already with us, safe, and where she belongs!
+MICAH: My efforts...?
+MOC: Bruno. The gentleman is leaving.
+BRUTE: This way, pal. Nice and easy, or the other way.
 -> END
+
+=== moc_masked ===
+MOC: Your invitation, brother.
+MOC: ...Welcome. The rite is about to begin. Go on through to the stage.
+-> END
+
+=== moc_again ===
+MOC: The stage, brother. They are waiting.
+-> END
+
+=== club_caught ===
+LEADER: Given that you returned Eleanor to us, you'll be forgiven for this intrusion, but this is enough for you.
+* [(Draw the revolver.)]
+    ~ set_flag("drew_revolver")
+    MICAH: Nobody move. Eleanor, come down off that stage. We're leaving.
+    ELEANOR: Oh, Micah. You never did understand.
+* [(Do nothing.)]
+    MICAH: ...
+    ELEANOR: Go home, Micah.
+- -> END
 
 // ---------------------------------------------------------------- CATHEDRAL
 
@@ -542,4 +535,138 @@ SAL: Hey. Gumshoe.
 SAL: Nice night for digging.
 SAL: Mr. Moretti would like a word. In private. Bring the box.
 MICAH: Funny. I was just about to ask for one.
+-> END
+
+// ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
+
+=== street_choice ===
+* [(Go find Rose.)]
+    ~ set_flag("go_rose")
+* [(Push forward.)]
+- -> END
+
+=== rose_house ===
+ROSE: Micah.
+ROSE: It's past eleven. What are you doing here?
+MICAH: I was passing by.
+ROSE: Nobody passes by this street, Micah. You have no business being here. Not anymore.
+- (opts)
++ {pushes == 0} [I came to say I'm sorry, Rose.]
+    ~ pushes = 1
+    ROSE: You always are. It's the one thing you were ever reliable about.
+    -> opts
++ {pushes == 1} [I know what I did. I left you and Tommy alone, and I called it work.]
+    ~ pushes = 2
+    ROSE: You called it a lot of things. Tommy called it "when is Daddy coming home". For a year.
+    -> opts
++ {pushes == 2} [I'm not asking you to take me back. Just to forgive me.]
+    ~ pushes = 3
+    ROSE: Forgiving is easy, Micah. Forgetting is the part you keep asking for.
+    -> opts
++ {pushes == 3} [I've done something terrible this week. I need to hear it from somebody. From you.]
+    ~ pushes = 4
+    ROSE: And there it is. You're not here for us. You're here because you need something.
+    -> opts
++ {pushes == 4} [Please, Rose. Just say it. Once.]
+    ~ pushes = 5
+    ROSE: ...
+    ROSE: Go home, Micah.
+    -> opts
++ [Good night, Rose.]
+    {pushes >= 3:
+        ~ set_flag("rose_wait")
+    }
+    ROSE: Good night.
+    -> END
+
+=== rose_coffee ===
+ROSE: Micah? It's the middle of the night. God, your face...
+MICAH: It looks worse than it is. It usually does.
+ROSE: What do you want? Last time you were here you wanted forgiving.
+MICAH: Nothing. Not tonight.
+MICAH: I was wondering... if some time you'd be free for a cup of coffee. Daylight. A table between us.
+ROSE: ...
+ROSE: Coffee.
+MICAH: Just coffee. You can bring Tommy, if he wants to see what his old man looks like.
+ROSE: ...Why not.
+-> END
+
+=== caleb_club ===
+CALEB: Micah. Twice in one week. People will start to talk.
+MICAH: There's a club on Hubbard. No sign on the door, a man in a robe at the bell. They have Eleanor.
+CALEB: ...I don't know anything about clubs.
+- (opts)
+* [You went as white as the altar cloth, Caleb.]
+    CALEB: It's late, Micah. Go home.
+    -> opts
+* [You hid her in your sacristy. Now they've got her back. Help me.]
+    CALEB: ...
+    CALEB: There are women who go there. Performers, they call them. When the Club is done with them, the sisters at the convent take some of them in.
+    CALEB: If anybody knows anything, it's the sisters. The convent is the best place to ask.
+    -> rest
+- (rest)
+CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
+MICAH: There's little left for me to do, at this point.
+CALEB: You know that that's not the case.
+~ set_flag("caleb_club")
+-> END
+
+=== caleb_warn ===
+CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
+MICAH: I asked nicely first.
+CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose, go anywhere.
+CALEB: There's still a way back. There always is. But not where you're going.
+MICAH: Good night, Caleb.
+-> END
+
+=== caleb_last ===
+CALEB: You've got that look. The one you had the night before you shipped out to France.
+MICAH: I'm going back to the Club tonight. Dressed for the occasion.
+CALEB: Then I can't stop you. I never could.
+CALEB: I'll pray for you, brother. It's all you ever left me to do.
+-> END
+
+=== nun_club ===
+NUN: You again. Twice in one week. You smell of whisky and trouble, young man.
+MICAH: There's a club on Hubbard Street. Eleanor Harrington is there. Father Jones says you take in their women.
+NUN: I know nothing about clubs. I know nothing about their women. Go with God, Mr. Jones.
+* [Where is she, sister?]
+    NUN: I told you. I know nothing. Good night.
+* [What happens in that club?]
+    NUN: Nothing I would know about. Good night.
+- (asked)
+~ set_flag("nun_club_asked")
+-> END
+
+=== nun_threat2 ===
+NUN: Are you crazy, sir?!
+MICAH: Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?
+NUN: You are of the same lot as that Jezebel. At this point, I'll let you burn in the flames of hell.
+NUN: She's a performer, you know. Almost caught me off guard, the whore.
+NUN: You might want to see Harrington senior.
+-> END
+
+=== beaten_choice ===
+* [(Keep going. For Eleanor.)]
+    ~ set_flag("keep_going")
+* [(Give up.)]
+- -> END
+
+// ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
+
+=== dinner_call2 ===
+LEO: DAD! DINNER!
+DANIEL: ...It's dark already? Again?
+LEO: Mom says it's the second night in a row, and the dog is getting used to your plate!
+DANIEL: Coming! I'm coming.
+DANIEL: White masks and a woman on a stage. What did you get yourself into, Micah?
+-> END
+
+=== bedroom ===
+MOM: Mmh... Dan. It's one in the morning. Turn that off.
+DANIEL: Five more minutes. He's back at the Club. He just walked up to the stage.
+MOM: Who is?
+DANIEL: Micah. The detective. From the attic.
+MOM: ...Goodnight, Dan.
+DANIEL: Five more minutes.
 -> END

@@ -222,8 +222,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office of Harringhton father
 
 - Two new locations, office of Harringhton father and the road below, at night.
-- <PlaceHolder> Simulate two locations, and a series of at least two things to get right in order to access the 
-  office without being notice.
+- **Road behind the Harrington Building, at night**: a watchman guards the back door and the alley; a trash can,
+  a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
+  - While the watchman is there, touching the crates or the fire escape gets Micah spotted: the watchman
+    shoos him back down the alley, and the back door is locked anyway. Threatening him with the revolver or kicking him is refused.
+  - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
+    goes inside to phone the fire department, leaving the alley unwatched.
+  - Step 2: use the hand on the crates to stack two of them under the fire escape.
+  - Step 3: climb the fire escape (hand on it, or on the window) and go in through the window: the office.
 - Once in the office, the player will have to search for clues, and it will have to open at least two drawers and a
   closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
 - In the drawer, he will find an invitation card to the Club.
@@ -263,6 +269,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - At this point, the player has two choices in dialogue:
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
+  - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 
 #### Churc, outside
 
@@ -271,7 +278,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
-  to the end of act 3
+  to the end of act 3 (caption "End of Act Three").
 - If the player decide to keep pushing, keep to the next.
 - For now, continue with the temporary storyline. 
 

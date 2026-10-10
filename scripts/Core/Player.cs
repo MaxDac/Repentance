@@ -32,7 +32,7 @@ public partial class Player : Node2D, ISpeaker
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
     /// <summary>Speech anchor: a few pixels above the top of the head (or hat), which sits ~83px above the feet.</summary>
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, (_pose != null ? 62 : 92) * Scale.Y);
+    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, (_pose == null ? 92 : _pose.EndsWith("_supine") ? 34 : 62) * Scale.Y);
 
     public bool Talking
     {
@@ -65,6 +65,7 @@ public partial class Player : Node2D, ISpeaker
         _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
         _sprite.Hframes = Cols;
         _sprite.Vframes = 3;
+        _sprite.Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + Baseline);
         UpdateFrame();
     }
 
@@ -82,6 +83,9 @@ public partial class Player : Node2D, ISpeaker
         _sprite.Hframes = 1;
         _sprite.Vframes = 1;
         _sprite.Frame = 0;
+        // Poses may be wider than a walk frame (e.g. lying on the ground); they stay centred on the feet.
+        var size = _sprite.Texture.GetSize();
+        _sprite.Offset = new Vector2(-size.X / 2, -size.Y + Baseline);
         _sprite.FlipH = _facing == Facing.Left;
     }
 

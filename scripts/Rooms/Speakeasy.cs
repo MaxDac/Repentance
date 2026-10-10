@@ -106,7 +106,7 @@ public partial class Speakeasy : Room
 
     /// <summary>
     /// In 1927 the bartender won't budge on Eleanor. When the talk is over he calls Micah back, and nods at Sal.
-    /// (In Act 2, the old Starlight lead is already known and he just pours.)
+    /// (In Act 2, the old Club lead is already known and he just pours.)
     /// </summary>
     private async Task BartenderDislikes()
     {

@@ -18,10 +18,41 @@ public partial class Street : Room
         if (GetNodeOrNull<Sprite2D>("World/StreetFront") is { } front) front.Texture = night ? NightFront : DayFront;
     }
 
+    public override async Task OnEnter(string entry)
+    {
+        if (entry == "thrown_out") await Game.Run(ThrownOut);
+    }
+
+    /// <summary>Act 2: Bruno dumps Micah on the pavement outside the Club. He thinks about Rose and Tommy, then chooses.</summary>
+    private async Task ThrownOut()
+    {
+        Player.SetPose("micah_supine");
+        await Wait(1.2);
+        await Say("The pavement on Hubbard Street is cold, and it doesn't ask questions. I like that in a pavement.");
+        await Say("What am I doing, lying in the gutter for a woman I met four days ago?");
+        await Say("I had a wife once. Still do, on paper. A boy who'd be eleven now. Tommy.");
+        await Say("I walked out on them because the bottle was easier to talk to. And now I'm walking into the night for a stranger.");
+        await Say("Maybe that's the joke. Maybe it's easier to save somebody you don't owe anything to.");
+        Player.SetPose(null);
+        Player.Face(Facing.Down);
+        await Wait(0.5);
+        await Talk("street_choice");
+        if (State.HasFlag("go_rose"))
+            await Game.ChangeRoom("rose_house", "start");
+        else
+            await Game.ChangeRoom("chicago_map", "start");
+    }
+
     // The hub is open, but each door only matters once the case has pointed Micah at it.
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         if (verb is not (Verb.Walk or Verb.Hand)) return false;
+        // Act 3, after the beating: only the motel and the road out of town are left
+        if (State.HasFlag("keep_going") && target.Id is not ("motel_door" or "road_out"))
+        {
+            await Say("Not tonight. Every part of me hurts, and only one thing is still worth the trouble.");
+            return true;
+        }
         switch (target.Id)
         {
             case "club_door" when !State.HasFlag("club_lead"):

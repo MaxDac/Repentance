@@ -20,7 +20,7 @@ public partial class MotelRoom : Room
     {
         switch (target.Id, verb)
         {
-            case ("bed", Verb.Hand) when State.HasItem("ledger") && !State.HasFlag("found_map"):
+            case ("bed", Verb.Hand) when !State.HasFlag("found_map"):
                 State.SetFlag(BedSearchedFlag);
                 State.SetFlag("found_map");
                 State.GiveItem("map");
