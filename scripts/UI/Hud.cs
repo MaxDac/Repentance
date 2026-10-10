@@ -23,10 +23,9 @@ public partial class Hud : CanvasLayer
 
     public event Action<string, bool, Vector2>? ItemClicked;
     public event Action<string?>? ItemHovered;
-    public event Action? TitleClicked;
-
     public static Font Font { get; private set; } = null!;
     public VerbWheel Wheel { get; private set; } = null!;
+    public GameMenu Menu { get; private set; } = null!;
 
     private Control _interface = null!;
     private Label _hover = null!;
@@ -41,7 +40,6 @@ public partial class Hud : CanvasLayer
     private TextureRect _image = null!;
     private TaskCompletionSource? _imageTcs;
     private TextureRect _title = null!;
-    private Label _titleHint = null!;
     private TextureRect _cursor = null!;
     private Texture2D _cursorTex = null!;
     private TaskCompletionSource<int>? _choiceTcs;
@@ -59,6 +57,8 @@ public partial class Hud : CanvasLayer
     public override void _Ready()
     {
         Layer = 10;
+        // keeps the cursor, fades and the pause menu alive while the tree is paused
+        ProcessMode = ProcessModeEnum.Always;
         Font = GD.Load<Font>("res://assets/fonts/Silkscreen-Regular.ttf");
         var theme = new Theme { DefaultFont = Font, DefaultFontSize = 8 };
 
@@ -116,19 +116,6 @@ public partial class Hud : CanvasLayer
             MouseFilter = Control.MouseFilterEnum.Ignore,
         };
         root.AddChild(_title);
-        _titleHint = new Label
-        {
-            Text = "Click to begin",
-            Position = new Vector2(0, 150),
-            Size = new Vector2(ScreenW, 10),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = 8, FontColor = VerbColor },
-        };
-        _title.AddChild(_titleHint);
-        _title.GuiInput += e =>
-        {
-            if (e is InputEventMouseButton { Pressed: true }) TitleClicked?.Invoke();
-        };
 
         _fade = new ColorRect { Color = new Color(0, 0, 0, 1), MouseFilter = Control.MouseFilterEnum.Ignore };
         _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
@@ -153,6 +140,9 @@ public partial class Hud : CanvasLayer
         };
         root.AddChild(_image);
 
+        Menu = new GameMenu { Name = "GameMenu" };
+        root.AddChild(Menu);
+
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.AddChild(_cursor);
@@ -172,8 +162,6 @@ public partial class Hud : CanvasLayer
 
     public override void _Process(double delta)
     {
-        if (_title.Visible)
-            _titleHint.Modulate = new Color(1, 1, 1, 0.55f + 0.45f * Mathf.Sin(Time.GetTicksMsec() / 300f));
         _cursor.Position = (MousePos - _cursor.Texture.GetSize() / 2).Round();
     }
 

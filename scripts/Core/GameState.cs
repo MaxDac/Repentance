@@ -50,11 +50,26 @@ public partial class GameState : Node
             EmitSignal(SignalName.Changed);
     }
 
-    public void Reset()
+    public void Reset() => Restore(System.Array.Empty<string>(), System.Array.Empty<string>(), 1);
+
+    /// <summary>Copies flags, inventory and act into a save.</summary>
+    public void CaptureInto(SaveData data)
+    {
+        data.Flags = new List<string>(_flags);
+        data.Flags.Sort(System.StringComparer.Ordinal);
+        data.Inventory = new List<string>(_inventory);
+        data.StoryAct = _storyAct;
+    }
+
+    /// <summary>Replaces the whole state at once, emitting <see cref="Changed"/> a single time.</summary>
+    public void Restore(IEnumerable<string> flags, IEnumerable<string> inventory, int storyAct)
     {
         _flags.Clear();
+        _flags.UnionWith(flags);
         _inventory.Clear();
-        _storyAct = 1;
+        foreach (var id in inventory)
+            if (!_inventory.Contains(id)) _inventory.Add(id);
+        _storyAct = Mathf.Clamp(storyAct, 1, 3);
         EmitSignal(SignalName.Changed);
     }
 }

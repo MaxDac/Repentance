@@ -25,6 +25,9 @@ public class AutoPlay
         // keep Godot from importing the screenshots
         using (FileAccess.Open($"{_dir}/.gdignore", FileAccess.ModeFlags.Write)) { }
         Engine.TimeScale = 3;
+        // never touch the player's own saves
+        SaveSystem.Directory = "user://autoplay_saves";
+        foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
         DialogueManager.Instance.AutoChoose = async (knot, options) =>
         {
             GD.Print($"[autoplay] {knot}: {string.Join(" | ", options)}");
@@ -42,6 +45,7 @@ public class AutoPlay
             var gs = GameState.Instance;
 
             // ---- prologue: the attic, played through the real mouse input where it matters
+            await TitleMenuTest(game, expectSaves: false);
             await game.ChangeRoom("attic", "start");
             Check(game.Player.Character == "daniel", "prologue plays as Daniel");
             await Shot("attic");
@@ -112,6 +116,7 @@ public class AutoPlay
             Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room?.Name == "Lobby", "back down in the lobby");
+            await SaveLoadTest(game);
             await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room?.Name == "Speakeasy", "entered the speakeasy");
 
@@ -376,6 +381,73 @@ public class AutoPlay
         for (int i = 0; i < inv.Count; i++)
             if (inv[i] == item) return i;
         return 0;
+    }
+
+    /// <summary>
+    /// Autosave on room change, Esc pause menu, saving to slot 1 through the menu, wiping progress and
+    /// loading the slot back.
+    /// </summary>
+    private async Task SaveLoadTest(Game game)
+    {
+        var gs = GameState.Instance;
+        await WaitIdle(game);
+        await game.Wait(0.1);
+        var auto = SaveSystem.Read(SaveSystem.AutosaveSlot);
+        Check(auto is { Room: "lobby" } && auto.Flags.Contains("seen_lobby"), "autosave written after a room change");
+
+        PressKey(Key.Escape);
+        await game.Wait(0.1);
+        Check(game.Hud.Menu.IsOpen && game.GetTree().Paused, "Esc opens the pause menu and pauses the game");
+        await Shot("pause_menu");
+        Check(game.Hud.Menu.Press("Save game"), "pause menu offers Save game");
+        await game.Wait(0.1);
+        await Shot("save_slots");
+        Check(game.Hud.Menu.Press("Slot 1"), "save menu lists slot 1");
+        await game.Wait(0.1);
+        var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
+        Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("matchbook"), "saved to slot 1 from the menu");
+        PressKey(Key.Escape);
+        await game.Wait(0.1);
+        Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc resumes the game");
+        if (saved == null) return;
+
+        var ink = DialogueManager.Instance.SaveInk();
+        gs.Reset();
+        DialogueManager.Instance.ResetInk();
+        await game.ChangeRoom("street", "lobby");
+        await WaitIdle(game);
+        Check(!gs.HasItem("matchbook") && game.Room?.Name == "Street", "progress wiped before loading");
+
+        await game.LoadGame(saved);
+        Check(game.Room?.Name == "Lobby", "load returns to the saved room");
+        Check(gs.HasItem("matchbook") && gs.HasItem("photo") && gs.HasFlag("knows_lantern") && gs.HasFlag("seen_lobby"),
+            "load restores items and flags");
+        Check(game.Player.Position.DistanceTo(new Vector2(saved.X, saved.Y)) < 0.5f, "load restores the player's position");
+        Check(ink.Length > 0 && DialogueManager.Instance.SaveInk() == ink, "load restores the Ink state");
+        await Shot("lobby_loaded");
+        await TitleMenuTest(game, expectSaves: true);
+    }
+
+    /// <summary>Shows the title menu: Continue/Load are only offered once a save exists.</summary>
+    private async Task TitleMenuTest(Game game, bool expectSaves)
+    {
+        game.Hud.ShowTitle(true);
+        var menu = game.Hud.Menu.OpenTitle();
+        await game.Hud.Fade(0, 0.1);
+        await Shot(expectSaves ? "title_with_saves" : "title_new");
+        bool canContinue = game.Hud.Menu.Press("Continue");
+        Check(canContinue == expectSaves, expectSaves ? "title offers Continue once saved" : "title hides Continue without saves");
+        if (!canContinue) game.Hud.Menu.Press("New game");
+        var result = await menu;
+        Check(result.Action == (expectSaves ? MenuAction.Load : MenuAction.NewGame) && (result.Save != null) == expectSaves,
+            "title menu returns the chosen action");
+        game.Hud.ShowTitle(false);
+    }
+
+    private void PressKey(Key key)
+    {
+        foreach (var pressed in new[] { true, false })
+            _game.GetViewport().PushInput(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed }, true);
     }
 
     private async Task WaitIdle(Game game)
