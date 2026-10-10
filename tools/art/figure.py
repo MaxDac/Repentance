@@ -50,6 +50,7 @@ class Canvas:
         self.shadow = np.zeros((h, w), bool)
         self.blend_parts, self.blend_zone = (), np.zeros((h, w), bool)
         self.blend_w = np.zeros((h, w))  # 1 = shade as one mass with the back, fading to 0 towards the armpit
+        self.seamless = ()  # parts that meet without the darker "behind" seam (e.g. bare torso and legs)
 
     def _blend_ids(self):
         return [self.parts[n] for n in self.blend_parts if n in self.parts]
@@ -78,6 +79,8 @@ class Canvas:
             sh &= ~mask & (self.mat >= 0) & (self.part != p)
             if part in self.blend_parts:
                 sh &= ~(self.blend_zone & np.isin(self.part, self._blend_ids()))
+            if part in self.seamless:
+                sh &= ~np.isin(self.part, [self.parts[n] for n in self.seamless if n in self.parts])
             self.bias[sh] -= 1
         self.mat[mask] = self.m(col, dither)
         n = np.stack([nx, ny, nz], -1)
@@ -162,9 +165,11 @@ class Canvas:
         behind = np.zeros_like(filled)
         bl = np.isin(self.part, self._blend_ids()) & self.blend_zone
         bp = np.pad(bl, 1)
-        for nb, nbl in ((pp[:-2, 1:-1], bp[:-2, 1:-1]), (pp[2:, 1:-1], bp[2:, 1:-1]),
-                        (pp[1:-1, :-2], bp[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:])):
-            behind |= (nb > self.part) & ~(bl & nbl)
+        sl = np.isin(self.part, [self.parts[n] for n in self.seamless if n in self.parts])
+        sp_ = np.pad(sl, 1)
+        for nb, nbl, nsl in ((pp[:-2, 1:-1], bp[:-2, 1:-1], sp_[:-2, 1:-1]), (pp[2:, 1:-1], bp[2:, 1:-1], sp_[2:, 1:-1]),
+                             (pp[1:-1, :-2], bp[1:-1, :-2], sp_[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:], sp_[1:-1, 2:])):
+            behind |= (nb > self.part) & ~(bl & nbl) & ~(sl & nsl)
         tone = np.where(filled & ~edge & behind, tone - 1, tone)
         tone = np.clip(tone, 0, 4)
         out = np.zeros((self.h, self.w, 4), np.uint8)
@@ -251,6 +256,7 @@ def figure(spec, ps, fw=56, fh=80):
         return p
 
     c.blend_parts = ("torso", "arm1", "arm-1")
+    c.seamless = spec.get("seamless", ())
     y_full, y_end = base + (0.29 + dy - 1.0) * H, base + (0.37 + dy - 1.0) * H  # cap .. armpit
     c.blend_zone = c.Y < y_end
     c.blend_w = np.clip((y_end - c.Y) / (y_end - y_full), 0, 1)
@@ -325,6 +331,11 @@ def figure(spec, ps, fw=56, fh=80):
                 shape[i] = np.where(new, cap[i], np.where(blend, (shape[i] + cap[i]) / 2, shape[i]))
             shape[0] = shape[0] | cap[0]
         c.put(tuple(shape), torso, "torso")
+        if col.get("rear"):  # rounded seat swelling out at the back of the near hip, easing into the thighs
+            side, back = col["rear"]
+            rc = P(body([side, 0.525, -back]))
+            rx = H * math.sqrt((hipw * 0.62 * cp) ** 2 + (0.03 * sp) ** 2)
+            c.put(c.ellipse((rc[0], rc[1]), rx, H * 0.055), torso, "torso", cast=False, clip=c.mat < 0)
         if col.get("abdomen"):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
                       col["abdomen"])
@@ -355,6 +366,14 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.005), 0.39, 0.012])
             wr = body([s * 0.022, 0.45, 0.075])
             hand = body([s * 0.004, 0.462, 0.085])
+        elif kind == "cover":  # one hand lowered over the lap
+            el = body([s * (sw + 0.006), 0.40, 0.0])
+            wr = body([s * 0.03, 0.50, 0.07])
+            hand = body([s * 0.0, 0.535, 0.075])
+        elif kind == "side":  # hanging still, drawn back behind the flank
+            el = body([s * (sw - 0.01), 0.40, -0.035])
+            wr = body([s * (hipw - 0.01), 0.50, -0.045])
+            hand = body([s * (hipw - 0.012), 0.54, -0.04])
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
@@ -443,6 +462,15 @@ def figure(spec, ps, fw=56, fh=80):
     for _, fn in sorted(prims, key=lambda kv: kv[0]):
         fn()
 
+    if col.get("front_line") and abs(cp) > 0.3:  # three-quarter view: a straight, vertical front from waist to thighs
+        r0, r1 = (int(P(body([0, v, 0]))[1]) for v in col["front_line"])
+        sgn = 1 if sp >= 0 else -1
+        body_px = (c.mat >= 0) & ~c.parts_mask("hair", "hairback", "hand1", "hand-1")
+        fronts = [(np.nonzero(body_px[y])[0] * sgn).max() for y in range(r0, r1 + 1) if body_px[y].any()]
+        if fronts:
+            cut = c.parts_mask("torso", "arm1", "arm-1") & (np.arange(c.w)[None, :] * sgn > min(fronts))
+            cut[:r0] = cut[r1 + 1:] = False
+            c.mat[cut], c.part[cut], c.bias[cut] = -1, -1, 0
     _decals(c, col, P, body, H, cp, sp, legs, ps)
     if facing:
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
@@ -644,10 +672,14 @@ def _hair_front(c, col, P, body, H, cp, sp, nod):
             t = i / n
             y = 0.175 + nod * (1 - t) + (end - 0.175) * t
             x = s * (0.075 - 0.035 * t) + 0.008 * math.sin(t * 7.0 + s)
-            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t]))
+            # an optional forward swell at chest height, where the locks may stand proud of the torso outline
+            bump = col.get("hair_bulge", 0.0) * math.exp(-((t - 0.62) / 0.2) ** 2)
+            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump]))
             r = H * (0.03 - 0.014 * t)
             m, ex, ey, ez = c.ellipse((cx, cy), r, r * 1.2)
-            m &= over & (c.Y > chin)  # never across the face; below the shoulders it only lies on the body
+            proud = bump > 0 and bump >= 0.4 * col["hair_bulge"]
+            # never across the face; below the shoulders it only lies on the body (save for the chest swell)
+            m &= (True if proud else over) & (c.Y > chin)
             if nx is None:
                 nx, ny, nz = ex, ey, ez
             else:
