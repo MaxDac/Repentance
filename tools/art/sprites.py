@@ -53,13 +53,13 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  decals=_vee(0.30, 0.03, "ebe6d8", "2a1818") +
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
                   ("belt", 0.42, "d8d0c0")])
-# Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, white collar, a single strand of pearls.
+# Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, high black neckline, a single strand of pearls.
 ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
                hair="4a2a1c", hair_style="long", soft_face=True, lips="a83e3c", eye="3a2416", brow="2e1a12",
                torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
                shoes="141014",
-               decals=[("strip", 0.205, 0.235, 0.03, 0.022, "ece6da"), ("strip", 0.235, 0.6, 0.0, 0.0, "2c2830"),
-                       ("pearls", 0.222, "f4efe4"), ("belt", 0.40, "1e1a20")])
+               decals=[("strip", 0.235, 0.6, 0.0, 0.0, "2c2830"),
+                       ("pearls", 0.232, "cfc8ba"), ("belt", 0.40, "1e1a20")])
 ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c49a52",
             hair_style="bob", soft_face=True, glasses="b09a6a", lips="b06a64", torso="9a6672", abdomen="34465e", pelvis="34465e",
             coat=dict(col="34465e", top=0.40, hem=0.80, flare=0.012), stockings="c49c84", shoes="3a2620",
