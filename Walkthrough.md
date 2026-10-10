@@ -224,8 +224,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Two new locations, office of Harringhton father and the road below, at night.
 - **Road behind the Harrington Building, at night**: a watchman guards the back door and the alley; a trash can,
   a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
-  - While the watchman is there, touching the crates, the fire escape or the back door gets Micah spotted and
-    sent back to the map. Threatening him with the revolver or kicking him is refused.
+  - While the watchman is there, touching the crates or the fire escape gets Micah spotted: the watchman
+    shoos him back down the alley, and the back door is locked anyway. Threatening him with the revolver or kicking him is refused.
   - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
@@ -269,6 +269,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - At this point, the player has two choices in dialogue:
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
+  - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 
 #### Churc, outside
 
@@ -277,7 +278,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
-  to the end of act 3
+  to the end of act 3 (caption "End of Act Three").
 - If the player decide to keep pushing, keep to the next.
 - For now, continue with the temporary storyline. 
 
