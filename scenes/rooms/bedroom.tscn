@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Bedroom.cs" id="1_Bedroom"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/bedroom.png" id="2_bedroom"]
+[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="3_Voice"]
+
+[node name="Bedroom" type="Node2D"]
+script = ExtResource("1_Bedroom")
+RoomName = "Bedroom"
+PlayerCharacter = "daniel"
+ShowPlayer = false
+FarScale = 1.0
+NearScale = 1.0
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_bedroom")
+centered = false
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(178, 154)
+metadata/facing = 1
+
+[node name="Mom" type="Node2D" parent="."]
+position = Vector2(136, 112)
+script = ExtResource("3_Voice")
+Id = "mom"
+SpeechColor = Color(0.96, 0.8, 0.86, 1)
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true

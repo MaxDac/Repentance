@@ -1,22 +1,32 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ChicagoMap.cs" id="1_ChicagoMap"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map.png" id="2_map"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
-[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/map_club.png" id="5_map_club"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_library.png" id="m_library"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_cathedral.png" id="m_cathedral"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_office.png" id="m_office"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_club.png" id="m_club"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_convent.png" id="m_convent"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_harrington.png" id="m_harrington"]
 
-[sub_resource type="RectangleShape2D" id="Rect_1"]
+[sub_resource type="RectangleShape2D" id="Rect_library"]
 size = Vector2(50, 28)
 
-[sub_resource type="RectangleShape2D" id="Rect_2"]
+[sub_resource type="RectangleShape2D" id="Rect_church"]
 size = Vector2(62, 28)
 
-[sub_resource type="RectangleShape2D" id="Rect_3"]
+[sub_resource type="RectangleShape2D" id="Rect_office"]
 size = Vector2(41, 28)
 
-[sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(79, 28)
+[sub_resource type="RectangleShape2D" id="Rect_club"]
+size = Vector2(54, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_convent"]
+size = Vector2(54, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_harrington"]
+size = Vector2(69, 28)
 
 [node name="ChicagoMap" type="Node2D"]
 script = ExtResource("1_ChicagoMap")
@@ -29,13 +39,37 @@ z_index = -10
 texture = ExtResource("2_map")
 centered = false
 
-[node name="ClubMarker" type="Sprite2D" parent="."]
+[node name="Markers" type="Node2D" parent="."]
 z_index = -9
-position = Vector2(274, 202)
-texture = ExtResource("5_map_club")
+[node name="Library" type="Sprite2D" parent="Markers"]
+position = Vector2(299, 48)
+texture = ExtResource("m_library")
 centered = false
-script = ExtResource("4_FlagSprite")
-ShowIfFlags = "club_unlocked"
+
+[node name="Church" type="Sprite2D" parent="Markers"]
+position = Vector2(89, 112)
+texture = ExtResource("m_cathedral")
+centered = false
+
+[node name="Office" type="Sprite2D" parent="Markers"]
+position = Vector2(273, 146)
+texture = ExtResource("m_office")
+centered = false
+
+[node name="Club" type="Sprite2D" parent="Markers"]
+position = Vector2(287, 202)
+texture = ExtResource("m_club")
+centered = false
+
+[node name="Convent" type="Sprite2D" parent="Markers"]
+position = Vector2(237, 80)
+texture = ExtResource("m_convent")
+centered = false
+
+[node name="Harrington" type="Sprite2D" parent="Markers"]
+position = Vector2(137, 174)
+texture = ExtResource("m_harrington")
+centered = false
 
 [node name="Entries" type="Node2D" parent="."]
 
@@ -47,7 +81,6 @@ metadata/facing = 1
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
-
 [node name="Library" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "library"
@@ -58,19 +91,19 @@ monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Library"]
 position = Vector2(323, 61)
-shape = SubResource("Rect_1")
+shape = SubResource("Rect_library")
 
 [node name="Church" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "church"
 DisplayName = "the cathedral"
-LookText = "Holy Name. Caleb's church. I've been there once already this week."
+LookText = "Holy Name. Caleb's church."
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Church"]
 position = Vector2(119, 125)
-shape = SubResource("Rect_2")
+shape = SubResource("Rect_church")
 
 [node name="Office" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
@@ -82,17 +115,40 @@ monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Office"]
 position = Vector2(292, 159)
-shape = SubResource("Rect_3")
+shape = SubResource("Rect_office")
 
 [node name="Club" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "club"
-DisplayName = "the Starlight"
-LookText = "The Starlight. A nightclub on Hubbard, from the slip in the book."
-ShowIfFlags = "club_unlocked"
+DisplayName = "the Club"
+LookText = "The Club. 18 W. Hubbard, from the slip in the book. No sign on the door, no name on the bell."
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Club"]
-position = Vector2(312, 215)
-shape = SubResource("Rect_4")
+position = Vector2(313, 215)
+shape = SubResource("Rect_club")
+
+[node name="Convent" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "convent"
+DisplayName = "the convent"
+LookText = "The Sisters of the Holy Name. Caleb says they know the Club's ladies better than they let on."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Convent"]
+position = Vector2(263, 93)
+shape = SubResource("Rect_convent")
+
+[node name="Harrington" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "harrington"
+DisplayName = "Harrington's office"
+LookText = "Theodore Harrington's office on LaSalle. The old man who built the steel mill."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Harrington"]
+position = Vector2(170, 187)
+shape = SubResource("Rect_harrington")

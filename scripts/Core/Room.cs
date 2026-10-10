@@ -31,6 +31,10 @@ public partial class Room : Node2D
     /// <summary>False for screens like the city map, where the player character isn't drawn.</summary>
     [Export] public bool ShowPlayer = true;
 
+    /// <summary>The sheet the player actually wears here: Micah goes masked and cloaked while the "masked" flag is set.</summary>
+    public virtual string ResolvePlayerCharacter() =>
+        PlayerCharacter == "micah" && GameState.Instance.HasFlag("masked") ? "micah_masked" : PlayerCharacter;
+
     public WalkArea? Walk { get; private set; }
     public Node2D World { get; private set; } = null!;
 

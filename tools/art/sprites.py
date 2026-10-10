@@ -100,6 +100,44 @@ MICAH_DRESSING = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="e4ddc
                               ("ribbon", -0.026, 0.212, 0.31, 0.005, "7b1f2a"),
                               ("buttons", 0.31, 0.41, 3, "b8ae9a"), ("belt", 0.43, "3a342e"),
                               ("hang", 0.44, 0.17, "6a3e22")])
+# The Master of Ceremonies: lodge regalia over evening dress - a sky-blue collar ribbon hanging in a V to a jewel, and
+# a white lambskin apron edged in blue tied over the hips.
+MOC = dict(h=65, sw=0.136, waist=0.09, hipw=0.098, skin="dcb090", hair="7a7470", hair_style="slick", old=True,
+           mustache=True, eye="2a2a34", torso="17161c", collar="f2eee4",
+           coat=dict(col="17161c", top=0.40, hem=0.62, flare=0.0), pants="17161c", shoes="0c0b0e",
+           sleeves="17161c", cuff="f2eee4",
+           decals=_vee(0.33, 0.034, "f2eee4") + [("bow", 0.205, "0e0d10"),
+                                                  ("ribbon", 0.05, 0.215, 0.36, 0.008, "5a8ac8"),
+                                                  ("ribbon", -0.05, 0.215, 0.36, 0.008, "5a8ac8"),
+                                                  ("strip", 0.355, 0.375, 0.012, 0.012, "e0c060"),
+                                                  ("strip", 0.43, 0.62, 0.085, 0.095, "f0ece2", ("torso", "hips", "coat", "leg1", "leg-1")),
+                                                  ("belt", 0.43, "5a8ac8")])
+# The club's bouncer: a big man in a dark three-piece suit and tie.
+BRUTE = dict(h=71, sw=0.168, hw=0.06, waist=0.112, hipw=0.112, leg_r=1.14, skin="c8987a", hair="1c1814",
+             hair_style="slick", torso="2a2a30", coat=dict(col="2a2a30", top=0.40, hem=0.6, flare=0.0),
+             pants="2a2a30", shoes="101012", decals=_vee(0.31, 0.03, "e8e2d6", "5a1a1a"))
+# Night watchman at the Harrington building's back door: peaked cap and a navy greatcoat.
+WATCHMAN = dict(h=69, sw=0.16, hw=0.058, skin="c89a7c", hair="4a3a2c", hat="cap", hat_col="1e2638",
+                torso="26304a", coat=dict(col="26304a", top=0.40, hem=0.66, flare=0.02), pants="1e2638", shoes="141210",
+                decals=[("strip", 0.215, 0.62, 0.0, 0.008, "a88c46")])
+# The club's members on the night of the rite: a white full-face mask in the shadow of a deep black cowl, the cowl
+# falling into a long cloak closed over the arms down to the ankles.
+MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_col="16141a", mask=("full", "ece8e0"),
+                  torso="16141a", collar="16141a", sleeves="16141a", cloak=dict(col="16141a", hem=0.96),
+                  pants="16141a", shoes="0e0c10", decals=[])
+MICAH_MASKED = dict(MASKED_MAN, decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
+# The women of the club: short, strapless black-fringed dresses above the knee, bare shoulders and arms, sheer
+# stockings and a black domino mask.
+MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.056, skin="ecc6a6",
+                    hair="1e1610", hair_style="bob", soft_face=True, lips="a8303a", eye="2a1a14", mask=("half", "121014"),
+                    torso="1a1820", sleeves="ecc6a6", neckline=0.262, coat=dict(col="1a1820", top=0.40, hem=0.66, flare=0.03),
+                    stockings="c8a088", shoes="141014",
+                    decals=[("pearls", 0.226, "e8e2d4"), ("ribbon", 0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)),
+                            ("ribbon", -0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)), ("belt", 0.46, "6a5a70")])
+MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
+# Eleanor on stage: the same short dress as the club's women, but no mask.
+ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
+                     eye="3a2416", brow="2e1a12", mask=None)
 
 
 def _arms(kind_r, kind_l=None):
@@ -140,8 +178,26 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR, _arms("down")),
         ("rose", ROSE, _arms("fold")), ("caleb", CALEB, _arms("fold")),
         ("harrington", HARRINGTON, _arms("down", "pocket")), ("nun", NUN, _arms("fold")),
-        ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)))
+        ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
+        ("moc", MOC, _arms("fold")), ("brute", BRUTE, _arms("fold")), ("watchman", WATCHMAN, _arms("down", "pocket")),
+        ("masked_man", MASKED_MAN, _arms("fold")), ("masked_woman", MASKED_WOMAN, _arms("hip", "down")),
+        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("down")))
 
+
+def supine_frame(spec, name):
+    """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
+    with the body resting on the row the standing figure's soles touch."""
+    from PIL import Image
+    stand = figure(spec, pose(90), FW, FH)
+    a = stand.getchannel("A").point(lambda v: 255 if v >= 250 else 0)  # drop the soft ground shadow
+    stand.putalpha(a)
+    box = stand.getbbox()
+    body = stand.crop(box).rotate(90, expand=True)
+    w = max(FW, body.width + 6)
+    img = Image.new("RGBA", (w, FH), (0, 0, 0, 0))
+    img.alpha_composite(body, ((w - body.width) // 2, box[3] - body.height))
+    save(img, "sprites", f"{name}.png")
+    return img
 
 def kneel_frame(spec, name):
     """Single 64x96 frame of a character down on hands and knees, soles' baseline shared with the player sheet."""
@@ -150,10 +206,22 @@ def kneel_frame(spec, name):
     return img, head
 
 
+def aim_frame(spec, name):
+    """Single 96x96 frame of a character in profile facing right, revolver held out at arm's length."""
+    ps = pose(90, arms={1: ("swing", 84, 2, 2), -1: ("swing", 2, 6, 14)}, gun=1, legs={1: (8, 4, 0), -1: (-8, 6, -4)},
+              lean=-2.0)
+    img = figure(spec, ps, FW + 32, FH)
+    save(img, "sprites", f"{name}.png")
+    return img
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
     player_sheet(MICAH_DRESSING, "micah_dressing")
     kneel_frame(MICAH, "micah_kneel")
+    player_sheet(MICAH_MASKED, "micah_masked")
+    supine_frame(MICAH, "micah_supine")
+    aim_frame(MICAH, "micah_aim")
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))

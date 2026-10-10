@@ -222,8 +222,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office of Harringhton father
 
 - Two new locations, office of Harringhton father and the road below, at night.
-- <PlaceHolder> Simulate two locations, and a series of at least two things to get right in order to access the 
-  office without being notice.
+- **Road behind the Harrington Building, at night**: a watchman guards the back door and the alley; a trash can,
+  a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
+  - While the watchman is there, touching the crates, the fire escape or the back door gets Micah spotted and
+    sent back to the map. Threatening him with the revolver or kicking him is refused.
+  - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
+    goes inside to phone the fire department, leaving the alley unwatched.
+  - Step 2: use the hand on the crates to stack two of them under the fire escape.
+  - Step 3: climb the fire escape (hand on it, or on the window) and go in through the window: the office.
 - Once in the office, the player will have to search for clues, and it will have to open at least two drawers and a
   closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
 - In the drawer, he will find an invitation card to the Club.
