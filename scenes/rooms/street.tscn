@@ -87,6 +87,10 @@ metadata/facing = 1
 position = Vector2(14, 214)
 metadata/facing = 4
 
+[node name="thrown_out" type="Marker2D" parent="Entries"]
+position = Vector2(170, 214)
+metadata/facing = 1
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]

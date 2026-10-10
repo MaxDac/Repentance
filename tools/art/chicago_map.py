@@ -1,8 +1,9 @@
 """Location-select screen: a creased, yellowed 1927 street map of Chicago lying on a dark desk under a lamp.
 
 Lake Michigan to the east, the river's Y through the middle, the street grid, parks, a compass rose and a title
-cartouche. Three location pins are painted into map.png; the fourth (THE STARLIGHT) is exported separately as a
-cropped transparent overlay (map_club.png) that lines up pixel-exactly when pasted at CLUB_BOX's top-left."""
+cartouche. map.png carries no pins: each location in MARKERS is exported as a cropped transparent overlay
+(map_<key>.png) that lines up pixel-exactly at the top-left printed by build(); the map room shows the ones the story
+has opened up."""
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 import math
 import random
@@ -37,8 +38,10 @@ MARKERS = {
     "library": ((322, 52), "LIBRARY"),
     "cathedral": ((118, 116), "CATHEDRAL"),
     "office": ((292, 150), "OFFICE"),
+    "club": ((312, 206), "THE CLUB"),
+    "convent": ((262, 84), "CONVENT"),
+    "harrington": ((170, 178), "HARRINGTON"),
 }
-CLUB = ((312, 206), "THE STARLIGHT")
 
 
 def shore_x(y):
@@ -304,24 +307,19 @@ def paint_base():
     return img
 
 
-def build():
-    base = paint_base()
-    for pos, label in MARKERS.values():
-        marker(base, pos, label)
-    with_club = base.copy()
-    marker(with_club, *CLUB)
-    for im in (base, with_club):
-        pencil(im)
-        lighting(im)
-    pal = palette_of(with_club, 120) + [PIN, PIN_D, PIN_L, mul(PIN, 0.8), mul(PIN, 0.65), mul(PIN_L, 0.8), PLATE, mul(PLATE, 0.85)]
-    a = pixelize(base, pal)
-    b = pixelize(with_club, pal)
-    save(a, "rooms", "map.png")
-    box = marker_box(*CLUB)
-    diff = np.any(np.asarray(a.crop(box)) != np.asarray(b.crop(box)), axis=2)
+def _overlay(base_px, key, pal):
+    """Pixelized marker cut out as an RGBA overlay (map_<key>.png) to lay over the pin-less map."""
+    pos, label = MARKERS[key]
+    with_pin = paint_base()
+    marker(with_pin, pos, label)
+    pencil(with_pin)
+    lighting(with_pin)
+    b = pixelize(with_pin, pal)
+    box = marker_box(pos, label)
+    diff = np.any(np.asarray(base_px.crop(box)) != np.asarray(b.crop(box)), axis=2)
     for bg in ((0, 0, 0), (255, 255, 255)):
         probe = Image.new("RGB", (W, FULL_H), bg)
-        marker(probe, *CLUB)
+        marker(probe, pos, label)
         diff |= np.any(np.asarray(probe.crop(box)) != np.array(bg, np.uint8), axis=2)
     ys, xs = np.nonzero(diff)
     tight = (box[0] + int(xs.min()), box[1] + int(ys.min()), box[0] + int(xs.max()) + 1, box[1] + int(ys.max()) + 1)
@@ -329,9 +327,22 @@ def build():
     alpha = Image.fromarray((diff[tight[1] - box[1]:tight[3] - box[1], tight[0] - box[0]:tight[2] - box[0]]
                              * 255).astype(np.uint8))
     crop.putalpha(alpha)
-    save(crop, "rooms", "map_club.png")
-    print("map_club box", tight)
-    for key, (pos, label) in list(MARKERS.items()) + [("club", CLUB)]:
-        x0, y0, x1, y1 = marker_box(pos, label)
-        print(key, "center", ((x0 + x1) // 2, (y0 + y1) // 2), "size", (x1 - x0, y1 - y0))
+    save(crop, "rooms", f"map_{key}.png")
+    x0, y0, x1, y1 = box
+    print(key, "overlay at", tight[:2], "hotspot center", ((x0 + x1) // 2, (y0 + y1) // 2), "size", (x1 - x0, y1 - y0))
+
+
+def build():
+    """The map itself carries no pins: every location is an overlay the room shows as the story opens it up."""
+    base = paint_base()
+    pencil(base)
+    lighting(base)
+    every = paint_base()
+    for pos, label in MARKERS.values():
+        marker(every, pos, label)
+    pal = palette_of(every, 120) + [PIN, PIN_D, PIN_L, mul(PIN, 0.8), mul(PIN, 0.65), mul(PIN_L, 0.8), PLATE, mul(PLATE, 0.85)]
+    a = pixelize(base, pal)
+    save(a, "rooms", "map.png")
+    for key in MARKERS:
+        _overlay(a, key, pal)
     return a

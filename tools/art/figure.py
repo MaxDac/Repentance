@@ -329,6 +329,10 @@ def figure(spec, ps, fw=56, fh=80):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
                       col["abdomen"])
         c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, hem_top, 0]))[1]), pelvis_col)
+        if col.get("neckline"):  # strapless/low-cut dress: bare skin above a slightly dipping neckline
+            nl = P(body([0, col["neckline"], 0.05]))
+            dip = np.clip(1 - np.abs(c.X - nl[0]) / max(H * sw * abs(cp) + 1, 1), 0, 1) * H * 0.012
+            c.recolor(c.parts_mask("torso") & (c.Y < nl[1] + dip), skin)
         coat = col.get("coat")
         if coat:
             _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp)
@@ -374,6 +378,23 @@ def figure(spec, ps, fw=56, fh=80):
                 c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.025), skin, f"hand{s}", dither=False)
         add(2.0 + Ds + 0.05 * abs(cp), arm)
 
+    if col.get("cloak"):
+        add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
+
+    if ps.get("gun"):  # a revolver in the hand of arm ps["gun"], barrel along the forearm
+        def gun(s=ps["gun"]):
+            _, el, wr, hand = arm_pts[s]
+            d = (hand - el) / max(np.linalg.norm(hand - el), 1e-6)
+            grip = hand + np.array([0, 0.045, -0.012])
+            muzzle = hand + d * 0.1 + np.array([0, -0.01, 0])
+            c.put(c.capsule(P(hand), P(grip), H * 0.017, H * 0.015), "3a2a20", "gun", dither=False)
+            c.put(c.capsule(P(hand + np.array([0, -0.01, 0])), P(muzzle), H * 0.015, H * 0.011), "2a2a32", "gun",
+                  dither=False)
+            c.put(c.capsule(P(hand + d * 0.015), P(hand + d * 0.035), H * 0.022, H * 0.022), "2a2a32", "gun",
+                  dither=False)
+            c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.025), col["skin"], f"hand{s}", dither=False)
+        add(2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
+
     # ---- head ----
     nod = ps["nod"]
     facing = cp > -0.25
@@ -399,7 +420,7 @@ def figure(spec, ps, fw=56, fh=80):
     if col.get("hair_style") == "long":
         # The mane falls behind the neck and shoulders unless the figure is seen from the back.
         add(1.9 if facing else 2.7, lambda: _long_hair_back(c, col, P, body, H, cp, sp, nod))
-    if col.get("hat") == "veil":
+    if col.get("hat") in ("veil", "hood"):
         add(1.9 if facing else 2.7, lambda: _veil_back(c, col, P, body, H, cp, sp, nod))
 
     for _, fn in sorted(prims, key=lambda kv: kv[0]):
@@ -408,6 +429,8 @@ def figure(spec, ps, fw=56, fh=80):
     _decals(c, col, P, body, H, cp, sp, legs, ps)
     if facing:
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
+        if col.get("mask"):
+            _mask(c, col, P, body, H, cp, sp, nod)
     shx = (P(legs[1][2])[0] + P(legs[-1][2])[0]) / 2
     return c.render(shadow_box=((shx, base + 0.6), H * 0.15, 1.7))
 
@@ -494,6 +517,53 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
     lo, hi = min(xs + [hc[0] - wh * 1.05]), max(xs + [hc[0] + wh * 1.05])
     pts = [(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (lo, hem_y), (hi, hem_y), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]
     c.put(c.poly(pts), coat["col"], "coat")
+
+
+def _cloak(c, cloak, body, P, legs, H, sw, cp, sp):
+    """A long hooded cloak hanging from the neck to the ankles, closed over the arms: one bell-shaped drape whose
+    hem follows the legs, with a few dark fold lines and the front opening."""
+    hem = cloak.get("hem", 0.95)
+
+    def width(ax, az):
+        return H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2)
+
+    levels = [(0.205, 0.05, 0.05), (0.235, sw + 0.03, 0.08), (0.27, sw + 0.055, 0.105), (0.36, sw + 0.065, 0.13),
+              (0.55, sw + 0.075, 0.15)]
+    left, right = [], []
+    for y, ax, az in levels:
+        q = P(body([0, y, 0.0]))
+        w = width(ax, az)
+        left.append((q[0] - w, q[1]))
+        right.append((q[0] + w, q[1]))
+    xs = []
+    hem_y = P(body([0, hem, 0]))[1]
+    for leg in legs.values():
+        p = _leg_at(leg, hem)
+        q = P(p if p is not None else leg[2])
+        xs += [q[0] - H * 0.07, q[0] + H * 0.07]
+    mid = P(body([0, hem, 0]))[0]
+    wh = width(sw + 0.085, 0.165)
+    lo, hi = min(xs + [mid - wh]), max(xs + [mid + wh])
+    pts = left + [(lo, hem_y)] + [(hi, hem_y)] + right[::-1]
+    m = c.put(c.poly(pts, curve=0.6), cloak["col"], "coat")
+    if m is None:
+        return
+    # vertical folds fanning out from the shoulders
+    top_y = P(body([0, 0.3, 0]))[1]
+    cx0 = P(body([0, 0.3, 0]))[0]
+    for k in (-0.62, -0.25, 0.25, 0.62):
+        x_top = cx0 + k * width(sw + 0.04, 0.11)
+        x_bot = mid + k * 1.2 * (hi - lo) / 2
+        t = np.clip((c.Y - top_y) / max(hem_y - top_y, 1), 0, 1)
+        fold = (np.abs(c.X - (x_top + (x_bot - x_top) * t)) < 0.6) & (c.Y > top_y)
+        c.bias[m & fold] -= 1
+    # the front opening: a lighter edge down the middle, only seen from the front
+    if cp > 0.3:
+        for y in np.arange(0.24, hem, 0.004):
+            q = P(body([0, y, 0.12]))
+            ix, iy = math.floor(q[0]), math.floor(q[1])
+            if 0 <= iy < c.h and 0 <= ix < c.w and m[iy, ix]:
+                c.bias[iy, ix] += 1
 
 
 def _long_hair_back(c, col, P, body, H, cp, sp, nod):
@@ -596,6 +666,62 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         hood = c.ellipse((hx_ - 0.9 * sp, hy_ - 0.4), hrx + 2.4, hry + 2.0)
         c.put(hood, hc, "veil", clip=~frame & (c.Y < hy_ + hry * 0.55))
         c.bias[c.parts_mask("veil") & (c.Y < hy_ - hry * 0.6) & ((c.X - hx_) * (1 if sp >= 0 else -1) < 0)] += 1
+    elif hat == "hood":
+        # A cloak's hood pulled up over the head, leaving only the face (or the mask) showing.
+        fx, fy, _ = P(body([0, 0.086 + nod, 0.045]))
+        frx, fry = max(hrx * (0.55 + 0.2 * abs(cp)), 2.4), hry * 0.8
+        face = c.ellipse((fx, fy), frx, fry)[0] if cp > -0.25 else np.zeros_like(c.mat, bool)
+        hood = c.ellipse((hx_ - 0.9 * sp, hy_ - 0.6), hrx + 2.2, hry + 2.0)
+        c.put(hood, hc, "veil", clip=~face & (c.Y < hy_ + hry * 0.75))
+        c.bias[c.parts_mask("veil") & (c.Y < hy_ - hry * 0.6) & ((c.X - hx_) * (1 if sp >= 0 else -1) < 0)] += 1
+    elif hat == "cowl":
+        # A deep monk's cowl: peaked at the back of the crown, pulled low over the brow and falling in one piece
+        # onto the shoulders, where the cloak takes over. The face opening sits in shadow.
+        fx, fy, _ = P(body([0, 0.09 + nod, 0.05]))
+        frx, fry = max(hrx * (0.5 + 0.22 * abs(cp)), 2.4), hry * 0.78
+        face = c.ellipse((fx, fy), frx, fry)[0] if cp > -0.25 else np.zeros_like(c.mat, bool)
+        back = -math.copysign(1.0, sp) if abs(sp) > 0.15 else 0.0
+        hood = c.ellipse((hx_ + back * 1.2, hy_ - 0.8), hrx + 3.2, hry + 2.8)
+        apex = (hx_ + back * (hrx + 2.5), hy_ - hry - 5.5)
+        peak = c.poly([(hx_ - hrx - 1.5, hy_ - hry * 0.2), apex, (hx_ + hrx + 1.5, hy_ - hry * 0.2)])
+        lo = P(body([0, 0.245, -0.01]))
+        drape_w = H * math.sqrt((0.105 * cp) ** 2 + (0.085 * sp) ** 2)
+        drape = c.poly([(hx_ - hrx - 3, hy_), (hx_ + hrx + 3, hy_), (lo[0] + drape_w, lo[1]), (lo[0] - drape_w, lo[1])])
+        for shape in (drape, peak, hood):
+            c.put(shape, hc, "veil", clip=~face)
+        rim = c.ellipse((fx, fy), frx + 1.3, fry + 1.3)[0] & ~face & c.parts_mask("veil")
+        c.bias[rim] += 1
+        # the head inside the cowl is lost in shadow except where the mask catches the light
+        c.bias[c.parts_mask("head", "hair", "ear") & face] -= 2
+
+
+def _mask(c, col, P, body, H, cp, sp, nod):
+    """A ritual mask over the face: ("full", colour) covers the whole face, ("half", colour) is a domino over the eyes."""
+    style, mc = col["mask"]
+    fx, fy, _ = P(body([0, 0.08 + nod, 0.05]))
+    hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
+    frx, fry = max(hrx * (0.62 + 0.25 * abs(cp)), 2.6), H * 0.077 * HEAD * 0.86
+    region = c.parts_mask("head")
+    ey = P(body([0, 0.074 + nod, 0.056 * HEAD]))[1]
+    if style == "half":
+        region &= (c.Y > ey - 2.5) & (c.Y < ey + 2.0)
+    m = c.put(c.ellipse((fx, fy), frx, fry), mc, "mask", dither=False, cast=False, clip=region)
+    if m is None or not m.any():
+        return
+    # The painted features under the mask disappear; only two dark eye holes show through.
+    keep = []
+    for x, y, ic in c.ink:
+        if 0 <= y < c.h and 0 <= x < c.w and (m[y, x] or (style == "full" and region[y, x])):
+            continue
+        keep.append((x, y, ic))
+    c.ink = keep
+    fs = 0 if abs(sp) < 0.12 else (1 if sp > 0 else -1)
+    for s in (1, -1):
+        if s * 0.4 * sp + 0.92 * cp < 0.1:
+            continue
+        ex, ey2, _ = P(body([s * 0.022 * HEAD, 0.074 + nod, 0.056 * HEAD]))
+        ex = math.floor(ex) - (fs if abs(sp) > 0.85 else 0)
+        c.dot(ex, math.floor(ey2), "141016")
 
 
 def _veil_back(c, col, P, body, H, cp, sp, nod):
@@ -729,6 +855,13 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             ex -= fs
         near = nD > 0.55 and not side
         look = fs or -s  # iris sits towards where the character looks; front view: towards the nose
+        if col.get("asleep"):  # closed lids: just the curved lash line
+            lash = _dark(col.get("brow") or col["hair"], 1)
+            c.dot(ex, ey, lash)
+            c.dot(ex - look, ey, lash)
+            c.dot(ex, ey - 3 if female else ey - 2, brow)
+            c.dot(ex - look, ey - 3 if female else ey - 2, brow)
+            continue
         c.dot(ex, ey, eye)
         if near or abs(cp) > 0.85:
             c.dot(ex - look, ey, "e6ded4")

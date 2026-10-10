@@ -41,7 +41,31 @@ public partial class Attic : Room
 
     private Task Hint(string text) => Say("hint", text);
 
-    private static readonly System.Collections.Generic.List<string> MicahItems = new();
+    private const string StashPrefix = "stash_";
+
+    /// <summary>Micah's pockets stay in 1927 while Daniel is in the present: stashed as flags so they survive saves.</summary>
+    public static void StashMicahItems()
+    {
+        var gs = GameState.Instance;
+        foreach (var id in System.Linq.Enumerable.ToList(gs.Inventory))
+        {
+            gs.SetFlag(StashPrefix + id);
+            gs.TakeItem(id);
+        }
+    }
+
+    /// <summary>Gives back everything <see cref="StashMicahItems"/> put away, and drops Daniel's journal.</summary>
+    public static void RestoreMicahItems()
+    {
+        var gs = GameState.Instance;
+        gs.TakeItem("journal");
+        foreach (var flag in System.Linq.Enumerable.ToList(gs.Flags))
+        {
+            if (!flag.StartsWith(StashPrefix)) continue;
+            gs.SetFlag(flag, false);
+            gs.GiveItem(flag[StashPrefix.Length..]);
+        }
+    }
 
     // End of Act 1: the same evening, dark outside and the lamp on.
     private static readonly Texture2D NightBackground = GD.Load<Texture2D>("res://assets/art/rooms/attic_night.png");
@@ -86,6 +110,11 @@ public partial class Attic : Room
         if (entry == "night")
         {
             await EndOfActOne();
+            return;
+        }
+        if (entry == "night2")
+        {
+            await EndOfActTwo();
             return;
         }
         if (State.HasFlag("attic_intro")) return;
@@ -217,9 +246,7 @@ public partial class Attic : Room
         if (State.StoryAct >= 2)
         {
             await Talk("journal_act2");
-            State.TakeItem("journal");
-            foreach (var id in MicahItems) State.GiveItem(id);
-            MicahItems.Clear();
+            RestoreMicahItems();
             // pick up the 1927 story where the old lead from the Blue Lantern left it
             State.SetFlag("sal_passed");
             State.SetFlag("photo_shown");
@@ -251,10 +278,7 @@ public partial class Attic : Room
     /// </summary>
     private Task EndOfActOne() => Game.Run(async () =>
     {
-        // Micah's pockets stay in 1927 while Daniel is in the attic
-        MicahItems.Clear();
-        MicahItems.AddRange(State.Inventory);
-        foreach (var id in MicahItems) State.TakeItem(id);
+        StashMicahItems();
         State.SetFlag("attic_night");
         Refresh();
         Player.Face(Facing.Down);
@@ -276,5 +300,32 @@ public partial class Attic : Room
         await Game.Hud.Fade(0, 1.2);
         await Talk("attic_act2");
         await Hint("(Right-click the journal in your satchel and use the hand to keep reading.)");
+    });
+
+    /// <summary>
+    /// Back from the Club: it got dark again while Daniel was reading. Leo calls him for dinner, and Act 3 picks up
+    /// that night, with Daniel reading in bed.
+    /// </summary>
+    private Task EndOfActTwo() => Game.Run(async () =>
+    {
+        StashMicahItems();
+        State.GiveItem("journal");
+        State.SetFlag("masked", false);
+        State.SetFlag("attic_night");
+        Refresh();
+        Player.Face(Facing.Down);
+        await Game.Hud.Fade(0, 1.2);
+        await Wait(0.8);
+        await Say("...");
+        await Talk("dinner_call2");
+        await Game.Hud.Fade(1, 1.5);
+        Game.Hud.ShowCaption("End of Act Two");
+        await Wait(2.5);
+        Game.Hud.ShowCaption("Act Three - That night");
+        await Wait(2.5);
+        Game.Hud.ShowCaption(null);
+        State.SetFlag("attic_night", false);
+        State.SetStoryAct(3);
+        await Game.ChangeRoom("bedroom", "start");
     });
 }

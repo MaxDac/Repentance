@@ -148,19 +148,146 @@ described here (other verbs, flavour lines) is left to the implementation.
   doesn't care about, and a little sheet of paper with an address: the Starlight club.
   Opening the book anywhere else, Micah says he'll read it at the office.
 - A new location is now available on the map: the club (the Starlight).
-- Selecting the club resumes the story from the club, as described below.
+
+#### Club (remove Starlight, the location will be called only Club)
+
+- Micah will access the first door to find the Master of Ceremonies (another character, dressed in Freemason ritualistic dress).
+- Micah will talk to the Master of Ceremonies asking whether he knows about the naturalistic rituals of the book;
+  The Master of Ceremonies (MoC from now on) will not comment on those, and ask instead why Micah is asking about this.
+  The conversation goes on and Micah keeps asking, but the MoC will say that he knows why he's asking, and it's because
+  of Eleanor.
+  Micah will get near the MoC and ask whether he knows where she is, the MoC will say "Of course! Thanks to your 
+  efforts, she is already with us, safe, and where she belongs!"
+  Then the MoC will call a brute (another character, in normal dress, tie and jacket) and ask to escort Micah out.
+
+#### Streets of Chicago
+
+- Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
+  questions about his life, why he abandoned his wife and son.
+- He get up, and the player will be presented with two choices:
+  - Go find his wife.
+  - Push forward.
+- If Micah go find his wife, there will be another location, outside of a terrace house in a row of terrace.
+- Otherwise, skip the next part.
+
+#### Outside Micah's wife house
+
+- Micah is outside the house. The player can choose whether to get out of the location, or ring the bell.
+- If the player let Micah ring the bell, a door will open and Micah's wife will get out.
+- Dialog is tense: the wife asks why he's here, he has no business being here.
+- Simulate a dialog where the player has two options: keep pushing for forgiveness, or just leave: keep pushing means that
+  the dialog will go on, but the option to leave will be always present.
+- There will have to be 5 phrases in which Micah will push the wife for her forgiveness, after which only the leave
+  phrase will be available.
+- If the player decides to keep pushing at least three times, before going out of the location, the wife will call him
+  back with a "Wait!": Micah will turn, a pause of at least 3 seconds, then the wife will say "Don't get into trouble again."
+- Then, the wife will close the door, and Micah will go out.
+
+#### Map of Chicago
+
+- Now, also the Club will not be a selectable location, Micah will say "No use returning there now."
+- Simulate the other locations, but no use going there, apart from the Convent.
+
+#### Church
+
+- Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
+- Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
+  to give up this foolish search.
+  Micah will answer "There's little left for me to do, at this point."
+  The brother will say "You know that that's not the case.:
+  Micah will say nothing and get out.
+
+#### Map of Chicago
+
+- The convent will appear as the next location.
+
+#### Convent
+
+- Micah will interrogate the sister about the club and Eleanor. She will say she knows nothing, Micah will have to
+  use the revolver again to threaten her.
+  The sister will say "Are you crazy, sir?!"
+  Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
+  Sister: "You are of the same lot as that Jezebel. At this point, I'll let you burn in the flames of hell.
+  She's a performer, you know. Almost caught me off guard, the whore. You might want to Harringhton senior.:
+- The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
+- At this point, also the Convent won't be available as a location.
+
+#### Map of Chicago
+
+- Only the Cathedral and the office of Harringhton father will be available.
+- The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
+  tell him not to go forward again.
+  You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
+
+#### Office of Harringhton father
+
+- Two new locations, office of Harringhton father and the road below, at night.
+- **Road behind the Harrington Building, at night**: a watchman guards the back door and the alley; a trash can,
+  a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
+  - While the watchman is there, touching the crates or the fire escape gets Micah spotted: the watchman
+    shoos him back down the alley, and the back door is locked anyway. Threatening him with the revolver or kicking him is refused.
+  - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
+    goes inside to phone the fire department, leaving the alley unwatched.
+  - Step 2: use the hand on the crates to stack two of them under the fire escape.
+  - Step 3: climb the fire escape (hand on it, or on the window) and go in through the window: the office.
+- Once in the office, the player will have to search for clues, and it will have to open at least two drawers and a
+  closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
+- In the drawer, he will find an invitation card to the Club.
+- In the closet, he will have to find a double door inside the closet, hiding a white mask and a cloak.
+
+#### Map of Chicago
+
+- The office of Harringhton father will disappear, and the Club will reappear. The Church will be still available,
+  and you'll have to save to the state of the game whether the player will decide to go to the Church and talk
+  with Micah's brother once more.
+
+#### Club
+
+- When Micah's enters the Club, he will be dressed with a white mask and a cloak. You will have to generate this 
+  new dress and sprite.
+- The club will be filled with a number of masked men with the same white mask as Micah (you can use the same model)
+  and women dressed with a black mask and succint dresses (even here, you can use the smae model and sprite multiple times).
+- When Micah will reach the stage, he will find Eleanor, with the same succint dress but without the black mask, at the 
+  center of the stage, with three masked men around her.
+
+### End of Act 2 - Present day, the attic
+
+- Dark again, the father is called for dinner.
+
+### Act 3 - Present day, bedroom
+
+- Father in the bedroom (new location) reading with the nightstand lamp on, wife covered by the blankets, light off on her side.
+- Father keeps reading.
+
+#### Club
+
+- Same scene as the end of Act 2.
+- One of the masked man turn to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
+- At this point, everyone turns to him.
+- The same man who spoke first continues: "Given that you returned Eleanor to us, you'll be forgiven for this intrusion,
+  but this is enough for you."
+- At this point, the player has two choices in dialogue:
+  - Use the revolver, but this will end with another man coming from behind and knocking him out.
+  - Do nothing, and the same man from behind will knock him out nonetheless.
+  - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
+
+#### Churc, outside
+
+- Micah is supine on the pavement, again, beaten.
+- Again, his thoughts will appear as narrating voice, saying what is he doing.
+- At this point, the player can have two choices: keep going for Eleanor, or giving up.
+- If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
+  whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
+  to the end of act 3 (caption "End of Act Three").
+- If the player decide to keep pushing, keep to the next.
+- For now, continue with the temporary storyline. 
+
+
 
 #### Temporary storyline (from the Starlight)
 
 The existing temporary storyline strings together the remaining locations:
 
-- **Starlight club** (hall, lounge, stage): in the lounge, Teddy's father, old Theodore Harrington, is watching
-  the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's bookkeeper is dead. She gives
-  Micah the key to her old suite. The club's street door leads to the street.
-- **Aurelian suite 4** (from the street): her diary is hidden in the vanity.
-- **Cathedral**: Caleb reads the diary and points Micah to the library.
-- **Public library**: Rose, Micah's estranged wife and a librarian, tells him where to look. The ledger behind the
-  right-hand shelves holds a motel receipt.
 - **Motel room 6**: a map is hidden in the bed.
 - **Outskirts**: digging where the map says reveals the bookkeeper's tin box... and Sal is waiting.
   *To be continued.*

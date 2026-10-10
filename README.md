@@ -90,17 +90,28 @@ autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
 15. **Office**: read the book (hand on it in the satchel) and an address slips out: the Starlight club is now
    on the map.
 
-From the Starlight the *temporary* storyline strings together every remaining location:
+From here the story follows Walkthrough.md:
 
-16. **Starlight club** (hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
-   is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
-   bookkeeper is dead. She gives you the key to her old suite.
-17. **Aurelian suite 4** (out on the street): her diary is hidden in the vanity.
-18. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
-19. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
-   the shelves holds a motel receipt.
-20. **Motel room 6**: a map is hidden in the bed.
-21. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
+16. **Club** (hall): the Master of Ceremonies knows exactly why Micah is asking: Eleanor is "already with us,
+   safe, and where she belongs". A brute shows Micah out.
+17. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
+   forward.
+18. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
+   three times and Rose calls him back: "Don't get into trouble again."
+19. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
+20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
+   try Harrington senior.
+21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
+   runs inside to phone the fire department, stack the crates under the fire escape and climb in.
+22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
+   back are a white mask and a cloak.
+23. **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
+   stands among three masked men. **End of Act Two**: back in the attic, dinner again.
+24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
+25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
+26. **Outside the cathedral**: give up and ask Rose out for coffee (**End of Act Three**), or keep going:
+27. **Motel room 6**: a map is hidden in the bed.
+28. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
 
 ## Project layout
 
@@ -127,7 +138,7 @@ tools/               Python art generator
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
 | `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |
-| `Actor` | An NPC: a hotspot with a 3-frame (idle + two talk frames) sprite strip, a speech colour, depth scaling and `MoveTo` |
+| `Actor` | An NPC: a hotspot with an 11-frame sprite strip (idle, two talk frames, an 8-frame walk cycle), a speech colour, depth scaling and `MoveTo` (which plays the walk cycle) |
 | `Player` | The player character (Micah, or Daniel in the prologue): 4-direction walk cycles, pathfinding along the walk polygon |
 | `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
@@ -172,7 +183,7 @@ py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lo
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 3-frame 56×96 strips (idle, two talk frames), and items are 32×24.
+size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
 
 ## Credits
 

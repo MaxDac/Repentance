@@ -46,7 +46,13 @@ public static class Items
         ["book"] = new("book", "book of Celtic rituals", "res://assets/art/items/book.png",
             "\"Rites of the Old Isles.\" Green leather gone soft as a glove. The same knot is stamped on the cover."),
         ["address"] = new("address", "address", "res://assets/art/items/address.png",
-            "A slip of paper from the book: \"The Starlight, 18 W. Hubbard. Ask for no one.\""),
+            "A slip of paper from the book: \"The Club, 18 W. Hubbard. Ask for no one.\""),
+        ["invitation"] = new("invitation", "invitation", "res://assets/art/items/invitation.png",
+            "Black card, gold edges, the endless knot pressed into it. \"The Club. Saturday, at the turning of the night.\""),
+        ["mask"] = new("mask", "white mask", "res://assets/art/items/mask.png",
+            "A white porcelain face with nothing behind its eyes. It looks like everybody and nobody."),
+        ["cloak"] = new("cloak", "black cloak", "res://assets/art/items/cloak.png",
+            "A long black cloak with a deep hood. It smells of cedar and somebody else's cigars."),
     };
 
     public static ItemDef Get(string id) => All[id];

@@ -1,10 +1,14 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ClubStage.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_stage.png" id="2_club_stage"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="91_eleanor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_stage.png" id="91_eleanor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_man.png" id="93_masked_man"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman.png" id="94_masked_woman"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman_b.png" id="95_masked_woman_b"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/brute.png" id="92_brute"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(60, 108)
@@ -40,6 +44,10 @@ polygon = PackedVector2Array(12, 256, 468, 256, 468, 154, 380, 154, 336, 170, 14
 [node name="start" type="Marker2D" parent="Entries"]
 position = Vector2(86, 208)
 metadata/facing = 4
+
+[node name="act3" type="Marker2D" parent="Entries"]
+position = Vector2(212, 208)
+metadata/facing = 2
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -105,14 +113,131 @@ position = Vector2(376.0, 164.0)
 shape = SubResource("Rect_4")
 
 [node name="Eleanor" type="Area2D" parent="World"]
-position = Vector2(244, 176)
+position = Vector2(244, 174)
 script = ExtResource("90_Actor")
 Id = "eleanor"
-DisplayName = "the singer"
-LookText = "Brunette, sober black crepe, a single strand of pearls, eyes that had stopped expecting rescue. Eleanor Harrington, singing as Nora."
+DisplayName = "Eleanor"
+LookText = "Eleanor. The same short black dress as the others, but no mask. Standing in the light like it was the only place she was ever meant to stand."
 WalkTo = Vector2(196, 196)
 monitoring = false
 monitorable = false
 Texture = ExtResource("91_eleanor")
 FlipH = true
 SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="Leader" type="Area2D" parent="World"]
+position = Vector2(290, 176)
+script = ExtResource("90_Actor")
+Id = "leader"
+DisplayName = "masked man"
+LookText = "One of the three around her. He stands half a step closer than the other two, like a man who owns the stage."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+FlipH = true
+SpeechColor = Color(0.9, 0.9, 0.94, 1)
+
+[node name="Ritual1" type="Area2D" parent="World"]
+position = Vector2(198, 176)
+script = ExtResource("90_Actor")
+Id = "ritual1"
+DisplayName = "masked man"
+LookText = "A masked man at Eleanor's side, still as a statue in a churchyard."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Ritual2" type="Area2D" parent="World"]
+position = Vector2(250, 160)
+script = ExtResource("90_Actor")
+Id = "ritual2"
+DisplayName = "masked man"
+LookText = "A masked man behind her, in the edge of the light."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+FlipH = true
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud1" type="Area2D" parent="World"]
+position = Vector2(128, 234)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A woman in a black eye-mask and a dress that wouldn't get past a church door. She doesn't look at anyone, and nobody looks at her face."
+monitoring = false
+monitorable = false
+Texture = ExtResource("94_masked_woman")
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud2" type="Area2D" parent="World"]
+position = Vector2(156, 242)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A man in a black cloak and a white mask. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud3" type="Area2D" parent="World"]
+position = Vector2(318, 236)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A man in a black cloak and a white mask. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+FlipH = true
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud4" type="Area2D" parent="World"]
+position = Vector2(348, 226)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A woman in a black eye-mask and a dress that wouldn't get past a church door. She doesn't look at anyone, and nobody looks at her face."
+monitoring = false
+monitorable = false
+Texture = ExtResource("95_masked_woman_b")
+FlipH = true
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud5" type="Area2D" parent="World"]
+position = Vector2(404, 240)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A man in a black cloak and a white mask. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
+monitoring = false
+monitorable = false
+Texture = ExtResource("93_masked_man")
+FlipH = true
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="Aud6" type="Area2D" parent="World"]
+position = Vector2(424, 206)
+script = ExtResource("90_Actor")
+Id = "audience"
+DisplayName = "masked guest"
+LookText = "A woman in a black eye-mask and a dress that wouldn't get past a church door. She doesn't look at anyone, and nobody looks at her face."
+monitoring = false
+monitorable = false
+Texture = ExtResource("94_masked_woman")
+FlipH = true
+SpeechColor = Color(0.82, 0.82, 0.86, 1)
+
+[node name="BruteStage" type="Area2D" parent="World"]
+position = Vector2(30, 214)
+script = ExtResource("90_Actor")
+Id = "brute"
+DisplayName = "doorman"
+LookText = "Bruno. Without a mask. He's not a member. He's the help."
+ShowIfFlags = "brute_stage"
+monitoring = false
+monitorable = false
+Texture = ExtResource("92_brute")
+SpeechColor = Color(0.86, 0.8, 0.74, 1)

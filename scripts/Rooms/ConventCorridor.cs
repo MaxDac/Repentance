@@ -5,8 +5,23 @@ namespace Repentance.Rooms;
 /// <summary>The convent on the North Side. A nun bars the corridor and asks Micah what he wants with Eleanor.</summary>
 public partial class ConventCorridor : Room
 {
+    /// <summary>Act 2: Micah comes back from the map to ask about the Club.</summary>
+    private bool ClubVisit => State.HasFlag("caleb_club");
+
     public override async Task OnEnter(string entry)
     {
+        if (ClubVisit)
+        {
+            if (State.HasFlag("nun_club_asked")) return;
+            await Game.Run(async () =>
+            {
+                await Wait(0.6);
+                await Say("Same corridor, same wax, same sister. She saw me coming from the other end of it.");
+                if (FindActor("nun") is { } nun) await Game.WalkTo(nun.WalkTo);
+                await Talk("nun_club");
+            });
+            return;
+        }
         if (State.HasFlag("nun_talked")) return;
         await Game.Run(async () =>
         {
@@ -18,6 +33,7 @@ public partial class ConventCorridor : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (ClubVisit && await ClubInteract(verb, target, item)) return true;
         switch (target.Id, verb)
         {
             case ("nun", Verb.Talk):
@@ -50,5 +66,43 @@ public partial class ConventCorridor : Room
                 return true;
         }
         return false;
+    }
+
+    private async Task<bool> ClubInteract(Verb verb, Hotspot target, string? item)
+    {
+        switch (target.Id, verb)
+        {
+            case ("nun", Verb.Talk):
+                await Talk("nun_club");
+                return true;
+            case ("nun", Verb.UseItem) when item == "revolver" && !State.HasFlag("nun_club_asked"):
+                await Say("Not before I've asked nicely. Even I have a running order.");
+                return true;
+            case ("nun", Verb.UseItem) when item == "revolver":
+                Player.Face(Facing.Right);
+                Player.SetPose("micah_aim");
+                await Say("I'm sorry, sister. I'm not asking anymore.");
+                await Talk("nun_threat2");
+                State.SetFlag("nun_threatened");
+                await Wait(1.0);
+                Player.SetPose(null);
+                await Say("...");
+                await Say("(I put the revolver away. My hand was shaking. It never used to.)");
+                await LeaveToMap();
+                return true;
+            case ("cell_door", Verb.Walk or Verb.Hand):
+                await Say("Eleanor's cell. It'll be empty. She's not hiding anymore.");
+                return true;
+            case ("entrance", Verb.Walk or Verb.Hand):
+                await LeaveToMap();
+                return true;
+        }
+        return false;
+    }
+
+    private async Task LeaveToMap()
+    {
+        if (FindHotspot("entrance") is { } door) await Game.WalkTo(door.WalkTo);
+        await Game.ChangeRoom("chicago_map", "start");
     }
 }
