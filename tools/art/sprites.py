@@ -136,11 +136,12 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     decals=[("pearls", 0.226, "e8e2d4"), ("ribbon", 0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)),
                             ("ribbon", -0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
-# Eleanor on stage: no mask and nothing else, shown with restraint. Her long hair falls forward over her chest and
-# her hands are folded in front of her.
+# Eleanor on stage: no mask and nothing else, shown with restraint. Her long hair falls forward over her chest, one
+# hand lowered over her lap, the other arm hanging at her side.
 ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
-                     eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e0b494", neckline=None,
-                     coat=None, stockings="d4a888", shoes="c89a7c", hair_front=0.34, decals=[])
+                     eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e4b898", neckline=None,
+                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, hair_bulge=0.07,
+                     seamless=("torso", "leg1", "leg-1"), decals=[])
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
                        coat=dict(col="5a1e26", top=0.40, hem=0.86, flare=0.02), pants="2a1a1e",
@@ -158,7 +159,7 @@ MICAH_INMATE = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="b8743a"
 def _arms(kind_r, kind_l=None):
     def one(k):
         return {"down": ("swing", 3, 6, 10), "hip": ("hip", 0, 0, 0), "pocket": ("pocket", 0, 0, 0),
-                "fold": ("fold", 0, 0, 0)}[k]
+                "fold": ("fold", 0, 0, 0), "cover": ("cover", 0, 0, 0), "side": ("side", 0, 0, 0)}[k]
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
@@ -207,7 +208,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
         ("moc", MOC, _arms("fold")), ("brute", BRUTE, _arms("fold")), ("watchman", WATCHMAN, _arms("down", "pocket")),
         ("masked_man", MASKED_MAN, _arms("fold")), ("masked_woman", MASKED_WOMAN, _arms("hip", "down")),
-        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("fold")),
+        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))
 
 
