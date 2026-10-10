@@ -415,6 +415,7 @@ CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
 CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
 CALEB: That's the Devil's work, brother. It's the oldest trick he has.
+CALEB: Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
@@ -584,6 +585,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
 MICAH: It looks worse than it is. It usually does.
 ROSE: What do you want? Last time you were here you wanted forgiving.
 MICAH: Nothing. Not tonight.
+MICAH: I'm not asking you to believe I've changed. I'd like to start showing you.
 MICAH: I was wondering... if some time you'd be free for a cup of coffee. Daylight. A table between us.
 ROSE: ...
 ROSE: Coffee.
@@ -608,12 +610,14 @@ CALEB: ...I don't know anything about clubs.
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
 MICAH: There's little left for me to do, at this point.
 CALEB: You know that that's not the case.
+CALEB: The prodigal thought so too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
 -> END
 
 === caleb_warn ===
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.
+CALEB: Repentance means more than asking nicely. Put the gun away.
 CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose, go anywhere.
 CALEB: There's still a way back. There always is. But not where you're going.
 MICAH: Good night, Caleb.
@@ -623,6 +627,7 @@ MICAH: Good night, Caleb.
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
+CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
 -> END
 
