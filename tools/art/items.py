@@ -190,10 +190,43 @@ def address(d, im):
     d.line([(16, 12), (17, 11), (19, 12), (20, 11), (23, 10)], fill=ink)
 
 
+def invitation(d, im):
+    """A black invitation card edged in gold, the endless knot embossed in the middle."""
+    d.polygon([(3, 5), (28, 3), (29, 19), (4, 21)], fill=hx("1a1620"))
+    d.polygon([(5, 7), (26, 5), (27, 17), (6, 19)], outline=hx("c8a050"))
+    g = hx("e8c060")
+    d.arc([11, 7, 17, 13], 90, 360, fill=g)
+    d.arc([15, 7, 21, 13], 180, 90, fill=g)
+    d.arc([13, 10, 19, 16], 270, 180, fill=g)
+
+
+def mask(d, im):
+    """A white full-face mask: plain porcelain, two almond eye holes and a closed, painted mouth."""
+    d.ellipse([9, 1, 23, 22], fill=hx("ece8e0"))
+    d.chord([9, 1, 23, 22], 300, 60, fill=hx("d4cec4"))
+    d.polygon([(11, 9), (14, 8), (15, 10), (12, 11)], fill=hx("141016"))
+    d.polygon([(21, 9), (18, 8), (17, 10), (20, 11)], fill=hx("141016"))
+    d.line([(16, 11), (16, 14)], fill=hx("c4beb4"))
+    d.line([(14, 17), (18, 17)], fill=hx("8a3a3a"))
+    d.line([(9, 9), (5, 8)], fill=hx("2a2028"))
+    d.line([(23, 9), (27, 8)], fill=hx("2a2028"))
+
+
+def cloak(d, im):
+    """A long black hooded cloak, folded over on itself."""
+    d.polygon([(10, 2), (22, 2), (27, 21), (5, 21)], fill=hx("16141a"))
+    d.ellipse([11, 1, 21, 9], fill=hx("221e28"))
+    d.ellipse([13, 3, 19, 8], fill=hx("0a080c"))
+    for x in (10, 15, 20):
+        d.line([(x + 1, 9), (x - 1 + (x - 15) // 3, 20)], fill=hx("2a2632"))
+    d.line([(5, 21), (27, 21)], fill=hx("2e2a36"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger), ("map", map_),
                      ("evidence", evidence), ("suitcase_key", suitcase_key), ("revolver", revolver),
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
-                     ("card", card), ("mirror", mirror), ("book", book), ("address", address)):
+                     ("card", card), ("mirror", mirror), ("book", book), ("address", address),
+                     ("invitation", invitation), ("mask", mask), ("cloak", cloak)):
         save(_icon(fn), "items", f"{name}.png")

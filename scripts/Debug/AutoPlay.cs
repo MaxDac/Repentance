@@ -220,62 +220,141 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("club")?.Visible == true, "the club is on the map now");
             await Shot("map_club");
-            await game.Perform(Verb.Walk, "club");
-
-            // ---- the temporary story: every location in order
-            Check(game.Room?.Name == "ClubHall" && !gs.HasFlag("on_map"), "entered the Starlight");
+            // ---- the Club, the first time: thrown out onto Hubbard Street
+            var club = game.Perform(Verb.Walk, "club");
+            await Until(() => game.Room?.Name == "ClubHall");
+            Check(!gs.HasFlag("on_map") && game.Room?.FindHotspot("guest")?.Visible == false, "entered the Club, no masks around yet");
+            await game.Wait(1);
             await Shot("club_hall");
+            await Until(() => gs.HasFlag("brute_called"));
+            await game.Wait(1);
+            await Shot("club_hall_brute");
+            await Until(() => game.Room?.Name == "Street");
+            await game.Wait(1.5);
+            await Shot("street_thrown_out");
+            await Until(() => game.Room?.Name == "RoseHouse");
+            await club;
+            await WaitIdle(game);
+            Check(gs.HasFlag("go_rose") && gs.HasFlag("club_out"), "chose to go to Rose's house");
+            await Shot("rose_house");
+            var bell = game.Perform(Verb.Hand, "bell");
+            await Until(() => gs.HasFlag("rose_door"));
+            await game.Wait(1.5);
+            await Shot("rose_house_door");
+            await bell;
+            Check(gs.HasFlag("rose_wait") && game.Room?.Name == "ChicagoMap", "Rose called Micah back, then the map");
+            Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("convent")?.Visible == false, "convent not on the map yet");
+            await game.Perform(Verb.Walk, "club");
+            Check(game.Room?.Name == "ChicagoMap", "no use going back to the Club");
+
+            // ---- Caleb points to the convent; the sister, and the revolver
+            await game.Perform(Verb.Walk, "church");
+            Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
+            await game.Perform(Verb.Walk, "church");
+            Check(game.Room?.Name == "ChicagoMap", "nothing new at the church yet");
+            Check(game.Room?.FindHotspot("convent")?.Visible == true, "the convent is on the map");
+            await game.Perform(Verb.Walk, "convent");
+            Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
+            await Shot("convent_act2");
+            var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+            await game.Wait(1.5);
+            await Shot("convent_gun");
+            await threat;
+            Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
+            Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("club")?.Visible == false
+                && game.Room?.FindHotspot("library")?.Visible == false, "only the church and Harrington are left on the map");
+            await Shot("map_harrington");
+            await game.Perform(Verb.Walk, "church");
+            Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
+
+            // ---- the alley behind the Harrington Building
+            await game.Perform(Verb.Walk, "harrington");
+            Check(game.Room?.Name == "HarringtonRoad", "at the Harrington Building");
+            await Shot("harrington_road");
+            await game.Perform(Verb.Hand, "crates");
+            Check(!gs.HasFlag("crates_stacked"), "the watchman sees Micah going for the crates");
+            await game.Perform(Verb.Hand, "fire_escape");
+            Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
+            await game.Perform(Verb.UseItem, "trash_can", "matchbook");
+            Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
+            await Shot("harrington_road_fire");
+            await game.Perform(Verb.Hand, "fire_escape");
+            Check(game.Room?.Name == "HarringtonRoad", "the ladder is too high without the crates");
+            await game.Perform(Verb.Hand, "crates");
+            Check(gs.HasFlag("crates_stacked"), "stacked the crates");
+            await Shot("harrington_road_crates");
+            await game.Perform(Verb.Hand, "fire_escape");
+            Check(game.Room?.Name == "HarringtonOffice", "climbed into Harrington's office");
+            await WaitIdle(game);
+            await Shot("harrington_office");
+            await game.Perform(Verb.Walk, "window");
+            Check(game.Room?.Name == "HarringtonOffice", "can't leave empty-handed");
+            await game.Perform(Verb.Hand, "drawer_left");
+            await game.Perform(Verb.Hand, "drawer_right");
+            Check(!gs.HasItem("invitation"), "the right drawer is locked");
+            await game.Perform(Verb.UseItem, "drawer_right", "lockpick");
+            Check(gs.HasItem("invitation"), "picked the drawer: the invitation");
+            await game.Perform(Verb.Hand, "closet");
+            await game.Perform(Verb.Hand, "panel");
+            await Shot("harrington_office_niche");
+            await game.Perform(Verb.Hand, "niche");
+            Check(gs.HasItem("mask") && gs.HasItem("cloak"), "took the mask and the cloak");
+            await Shot("harrington_office_after");
+            await game.Perform(Verb.Walk, "window");
+            Check(gs.HasFlag("harrington_done") && game.Room?.Name == "ChicagoMap", "out the window, back to the map");
+            Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false, "the Club is back on the map");
+            await game.Perform(Verb.Walk, "church");
+            Check(gs.HasFlag("church_before_club"), "Caleb's last warning before the Club");
+
+            // ---- the Club, masked: end of Act Two, the bedroom, and the stage in Act 3
+            var rite = game.Perform(Verb.Walk, "club");
+            await Until(() => game.Room?.Name == "ClubHall");
+            await WaitIdle(game);
+            Check(gs.HasFlag("masked") && game.Player.Character == "micah_masked", "Micah goes in masked");
+            Check(game.Room?.FindHotspot("guest")?.Visible == true, "masked guests in the hall");
+            await rite;
+            await Shot("club_hall_masked");
             await game.Perform(Verb.Walk, "exit");
-            Check(game.Room?.Name == "ClubLounge", "entered the lounge");
+            Check(game.Room?.Name == "ClubLounge", "into the lounge");
             await Shot("club_lounge");
-            await game.Perform(Verb.Talk, "harrington");
-            Check(gs.HasFlag("harrington_met"), "met Teddy's father in the lounge");
-            await game.Perform(Verb.Walk, "stage_exit");
-            Check(game.Room?.Name == "ClubStage", "entered the stage room");
+            var stage = game.Perform(Verb.Walk, "stage_exit");
+            await Until(() => game.Room?.Name == "ClubStage");
+            await game.Wait(4);
             await Shot("club_stage");
-            await game.Perform(Verb.Talk, "eleanor");
-            Check(gs.HasItem("key"), "Eleanor gives Micah her key");
-            await Shot("club_stage_after");
-            await game.Perform(Verb.Walk, "lounge_exit");
-            await game.Perform(Verb.Walk, "hall_exit");
-            await game.Perform(Verb.Walk, "street_door");
-            Check(game.Room?.Name == "Street", "back on the street");
-            await Shot("street");
+            await Until(() => game.Room?.Name == "Attic");
+            await game.Wait(2);
+            await Shot("attic_night2");
+            await Until(() => game.Hud.CaptionVisible);
+            Check(game.Player.Character == "daniel" && !gs.HasItem("revolver") && gs.HasItem("journal"), "back in the attic, Micah's things put away");
+            await Shot("end_of_act_two");
+            await Until(() => game.Room?.Name == "Bedroom");
+            Check(gs.StoryAct == 3, "Act Three");
+            await game.Wait(2);
+            await Shot("bedroom");
+            await Until(() => game.Room?.Name == "ClubStage");
+            Check(gs.HasItem("revolver") && gs.HasFlag("masked"), "back on the stage with Micah's things");
+            await game.Wait(3);
+            await Shot("club_stage_act3");
+            await Until(() => gs.HasFlag("brute_stage"));
+            await game.Wait(1);
+            await Shot("club_stage_brute");
+            await Until(() => game.Room?.Name == "ChurchExterior");
+            await game.Wait(1.5);
+            await Shot("church_exterior_beaten");
+            await Until(() => game.Room?.Name == "MotelRoom");
+            await stage;
+            await WaitIdle(game);
+            Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked"), "Micah keeps going, to the motel");
 
-            await game.Perform(Verb.Walk, "hotel_door");
-            Check(game.Room?.Name == "AurelianRoom", "entered Eleanor's suite");
-            await game.Perform(Verb.Hand, "vanity");
-            Check(gs.HasItem("diary"), "found the diary");
-            await Shot("aurelian_room");
-            await game.Perform(Verb.Walk, "exit");
-
-            await game.Perform(Verb.Walk, "church_door");
-            Check(game.Room?.Name == "ChurchExterior", "at the cathedral steps");
-            await Shot("church_exterior");
-            await game.Perform(Verb.Walk, "doors");
-            Check(game.Room?.Name == "ChurchInterior", "inside the cathedral");
-            await game.Perform(Verb.Talk, "caleb");
-            Check(gs.HasFlag("library_lead") && !gs.HasItem("diary"), "Caleb reads the diary");
-            await Shot("church_interior");
-            await game.Perform(Verb.Walk, "doors");
-            await game.Perform(Verb.Walk, "exit");
-
-            await game.Perform(Verb.Walk, "library_door");
-            Check(game.Room?.Name == "Library", "entered the library");
-            await game.Perform(Verb.Talk, "rose");
-            Check(gs.HasFlag("rose_tip"), "Rose remembers Eleanor");
-            await Shot("library");
-            await game.Perform(Verb.Hand, "shelves_right");
-            Check(gs.HasItem("ledger"), "found the ledger");
-            await game.Perform(Verb.Walk, "exit");
-
-            await game.Perform(Verb.Walk, "motel_door");
-            Check(game.Room?.Name == "MotelRoom", "entered the motel room");
+            // ---- the motel, and the road out of town
             await game.Perform(Verb.Hand, "bed");
             Check(gs.HasItem("map"), "found the map");
             await Shot("motel_room");
             await game.Perform(Verb.Walk, "exit");
-
+            Check(game.Room?.Name == "Street", "back on the street");
+            await game.Perform(Verb.Walk, "church_door");
+            Check(game.Room?.Name == "Street", "only the road out is left");
+            await Shot("street");
             await game.Perform(Verb.Walk, "road_out");
             Check(game.Room?.Name == "Outskirts", "drove out of town");
             await Shot("outskirts");
@@ -287,6 +366,17 @@ public class AutoPlay
             for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
             Check(game.Hud.CaptionVisible, "reached 'To be continued'");
             await Shot("ending");
+
+            // ---- the other Act 3 ending: giving up, and a coffee with Rose
+            game.Hud.ShowCaption(null);
+            _ = game.ChangeRoom("rose_house", "coffee");
+            await Until(() => game.Room?.Name == "RoseHouse");
+            await Until(() => gs.HasFlag("rose_door"));
+            await game.Wait(1);
+            await Shot("rose_coffee");
+            for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
+            Check(game.Hud.CaptionVisible, "reached 'End of Act Three' with Rose");
+            await Shot("ending_rose");
         }
         catch (Exception ex)
         {

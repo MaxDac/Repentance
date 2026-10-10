@@ -1,0 +1,116 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/RoseHouse.cs" id="1_RoseHouse"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/rose_house.png" id="2_rose_house"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="5_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/rose_house_door.png" id="6_rose_house_door"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/rose.png" id="7_rose"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(36, 88)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(12, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(16, 44)
+
+[node name="RoseHouse" type="Node2D"]
+script = ExtResource("1_RoseHouse")
+RoomName = "Rose's house"
+FarY = 214
+FarScale = 0.84
+NearY = 256
+NearScale = 0.98
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_rose_house")
+centered = false
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(190, 100)
+texture = ExtResource("6_rose_house_door")
+centered = false
+script = ExtResource("5_FlagSprite")
+ShowIfFlags = "rose_door"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 256, 480, 256, 480, 212, 0, 212)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(36, 236)
+metadata/facing = 4
+
+[node name="coffee" type="Marker2D" parent="Entries"]
+position = Vector2(36, 236)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "front door"
+LookText = "Number 14. Green paint, brass knocker. I paid for that paint. She picked the colour."
+WalkTo = Vector2(240, 220)
+Face = 2
+HideIfFlags = "rose_door"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(240, 154)
+shape = SubResource("Rect_1")
+
+[node name="Bell" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bell"
+DisplayName = "doorbell"
+LookText = "A doorbell. Press it and you can't take it back."
+WalkTo = Vector2(258, 220)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bell"]
+position = Vector2(268, 151)
+shape = SubResource("Rect_2")
+
+[node name="Exit" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "exit"
+DisplayName = "the street"
+LookText = "Back down the row, into the night. I know the way. I've taken it before."
+WalkTo = Vector2(8, 236)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
+position = Vector2(8, 234)
+shape = SubResource("Rect_3")
+
+[node name="Rose" type="Area2D" parent="World"]
+position = Vector2(240, 202)
+script = ExtResource("4_Actor")
+Id = "rose"
+DisplayName = "Rose"
+LookText = "Rose. A cardigan over her nightgown, and the face she used to keep for the bill collectors."
+WalkTo = Vector2(222, 226)
+Face = 2
+ShowIfFlags = "rose_door"
+monitoring = false
+monitorable = false
+Texture = ExtResource("7_rose")
+SpeechColor = Color(0.78, 0.86, 1.0, 1)

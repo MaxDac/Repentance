@@ -15,6 +15,7 @@ public partial class GameState : Node
     private int _storyAct = 1;
 
     public IReadOnlyList<string> Inventory => _inventory;
+    public IReadOnlyCollection<string> Flags => _flags;
     public int StoryAct => _storyAct;
 
     public override void _EnterTree() => Instance = this;

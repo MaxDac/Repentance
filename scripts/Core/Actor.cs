@@ -111,6 +111,13 @@ public partial class Actor : Hotspot, ISpeaker
         return _moveDone.Task;
     }
 
+    /// <summary>Turns the actor to face screen-left (true) or screen-right (false) without moving.</summary>
+    public void FaceLeft(bool left)
+    {
+        FlipH = left;
+        if (_sprite != null) _sprite.FlipH = left;
+    }
+
     private static readonly int[] TalkCycle = { 1, 2, 1, 0, 2, 1, 2, 0 };
 
     private void UpdateFrame()

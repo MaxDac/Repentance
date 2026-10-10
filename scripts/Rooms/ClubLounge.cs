@@ -2,21 +2,34 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>The Starlight's lounge, where Teddy's father watches the stage curtain.</summary>
+/// <summary>The Club's lounge: masked members waiting for the rite on the stage beyond the curtain.</summary>
 public partial class ClubLounge : Room
 {
+    public override async Task OnEnter(string entry)
+    {
+        if (State.HasFlag("seen_club_lounge")) return;
+        State.SetFlag("seen_club_lounge");
+        await Game.Run(async () =>
+        {
+            await Wait(0.4);
+            await Say("Sofas full of white faces, and none of them is a face. Half the city council could be in this room.");
+        });
+    }
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
         {
-            case ("harrington", Verb.Talk):
-                await Talk("harrington");
+            case ("guest", Verb.Talk):
+                await Say(Game.Pick("I lean in. The mask leans back. Neither of us says a word.",
+                    "She looks through me, like I'm the one wearing a mask. I am.",
+                    "A man nods at me and points at the stage curtain. It's starting."));
                 return true;
-            case ("harrington", Verb.UseItem) when item == "photo":
-                await Say("harrington", "Eleanor. She looked like that at her wedding. Like somebody waiting for a train out.");
+            case ("guest", Verb.Hand or Verb.Kick):
+                await Say("Start a fight in here, and I'd be the one on the stage tonight.");
                 return true;
-            case ("harrington", Verb.Hand or Verb.Kick):
-                await Say("harrington", "Young man, I have outlived two wars and three business partners. Don't.");
+            case ("guest", Verb.UseItem) when item == "photo":
+                await Say("Show Eleanor's photograph to a room full of masks. They'd know who I was before I put it away.");
                 return true;
         }
         return false;

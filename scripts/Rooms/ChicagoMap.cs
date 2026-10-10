@@ -3,11 +3,15 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>Act 2: the map of Chicago. Micah picks where to look for Eleanor next.</summary>
+/// <summary>
+/// Act 2: the map of Chicago. Micah picks where to look for Eleanor next. Which places are on the map
+/// depends on how far the story has gone (see <see cref="OnRefresh"/>).
+/// </summary>
 public partial class ChicagoMap : Room
 {
     public override async Task OnEnter(string entry)
     {
+        State.SetFlag("on_map");
         if (State.HasFlag("map_seen")) return;
         State.SetFlag("map_seen");
         await Game.Run(() => Say("I have to find her again."));
@@ -15,6 +19,37 @@ public partial class ChicagoMap : Room
 
     // nobody walks on a map
     public override Vector2 ClampWalkTarget(Vector2 target) => Player.Position;
+
+    private bool ClubOut => State.HasFlag("club_out");
+    private bool NunThreatened => State.HasFlag("nun_threatened");
+    private bool HarringtonDone => State.HasFlag("harrington_done");
+
+    /// <summary>Is a place on the map right now? Library and office drop off once the hunt narrows to Harrington.</summary>
+    private bool Shows(string id) => id switch
+    {
+        "library" or "office" => !NunThreatened,
+        "church" => true,
+        "club" => State.HasFlag("club_unlocked") && (!NunThreatened || HarringtonDone),
+        "convent" => State.HasFlag("caleb_club") && !NunThreatened,
+        "harrington" => NunThreatened && !HarringtonDone,
+        _ => false,
+    };
+
+    private static readonly (string id, string node)[] Places =
+    {
+        ("library", "Library"), ("church", "Church"), ("office", "Office"),
+        ("club", "Club"), ("convent", "Convent"), ("harrington", "Harrington"),
+    };
+
+    protected override void OnRefresh()
+    {
+        foreach (var (id, node) in Places)
+        {
+            bool on = Shows(id);
+            if (GetNodeOrNull<CanvasItem>($"Markers/{node}") is { } marker) marker.Visible = on;
+            if (FindHotspot(id) is { } spot) spot.Visible = on;
+        }
+    }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
@@ -37,15 +72,44 @@ public partial class ChicagoMap : Room
             case "library":
                 await Game.ChangeRoom("library", "start");
                 return true;
-            case "church":
+
+            case "church" when !ClubOut:
                 await Say("Caleb's sermons can wait. Coming there was a mistake once already.");
+                return true;
+            case "church" when !State.HasFlag("caleb_club"):
+            case "church" when NunThreatened:
+                await Game.ChangeRoom("church_interior", "map");
+                return true;
+            case "church":
+                await Say("Caleb said the convent. I don't need the sermon that comes with it twice.");
+                return true;
+
+            case "office" when ClubOut:
+                await Say("An empty bottle and an empty chair. Neither of them knows where she is.");
                 return true;
             case "office":
                 await Game.ChangeRoom("office", "door");
                 return true;
+
+            case "club" when ClubOut && !HarringtonDone:
+                await Say("No use returning there now.");
+                return true;
+            case "club" when HarringtonDone:
+                // the invitation, the mask and the cloak: tonight Micah goes in as one of them
+                State.SetFlag("masked");
+                State.SetFlag("on_map", false);
+                await Game.ChangeRoom("club_hall", "from_street");
+                return true;
             case "club":
                 State.SetFlag("on_map", false);
                 await Game.ChangeRoom("club_hall", "from_street");
+                return true;
+
+            case "convent":
+                await Game.ChangeRoom("convent_corridor", "start");
+                return true;
+            case "harrington":
+                await Game.ChangeRoom("harrington_road", "start");
                 return true;
         }
         return false;

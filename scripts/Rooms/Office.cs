@@ -130,7 +130,7 @@ public partial class Office : Room
         await Say("Wait. Something slipped out from between the pages. A little sheet of paper.");
         State.GiveItem("address");
         State.SetFlag("club_unlocked");
-        await Say("An address, in a woman's hand. \"The Starlight, 18 W. Hubbard.\" A nightclub.");
+        await Say("An address, in a woman's hand. \"The Club, 18 W. Hubbard.\" Just that. A place that doesn't need a name.");
         return true;
     }
 }
