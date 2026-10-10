@@ -1,7 +1,7 @@
 """Present day: the dusty attic of an old family house, lit by a round gable window."""
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageChops, ImageFilter
 import random
-from .common import (W, FULL_H, hx, mix, vgrad, noise, light, shadow, vignette, pixelize, palette_of, text, save,
+from .common import (W, FULL_H, hx, mix, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, text, save,
                      floor_boards)
 
 H = FULL_H
@@ -342,7 +342,99 @@ def clutter(img):
     d.line([(262, 36), (264, 52)], fill=hx("c8c4b0"))
 
 
+NIGHT_EXTRA = [hx(c) for c in ("fff8d8", "ffe0a0", "ffd890", "f0b860", "d89848", "d88a3a", "c87830", "a86a2a",
+                                 "8a5a24", "e8e8d0", "c8c8b4", "6a7898")]
+LAMP = dict(x=268, base=182, shade_top=112, shade_bot=128, top_w=8, bot_w=15)
+
+
+def night_glass(img):
+    """The round window at night: deep blue sky, a few stars, the moon behind the bare maple."""
+    cx, cy, r = 260, 80, 19
+    glass = Image.new("RGB", img.size)
+    vgrad(glass, (cx - r, cy - r, cx + r, cy + r), hx("0c1430"), hx("1c2a4c"))
+    gd = ImageDraw.Draw(glass)
+    for (sx, sy) in ((cx - 13, cy - 6), (cx + 4, cy - 14), (cx + 13, cy - 3), (cx - 5, cy - 2)):
+        gd.point((sx, sy), fill=hx("c8d0e8"))
+    mx, my = cx + 8, cy - 9
+    gd.ellipse([mx - 6, my - 6, mx + 6, my + 6], fill=hx("e8e8d0"))
+    gd.ellipse([mx - 3, my - 3, mx - 1, my - 1], fill=hx("c8c8b4"))
+    gd.ellipse([mx + 1, my + 1, mx + 4, my + 3], fill=hx("ccccb8"))
+    light(glass, "ellipse", [mx - 14, my - 14, mx + 14, my + 14], hx("8090b8"), 0.35, 5)
+    for (lx, ly, lr) in ((cx - 12, cy + 8, 9), (cx + 8, cy + 12, 11), (cx - 2, cy + 18, 8)):
+        gd.ellipse([lx - lr, ly - lr, lx + lr, ly + lr], fill=hx("0a0e18"))
+    gd.line([(cx - 4, cy + 20), (cx - 2, cy + 4), (cx + 6, cy - 4)], fill=hx("0a0e18"), width=2)
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).ellipse([cx - r, cy - r, cx + r, cy + r], fill=255)
+    img.paste(glass, (0, 0), m)
+    d = ImageDraw.Draw(img)
+    frame = hx("1e1812")
+    d.line([(cx - r, cy), (cx + r, cy)], fill=frame, width=2)
+    d.line([(cx, cy - r), (cx, cy + r)], fill=frame, width=2)
+    d.arc([cx - r, cy - r, cx + r, cy + r], 0, 360, fill=frame, width=2)
+    d.line([(cx - 10, cy - 12), (cx - 4, cy - 15)], fill=hx("6a7898"))
+
+
+def lamp(img):
+    """An old standard lamp with a pleated fabric shade, switched on."""
+    d = ImageDraw.Draw(img)
+    L = LAMP
+    x, st, sb, tw, bw = L["x"], L["shade_top"], L["shade_bot"], L["top_w"], L["bot_w"]
+    shadow(img, "ellipse", [x - 14, L["base"] - 3, x + 16, L["base"] + 3], 0.5, 2)
+    d.ellipse([x - 8, L["base"] - 3, x + 8, L["base"] + 1], fill=hx("2a1c10"))
+    d.ellipse([x - 7, L["base"] - 4, x + 7, L["base"]], fill=hx("6a4a24"))
+    d.line([(x, L["base"] - 3), (x, sb)], fill=hx("2a1c10"), width=3)
+    d.line([(x - 1, L["base"] - 3), (x - 1, sb)], fill=hx("b08a48"))
+    d.ellipse([x - 2, 158, x + 2, 161], fill=hx("8a6a30"))
+    # the bulb glows under the shade's lower rim
+    d.ellipse([x - 4, sb - 2, x + 4, sb + 4], fill=hx("fff8d8"))
+    shade = [(x - tw, st), (x + tw, st), (x + bw, sb), (x - bw, sb)]
+    d.polygon(shade, fill=hx("f0b860"))
+    tmp = Image.new("RGB", img.size)
+    hgrad(tmp, (x - bw, st, x + bw, sb), hx("d88a3a"), hx("ffd890"))
+    hgrad(tmp, (x, st, x + bw, sb), hx("ffe0a0"), hx("c87830"))
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).polygon(shade, fill=255)
+    img.paste(tmp, (0, 0), m)
+    for k in range(-3, 4):
+        d.line([(x + k * tw / 4, st + 1), (x + k * bw / 4, sb - 1)], fill=hx("d89848"))
+    d.line([(x - tw, st), (x + tw, st)], fill=hx("8a5a24"))
+    d.line([(x - bw, sb), (x + bw, sb)], fill=hx("a86a2a"), width=2)
+    for k in (-10, -4, 2, 8):  # fringe
+        d.line([(x + k, sb + 1), (x + k, sb + 3)], fill=hx("c88a3a"))
+    light(img, "ellipse", [x - 22, st - 10, x + 22, sb + 12], hx("ffd890"), 0.35, 6)
+
+
+def relight_night(img):
+    """Darkens the whole attic to moonlit night, then lets the lamp throw a warm pool of light."""
+    x, sb = LAMP["x"], LAMP["shade_bot"]
+    dark = ImageChops.multiply(img, Image.new("RGB", img.size, (62, 70, 112)))
+    warm = ImageChops.multiply(img, Image.new("RGB", img.size, (255, 206, 140)))
+    warm = ImageChops.screen(warm, Image.new("RGB", img.size, (34, 18, 4)))
+    m = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(m)
+    md.ellipse([x - 190, sb - 120, x + 190, sb + 150], fill=70)
+    m = m.filter(ImageFilter.GaussianBlur(40))
+    core = Image.new("L", img.size, 0)
+    cd = ImageDraw.Draw(core)
+    cd.polygon([(x - 15, sb), (x + 15, sb), (x + 110, 250), (x - 120, 250)], fill=150)  # cone under the shade
+    cd.ellipse([x - 120, 168, x + 110, 230], fill=170)  # pool on the floorboards
+    cd.ellipse([x - 70, sb - 70, x + 70, sb + 40], fill=150)
+    cd.polygon([(x - 8, LAMP["shade_top"]), (x + 8, LAMP["shade_top"]), (x + 50, 20), (x - 50, 20)], fill=110)
+    core = core.filter(ImageFilter.GaussianBlur(18))
+    m = ImageChops.lighter(m, core)
+    hatch_glow = Image.new("L", img.size, 0)
+    ImageDraw.Draw(hatch_glow).polygon([(14, 236), (96, 236), (102, 270), (6, 270)], fill=230)
+    ImageDraw.Draw(hatch_glow).ellipse([-10, 196, 120, 280], fill=90)
+    m = ImageChops.lighter(m, hatch_glow.filter(ImageFilter.GaussianBlur(8)))
+    out = Image.composite(warm, dark, m)
+    # cool moonlight falling through the round window
+    light(out, "polygon", [(246, 72), (276, 72), (330, 266), (186, 266)], hx("5068a8"), 0.1, 8)
+    return out
+
+
 def paint(act=1, spill=False, lifted=False, opened=False):
+    if act == "night":
+        return paint_night(spill, lifted, opened)
     mood = ACTS[act]
     img = Image.new("RGB", (W, H))
     shell(img)
@@ -366,6 +458,25 @@ def paint(act=1, spill=False, lifted=False, opened=False):
     return img
 
 
+def paint_night(spill=False, lifted=False, opened=False):
+    img = Image.new("RGB", (W, H))
+    shell(img)
+    floor(img)
+    window(img, 1)
+    clutter(img)
+    boxes(img)
+    sheet_furniture(img, lifted)
+    trunk(img, opened)
+    if spill:
+        spilled(img)
+    hatch(img)
+    img = relight_night(img)
+    night_glass(img)
+    lamp(img)
+    vignette(img, 0.7, tint=(14, 14, 32), blur=46)
+    return img
+
+
 def build():
     act1 = paint(1)
     act1_alt = paint(1, True, True, True)
@@ -385,4 +496,11 @@ def build():
         for name, box in overlay_boxes:
             suffix = "" if act == 1 else f"_act{act}"
             save(alt.crop(box), "rooms", f"{name}{suffix}.png")
+
+    night, night_alt = paint("night"), paint("night", True, True, True)
+    night_pal = palette_of(Image.blend(night, night_alt, 0.5), 116) + NIGHT_EXTRA
+    save(pixelize(night, night_pal), "rooms", "attic_night.png")
+    night_alt = pixelize(night_alt, night_pal)
+    for name, box in overlay_boxes:
+        save(night_alt.crop(box), "rooms", f"{name}_night.png")
     return outputs[1]

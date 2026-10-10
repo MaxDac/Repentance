@@ -117,14 +117,57 @@ public class AutoPlay
 
             await Shot("speakeasy");
             await game.Perform(Verb.Talk, "bartender");
-            Check(!gs.HasFlag("photo_shown"), "Sal blocks the bar");
+            Check(game.Room?.Name == "Speakeasy", "Sal blocks the bar");
             await game.Perform(Verb.Talk, "sal");
-            Check(gs.HasFlag("sal_passed"), "password accepted");
+            Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out"), "no password, but Sal takes the bribe");
             await Shot("speakeasy_inside");
-            await game.Perform(Verb.Talk, "bartender");
-            Check(gs.HasFlag("photo_shown") && gs.HasFlag("club_lead"), "bartender points to the Starlight");
-            await game.Perform(Verb.Walk, "door");
-            Check(game.Room?.Name == "Street", "speakeasy door leads to the street");
+            var bar = game.Perform(Verb.Talk, "bartender");
+            await Until(() => game.Room?.Name == "Alley");
+            Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
+            await game.Wait(2.5);
+            await Shot("alley");
+            await bar;
+
+            // ---- the convent
+            Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_talked"), "the nun questions Micah in the corridor");
+            await Shot("convent_corridor");
+            await game.Perform(Verb.Walk, "cell_door");
+            Check(game.Room?.Name == "ConventCell", "entered Eleanor's cell");
+            await Shot("convent_cell");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "ConventCell", "can't leave the cell without the mirror");
+            await game.Perform(Verb.Hand, "nightstand");
+            Check(gs.HasFlag("cell_drawer_open"), "opened the nightstand drawer");
+            await Shot("convent_cell_drawer");
+            var take = game.Perform(Verb.Hand, "mirror");
+            await Until(() => game.Hud.ImageVisible);
+            Check(game.Hud.ImageVisible, "the symbol behind the mirror is shown full screen");
+            await Shot("triquetra");
+            game.Hud.CloseImage();
+            await take;
+            await game.Perform(Verb.Hand, "comb");
+            Check(gs.HasItem("mirror") && !gs.HasItem("comb"), "took only the mirror");
+            await Shot("convent_cell_after");
+
+            var leave = game.Perform(Verb.Walk, "exit");
+            await Until(() => game.Room?.Name == "ConventRoad");
+            Check(game.Room?.Name == "ConventRoad", "Eleanor is waiting outside the convent");
+            await game.Wait(3);
+            await Shot("convent_road");
+            await Until(() => game.Room?.Name == "MotelNight");
+            Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
+            await game.Wait(2);
+            await Shot("motel_night");
+            await Until(() => game.Room?.Name == "Attic");
+            await game.Wait(2.5);
+            await Shot("attic_night");
+            await leave;
+
+            // ---- end of Act 1, then Act 2 the next day
+            Check(gs.StoryAct == 2 && gs.HasItem("journal") && game.Player.Character == "daniel", "Act 2: Daniel is back with the journal");
+            await Shot("attic_act2");
+            await game.ItemVerb(Verb.Hand, "journal");
+            Check(game.Room?.Name == "Street" && gs.HasItem("mirror"), "reading again leads back to 1927");
 
             // ---- the temporary story: every location in order
             await Shot("street");
@@ -309,6 +352,11 @@ public class AutoPlay
                 Position = pos, GlobalPosition = pos, ButtonIndex = button, Pressed = pressed,
             }, true);
         }
+    }
+
+    private async Task Until(Func<bool> done, double timeout = 90)
+    {
+        for (double t = 0; t < timeout && !done(); t += 0.1) await _game.Wait(0.1);
     }
 
     private void Check(bool ok, string what)

@@ -14,7 +14,7 @@ public static class Items
         ["dollar"] = new("dollar", "dollar bill", "res://assets/art/items/dollar.png",
             "One whole dollar. My entire operating budget."),
         ["matchbook"] = new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
-            "A blue lantern on the cover. Inside someone scribbled: \"Sweet Caroline's sister\"."),
+            "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. Just matches."),
         ["crowbar"] = new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
             "A rusty crowbar. Every attic has one. Nobody knows why."),
         ["journal"] = new("journal", "journal", "res://assets/art/items/journal.png",
@@ -41,6 +41,8 @@ public static class Items
             "A little brass box, engraved with lilies. Something slides around inside."),
         ["card"] = new("card", "business card", "res://assets/art/items/card.png",
             "A calling card, heavy stock, gilt edges. No name, no address. Just curlicues, and a perfume that isn't Eleanor's."),
+        ["mirror"] = new("mirror", "little mirror", "res://assets/art/items/mirror.png",
+            "Eleanor's little hand mirror. On the back, scratched into the wood, three loops tied in a knot that never ends."),
     };
 
     public static ItemDef Get(string id) => All[id];

@@ -165,6 +165,12 @@ public partial class Game : Node
             await Say("And a matchbook. A blue lantern on the cover. The Blue Lantern, then. That's where her trail goes next.");
             return;
         }
+        if (verb == Verb.Hand && item == "mirror")
+        {
+            await Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
+            await Say("Three loops tied in one knot. No beginning, no end. It looks old. Older than the convent.");
+            return;
+        }
         switch (verb)
         {
             case Verb.Look:

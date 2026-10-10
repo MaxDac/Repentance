@@ -1,0 +1,127 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/Alley.cs" id="1_Alley"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/alley.png" id="2_alley"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/alley_lamp.png" id="3_alley_lamp"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="4_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="6_sal"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/bartender.png" id="7_bartender"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(40, 64)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(40, 140)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(50, 36)
+
+[node name="Alley" type="Node2D"]
+script = ExtResource("1_Alley")
+RoomName = "Alley behind the Blue Lantern"
+FarY = 188
+NearY = 264
+FarScale = 0.9
+NearScale = 1.06
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_alley")
+centered = false
+
+[node name="Lamp" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(47, 20)
+texture = ExtResource("3_alley_lamp")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 262, 0, 196, 40, 188, 100, 188, 104, 198, 140, 198, 310, 192, 352, 192, 380, 206, 430, 212, 480, 214, 480, 268, 0, 268)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(200, 226)
+metadata/facing = 4
+
+[node name="back_door" type="Marker2D" parent="Entries"]
+position = Vector2(331, 198)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("4_Hotspot")
+Id = "back_door"
+DisplayName = "back door"
+LookText = "Steel, bolted from the inside. The Blue Lantern's way of saying goodnight."
+WalkTo = Vector2(331, 198)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(331, 155)
+shape = SubResource("Rect_1")
+
+[node name="StreetLamp" type="Area2D" parent="Hotspots"]
+script = ExtResource("4_Hotspot")
+Id = "street_lamp"
+DisplayName = "street lamp"
+LookText = "It can't decide whether to light the place or leave it to the rats."
+WalkTo = Vector2(165, 205)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/StreetLamp"]
+position = Vector2(172, 128)
+shape = SubResource("Rect_2")
+
+[node name="TrashCans" type="Area2D" parent="Hotspots"]
+script = ExtResource("4_Hotspot")
+Id = "trash"
+DisplayName = "trash cans"
+LookText = "The cat on top has seen worse beatings than mine. It doesn't look impressed."
+WalkTo = Vector2(404, 218)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/TrashCans"]
+position = Vector2(404, 187)
+shape = SubResource("Rect_3")
+
+[node name="Sal" type="Area2D" parent="World"]
+position = Vector2(242, 224)
+script = ExtResource("5_Actor")
+Id = "sal"
+DisplayName = "Sal"
+LookText = "Sal, rubbing his knuckles. They're his kind of argument."
+WalkTo = Vector2(210, 226)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("6_sal")
+FlipH = true
+SpeechColor = Color(0.878, 0.439, 0.376, 1)
+
+[node name="Bartender" type="Area2D" parent="World"]
+position = Vector2(282, 206)
+script = ExtResource("5_Actor")
+Id = "bartender"
+DisplayName = "Tony"
+LookText = "Tony, standing behind his muscle. Brave man."
+WalkTo = Vector2(250, 210)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("7_bartender")
+FlipH = true
+SpeechColor = Color(0.565, 0.753, 0.941, 1)

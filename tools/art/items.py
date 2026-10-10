@@ -143,10 +143,24 @@ def card(d, im):
     d.point((16, 12), fill=hx("c8a050"))
 
 
+def mirror(d, im):
+    """Small round hand mirror lying at an angle: tarnished silver frame, pale glass, short turned handle."""
+    d.line([(17, 15), (26, 22)], fill=hx("9a9488"), width=4)
+    d.ellipse([23, 19, 28, 23], fill=hx("8a8478"))
+    d.line([(18, 15), (25, 21)], fill=hx("c8c2b4"))
+    d.ellipse([3, 1, 22, 19], fill=hx("a8a294"))
+    d.ellipse([5, 3, 20, 17], fill=hx("6a6660"))
+    d.ellipse([6, 4, 19, 16], fill=hx("8aa6b8"))
+    d.chord([6, 4, 19, 16], 200, 290, fill=hx("c8dce6"))
+    d.line([(9, 13), (14, 7)], fill=hx("e8f2f4"))
+    d.point((15, 6), fill=hx("e8f2f4"))
+    d.rectangle([16, 14, 18, 16], fill=hx("b8b2a4"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger), ("map", map_),
                      ("evidence", evidence), ("suitcase_key", suitcase_key), ("revolver", revolver),
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
-                     ("card", card)):
+                     ("card", card), ("mirror", mirror)):
         save(_icon(fn), "items", f"{name}.png")

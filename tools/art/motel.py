@@ -1,7 +1,7 @@
 """A cheap roadside motel room in flat, dingy daytime light."""
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import (W, H, TOP, tall, hx, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
-                     floor_boards)
+                     floor_boards, text)
 from .furniture import Room3D
 
 FLOOR = 136
@@ -273,10 +273,273 @@ def ceiling(img):
     d.line([(248, 6), (242, 14), (248, 22)], fill=hx("443a2d"))
 
 
+# --- night: Eleanor asleep under the sheet, a bedside lamp turned low, neon through the window -------------------
+
+WIN = (302, 26, 396, 92)
+LAMP_W = (163, 30, 13)  # world position of the bedside lamp's foot on the nightstand
+NIGHT_EXTRA = [hx(c) for c in ("ff3a4a", "c8203a", "ff8090", "4a8cff", "2a5ad0", "a0c8ff", "fff2c8", "ffd27a",
+                               "e09a44", "f0e6c0", "d8c690", "a8935e", "a83e3c", "3a2418", "1e120c", "3a2014", "5a3422", "8a5638",
+                               "e8b890", "b88060", "5a3020", "f0dcb0", "a88a64")]
+
+
+def window_night(img):
+    """Frame and curtains only; the glass is painted after the room has been darkened."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = WIN
+    d.rectangle([x0, y0, x1, y1], fill=hx("101420"))
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 7], fill=WOOD_D)
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 4], fill=WOOD)
+    d.rectangle([x0, y0, x1, y1], fill=hx("101420"))
+    d.rectangle([x0 - 8, y1 + 4, x1 + 8, y1 + 8], fill=hx("4e3a2a"))
+    for pts, col, sh in (([(292, 18), (322, 22), (326, 36), (318, 84), (304, 88), (296, 58)], hx("c0b490"), hx("a89b78")),
+                         ([(406, 18), (378, 22), (374, 36), (380, 84), (394, 88), (402, 58)], hx("b8ac88"), hx("a0926e"))):
+        d.polygon(pts, fill=col)
+        for x in range(min(p[0] for p in pts) + 4, max(p[0] for p in pts) - 2, 5):
+            d.line([(x, 22), (x, 84)], fill=sh)
+    noise(img, (294, 18, 404, 88), 5, 408)
+    d.line([(286, 18), (412, 18)], fill=hx("3a2c1e"), width=2)
+    d.line([(350, 18), (350, 12)], fill=hx("3a2c1e"))
+
+
+def glass_night(img, flicker=1.0):
+    """Night outside the glass: rooftops against an indigo sky and the motel's neon sign right outside."""
+    x0, y0, x1, y1 = WIN
+    layer = Image.new("RGB", img.size)
+    vgrad(layer, (x0, y0, x1, y1), hx("0a0c22"), hx("2a1838"))
+    ld = ImageDraw.Draw(layer)
+    for (sx, sy) in ((330, 32), (342, 29), (360, 36), (368, 30)):
+        ld.point((sx, sy), fill=hx("a0a8c8"))
+    ld.rectangle([x0, 64, x1, y1], fill=hx("0a0810"))
+    ld.rectangle([x0, 58, 330, 64], fill=hx("0a0810"))
+    ld.rectangle([352, 52, 366, 64], fill=hx("0a0810"))
+    ld.point((340, 70), fill=hx("e8c060"))
+    ld.point((358, 68), fill=hx("e8c060"))
+    # neon: a red MOTEL sign and a blue VACANCY strip below it, glowing in the wet air
+    light(layer, "ellipse", [326, 34, 398, 70], hx("c8203a"), 0.45 * flicker, 8)
+    light(layer, "ellipse", [334, 64, 398, 90], hx("2a5ad0"), 0.45, 6)
+    text(layer, (351, 49), "MOTEL", hx("ff3a4a"), size=8)
+    text(layer, (351, 76), "VACANCY", hx("4a8cff"), size=8)
+    ld.line([(330, 42), (392, 42)], fill=hx("ff8090"))
+    ld.line([(330, 56), (392, 56)], fill=hx("ff8090"))
+    m = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(m)
+    md.rectangle([x0, y0, x1, y1], fill=255)
+    md.polygon([(292, 18), (322, 22), (326, 36), (318, 84), (304, 88), (296, 58)], fill=0)
+    md.polygon([(406, 18), (378, 22), (374, 36), (380, 84), (394, 88), (402, 58)], fill=0)
+    img.paste(layer, (0, 0), m)
+    d = ImageDraw.Draw(img)
+    d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=hx("140c0a"), width=2)
+    d.line([(x0, 58), (x1, 58)], fill=hx("140c0a"), width=2)
+    d.rectangle([x0, y0, x1, y1], outline=hx("140c0a"))
+
+
+def _ell(d, c, rx, ry, col):
+    d.ellipse([c[0] - rx, c[1] - ry, c[0] + rx, c[1] + ry], fill=col)
+
+
+def bed_night(img):
+    """The iron bed, rumpled: Eleanor asleep under the sheet, head on the pillow, the blanket kicked to the foot."""
+    X0, X1, Z0, Z1 = 52, 140, 4, 42
+    d = ImageDraw.Draw(img)
+    a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z0)
+    shadow(img, "rect", [a[0] - 2, b[1] - 2, b[0] + 6, a[1] + 3], 0.45, 3)
+    for x, top in ((X0, 30), (X1, 46)):
+        R.line(img, (x, 0, Z0), (x, top, Z0), IRON, 2)
+    R.box(img, X0 + 2, X1 - 2, 12, 15, Z0 + 2, Z1 - 2, IRON_L)
+    sheet, sheet_d, sheet_l = hx("cfc6ad"), hx("a59c84"), hx("e2dac6")
+    R.box(img, X0 + 2, X1 - 2, 15, 24, Z0 + 2, Z1 - 2, sheet, top=hx("ddd4bc"), side=sheet_d)
+    # two pillows at the head end, the back one propped against the rail
+    R.box(img, X1 - 17, X1 - 4, 24, 31, Z0 + 3, Z0 + 16, hx("d8d0ba"), top=hx("e6dfcc"), side=hx("b0a690"))
+    R.box(img, X1 - 20, X1 - 4, 24, 28, Z0 + 12, Z1 - 5, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
+    # the sheet over her body: shoulder, waist, hip, knees, feet
+    ridge = [(X1 - 25, 31), (X1 - 36, 29.5), (X0 + 52, 33), (X0 + 40, 31), (X0 + 26, 32), (X0 + 14, 29),
+             (X0 + 6, 26.5)]
+    top = [R.P(x, y, 24) for x, y in ridge]
+    front = [R.P(x, 24, Z1 - 1) for x, _ in reversed(ridge)]
+    d.polygon(top + front, fill=sheet)
+    d.line(top, fill=sheet_l)
+    for (x, y) in ridge[1:-1]:
+        d.line([R.P(x, y, 24), R.P(x + 3, 24, Z1 - 1)], fill=sheet_d)
+    d.line([R.P(X1 - 25, 30.5, 22), R.P(X1 - 26, 24, Z1 - 1)], fill=hx("b8af98"))
+    shadow(img, "polygon", [R.P(x, y - 1.5, 24) for x, y in ridge] + front, 0.2, 2, hx("8a8070"))
+    # the blanket kicked into a heap at the foot, half off the end
+    R.quad(img, [(X0 - 2, 22, Z0 + 4), (X0 + 14, 27, Z0 + 6), (X0 + 18, 26, Z1 - 4), (X0 - 2, 22, Z1)],
+           hx("6f7558"))
+    R.quad(img, [(X0 + 2, 26, Z0 + 10), (X0 + 12, 29, Z0 + 12), (X0 + 14, 27, Z1 - 8), (X0 + 2, 25, Z1 - 6)],
+           hx("8c9270"))
+    R.line(img, (X0 + 4, 26, Z0 + 14), (X0 + 12, 27.5, Z1 - 10), hx("565b44"))
+    # rail, posts and end panels in front
+    R.line(img, (X0, 12, Z1), (X1, 12, Z1), IRON, 2)
+    for x, top_, mid in ((X0, 30, 20), (X1, 46, 32)):
+        R.line(img, (x, 0, Z1), (x, top_, Z1), IRON, 2)
+        R.line(img, (x, top_, Z0), (x, top_, Z1), IRON, 2)
+        R.line(img, (x, mid, Z0), (x, mid, Z1), IRON)
+        for z in range(Z0 + 6, Z1 - 3, 6):
+            R.line(img, (x, mid, z), (x, top_, z), IRON_L)
+        for z in (Z0, Z1):
+            px, py = R.P(x, top_ + 1.5, z)
+            d.ellipse([px - 1.5, py - 1.5, px + 1.5, py + 1.5], fill=BRASS)
+    # the sheet's loose end and the blanket spilling over the side rail
+    R.quad(img, [(X0 + 34, 24, Z1 - 1), (X0 + 58, 24, Z1 - 1), (X0 + 62, 5, Z1 + 1), (X0 + 30, 7, Z1 + 1)], sheet)
+    R.line(img, (X0 + 44, 22, Z1), (X0 + 46, 7, Z1 + 1), sheet_d)
+    R.line(img, (X0 + 54, 22, Z1), (X0 + 58, 6, Z1 + 1), sheet_d)
+    R.quad(img, [(X0 - 1, 23, Z1), (X0 + 16, 24, Z1), (X0 + 14, 4, Z1 + 2), (X0 - 3, 6, Z1 + 2)], hx("6f7558"))
+    R.line(img, (X0 + 6, 22, Z1 + 1), (X0 + 5, 6, Z1 + 2), hx("565b44"))
+
+
+def sleeper(img):
+    """Eleanor's head and bare shoulder, painted after the relight in lamp-lit tones so they read clearly."""
+    X1, Z1 = 140, 42
+    d = ImageDraw.Draw(img)
+    hc = R.P(X1 - 12, 32, 25)
+    hc = (round(hc[0]), round(hc[1]))
+    sc = R.P(X1 - 21, 30, 26)
+    sc = (round(sc[0]), round(sc[1]))
+    # shoulder and upper arm
+    _ell(d, sc, 5, 3, hx("3a2418"))
+    _ell(d, sc, 4, 2, hx("e8b890"))
+    d.line([(sc[0] - 3, sc[1] - 2), (sc[0] + 2, sc[1] - 2)], fill=hx("fff2c8"))
+    d.line([(sc[0] - 4, sc[1] + 1), (sc[0] + 4, sc[1] + 2)], fill=hx("b88060"))
+    # dark brown wavy hair spread on the pillow, face turned towards the room
+    _ell(d, (hc[0] + 3, hc[1] + 1), 6, 4, hx("1e120c"))
+    _ell(d, (hc[0] + 3, hc[1] + 1), 5, 3, hx("3a2014"))
+    d.line([(hc[0] + 4, hc[1] + 4), (hc[0] + 7, hc[1] + 2), (hc[0] + 8, hc[1] + 4)], fill=hx("5a3422"))
+    _ell(d, (hc[0] + 1, hc[1]), 6, 5, hx("1e120c"))
+    _ell(d, (hc[0] + 1, hc[1]), 5, 4, hx("3a2014"))
+    _ell(d, (hc[0] + 1, hc[1] - 1), 4, 3, hx("5a3422"))
+    d.line([(hc[0] - 2, hc[1] - 4), (hc[0] + 3, hc[1] - 4)], fill=hx("8a5638"))
+    d.point((hc[0] + 3, hc[1] - 2), fill=hx("8a5638"))
+    d.line([(hc[0] + 4, hc[1]), (hc[0] + 5, hc[1] + 2)], fill=hx("8a5638"))
+    d.ellipse([hc[0] - 5, hc[1] - 2, hc[0] + 1, hc[1] + 4], fill=hx("1e120c"))
+    d.ellipse([hc[0] - 4, hc[1] - 1, hc[0], hc[1] + 3], fill=hx("e8b890"))
+    d.line([(hc[0] - 4, hc[1] - 2), (hc[0] + 1, hc[1] - 2)], fill=hx("5a3422"))
+    d.line([(hc[0] + 1, hc[1] - 1), (hc[0] + 1, hc[1] + 5)], fill=hx("3a2014"))
+    d.point((hc[0] - 3, hc[1]), fill=hx("5a3020"))
+    d.point((hc[0] - 2, hc[1] + 2), fill=hx("a83e3c"))
+    d.point((hc[0], hc[1] + 3), fill=hx("b88060"))
+    # the sheet's hem drawn up over her chest, and the line of her body beneath it
+    ridge = [(X1 - 25, 31), (X1 - 36, 29.5), (52 + 52, 33), (52 + 40, 31), (52 + 26, 32), (52 + 14, 29), (52 + 6, 27.5)]
+    pts = [R.P(x, y, 24) for x, y in ridge]
+    d.line([R.P(X1 - 18, 29, 26), pts[0]], fill=hx("f0dcb0"), width=2)
+    d.line(pts, fill=hx("f0dcb0"))
+    d.line([(x, y + 1) for x, y in pts[1:]], fill=hx("a88a64"))
+    for x, y in ridge[1:-1]:
+        d.line([R.P(x, y - 1, 24), R.P(x + 2, 26, Z1 - 4)], fill=hx("a88a64"))
+
+def nightstand_night(img):
+    X0, X1, Z0, Z1 = 148, 172, 3, 22
+    R.box(img, X0, X1, 0, 30, Z0, Z1, hx("5a4130"), top=hx("74563e"), side=hx("3c2a1d"))
+    R.quad(img, [(X0 + 2, 18, Z1), (X1 - 2, 18, Z1), (X1 - 2, 27, Z1), (X0 + 2, 27, Z1)], None, hx("2a1c12"))
+    R.quad(img, [(X0 + 2, 3, Z1), (X1 - 2, 3, Z1), (X1 - 2, 15, Z1), (X0 + 2, 15, Z1)], None, hx("2a1c12"))
+    for y in (22, 9):
+        px, py = R.P((X0 + X1) / 2, y, Z1)
+        ImageDraw.Draw(img).rectangle([px - 2, py, px + 2, py + 1], fill=hx("ac8a4a"))
+    R.box(img, 150, 157, 30, 31.5, 13, 19, hx("5e5a52"), top=hx("8a857a"))  # ashtray
+    R.box(img, 150, 153, 30, 36, 6, 9, hx("a9b2a6"), top=hx("d8e0d4"))  # half-empty glass
+
+
+def lamp_night(img):
+    """The little bedside lamp, its shade glowing, drawn after the relight."""
+    d = ImageDraw.Draw(img)
+    x, y, z = LAMP_W
+    bx, by = R.P(x, y, z)
+    d.ellipse([bx - 3, by - 1, bx + 3, by + 1], fill=hx("4a3420"))
+    d.line([(bx, by), (bx, by - 9)], fill=hx("6a5030"), width=2)
+    d.ellipse([bx - 2, by - 6, bx + 2, by - 2], fill=hx("8a6a3a"))
+    shade = [(bx - 3, by - 16), (bx + 3, by - 16), (bx + 6, by - 9), (bx - 6, by - 9)]
+    d.polygon(shade, fill=hx("ffd27a"))
+    d.line([(bx - 1, by - 15), (bx - 3, by - 10)], fill=hx("fff2c8"))
+    d.line([(bx + 2, by - 15), (bx + 4, by - 10)], fill=hx("e09a44"))
+    d.line([(bx - 6, by - 9), (bx + 6, by - 9)], fill=hx("e09a44"))
+    d.line([(bx - 3, by - 16), (bx + 3, by - 16)], fill=hx("c8803a"))
+    light(img, "ellipse", [bx - 12, by - 24, bx + 12, by - 2], hx("ffd27a"), 0.3, 4)
+
+
+def clothes(img):
+    """Micah's trench coat flung over the chair back and his fedora dropped on the seat."""
+    X0, X1, Z0, Z1 = 236, 258, 6, 24
+    coat, coat_d, coat_l = hx("ae8848"), hx("7a5c2c"), hx("c8a060")
+    R.quad(img, [(X0 - 2, 48, Z0 + 1), (X1 + 2, 47, Z0 + 1), (X1 + 3, 20, Z0 + 4), (X0 - 3, 21, Z0 + 4)], coat)
+    R.quad(img, [(X0 - 3, 21, Z0 + 4), (X1 + 3, 20, Z0 + 4), (X1 + 2, 21, Z0 + 12), (X0 - 2, 21, Z0 + 10)], coat_d)
+    R.line(img, (X0 - 2, 48, Z0 + 1), (X1 + 2, 47, Z0 + 1), coat_l)
+    R.line(img, (X0 + 9, 46, Z0 + 1), (X0 + 7, 22, Z0 + 4), coat_d)  # lapel fold
+    R.line(img, (X0 + 13, 44, Z0 + 1), (X0 + 14, 30, Z0 + 2), coat_d)
+    # a sleeve hanging down the side to the floor, and the belt trailing
+    R.quad(img, [(X0 - 3, 40, Z0 + 2), (X0 + 2, 40, Z0 + 2), (X0 + 1, 3, Z0 + 6), (X0 - 5, 4, Z0 + 6)], coat_d)
+    R.line(img, (X0 - 4, 38, Z0 + 2), (X0 - 4, 6, Z0 + 6), coat)
+    R.line(img, (X1 + 2, 26, Z0 + 4), (X1 + 4, 8, Z0 + 8), hx("6a4e26"), 2)
+    # fedora on the seat
+    d = ImageDraw.Draw(img)
+    hx_, hy_ = R.P(X0 + 13, 21, Z1 - 6)
+    d.ellipse([hx_ - 8, hy_ - 2, hx_ + 8, hy_ + 2], fill=hx("4a3a2c"))
+    d.rectangle([hx_ - 5, hy_ - 6, hx_ + 5, hy_], fill=hx("5c4838"))
+    d.ellipse([hx_ - 5, hy_ - 8, hx_ + 5, hy_ - 4], fill=hx("6c5644"))
+    d.line([(hx_ - 1, hy_ - 7), (hx_ + 1, hy_ - 5)], fill=hx("4a3a2c"))
+    d.rectangle([hx_ - 5, hy_ - 2, hx_ + 5, hy_ - 1], fill=hx("1a120e"))
+
+
+def relight_night(img):
+    """Night grade: the room sinks into blue-black, the lamp keeps a warm pool by the bed, neon washes the floor."""
+    lx, ly = R.P(LAMP_W[0], LAMP_W[1] + 12, LAMP_W[2])
+    dark = ImageChops.multiply(img, Image.new("RGB", img.size, (52, 56, 96)))
+    warm = ImageChops.multiply(img, Image.new("RGB", img.size, (255, 196, 128)))
+    warm = ImageChops.screen(warm, Image.new("RGB", img.size, (26, 12, 2)))
+    m = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(m)
+    md.ellipse([lx - 150, ly - 90, lx + 150, ly + 110], fill=90)
+    m = m.filter(ImageFilter.GaussianBlur(36))
+    core = Image.new("L", img.size, 0)
+    cd = ImageDraw.Draw(core)
+    cd.ellipse([lx - 90, ly - 40, lx + 40, ly + 50], fill=200)  # the bed and her face
+    cd.ellipse([lx - 50, ly - 50, lx + 50, ly + 70], fill=190)
+    cd.polygon([(lx - 6, ly), (lx + 6, ly), (lx + 40, ly - 70), (lx - 40, ly - 70)], fill=120)  # up the wall
+    core = core.filter(ImageFilter.GaussianBlur(14))
+    m = ImageChops.lighter(m, core)
+    out = Image.composite(warm, dark, m)
+    # neon from the window: red and blue bands across the floor, the curtains backlit
+    light(out, "polygon", [(310, 92), (350, 92), (330, 228), (230, 228)], hx("c8203a"), 0.12, 16)
+    light(out, "polygon", [(350, 92), (394, 92), (470, 228), (330, 228)], hx("2a5ad0"), 0.11, 16)
+    light(out, "rect", [292, 18, 406, 90], hx("a03050"), 0.22, 4)
+    light(out, "ellipse", [270, 0, 430, 120], hx("6a2040"), 0.12, 20)
+    return out
+
+
+def paint_night():
+    img = Image.new("RGB", (W, H))
+    shell(img)
+    floor(img)
+    window_night(img)
+    details(img)
+    door(img)
+    bed_night(img)
+    nightstand_night(img)
+    chair(img)
+    clothes(img)
+    dresser(img)
+    bottle(img)
+    bulb(img)
+    img = relight_night(img)
+    glass_night(img)
+    sleeper(img)
+    lamp_night(img)
+    img = tall(img, ceiling_night)
+    vignette(img, 0.72, tint=(14, 12, 30), blur=46)
+    return img
+
+
+def ceiling_night(img):
+    ceiling(img)
+    band = img.crop((0, 0, W, TOP + 1))
+    band = ImageChops.multiply(band, Image.new("RGB", band.size, (52, 56, 96)))
+    img.paste(band, (0, 0))
+
+
 def build():
     made = paint(False)
     unmade = paint(True)
     pal = palette_of(Image.blend(made, unmade, 0.5), 128)
     save(pixelize(made, pal), "rooms", "motel_room_made.png")
     save(pixelize(unmade, pal), "rooms", "motel_room_unmade.png")
+    night = paint_night()
+    save(pixelize(night, palette_of(night, 102) + NIGHT_EXTRA), "rooms", "motel_night.png")
     return made
