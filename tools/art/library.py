@@ -190,51 +190,49 @@ def shelves(img):
 
 
 def desk(img):
+    # roughly waist height for the ~85px characters, kept below the fireplace opening
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle([160, 116, 320, 180], 8, fill=hx("5a2c1b"))
-    d.rounded_rectangle([166, 120, 314, 176], 7, outline=hx("2a120b"))
-    d.polygon([(156, 122), (324, 122), (316, 112), (164, 112)], fill=hx("6f3d26"))
-    d.line([(166, 113), (314, 113)], fill=hx("8d593b"))
-    for px0 in (170, 260):
-        d.rectangle([px0, 126, px0 + 44, 173], outline=hx("26110b"))
-        for yy in (129, 149):
-            d.rectangle([px0 + 4, yy, px0 + 40, yy + 16], outline=hx("30170f"))
-            d.rectangle([px0 + 18, yy + 7, px0 + 26, yy + 9], fill=GOLD)
-    d.rectangle([216, 126, 260, 173], fill=hx("2e150d"))
-    for lx in (178, 306):
-        d.line([(lx, 176), (lx - 10, 220)], fill=hx("30140c"), width=4)
-        d.line([(lx, 176), (lx - 10, 220)], fill=hx("5a2b1a"), width=2)
-    for lx in (304, 172):
-        d.line([(lx, 176), (lx + 8, 220)], fill=hx("30140c"), width=4)
-        d.line([(lx, 176), (lx + 8, 220)], fill=hx("5a2b1a"), width=2)
-    shadow(img, "polygon", [(150, 178), (330, 178), (348, 224), (132, 224)], 0.28, 10)
+    shadow(img, "polygon", [(186, 200), (294, 200), (304, 212), (176, 212)], 0.3, 5)
+    d.polygon([(188, 167), (292, 167), (287, 161), (193, 161)], fill=hx("6f3d26"))
+    d.line([(194, 161), (286, 161)], fill=hx("8d593b"))
+    d.rectangle([190, 167, 290, 194], fill=hx("5a2c1b"), outline=hx("2a120b"))
+    d.line([(190, 168), (290, 168)], fill=hx("2a120b"))
+    for px0 in (194, 260):
+        d.rectangle([px0, 170, px0 + 26, 192], outline=hx("26110b"))
+        for yy in (172, 182):
+            d.rectangle([px0 + 2, yy, px0 + 24, yy + 8], outline=hx("30170f"))
+            d.rectangle([px0 + 11, yy + 4, px0 + 15, yy + 4], fill=GOLD)
+    d.rectangle([222, 170, 258, 194], fill=hx("2e150d"))
+    for lx, dx in ((194, -3), (286, 3)):
+        d.line([(lx, 194), (lx + dx, 206)], fill=hx("30140c"), width=3)
+        d.line([(lx, 194), (lx + dx, 206)], fill=hx("5a2b1a"), width=1)
 
 
 def desk_props(img):
     d = ImageDraw.Draw(img)
     # oil lamp
-    d.ellipse([182, 104, 210, 112], fill=hx("8a622a"))
-    d.rectangle([193, 90, 199, 104], fill=hx("a67838"))
-    d.ellipse([188, 84, 204, 94], fill=hx("ead8a8"))
-    d.ellipse([190, 86, 202, 92], fill=hx("fff0b8"))
-    d.polygon([(194, 82), (197, 74), (200, 82)], fill=hx("ffd870"))
-    light(img, "ellipse", [150, 64, 250, 138], hx("ffd08a"), 0.58, 18)
-    light(img, "polygon", [(180, 104), (212, 104), (238, 122), (154, 122)], hx("fff0c8"), 0.48, 5)
+    d.ellipse([199, 158, 211, 162], fill=hx("8a622a"))
+    d.rectangle([204, 151, 206, 158], fill=hx("a67838"))
+    d.ellipse([201, 147, 209, 152], fill=hx("ead8a8"))
+    d.ellipse([202, 148, 208, 151], fill=hx("fff0b8"))
+    d.polygon([(204, 146), (205, 142), (206, 146)], fill=hx("ffd870"))
+    light(img, "ellipse", [180, 130, 232, 176], hx("ffd08a"), 0.5, 10)
+    light(img, "polygon", [(196, 160), (214, 160), (226, 168), (186, 168)], hx("fff0c8"), 0.4, 3)
     # papers, quill, magnifier
-    d.polygon([(222, 102), (260, 100), (262, 116), (218, 118)], fill=hx("d7c5a0"))
-    d.line([(228, 106), (254, 105)], fill=hx("7a6a54"))
-    d.line([(228, 110), (252, 109)], fill=hx("7a6a54"))
-    d.line([(244, 98), (270, 110)], fill=hx("e8e0d0"))
-    d.polygon([(244, 98), (249, 96), (246, 101)], fill=hx("d0d0d0"))
-    d.ellipse([272, 102, 286, 116], outline=hx("b88a4c"), width=2)
-    d.line([(284, 114), (292, 121)], fill=hx("b88a4c"), width=2)
+    d.polygon([(222, 160), (242, 159), (243, 165), (220, 166)], fill=hx("d7c5a0"))
+    d.line([(225, 161), (239, 161)], fill=hx("7a6a54"))
+    d.line([(225, 163), (238, 163)], fill=hx("7a6a54"))
+    d.line([(234, 157), (248, 163)], fill=hx("e8e0d0"))
+    d.ellipse([249, 159, 256, 165], outline=hx("b88a4c"))
+    d.line([(255, 164), (259, 167)], fill=hx("b88a4c"))
     # globe
-    d.line([(292, 89), (292, 112)], fill=hx("7b572e"), width=2)
-    d.arc([281, 84, 303, 106], 190, 350, fill=hx("9d7440"), width=2)
-    d.ellipse([282, 74, 302, 94], fill=hx("56745c"))
-    d.line([(291, 75), (291, 93)], fill=hx("a0c29a"))
-    d.line([(284, 84), (300, 84)], fill=hx("a0c29a"))
-    light(img, "ellipse", [280, 72, 306, 98], hx("d8c890"), 0.25, 4)
+    d.line([(276, 151), (276, 162)], fill=hx("7b572e"))
+    d.ellipse([272, 160, 281, 163], fill=hx("7b572e"))
+    d.arc([269, 143, 283, 157], 190, 350, fill=hx("9d7440"))
+    d.ellipse([270, 143, 282, 155], fill=hx("56745c"))
+    d.line([(276, 143), (276, 155)], fill=hx("a0c29a"))
+    d.line([(270, 149), (282, 149)], fill=hx("a0c29a"))
+    light(img, "ellipse", [268, 141, 284, 157], hx("d8c890"), 0.2, 3)
 
 
 def chairs(img):
@@ -290,7 +288,7 @@ def paint():
     desk(img)
     desk_props(img)
     ladder(img)
-    light(img, "ellipse", [150, 118, 334, 236], hx("9a5426"), 0.11, 18)
+    light(img, "ellipse", [170, 150, 310, 230], hx("9a5426"), 0.11, 18)
     shadow(img, "ellipse", [0, 0, W - 1, 40], 0.22, 12, hx("2a130d"))
     return tall(img, ceiling)
 
