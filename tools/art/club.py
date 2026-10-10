@@ -3,7 +3,7 @@ import math
 import random
 from PIL import Image, ImageDraw
 from .common import (W, H, TOP, FULL_H, tall, hx, mix, mul, clamp, vgrad, noise, light, shadow, vignette, pixelize,
-                     palette_of, save, floor_boards)
+                     save, floor_boards)
 
 FLOOR = 146
 WALL_TOP = hx("241117")
@@ -77,8 +77,8 @@ def lamp(full_img, x, top_y, pool_box, cone_box=None):
     d.ellipse([x - 3, top_y - 3, x + 3, top_y + 3], fill=LAMPLIGHT)
     if cone_box:
         x0, y0, x1, y1 = cone_box
-        light(full_img, "polygon", [(x - 2, top_y + 1), (x + 2, top_y + 1), (x1, y1), (x0, y1)], LAMPLIGHT, 0.18, 10)
-    light(full_img, "ellipse", pool_box, LAMPLIGHT, 0.38, 16)
+        light(full_img, "polygon", [(x - 2, top_y + 1), (x + 2, top_y + 1), (x1, y1), (x0, y1)], LAMPLIGHT, 0.08, 10)
+    light(full_img, "ellipse", pool_box, LAMPLIGHT, 0.06, 12)
 
 
 def sofa(img, box, seed):
@@ -88,8 +88,15 @@ def sofa(img, box, seed):
     d.rounded_rectangle([x0 + 4, y0 - 16, x1 - 4, y0 + 8], 8, fill=VELVET)
     d.rounded_rectangle([x0 - 4, y0 - 10, x0 + 10, y1], 6, fill=VELVET)
     d.rounded_rectangle([x1 - 10, y0 - 10, x1 + 4, y1], 6, fill=VELVET)
-    for px in range(x0 + 10, x1 - 8, 14):
-        d.point((px, y0 - 4), fill=BRASS)
+    d.line([(x0 + 10, y0 + 5), (x1 - 10, y0 + 5)], fill=VELVET_DARK)
+    d.rounded_rectangle([x0 + 10, y0 + 7, x1 - 10, y0 + 15], 2, fill=mul(VELVET, 0.8), outline=VELVET_DARK)
+    for px in range(x0 + 16, x1 - 12, 18):
+        d.line([(px, y0 - 10), (px, y0 + 2)], fill=mul(VELVET, 0.65))
+        d.point((px + 1, y0 - 4), fill=mul(VELVET, 1.4))
+        d.line([(px, y0 + 8), (px, y0 + 14)], fill=VELVET_DARK)
+    d.line([(x0 + 5, y0 - 13), (x1 - 5, y0 - 13)], fill=mul(VELVET, 1.25))
+    for px in (x0 + 4, x1 - 6):
+        d.rectangle([px, y1, px + 2, y1 + 4], fill=WOOD_DEEP)
     noise(img, (x0, y0 - 16, x1, y1), 3, seed)
     shadow(img, "ellipse", [x0 + 4, y1 - 1, x1 - 4, y1 + 8], 0.45, 4)
 
@@ -354,23 +361,22 @@ def hall_scene():
 
 def lounge_scene():
     img = Image.new("RGB", (W, H))
-    room_shell(img, FLOOR, (240, -230), 201)
+    room_shell(img, FLOOR, HALL_VP, 201)
     d = ImageDraw.Draw(img)
     d.rounded_rectangle([12, 62, 60, 142], 5, fill=hx("100609"), outline=WOOD_DEEP)
     d.rounded_rectangle([420, 54, 468, 146], 5, fill=hx("100609"), outline=WOOD_DEEP)
     drape(img, (436, 58, 464, 142), 211)
+    d.polygon([(152, 152), (328, 152), (356, 205), (124, 205)], fill=hx("4a141b"))
+    d.polygon([(162, 156), (318, 156), (342, 198), (138, 198)], outline=BRASS)
     sofa(img, (68, 136, 174, 162), 220)
     sofa(img, (306, 136, 412, 162), 221)
     sofa(img, (180, 112, 300, 138), 222)
-    sofa(img, (150, 164, 238, 190), 223)
-    sofa(img, (242, 164, 330, 190), 224)
-    d.polygon([(152, 152), (328, 152), (356, 205), (124, 205)], fill=hx("4a141b"))
-    d.polygon([(162, 156), (318, 156), (342, 198), (138, 198)], outline=BRASS)
+    low_table(img, (198, 126, 282, 140), 225, glasses=3)
     for x in (108, 240, 372):
         d.line([(x, 86), (x, 124)], fill=hx("1c0c10"))
         d.rectangle([x - 12, 82, x + 12, 86], fill=BRASS)
     for box in ([40, 46, 170, 138], [310, 46, 440, 138], [176, 54, 304, 138]):
-        light(img, "ellipse", box, LAMPLIGHT, 0.2, 18)
+        light(img, "ellipse", box, LAMPLIGHT, 0.04, 18)
     light(img, "ellipse", [146, 96, 338, 178], hx("9a2830"), 0.1, 16)
     shadow(img, "rect", [0, 0, 56, FLOOR], 0.22, 10, hx("20090c"))
     shadow(img, "rect", [W - 56, 0, W - 1, FLOOR], 0.22, 10, hx("20090c"))
@@ -386,42 +392,41 @@ def stage_backdrop(img):
     d = ImageDraw.Draw(img)
     d.polygon([(156, 40), (324, 40), (346, 110), (134, 110)], fill=hx("110708"))
     drape(img, (168, 44, 312, 110), 301)
-    d.polygon([(184, 110), (296, 110), (314, 132), (166, 132)], fill=WOOD_DARK)
+    d.polygon([(184, 110), (296, 110), (314, 146), (166, 146)], fill=WOOD_DARK)
     d.line([(184, 110), (296, 110)], fill=mul(WOOD, 1.1))
-    d.polygon([(196, 114), (284, 114), (298, 128), (182, 128)], fill=hx("311418"))
-
-
-def seating_row(img, y, width, height, inset, col):
-    d = ImageDraw.Draw(img)
-    x0 = inset
-    x1 = W - inset
-    seat_w = max(10, int(width / 7))
-    gap = max(3, int(seat_w * 0.22))
-    x = x0
-    while x + seat_w <= x1:
-        d.rounded_rectangle([x, y, x + seat_w, y + height], 3, fill=col)
-        d.rectangle([x + 2, y + height - 4, x + seat_w - 2, y + height + 2], fill=mul(col, 0.75))
-        x += seat_w + gap
+    for x in range(188, 296, 12):
+        d.line([(x, 111), (240 + (x - 240) * 1.3, 146)], fill=hx("3a2216"))
+    d.polygon([(166, 146), (314, 146), (314, 152), (166, 152)], fill=WOOD_DEEP)
+    d.line([(166, 146), (314, 146)], fill=mul(WOOD, 1.15))
 
 
 def stage_scene():
     img = Image.new("RGB", (W, H))
     room_shell(img, 136, (240, -180), 320)
     d = ImageDraw.Draw(img)
-    stage_backdrop(img)
-    for i, y in enumerate((84, 102, 120, 140, 162, 186)):
-        col = mix(hx("251114"), hx("080405"), i / 5)
-        seating_row(img, y, 264 - i * 24, 10 + max(0, 4 - i), 74 + i * 10, col)
     d.polygon([(0, 136), (W - 1, 136), (W - 1, H - 1), (0, H - 1)], fill=hx("12070a"))
     d.polygon([(168, 132), (312, 132), (362, H - 1), (118, H - 1)], fill=hx("1c0b0f"))
     for x in range(120, 360, 12):
         d.line([(x, 160), (x - 12, 230)], fill=hx("18080c"))
+    stage_backdrop(img)
+    d.rounded_rectangle([14, 58, 66, 146], 16, fill=hx("090407"), outline=WOOD)
+    drape(img, (18, 76, 32, 145), 302)
+    for i, y in enumerate((78, 94, 110)):
+        col = mix(hx("45202a"), hx("201018"), i / 3)
+        for side in (-1, 1):
+            for j in range(4):
+                x = 240 + side * (90 + j * 26 + i * 3)
+                d.rounded_rectangle([x - 10, y, x + 10, y + 12], 3, fill=col, outline=WOOD_DEEP)
+                d.line([(x - 7, y + 2), (x + 7, y + 2)], fill=mul(col, 1.3))
+                d.rectangle([x - 9, y + 10, x + 9, y + 14], fill=mul(col, 0.65))
     shadow(img, "rect", [0, 72, W - 1, H - 1], 0.26, 18, hx("22090c"))
     full = tall(img, ceiling_band)
-    lamp(full, 240, TOP + 4, [176, TOP + 62, 304, TOP + 190], (210, TOP + 38, 270, TOP + 160))
-    light(full, "polygon", [(236, TOP + 10), (244, TOP + 10), (282, TOP + 162), (198, TOP + 162)], hx("fff0c2"), 0.34, 9)
-    light(full, "ellipse", [186, TOP + 102, 294, TOP + 172], hx("f8d28a"), 0.32, 12)
-    light(full, "ellipse", [182, TOP + 110, 298, TOP + 148], hx("a8242a"), 0.12, 10)
+    fd = ImageDraw.Draw(full)
+    fd.line([(326, 0), (326, 76)], fill=BRASS, width=2)
+    fd.polygon([(316, 78), (333, 82), (326, 94), (310, 87)], fill=hx("3a3034"), outline=WOOD_DEEP)
+    fd.line([(311, 87), (326, 94)], fill=hx("fff0c2"), width=2)
+    light(full, "polygon", [(313, 90), (325, 94), (278, TOP + 146), (204, TOP + 146)], hx("fff0c2"), 0.12, 5)
+    light(full, "ellipse", [192, TOP + 112, 290, TOP + 148], hx("f8d28a"), 0.20, 7)
     vignette(full, 0.82, tint=(26, 8, 12), blur=58)
     shadow(full, "rect", [0, TOP + 144, W - 1, H + TOP], 0.12, 20, hx("160609"))
     return full
@@ -431,11 +436,10 @@ def build():
     hall = hall_scene()
     lounge = lounge_scene()
     stage = stage_scene()
-    pal = palette_of(Image.blend(Image.blend(hall, lounge, 0.5), stage, 0.4), 128)
     out = {
-        "club_hall.png": pixelize(hall, pal),
-        "club_lounge.png": pixelize(lounge, pal),
-        "club_stage.png": pixelize(stage, pal),
+        "club_hall.png": pixelize(hall, n=128),
+        "club_lounge.png": pixelize(lounge, n=128),
+        "club_stage.png": pixelize(stage, n=128),
     }
     for name, img in out.items():
         save(img, "rooms", name)

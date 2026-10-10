@@ -197,8 +197,10 @@ def paint_road(fire=False, stacked=False):
                 continue
             d.rectangle([x, fy, x + 22, fy + 32], fill=hx("12141e"))
             d.rectangle([x - 2, fy + 32, x + 24, fy + 35], fill=hx("4a3c38"))
-    # Harrington's window, third floor, behind the fire escape - dark tonight
-    d.rectangle([330, 20, 368, 60], fill=hx("161a2a"))
+    # The one lit office window is also the player's destination.
+    d.rectangle([330, 20, 368, 60], fill=hx("c8a060"))
+    for x in range(332, 368, 5):
+        d.line([(x, 22), (x, 58)], fill=hx("9a7448"))
     d.rectangle([326, 60, 372, 64], fill=hx("5a4a44"))
     d.line([(349, 20), (349, 60)], fill=hx("3a3a4a"))
     d.line([(330, 40), (368, 40)], fill=hx("3a3a4a"))
@@ -209,11 +211,20 @@ def paint_road(fire=False, stacked=False):
         d.line([(306, ly - 14), (396, ly - 14)], fill=iron)
         for x in range(306, 397, 6):
             d.line([(x, ly - 14), (x, ly)], fill=iron)
+        d.line([(306, ly), (396, ly)], fill=hx("565464"))
     d.line([(312, 118), (390, 66)], fill=iron, width=2)
+    d.line([(319, 120), (397, 68)], fill=iron)
+    for i in range(12):
+        x, y = 314 + i * 6, 116 - i * 4
+        d.line([(x, y), (x + 7, y + 2)], fill=hx("5a5460"))
     for x0 in (330, 338):
         d.line([(x0, 120), (x0, 160)], fill=iron)
     for y in range(124, 160, 6):
         d.line([(330, y), (338, y)], fill=iron)
+        d.line([(331, y), (337, y)], fill=hx("5a5460"))
+    d.line([(404, 0), (404, 198)], fill=hx("16161c"), width=3)
+    d.line([(403, 0), (403, 198)], fill=hx("4a4248"))
+    text(img, (255, 185), "HARRINGTON STEEL", hx("74685a"), 8)
     # back door, a bare bulb over it
     d.rectangle([156, 118, 194, 200], fill=hx("2a2620"))
     d.rectangle([160, 122, 190, 200], fill=hx("4a3a28"))
@@ -229,6 +240,9 @@ def paint_road(fire=False, stacked=False):
         for x in range(-off, W, 12):
             d.arc([x, y, x + 11, y + 6], 180, 360, fill=hx("3a3c46"))
     noise(img, (0, 200, W - 1, H - 1), 6, 44)
+    for x0, y, x1 in ((16, 232, 96), (256, 246, 302), (374, 225, 456)):
+        d.line([(x0, y), (x1, y)], fill=hx("424656"))
+        d.line([(x0 + 8, y + 2), (x1 - 6, y + 2)], fill=hx("323644"))
     d.line([(0, 200), (W, 200)], fill=hx("12121a"))
     # trash can at the street corner
     d.rectangle([40, 176, 66, 206], fill=hx("4a4c50"), outline=hx("1a1a1e"))
@@ -247,6 +261,7 @@ def paint_road(fire=False, stacked=False):
     img.paste(ImageChops.multiply(img, Image.new("RGB", img.size, (120, 128, 176))))
     light(img, "polygon", [(170, 112), (180, 112), (232, 230), (118, 230)], hx("e8c070"), 0.5, 12)
     light(img, "ellipse", [162, 98, 188, 124], hx("fff0b0"), 0.8, 4)
+    light(img, "rect", [330, 20, 368, 60], hx("e0a050"), 0.18, 6)
     if fire:
         d = ImageDraw.Draw(img)
         for i, (fx, fh) in enumerate(((44, 20), (50, 28), (56, 24), (62, 16))):
@@ -263,7 +278,7 @@ def build_road():
     pal = palette_of(Image.blend(Image.blend(base, variants[0], 0.5), variants[1], 0.5), 120)
     px = pixelize(base, pal)
     save(px, "rooms", "harrington_road.png")
-    overlay(variants[0], px, pal, (0, 80, 176, 270), "harrington_road_fire")
+    overlay(variants[0], px, pal, (0, 0, W, H), "harrington_road_fire")
     overlay(variants[1], px, pal, (300, 120, 476, 212), "harrington_road_crates")
     return px
 
@@ -382,6 +397,12 @@ def paint_office(left=False, right=False, closet=False, secret=False):
     d.rectangle([0, 100, W - 1, 104], fill=hx("5a3a22"))
     d.rectangle([0, 0, W - 1, 8], fill=hx("1e140c"))
     noise(img, (0, 0, W - 1, 196), 4, 51)
+    vgrad(img, (0, 196, W - 1, H - 1), hx("3a1a1a"), hx("4a2222"))
+    d.polygon([(90, 214), (390, 214), (420, 262), (60, 262)], fill=hx("4e2428"), outline=hx("7a5a2a"))
+    d.polygon([(96, 218), (384, 218), (410, 258), (70, 258)], outline=hx("a07a46"))
+    for x in range(114, 380, 32):
+        d.polygon([(x, 236), (x + 7, 230), (x + 14, 236), (x + 7, 242)], outline=hx("805238"))
+    noise(img, (0, 196, W - 1, H - 1), 5, 53)
     # window on the left: the fire escape and the city at night
     d.rectangle([24, 30, 112, 160], fill=hx("4a3220"))
     d.rectangle([30, 36, 106, 154], fill=hx("141a30"))
@@ -430,6 +451,8 @@ def paint_office(left=False, right=False, closet=False, secret=False):
         d.rectangle([x0, 180, x0 + 36, 198], outline=hx("2a1a0c"))
     # desk top clutter: blotter, inkwell, a dark lamp
     d.rectangle([236, 138, 268, 142], fill=hx("2a3a2a"))
+    d.rectangle([240, 135, 263, 138], fill=hx("c0b090"))
+    d.line([(244, 136), (260, 136)], fill=hx("5a5044"))
     d.ellipse([200, 136, 208, 142], fill=hx("16161a"))
     d.rectangle([294, 124, 296, 142], fill=hx("8a7a3a"))
     d.polygon([(286, 124), (304, 124), (300, 116), (290, 116)], fill=hx("2a4a2a"))
@@ -467,14 +490,11 @@ def paint_office(left=False, right=False, closet=False, secret=False):
             d.rectangle([x0, wy0 + 80, x1, wy1 - 12], outline=hx("1e1208"))
         d.rectangle([mx - 5, 128, mx - 3, 136], fill=hx("c8a858"))
         d.rectangle([mx + 3, 128, mx + 5, 136], fill=hx("c8a858"))
-    # carpet floor
-    vgrad(img, (0, 196, W - 1, H - 1), hx("3a1a1a"), hx("4a2222"))
-    d.rectangle([60, 214, 420, 262], outline=hx("7a5a2a"))
-    d.rectangle([66, 218, 414, 258], outline=hx("6a2a24"))
-    noise(img, (0, 196, W - 1, H - 1), 5, 53)
     # moonlight: everything cold, a blue shaft from the window
     img.paste(ImageChops.multiply(img, Image.new("RGB", img.size, (118, 128, 186))))
     light(img, "polygon", [(30, 36), (106, 36), (300, 262), (110, 262)], hx("5a70b0"), 0.35, 14)
+    light(img, "ellipse", [268, 100, 326, 174], hx("d8a058"), 0.16, 10)
+    light(img, "ellipse", [218, 12, 278, 74], hx("e0b868"), 0.12, 8)
     vignette(img, 0.6, (8, 8, 22), 40)
     return img
 

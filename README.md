@@ -184,6 +184,8 @@ Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main
 ### Regenerating the art
 
 All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed.
+There are no imported 3D models: figure skeletons and perspective furniture are painted into PNGs by
+`tools/art/figure.py` and `tools/art/furniture.py`.
 The characters come from `tools/art/figure.py`, a small 3D-ish figure painter whose look is inspired by
 early-90s VGA adventures such as *Indiana Jones and the Fate of Atlantis*: tall, naturally proportioned
 bodies, shading lit from the top left, a darker outline on each material ("sel-out") and dithered fabric.
@@ -193,10 +195,16 @@ Each character is a spec dict in `tools/art/sprites.py`.
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
+py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+Puzzle overlays and foreground layers keep their own crop sizes and scene positions. After regeneration,
+check the printed overlay coordinates against the corresponding scene; moving a crop without its node
+misaligns the object. Club rooms use their own 128-colour palettes so the stage's darkness does not
+flatten the lounge's velvet and brass.
 
 ## Credits
 
