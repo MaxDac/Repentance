@@ -157,10 +157,43 @@ def mirror(d, im):
     d.rectangle([16, 14, 18, 16], fill=hx("b8b2a4"))
 
 
+def book(d, im):
+    """Old dark-green leather book of Celtic rites: raised spine bands, worn page edges, a gilt triquetra."""
+    d.polygon([(6, 2), (25, 2), (26, 21), (7, 22)], fill=hx("1e3a2a"))
+    d.polygon([(25, 3), (27, 4), (28, 20), (26, 21)], fill=hx("d8caa0"))
+    for y in (8, 12, 16):
+        d.line([(26, y), (27, y)], fill=hx("b0a078"))
+    d.rectangle([6, 2, 9, 22], fill=hx("122618"))
+    for y in (5, 11, 18):
+        d.line([(6, y), (9, y)], fill=hx("a07a34"))
+    d.polygon([(11, 4), (23, 4), (23, 19), (11, 20)], outline=hx("8a6a2c"))
+    g = hx("e8bc54")
+    for x, y in ((17, 6), (16, 7), (18, 7), (15, 8), (19, 8), (15, 9), (19, 9), (16, 10), (18, 10),
+                 (13, 11), (14, 11), (21, 11), (20, 11), (12, 12), (12, 13), (22, 12), (22, 13),
+                 (13, 14), (14, 14), (21, 14), (20, 14), (15, 14), (19, 14), (16, 15), (17, 15), (18, 15),
+                 (15, 12), (19, 12), (16, 13), (18, 13), (17, 11)):
+        d.point((x, y), fill=g)
+    d.point((17, 9), fill=hx("2e5a3e"))
+
+
+def address(d, im):
+    """A small torn scrap of notepaper, creased where it was folded, with a scrawled pencil address."""
+    d.polygon([(4, 9), (25, 4), (28, 14), (26, 15), (24, 14), (21, 16), (18, 15), (15, 17), (12, 16), (9, 18),
+               (7, 18)], fill=hx("ece2c4"))
+    d.polygon([(4, 9), (25, 4), (26, 8), (5, 13)], fill=hx("f6eed6"))
+    d.line([(5, 13), (26, 8)], fill=hx("c4b48c"))
+    d.polygon([(25, 4), (28, 14), (26, 8)], fill=hx("d4c6a0"))
+    ink = hx("2e2a44")
+    d.line([(7, 10), (8, 9), (9, 10), (11, 9), (12, 9), (13, 8)], fill=ink)
+    d.line([(15, 8), (16, 7), (17, 8), (19, 6), (20, 7), (22, 6)], fill=ink)
+    d.line([(8, 15), (9, 14), (11, 14), (12, 13), (14, 13)], fill=ink)
+    d.line([(16, 12), (17, 11), (19, 12), (20, 11), (23, 10)], fill=ink)
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger), ("map", map_),
                      ("evidence", evidence), ("suitcase_key", suitcase_key), ("revolver", revolver),
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
-                     ("card", card), ("mirror", mirror)):
+                     ("card", card), ("mirror", mirror), ("book", book), ("address", address)):
         save(_icon(fn), "items", f"{name}.png")

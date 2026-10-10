@@ -43,6 +43,10 @@ public static class Items
             "A calling card, heavy stock, gilt edges. No name, no address. Just curlicues, and a perfume that isn't Eleanor's."),
         ["mirror"] = new("mirror", "little mirror", "res://assets/art/items/mirror.png",
             "Eleanor's little hand mirror. On the back, scratched into the wood, three loops tied in a knot that never ends."),
+        ["book"] = new("book", "book of Celtic rituals", "res://assets/art/items/book.png",
+            "\"Rites of the Old Isles.\" Green leather gone soft as a glove. The same knot is stamped on the cover."),
+        ["address"] = new("address", "address", "res://assets/art/items/address.png",
+            "A slip of paper from the book: \"The Starlight, 18 W. Hubbard. Ask for no one.\""),
     };
 
     public static ItemDef Get(string id) => All[id];

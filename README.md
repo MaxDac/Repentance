@@ -68,18 +68,27 @@ godot --path . -- --autoplay
    and Micah drops the case.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
 10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
+11. **Cathedral steps**: Micah couldn't turn Eleanor in, and can't think of anything but her. He goes in.
+12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
+   Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
+13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
+14. **Library, after hours**: ask the night librarian about the knot (shown full screen). He wants to know where
+   the mirror came from; Micah won't say, so neither will he, until Micah uses the revolver on him. He hands
+   over a book of Celtic rituals, and the library is off limits from then on.
+15. **Office**: read the book (hand on it in the satchel) and an address slips out: the Starlight club is now
+   on the map.
 
-From here the *temporary* storyline strings together every remaining location:
+From the Starlight the *temporary* storyline strings together every remaining location:
 
-11. **Starlight club** (street → hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
+16. **Starlight club** (hall → lounge → stage): in the lounge, Teddy's father, old Theodore Harrington,
    is watching the curtain too. On stage, "Nora" is Eleanor. Teddy owes Moretti, and Teddy's
    bookkeeper is dead. She gives you the key to her old suite.
-12. **Aurelian suite 4**: her diary is hidden in the vanity.
-13. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
-14. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
+17. **Aurelian suite 4** (out on the street): her diary is hidden in the vanity.
+18. **Cathedral**: Father Caleb, Micah's estranged brother, reads the diary and points you to the library.
+19. **Public library**: Rose, Micah's estranged wife and a librarian, tells you where to look. The ledger behind
    the shelves holds a motel receipt.
-15. **Motel room 6**: a map is hidden in the bed.
-16. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
+20. **Motel room 6**: a map is hidden in the bed.
+21. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
 
 ## Project layout
 
@@ -146,7 +155,7 @@ Each character is a spec dict in `tools/art/sprites.py`.
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
-py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, ui
+py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same

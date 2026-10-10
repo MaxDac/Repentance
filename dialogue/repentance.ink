@@ -407,6 +407,26 @@ ELEANOR: The Aurelian, suite 4. Then the cathedral. Please, Mr. Jones.
 
 // ---------------------------------------------------------------- CATHEDRAL
 
+=== caleb_act2 ===
+CALEB: Can I help you, my son?
+CALEB: ...Micah?
+MICAH: Hello, Caleb. Or is it "Father" now?
+CALEB: Six years. You look like a man who hasn't slept for most of them.
+~ set_flag("caleb_met")
+MICAH: I didn't come to confess. I came to talk. There's a difference, isn't there?
+CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
+MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
+MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
+MICAH: Right now, Caleb... I'm too far off to be saved.
+CALEB: That's crap, Micah.
+CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
+CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
+CALEB: That's the Devil's work, brother. It's the oldest trick he has.
+MICAH: I'll think about that.
+MICAH: ...Coming here was a mistake.
+CALEB: Micah, wait-
+-> END
+
 === caleb ===
 {has_flag("library_lead"): -> caleb.after}
 {not has_flag("caleb_met"):
@@ -445,6 +465,46 @@ CALEB: The library. And Micah... be kind to her.
 -> END
 
 // ---------------------------------------------------------------- LIBRARY
+
+=== librarian ===
+{has_flag("librarian_refused"): -> librarian.again}
+{not has_flag("librarian_met"):
+    LIBRARIAN: Shh. The reading room closes at ten, sir. What can I do for you?
+    ~ set_flag("librarian_met")
+- else:
+    LIBRARIAN: Yes?
+}
+- (opts)
+* {has_item("mirror")} [I want to know about a symbol.]
+    MICAH: Three loops in one knot. Scratched into the back of a lady's mirror.
+    IMAGE: triquetra
+    LIBRARIAN: ...
+    LIBRARIAN: Where did you get that mirror?
+    MICAH: That's between me and the mirror.
+    LIBRARIAN: Then what that knot means is between me and my books. Good evening, sir.
+    ~ set_flag("librarian_refused")
+    -> END
+* [Where's the day librarian? Mrs. Jones.]
+    LIBRARIAN: Mrs. Jones keeps Christian hours, sir. I keep the other kind.
+    -> librarian.opts
++ [(Leave)]
+    LIBRARIAN: Mind the step. And the silence.
+    -> END
+= again
+LIBRARIAN: I've nothing to say to a man who won't tell me where he gets his mirrors.
+-> END
+
+=== librarian_threat ===
+MICAH: Let's try that again. Slower, this time.
+LIBRARIAN: Good Lord. Put that away! This is a library!
+MICAH: Then keep your voice down. The knot.
+LIBRARIAN: C-Celtic. A triquetra. Old, very old, from before the saints ever reached Ireland.
+LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
+LIBRARIAN: There's a book. "Rites of the Old Isles." A rare thing. We had a request for it just last month.
+LIBRARIAN: Take it. Take it and go away, and please don't come back.
+~ give_item("book")
+MICAH: Pleasure doing business. Late fees are on me.
+-> END
 
 === rose ===
 {not has_flag("rose_met"):

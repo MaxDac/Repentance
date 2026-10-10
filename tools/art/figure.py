@@ -745,6 +745,14 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             c.dot(ex + look, by, brow)
         if female and near:
             c.dot(ex + (1 if s > 0 else -1) * (1 if fs == 0 else 0), by + 1, brow)
+        if col.get("specs"):  # round wire rims round the eye and its white, with a bridge over the nose
+            rim = col["specs"]
+            x0, x1 = min(ex, ex - look), max(ex, ex - look)
+            for x in range(x0, x1 + 1):
+                c.dot(x, ey - 1, rim)
+                c.dot(x, ey + 1, rim)
+            c.dot(x0 - 1, ey, rim)
+            c.dot(x1 + 1, ey, rim)
 
     # ---- nose ----
     nx_, ny_, _ = pt(0.0, 0.03, 0.072)

@@ -50,6 +50,9 @@ public partial class Office : Room
             case ("door", Verb.Walk or Verb.Hand) when DrawerLeft() > 0:
                 await Say("Not without my things from the top drawer. A man goes out at night in this town, he goes prepared.");
                 return true;
+            case ("door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                await Game.ChangeRoom("chicago_map", "start");
+                return true;
 
             case ("drawer", Verb.Hand):
                 if (State.HasFlag("drawer_open"))
@@ -111,5 +114,23 @@ public partial class Office : Room
                 return true;
         }
         return false;
+    }
+
+    public override async Task<bool> OnItemVerb(Verb verb, string item)
+    {
+        if (item != "book" || verb != Verb.Hand) return false;
+        if (State.HasFlag("read_book"))
+        {
+            await Say("Groves, wells, bonfires on the hills. I've read enough of it for one lifetime.");
+            return true;
+        }
+        State.SetFlag("read_book");
+        await Say("\"Rites of the Old Isles.\" Midsummer fires. Oak groves. Wells you whisper your sins into.");
+        await Say("Druids and dew and the turning of the seasons. Pretty, if you're a farmer. I'm not.");
+        await Say("Wait. Something slipped out from between the pages. A little sheet of paper.");
+        State.GiveItem("address");
+        State.SetFlag("club_unlocked");
+        await Say("An address, in a woman's hand. \"The Starlight, 18 W. Hubbard.\" A nightclub.");
+        return true;
     }
 }

@@ -7,6 +7,13 @@ public partial class Library : Room
 {
     public override async Task OnEnter(string entry)
     {
+        if (State.HasFlag("on_map"))
+        {
+            if (State.HasFlag("seen_library_night")) return;
+            State.SetFlag("seen_library_night");
+            await Game.Run(() => Say("The library, after hours. Rose has the day shift. Small mercies."));
+            return;
+        }
         if (State.HasFlag("seen_library")) return;
         State.SetFlag("seen_library");
         await Game.Run(() => Say("The public library. Leather, dust and silence. Rose always said it was the only honest room in Chicago."));
@@ -16,6 +23,26 @@ public partial class Library : Room
     {
         switch (target.Id, verb)
         {
+            case ("exit", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                await Game.ChangeRoom("chicago_map", "start");
+                return true;
+
+            case ("librarian", Verb.Talk):
+            case ("librarian", Verb.UseItem) when item == "mirror":
+                await Talk("librarian");
+                return true;
+            case ("librarian", Verb.UseItem) when item == "revolver" && !State.HasFlag("librarian_refused"):
+                await Say("Pulling a gun on a librarian before I've even asked nicely? Even I have manners.");
+                return true;
+            case ("librarian", Verb.UseItem) when item == "revolver":
+                await Talk("librarian_threat");
+                State.SetFlag("library_banned");
+                await Say("I'd just held up a library. Mother would have been so proud.");
+                await Game.ChangeRoom("chicago_map", "start");
+                return true;
+            case ("librarian", Verb.Hand):
+                await Say("He looks like he'd break. I'm not that desperate. Not yet.");
+                return true;
             case ("rose", Verb.Talk):
                 await Talk("rose");
                 return true;

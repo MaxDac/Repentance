@@ -56,6 +56,12 @@ public partial class DialogueManager : Node
                 var line = story.Continue().Trim();
                 if (line.Length == 0) continue;
                 var (speaker, text) = Parse(line);
+                // "IMAGE: name" shows res://assets/art/ui/name.png full screen until clicked
+                if (speaker == "IMAGE")
+                {
+                    await game.Hud.ShowImage(GD.Load<Texture2D>($"res://assets/art/ui/{text}.png"));
+                    continue;
+                }
                 await game.Say(speaker, text);
             }
             var choices = story.CurrentChoices;

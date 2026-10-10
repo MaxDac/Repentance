@@ -171,6 +171,11 @@ public partial class Game : Node
             await Say("Three loops tied in one knot. No beginning, no end. It looks old. Older than the convent.");
             return;
         }
+        if (verb == Verb.Hand && item == "book")
+        {
+            await Say("Not here. A book like that wants a locked door and a desk lamp. My office has both.");
+            return;
+        }
         switch (verb)
         {
             case Verb.Look:
@@ -353,6 +358,7 @@ public partial class Game : Node
             _roomHost.AddChild(Room);
             Room.World.AddChild(Player);
             Player.SetCharacter(Room.PlayerCharacter);
+            Player.Visible = Room.ShowPlayer;
             var marker = Room.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);

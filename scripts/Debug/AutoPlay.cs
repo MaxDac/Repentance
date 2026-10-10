@@ -166,13 +166,59 @@ public class AutoPlay
             // ---- end of Act 1, then Act 2 the next day
             Check(gs.StoryAct == 2 && gs.HasItem("journal") && game.Player.Character == "daniel", "Act 2: Daniel is back with the journal");
             await Shot("attic_act2");
-            await game.ItemVerb(Verb.Hand, "journal");
-            Check(game.Room?.Name == "Street" && gs.HasItem("mirror"), "reading again leads back to 1927");
+            var read = game.ItemVerb(Verb.Hand, "journal");
+
+            // ---- Act 2, 1927: the cathedral, then the map of Chicago
+            await Until(() => game.Room?.Name == "ChurchExterior");
+            Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+            await game.Wait(1.5);
+            await Shot("church_exterior_act2");
+            await Until(() => game.Room?.Name == "ChurchInterior");
+            Check(gs.HasFlag("act2_church_thought"), "Micah thinks about Eleanor outside the cathedral, then goes in");
+            await game.Wait(2);
+            await Shot("church_act2");
+            await Until(() => game.Room?.Name == "ChicagoMap");
+            Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
+            Check(!game.Player.Visible, "the player isn't drawn on the map");
+            await read;
+            await WaitIdle(game);
+            await Shot("map");
+            Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
+            await game.Perform(Verb.Walk, "church");
+            Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
+
+            await game.Perform(Verb.Walk, "library");
+            Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the night librarian is there, not Rose");
+            await Shot("library_night");
+            await game.Perform(Verb.UseItem, "librarian", "revolver");
+            Check(!gs.HasFlag("library_banned"), "no gun before asking");
+            var ask = game.Perform(Verb.Talk, "librarian");
+            await Until(() => game.Hud.ImageVisible);
+            Check(game.Hud.ImageVisible, "the symbol is shown full screen during the talk");
+            await Shot("librarian_symbol");
+            game.Hud.CloseImage();
+            await ask;
+            Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
+            await game.Perform(Verb.UseItem, "librarian", "revolver");
+            Check(gs.HasItem("book") && gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "threatened the librarian into giving up the book");
+            await game.Perform(Verb.Walk, "library");
+            Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
+
+            await game.ItemVerb(Verb.Hand, "book");
+            Check(!gs.HasItem("address"), "the book is only read at the office");
+            await game.Perform(Verb.Walk, "office");
+            Check(game.Room?.Name == "Office", "back at the office");
+            await game.ItemVerb(Verb.Hand, "book");
+            Check(gs.HasItem("address") && gs.HasFlag("club_unlocked"), "an address slipped out of the book");
+            await Shot("office_book");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("club")?.Visible == true, "the club is on the map now");
+            await Shot("map_club");
+            await game.Perform(Verb.Walk, "club");
 
             // ---- the temporary story: every location in order
-            await Shot("street");
-            await game.Perform(Verb.Walk, "club_door");
-            Check(game.Room?.Name == "ClubHall", "entered the Starlight");
+            Check(game.Room?.Name == "ClubHall" && !gs.HasFlag("on_map"), "entered the Starlight");
             await Shot("club_hall");
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room?.Name == "ClubLounge", "entered the lounge");
@@ -189,6 +235,7 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "hall_exit");
             await game.Perform(Verb.Walk, "street_door");
             Check(game.Room?.Name == "Street", "back on the street");
+            await Shot("street");
 
             await game.Perform(Verb.Walk, "hotel_door");
             Check(game.Room?.Name == "AurelianRoom", "entered Eleanor's suite");

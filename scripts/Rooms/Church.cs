@@ -7,10 +7,31 @@ public partial class Church : Room
 {
     public override async Task OnEnter(string entry)
     {
+        if (State.HasFlag("act2_church"))
+        {
+            await Act2Visit();
+            return;
+        }
         if (State.HasFlag("seen_church_interior")) return;
         State.SetFlag("seen_church_interior");
         await Game.Run(() => Say("The nave swallowed the street noise whole. Even my footsteps sounded guilty in here."));
     }
+
+    /// <summary>Act 2: Micah talks to his brother, then walks out on him and onto the streets of Chicago.</summary>
+    private Task Act2Visit() => Game.Run(async () =>
+    {
+        State.SetFlag("seen_church_interior");
+        await Wait(0.4);
+        if (FindActor("caleb") is { } caleb)
+        {
+            await Game.WalkTo(caleb.WalkTo);
+            Player.Face(Facing.Right);
+        }
+        await Talk("caleb_act2");
+        State.SetFlag("act2_church", false);
+        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
+        await Game.ChangeRoom("chicago_map", "start");
+    });
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
