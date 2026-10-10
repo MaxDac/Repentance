@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Repentance.Rooms;
 
 /// <summary>
-/// The old man's bedroom: Eleanor under the sheet in the four-poster, Harrington in his dressing gown. Micah listens from
+/// The old man's bedroom: Eleanor under the sheet in the walnut bed, Harrington in his dressing gown. Micah listens from
 /// behind the folding screen, steps out with the revolver, and the act's last choice is his.
 /// </summary>
 public partial class MansionBedroom : Room
@@ -15,6 +15,17 @@ public partial class MansionBedroom : Room
     private static readonly Vector2 BehindScreen = new(107, 214);
     private static readonly Vector2 MicahAims = new(160, 236);
     private static readonly Vector2 EleanorUp = new(396, 240);
+
+    public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
+    {
+        switch (target.Id, verb)
+        {
+            case ("bed", Verb.Hand):
+                await Say("Not my bed, not my business. I've slept on worse, and with a cleaner conscience.");
+                return true;
+        }
+        return false;
+    }
 
     public override async Task OnEnter(string entry)
     {

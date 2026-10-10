@@ -65,7 +65,7 @@ ShowIfFlags = "ending_5"
 
 [node name="Table" type="Sprite2D" parent="."]
 z_index = 5
-position = Vector2(206, 190)
+position = Vector2(202, 189)
 texture = ExtResource("13_prison_table")
 centered = false
 script = ExtResource("4_FlagSprite")

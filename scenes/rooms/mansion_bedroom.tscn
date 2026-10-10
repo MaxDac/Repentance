@@ -1,13 +1,17 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionBedroom.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom.png" id="2_bg"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom_empty.png" id="10_mansion_bedroom_empty"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bed.png" id="10_mansion_bed"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bed_empty.png" id="13_mansion_bed_empty"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/harrington_gown.png" id="11_harrington_gown"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="12_eleanor_sheet"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(96, 72)
 
 [node name="MansionBedroom" type="Node2D"]
 script = ExtResource("1_Room")
@@ -35,13 +39,35 @@ metadata/facing = 4
 
 [node name="Hotspots" type="Node2D" parent="."]
 
+[node name="Bed" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bed"
+DisplayName = "bed"
+LookText = "A walnut bed with a rose satin coverlet. More money in the sheets than I make in a year."
+WalkTo = Vector2(330, 226)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
+position = Vector2(354.0, 176.0)
+shape = SubResource("Rect_1")
+
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
 
+[node name="Bed" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(293, 136)
+texture = ExtResource("10_mansion_bed")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "eleanor_up"
+
 [node name="BedEmpty" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(266, 122)
-texture = ExtResource("10_mansion_bedroom_empty")
+position = Vector2(293, 136)
+texture = ExtResource("13_mansion_bed_empty")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "eleanor_up"

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crw14x2nc1jl7"
-path="res://.godot/imported/mansion_bedroom_empty.png-7545aaefe2ddc94932eaf3c10da4fec1.ctex"
+uid="uid://ctnnare4kila5"
+path="res://.godot/imported/mansion_bed.png-7fd74ee1d80f31c4d0009eaa109f1e35.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/mansion_bedroom_empty.png"
-dest_files=["res://.godot/imported/mansion_bedroom_empty.png-7545aaefe2ddc94932eaf3c10da4fec1.ctex"]
+source_file="res://assets/art/rooms/mansion_bed.png"
+dest_files=["res://.godot/imported/mansion_bed.png-7fd74ee1d80f31c4d0009eaa109f1e35.ctex"]
 
 [params]
 

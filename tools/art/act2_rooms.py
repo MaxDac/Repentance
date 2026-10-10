@@ -500,20 +500,24 @@ def build_office():
 
 # ------------------------------------------------------------------------------------------------ DANIEL'S BEDROOM
 
+# the couple were painted at the standing height of the other rooms and filled the bed; in bed they read smaller
+BED_FIGURE_H = 62
+
+
 def _bed_figures(sD, sW):
     """Daniel sitting up in bed reading, seen in profile, and his wife asleep on her side facing the room (head and
     shoulders only: the quilt covers the rest, top of the head towards the headboard). Returns RGBA crops, the hands'
     offset from Daniel's seat corner and the wife's crop."""
     from .figure import figure, pose
     from .sprites import DANIEL, ELEANOR
-    hD = 80 * sD
+    hD = BED_FIGURE_H * sD
     ps = pose(90, legs={1: (86, 0, 0), -1: (84, 4, 0)}, arms={1: ("swing", 22, 4, 82), -1: ("swing", 28, 4, 78)},
               lean=-7.0, nod=0.01)
     a = figure(dict(DANIEL, h=hD), ps, int(hD * 1.2), int(hD * 1.3))
     a.putalpha(a.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     a = a.crop(a.getbbox())
     hand = (0.31 * hD, -0.255 * hD)
-    hW = 80 * sW
+    hW = BED_FIGURE_H * sW
     wife = dict(ELEANOR, h=hW, hair="2e1c14", torso="c4b0cc", sleeves="ecc4a2", neckline=0.262, asleep=True,
                 lips="b0645a", decals=[])
     wife.pop("coat", None)

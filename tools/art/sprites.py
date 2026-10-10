@@ -136,9 +136,11 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     decals=[("pearls", 0.226, "e8e2d4"), ("ribbon", 0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)),
                             ("ribbon", -0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
-# Eleanor on stage: the same short dress as the club's women, but no mask.
-ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
-                     eye="3a2416", brow="2e1a12", mask=None)
+# Eleanor on stage: no mask and nothing else, shown with restraint. Her long hair falls forward over her chest and
+# her hands are folded in front of her.
+ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
+                     eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e0b494", neckline=None,
+                     coat=None, stockings="d4a888", shoes="c89a7c", hair_front=0.34, decals=[])
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
                        coat=dict(col="5a1e26", top=0.40, hem=0.86, flare=0.02), pants="2a1a1e",
@@ -205,7 +207,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
         ("moc", MOC, _arms("fold")), ("brute", BRUTE, _arms("fold")), ("watchman", WATCHMAN, _arms("down", "pocket")),
         ("masked_man", MASKED_MAN, _arms("fold")), ("masked_woman", MASKED_WOMAN, _arms("hip", "down")),
-        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("down")),
+        ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("fold")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))
 
 
@@ -278,9 +280,10 @@ def kneel_frame(spec, name):
 
 
 def aim_frame(spec, name):
-    """Single 96x96 frame of a character in profile facing right, revolver held out at arm's length."""
-    ps = pose(90, arms={1: ("swing", 84, 2, 2), -1: ("swing", 2, 6, 14)}, gun=1, legs={1: (8, 4, 0), -1: (-8, 6, -4)},
-              lean=-2.0)
+    """Single 96x96 frame of a character in profile facing right, revolver raised at shoulder height in a two-handed
+    grip, arms out straight so the gun stands clear of the body."""
+    ps = pose(90, arms={1: ("swing", 98, 2, 0), -1: ("swing", 94, -12, 4)}, gun=1,
+              legs={1: (8, 4, 0), -1: (-8, 6, -4)}, lean=-2.0)
     img = figure(spec, ps, FW + 32, FH)
     save(img, "sprites", f"{name}.png")
     return img

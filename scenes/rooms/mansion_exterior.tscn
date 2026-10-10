@@ -12,16 +12,16 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="14_eleanor_sheet"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(38, 80)
+size = Vector2(38, 98)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(58, 12)
+size = Vector2(62, 14)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(48, 26)
+size = Vector2(40, 34)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(38, 36)
+size = Vector2(32, 34)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
 size = Vector2(50, 40)
@@ -33,10 +33,10 @@ size = Vector2(50, 40)
 size = Vector2(28, 16)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
-size = Vector2(30, 58)
+size = Vector2(30, 44)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(24, 74)
+size = Vector2(30, 84)
 
 [node name="MansionExterior" type="Node2D"]
 script = ExtResource("1_Room")
@@ -82,7 +82,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(269.0, 160.0)
+position = Vector2(269.0, 147.0)
 shape = SubResource("Rect_1")
 
 [node name="Lintel" type="Area2D" parent="Hotspots"]
@@ -97,7 +97,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Lintel"]
-position = Vector2(269.0, 114.0)
+position = Vector2(269.0, 89.0)
 shape = SubResource("Rect_2")
 
 [node name="Wire" type="Area2D" parent="Hotspots"]
@@ -112,14 +112,14 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Wire"]
-position = Vector2(310.0, 107.0)
+position = Vector2(313.0, 111.0)
 shape = SubResource("Rect_3")
 
 [node name="Bell" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "bell"
 DisplayName = "alarm bell"
-LookText = "A red box with a brass gong and a little hammer. A burglar alarm."
+LookText = "A red box with a big brass gong and a little hammer. A burglar alarm."
 WalkTo = Vector2(331, 222)
 Face = 2
 ClickPriority = 1
@@ -127,7 +127,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bell"]
-position = Vector2(335.0, 78.0)
+position = Vector2(331.0, 77.0)
 shape = SubResource("Rect_4")
 
 [node name="Bin" type="Area2D" parent="Hotspots"]
@@ -185,7 +185,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
-position = Vector2(457.0, 65.0)
+position = Vector2(457.0, 60.0)
 shape = SubResource("Rect_8")
 
 [node name="Gate" type="Area2D" parent="Hotspots"]
@@ -199,12 +199,12 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Gate"]
-position = Vector2(14.0, 185.0)
+position = Vector2(16.0, 172.0)
 shape = SubResource("Rect_9")
 
 [node name="BinMoved" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(304, 172)
+position = Vector2(304, 173)
 texture = ExtResource("10_mansion_exterior_bin")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -212,7 +212,7 @@ ShowIfFlags = "bin_moved"
 
 [node name="Tie" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(338, 74)
+position = Vector2(337, 69)
 texture = ExtResource("11_mansion_exterior_tie")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -220,7 +220,7 @@ ShowIfFlags = "bell_wedged"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(240, 120)
+position = Vector2(248, 96)
 texture = ExtResource("12_mansion_exterior_door")
 centered = false
 script = ExtResource("4_FlagSprite")
