@@ -41,6 +41,18 @@ godot --path . -- --autoplay
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
+- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Quit to title*. The title screen offers
+  *Continue* (most recent save), *New game* and *Load game*.
+
+### Saving
+
+The game autosaves every time you enter a room, and there are 3 manual slots. Saving is only possible
+between actions, not during a cutscene or conversation. Saves are JSON files in `user://saves/`
+(on Windows, `%APPDATA%\Godot\app_userdata\Repentance\saves`). Each save stores the story flags, the
+inventory, the story act, the Ink state, the current room and the player's position. Loading a save
+doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when flags, items or rooms are
+renamed: older saves then show up as *Incompatible* instead of loading into a broken state. The
+autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
 
 ## The demo
 
@@ -100,7 +112,7 @@ scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
 scripts/Rooms/       per-room puzzle scripts
-scripts/UI/          Hud (hover label, satchel, inventory, choices, speech, fades, cursor) and VerbWheel
+scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, cursor), VerbWheel and GameMenu (title/pause/save slots)
 scripts/Debug/       AutoPlay smoke test
 tools/               Python art generator
 ```
@@ -110,7 +122,8 @@ tools/               Python art generator
 | Type | Role |
 |---|---|
 | `Game` | Main controller. Handles input (left click, right-click wheel, held item), executes verbs and changes rooms. Exposes the script helpers `Say`, `WalkTo`, `Wait`, `Run` and `ChangeRoom` |
-| `GameState` (autoload) | Story flags and inventory; emits `Changed` |
+| `GameState` (autoload) | Story flags and inventory; emits `Changed`. `CaptureInto`/`Restore` copy it to and from a save |
+| `SaveData` / `SaveSystem` | The save file model and its JSON serializer (Godot-free and unit tested), and the autosave plus slot files in `user://saves` |
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
 | `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |

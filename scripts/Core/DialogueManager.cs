@@ -84,4 +84,15 @@ public partial class DialogueManager : Node
 
     /// <summary>Reads an Ink variable (handy for room scripts).</summary>
     public Variant Get(string variable) => Story.FetchVariable(variable);
+
+    /// <summary>Ink runtime state (visit counts, variables) as JSON, or "" if no conversation has run yet.</summary>
+    public string SaveInk() => _story?.SaveState() ?? "";
+
+    public void LoadInk(string json)
+    {
+        if (string.IsNullOrEmpty(json)) ResetInk();
+        else Story.LoadState(json);
+    }
+
+    public void ResetInk() => _story?.ResetState();
 }

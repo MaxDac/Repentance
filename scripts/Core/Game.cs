@@ -28,9 +28,20 @@ public partial class Game : Node
     private int _actionId;
     private TaskCompletionSource? _skipSpeech;
     private bool _onTitle;
+    private string _roomScene = "";
+    private double _playtime;
+    private bool _autosavePending;
     private readonly Random _rng = new();
 
     public bool Busy => _busy > 0;
+
+    /// <summary>Writes the autosave slot after every room change (turned off by tests that don't want it).</summary>
+    public bool AutosaveEnabled { get; set; } = true;
+
+    /// <summary>Saving is only allowed between actions, when no script, dialogue or fade is running.</summary>
+    public bool CanSave => Room != null && !Busy && !_onTitle;
+
+    public static string RoomScenePath(string room) => $"res://scenes/rooms/{room}.tscn";
 
     public override void _EnterTree() => Instance = this;
 
@@ -43,7 +54,6 @@ public partial class Game : Node
         AddChild(Hud);
         Hud.ItemClicked += OnItemClicked;
         Hud.ItemHovered += id => _hoverItem = id;
-        Hud.TitleClicked += () => _onTitle = false;
 
         var args = OS.GetCmdlineUserArgs();
         foreach (var a in args)
@@ -57,16 +67,21 @@ public partial class Game : Node
             return;
         }
 
-        if (Array.IndexOf(args, "--skip-title") < 0)
-        {
-            _onTitle = true;
-            Hud.ShowTitle(true);
-            await Hud.Fade(0, 0.8);
-            while (_onTitle) await Wait(0.05);
-            await Hud.Fade(1, 0.5);
-            Hud.ShowTitle(false);
-        }
-        await ChangeRoom(StartRoom, StartEntry);
+        if (Array.IndexOf(args, "--skip-title") < 0) await TitleScreen();
+        else await NewGame();
+    }
+
+    private async Task TitleScreen()
+    {
+        _onTitle = true;
+        Hud.ShowTitle(true);
+        await Hud.Fade(0, 0.8);
+        var choice = await Hud.Menu.OpenTitle();
+        await Hud.Fade(1, 0.5);
+        Hud.ShowTitle(false);
+        _onTitle = false;
+        if (choice is { Action: MenuAction.Load, Save: { } save }) await LoadGame(save);
+        else await NewGame();
     }
 
     // ------------------------------------------------------------------ input
@@ -76,6 +91,13 @@ public partial class Game : Node
 
     public override void _UnhandledInput(InputEvent e)
     {
+        if (e.IsActionPressed("ui_cancel"))
+        {
+            GetViewport().SetInputAsHandled();
+            if (Hud.Wheel.IsOpen) Hud.Wheel.Close();
+            else if (CanSave && !Hud.Menu.IsOpen) _ = PauseMenu();
+            return;
+        }
         if (e is not InputEventMouseButton { Pressed: true } mb) return;
         if (mb.ButtonIndex is not (MouseButton.Left or MouseButton.Right)) return;
         GetViewport().SetInputAsHandled();
@@ -197,8 +219,15 @@ public partial class Game : Node
     public override void _Process(double delta)
     {
         if (Room == null || _onTitle) return;
+        _playtime += delta;
         if (Busy) { Hud.SetInterfaceVisible(false); return; }
         Hud.SetInterfaceVisible(true);
+
+        if (_autosavePending)
+        {
+            _autosavePending = false;
+            if (AutosaveEnabled) SaveToSlot(SaveSystem.AutosaveSlot);
+        }
 
         var mouse = Hud.MousePos;
         if (Hud.Wheel.IsOpen) { Hud.SetHover(null, mouse); return; }
@@ -347,27 +376,113 @@ public partial class Game : Node
         try
         {
             await Hud.Fade(1, 0.35);
-            Player.Stop();
-            if (Room != null)
-            {
-                Room.World.RemoveChild(Player);
-                Room.QueueFree();
-            }
-            var scene = GD.Load<PackedScene>($"res://scenes/rooms/{name}.tscn");
-            Room = scene.Instantiate<Room>();
-            _roomHost.AddChild(Room);
-            Room.World.AddChild(Player);
-            Player.SetCharacter(Room.PlayerCharacter);
-            Player.Visible = Room.ShowPlayer;
-            var marker = Room.GetNodeOrNull<Node2D>($"Entries/{entry}");
+            LoadRoomScene(name);
+            var marker = Room!.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);
-            SetCarried(null);
-            Hud.ShowInventory(false);
-            Hud.Wheel.Close();
             await Hud.Fade(0, 0.35);
         }
         finally { _busy--; }
-        await Room.OnEnter(entry);
+        await Room!.OnEnter(entry);
+        // written once the player is back in control, so entry cutscenes have already set their flags
+        _autosavePending = true;
+    }
+
+    private void LoadRoomScene(string name)
+    {
+        UnloadRoom();
+        Room = GD.Load<PackedScene>(RoomScenePath(name)).Instantiate<Room>();
+        _roomScene = name;
+        _roomHost.AddChild(Room);
+        Room.World.AddChild(Player);
+        Player.SetCharacter(Room.PlayerCharacter);
+        Player.Visible = Room.ShowPlayer;
+    }
+
+    private void UnloadRoom()
+    {
+        _actionId++;
+        Player.Stop();
+        SetCarried(null);
+        Hud.ShowInventory(false);
+        Hud.Wheel.Close();
+        Hud.SetHover(null, Hud.MousePos);
+        if (Room == null) return;
+        Room.World.RemoveChild(Player);
+        Room.QueueFree();
+        Room = null;
+        _roomScene = "";
+    }
+
+    // ------------------------------------------------------------------ save / load
+
+    public SaveData CaptureSave()
+    {
+        var data = new SaveData
+        {
+            SavedAtUtc = DateTime.UtcNow,
+            Room = _roomScene,
+            RoomTitle = Room?.RoomName ?? "",
+            X = Player.Position.X,
+            Y = Player.Position.Y,
+            Facing = (int)Player.Facing,
+            Ink = DialogueManager.Instance.SaveInk(),
+            PlaytimeSeconds = _playtime,
+        };
+        GameState.Instance.CaptureInto(data);
+        return data;
+    }
+
+    public bool SaveToSlot(string slot) => CanSave && SaveSystem.Write(slot, CaptureSave());
+
+    /// <summary>Restores a save: game state, Ink state, room and the player's exact spot. Entry cutscenes don't replay.</summary>
+    public async Task LoadGame(SaveData data)
+    {
+        _busy++;
+        try
+        {
+            await Hud.Fade(1, 0.35);
+            GameState.Instance.Restore(data.Flags, data.Inventory, data.StoryAct);
+            DialogueManager.Instance.LoadInk(data.Ink);
+            _playtime = data.PlaytimeSeconds;
+            _autosavePending = false;
+            LoadRoomScene(data.Room);
+            Player.Teleport(new Vector2(data.X, data.Y), (Facing)data.Facing);
+            await Hud.Fade(0, 0.35);
+        }
+        finally { _busy--; }
+    }
+
+    public async Task NewGame()
+    {
+        GameState.Instance.Reset();
+        DialogueManager.Instance.ResetInk();
+        _playtime = 0;
+        await ChangeRoom(StartRoom, StartEntry);
+    }
+
+    private async Task PauseMenu()
+    {
+        _actionId++;
+        Player.Stop();
+        SetCarried(null);
+        Hud.ShowInventory(false);
+        Hud.SetHover(null, Hud.MousePos);
+        GetTree().Paused = true;
+        var choice = await Hud.Menu.OpenPause();
+        GetTree().Paused = false;
+        switch (choice)
+        {
+            case { Action: MenuAction.Load, Save: { } save }:
+                await LoadGame(save);
+                break;
+            case { Action: MenuAction.QuitToTitle }:
+                _busy++;
+                try { await Hud.Fade(1, 0.5); }
+                finally { _busy--; }
+                UnloadRoom();
+                await TitleScreen();
+                break;
+        }
     }
 }
