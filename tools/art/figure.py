@@ -331,6 +331,11 @@ def figure(spec, ps, fw=56, fh=80):
                 shape[i] = np.where(new, cap[i], np.where(blend, (shape[i] + cap[i]) / 2, shape[i]))
             shape[0] = shape[0] | cap[0]
         c.put(tuple(shape), torso, "torso")
+        if col.get("rear"):  # rounded seat swelling out at the back of the near hip, easing into the thighs
+            side, back = col["rear"]
+            rc = P(body([side, 0.525, -back]))
+            rx = H * math.sqrt((hipw * 0.62 * cp) ** 2 + (0.03 * sp) ** 2)
+            c.put(c.ellipse((rc[0], rc[1]), rx, H * 0.055), torso, "torso", cast=False, clip=c.mat < 0)
         if col.get("abdomen"):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
                       col["abdomen"])
@@ -365,10 +370,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.006), 0.40, 0.0])
             wr = body([s * 0.03, 0.50, 0.07])
             hand = body([s * 0.0, 0.535, 0.075])
-        elif kind == "side":  # hanging still and straight down the side
-            el = body([s * (sw + 0.004), 0.40, -0.005])
-            wr = body([s * (hipw + 0.006), 0.52, -0.005])
-            hand = body([s * (hipw + 0.004), 0.56, -0.003])
+        elif kind == "side":  # hanging still, drawn back behind the flank
+            el = body([s * (sw - 0.01), 0.40, -0.035])
+            wr = body([s * (hipw - 0.01), 0.50, -0.045])
+            hand = body([s * (hipw - 0.012), 0.54, -0.04])
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
@@ -457,6 +462,15 @@ def figure(spec, ps, fw=56, fh=80):
     for _, fn in sorted(prims, key=lambda kv: kv[0]):
         fn()
 
+    if col.get("front_line") and abs(cp) > 0.3:  # three-quarter view: a straight, vertical front from waist to thighs
+        r0, r1 = (int(P(body([0, v, 0]))[1]) for v in col["front_line"])
+        sgn = 1 if sp >= 0 else -1
+        body_px = (c.mat >= 0) & ~c.parts_mask("hair", "hairback", "hand1", "hand-1")
+        fronts = [(np.nonzero(body_px[y])[0] * sgn).max() for y in range(r0, r1 + 1) if body_px[y].any()]
+        if fronts:
+            cut = c.parts_mask("torso", "arm1", "arm-1") & (np.arange(c.w)[None, :] * sgn > min(fronts))
+            cut[:r0] = cut[r1 + 1:] = False
+            c.mat[cut], c.part[cut], c.bias[cut] = -1, -1, 0
     _decals(c, col, P, body, H, cp, sp, legs, ps)
     if facing:
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
