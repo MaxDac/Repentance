@@ -206,19 +206,34 @@ public partial class Game : Node
             await TryDecodeCard();
             return true;
         }
-        if (PuzzleRules.Pair(first, second, "map_base", "map_tracing"))
+        if (PuzzleRules.Pair(first, second, "audit_folder", "audit_tracing"))
         {
-            if (await Hud.Puzzle.Open(PuzzleKind.Alignment))
-            {
-                state.TakeItem("map_base");
-                state.TakeItem("map_tracing");
-                state.GiveItem("map");
-                state.SetFlag("found_map");
-                await Say("All three landmarks line up. The X has notes: thirty paces east of the fence post, ten north of the creek bend.");
-            }
+            await TryReadAccounts();
             return true;
         }
         return false;
+    }
+
+    public async Task TryReadAccounts()
+    {
+        var state = GameState.Instance;
+        if (Room is not Rooms.MansionStudy || state.HasFlag("entered_bedroom"))
+        {
+            await Say("I need the study desk to lay these out. Once I go through that bedroom door, I won't get another chance.");
+            return;
+        }
+        if (!state.HasItem("audit_folder") || !state.HasItem("audit_tracing"))
+        {
+            await Say("The numbered accounts need the auditor's index. The other desk drawer might have it.");
+            return;
+        }
+        if (!await Hud.Puzzle.Open(PuzzleKind.Alignment)) return;
+        state.TakeItem("audit_folder");
+        state.TakeItem("audit_tracing");
+        state.GiveItem("documents");
+        state.SetFlag("audit_identified");
+        state.SetFlag(Endings.TookDocuments);
+        await Say("Bank, judge, captain. The index identifies the numbered pocket in the drawer. Inside: signed payment sheets. Names, dates, signatures. Into the coat. Insurance.");
     }
 
     public async Task TryDecodeCard()
@@ -245,6 +260,7 @@ public partial class Game : Node
             state.GiveItem("card");
             state.GiveItem("matchbook");
             await Say("The clasp gave with a click. Inside: a calling card, blank but for the curlicues, and a perfume that wasn't hers.");
+            await Say("Strange perfume. Quite attractive, though.");
             await Say("And a matchbook. A blue lantern on the cover. The Blue Lantern, then. That's where her trail goes next.");
             return;
         }
@@ -465,7 +481,7 @@ public partial class Game : Node
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
-        Player.Visible = Room.ShowPlayer;
+        Player.Visible = Room.PlayerVisibleOnLoad;
     }
 
     private void UnloadRoom()

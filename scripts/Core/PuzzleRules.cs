@@ -23,11 +23,12 @@ public static class PuzzleRules
     public static bool Crests(IReadOnlyList<int> symbols) => symbols.SequenceEqual(new[] { 2, 0, 1 });
     public static bool Catalogue(int motif, int entry) => motif == 1 && entry == 2;
     public static bool Cipher(IReadOnlyList<int> fragments) => fragments.SequenceEqual(new[] { 1, 2, 0 });
+    public static bool Bell(IReadOnlyList<int> steps) => steps.SequenceEqual(new[] { 0, 1, 2 });
     public static bool CipherReady(bool bookRead, bool warmed, bool reflected) => bookRead && warmed && reflected;
     public static bool Pair(string first, string second, string a, string b) =>
         (first == a && second == b) || (first == b && second == a);
 
-    public static IReadOnlyList<GridPoint> MapMarks { get; } =
+    public static IReadOnlyList<GridPoint> AccountMarks { get; } =
         Array.AsReadOnly(new[] { new GridPoint(6, 3), new GridPoint(6, 5), new GridPoint(3, 3) });
     public static IReadOnlyList<GridPoint> TracingMarks { get; } =
         Array.AsReadOnly(new[] { new GridPoint(0, 0), new GridPoint(2, 0), new GridPoint(0, 3) });
@@ -47,18 +48,17 @@ public static class PuzzleRules
 
     public static bool Alignment(int rotation, int x, int y) =>
         rotation is >= 0 and < 4 && x is >= 0 and <= 10 && y is >= 0 and <= 10 &&
-        TracingMarks.Select(p => Transform(p, rotation, x, y)).SequenceEqual(MapMarks);
-
-    public static bool Survey(int x, int y) =>
-        x is >= 0 and <= 10 && y is >= 0 and <= 10 && (x - 2) * 5 == 30 && (10 - y) * 5 == 10;
+        TracingMarks.Select(p => Transform(p, rotation, x, y)).SequenceEqual(AccountMarks);
 }
 
 public static class PuzzleMigration
 {
     public const string SchemaFlag = "puzzles_v1";
+    public const string Act3SchemaFlag = "puzzles_act3_v1";
 
     public static void Normalize(SaveData data)
     {
+        NormalizeAct3(data);
         if (data.Flags.Contains(SchemaFlag)) return;
         var flags = new HashSet<string>(data.Flags, StringComparer.Ordinal);
         bool Has(string item) => data.Inventory.Contains(item) || flags.Contains("stash_" + item);
@@ -93,9 +93,22 @@ public static class PuzzleMigration
             flags.Contains("harrington_done")) flags.Add("ladder_freed");
         if (flags.Contains("secret_open") || flags.Contains("took_mask") || Has("mask"))
             flags.Add("harrington_closet_open");
-        if (Has("map")) flags.Add("found_map");
-        if (Has("evidence") || flags.Contains("ending")) flags.Add("burial_surveyed");
         flags.Add(SchemaFlag);
+        data.Flags = flags.OrderBy(f => f, StringComparer.Ordinal).ToList();
+    }
+
+    private static void NormalizeAct3(SaveData data)
+    {
+        if (data.Flags.Contains(Act3SchemaFlag)) return;
+        var flags = new HashSet<string>(data.Flags, StringComparer.Ordinal);
+        bool Has(string item) => data.Inventory.Contains(item) || flags.Contains("stash_" + item);
+        if (flags.Contains("door_open") || flags.Contains("bell_wedged") ||
+            flags.Contains("seen_mansion_kitchen") || flags.Contains("entered_bedroom") || flags.Contains("escaping") ||
+            data.Room is "mansion_kitchen" or "mansion_study" or "mansion_bedroom")
+            flags.UnionWith(new[] { "alarm_noticed", "bin_moved", "bell_wedged" });
+        if (flags.Contains(Endings.TookDocuments) || Has("documents"))
+            flags.UnionWith(new[] { Endings.TookDocuments, "audit_identified", "audit_folder_taken" });
+        flags.Add(Act3SchemaFlag);
         data.Flags = flags.OrderBy(f => f, StringComparer.Ordinal).ToList();
     }
 }

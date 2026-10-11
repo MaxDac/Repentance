@@ -53,7 +53,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   its graphical controls, not the safe itself. Enter **R 12 / L 31 / R 7** in the three direction/number rows
   and submit. The paper remains readable; wrong settings can be reset or retried.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
-  - a perfumed business card, blank except for some decorations;
+  - a perfumed business card, blank except for some decorations; Micah remarks that the perfume is strange, but quite attractive;
   - a matchbook with the name of the club, the Blue Lantern (next location).
 - Leaving the room goes back down to the lobby; the revolving door now leads to the club.
 
@@ -303,7 +303,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   - Do nothing, and the same man from behind will knock him out nonetheless.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 
-#### Churc, outside
+#### Church, outside
 
 - Micah is supine on the pavement, again, beaten.
 - Again, his thoughts will appear as narrating voice, saying what is he doing.
@@ -312,28 +312,132 @@ described here (other verbs, flavour lines) is left to the implementation.
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
   to the end of act 3 (caption "End of Act Three").
 - If the player decide to keep pushing, keep to the next.
-- For now, continue with the temporary storyline. 
 
+#### Office
 
+- The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
+- He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the
+  Blue Lantern, the mob.
+- Micah stands up, and walks through the door.
 
-#### Temporary storyline (from the Starlight)
+#### Behind Blue Lantern, previous location from Act 1
 
-The existing temporary storyline strings together the remaining locations:
+- The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
+  Sal out, then use the revolver on him to knock him down. Only then knock on the back door to face Tony.
+  Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
+- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
+  Eleanor.
+- The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
+- At this point, the player must choose between fire the revolver on the leg, or to walk away, because it's not worth it.
+  The option to walk away would be available only if the player returned to the church at least one.
+- If the player walks out, he's going to his wife's house (caption *End of Act Three*).
+- If he's firing at the leg, you have to create a new model for the bartender supine, with a drop of blood from the leg.
+- The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
+  from the kitchen, because they provide them with booze.
+- Micah get out of the scene.
 
-- **Puzzle 9 - Motel room 6, map overlay:** searching the bed yields a county-map fragment; the dresser
-  yields a transparent tracing. Combine them in either order to open the alignment close-up.
-  Move the tracing on the discrete grid and rotate it in quarter turns until its windmill, creek and fence
-  registration marks all match the base map. The asymmetric arrangement has one solution: one clockwise
-  turn and offset (6, 3). Correct alignment merges the pieces into the map and reveals the bearing notes.
-  A fragment alone cannot unlock the road out of town; cancellation retains both pieces.
-- **Puzzle 10 - Outskirts, survey:** use the completed map on the fence post. The notes specify thirty paces
-  east of that post and ten paces north of the creek bend. In the north-up survey, each grid step is five paces;
-  the fence is at column 2, row 8 and the creek bend at column 5, row 10. Mark column **8**, row **8**.
-  This identifies the burial hotspot; digging at a suspicious patch beforehand cannot grant evidence.
-  Digging at the identified spot reveals the bookkeeper's tin box... and Sal is waiting.
-  *To be continued.*
+#### Outside of the Harrington mansion, behind the kitchen
 
-All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful inventory
-items. Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
-The satchel has pages so every collected item remains accessible. Completed discoveries in older saves
-remain completed; an unfinished new puzzle does not complete merely by saving and loading.
+- Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
+  the taut wire; move the coal bin under the bell to reach its hammer.
+- **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
+  the door wire. Cutting the wire releases it. Plan **hold hammer, tie hammer, release hand**, using
+  Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
+  option. Incorrect plans are rejected before touching the mechanism; no alarm sounds and retries
+  cost nothing. Close/reset preserves the unrestrained state. Use the lintel key only after securing it.
+- In the kitchen, for now, don't do anything, just generate a mansion kitchen in the darkness, the player can pass through.
+- Harrington's study has a closet and a desk with two drawers. The bedroom door is always accessible:
+  Micah can pass straight through without collecting evidence.
+- **Puzzle 10 - Auditor's index (optional):** the right drawer contains a numbered account register,
+  not the signed evidence. The left drawer supplies a transparent index with the same Harrington Steel
+  stamp. Combine them in either order, or use the index on the register in the open drawer, at the study
+  desk. Match all three labelled BANK/JUDGE/CAPTAIN marks by rotating and sliding the index. Its note
+  puts BANK above JUDGE and CAPTAIN left of BANK; the asymmetric grid has one solution: one clockwise
+  turn, offset **(6, 3)**. The aligned window identifies the drawer pocket containing signed payoff
+  sheets, which Micah takes as the existing documents item. Cancellation keeps both clues.
+  Taking the register alone does not count as evidence. This opportunity ends on entering the bedroom,
+  as before: neither inventory combination during escape nor returning through the kitchen bypasses it.
+  Skipping the puzzle must retain the prison endings when the mansion does not explode.
+- Next area is Harrington father's bedroom: huge bedroom with king size bed, Elearon under the sheet naked, Harrington
+  father in his dressing gown. He's talking with Eleanor, telling her that it's not too bad to have returned where she
+  belongs.
+- After the dialogue, Micah, who previusly hid behind something, shows up with his revolver pointed at the old man; the
+  old man turns to Micah, Eleanor get out of bed covering herself with the sheets (you have to generate this character also).
+- The old man tells Micah that he doesn't have the guts to do that, and that Eleanor's place is here, she's just a whore.
+- The player has two choices: either shoots the old man or not:
+  - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
+    sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
+    - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
+    - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas
+      and make the mansion explode.
+    - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
+  - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
+    **and** returned to the church at least once. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    and the scene skips to *End of Act 3*.
+
+### End of Act 3
+
+- Here, there are multiple endings, depending on the choices made in the previous selection:
+
+#### Option 1 - Outside Micah's wife
+
+- Previously used location
+- This ending is accessible if Micah refuses to go forward at any point, either outside of the Church, or if he refuses
+  to shoot the bartender, or the old man.
+- Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
+- In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
+
+#### Option 2 - Outskirts, with Eleanor
+
+- Previously generated location
+- This ending is accessible only if Micah manages to convince Eleanor in the Harringtom mansion, and manages to make it explode
+  or finds the documents in the mansion.
+- They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
+- In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
+
+#### Option 3 - Outskirts, without Eleanor
+
+- Previously generated location
+- This ending is accessible if Micah didn't manage to convince Eleanor, and Micah either finds the documents in the mansion
+  or make it explode.
+- You have to generate the car in this case also, Micah gets out of the car.
+- In this case, the journal ends with Micah shooting himself, and the last entry is stained with alcohol and blood.
+
+#### Option 4 - Prison - With Eleanor
+
+- You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
+- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the
+  documents.
+- Micah in this case has a jumpsuit for an inmate, you have to generate the model.
+- Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
+  jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
+- In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
+
+#### Option 5 - Prison - With brother
+
+- You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
+- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't
+  find the documents.
+- Micah in this case has a jumpsuit for an inmate, you have to generate the model.
+- Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly
+  says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
+- In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
+
+### Present
+
+The story ends with the father reading the last entry, commenting briefly, and then throwing back the journal in the
+trunk.
+
+### Puzzle pacing and saves
+
+The ten added/expanded puzzles are distributed **4 in Act 1, 4 in Act 2, and 2 in Act 3**.
+The final act also retains its existing three-step alley encounter. The alarm gives the pursuit route
+an interactive infiltration beat; the optional index provides investigation before the confrontation.
+Giving up or reconciling never requires completing a pursuit-route puzzle. The obsolete temporary
+motel map and burial survey are not part of the completed Act 3.
+
+All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
+Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
+The satchel has pages so every collected item remains accessible. Main's version-3 save format remains
+unchanged; completed discoveries in compatible older saves remain completed, using independent markers
+for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.

@@ -1,7 +1,7 @@
 """Targeted props, clue plates and inventory icons for the ten story puzzles."""
 from PIL import Image, ImageDraw
 from .common import hx, save, text
-from .items import _icon, mirror, map_
+from .items import _icon, mirror
 
 
 def waxed_mirror(d, im):
@@ -23,9 +23,12 @@ def wedge(d, im):
 
 
 def base(d, im):
-    map_(d, im)
-    d.rectangle([20, 7, 28, 14], fill=hx("d8c898"))
-    for x, y in ((8, 10), (18, 16), (24, 8)):
+    d.rectangle([4, 3, 28, 21], fill=hx("d8c898"), outline=hx("6a5a40"))
+    for x in (10, 16, 22):
+        d.line([(x, 4), (x, 20)], fill=hx("a3916c"))
+    for y in (8, 13, 18):
+        d.line([(5, y), (27, y)], fill=hx("a3916c"))
+    for x, y in ((18, 8), (18, 16), (8, 8)):
         d.ellipse([x - 2, y - 2, x + 2, y + 2], outline=hx("6a5a40"))
 
 
@@ -34,13 +37,12 @@ def tracing(d, im):
     for x, y in ((8, 8), (18, 8), (8, 17)):
         d.line([(x - 2, y), (x + 2, y)], fill=hx("e6f4f8"))
         d.line([(x, y - 2), (x, y + 2)], fill=hx("e6f4f8"))
-    d.line([(20, 14), (24, 18)], fill=hx("a43a32"))
-    d.line([(24, 14), (20, 18)], fill=hx("a43a32"))
+    d.rectangle([19, 13, 25, 19], outline=hx("a43a32"))
 
 
 def build():
     for name, fn in (("mirror_waxed", waxed_mirror), ("cloth", cloth), ("wedge", wedge),
-                     ("map_base", base), ("map_tracing", tracing)):
+                     ("audit_folder", base), ("audit_tracing", tracing)):
         save(_icon(fn), "items", name + ".png")
 
     tin = Image.new("RGBA", (38, 24))
@@ -94,8 +96,3 @@ def build():
     d.rectangle([0, 0, 63, 27], fill=hx("352821", 230), outline=gold)
     text(marker, (32, 14), "HOTEL", gold, size=8)
     save(marker, "rooms", "map_hotel.png")
-    burial = Image.new("RGBA", (24, 18))
-    d = ImageDraw.Draw(burial)
-    d.line([(3, 3), (20, 14)], fill=hx("e1c79a"), width=3)
-    d.line([(20, 3), (3, 14)], fill=hx("e1c79a"), width=3)
-    save(burial, "rooms", "burial_marker.png")

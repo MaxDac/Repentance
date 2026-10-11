@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Repentance;
 
-public enum PuzzleKind { Lift, Safe, Catalogue, Cipher, Crests, Alignment, Survey }
+public enum PuzzleKind { Lift, Safe, Catalogue, Cipher, Crests, Bell, Alignment }
 
 public partial class PuzzlePanel : Control
 {
@@ -52,8 +52,9 @@ public partial class PuzzlePanel : Control
             PuzzleKind.Catalogue => "RESTRICTED CATALOGUE",
             PuzzleKind.Cipher => "REFLECTED CALLING CARD",
             PuzzleKind.Crests => "HARRINGTON - FALSE BACK",
-            PuzzleKind.Alignment => "COUNTY MAP - TRACING",
-            _ => "BURIAL SURVEY - NORTH UP",
+            PuzzleKind.Bell => "MANSION - ALARM HAMMER",
+            PuzzleKind.Alignment => "HARRINGTON - AUDITOR'S INDEX",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         }, 18, 8, 440);
         _feedback = Label("Read the clues. Nothing here is timed.", 18, 244, 440);
         _clue = Label("", 282, 38, 178, 168);
@@ -66,7 +67,7 @@ public partial class PuzzlePanel : Control
             case PuzzleKind.Cipher: BuildCipher(); break;
             case PuzzleKind.Crests: BuildCrests(); break;
             case PuzzleKind.Alignment: BuildAlignment(); break;
-            case PuzzleKind.Survey: BuildSurvey(); break;
+            case PuzzleKind.Bell: BuildBell(); break;
         }
         Button("reset", "Reset", 18, 218, 68, Reset);
         Button("close", "Close / Esc", 364, 218, 98, () => Finish(false));
@@ -222,7 +223,7 @@ public partial class PuzzlePanel : Control
             int index = i;
             Button($"s{i}", labels[0], 28, 83 + i * 38, 218, () =>
             {
-                _settings[index] = (_settings[index] + 1) % 3;
+                _settings[index] = (_settings[index] + 1) % labels.Length;
                 RefreshControls();
                 QueueRedraw();
             });
@@ -232,14 +233,14 @@ public partial class PuzzlePanel : Control
 
     private void BuildAlignment()
     {
-        _clue.Text = "Align all THREE marks.\nW: windmill / C: creek\nF: fence gate\nGold: map / Blue: tracing";
+        _clue.Text = "Gold: register\nBlue: index\nB: BANK / J: JUDGE\nC: CAPTAIN\nBANK above JUDGE.\nCAPTAIN left of BANK.";
         Button("left", "<", 282, 148, 40, () => Move(-1, 0));
         Button("right", ">", 370, 148, 40, () => Move(1, 0));
         Button("up", "^", 326, 125, 40, () => Move(0, -1));
         Button("down", "v", 326, 171, 40, () => Move(0, 1));
         Button("rotate", "Quarter turn", 282, 195, 152, () => { _rotation = (_rotation + 1) % 4; QueueRedraw(); });
-        Button("submit", "Join pieces", 180, 218, 108, () =>
-            Submit(PuzzleRules.Alignment(_rotation, _x, _y), "All three marks must overlap, not just the X."));
+        Button("submit", "Read accounts", 180, 218, 108, () =>
+            Submit(PuzzleRules.Alignment(_rotation, _x, _y), "Match all three labelled marks to identify the signed sheets."));
     }
 
     private void Move(int x, int y)
@@ -249,25 +250,12 @@ public partial class PuzzlePanel : Control
         QueueRedraw();
     }
 
-    private void BuildSurvey()
+    private void BuildBell()
     {
-        _clue.Text = "NORTH IS UP.\nEach step: 5 paces.\n\nPost: (2,8)\nCreek: (5,10)\n\n30 paces EAST of post.\n10 paces NORTH of creek.\n\nClick a grid point.";
-        for (int x = 0; x <= 10; x++)
-            for (int y = 0; y <= 10; y++)
-            {
-                int col = x, row = y;
-                var cell = new Button
-                {
-                    Position = GridPosition(new GridPoint(x, y)) - new Vector2(6, 6),
-                    Size = new Vector2(12, 12), Flat = true, FocusMode = FocusModeEnum.None,
-                    TooltipText = $"Column {x}, row {y}",
-                };
-                cell.Pressed += () => { _x = col; _y = row; QueueRedraw(); };
-                AddChild(cell);
-                _buttons.Add($"cell{x}_{y}", cell);
-            }
-        Button("submit", "Mark burial", 180, 218, 108, () =>
-            Submit(PuzzleRules.Survey(_x, _y), "That point fails the pace/bearing notes. Count from both landmarks."));
+        _clue.Text = "The taut wire holds a spring-loaded hammer.\nCut it: the gong rings.\n\nA tie can secure the hammer to its bracket, but only while held back.\n\nPlan three steps.";
+        BuildWheels(new[] { "Hold hammer", "Tie hammer", "Release hand", "Cut wire" }, () =>
+            Submit(PuzzleRules.Bell(_settings), "I stop before touching it. Nothing rings. The hammer needs restraint."));
+        RefreshControls();
     }
 
     private void RefreshControls()
@@ -279,6 +267,7 @@ public partial class PuzzlePanel : Control
                 {
                     PuzzleKind.Lift => $"{(char)('A' + i)}: {(_settings[i] == 0 ? "UPPER" : "LOWER")}",
                     PuzzleKind.Crests => new[] { "SUN", "MOON", "STAR" }[_settings[i]],
+                    PuzzleKind.Bell => $"{i + 1}. {new[] { "Hold hammer", "Tie hammer", "Release hand", "Cut wire" }[_settings[i]]}",
                     _ => new[] { "Feather", "Lily", "Leaf" }[_settings[i]],
                 };
             if (_buttons.TryGetValue($"d{i}", out var direction))
@@ -293,7 +282,7 @@ public partial class PuzzlePanel : Control
     {
         DrawRect(new Rect2(0, 0, 480, 270), new Color("171821"));
         DrawRect(new Rect2(8, 4, 464, 236), new Color("907346"), false, 2);
-        if (Kind is PuzzleKind.Alignment or PuzzleKind.Survey)
+        if (Kind == PuzzleKind.Alignment)
         {
             for (int i = 0; i <= 10; i++)
             {
@@ -302,25 +291,29 @@ public partial class PuzzlePanel : Control
                 DrawString(Hud.Font, new Vector2(32 + i * 14, 51), i.ToString(), fontSize: 8, modulate: Hud.VerbHover);
                 DrawString(Hud.Font, new Vector2(12, 68 + i * 14), i.ToString(), fontSize: 8, modulate: Hud.VerbHover);
             }
-            if (Kind == PuzzleKind.Alignment)
+            for (int i = 0; i < 3; i++)
             {
-                for (int i = 0; i < 3; i++)
+                var p = GridPosition(PuzzleRules.AccountMarks[i]);
+                DrawCircle(p, 5, Hud.VerbHover);
+                DrawString(Hud.Font, p + new Vector2(5, -5), new[] { "B", "J", "C" }[i], fontSize: 8, modulate: Hud.VerbHover);
+                var mark = PuzzleRules.Transform(PuzzleRules.TracingMarks[i], _rotation, _x, _y);
+                if (mark.X is >= 0 and <= 10 && mark.Y is >= 0 and <= 10)
                 {
-                    var p = GridPosition(PuzzleRules.MapMarks[i]);
-                    DrawCircle(p, 5, Hud.VerbHover);
-                    DrawString(Hud.Font, p + new Vector2(5, -5), new[] { "W", "C", "F" }[i], fontSize: 8, modulate: Hud.VerbHover);
-                    var mark = PuzzleRules.Transform(PuzzleRules.TracingMarks[i], _rotation, _x, _y);
-                    if (mark.X is >= 0 and <= 10 && mark.Y is >= 0 and <= 10)
-                        DrawArc(GridPosition(mark), 6, 0, Mathf.Tau, 16, new Color("65b8ef"), 2);
+                    var position = GridPosition(mark);
+                    DrawArc(position, 6, 0, Mathf.Tau, 16, new Color("65b8ef"), 2);
+                    DrawString(Hud.Font, position + new Vector2(-10, 12), new[] { "B", "J", "C" }[i], fontSize: 8, modulate: new Color("65b8ef"));
                 }
-                DrawString(Hud.Font, new Vector2(32, 36), $"Offset {_x},{_y}  Turn {_rotation * 90}", fontSize: 8, modulate: Hud.VerbHover);
             }
-            else
-            {
-                DrawString(Hud.Font, GridPosition(new GridPoint(2, 8)) + new Vector2(4, -5), "POST", fontSize: 8, modulate: Hud.VerbHover);
-                DrawString(Hud.Font, GridPosition(new GridPoint(5, 10)) + new Vector2(4, -5), "CREEK", fontSize: 8, modulate: Hud.VerbHover);
-                DrawCircle(GridPosition(new GridPoint(_x, _y)), 5, new Color("65b8ef"));
-            }
+            DrawString(Hud.Font, new Vector2(32, 36), $"Offset {_x},{_y}  Turn {_rotation * 90}", fontSize: 8, modulate: Hud.VerbHover);
+        }
+        if (Kind == PuzzleKind.Bell)
+        {
+            DrawLine(new Vector2(28, 50), new Vector2(138, 50), Hud.VerbHover, 2);
+            DrawRect(new Rect2(136, 42, 24, 16), new Color("65b8ef"));
+            DrawArc(new Vector2(222, 50), 16, -Mathf.Pi / 2, Mathf.Pi / 2, 16, Hud.VerbHover, 3);
+            DrawString(Hud.Font, new Vector2(28, 35), "TAUT WIRE", fontSize: 8, modulate: Hud.VerbHover);
+            DrawString(Hud.Font, new Vector2(118, 72), "HAMMER", fontSize: 8, modulate: Hud.VerbHover);
+            DrawString(Hud.Font, new Vector2(205, 35), "GONG", fontSize: 8, modulate: Hud.VerbHover);
         }
         if (Kind == PuzzleKind.Lift)
         {

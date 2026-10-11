@@ -51,7 +51,7 @@ centered = false
 
 [node name="Fire" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(0, 80)
+position = Vector2(0, 71)
 texture = ExtResource("6_harrington_road_fire")
 centered = false
 script = ExtResource("5_FlagSprite")

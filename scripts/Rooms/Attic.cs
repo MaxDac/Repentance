@@ -117,6 +117,11 @@ public partial class Attic : Room
             await EndOfActTwo();
             return;
         }
+        if (entry == "epilogue")
+        {
+            await Epilogue();
+            return;
+        }
         if (State.HasFlag("attic_intro")) return;
         State.SetFlag("attic_intro");
         await Game.Run(async () =>
@@ -334,5 +339,21 @@ public partial class Attic : Room
         State.SetFlag("attic_night", false);
         State.SetStoryAct(3);
         await Game.ChangeRoom("bedroom", "start");
+    });
+
+    /// <summary>The morning after Act 3: Daniel reads the journal's last entry, which depends on the ending, and puts it back.</summary>
+    private Task Epilogue() => Game.Run(async () =>
+    {
+        await Wait(0.8);
+        await Talk("epilogue");
+        await Game.WalkTo(new Vector2(384, 224));
+        Player.Face(Facing.Right);
+        State.TakeItem("journal");
+        await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
+        await Wait(0.6);
+        await Game.Hud.Fade(1, 2.0);
+        Game.Hud.ShowCaption("The End");
+        // the story is over: keep the game on the caption
+        await new TaskCompletionSource().Task;
     });
 }

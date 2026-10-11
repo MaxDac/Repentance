@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://by5ulb52ksykd"
-path="res://.godot/imported/map_base.png-4e9255db6f9d0238f255596a0456a230.ctex"
+uid="uid://bmmmvo15dela1"
+path="res://.godot/imported/micah_inmate_seated.png-28d72f28db94b6c78092d3336feed5f3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/items/map_base.png"
-dest_files=["res://.godot/imported/map_base.png-4e9255db6f9d0238f255596a0456a230.ctex"]
+source_file="res://assets/art/sprites/micah_inmate_seated.png"
+dest_files=["res://.godot/imported/micah_inmate_seated.png-28d72f28db94b6c78092d3336feed5f3.ctex"]
 
 [params]
 

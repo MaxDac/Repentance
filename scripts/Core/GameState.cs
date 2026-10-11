@@ -51,7 +51,7 @@ public partial class GameState : Node
             EmitSignal(SignalName.Changed);
     }
 
-    public void Reset() => Restore(new[] { PuzzleMigration.SchemaFlag }, System.Array.Empty<string>(), 1);
+    public void Reset() => Restore(new[] { PuzzleMigration.SchemaFlag, PuzzleMigration.Act3SchemaFlag }, System.Array.Empty<string>(), 1);
 
     /// <summary>Copies flags, inventory and act into a save.</summary>
     public void CaptureInto(SaveData data)
