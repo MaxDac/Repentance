@@ -19,6 +19,23 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_eleanor_back_hair_is_slightly_longer(self):
+        paint = painter._long_hair_back
+        bottoms = []
+
+        def record(canvas, *args):
+            paint(canvas, *args)
+            bottoms.append(np.nonzero(canvas.parts_mask("hairback"))[0].max())
+
+        pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
+        with patch.object(painter, "_long_hair_back", side_effect=record):
+            sprites.figure(dict(sprites.ELEANOR_STAGE, hair_back=0.29), pose, sprites.NPC_W, sprites.FH)
+            sprites.figure(sprites.ELEANOR_STAGE, pose, sprites.NPC_W, sprites.FH)
+        self.assertGreater(bottoms[1], bottoms[0])
+        self.assertLessEqual(bottoms[1] - bottoms[0], 3, "extend the back only slightly")
+        self.assertEqual(sprites.ELEANOR_STAGE["hair_front"], 0.34)
+        self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.03)
+
     def test_eleanor_front_locks_remain_in_all_animation_frames(self):
         original = painter._hair_front
         checks = []

@@ -661,9 +661,12 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
     """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
     hc = P(body([0, 0.15 + nod, -0.03]))
     rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2)
-    m, nx, ny, nz = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx, H * 0.14)
+    extension = H * (col.get("hair_back", 0.29) - 0.29) / 2
+    center = (hc[0] - 0.045 * H * sp, hc[1] + extension)
+    ry = H * 0.14 + extension
+    m, nx, ny, nz = c.ellipse(center, rx, ry)
     wave = np.sin(c.Y / 1.7) * 0.9
-    m2, _, _, _ = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx + wave, H * 0.14)
+    m2, _, _, _ = c.ellipse(center, rx + wave, ry)
     top = P(body([0, 0.02 + nod, 0]))[1]
     keep = m2 & (c.Y > top)
     if abs(sp) > 0.15 and cp > -0.25:
