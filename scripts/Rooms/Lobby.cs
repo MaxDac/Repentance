@@ -46,6 +46,11 @@ public partial class Lobby : Room
                 return true;
 
             case ("service_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator"):
+                if (!State.HasFlag("lift_routed"))
+                {
+                    if (!await Game.Hud.Puzzle.Open(PuzzleKind.Lift)) return true;
+                    State.SetFlag("lift_routed");
+                }
                 await Say("Staff elevator. Fifth floor, room 507. Nobody looks twice at a man who uses the back door.");
                 await Game.ChangeRoom("eleanor_room", "lobby");
                 return true;
@@ -56,6 +61,13 @@ public partial class Lobby : Room
                 await Say("Kicking down a door in the lobby. Subtle, Micah.");
                 return true;
 
+            case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                await Game.ChangeRoom("chicago_map", "start");
+                return true;
+            case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator") &&
+                !State.HasFlag("took_brass_box") && !State.HasFlag("club_lead"):
+                await Say("Not yet. I bought a look at room 507. I should collect its clues before chasing the Blue Lantern.");
+                return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern") || State.HasFlag("club_lead"):
                 await Game.ChangeRoom("street", "lobby");
                 return true;

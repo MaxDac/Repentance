@@ -5,8 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Act 2: the alley behind the Harrington Building. A watchman guards the service door and spots anybody who goes for
-/// the fire escape. Burning the trash can sends him inside to phone the fire department; stacking the crates under
-/// the fire escape gets Micah up to Harrington's office window.
+/// the fire escape. Burning the trash can sends him inside; stacking crates and wedging the ladder's jammed catch
+/// gets Micah up to Harrington's office window.
 /// </summary>
 public partial class HarringtonRoad : Room
 {
@@ -89,6 +89,37 @@ public partial class HarringtonRoad : Room
             case ("crates", Verb.Kick):
                 await Say("They're more useful in one piece.");
                 return true;
+            case ("packing_wedge", Verb.Hand):
+                if (Watched)
+                {
+                    await Spotted();
+                    return true;
+                }
+                if (!State.HasFlag("ladder_freed"))
+                {
+                    State.GiveItem("wedge");
+                    State.SetFlag("wedge_taken");
+                    await Say("A tapered packing wedge. Just the thing to hold a spring catch clear.");
+                }
+                return true;
+            case ("ladder_catch", Verb.Look or Verb.Hand):
+                await Say("A spring catch jammed against the ladder. The little diagram says to hold it back while lowering. A wooden wedge would do.");
+                return true;
+            case ("ladder_catch", Verb.UseItem) when item == "wedge":
+                if (Watched)
+                {
+                    await Spotted();
+                    return true;
+                }
+                if (!State.HasFlag("crates_stacked"))
+                {
+                    await Say("The catch is up by the bottom rung. I need those crates stacked to reach it.");
+                    return true;
+                }
+                State.SetFlag("ladder_freed");
+                State.TakeItem("wedge");
+                await Say("The wedge holds the spring catch clear. It stays there; the ladder can come down now.");
+                return true;
 
             case ("fire_escape" or "window", Verb.Hand or Verb.Walk):
                 if (Watched)
@@ -99,6 +130,11 @@ public partial class HarringtonRoad : Room
                 if (!State.HasFlag("crates_stacked"))
                 {
                     await Say("I jumped. I'm fifty-one. The ladder's still up there. I need something to stand on.");
+                    return true;
+                }
+                if (!State.HasFlag("ladder_freed"))
+                {
+                    await Say("I can reach it now, but the spring catch is jammed. That packing wedge could hold it clear.");
                     return true;
                 }
                 await Climb();
@@ -130,11 +166,12 @@ public partial class HarringtonRoad : Room
             await w.MoveTo(new Vector2(176, 196));
         }
         State.SetFlag("watchman_distracted");
-        await Say("He'll be on that telephone for five minutes, explaining a trash can to the fire department. Five minutes is plenty.");
+        await Say("He'll stay inside explaining a trash can to the fire department. Time to sort out that ladder.");
     }
 
     private async Task StackCrates()
     {
+        if (State.HasFlag("crates_stacked")) return;
         await Game.WalkTo(new Vector2(440, 222));
         Player.Face(Facing.Up);
         await Say("*grunt*");

@@ -41,6 +41,10 @@ godot --path . -- --autoplay
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
+- Puzzle close-ups have their own controls, **Reset**, and **Close / Esc**. They are untimed and allow
+  unlimited retries. Unsubmitted settings reset when closed; collected clues remain available.
+- Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be
+  combined with an item on another page.
 - **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Quit to title*. The title screen offers
   *Continue* (most recent save), *New game* and *Load game*.
 
@@ -53,19 +57,27 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when flags, items or rooms are
 renamed: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
+The ten-puzzle expansion preserves completed discoveries in compatible version-3 saves using separate
+original-puzzle and Act 3 schema markers. New saves do not grandfather unfinished puzzles on reload.
+Version-2 saves, including saves made on the puzzle branch before this merge, remain incompatible with
+main's completed Act 3, which removed the temporary ending route.
+An older Act 2 save that skipped room 507 gets a temporary Hotel map marker to recover the card clues.
 
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
-   over the boxes, find the crowbar in the papers and use it on the steamer trunk (the key in the suitcase
-   doesn't fit it). Inside is Micah's journal.
+   over the boxes and find a locked tool tin in the papers. The suitcase's small key opens that tin,
+   not the trunk; its crowbar opens the steamer trunk. Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
    a dollar and a set of lockpicks. Micah won't leave without all three.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
-   staff elevator up to Eleanor's room.
+   staff elevator up to Eleanor's room. Trace its routing diagram and set the three junctions
+   lower, upper, upper to reach room 507.
+   Micah collects the brass box there before departing for the Blue Lantern.
 3. **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet to find the safe, and take the brass box. Open it in the satchel with the hand: a
+   open the closet and enter R 12 / L 31 / R 7 on the safe's close-up controls, then take the brass box.
+   Open it in the satchel with the hand: a
    perfumed, blank calling card and a matchbook from the Blue Lantern.
 4. **Blue Lantern speakeasy**: Micah doesn't know the password and has to bribe Sal (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
@@ -74,7 +86,8 @@ autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
    him Eleanor is "hot stuff" and that he sent her to the nuns.
 6. **The convent** (corridor → cell): Sister Agatha questions Micah, warns him off "that Jezebel", then lets
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
-   the back. Micah won't leave without the mirror.
+   the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
+   mirror and cloth to reveal the symbol. Micah returns the cloth and won't leave before that discovery.
 7. **Outside the convent**: Eleanor, in black, is waiting for him.
 8. **Motel, that night**: Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
    and Micah drops the case.
@@ -85,10 +98,13 @@ autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
    Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
 13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
 14. **Library, after hours**: ask the night librarian about the knot (shown full screen). He wants to know where
-   the mirror came from; Micah won't say, so neither will he, until Micah uses the revolver on him. He hands
+   the mirror came from; Micah won't say, so neither will he. Consult the desk catalogue: match the
+   Celtic triquetra and select Bell's *Rites of the Old Isles*, C-17. The restricted shelves are locked.
+   Micah uses the revolver on the librarian to obtain that book. He hands
    over a book of Celtic rituals, and the library is off limits from then on.
-15. **Office**: read the book (hand on it in the satchel) and an address slips out: the Starlight club is now
-   on the map.
+15. **Office**: read the book's concealed-ink instructions, warm the hotel card on the radiator and combine
+   it with the mirror. Order the reflected fragments lily, leaf, feather to obtain the Club address.
+   The steps can be discovered in a different order; all three clues remain available.
 
 From here the story follows Walkthrough.md:
 
@@ -102,9 +118,11 @@ From here the story follows Walkthrough.md:
 20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
    try Harrington senior.
 21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
-   runs inside to phone the fire department, stack the crates under the fire escape and climb in.
+   runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
+   on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
-   back are a white mask and a cloak.
+   back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
+   heraldic key; set the false-back lock to STAR / SUN / MOON.
 23. **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
    stands among three masked men. **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
@@ -115,9 +133,12 @@ From here the story follows Walkthrough.md:
    the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the leg, or (only if Micah went
    back to Caleb while hunting for Eleanor) walk away (ending 1). Tony sends him to old Harrington's house.
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
-   the door to spot it, take the key, push the coal bin under the bell, wedge it with the tie, then open the door.
-30. **Kitchen and study**: the right desk drawer holds Harrington's ledgers (take them to have something to
-   bargain with).
+   the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
+   tie hammer, release hand; cutting the wire would release the spring. Then open the door.
+30. **Kitchen and study**: optionally take the right drawer's account register and the left drawer's auditor's
+   index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
+   to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
+   ends this opportunity; skipping remains possible and preserves the prison endings.
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times) lower the gun (ending 1). Then talk Eleanor into leaving ("I didn't come all this
    way...", or later "Every time I've seen you...").
@@ -158,6 +179,8 @@ tools/               Python art generator
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
+| `PuzzleRules` / `PuzzleMigration` | Godot-free puzzle validators and one-time legacy-save normalization |
+| `PuzzlePanel` | Modal route, dial, catalogue, cipher, crest, alarm-plan and account-index controls |
 
 ### Adding a room
 
@@ -184,6 +207,7 @@ Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main
 ### Regenerating the art
 
 All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed.
+Regenerate only the new puzzle props, icons and clue plates with `py -3.14 tools\gen_art.py puzzles`.
 There are no imported 3D models: figure skeletons and perspective furniture are painted into PNGs by
 `tools/art/figure.py` and `tools/art/furniture.py`.
 The characters come from `tools/art/figure.py`, a small 3D-ish figure painter whose look is inspired by

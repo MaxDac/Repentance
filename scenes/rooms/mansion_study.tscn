@@ -121,12 +121,12 @@ shape = SubResource("Rect_4")
 [node name="Documents" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "documents"
-DisplayName = "folder"
-LookText = "A folder tied with red tape. \"Harrington Steel - Private\"."
+DisplayName = "account register"
+LookText = "Numbered accounts. \"Harrington Steel - Private. Use auditor's index to locate signed sheets.\""
 WalkTo = Vector2(324, 222)
 Face = 2
-ShowIfFlags = "drawer_right_open"
-HideIfFlags = "took_documents"
+ShowIfFlags = "study_drawer_right_open"
+HideIfFlags = "audit_folder_taken"
 ClickPriority = 2
 monitoring = false
 monitorable = false
@@ -183,7 +183,7 @@ position = Vector2(218, 181)
 texture = ExtResource("10_mansion_study_drawer_left")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "drawer_left_open"
+ShowIfFlags = "study_drawer_left_open"
 
 [node name="DrawerRight" type="Sprite2D" parent="."]
 z_index = -9
@@ -191,8 +191,8 @@ position = Vector2(301, 181)
 texture = ExtResource("11_mansion_study_drawer_right")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "drawer_right_open"
-HideIfFlags = "took_documents"
+ShowIfFlags = "study_drawer_right_open"
+HideIfFlags = "audit_folder_taken"
 
 [node name="DrawerEmpty" type="Sprite2D" parent="."]
 z_index = -9
@@ -200,7 +200,7 @@ position = Vector2(301, 181)
 texture = ExtResource("12_mansion_study_drawer_empty")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "drawer_right_open,took_documents"
+ShowIfFlags = "study_drawer_right_open,audit_folder_taken"
 
 [node name="ClosetOpen" type="Sprite2D" parent="."]
 z_index = -9
@@ -208,4 +208,4 @@ position = Vector2(152, 61)
 texture = ExtResource("13_mansion_study_closet")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "closet_open"
+ShowIfFlags = "study_closet_open"

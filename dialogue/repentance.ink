@@ -176,6 +176,7 @@ BELLBOY: And no, I don't know it. But a guy like that leaves matches everywhere.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: Front desk won't give you the time of day, never mind a key. But that dollar buys you the back way.
+BELLBOY: Staff lift's in routing mode. Diagram by the service door. Trace the branches to 507 before you dispatch it.
 BELLBOY: Staff door, by the palm. Service elevator to five, room 507. Maids leave it on the latch.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
@@ -358,7 +359,7 @@ MOC: How edifying. And what does a gentleman like you read?
 * [Midsummer fires. Oak groves. Wells you whisper your sins into.]
     MOC: Farmers' tales. Why would a man like you care what farmers did on the longest night of the year?
     -> opts
-* [A book from the public library. Your address was tucked inside it.]
+* [A book from the public library. It helped me decipher a card with your address.]
     MOC: We are a club. People who like us write our address down. Why are you asking, Mr...?
     MICAH: Jones. Micah Jones.
     -> opts
@@ -491,10 +492,10 @@ LIBRARIAN: I've nothing to say to a man who won't tell me where he gets his mirr
 === librarian_threat ===
 MICAH: Let's try that again. Slower, this time.
 LIBRARIAN: Good Lord. Put that away! This is a library!
-MICAH: Then keep your voice down. The knot.
+MICAH: Then keep your voice down. Bell's "Rites of the Old Isles", C-17. The book about this knot.
 LIBRARIAN: C-Celtic. A triquetra. Old, very old, from before the saints ever reached Ireland.
 LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
-LIBRARIAN: There's a book. "Rites of the Old Isles." A rare thing. We had a request for it just last month.
+LIBRARIAN: Y-yes. Bell's book, C-17. A rare thing. We had a request for it just last month.
 LIBRARIAN: Take it. Take it and go away, and please don't come back.
 ~ give_item("book")
 MICAH: Pleasure doing business. Late fees are on me.
