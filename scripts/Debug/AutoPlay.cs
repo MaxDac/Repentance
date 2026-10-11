@@ -17,6 +17,8 @@ public class AutoPlay
     private readonly List<string> _failures = new();
     private string _dir = "";
     private int _shot;
+    private readonly Dictionary<string, int> _poseCounts = new();
+    private readonly Dictionary<PosePlayback, int> _lastPoseFrame = new();
     private string[] _prefer = Array.Empty<string>();
     private readonly Dictionary<string, string[]> _offered = new();
     private bool _theEndShot;
@@ -26,6 +28,7 @@ public class AutoPlay
     public async Task Run(Game game)
     {
         _game = game;
+        PosePlayback.FrameObserver = ObservePose;
         _dir = ProjectSettings.GlobalizePath("res://screenshots");
         DirAccess.MakeDirRecursiveAbsolute(_dir);
         // keep Godot from importing the screenshots
@@ -56,6 +59,8 @@ public class AutoPlay
         try
         {
             var gs = GameState.Instance;
+            await ContentSettingsTest(game);
+            if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
             bool autosave = game.AutosaveEnabled;
             game.AutosaveEnabled = false;
             await PuzzleRecoveryTest(game);
@@ -72,6 +77,7 @@ public class AutoPlay
             Check(game.Player.Character == "daniel", "prologue plays as Daniel");
             await Shot("attic");
             await WheelTest(game);
+            await PosePlaybackTest(game);
             await game.Perform(Verb.Talk, "hatch");
             await game.Perform(Verb.Hand, "sheet");
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
@@ -435,6 +441,8 @@ public class AutoPlay
             await Shot("office_act3_desk");
             await stage;
             await WaitIdle(game);
+            Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+            Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
             Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
             _prefer = new[] { "Visit Caleb", "Refuse the cross" };
             int offers = _crossOffers;
@@ -657,10 +665,132 @@ public class AutoPlay
         {
             _failures.Add(ex.ToString());
         }
+        finally
+        {
+            GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
+            PosePlayback.FrameObserver = null;
+            Engine.TimeScale = 1;
+            game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        }
+    }
 
-        GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
-        Engine.TimeScale = 1;
-        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+    private async Task ContentSettingsTest(Game game)
+    {
+        const string path = "user://autoplay_settings.cfg";
+        if (FileAccess.FileExists(path))
+            Check(DirAccess.RemoveAbsolute(path) == Error.Ok, "removed only the isolated test settings");
+        Check(game.Settings.Load() && !game.Settings.NudityEnabled, "nudity defaults to off");
+        game.Hud.ShowTitle(true);
+        var title = game.Hud.Menu.OpenTitle();
+        Check(game.Hud.Menu.Press("Settings"), "title offers Settings");
+        await Observe(0.1);
+        Check(game.Hud.Menu.Press("Nudity: Off"), "settings offers explicit nudity opt-in");
+        await Observe(0.1);
+        Check(game.Settings.NudityEnabled, "nudity enabled through title settings");
+        var reloaded = new GameSettings(path);
+        Check(reloaded.Load() && reloaded.NudityEnabled, "nudity persists across settings instances");
+        await Shot("settings_nudity_on");
+        PressKey(Key.Escape);
+        await Observe(0.1);
+        Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
+        await title;
+        game.Hud.ShowTitle(false);
+
+        foreach (int act in new[] { 2, 3 })
+        {
+            var save = new SaveData { Room = "club_stage", StoryAct = act, X = 86, Y = 208 };
+            await game.LoadGame(save);
+            var eleanor = game.Room!.FindActor("eleanor")!;
+            var position = eleanor.Position;
+            Check(eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"), $"Act {act}: opted-in sprite on load");
+            await Shot($"eleanor_act{act}_nudity_on");
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(game.GetTree().Paused && game.Hud.Menu.Press("Settings"), $"Act {act}: pause offers Settings");
+            await Observe(0.1);
+            Check(game.Hud.Menu.Press("Nudity: On"), $"Act {act}: nudity can be disabled");
+            await Observe(0.1);
+            Check(!game.Settings.NudityEnabled &&
+                eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png") &&
+                eleanor.Position == position && eleanor.Frames == 11,
+                $"Act {act}: disabling immediately restores dressed Eleanor without moving her");
+            Check(reloaded.Load() && !reloaded.NudityEnabled, $"Act {act}: opt-out persists");
+            await Shot($"eleanor_act{act}_nudity_off");
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(!game.GetTree().Paused && !game.Hud.Menu.IsOpen, $"Act {act}: back from settings resumes correctly");
+            await game.LoadGame(save);
+            Check(game.Room!.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png"),
+                $"Act {act}: loading a save respects the current opt-out");
+            Check(game.Settings.SetNudity(true), $"Act {act}: re-enabled nudity");
+            Check(game.Room.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"),
+                $"Act {act}: enabling immediately restores the opted-in variant");
+        }
+        Check(game.Settings.SetNudity(false), "reset isolated preference");
+        await game.ChangeRoom("attic", "settings_test");
+        await WaitIdle(game);
+        GameState.Instance.Reset();
+        DialogueManager.Instance.ResetInk();
+        foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
+    }
+
+    private async Task ObservePose(PosePlayback pose)
+    {
+        string name = pose.Action!;
+        int frame = pose.Frame;
+        if (frame == 0)
+        {
+            _poseCounts[name] = _poseCounts.GetValueOrDefault(name) + 1;
+            _lastPoseFrame[pose] = -1;
+        }
+        Check(frame == _lastPoseFrame.GetValueOrDefault(pose, -1) + 1, $"{name}: ordered frame {frame}");
+        _lastPoseFrame[pose] = frame;
+        await _game.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+        Check(pose.Action == name && pose.Frame == frame, $"{name}: frame {frame} held for rendering");
+        if (name == "eleanor_sheet_rise")
+            Check(_game.Room!.GetNode<Sprite2D>("EleanorFigure").ZIndex == (frame >= 4 ? 2 : 0),
+                $"{name}: frame {frame} is on the correct side of the bed rail");
+        var image = _game.GetViewport().GetTexture().GetImage();
+        Check(image.SavePng($"{_dir}/{++_shot:00}_pose_{name}_{frame}.png") == Error.Ok, $"{name}: saved frame {frame}");
+    }
+
+    private async Task PosePlaybackTest(Game game)
+    {
+        var player = game.Player;
+        var character = player.Character;
+        var observer = PosePlayback.FrameObserver;
+        PosePlayback.FrameObserver = null;
+        var action = player.PlayPose("micah_recover");
+        await game.Wait(0.2);
+        player.SetCharacter(character);
+        Check(!await action && !player.Poses.Active, "character swap cancels awaited playback and restores animation");
+        player.SetPose("micah_supine");
+        player.Face(Facing.Right);
+        var right = player.HeadPosition - player.GlobalPosition;
+        player.Face(Facing.Left);
+        var left = player.HeadPosition - player.GlobalPosition;
+        Check(Mathf.IsEqualApprox(right.X, -left.X) && Mathf.IsEqualApprox(right.Y, left.Y), "wide-pose speech mirrors around the contact anchor");
+        var first = player.PlayPose("micah_recover");
+        var second = player.PlayPose("micah_kneel_rise");
+        Check(!await first, "a new pose cancels the previous await");
+        player.Stop();
+        Check(!await second && !player.Poses.Active, "stopping restores the sheet and cancels playback");
+        var actor = new Actor { Id = "pose_test", Texture = GD.Load<Texture2D>("res://assets/art/sprites/sal.png"), DepthScale = false };
+        game.Room!.World.AddChild(actor);
+        actor.SetPose("micah_supine");
+        actor.FaceLeft(false);
+        var rightBounds = actor.Bounds;
+        actor.FaceLeft(true);
+        Check(Mathf.IsEqualApprox(actor.Bounds.Size.X, rightBounds.Size.X), "actor wide-pose hit bounds survive mirroring");
+        Check(actor.Contains(actor.GlobalPosition + actor.Poses!.Bounds.GetCenter()), "actor hit testing uses the displayed pose");
+        var leaving = actor.PlayPose("micah_recover");
+        game.Room.World.RemoveChild(actor);
+        Check(!await leaving, "actor removal cancels playback");
+        actor.QueueFree();
+        player.SetCharacter(character);
+        PosePlayback.FrameObserver = observer;
     }
 
     public async Task RunPauseTests(Game game)

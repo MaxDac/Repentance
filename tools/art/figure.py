@@ -385,7 +385,7 @@ def figure(spec, ps, fw=56, fh=80):
             d2 = np.array([s * math.sin(orr) * 0.3, math.cos(fr + er), math.sin(fr + er)])
             d2 /= np.linalg.norm(d2)
             wr = el + 0.145 * d2
-            hand = wr + 0.045 * d2
+            hand = wr + 0.036 * d2
         arm_pts[s] = (sh, el, wr, hand)
         Ds = P(sh)[2]
 
@@ -398,7 +398,7 @@ def figure(spec, ps, fw=56, fh=80):
             if col.get("cuff") and fore != skin:
                 c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
             if hand is not None:
-                c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.025), skin, f"hand{s}", dither=False)
+                c.put(c.capsule(P(wr), P(hand), H * 0.025, H * 0.021), skin, f"hand{s}", dither=False)
         add(2.0 + Ds + 0.05 * abs(cp), arm)
 
     if col.get("cloak"):
@@ -504,7 +504,7 @@ def _head(c, col, P, body, H, cp, sp, nod):
     """Skull, jaw, profile features, ear, hair and hat (the painted face dots come later from _face)."""
     skin = col["skin"]
     hx_, hy_, _ = P(body([0.0, 0.074 + nod, 0.008]))
-    hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
+    hrx = H * HEAD * math.sqrt((col.get("face_w", 0.048) * cp) ** 2 + (0.056 * sp) ** 2)
     hry = H * 0.077 * HEAD
     fs = math.copysign(1.0, sp) if abs(sp) > 1e-3 else 0.0
     facing = cp > -0.25
@@ -517,7 +517,7 @@ def _head(c, col, P, body, H, cp, sp, nod):
         oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
         c.put(c.ellipse(oc, orx, ory), skin, "head", dither=False)
     c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
-    jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), 0.039 * HEAD, 0.047 * HEAD, 0.05 * HEAD)
+    jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), col.get("jaw_w", 0.039) * HEAD, 0.044 * HEAD, 0.05 * HEAD)
     c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
     if abs(sp) > 0.3:
         ys = 0.074 + nod
@@ -660,10 +660,13 @@ def _cloak(c, cloak, body, P, legs, H, sw, cp, sp):
 def _long_hair_back(c, col, P, body, H, cp, sp, nod):
     """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
     hc = P(body([0, 0.15 + nod, -0.03]))
-    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2)
-    m, nx, ny, nz = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx, H * 0.14)
+    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2) * col.get("hair_back_width", 1.0)
+    extension = H * (col.get("hair_back", 0.29) - 0.29) / 2
+    center = (hc[0] - 0.045 * H * sp, hc[1] + extension)
+    ry = H * 0.14 + extension
+    m, nx, ny, nz = c.ellipse(center, rx, ry)
     wave = np.sin(c.Y / 1.7) * 0.9
-    m2, _, _, _ = c.ellipse((hc[0] - 0.045 * H * sp, hc[1]), rx + wave, H * 0.14)
+    m2, _, _, _ = c.ellipse(center, rx + wave, ry)
     top = P(body([0, 0.02 + nod, 0]))[1]
     keep = m2 & (c.Y > top)
     if abs(sp) > 0.15 and cp > -0.25:
@@ -671,6 +674,8 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
         hx0, hy0 = P(body([0, 0.077 + nod, 0.0]))[:2]
         keep &= ~(((c.X - hx0) * math.copysign(1.0, sp) > -1.5) & (c.Y > hy0 + 1))
     c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False)
+    upper = c.parts_mask("hairback") & (c.Y < P(body([0, 0.20 + nod, 0]))[1])
+    c.bias[upper] += col.get("hair_back_shade", 0)
 
 
 def _hair_front(c, col, P, body, H, cp, sp, nod):
@@ -1069,6 +1074,89 @@ def sheet(rows, fw, fh, cols=None):
         for i, im in enumerate(row):
             out.paste(im, (i * fw, r * fh))
     return out
+
+
+def grounded_joints(joints, fw=192):
+    points = [np.array(p, float) for p in joints]
+    shift = np.array([fw / 2 + 2 - points[4][0], 0])
+    return [p + shift for p in points]
+
+
+def action_figure(spec, joints, fw=192, fh=96):
+    """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately."""
+    H = spec["h"]
+    c = Canvas(fw, fh)
+    # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
+    hip, shoulder, head, knee, ankle, elbow, hand = grounded_joints(joints, fw)
+    up = shoulder - hip
+    up /= np.linalg.norm(up)
+    across = np.array([-up[1], up[0]])
+    torso, skin = spec["torso"], spec["skin"]
+    pants = spec.get("pants", torso)
+
+    def limb(a, b, ra, rb, col, part):
+        c.put(c.capsule(a, b, ra, rb), col, part, dither=col != skin)
+
+    for far in (True, False):
+        off = np.array([-3, -2]) if far else np.zeros(2)
+        part = "farleg" if far else "leg"
+        limb(hip + off, knee + off, 4.3, 3.1, pants, part)
+        limb(knee + off, ankle + off, 3.1, 2.4, pants, part)
+        limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
+        if far:
+            limb(shoulder + off, elbow + off, 3, 2.5, spec.get("sleeves", torso), "fararm")
+            limb(elbow + off, hand + off, 2.5, 2, spec.get("sleeves", torso), "fararm")
+    waist = hip + up * 10
+    limb(hip, waist, 6, 5, torso, "torso")
+    limb(waist, shoulder, 5, 6, torso, "torso")
+    coat = spec.get("coat")
+    if coat:
+        tail = hip + (knee - hip) * min(1, (coat["hem"] - 0.5) / 0.24)
+        pts = [waist - across * 5, hip - across * 6, tail - across * 5,
+               tail + across * 5, hip + across * 6, waist + across * 5]
+        c.put(c.poly(pts), coat["col"], "coat")
+    # Shirt opening and tie follow the trunk, not the screen's vertical axis.
+    if not spec.get("cloak"):
+        shirt = shoulder - up * 5
+        limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
+        tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)
+        if tie:
+            limb(shoulder - up * 2, shoulder - up * 9, 0.7, 0.6, tie, "tie")
+    limb(shoulder + across * 2, elbow, 3.2, 2.7, spec.get("sleeves", torso), "arm")
+    limb(elbow, hand - (hand - elbow) * 0.12, 2.7, 2, spec.get("sleeves", torso), "arm")
+    limb(hand - (hand - elbow) * 0.12, hand, 2, 1.7, skin, "hand")
+    if spec.get("cloak"):
+        points = [shoulder - across * 8, hip - across * 10, knee - across * 6,
+                  ankle + (3, 0), knee + across * 7, hip + across * 10, shoulder + across * 8]
+        m = c.put(c.poly(points, curve=0.6), spec["cloak"]["col"], "cloak")
+        seam = c.capsule(shoulder, hip + (knee - hip) * 0.6, 0.6, 0.8)[0]
+        c.bias[m & seam] += 1
+    neck = shoulder + (head - shoulder) * 0.25
+    limb(shoulder, neck, 2.3, 2, skin, "neck")
+    img = c.render(shadow_box=((fw / 2, 94), 36, 1.2))
+    # The screen-space head painter retains each character's hat, hair and mask.
+    hc = Canvas(64, 64)
+    phi = math.radians(80)
+    cp, sp = math.cos(phi), math.sin(phi)
+
+    def P(p):
+        x, y, z = p
+        return (32 + (-x * cp + z * sp) * H, 40 + (y - 0.2) * H + (x * sp + z * cp) * H * PITCH, 0)
+    ident = lambda p: np.array(p, float)
+    _head(hc, spec, P, ident, H, cp, sp, 0)
+    _face(hc, spec, P, ident, H, cp, sp, 0, 0)
+    if spec.get("mask"):
+        _mask(hc, spec, P, ident, H, cp, sp, 0)
+    hp = np.array(P([0, 0.074, 0.008])[:2])
+    direction = head - neck
+    angle = math.degrees(math.atan2(direction[0], -direction[1]))
+    lt = math.radians(angle)
+    light = np.array([math.cos(lt) * LIGHT[0] + math.sin(lt) * LIGHT[1],
+                      -math.sin(lt) * LIGHT[0] + math.cos(lt) * LIGHT[1], LIGHT[2]])
+    painted = hc.render(light=light).rotate(-angle, resample=Image.Resampling.NEAREST,
+                                           center=tuple(hp))
+    img.alpha_composite(painted, (round(head[0] - hp[0]), round(head[1] - hp[1])))
+    return img, tuple(head)
 
 def kneel_figure(spec, fw=64, fh=96, phi=80, head_turn=105, reach=0.95, floor=None):
     """A figure down on hands and knees (beaten to the ground), seen from the side: vertical thighs, shins flat on
