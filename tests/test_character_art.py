@@ -19,6 +19,21 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_eleanor_back_hair_has_a_little_more_volume(self):
+        paint = painter._long_hair_back
+        edges = []
+
+        def record(canvas, *args):
+            paint(canvas, *args)
+            edges.append(np.nonzero(canvas.parts_mask("hairback"))[1].min())
+
+        pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
+        with patch.object(painter, "_long_hair_back", side_effect=record):
+            sprites.figure(dict(sprites.ELEANOR_STAGE, hair_back_width=1.0), pose, sprites.NPC_W, sprites.FH)
+            sprites.figure(sprites.ELEANOR_STAGE, pose, sprites.NPC_W, sprites.FH)
+        self.assertLess(edges[1], edges[0])
+        self.assertLessEqual(edges[0] - edges[1], 2, "add only a pixel or two along the back edge")
+
     def test_eleanor_back_hair_is_slightly_longer(self):
         paint = painter._long_hair_back
         bottoms = []

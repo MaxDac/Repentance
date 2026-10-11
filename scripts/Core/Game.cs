@@ -32,9 +32,24 @@ public partial class Game : Node
     private string _roomScene = "";
     private double _playtime;
     private bool _autosavePending;
+    private TaskCompletionSource? _resume;
     private readonly Random _rng = new();
 
     public bool Busy => _busy > 0;
+    public bool IsPaused => _resume != null;
+
+    public void TogglePause()
+    {
+        if (Room == null || _onTitle || Hud.TitleVisible || Hud.Menu.IsOpen) return;
+        if (!IsPaused && GetTree().Paused) return;
+        var resume = _resume;
+        _resume = resume == null ? new TaskCompletionSource() : null;
+        Hud.ShowPause(IsPaused);
+        GetTree().Paused = IsPaused;
+        resume?.TrySetResult();
+    }
+
+    public Task WaitUntilResumed() => _resume?.Task ?? Task.CompletedTask;
 
     /// <summary>Writes the autosave slot after every room change (turned off by tests that don't want it).</summary>
     public bool AutosaveEnabled { get; set; } = true;
@@ -50,7 +65,8 @@ public partial class Game : Node
     {
         var args = OS.GetCmdlineUserArgs();
         bool settingsTest = Array.IndexOf(args, "--settings-test") >= 0;
-        Settings = new GameSettings(settingsTest || Array.IndexOf(args, "--autoplay") >= 0
+        bool pauseTest = Array.IndexOf(args, "--pause-test") >= 0;
+        Settings = new GameSettings(settingsTest || pauseTest || Array.IndexOf(args, "--autoplay") >= 0
             ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
         _roomHost = new Node2D { Name = "RoomHost" };
@@ -65,6 +81,11 @@ public partial class Game : Node
         {
             if (a.StartsWith("--room=")) StartRoom = a[7..];
             if (a.StartsWith("--entry=")) StartEntry = a[8..];
+        }
+        if (pauseTest)
+        {
+            await new AutoPlay().RunPauseTests(this);
+            return;
         }
         if (settingsTest || Array.IndexOf(args, "--autoplay") >= 0)
         {
@@ -96,6 +117,7 @@ public partial class Game : Node
 
     public override void _UnhandledInput(InputEvent e)
     {
+        if (IsPaused) return;
         if (e.IsActionPressed("ui_cancel"))
         {
             GetViewport().SetInputAsHandled();
@@ -154,6 +176,7 @@ public partial class Game : Node
 
     private async void OnItemClicked(string item, bool right, Vector2 pos)
     {
+        if (IsPaused) return;
         if (_skipSpeech != null) { _skipSpeech.TrySetResult(); return; }
         if (Busy || Hud.Wheel.IsOpen) return;
         if (right)
@@ -456,7 +479,7 @@ public partial class Game : Node
 
     public async Task Wait(double seconds)
     {
-        var timer = GetTree().CreateTimer(seconds);
+        var timer = GetTree().CreateTimer(seconds, processAlways: false);
         await ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
     }
 

@@ -149,7 +149,8 @@ ELEANOR_STAGE_CLOTHED = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", ski
 # hand lowered over her lap, the other arm hanging at her side.
 ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
                      eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e4b898", neckline=None,
-                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, hair_bulge=0.03, hair_back=0.32,
+                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, hair_bulge=0.03,
+                     hair_back=0.32, hair_back_width=1.12,
                      front_line=(0.36, 0.53), rear=(0.04, 0.05),
                      seamless=("torso", "leg1", "leg-1"), decals=[])
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.

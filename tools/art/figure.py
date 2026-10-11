@@ -660,7 +660,7 @@ def _cloak(c, cloak, body, P, legs, H, sw, cp, sp):
 def _long_hair_back(c, col, P, body, H, cp, sp, nod):
     """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
     hc = P(body([0, 0.15 + nod, -0.03]))
-    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2)
+    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2) * col.get("hair_back_width", 1.0)
     extension = H * (col.get("hair_back", 0.29) - 0.29) / 2
     center = (hc[0] - 0.045 * H * sp, hc[1] + extension)
     ry = H * 0.14 + extension
