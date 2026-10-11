@@ -1388,7 +1388,6 @@ def _bed_front(img, R):
     for x0_, hgt in ((x0 - 4, 36), (x1, 62)):
         p = R.P(x0_ + 2, hgt, z0 + 1)
         d.ellipse([p[0] - 3, p[1] - 6, p[0] + 3, p[1]], fill=WAL_L, outline=WAL_D)
-    R.line(img, (x0 - 4, 12, z1 + 4), (x1 + 4, 12, z1 + 4), WAL_D)  # the side rail under the coverlet's hem
     R.line(img, (x0 - 2, 4, z1 + 3), (x1 + 2, 4, z1 + 3), WAL)
 
 def paint_bedroom(bed=None):

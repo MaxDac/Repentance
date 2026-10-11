@@ -273,6 +273,18 @@ class SceneImprovementsTests(unittest.TestCase):
         current = np.asarray(mansion.paint_bedroom("eleanor"))
         np.testing.assert_array_equal(current[foreground], original[foreground])
 
+    def test_mansion_bed_has_no_side_rail_across_the_bedding(self):
+        R = mansion.Room3D(mansion.BFL, 240, 100)
+        mask = Image.new("RGBA", (480, 270))
+        mansion._bed_front(mask, R)
+        alpha = np.asarray(mask.getchannel("A")) == 255
+        x0, x1, z1 = mansion.BED["x0"], mansion.BED["x1"], mansion.BED["z1"]
+        left, right = R.P(x0 + 1, 0, z1)[0], R.P(x1 - 1, 0, z1)[0]
+        top_of_base = int(R.P(x0, 5, z1 + 3)[1])
+        bottom_of_cover = int(R.P(x0, 24, z1 + 1)[1])
+        between_posts = alpha[bottom_of_cover:top_of_base, int(left) + 1:int(right)]
+        self.assertFalse(between_posts.any(), "no frame rail may cross the hanging bedding")
+
     def test_bed_sprites_reconstruct_both_room_states(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
         base = mansion.paint_bedroom()
