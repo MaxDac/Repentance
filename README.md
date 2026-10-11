@@ -158,7 +158,8 @@ From here the story follows Walkthrough.md:
 32. **The escape**: in the kitchen, optionally turn on the gas and light the candle; the house blows up behind them.
 33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and ledgers or explosion); 3 out of town
    alone (not convinced, ledgers or explosion); 4 prison, Eleanor visits (convinced, nothing to bargain with);
-   5 prison, Caleb visits. Each ends Act Three; the next morning Daniel puts the journal back in the trunk. *The End.*
+   5 prison, Caleb visits. Each ends Act Three; the next morning Daniel keeps the journal for Leo if Micah returned
+   to Rose, saying "maybe Leo would like to read it some day". Otherwise, he puts it back in the trunk. *The End.*
 
 ## Project layout
 

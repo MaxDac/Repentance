@@ -341,15 +341,18 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    /// <summary>The morning after Act 3: Daniel reads the journal's last entry, which depends on the ending, and puts it back.</summary>
+    /// <summary>The morning after Act 3: Daniel reads the last entry and keeps the journal for Leo only if Micah returned to Rose.</summary>
     private Task Epilogue() => Game.Run(async () =>
     {
         await Wait(0.8);
         await Talk("epilogue");
-        await Game.WalkTo(new Vector2(384, 224));
-        Player.Face(Facing.Right);
-        State.TakeItem("journal");
-        await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
+        if (!State.HasFlag("ending_1"))
+        {
+            await Game.WalkTo(new Vector2(384, 224));
+            Player.Face(Facing.Right);
+            State.TakeItem("journal");
+            await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
+        }
         await Wait(0.6);
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.ShowCaption("The End");
