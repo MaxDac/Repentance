@@ -1,4 +1,6 @@
 """A cheap roadside motel room in flat, dingy daytime light."""
+import math
+import numpy as np
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
                      floor_boards, text)
@@ -389,7 +391,7 @@ def bed_night(img, rails=True):
 def bed_rails_night(img):
     X0, X1, Z0, Z1 = 52, 140, 4, 42
     d = ImageDraw.Draw(img)
-    R.line(img, (X0, 12, Z1), (X1, 12, Z1), IRON, 2)
+    # No near side rail: the hanging sheet hides it, and drawn in front it read as a stray floor line.
     for x, top_, mid in ((X0, 30, 20), (X1, 46, 32)):
         R.line(img, (x, 0, Z1), (x, top_, Z1), IRON, 2)
         R.line(img, (x, top_, Z0), (x, top_, Z1), IRON, 2)
@@ -405,6 +407,55 @@ def bed_rails_night(img):
 ELEANOR_ORIGIN = (110, 112)
 
 
+# Eleanor's legs under the cover, hip to toes, in screen space at mid-mattress depth:
+# the near leg first, the far one a little deeper (higher on screen) and to the right.
+LEGS = [(122, 123), (113, 121), (102, 120), (93, 122), (86, 123), (81, 121)]
+FAR_LEG = [(x + 3, y - 5) for x, y in LEGS]
+# The near head post; Eleanor's lap sheet must stop behind it rather than hang through the frame.
+HEAD_POST_X = 134
+
+
+def _leg_height(path, xx, yy, radius):
+    distance = np.full(xx.shape, np.inf)
+    along = np.zeros(xx.shape)
+    lengths = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path, path[1:])]
+    travelled, total = 0.0, sum(lengths)
+    for a, b, length in zip(path, path[1:], lengths):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        t = np.clip(((xx - a[0]) * dx + (yy - a[1]) * dy) / length ** 2, 0, 1)
+        dist = np.hypot(xx - a[0] - t * dx, yy - a[1] - t * dy)
+        nearest = dist < distance
+        along[nearest] = (travelled + t * length)[nearest] / total
+        distance = np.minimum(distance, dist)
+        travelled += length
+    # Thighs are fuller than shins; the feet lift the cover again at the far end.
+    girth = radius * (1.15 - 0.45 * along + 0.35 * np.exp(-((along - 0.97) / 0.06) ** 2))
+    return np.exp(-(distance / girth) ** 2), distance, girth
+
+
+def body_mound(cloth, legs, radius=5.0, lift=1.2):
+    """Shade leg-shaped height fields into flat linen: lamp-facing slopes lift, near slopes fall into shadow."""
+    rgba = np.asarray(cloth).astype(float)
+    h, w = rgba.shape[:2]
+    yy, xx = np.mgrid[:h, :w].astype(float)
+    fields = [_leg_height(path, xx, yy, radius) for path in legs]
+    # Where the legs overlap the higher one wins, leaving a shallow valley between them.
+    height = np.max([f[0] for f in fields], axis=0) * lift
+    gy, gx = np.gradient(height)
+    shade = 22 * height + 150 * gy - 40 * gx
+    for near, far in zip(legs, legs[1:]):
+        # The cover sags into a crease between neighbouring legs.
+        gap, _, _ = _leg_height([((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) for a, b in zip(near, far)],
+                                xx, yy, 1.2)
+        shade -= 12 * gap
+    # The cover pulls taut over the near shin and drops a soft shadow along the near side.
+    _, distance, girth = fields[0]
+    shade -= 16 * np.exp(-((distance - girth * 1.25) / 1.5) ** 2) * (yy > np.interp(xx, *zip(*sorted(legs[0]))))
+    from .mansion import SHEET_FOLD, SHEET_LIT
+    rgba[:, :, :3] = np.clip(rgba[:, :, :3] + shade[:, :, None], SHEET_FOLD, SHEET_LIT)
+    return Image.fromarray(rgba.astype("uint8"), "RGBA")
+
+
 def white_bed_linen(img):
     from .mansion import linen_surface, SHEET, SHEET_SIDE
     for outline, center in (
@@ -416,6 +467,7 @@ def white_bed_linen(img):
         pillow = linen_surface((W, H), outline, [
             ([(125, center[1] + 4), (130, center[1] + 5), (135, center[1] + 2)], 1.1, 18),
         ], SHEET, loft=[(*center, 6, 5, 14)])
+        ImageDraw.Draw(pillow).rectangle([HEAD_POST_X, 0, W, H], fill=(0, 0, 0, 0))
         img.paste(pillow, (0, TOP), pillow)
     # Screen coordinates follow the projected mattress: the lap rises at the head,
     # then the sheet turns over the near edge and hangs in unequal scallops.
@@ -430,8 +482,8 @@ def white_bed_linen(img):
         ([(123, 129), (119, 138), (120, 148), (117, 154)], 1.7, 22),
     ], SHEET_SIDE, falloff=0.85)
     top = linen_surface((W, H), [
-        (55, 118), (65, 115), (74, 116), (82, 112), (91, 114),
-        (102, 112), (113, 116), (119, 116), (127, 113), (133, 117),
+        (55, 118), (65, 115), (74, 116), (82, 113), (87, 112), (92, 109),
+        (99, 106), (107, 105), (114, 107), (120, 111), (127, 113), (133, 117),
         (132, 128), (122, 132), (112, 131), (99, 134), (86, 131),
         (75, 132), (64, 130), (53, 133),
     ], [
@@ -440,9 +492,9 @@ def white_bed_linen(img):
         ([(102, 115), (96, 120), (98, 126), (107, 130)], 1.6, 25),
         ([(120, 119), (113, 123), (112, 128)], 1.5, 20),
         ([(61, 128), (68, 127), (73, 129)], 1.0, 14),
-    ], SHEET, falloff=0.35, loft=[(84, 117, 10, 4, 12), (104, 119, 10, 5, 8)])
+    ], SHEET, falloff=0.35)
     img.paste(side, (0, TOP), side)
-    img.paste(top, (0, TOP), top)
+    img.paste(body_mound(top, [LEGS, FAR_LEG]), (0, TOP), top)
     # Cotton compressed under the seated hip and between the two pillows.
     shadow(img, "ellipse", [120, 145, 138, 157], 0.25, 2)
 
@@ -451,6 +503,10 @@ def sleeper(img):
     from PIL import ImageOps
     from .mansion import _eleanor_in_bed
     eleanor = ImageOps.mirror(_eleanor_in_bed())
+    # Trim the lap sheet's spill past the near head post so the iron frame stays clean.
+    alpha = eleanor.getchannel("A")
+    ImageDraw.Draw(alpha).rectangle([HEAD_POST_X - ELEANOR_ORIGIN[0], 20, eleanor.width, eleanor.height], fill=0)
+    eleanor.putalpha(alpha)
     img.paste(eleanor, ELEANOR_ORIGIN, eleanor)
 
 def nightstand_night(img):

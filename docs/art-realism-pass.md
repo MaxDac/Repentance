@@ -64,6 +64,12 @@ GPT-6.1 Sol, Claude Opus 5.5, and Grok 4.7 independently implemented painters an
 
 The selected cotton adds 137 opaque pixels beyond the old standing-body clip; its lap spans 30 pixels versus 21 at the upper torso. Padding the unchanged figure makes motel origin `(110,112)` a net five-pixel rightward/two-pixel upward displacement from `(111,114)`. Both mansion overlays remain `120x83` at `(296,136)`, so the scene needs no crop adjustment. The five regenerated room PNGs are the bedding asset changes; no PNG is hand-edited and no motel stand-up action is activated.
 
+### Motel bed follow-up: legs, floor line, head frame
+
+- **Legs under the cover:** `motel.body_mound` shades two leg-shaped height fields (`LEGS`, near, and `FAR_LEG`, offset 3 px right and 5 px back) into the top linen. Each leg runs hip to toes over about three quarters of the mattress, with fuller thighs and a small foot lift. Lamp-facing slopes brighten, near slopes fall into a soft contact shadow, and a crease sits between the two legs. The top silhouette rises over the knees. Highlights are clamped to the linen palette, so quantization cannot add warm speckles. The old fixed lofts were removed.
+- **Floor line:** the near side rail is no longer drawn in `bed_rails_night`. The hanging sheet hides the rail, and when it was drawn in the foreground layer it read as a dark line near the floor. The posts and head/foot rails are unchanged.
+- **Head frame:** the pillows and Eleanor's lap sheet are trimmed at `HEAD_POST_X = 134`, so no cotton hangs past the near head post. This is motel-only; the shared `mansion._sheet_on` is untouched, and the motel figure still matches the mansion figure outside that strip.
+
 The preserved Harrington painter also needed its missing local `PIL.Image` import before regeneration. `harrington_fall.png` and its anchor metadata now start on the exact NPC idle frame and finish on the existing held prone shot; this is not a new action or redesign.
 
 Reports, all three candidate previews, the rejected baseline, comparison contact sheets, and final runtime evidence are retained in the coordinating session's artifacts rather than committed to the game. Passing checks is not user visual approval: this remains stylized pixel art, and the selected result should be judged at native size as well as enlarged.
@@ -85,4 +91,4 @@ godot_console.exe --path . -- --autoplay
 
 Focused asserts: the club portrait crop contains skin and dark eyes; the wife crop is wider than it is tall; each door strip starts on `figure(spec, pose(yaw))` and the reach extends past that idle; Harrington’s fall frames are distinct and unclipped.
 
-Bedding regressions also measure expansion beyond the standing-body mask, lower-body coverage, finite curved/tapered fold endpoints, pixel-identical canonical head geometry, the exact five-right/two-back motel displacement, and unchanged graded foreground frame pixels. The integrated correction passes all 64 checks in the four suites, including the regenerated Harrington idle frame. Reimport the five room textures before runtime inspection; stale Godot imports can show the rejected sheets even when generated PNGs are correct.
+Bedding regressions also measure expansion beyond the standing-body mask, lower-body coverage, finite curved/tapered fold endpoints, pixel-identical canonical head geometry, the exact five-right/two-back motel displacement, and unchanged graded foreground frame pixels. The integrated correction passes all 65 checks in the four suites, including the regenerated Harrington idle frame. Reimport the five room textures before runtime inspection; stale Godot imports can show the rejected sheets even when generated PNGs are correct.

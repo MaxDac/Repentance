@@ -189,7 +189,11 @@ class SceneImprovementsTests(unittest.TestCase):
         night = motel.paint_night()
         for room, (x, y) in ((bedroom, (bx, by)), (night, motel.ELEANOR_ORIGIN)):
             crop = np.array(room.crop((x, y, x + figure.width, y + figure.height)))
-            np.testing.assert_array_equal(crop[opaque], np.array(figure)[:, :, :3][opaque])
+            shown = opaque.copy()
+            if room is night:
+                # The motel trims only the lap-sheet spill behind its near head post.
+                shown[20:, motel.HEAD_POST_X - x:] = False
+            np.testing.assert_array_equal(crop[shown], np.array(figure)[:, :, :3][shown])
         for name in ("motel_night", "mansion_bed"):
             image = np.array(Image.open(self.generated / "rooms" / f"{name}.png").convert("RGB"))
             white = (image.min(axis=2) >= 100) & (image.max(axis=2) - image.min(axis=2) <= 20)
@@ -237,6 +241,20 @@ class SceneImprovementsTests(unittest.TestCase):
         current = ImageOps.mirror(figure.crop((0, 0, figure.width, 19))).getbbox()
         self.assertEqual(motel.ELEANOR_ORIGIN[0] + current[0] - (111 + original[0]), 5)
         self.assertEqual(motel.ELEANOR_ORIGIN[1] + current[1] - (114 + original[1]), -2)
+
+    def test_motel_bed_shows_a_body_and_a_clean_frame(self):
+        flat = Image.new("RGBA", (480, 240), mansion.SHEET + (255,))
+        mound = np.asarray(motel.body_mound(flat, [motel.LEGS])).astype(int)[:, :, 0]
+        for x, y in motel.LEGS[1:-1]:
+            self.assertGreater(mound[y - 3, x], mound[y + 5, x] + 40, f"no leg relief at x={x}")
+        pair = np.asarray(motel.body_mound(flat, [motel.LEGS, motel.FAR_LEG])).astype(int)[:, :, 0]
+        self.assertFalse(np.array_equal(pair, mound), "the far leg adds no second ridge")
+        rails = np.asarray(Image.open(self.generated / "rooms" / "motel_night_rails.png").getchannel("A"))
+        self.assertEqual(rails[168:176, 50:130].max(), 0, "the near side rail reads as a floor line")
+        night = np.asarray(Image.open(self.generated / "rooms" / "motel_night.png").convert("RGB")).astype(int)
+        behind_post = night[130:165, motel.HEAD_POST_X + 2:motel.HEAD_POST_X + 7]
+        linen = (behind_post.min(axis=2) >= 70) & (np.ptp(behind_post, axis=2) <= 12)
+        self.assertEqual(np.count_nonzero(linen), 0, "cotton hangs through the head frame")
 
     def test_neutral_linen_does_not_repaint_either_foreground_frame(self):
         mask = Image.new("RGBA", (480, 240))
