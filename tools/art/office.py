@@ -46,9 +46,31 @@ def floor(img):
     noise(img, (118, 158, 392, 198), 6, 4)
 
 
-def door(img):
+DOOR = (22, 18, 94, 127)
+DOOR_BOX = (17, 13 + TOP, 100, 140 + TOP)
+
+
+def door(img, state="closed"):
     d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 22, 18, 94, 127
+    x0, y0, x1, y1 = DOOR
+    if state != "closed":
+        d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 8], fill=hx("3a2416"))
+        vgrad(img, (x0, y0, x1, y1), hx("6a6458"), hx("3a342c"))
+        d.polygon([(x0 + 4, y1 - 10), (x1 - 4, y1 - 10), (x1 - 10, y1), (x0 + 10, y1)], fill=hx("5a4634"))
+        d.ellipse([(x0 + x1) // 2 - 6, y0 + 8, (x0 + x1) // 2 + 6, y0 + 18], fill=hx("f8e8b0"))
+        d.rectangle([x0 + 8, y0 + 28, x1 - 18, y1 - 16], fill=hx("2e2a24"))
+        if state == "ajar":
+            d.polygon([(x1 - 16, y0 + 2), (x1 - 2, y0 + 6), (x1 - 6, y1 - 2), (x1 - 22, y1 - 4)], fill=hx("4a2e1c"))
+            d.rectangle([x1 - 18, y0 + 12, x1 - 8, 62], fill=hx("c8c098"))
+            d.ellipse([x1 - 16, 80, x1 - 11, 85], fill=hx("c8a050"))
+        else:
+            d.rectangle([x0, y0, x0 + 9, y1], fill=hx("4e321c"))
+            d.rectangle([x0 + 1, y0 + 8, x0 + 7, 66], fill=hx("c8c098"))
+            d.line([(x0 + 9, y0), (x0 + 9, y1)], fill=hx("2a180c"))
+            d.ellipse([x0 + 2, 80, x0 + 6, 85], fill=hx("c8a050"))
+        d.line([(x0 + 1, y1), (x1 - 1, y1)], fill=hx("d8c080"))
+        return
+    x0, y0, x1, y1 = DOOR
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1], fill=hx("3a2416"))
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, y0 - 2], fill=hx("5a3a24"))
     vgrad(img, (x0, y0, x1, y1), hx("5a3a22"), hx("3e2616"))
@@ -210,11 +232,11 @@ def window(img):
     light(img, "ellipse", [380, 110, 480, 200], hx("ff3030"), 0.12, 20)
 
 
-def paint(drawer=None):
+def paint(drawer=None, door_state="closed"):
     img = Image.new("RGB", (W, H))
     walls(img)
     floor(img)
-    door(img)
+    door(img, door_state)
     cabinet(img)
     coat_rack(img)
     clock(img)
@@ -282,6 +304,8 @@ def build():
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "office.png")
+    for state in ("ajar", "open"):
+        save(pixelize(paint(door_state=state), pal).crop(DOOR_BOX), "rooms", f"office_door_{state}.png")
     save(pixelize(paint(()), pal).crop(DRAWER_BOX), "rooms", "office_drawer_open.png")
     for item, box in ITEM_BOXES.items():
         save(pixelize(paint((item,)), pal).crop(box), "rooms", f"office_drawer_{item}.png")

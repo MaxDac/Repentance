@@ -51,12 +51,23 @@ public partial class RoseHouse : Room
         return false;
     }
 
+    private async Task RoseOpens()
+    {
+        State.SetFlag("rose_door");
+        if (FindActor("rose") is { } rose)
+        {
+            rose.FaceLeft(false);
+            await rose.PlayPose("rose_open_door");
+            rose.SetPose(null);
+        }
+        await Wait(0.3);
+    }
+
     private async Task RingTheBell()
     {
         await Say("*Ring*");
         await Wait(1.2);
-        State.SetFlag("rose_door");
-        await Wait(0.6);
+        await RoseOpens();
         await Talk("rose_house");
         State.SetFlag("rose_done");
         await WalkAway();
@@ -90,8 +101,7 @@ public partial class RoseHouse : Room
         Player.Face(Facing.Up);
         await Say("*Ring*");
         await Wait(1.2);
-        State.SetFlag("rose_door");
-        await Wait(0.6);
+        await RoseOpens();
         await Talk("rose_coffee");
         await Act3.Finish();
     });

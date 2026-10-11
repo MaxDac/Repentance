@@ -58,7 +58,7 @@ y_sort_enabled = true
 
 [node name="Bed" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(293, 136)
+position = Vector2(296, 136)
 texture = ExtResource("10_mansion_bed")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -66,7 +66,7 @@ HideIfFlags = "eleanor_up"
 
 [node name="BedEmpty" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(293, 136)
+position = Vector2(296, 136)
 texture = ExtResource("13_mansion_bed_empty")
 centered = false
 script = ExtResource("4_FlagSprite")

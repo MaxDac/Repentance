@@ -315,8 +315,19 @@ def painting(img, x0, y0, x1, y1):
     d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 3], fill=hx("1c1410"))
     vgrad(img, (x0 + 4, y0 + 4, x1 - 4, y1 - 4), hx("2a2018"), hx("120c0a"))
     cx = (x0 + x1) // 2
-    d.ellipse([cx - 6, y0 + 10, cx + 4, y0 + 22], fill=hx("4a3428"))
-    d.polygon([(cx - 14, y1 - 4), (cx - 8, y0 + 22), (cx + 6, y0 + 22), (cx + 12, y1 - 4)], fill=hx("2c1c18"))
+    top = y0 + 8
+    # Suit and shirt stay far from the skin ramp so the bust does not collapse into one blob.
+    d.rectangle([cx - 14, top + 20, cx + 14, y1 - 5], fill=hx("12100e"))
+    d.polygon([(cx - 4, top + 18), (cx + 4, top + 18), (cx + 1, y1 - 6), (cx - 1, y1 - 6)], fill=hx("f4f0e4"))
+    d.rectangle([cx, top + 19, cx + 2, y1 - 8], fill=hx("8a1a22"))
+    d.ellipse([cx - 11, top, cx + 11, top + 16], fill=hx("100c0a"))
+    d.ellipse([cx - 7, top + 5, cx + 7, top + 19], fill=hx("e0a878"))
+    d.pieslice([cx - 11, top, cx + 11, top + 14], 200, 340, fill=hx("100c0a"))
+    d.rectangle([cx - 5, top + 9, cx - 3, top + 11], fill=hx("100c0a"))
+    d.rectangle([cx + 3, top + 9, cx + 5, top + 11], fill=hx("100c0a"))
+    d.line([(cx - 3, top + 14), (cx + 3, top + 14)], fill=hx("100c0a"))
+    d.point((cx, top + 12), fill=hx("a06848"))
+    d.rectangle([cx - 12, y0 + 5, cx + 12, y0 + 7], fill=BRASS)
     light(img, "rect", [x0, y0, x1, y0 + 10], LAMPLIGHT, 0.12, 4)
 
 
@@ -408,6 +419,11 @@ def stage_scene():
     d.polygon([(168, 132), (312, 132), (362, H - 1), (118, H - 1)], fill=hx("1c0b0f"))
     for x in range(120, 360, 12):
         d.line([(x, 160), (x - 12, 230)], fill=hx("18080c"))
+    # a worn aisle carpet, so the floor is not one flat polygon
+    d.polygon([(214, 150), (266, 150), (286, H - 1), (194, H - 1)], fill=hx("3a1018"))
+    d.polygon([(222, 156), (258, 156), (272, H - 1), (208, H - 1)], fill=hx("4a1822"))
+    for y in range(162, H, 10):
+        d.line([(206 + (y - 150) // 8, y), (274 - (y - 150) // 8, y)], fill=hx("2a0c12"))
     stage_backdrop(img)
     d.rounded_rectangle([14, 58, 66, 146], 16, fill=hx("090407"), outline=WOOD)
     drape(img, (18, 76, 32, 145), 302)
@@ -416,9 +432,12 @@ def stage_scene():
         for side in (-1, 1):
             for j in range(4):
                 x = 240 + side * (90 + j * 26 + i * 3)
+                d.rectangle([x - 11, y - 8, x + 11, y + 1], fill=hx("6a4030"))
+                d.line([(x - 10, y - 7), (x + 10, y - 7)], fill=hx("8a5840"))
                 d.rounded_rectangle([x - 10, y, x + 10, y + 12], 3, fill=col, outline=WOOD_DEEP)
-                d.line([(x - 7, y + 2), (x + 7, y + 2)], fill=mul(col, 1.3))
-                d.rectangle([x - 9, y + 10, x + 9, y + 14], fill=mul(col, 0.65))
+                d.line([(x - 7, y + 2), (x + 7, y + 2)], fill=mul(col, 1.35))
+                d.rectangle([x - 9, y + 10, x + 9, y + 14], fill=hx("5a3824"))
+                d.line([(x - 8, y + 11), (x + 8, y + 11)], fill=hx("7a5040"))
     shadow(img, "rect", [0, 72, W - 1, H - 1], 0.26, 18, hx("22090c"))
     full = tall(img, ceiling_band)
     fd = ImageDraw.Draw(full)

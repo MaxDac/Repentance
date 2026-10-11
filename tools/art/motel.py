@@ -232,6 +232,8 @@ def dresser(img):
     d = ImageDraw.Draw(img)
     d.rectangle([420, 54, 456, 88], fill=WOOD_D)
     vgrad(img, (423, 57, 453, 85), hx("a7ad98"), hx("6d7266"))
+    d.rectangle([430, 62, 446, 74], fill=hx("8a9aa4"))
+    d.polygon([(432, 72), (438, 66), (444, 72)], fill=hx("6a7a58"))
     d.line([(428, 60), (436, 70)], fill=hx("c8ccb8"))
     shadow(img, "ellipse", [424, 58, 452, 84], 0.2, 6, hx("8a7a5a"))
 
@@ -254,6 +256,14 @@ def details(img):
     d.rectangle([86, 50, 110, 54], fill=hx("7f684b"))
     d.line([(87, 42), (98, 47), (108, 41)], fill=hx("9ea47f"))
     d.line([(84, 62), (112, 60)], fill=hx("2c2018"))
+    # a second print and a tear-off calendar, so the wall is not one brown wash
+    d.polygon([(150, 28), (196, 26), (198, 58), (148, 60)], fill=hx("5c4632"))
+    d.polygon([(154, 31), (192, 29), (194, 54), (152, 56)], fill=hx("8aa0b0"))
+    d.polygon([(154, 44), (194, 42), (194, 54), (152, 56)], fill=hx("6a7a58"))
+    d.polygon([(168, 40), (178, 36), (182, 44)], fill=hx("d8d0c0"))
+    d.rectangle([206, 30, 228, 52], fill=hx("efe6d0"), outline=hx("6a5038"))
+    d.line([(206, 36), (228, 36)], fill=hx("a04040"))
+    d.text((210, 38), "27", fill=hx("2a2018"))
     # Scuffs and grime around the baseboards
     for x in range(18, W, 28):
         d.line([(x, FLOOR - 8), (x + 8, FLOOR - 4)], fill=hx("271b13"))
@@ -386,6 +396,12 @@ def bed_night(img, occupied=True, rails=True):
     if rails:
         bed_rails_night(img)
     if occupied:
+        # The sheet hangs the length of the near side, so the bed frame is not a dark gap.
+        R.quad(img, [(X0 + 6, 16, Z1), (X1 - 8, 16, Z1), (X1 - 6, 1, Z1 + 2), (X0 + 4, 1, Z1 + 2)], sheet)
+        R.line(img, (X0 + 18, 15, Z1 + 1), (X0 + 16, 2, Z1 + 2), sheet_d)
+        R.line(img, (X0 + 36, 15, Z1 + 1), (X0 + 34, 2, Z1 + 2), sheet_l)
+        R.line(img, (X0 + 54, 15, Z1 + 1), (X0 + 56, 2, Z1 + 2), sheet_d)
+        R.line(img, (X0 + 70, 15, Z1 + 1), (X0 + 68, 2, Z1 + 2), sheet_d)
         R.quad(img, [(X0 + 34, 24, Z1 - 1), (X0 + 58, 24, Z1 - 1), (X0 + 62, 5, Z1 + 1), (X0 + 30, 7, Z1 + 1)], sheet)
         R.line(img, (X0 + 44, 22, Z1), (X0 + 46, 7, Z1 + 1), sheet_d)
         R.line(img, (X0 + 54, 22, Z1), (X0 + 58, 6, Z1 + 1), sheet_d)
@@ -532,7 +548,7 @@ def paint_night(rails=False):
     window_night(img)
     details(img)
     door(img)
-    bed_night(img, occupied=False, rails=rails)
+    bed_night(img, occupied=True, rails=rails)
     nightstand_night(img)
     chair(img)
     clothes(img)
@@ -541,6 +557,8 @@ def paint_night(rails=False):
     bulb(img)
     img = relight_night(img)
     glass_night(img)
+    if not rails:
+        sleeper(img)
     lamp_night(img)
     img = tall(img, ceiling_night)
     vignette(img, 0.72, tint=(14, 12, 30), blur=46)
@@ -639,3 +657,4 @@ def eleanor_rise(palette):
         img.putalpha(alpha)
         frames.append((img, tuple(head)))
     action_strip("eleanor_sheet_rise", frames, [0.18, 0.24, 0.28, 0.26, 0.3, 0.25, 0.24, 0.24, 0.3], anchor=anchor)
+

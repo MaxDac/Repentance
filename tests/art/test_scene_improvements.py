@@ -180,7 +180,7 @@ class SceneImprovementsTests(unittest.TestCase):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
         base = mansion.paint_bedroom()
         occupied, empty = mansion.paint_bedroom("eleanor"), mansion.paint_bedroom("empty")
-        pal = common.palette_of(Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3), 124)
+        pal = mansion.bedroom_palette(base, occupied, empty)
         for name, variant, node in (("mansion_bed", occupied, "Bed"),
                                     ("mansion_bed_empty", empty, "BedEmpty")):
             block = re.search(rf'\[node name="{node}" type="Sprite2D"[^\]]*\]([^\[]*)', scene)[1]

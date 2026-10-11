@@ -752,6 +752,9 @@ public class AutoPlay
         if (name == "eleanor_sheet_rise")
             Check(_game.Room!.GetNode<Sprite2D>("EleanorFigure").ZIndex == (frame >= 4 ? 2 : 0),
                 $"{name}: frame {frame} is on the correct side of the bed rail");
+        if (name == "eleanor_bed_turn")
+            Check(_game.Room!.GetNode<Sprite2D>("EleanorFigure").ZIndex == 0,
+                $"{name}: frame {frame} stays behind the bed rail");
         var image = _game.GetViewport().GetTexture().GetImage();
         Check(image.SavePng($"{_dir}/{++_shot:00}_pose_{name}_{frame}.png") == Error.Ok, $"{name}: saved frame {frame}");
     }

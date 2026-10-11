@@ -242,10 +242,49 @@ class CharacterArtTests(unittest.TestCase):
         for joints in sprites.FALL + [sprites.SIT, sprites.CROUCH, sprites.HALF_UP, sprites.KNEEL]:
             self.assertEqual(tuple(grounded_joints(joints)[4]), (98, 91))
 
+    def test_door_reach_is_the_idle_pose_then_an_extended_arm(self):
+        for name, spec, yaw in (("micah_open_door", sprites.MICAH, sprites.PLAYER_IDLE_YAW),
+                                ("teddy_open_door", sprites.TEDDY, 35),
+                                ("rose_open_door", sprites.ROSE, 20)):
+            clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            width, height = clip["width"], clip["height"]
+            frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(4)]
+            expected = sprites.figure(spec, sprites.pose(yaw), width, height)
+            self.assertEqual(frames[0].tobytes(), expected.tobytes(), name)
+            self.assertEqual(frames[3].tobytes(), frames[0].tobytes(), name)
+            idle_right = np.nonzero(np.array(frames[0].getchannel("A")) >= 250)[1].max()
+            reach_right = np.nonzero(np.array(frames[1].getchannel("A")) >= 250)[1].max()
+            self.assertGreater(reach_right, idle_right + 6, name)
+            self.assertNotEqual(frames[1].tobytes(), frames[2].tobytes(), name)
+
+    def test_harrington_fall_topples_without_leaving_the_frame(self):
+        clip = json.loads((ART / "sprites" / "harrington_fall.json").read_text())
+        image = Image.open(ART / "sprites" / "harrington_fall.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        self.assertGreater(width, 64)
+        spans = []
+        for index in range(len(clip["frames"])):
+            frame = image.crop((index * width, 0, (index + 1) * width, height))
+            ys, xs = np.nonzero(np.array(frame.getchannel("A")) >= 250)
+            spans.append(int(xs.max() - xs.min()))
+            self.assertGreater(xs.min(), 0)
+            self.assertLess(xs.max(), width - 1)
+        self.assertGreater(spans[-1], spans[0] + 12, "the last frame should be the body gone over")
+
     def test_kneeling_rise_starts_from_the_actual_held_pose(self):
         held = Image.open(ART / "sprites" / "micah_kneel.png")
         rise = Image.open(ART / "sprites" / "micah_kneel_rise.png")
         self.assertEqual(held.tobytes(), rise.crop((0, 0, *held.size)).tobytes())
+
+    def test_motel_sleeper_stays_painted_in_the_bed(self):
+        source = (ROOT / "scripts" / "Rooms" / "MotelNight.cs").read_text(encoding="utf-8")
+        self.assertNotIn("eleanor_sheet_rise", source)
+        self.assertNotIn("eleanor_bed_turn", source)
+        night = np.array(Image.open(ART / "rooms" / "motel_night.png").convert("RGB"))
+        rails = np.array(Image.open(ART / "rooms" / "motel_night_rails.png").convert("RGB"))
+        pillow = np.abs(night[140:175, 90:150].astype(int) - rails[140:175, 90:150].astype(int)).sum()
+        self.assertGreater(pillow, 400, "the painted sleeper is missing from the pillow")
 
     def test_motel_foreground_is_a_transparent_rail_layer(self):
         rails = Image.open(ART / "rooms" / "motel_night_rails.png")

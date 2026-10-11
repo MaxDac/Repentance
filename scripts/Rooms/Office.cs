@@ -52,6 +52,7 @@ public partial class Office : Room
         await Talk("office_ring");
         State.SetFlag("act2_office_done");
         await Game.WalkTo(new Godot.Vector2(58, 172));
+        await OpenTheDoor(player: true);
         await Game.ChangeRoom("church_exterior", "start");
     }
 
@@ -60,8 +61,38 @@ public partial class Office : Room
         if (!State.HasFlag("teddy_briefed") || FindActor("teddy") is not { } teddy) return;
         await Say("teddy", "Good evening, Jones. Do try not to embarrass me.");
         await teddy.MoveTo(new Godot.Vector2(58, 170), 55);
+        await OpenTheDoor(player: false);
         State.SetFlag("teddy_gone");
+        await CloseTheDoor();
         await Say("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
+    }
+
+    /// <summary>The frosted door swings, then the leaf is clear of the frame. Facing left reaches for the knob.</summary>
+    private async Task OpenTheDoor(bool player)
+    {
+        State.SetFlag("office_door_ajar");
+        await Wait(0.12);
+        if (player)
+        {
+            Player.Face(Facing.Left);
+            await Player.PlayPose("micah_open_door");
+        }
+        else if (FindActor("teddy") is { } teddy)
+        {
+            teddy.FaceLeft(true);
+            await teddy.PlayPose("teddy_open_door");
+            teddy.SetPose(null);
+        }
+        State.SetFlag("office_door_ajar", false);
+        State.SetFlag("office_door_open");
+    }
+
+    private async Task CloseTheDoor()
+    {
+        State.SetFlag("office_door_open", false);
+        State.SetFlag("office_door_ajar");
+        await Wait(0.28);
+        State.SetFlag("office_door_ajar", false);
     }
 
     /// <summary>Act 3: thinking it over at the desk, then out the door to the Blue Lantern.</summary>
@@ -105,6 +136,7 @@ public partial class Office : Room
         switch (target.Id, verb)
         {
             case ("door", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
+                await OpenTheDoor(player: true);
                 await LeaveAct3();
                 return true;
             case ("faith_ring", Verb.Hand):
@@ -127,8 +159,12 @@ public partial class Office : Room
                 await Say("Not without my things from the top drawer. A man goes out at night in this town, he goes prepared.");
                 return true;
             case ("door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                await OpenTheDoor(player: true);
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
+            case ("door", Verb.Walk or Verb.Hand):
+                await OpenTheDoor(player: true);
+                return false;
 
             case ("drawer", Verb.Hand):
                 if (State.HasFlag("drawer_open"))

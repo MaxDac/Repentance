@@ -12,13 +12,17 @@ def waxed_mirror(d, im):
 
 def cloth(d, im):
     d.polygon([(4, 6), (25, 4), (28, 18), (7, 21)], fill=hx("e6dfc8"))
+    d.polygon([(8, 7), (18, 6), (16, 14), (6, 16)], fill=hx("f4f0e2"))
     d.line([(8, 8), (21, 7), (23, 17)], fill=hx("a69f90"))
     d.line([(11, 6), (13, 19)], fill=hx("c4bcaa"))
+    d.line([(16, 8), (20, 16)], fill=hx("b8b0a0"))
 
 
 def wedge(d, im):
     d.polygon([(4, 18), (27, 9), (27, 19)], fill=hx("b58a4f"))
     d.line([(4, 18), (27, 9)], fill=hx("ead097"))
+    for y, x1 in ((12, 22), (15, 25), (17, 26)):
+        d.line([(8, y), (x1, y - 3)], fill=hx("8a6234"))
     d.line([(15, 17), (24, 13)], fill=hx("674c2e"))
 
 

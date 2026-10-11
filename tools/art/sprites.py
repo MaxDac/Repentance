@@ -257,6 +257,38 @@ def supine_frame(spec, name, wound=None):
     return img
 
 
+def door_strip(spec, name, yaw):
+    """Reach for a knob, pull, and settle. The near arm (screen-right) does the work; facing left flips it."""
+    fw = FW + 28
+    poses = (
+        pose(yaw),
+        pose(yaw, arms={-1: ("swing", 78, 6, 4), 1: ("swing", 6, 6, 14)}, lean=5.0),
+        pose(yaw, arms={-1: ("swing", 34, 2, 36), 1: ("swing", 4, 6, 16)}, lean=8.0, shift=0.01),
+        pose(yaw),
+    )
+    frames = [(figure(spec, ps, fw, FH), (fw / 2, 18)) for ps in poses]
+    action_strip(name, frames, [0.16, 0.22, 0.28, 0.16], anchor=(fw / 2, FH - 3))
+    return frames
+
+
+def fall_strip(spec, name):
+    """A short topple, then the body is low enough for the shot pose to take over."""
+    from PIL import Image
+    fw, fh = FW + 112, FH + 32
+    frames = []
+    for ang, lean in ((0, -4.0), (16, -12.0), (34, -16.0), (50, -6.0)):
+        ps = pose(90, arms={1: ("swing", -70, 30, 20), -1: ("swing", -40, 20, 30)},
+                  legs={1: (14, 10, 0), -1: (-6, 18, 0)}, lean=lean)
+        canvas = Image.new("RGBA", (fw, fh))
+        fig = figure(spec, ps, FW + 20, FH)
+        fig.putalpha(fig.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
+        canvas.alpha_composite(fig, ((fw - fig.width) // 2, 8))
+        tilted = canvas.rotate(ang, resample=Image.NEAREST, center=(fw // 2, fh - 6))
+        frames.append((tilted, (fw / 2, 22)))
+    action_strip(name, frames, [0.1, 0.12, 0.14, 0.2], anchor=(fw / 2, fh - 4))
+    return frames
+
+
 def falling_frame(spec, name):
     """Single frame of a character facing right, hit and toppling backwards, arms flung up."""
     from PIL import Image
@@ -383,6 +415,9 @@ def build():
     aim_frame(MICAH, "micah_aim")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
+    door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
+    door_strip(TEDDY, "teddy_open_door", 35)
+    door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
@@ -393,6 +428,7 @@ def build_act3():
     supine_frame(SAL, "sal_supine")
     supine_frame(BARTENDER, "bartender_shot", wound=0.74)
     falling_frame(HARRINGTON_GOWN, "harrington_falling")
+    fall_strip(HARRINGTON_GOWN, "harrington_fall")
     supine_frame(HARRINGTON_GOWN, "harrington_shot", wound=0.44)
     desk_frame(MICAH, "micah_desk")
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
