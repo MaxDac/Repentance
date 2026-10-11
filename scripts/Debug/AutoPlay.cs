@@ -683,15 +683,15 @@ public class AutoPlay
         game.Hud.ShowTitle(true);
         var title = game.Hud.Menu.OpenTitle();
         Check(game.Hud.Menu.Press("Settings"), "title offers Settings");
-        await game.Wait(0.1);
+        await Observe(0.1);
         Check(game.Hud.Menu.Press("Nudity: Off"), "settings offers explicit nudity opt-in");
-        await game.Wait(0.1);
+        await Observe(0.1);
         Check(game.Settings.NudityEnabled, "nudity enabled through title settings");
         var reloaded = new GameSettings(path);
         Check(reloaded.Load() && reloaded.NudityEnabled, "nudity persists across settings instances");
         await Shot("settings_nudity_on");
         PressKey(Key.Escape);
-        await game.Wait(0.1);
+        await Observe(0.1);
         Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
         await title;
         game.Hud.ShowTitle(false);
@@ -705,11 +705,11 @@ public class AutoPlay
             Check(eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"), $"Act {act}: opted-in sprite on load");
             await Shot($"eleanor_act{act}_nudity_on");
             PressKey(Key.Escape);
-            await game.Wait(0.1);
+            await Observe(0.1);
             Check(game.GetTree().Paused && game.Hud.Menu.Press("Settings"), $"Act {act}: pause offers Settings");
-            await game.Wait(0.1);
+            await Observe(0.1);
             Check(game.Hud.Menu.Press("Nudity: On"), $"Act {act}: nudity can be disabled");
-            await game.Wait(0.1);
+            await Observe(0.1);
             Check(!game.Settings.NudityEnabled &&
                 eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png") &&
                 eleanor.Position == position && eleanor.Frames == 11,
@@ -717,9 +717,9 @@ public class AutoPlay
             Check(reloaded.Load() && !reloaded.NudityEnabled, $"Act {act}: opt-out persists");
             await Shot($"eleanor_act{act}_nudity_off");
             PressKey(Key.Escape);
-            await game.Wait(0.1);
+            await Observe(0.1);
             PressKey(Key.Escape);
-            await game.Wait(0.1);
+            await Observe(0.1);
             Check(!game.GetTree().Paused && !game.Hud.Menu.IsOpen, $"Act {act}: back from settings resumes correctly");
             await game.LoadGame(save);
             Check(game.Room!.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png"),

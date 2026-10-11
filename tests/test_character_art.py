@@ -19,6 +19,21 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_eleanor_marked_back_hair_patch_is_darker(self):
+        spec = sprites.ELEANOR_STAGE
+        pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
+        before = np.array(sprites.figure(dict(spec, hair_back_shade=0), pose, sprites.NPC_W, sprites.FH))
+        after = np.array(sprites.figure(spec, pose, sprites.NPC_W, sprites.FH))
+        self.assertTrue(np.array_equal(before[:, :, 3], after[:, :, 3]), "shading must not change the silhouette")
+        changed = np.any(before[:, :, :3] != after[:, :, :3], axis=2)
+        self.assertGreater(np.count_nonzero(changed), 0)
+        self.assertLess(after[changed, :3].mean(), before[changed, :3].mean(),
+                        "darken the bright back-hair patch without lifting the dark underside")
+        hair_palette = painter.ramp(spec["hair"])
+        for image in (before, after):
+            self.assertTrue(np.all(np.any(np.all(image[changed, None, :3] == hair_palette, axis=2), axis=1)),
+                            "only hair pixels should change color")
+
     def test_eleanor_back_hair_has_a_little_more_volume(self):
         paint = painter._long_hair_back
         edges = []

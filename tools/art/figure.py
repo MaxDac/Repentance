@@ -674,6 +674,8 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
         hx0, hy0 = P(body([0, 0.077 + nod, 0.0]))[:2]
         keep &= ~(((c.X - hx0) * math.copysign(1.0, sp) > -1.5) & (c.Y > hy0 + 1))
     c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False)
+    upper = c.parts_mask("hairback") & (c.Y < P(body([0, 0.20 + nod, 0]))[1])
+    c.bias[upper] += col.get("hair_back_shade", 0)
 
 
 def _hair_front(c, col, P, body, H, cp, sp, nod):
