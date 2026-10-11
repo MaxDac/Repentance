@@ -197,6 +197,64 @@ class SceneImprovementsTests(unittest.TestCase):
             for color in (mansion.SHEET, mansion.SHEET_LIT):
                 self.assertLessEqual(max(color), 155, "linen should not glow against the night room")
 
+    def test_sheet_spreads_over_the_lap_instead_of_clipping_to_the_standing_body(self):
+        body = np.asarray(mansion._bare_eleanor())
+        cloth = np.asarray(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT))
+        mask = cloth[:, :, 3] == 255
+        self.assertGreater(np.count_nonzero(mask & (body[:, :, 3] == 0)), 100)
+        self.assertGreater(np.count_nonzero(mask[38]), np.count_nonzero(mask[25]) + 6)
+        lower_body = body[30:, :, 3] == 255
+        self.assertTrue(np.all(mask[30:][lower_body]), "the seated lap must cover the lower body")
+
+    def test_cotton_folds_have_finite_tapered_ends_and_curved_valleys(self):
+        outline = [(0, 0), (39, 0), (39, 39), (0, 39)]
+        flat = np.asarray(mansion.linen_surface((40, 40), outline, []), dtype=int)
+        with np.errstate(invalid="raise"):
+            folded = np.asarray(mansion.linen_surface((40, 40), outline, [
+                ([(10, 5), (13, 15), (23, 24), (20, 34)], 1.5, 30),
+            ]), dtype=int)
+        difference = flat[:, :, 0] - folded[:, :, 0]
+        self.assertGreater(difference[15, 13], 15)
+        self.assertGreater(difference[24, 23], 15)
+        self.assertLess(abs(difference[5, 10]), 2)
+        self.assertLess(abs(difference[34, 20]), 2)
+        self.assertGreater(difference[15, 13], difference[15, 23] + 10)
+        self.assertGreater(difference[24, 23], difference[24, 13] + 10)
+
+    def test_motel_head_moves_only_five_pixels_right_and_two_back(self):
+        from PIL import ImageOps
+        from art import sprites
+        figure = mansion._bare_eleanor()
+        skin = sprites.ELEANOR["skin"]
+        spec = dict(sprites.ELEANOR, torso=skin, pelvis=skin, sleeves=skin,
+                    coat=None, neckline=None, decals=[])
+        canonical = sprites.figure(spec, sprites.pose(16, arms=sprites._arms("side")),
+                                   sprites.FW, sprites.FH).convert("RGBA")
+        canonical.putalpha(canonical.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
+        bx, by, right, _ = canonical.getbbox()
+        self.assert_image_equal(figure.crop((8, 0, 28, 19)), canonical.crop((bx, by, right, by + 19)))
+        original = ImageOps.mirror(figure.crop((8, 0, 28, 19))).getbbox()
+        current = ImageOps.mirror(figure.crop((0, 0, figure.width, 19))).getbbox()
+        self.assertEqual(motel.ELEANOR_ORIGIN[0] + current[0] - (111 + original[0]), 5)
+        self.assertEqual(motel.ELEANOR_ORIGIN[1] + current[1] - (114 + original[1]), -2)
+
+    def test_neutral_linen_does_not_repaint_either_foreground_frame(self):
+        mask = Image.new("RGBA", (480, 240))
+        motel.bed_rails_night(mask)
+        foreground = np.asarray(mask.getchannel("A")) == 255
+        with patch.object(motel, "white_bed_linen"):
+            original = np.asarray(motel.paint_night(rails=True))[common.TOP:]
+        current = np.asarray(motel.paint_night(rails=True))[common.TOP:]
+        np.testing.assert_array_equal(current[foreground], original[foreground])
+
+        mask = Image.new("RGBA", (480, 270))
+        mansion._bed_front(mask, mansion.Room3D(mansion.BFL, 240, 100))
+        foreground = np.asarray(mask.getchannel("A")) == 255
+        with patch.object(mansion, "_restamp_white_sheet"):
+            original = np.asarray(mansion.paint_bedroom("eleanor"))
+        current = np.asarray(mansion.paint_bedroom("eleanor"))
+        np.testing.assert_array_equal(current[foreground], original[foreground])
+
     def test_bed_sprites_reconstruct_both_room_states(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
         base = mansion.paint_bedroom()
