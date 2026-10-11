@@ -63,6 +63,7 @@ public partial class Actor : Hotspot, ISpeaker
     public override void _Ready()
     {
         if (Texture == null) return;
+        Frames = FitFrames(Texture.GetWidth(), Frames);
         _sprite = new Sprite2D
         {
             Texture = Texture,
@@ -74,6 +75,18 @@ public partial class Actor : Hotspot, ISpeaker
         AddChild(_sprite);
         _poses = new PosePlayback(_sprite);
         ApplyDepthScale();
+    }
+
+    /// <summary>
+    /// The 3-frame strips (idle + two talk frames) are usually placed with the 11-frame default; slicing them as 11
+    /// shows thin slivers that change with every talk frame. Fall back to a frame count that divides the strip.
+    /// </summary>
+    public static int FitFrames(int width, int frames)
+    {
+        if (frames > 0 && width % frames == 0) return frames;
+        foreach (int f in new[] { WalkStart + WalkFrames, 3, 2 })
+            if (width % f == 0) return f;
+        return 1;
     }
 
     private void ApplyDepthScale()
@@ -155,6 +168,21 @@ public partial class Actor : Hotspot, ISpeaker
     {
         _poses?.Clear();
         _moveDone?.TrySetCanceled();
+    }
+
+    /// <summary>Swaps the actor's sprite (e.g. a single-frame pose like lying on the ground); feet stay where they are.</summary>
+    public void SetTexture(Texture2D texture, int frames = 1)
+    {
+        _poses?.Clear();
+        Texture = texture;
+        Frames = frames;
+        _talking = false;
+        if (_sprite == null) { _Ready(); return; }
+        _sprite.Texture = texture;
+        _sprite.Hframes = frames;
+        _sprite.Vframes = 1;
+        _sprite.Frame = 0;
+        _sprite.Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y + Baseline);
     }
 
     private static readonly int[] TalkCycle = { 1, 2, 1, 0, 2, 1, 2, 0 };

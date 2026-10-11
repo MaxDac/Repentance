@@ -48,12 +48,6 @@ public partial class Street : Room
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         if (verb is not (Verb.Walk or Verb.Hand)) return false;
-        // Act 3, after the beating: only the motel and the road out of town are left
-        if (State.HasFlag("keep_going") && target.Id is not ("motel_door" or "road_out"))
-        {
-            await Say("Not tonight. Every part of me hurts, and only one thing is still worth the trouble.");
-            return true;
-        }
         switch (target.Id)
         {
             case "club_door" when !State.HasFlag("club_lead"):
@@ -62,7 +56,7 @@ public partial class Street : Room
             case "hotel_door" when !State.HasItem("key"):
                 await Say("The doorman took one look at my coat and decided I was weather. I'd need a room key.");
                 return true;
-            case "road_out" when !State.HasItem("map") && !State.HasFlag("found_evidence"):
+            case "road_out":
                 await Say("Nothing out past the city limits but cornfields and men who went for a drive. Not yet.");
                 return true;
         }

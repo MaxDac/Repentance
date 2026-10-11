@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_stage.png" id="2_club_stage"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_stage.png" id="91_eleanor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_stage_clothed.png" id="91_eleanor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_man.png" id="93_masked_man"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman.png" id="94_masked_woman"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman_b.png" id="95_masked_woman_b"]
@@ -37,7 +37,7 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(12, 256, 468, 256, 468, 154, 380, 154, 336, 170, 140, 170, 102, 154, 12, 154)
+polygon = PackedVector2Array(12, 256, 468, 256, 468, 154, 380, 154, 336, 184, 140, 184, 102, 154, 12, 154)
 
 [node name="Entries" type="Node2D" parent="."]
 
@@ -117,7 +117,7 @@ position = Vector2(244, 174)
 script = ExtResource("90_Actor")
 Id = "eleanor"
 DisplayName = "Eleanor"
-LookText = "Eleanor. The same short black dress as the others, but no mask. Standing in the light like it was the only place she was ever meant to stand."
+LookText = "Eleanor. No mask, no dress, nothing at all. Standing in the light like it was the only place she was ever meant to stand."
 WalkTo = Vector2(196, 196)
 monitoring = false
 monitorable = false

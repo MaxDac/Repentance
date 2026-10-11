@@ -50,6 +50,7 @@ class Canvas:
         self.shadow = np.zeros((h, w), bool)
         self.blend_parts, self.blend_zone = (), np.zeros((h, w), bool)
         self.blend_w = np.zeros((h, w))  # 1 = shade as one mass with the back, fading to 0 towards the armpit
+        self.seamless = ()  # parts that meet without the darker "behind" seam (e.g. bare torso and legs)
 
     def _blend_ids(self):
         return [self.parts[n] for n in self.blend_parts if n in self.parts]
@@ -78,6 +79,8 @@ class Canvas:
             sh &= ~mask & (self.mat >= 0) & (self.part != p)
             if part in self.blend_parts:
                 sh &= ~(self.blend_zone & np.isin(self.part, self._blend_ids()))
+            if part in self.seamless:
+                sh &= ~np.isin(self.part, [self.parts[n] for n in self.seamless if n in self.parts])
             self.bias[sh] -= 1
         self.mat[mask] = self.m(col, dither)
         n = np.stack([nx, ny, nz], -1)
@@ -162,9 +165,11 @@ class Canvas:
         behind = np.zeros_like(filled)
         bl = np.isin(self.part, self._blend_ids()) & self.blend_zone
         bp = np.pad(bl, 1)
-        for nb, nbl in ((pp[:-2, 1:-1], bp[:-2, 1:-1]), (pp[2:, 1:-1], bp[2:, 1:-1]),
-                        (pp[1:-1, :-2], bp[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:])):
-            behind |= (nb > self.part) & ~(bl & nbl)
+        sl = np.isin(self.part, [self.parts[n] for n in self.seamless if n in self.parts])
+        sp_ = np.pad(sl, 1)
+        for nb, nbl, nsl in ((pp[:-2, 1:-1], bp[:-2, 1:-1], sp_[:-2, 1:-1]), (pp[2:, 1:-1], bp[2:, 1:-1], sp_[2:, 1:-1]),
+                             (pp[1:-1, :-2], bp[1:-1, :-2], sp_[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:], sp_[1:-1, 2:])):
+            behind |= (nb > self.part) & ~(bl & nbl) & ~(sl & nsl)
         tone = np.where(filled & ~edge & behind, tone - 1, tone)
         tone = np.clip(tone, 0, 4)
         out = np.zeros((self.h, self.w, 4), np.uint8)
@@ -251,6 +256,7 @@ def figure(spec, ps, fw=56, fh=80):
         return p
 
     c.blend_parts = ("torso", "arm1", "arm-1")
+    c.seamless = spec.get("seamless", ())
     y_full, y_end = base + (0.29 + dy - 1.0) * H, base + (0.37 + dy - 1.0) * H  # cap .. armpit
     c.blend_zone = c.Y < y_end
     c.blend_w = np.clip((y_end - c.Y) / (y_end - y_full), 0, 1)
@@ -325,6 +331,11 @@ def figure(spec, ps, fw=56, fh=80):
                 shape[i] = np.where(new, cap[i], np.where(blend, (shape[i] + cap[i]) / 2, shape[i]))
             shape[0] = shape[0] | cap[0]
         c.put(tuple(shape), torso, "torso")
+        if col.get("rear"):  # rounded seat swelling out at the back of the near hip, easing into the thighs
+            side, back = col["rear"]
+            rc = P(body([side, 0.525, -back]))
+            rx = H * math.sqrt((hipw * 0.62 * cp) ** 2 + (0.03 * sp) ** 2)
+            c.put(c.ellipse((rc[0], rc[1]), rx, H * 0.055), torso, "torso", cast=False, clip=c.mat < 0)
         if col.get("abdomen"):
             c.recolor(c.parts_mask("torso") & (c.Y >= P(body([0, spec.get("abdomen_top", 0.37), 0]))[1]),
                       col["abdomen"])
@@ -355,6 +366,14 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.005), 0.39, 0.012])
             wr = body([s * 0.022, 0.45, 0.075])
             hand = body([s * 0.004, 0.462, 0.085])
+        elif kind == "cover":  # one hand lowered over the lap
+            el = body([s * (sw + 0.006), 0.40, 0.0])
+            wr = body([s * 0.03, 0.50, 0.07])
+            hand = body([s * 0.0, 0.535, 0.075])
+        elif kind == "side":  # hanging still, drawn back behind the flank
+            el = body([s * (sw - 0.01), 0.40, -0.035])
+            wr = body([s * (hipw - 0.01), 0.50, -0.045])
+            hand = body([s * (hipw - 0.012), 0.54, -0.04])
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
@@ -385,14 +404,29 @@ def figure(spec, ps, fw=56, fh=80):
         def gun(s=ps["gun"]):
             _, el, wr, hand = arm_pts[s]
             d = (hand - el) / max(np.linalg.norm(hand - el), 1e-6)
-            grip = hand + np.array([0, 0.045, -0.012])
-            muzzle = hand + d * 0.1 + np.array([0, -0.01, 0])
-            c.put(c.capsule(P(hand), P(grip), H * 0.017, H * 0.015), "3a2a20", "gun", dither=False)
-            c.put(c.capsule(P(hand + np.array([0, -0.01, 0])), P(muzzle), H * 0.015, H * 0.011), "2a2a32", "gun",
+            up = np.array([0, -1.0, 0]) - d * (-d[1])
+            up /= max(np.linalg.norm(up), 1e-6)
+            steel, wood = "4a4c58", "5a3a24"
+            fist = hand - d * 0.01
+            # the grip, raked back below the fist, then the fist closed round it
+            c.put(c.capsule(P(fist + up * 0.004), P(fist - up * 0.05 - d * 0.02), H * 0.016, H * 0.018), wood, "gun",
                   dither=False)
-            c.put(c.capsule(P(hand + d * 0.015), P(hand + d * 0.035), H * 0.022, H * 0.022), "2a2a32", "gun",
+            c.put(c.capsule(P(wr), P(fist), H * 0.028, H * 0.027), col["skin"], f"hand{s}", dither=False)
+            # frame and cylinder sitting on top of the fist, hammer cocked back, barrel with a front sight
+            base_ = fist + up * 0.026
+            c.put(c.capsule(P(base_ - d * 0.02), P(base_ + d * 0.03), H * 0.017, H * 0.017), steel, "gun", dither=False)
+            c.put(c.capsule(P(base_ + d * 0.004), P(base_ + d * 0.026), H * 0.023, H * 0.023), steel, "gun",
                   dither=False)
-            c.put(c.capsule(P(wr), P(hand), H * 0.027, H * 0.025), col["skin"], f"hand{s}", dither=False)
+            c.put(c.capsule(P(base_ - d * 0.022), P(base_ - d * 0.036 + up * 0.016), H * 0.008, H * 0.007), steel,
+                  "gun", dither=False)
+            bar = base_ + up * 0.006
+            muzzle = bar + d * 0.115
+            c.put(c.capsule(P(bar + d * 0.02), P(muzzle), H * 0.012, H * 0.011), steel, "gun", dither=False)
+            c.put(c.capsule(P(muzzle - d * 0.006 + up * 0.012), P(muzzle - d * 0.006 + up * 0.012), H * 0.006,
+                            H * 0.006), steel, "gun", dither=False)
+            # trigger guard under the frame, just ahead of the fist
+            g = P(fist + d * 0.03 - up * 0.004)
+            c.dot(g[0], g[1], "1a1a20")
         add(2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
 
     # ---- head ----
@@ -422,10 +456,21 @@ def figure(spec, ps, fw=56, fh=80):
         add(1.9 if facing else 2.7, lambda: _long_hair_back(c, col, P, body, H, cp, sp, nod))
     if col.get("hat") in ("veil", "hood"):
         add(1.9 if facing else 2.7, lambda: _veil_back(c, col, P, body, H, cp, sp, nod))
+    if col.get("hair_front") and facing:
+        add(2.65, lambda: _hair_front(c, col, P, body, H, cp, sp, nod))
 
     for _, fn in sorted(prims, key=lambda kv: kv[0]):
         fn()
 
+    if col.get("front_line") and abs(cp) > 0.3:  # three-quarter view: a straight, vertical front from waist to thighs
+        r0, r1 = (int(P(body([0, v, 0]))[1]) for v in col["front_line"])
+        sgn = 1 if sp >= 0 else -1
+        body_px = (c.mat >= 0) & ~c.parts_mask("hair", "hairback", "hand1", "hand-1")
+        fronts = [(np.nonzero(body_px[y])[0] * sgn).max() for y in range(r0, r1 + 1) if body_px[y].any()]
+        if fronts:
+            cut = c.parts_mask("torso", "arm1", "arm-1") & (np.arange(c.w)[None, :] * sgn > min(fronts))
+            cut[:r0] = cut[r1 + 1:] = False
+            c.mat[cut], c.part[cut], c.bias[cut] = -1, -1, 0
     _decals(c, col, P, body, H, cp, sp, legs, ps)
     if facing:
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
@@ -506,6 +551,9 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
     tc = P(body([0, coat.get("top", 0.42), 0]))
     hc = P(body([0, 0.5, 0]))
     wt, wh = width(waist + 0.012, 0.064), width(hipw + 0.016, 0.07)
+    if all(abs(l[1][1] - l[0][1]) < 0.12 for l in legs.values()):
+        _seated_skirt(c, coat, body, P, legs, H, flare, tc, hc, wt, wh)
+        return
     xs = []
     for s, leg in legs.items():
         p = _leg_at(leg, hem)
@@ -517,6 +565,35 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
     lo, hi = min(xs + [hc[0] - wh * 1.05]), max(xs + [hc[0] + wh * 1.05])
     pts = [(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (lo, hem_y), (hi, hem_y), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]
     c.put(c.poly(pts), coat["col"], "coat")
+
+
+def _seated_skirt(c, coat, body, P, legs, H, flare, tc, hc, wt, wh):
+    """A dress or cassock on a sitting figure: it wraps the hips, lies over the lap along the thighs and falls from
+    the knees to the hem, leaving the chair visible beneath the thighs."""
+    seat = max(l[0][1] for l in legs.values()) + 0.045
+    sy = P(np.array([0, seat, 0]))[1]
+    c.put(c.poly([(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (hc[0] - wh * 0.97, sy - 2), (hc[0] - wh * 0.7, sy),
+                  (hc[0] + wh, sy), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]), coat["col"], "coat")
+    below = coat["hem"] - 0.735  # how far the hem hangs below the knee when standing
+    for s in sorted(legs, key=lambda k: -P(legs[k][1])[2]):
+        hip, knee, ank = legs[s][:3]
+        fwd = (knee - hip) / max(np.linalg.norm(knee - hip), 1e-6)
+        lap = c.capsule(P(hip - fwd * 0.03), P(knee + fwd * 0.012), H * 0.064, H * 0.05)
+        c.put(lap, coat["col"], "coat")
+        hem_y = min(knee[1] + 0.03 + below, ank[1] - 0.012)
+        if hem_y <= knee[1] + 0.03:
+            continue
+        kz = knee[2]
+        pts = [knee + np.array([0, 0.0, -0.035]), knee + np.array([0, -0.01, 0.05]),
+               np.array([knee[0], hem_y, kz + 0.06 + flare]), np.array([knee[0], hem_y, kz - 0.045 - flare * 0.5])]
+        m = c.put(c.poly([P(p)[:2] for p in pts], curve=0.7), coat["col"], "coat")
+        # a couple of soft folds falling from the knee
+        for off in (0.012, 0.035):
+            top_ = P(knee + np.array([0, 0.02, off]))
+            bot = P(np.array([knee[0], hem_y, kz + off * 1.4]))
+            t = np.clip((c.Y - top_[1]) / max(bot[1] - top_[1], 1), 0, 1)
+            fold = (np.abs(c.X - (top_[0] + (bot[0] - top_[0]) * t)) < 0.5) & (c.Y > top_[1]) & (c.Y < bot[1] - 1)
+            c.bias[m & fold] -= 1
 
 
 def _cloak(c, cloak, body, P, legs, H, sw, cp, sp):
@@ -580,6 +657,37 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
         hx0, hy0 = P(body([0, 0.077 + nod, 0.0]))[:2]
         keep &= ~(((c.X - hx0) * math.copysign(1.0, sp) > -1.5) & (c.Y > hy0 + 1))
     c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False)
+
+
+def _hair_front(c, col, P, body, H, cp, sp, nod):
+    """Long wavy locks brought forward over the shoulders, falling down the chest to col["hair_front"] (body y)."""
+    end = col["hair_front"]
+    over = c.parts_mask("torso", "hair", "hairback")
+    chin = P(body([0, 0.165 + nod, 0]))[1]
+    lock = np.zeros_like(over)
+    nx = ny = nz = None
+    for s in (1, -1):
+        n = 14
+        for i in range(n + 1):
+            t = i / n
+            y = 0.175 + nod * (1 - t) + (end - 0.175) * t
+            x = s * (0.075 - 0.035 * t) + 0.008 * math.sin(t * 7.0 + s)
+            # an optional forward swell at chest height, where the locks may stand proud of the torso outline
+            bump = col.get("hair_bulge", 0.0) * math.exp(-((t - 0.62) / 0.2) ** 2)
+            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump]))
+            r = H * (0.03 - 0.014 * t)
+            m, ex, ey, ez = c.ellipse((cx, cy), r, r * 1.2)
+            proud = bump > 0 and bump >= 0.4 * col["hair_bulge"]
+            # never across the face; below the shoulders it only lies on the body (save for the chest swell)
+            m &= (True if proud else over) & (c.Y > chin)
+            if nx is None:
+                nx, ny, nz = ex, ey, ez
+            else:
+                nx, ny, nz = (np.where(m & ~lock, ex, nx), np.where(m & ~lock, ey, ny), np.where(m & ~lock, ez, nz))
+            lock |= m
+    c.put((lock, nx, ny, nz), col["hair"], "hair", cast=False)
+    stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
+    c.bias[lock & stripe] -= 1
 
 
 def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):

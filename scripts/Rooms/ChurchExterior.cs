@@ -45,13 +45,15 @@ public partial class ChurchExterior : Room
         await Talk("beaten_choice");
         if (State.HasFlag("keep_going"))
         {
-            await Say("Teddy's ledger. The motel on the South Side. That's where this started. That's where it ends.");
-            await Game.ChangeRoom("motel_room", "start");
+            await Say("Not yet. Not while she's in there with them.");
+            State.SetFlag("micah_at_desk");
+            await Game.ChangeRoom("office", "act3");
         }
         else
         {
             await Say("Enough. Enough for one life.");
-            await Game.ChangeRoom("rose_house", "coffee");
+            State.SetFlag(Endings.GaveUpSteps);
+            await Act3.End();
         }
     }
 }

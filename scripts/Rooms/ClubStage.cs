@@ -9,6 +9,26 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ClubStage : Room
 {
+    public override void _Ready()
+    {
+        base._Ready();
+        Game.Settings.Changed += ApplyNuditySetting;
+        ApplyNuditySetting();
+    }
+
+    public override void _ExitTree()
+    {
+        Game.Settings.Changed -= ApplyNuditySetting;
+        base._ExitTree();
+    }
+
+    private void ApplyNuditySetting()
+    {
+        string sprite = Game.Settings.NudityEnabled ? "eleanor_stage" : "eleanor_stage_clothed";
+        if (FindActor("eleanor") is { } eleanor)
+            eleanor.SetTexture(GD.Load<Texture2D>($"res://assets/art/sprites/{sprite}.png"), 11);
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "act3")
@@ -28,7 +48,9 @@ public partial class ClubStage : Room
         await Game.WalkTo(new Vector2(212, 208));
         Player.Face(Facing.Up);
         await Wait(0.8);
-        await Say("And in the light, Eleanor. No mask. No fear in her face either. Three of them around her, like pall-bearers.");
+        await Say(Game.Settings.NudityEnabled
+            ? "And in the light, Eleanor. No mask. Not a stitch on her, and no fear in her face either. Three of them around her, like pall-bearers."
+            : "And in the light, Eleanor. No mask, and no fear in her face. Three of them around her, like pall-bearers.");
         await Say("She wasn't a prisoner. Or she was, and she'd stopped minding. I couldn't tell which was worse.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);

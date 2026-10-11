@@ -3,11 +3,22 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>Micah's office, 9 PM. Teddy Harrington is waiting when the game starts.</summary>
+/// <summary>
+/// Micah's office, 9 PM. Teddy Harrington is waiting when the game starts. In Act 3 Micah ends up back here, at his
+/// desk, working out who could know where Eleanor is.
+/// </summary>
 public partial class Office : Room
 {
+    // Micah starts Act 3 seated behind the desk (a sprite), so the walking player is hidden until he stands up.
+    public override bool PlayerVisibleOnLoad => ShowPlayer && !State.HasFlag("micah_at_desk");
+
     public override async Task OnEnter(string entry)
     {
+        if (entry == "act3" && State.HasFlag("micah_at_desk"))
+        {
+            await Game.Run(AtTheDesk);
+            return;
+        }
         if (State.HasFlag("teddy_gone")) return;
         await Game.Run(async () =>
         {
@@ -25,6 +36,27 @@ public partial class Office : Room
         await teddy.MoveTo(new Godot.Vector2(58, 170), 55);
         State.SetFlag("teddy_gone");
         await Say("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
+    }
+
+    /// <summary>Act 3: thinking it over at the desk, then out the door to the Blue Lantern.</summary>
+    private async Task AtTheDesk()
+    {
+        await Wait(1.0);
+        await Say("Back behind my own desk. The bottle's still empty. Some things you can count on.");
+        await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
+        await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
+        await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
+        await Say("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
+        State.SetFlag("micah_at_desk", false);
+        Player.Teleport(new Godot.Vector2(160, 172), Facing.Left);
+        Player.Visible = true;
+        await Wait(0.4);
+        await Game.WalkTo(new Godot.Vector2(58, 172));
+        // tonight Sal and Tony are inside; Micah has the alley to himself
+        State.SetFlag("alley3");
+        State.SetFlag("alley3_sal_inside");
+        State.SetFlag("alley3_tony_inside");
+        await Game.ChangeRoom("alley", "act3");
     }
 
     private static readonly string[] DrawerFlags = { "took_revolver", "took_dollar", "took_lockpick" };

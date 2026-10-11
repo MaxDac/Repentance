@@ -26,6 +26,7 @@ Command-line options (after `--`):
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
+| `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 
 ```powershell
 godot --path . -- --autoplay
@@ -41,8 +42,16 @@ godot --path . -- --autoplay
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
-- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Quit to title*. The title screen offers
-  *Continue* (most recent save), *New game* and *Load game*.
+- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers
+  *Continue* (most recent save), *New game*, *Load game* and *Settings*.
+
+### Content settings
+
+**Settings > Nudity** is **Off** by default. Off uses Eleanor's dressed club sprite; On uses the
+implied-nude variant, with hair and hand coverage. The choice updates the club scene immediately
+and applies in both Act Two and Act Three. Preferences are stored in `user://settings.cfg`,
+independently of saves, so loading an older save or starting a new game cannot override the choice.
+Automated checks use a separate `user://autoplay_settings.cfg` and never modify player preferences.
 
 ### Saving
 
@@ -109,9 +118,22 @@ From here the story follows Walkthrough.md:
    stands among three masked men. **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
 25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
-26. **Outside the cathedral**: give up and ask Rose out for coffee (**End of Act Three**), or keep going:
-27. **Motel room 6**: a map is hidden in the bed.
-28. **Outskirts**: dig where the map says to find the bookkeeper's tin box... and Sal is waiting. *To be continued.*
+26. **Outside the cathedral**: give up (ending 1), or keep going:
+27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
+   the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the leg, or (only if Micah went
+   back to Caleb while hunting for Eleanor) walk away (ending 1). Tony sends him to old Harrington's house.
+29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
+   the door to spot it, take the key, push the coal bin under the bell, wedge it with the tie, then open the door.
+30. **Kitchen and study**: the right desk drawer holds Harrington's ledgers (take them to have something to
+   bargain with).
+31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
+   Rose at least three times) lower the gun (ending 1). Then talk Eleanor into leaving ("I didn't come all this
+   way...", or later "Every time I've seen you...").
+32. **The escape**: in the kitchen, optionally turn on the gas and light the candle; the house blows up behind them.
+33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and ledgers or explosion); 3 out of town
+   alone (not convinced, ledgers or explosion); 4 prison, Eleanor visits (convinced, nothing to bargain with);
+   5 prison, Caleb visits. Each ends Act Three; the next morning Daniel puts the journal back in the trunk. *The End.*
 
 ## Project layout
 
@@ -171,6 +193,8 @@ Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main
 ### Regenerating the art
 
 All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed.
+There are no imported 3D models: figure skeletons and perspective furniture are painted into PNGs by
+`tools/art/figure.py` and `tools/art/furniture.py`.
 The characters come from `tools/art/figure.py`, a small 3D-ish figure painter whose look is inspired by
 early-90s VGA adventures such as *Indiana Jones and the Fate of Atlantis*: tall, naturally proportioned
 bodies, shading lit from the top left, a darker outline on each material ("sel-out") and dithered fabric.
@@ -197,10 +221,16 @@ both knockout/recovery branches. Character quality and motion still require view
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
+py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: rooms are 480×200, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+Puzzle overlays and foreground layers keep their own crop sizes and scene positions. After regeneration,
+check the printed overlay coordinates against the corresponding scene; moving a crop without its node
+misaligns the object. Club rooms use their own 128-colour palettes so the stage's darkness does not
+flatten the lounge's velvet and brass.
 
 ## Credits
 

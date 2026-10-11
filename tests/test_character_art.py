@@ -3,6 +3,7 @@ import argparse
 import json
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import numpy as np
@@ -12,11 +13,42 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from art import sprites
 from art.figure import action_figure, grounded_joints
+import art.figure as painter
 
 ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_eleanor_front_hair_stays_against_the_body(self):
+        original = painter._hair_front
+        checks = []
+
+        def check_lock(canvas, *args):
+            silhouette = canvas.parts_mask("torso", "hair", "hairback").copy()
+            existing_hair = canvas.parts_mask("hair").copy()
+            original(canvas, *args)
+            new_hair = canvas.parts_mask("hair") & ~existing_hair
+            checks.append(np.count_nonzero(new_hair))
+            self.assertFalse(np.any(new_hair & ~silhouette), "front hair must not project out from the chest")
+
+        with patch.object(painter, "_hair_front", side_effect=check_lock):
+            for phi in (35, 90):
+                for mouth in (0, 1, 2):
+                    sprites.figure(sprites.ELEANOR_STAGE,
+                                   sprites.pose(phi, arms=sprites._arms("cover", "side"), mouth=mouth),
+                                   sprites.NPC_W, sprites.FH)
+        self.assertEqual(len(checks), 6)
+        self.assertTrue(all(count > 0 for count in checks), "retain front-hair coverage in every view")
+
+    def test_eleanor_club_variants_have_matching_animation_layouts(self):
+        nude = Image.open(ART / "sprites" / "eleanor_stage.png")
+        dressed = Image.open(ART / "sprites" / "eleanor_stage_clothed.png")
+        self.assertEqual(nude.size, (56 * 11, 96))
+        self.assertEqual(dressed.size, nude.size)
+        self.assertNotEqual(nude.tobytes(), dressed.tobytes())
+        for i in range(11):
+            self.assertIsNotNone(dressed.crop((i * 56, 0, (i + 1) * 56, 96)).getbbox())
+
     def test_action_contracts(self):
         for path in (ART / "sprites").glob("*.json"):
             with self.subTest(clip=path.stem):

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance;
@@ -18,6 +19,10 @@ public class AutoPlay
     private int _shot;
     private readonly Dictionary<string, int> _poseCounts = new();
     private readonly Dictionary<PosePlayback, int> _lastPoseFrame = new();
+    private string[] _prefer = Array.Empty<string>();
+    private readonly Dictionary<string, string[]> _offered = new();
+    private bool _theEndShot;
+    private string _act3Ink = "";
 
     public async Task Run(Game game)
     {
@@ -40,12 +45,20 @@ public class AutoPlay
                 await Shot($"choices_{knot.Replace('.', '_')}");
                 game.Hud.HideChoices();
             }
+            _offered[knot] = options.ToArray();
+            foreach (var want in _prefer)
+            {
+                for (int i = 0; i < options.Count; i++)
+                    if (options[i].Contains(want)) return i;
+            }
             return 0;
         };
 
         try
         {
             var gs = GameState.Instance;
+            await ContentSettingsTest(game);
+            if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
 
             // ---- prologue: the attic, played through the real mouse input where it matters
             await TitleMenuTest(game, expectSaves: false);
@@ -345,67 +358,235 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "ChurchExterior");
             await game.Wait(1.5);
             await Shot("church_exterior_beaten");
-            await Until(() => game.Room?.Name == "MotelRoom");
+            await Until(() => game.Room?.Name == "Office");
+            await game.Wait(1.5);
+            await Shot("office_act3_desk");
+            await Until(() => game.Room?.Name == "Alley");
             await stage;
             await WaitIdle(game);
-            Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked"), "Micah keeps going, to the motel");
             Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
             Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
+            Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
+            var act3Flags = gs.Flags.ToArray();
+            var act3Items = gs.Inventory.ToArray();
+            _act3Ink = DialogueManager.Instance.SaveInk();
 
-            // ---- the motel, and the road out of town
-            await game.Perform(Verb.Hand, "bed");
-            Check(gs.HasItem("map"), "found the map");
-            await Shot("motel_room");
-            await game.Perform(Verb.Walk, "exit");
-            Check(game.Room?.Name == "Street", "back on the street");
-            await game.Perform(Verb.Walk, "church_door");
-            Check(game.Room?.Name == "Street", "only the road out is left");
-            await Shot("street");
-            await game.Perform(Verb.Walk, "road_out");
-            Check(game.Room?.Name == "Outskirts", "drove out of town");
-            await Shot("outskirts");
-            _ = game.Perform(Verb.Hand, "disturbed_earth");
-            for (int i = 0; i < 600 && !gs.HasFlag("ending"); i++) await game.Wait(0.1);
-            Check(gs.HasItem("evidence"), "dug up the evidence");
-            await game.Wait(2.5);
-            await Shot("ending_sal");
-            for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
-            Check(game.Hud.CaptionVisible, "reached 'To be continued'");
-            await Shot("ending");
+            // ---- the alley: break the lamp, lure Sal out, knock him down, and bring Tony out
+            await Shot("alley_act3");
+            await game.Perform(Verb.Talk, "back_door");
+            Check(!gs.HasFlag("shot_bartender"), "not knocking with Sal inside");
+            await game.Perform(Verb.Kick, "trash");
+            Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
+            await game.Perform(Verb.Hand, "street_lamp");
+            Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+            await Shot("alley_dark");
+            await game.Perform(Verb.Kick, "trash");
+            Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+            await Shot("alley_sal_out");
+            await game.Perform(Verb.UseItem, "sal", "revolver");
+            Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+            _prefer = new[] { "Shoot him", "You can't stay", "Every time" };
+            await game.Perform(Verb.Talk, "back_door");
+            Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
+            Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the leg, on to the Harrington mansion");
 
-            // ---- the other Act 3 ending: giving up, and a coffee with Rose
-            game.Hud.ShowCaption(null);
-            // Replay the alternative from fresh Ink visit counts: its choices are once-only.
-            DialogueManager.Instance.ResetInk();
-            DialogueManager.Instance.AutoChoose = (knot, options) => Task.FromResult(knot is "club_caught" or "beaten_choice" ? 1 : 0);
-            gs.SetFlag("keep_going", false);
-            gs.SetFlag("brute_stage", false);
-            gs.SetFlag("masked");
-            var otherBranch = game.ChangeRoom("club_stage", "act3");
-            await Until(() => _poseCounts.GetValueOrDefault("micah_masked_collapse") == 2);
-            Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 2, "masked collapse also ran on the do-nothing branch");
-            await Until(() => game.Room?.Name == "ChurchExterior");
-            Check(game.Room?.Name == "ChurchExterior", "give-up route enters the actual beaten scene");
+            // ---- the mansion: the alarm bell, the key, the study, the bedroom
+            await Shot("mansion_exterior");
+            await game.Perform(Verb.Hand, "bell");
+            await game.Perform(Verb.Look, "door");
+            Check(gs.HasFlag("alarm_noticed"), "spotted the alarm wire");
+            await game.Perform(Verb.Hand, "lintel");
+            Check(gs.HasItem("kitchen_key"), "the key on the lintel");
+            await game.Perform(Verb.Hand, "door");
+            await game.Perform(Verb.Hand, "bell");
+            Check(game.Room?.Name == "MansionExterior" && !gs.HasFlag("bell_wedged"), "the bell is out of reach");
+            await game.Perform(Verb.Hand, "bin");
+            Check(gs.HasFlag("bin_moved"), "moved the coal bin under the bell");
+            await game.Perform(Verb.Hand, "bell");
+            Check(gs.HasFlag("bell_wedged"), "gagged the bell with the tie");
+            await Shot("mansion_exterior_wedged");
+            await game.Perform(Verb.Hand, "door");
+            Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("kitchen_key"), "in through the kitchen, quietly");
+            await Shot("mansion_kitchen");
+            await game.Perform(Verb.Hand, "range");
+            await game.Perform(Verb.Hand, "back_door");
+            Check(!gs.HasFlag("gas_on") && game.Room?.Name == "MansionKitchen", "no gas, no leaving yet");
+            await game.Perform(Verb.Walk, "baize_door");
+            Check(game.Room?.Name == "MansionStudy", "into the study");
+            await Shot("mansion_study");
+            await game.Perform(Verb.Hand, "drawer_right");
+            await Shot("mansion_study_drawer");
+            await game.Perform(Verb.Hand, "documents");
+            Check(gs.HasFlag("took_documents") && gs.HasItem("documents"), "took Harrington's ledgers");
+            var confront = game.Perform(Verb.Walk, "door_right");
+            await Until(() => game.Room?.Name == "MansionBedroom");
+            await game.Wait(1.5);
+            await Shot("mansion_bedroom");
+            await Until(() => gs.HasFlag("eleanor_up"));
+            await game.Wait(0.5);
+            await Shot("mansion_bedroom_gun");
+            await confront;
+            await WaitIdle(game);
+            Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag), "sparing the old man follows Caleb and Rose");
+            Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
+            await Shot("mansion_kitchen_escape");
+            await game.Perform(Verb.Hand, "range");
+            await game.Perform(Verb.Hand, "candle");
+            Check(gs.HasFlag("gas_on") && gs.HasFlag("candle_lit"), "gas on, candle lit");
+            await Shot("mansion_kitchen_gas");
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() => gs.HasFlag(Endings.MansionExploded));
+            await game.Wait(1.5);
+            await Shot("mansion_explosion");
+            await Until(() => game.Room?.Name == "Outskirts");
+            Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
+            await game.Wait(3);
+            await Shot("ending_together");
+            await TheEnd("ending_2");
+
+            // ---- the other endings, each from a seeded state
+            string[] alleyReady = act3Flags.Where(f => f != "alley3_sal_inside")
+                .Concat(new[] { "alley3_dark", "alley3_sal_out", "alley3_sal_down" }).ToArray();
+
+            // 5: no visits to Caleb, so no walking away; shoot, Eleanor stays, nothing to bargain with
+            var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club")).Append("rose_wait");
+            Seed(noChurch, act3Items, "Shoot him", "You can't stay", "Nobody's coming");
+            await game.ChangeRoom("alley", "act3");
+            await game.Perform(Verb.Talk, "back_door");
+            Check(!Offered("bartender_gun", "Lower the gun") && gs.HasFlag("shot_bartender"), "without Caleb, Micah can't walk away from Tony");
+            await game.ChangeRoom("mansion_bedroom", "start");
+            Check(!Offered("oldman_taunt", "Lower the gun") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
+            Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
+            await Shot("mansion_kitchen_alone");
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() => game.Room?.Name == "Prison");
+            Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
+            await game.Wait(4);
+            await Shot("ending_prison_caleb");
+            await TheEnd("ending_5");
+
+            // 4: Eleanor comes, but no ledgers and no fire
+            Seed(act3Flags, act3Items, "Shoot him", "I didn't come all this way");
+            await game.ChangeRoom("mansion_bedroom", "start");
+            Check(gs.HasFlag("eleanor_convinced"), "Eleanor convinced at the first try");
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() => game.Room?.Name == "Prison");
+            Check(gs.HasFlag("ending_4"), "ending 4: prison, Eleanor visits");
+            await game.Wait(4);
+            await Shot("ending_prison_eleanor");
+            await TheEnd("ending_4");
+
+            // 3: the house goes up, Eleanor stays behind
+            Seed(act3Flags, act3Items, "Shoot him", "He had it coming", "I'll go to the police");
+            await game.ChangeRoom("mansion_bedroom", "start");
+            Check(!gs.HasFlag("eleanor_convinced"), "Eleanor stays");
+            await game.Perform(Verb.Hand, "range");
+            await game.Perform(Verb.Hand, "candle");
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() => game.Room?.Name == "Outskirts");
+            Check(gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded), "ending 3: out of town, alone");
+            await game.Wait(3);
+            await Shot("ending_alone");
+            await TheEnd("ending_3");
+
+            // 1: walking away from Tony
+            Seed(alleyReady, act3Items, "Lower the gun");
+            await game.ChangeRoom("alley", "act3");
+            _ = game.Perform(Verb.Talk, "back_door");
             await Until(() => game.Room?.Name == "RoseHouse");
+            Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1"), "ending 1: walked away from Tony, coffee with Rose");
             await Until(() => gs.HasFlag("rose_door"));
             await game.Wait(1);
             await Shot("rose_coffee");
-            for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
-            Check(game.Hud.CaptionVisible, "reached 'End of Act Three' with Rose");
-            await Shot("ending_rose");
-            Check(_poseCounts.GetValueOrDefault("micah_kneel_rise") == 1, "alley played its kneeling rise");
-            Check(_poseCounts.GetValueOrDefault("micah_recover") == 3, "street and both cathedral branches played full recoveries");
-            Check(_poseCounts.GetValueOrDefault("eleanor_sheet_rise") == 1, "Eleanor played her sheet-covered rise");
+            await TheEnd("ending_1 (Tony)");
+
+            // 1: sparing the old man
+            Seed(act3Flags.Append("rose_wait"), act3Items, "Lower the gun");
+            _ = game.ChangeRoom("mansion_bedroom", "start");
+            await Until(() => game.Room?.Name == "RoseHouse");
+            Check(gs.HasFlag("spared_oldman") && gs.HasFlag("ending_1"), "ending 1: spared the old man");
+            await TheEnd("ending_1 (old man)");
+
+            // 1: giving up on the church steps
+            Seed(act3Flags.Where(f => f != "keep_going"), act3Items, "Give up");
+            _ = game.ChangeRoom("church_exterior", "beaten");
+            await Until(() => game.Room?.Name == "RoseHouse");
+            Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
+            await TheEnd("ending_1 (steps)");
         }
         catch (Exception ex)
         {
             _failures.Add(ex.ToString());
         }
+        finally
+        {
+            GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
+            PosePlayback.FrameObserver = null;
+            Engine.TimeScale = 1;
+            game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        }
+    }
 
-        GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
-        PosePlayback.FrameObserver = null;
-        Engine.TimeScale = 1;
-        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+    private async Task ContentSettingsTest(Game game)
+    {
+        const string path = "user://autoplay_settings.cfg";
+        if (FileAccess.FileExists(path))
+            Check(DirAccess.RemoveAbsolute(path) == Error.Ok, "removed only the isolated test settings");
+        Check(game.Settings.Load() && !game.Settings.NudityEnabled, "nudity defaults to off");
+        game.Hud.ShowTitle(true);
+        var title = game.Hud.Menu.OpenTitle();
+        Check(game.Hud.Menu.Press("Settings"), "title offers Settings");
+        await game.Wait(0.1);
+        Check(game.Hud.Menu.Press("Nudity: Off"), "settings offers explicit nudity opt-in");
+        await game.Wait(0.1);
+        Check(game.Settings.NudityEnabled, "nudity enabled through title settings");
+        var reloaded = new GameSettings(path);
+        Check(reloaded.Load() && reloaded.NudityEnabled, "nudity persists across settings instances");
+        await Shot("settings_nudity_on");
+        PressKey(Key.Escape);
+        await game.Wait(0.1);
+        Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
+        await title;
+        game.Hud.ShowTitle(false);
+
+        foreach (int act in new[] { 2, 3 })
+        {
+            var save = new SaveData { Room = "club_stage", StoryAct = act, X = 86, Y = 208 };
+            await game.LoadGame(save);
+            var eleanor = game.Room!.FindActor("eleanor")!;
+            var position = eleanor.Position;
+            Check(eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"), $"Act {act}: opted-in sprite on load");
+            await Shot($"eleanor_act{act}_nudity_on");
+            PressKey(Key.Escape);
+            await game.Wait(0.1);
+            Check(game.GetTree().Paused && game.Hud.Menu.Press("Settings"), $"Act {act}: pause offers Settings");
+            await game.Wait(0.1);
+            Check(game.Hud.Menu.Press("Nudity: On"), $"Act {act}: nudity can be disabled");
+            await game.Wait(0.1);
+            Check(!game.Settings.NudityEnabled &&
+                eleanor.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png") &&
+                eleanor.Position == position && eleanor.Frames == 11,
+                $"Act {act}: disabling immediately restores dressed Eleanor without moving her");
+            Check(reloaded.Load() && !reloaded.NudityEnabled, $"Act {act}: opt-out persists");
+            await Shot($"eleanor_act{act}_nudity_off");
+            PressKey(Key.Escape);
+            await game.Wait(0.1);
+            PressKey(Key.Escape);
+            await game.Wait(0.1);
+            Check(!game.GetTree().Paused && !game.Hud.Menu.IsOpen, $"Act {act}: back from settings resumes correctly");
+            await game.LoadGame(save);
+            Check(game.Room!.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage_clothed.png"),
+                $"Act {act}: loading a save respects the current opt-out");
+            Check(game.Settings.SetNudity(true), $"Act {act}: re-enabled nudity");
+            Check(game.Room.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"),
+                $"Act {act}: enabling immediately restores the opted-in variant");
+        }
+        Check(game.Settings.SetNudity(false), "reset isolated preference");
+        await game.ChangeRoom("attic", "settings_test");
+        await WaitIdle(game);
+        GameState.Instance.Reset();
+        DialogueManager.Instance.ResetInk();
+        foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
     }
 
     private async Task ObservePose(PosePlayback pose)
@@ -615,6 +796,31 @@ public class AutoPlay
     {
         foreach (var pressed in new[] { true, false })
             _game.GetViewport().PushInput(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed }, true);
+    }
+
+    /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
+    private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
+    {
+        _game.Hud.ShowCaption(null);
+        GameState.Instance.Restore(flags.ToArray(), items.ToArray(), 3);
+        DialogueManager.Instance.LoadInk(_act3Ink);
+        if (prefer.Length > 0) _prefer = prefer;
+        _offered.Clear();
+    }
+
+    private bool Offered(string knot, string option) =>
+        _offered.TryGetValue(knot, out var options) && options.Any(o => o.Contains(option));
+
+    /// <summary>Waits for "End of Act Three", then for Daniel's epilogue to finish on "The End".</summary>
+    private async Task TheEnd(string ending)
+    {
+        await Until(() => _game.Hud.CaptionVisible, 120);
+        Check(_game.Hud.CaptionVisible, $"{ending}: End of Act Three");
+        var gs = GameState.Instance;
+        await Until(() => _game.Room?.Name == "Attic" && !gs.HasItem("journal") && _game.Hud.CaptionVisible, 120);
+        Check(_game.Room?.Name == "Attic" && !gs.HasItem("journal"), $"{ending}: Daniel puts the journal back");
+        if (!_theEndShot) await Shot("the_end");
+        _theEndShot = true;
     }
 
     private async Task WaitIdle(Game game)
