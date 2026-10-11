@@ -52,7 +52,7 @@ texture = ExtResource("5_drawer")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "cell_drawer_open"
-HideIfFlags = "got_mirror"
+HideIfFlags = "took_mirror"
 
 [node name="DrawerComb" type="Sprite2D" parent="."]
 z_index = -9
@@ -60,7 +60,7 @@ position = Vector2(306, 180)
 texture = ExtResource("6_drawer_comb")
 centered = false
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "cell_drawer_open,got_mirror"
+ShowIfFlags = "cell_drawer_open,took_mirror"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -175,7 +175,7 @@ WalkTo = Vector2(315, 214)
 Face = 2
 ClickPriority = 2
 ShowIfFlags = "cell_drawer_open"
-HideIfFlags = "got_mirror"
+HideIfFlags = "took_mirror"
 monitoring = false
 monitorable = false
 

@@ -32,6 +32,7 @@ public partial class ChicagoMap : Room
         "club" => State.HasFlag("club_unlocked") && (!NunThreatened || HarringtonDone),
         "convent" => State.HasFlag("caleb_club") && !NunThreatened,
         "harrington" => NunThreatened && !HarringtonDone,
+        "hotel" => State.HasFlag("recover_hotel") && !State.HasItem("card") && !State.HasItem("brass_box") && !ClubOut,
         _ => false,
     };
 
@@ -39,6 +40,7 @@ public partial class ChicagoMap : Room
     {
         ("library", "Library"), ("church", "Church"), ("office", "Office"),
         ("club", "Club"), ("convent", "Convent"), ("harrington", "Harrington"),
+        ("hotel", "Hotel"),
     };
 
     protected override void OnRefresh()
@@ -71,6 +73,10 @@ public partial class ChicagoMap : Room
                 return true;
             case "library":
                 await Game.ChangeRoom("library", "start");
+                return true;
+            case "hotel":
+                await Say("I left room 507 without its clues. The staff entrance is still there.");
+                await Game.ChangeRoom("lobby", "eleanor_room");
                 return true;
 
             case "church" when !ClubOut:
