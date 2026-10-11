@@ -69,8 +69,10 @@ public partial class Office : Room
     {
         await Wait(1.0);
         await Say("Back behind my own desk. The whiskey's still there. Some things you can count on.");
+        await Say("Thanks to my efforts, he said. How'd they find her through me? Somebody on my heels? Something I let slip?");
+        await Say("Aw, what's the difference? They've got her just the same.");
         await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
-        await Say("The convent's done with me. The cops are on somebody's payroll. Caleb can't find her for me, but he might help me stop.");
+        await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
         await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
         await Say("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
         await Say("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
@@ -141,7 +143,7 @@ public partial class Office : Room
                 await Say(DrawerLeft() switch
                 {
                     0 => "Empty. The story of my life.",
-                    3 => "My revolver, my entire savings: one dollar, and my picks.",
+                    3 => "My revolver, twenty-two dollars for the case, and my picks.",
                     _ => "What's left of the important things.",
                 });
                 return true;
@@ -155,7 +157,7 @@ public partial class Office : Room
             case ("dollar", Verb.Hand):
                 State.GiveItem("dollar");
                 State.SetFlag("took_dollar");
-                await Say("Don't spend it all at once, Micah.");
+                await Say("Twenty-two dollars. A day's fee, and two dollars left from the last job. Better make it count.");
                 return true;
             case ("revolver", Verb.Hand):
                 State.GiveItem("revolver");

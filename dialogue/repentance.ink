@@ -6,6 +6,7 @@
 
 EXTERNAL has_item(id)
 EXTERNAL has_flag(flag)
+EXTERNAL cash_amount()
 EXTERNAL give_item(id)
 EXTERNAL take_item(id)
 EXTERNAL set_flag(flag)
@@ -166,8 +167,13 @@ BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't he
 -> END
 
 === bellboy_tip ===
+{has_flag("knows_lantern"): -> bellboy.after}
+{cash_amount() < 1:
+    MICAH: I need a dollar in cash before I can buy his help.
+    -> END
+}
 BELLBOY: Now you're speaking my language, mister.
-~ take_item("dollar")
+MICAH: One dollar. For your memory.
 BELLBOY: The dame in the picture? Tuesday night. Left with a big fella. Broken nose, cheap suit, expensive cigar.
 BELLBOY: Out the revolving door, toward State Street. Toward the Blue Lantern, if you catch my drift.
 MICAH: The Blue Lantern?
@@ -204,10 +210,10 @@ SAL: Then you don't know nothin', and nothin' don't get in.
 MICAH: Matchbook says the Blue Lantern. Doesn't say a word about a password.
 SAL: Matches are free. The door ain't.
 - (bribe_opts)
-* [(Slip him my wristwatch)]
-    MICAH: It keeps better time than I do.
-    SAL: ...Swiss?
-    MICAH: Elgin. Same thing, after midnight.
+* {cash_amount() >= 10} [(Give him ten dollars)]
+    MICAH: Ten dollars. Maybe that'll open the door.
+    SAL: ...
+    SAL: That'll do.
     SAL: Go on in. Keep your hands where I can see 'em.
     ~ set_flag("sal_passed")
     -> END
@@ -375,7 +381,6 @@ MOC: You are here because of Eleanor.
 MICAH: Do you know where she is?
 MOC: Of course! Thanks to your efforts, she is already with us, safe, and where she belongs!
 MICAH: My efforts...?
-MOC: You were followed, Mr. Jones. From the Aurelian to the Lantern, to the sisters, to that charming motor court.
 MOC: Bruno. The gentleman is leaving.
 BRUTE: This way, pal. Nice and easy, or the other way.
 -> END
@@ -417,8 +422,7 @@ CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
 CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
 CALEB: That's the Devil's work, brother. It's the oldest trick he has.
-CALEB: "Be penitent, therefore, and be converted, that your sins may be blotted out." The Acts of the Apostles, Micah.
-CALEB: Turn back. Salvation isn't wages for being good; it's grace.
+CALEB: Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
@@ -556,7 +560,7 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
     -> opts
 + {pushes == 2} [I'm not asking you to take me back. Just to forgive me.]
     ~ pushes = 3
-    ROSE: Forgiveness isn't something you collect at the door, Micah. And it doesn't mean taking you back.
+    ROSE: Forgiving is easy, Micah. Forgetting is the part you keep asking for.
     -> opts
 + {pushes == 3} [I've done something terrible this week. I need to hear it from somebody. From you.]
     ~ pushes = 4
@@ -671,7 +675,6 @@ CALEB: Nobody is beyond the way back. Not even you.
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.
 CALEB: Repentance means more than asking nicely. Put the gun away.
-CALEB: "I desire not the death of the wicked, but that the wicked turn from his way, and live." Ezechiel, Micah. Turn, and live.
 CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose, go anywhere.
 CALEB: There's still a way back. There always is. But not where you're going.
 MICAH: Good night, Caleb.
@@ -681,8 +684,7 @@ MICAH: Good night, Caleb.
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
-CALEB: The fiftieth psalm: "a contrite and humbled heart, O God, thou wilt not despise."
-CALEB: You don't have to be whole to turn to Him.
+CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
 -> END
 
@@ -812,7 +814,9 @@ MICAH: She wouldn't come with me. Even with him on the carpet and the whole Club
     MICAH: I've got the old man's papers in my coat. Enough to keep the cops off me for the rest of my life.
 }
 {has_flag("mansion_exploded"):
-    MICAH: The sky over the Gold Coast is still orange. Nobody will ever know what happened in that bedroom.
+    MICAH: The morning paper lists the dead. Eleanor Harrington. There it is, in black and white.
+    MICAH: I told myself I was saving her. I left her there and lit the fuse.
+    MICAH: They know who died. They don't know what I did.
 }
 MICAH: Free. That's the word for it. Free as a dog nobody wants.
 -> END

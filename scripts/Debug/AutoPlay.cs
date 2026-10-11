@@ -112,6 +112,7 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "dollar");
             await game.Perform(Verb.Hand, "lockpick");
             Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
+            Check(CashRules.Balance(gs.HasFlag) == 22, "case cash is twice the combined bribes");
             await Shot("office_drawer_empty");
             await MouseTest(game);
             await game.Perform(Verb.Walk, "door");
@@ -125,9 +126,14 @@ public class AutoPlay
             Check(game.Room?.Name == "Lobby", "back in the lobby");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
+            Check(gs.HasItem("dollar") && CashRules.Balance(gs.HasFlag) == 21, "bellboy costs one dollar, not the whole cash supply");
+            await game.Perform(Verb.UseItem, "bellboy", "dollar");
+            Check(CashRules.Balance(gs.HasFlag) == 21, "repeat bellboy visit does not charge again");
+            await ReloadCheckpoint("cash_after_bellboy");
+            Check(CashRules.Balance(gs.HasFlag) == 21 && gs.HasItem("dollar"), "save/load preserves remaining cash");
             Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
             await game.Perform(Verb.Walk, "revolving_door");
-            Check(game.Room?.Name == "Lobby", "cannot abandon newly required hotel clues before Blue Lantern departure");
+            Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
             await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
             await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift,
                 new[] { ("s0", 1) }, "lift_route");
@@ -164,6 +170,7 @@ public class AutoPlay
             Check(game.Room?.Name == "Speakeasy", "Sal blocks the bar");
             await game.Perform(Verb.Talk, "sal");
             Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out"), "no password, but Sal takes the bribe");
+            Check(CashRules.Balance(gs.HasFlag) == 11 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves eleven");
             await Shot("speakeasy_inside");
             var bar = game.Perform(Verb.Talk, "bartender");
             await Until(() => game.Room?.Name == "Alley");
@@ -622,9 +629,12 @@ public class AutoPlay
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts");
             Check(gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded), "ending 3: out of town, alone");
+            await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning", 10);
+            bool nextMorning = game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
+            Check(nextMorning, "alone explosion escape opens with the next-morning caption");
             await game.Wait(3);
             await Shot("ending_alone");
-            await TheEnd("ending_3");
+            await TheEnd("ending_3", nextMorning);
 
             // Signed evidence alone preserves both outskirts outcomes without a fire.
             foreach (bool convinced in new[] { false, true })
@@ -1396,9 +1406,9 @@ public class AutoPlay
             foreach (var (knot, excerpt) in new[]
             {
                 ("nun", "\"I will shew thee, O man, what is good.\""),
-                ("caleb_act2", "\"Be penitent, therefore, and be converted, that your sins may be blotted out.\""),
-                ("caleb_warn", "\"I desire not the death of the wicked, but that the wicked turn from his way, and live.\""),
-                ("caleb_last", "\"a contrite and humbled heart, O God, thou wilt not despise.\""),
+                ("caleb_act2", "Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace."),
+                ("caleb_warn", "There's still a way back. There always is. But not where you're going."),
+                ("caleb_last", "God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him."),
             })
             {
                 await game.LoadGame(original);
@@ -1410,7 +1420,25 @@ public class AutoPlay
                     if (story.CurrentChoices.Count == 0) break;
                     story.ChooseChoiceIndex(0);
                 }
-                Check(lines.Contains(excerpt, StringComparison.Ordinal), $"{knot}: compiled Douay-Rheims excerpt");
+                Check(lines.Contains(excerpt, StringComparison.Ordinal), $"{knot}: approved compiled dialogue");
+            }
+            foreach (bool together in new[] { false, true })
+            foreach (bool exploded in new[] { false, true })
+            foreach (bool documents in new[] { false, true })
+            {
+                await game.LoadGame(original);
+                GameState.Instance.SetFlag(Endings.MansionExploded, exploded);
+                GameState.Instance.SetFlag(Endings.TookDocuments, documents);
+                story.ChoosePathString(together ? "ending_together" : "ending_alone");
+                string lines = story.ContinueMaximally();
+                bool deathReport = !together && exploded;
+                Check(lines.Contains("The morning paper lists the dead. Eleanor Harrington.", StringComparison.Ordinal) == deathReport,
+                    $"newspaper death report: together={together}, exploded={exploded}, documents={documents}");
+                Check(lines.Contains("I left her there and lit the fuse.", StringComparison.Ordinal) == deathReport &&
+                    lines.Contains("They know who died. They don't know what I did.", StringComparison.Ordinal) == deathReport,
+                    "responsibility and secret lines accompany only the death report");
+                Check(!lines.Contains("The sky over the Gold Coast is still orange.", StringComparison.Ordinal),
+                    "next-morning dialogue does not retain the same-night sky");
             }
             await game.LoadGame(original);
             Engine.TimeScale = 1;
@@ -1473,14 +1501,24 @@ public class AutoPlay
         _offered.TryGetValue(knot, out var options) && options.Any(o => o.Contains(option));
 
     /// <summary>Waits for "End of Act Three", then for Daniel's epilogue to finish on "The End".</summary>
-    private async Task TheEnd(string ending)
+    private async Task TheEnd(string ending, bool sawNextMorning = false)
     {
-        await Until(() => _game.Hud.CaptionVisible, 120);
-        Check(_game.Hud.CaptionVisible, $"{ending}: End of Act Three");
+        bool outskirts = _game.Room is Rooms.Outskirts;
+        await Until(() =>
+        {
+            if (_game.Hud.CaptionVisible && _game.Hud.CaptionText == "The next morning")
+                sawNextMorning = true;
+            return _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three";
+        }, 120);
+        Check(_game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", $"{ending}: End of Act Three");
         var gs = GameState.Instance;
+        if (outskirts)
+            Check(sawNextMorning == (gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded)),
+                $"{ending}: next-morning transition only after alone escape with explosion");
         bool keepJournal = gs.HasFlag("ending_1");
-        await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible, 120);
-        Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionVisible, $"{ending}: final attic caption");
+        await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 120);
+        Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End",
+            $"{ending}: final attic caption");
         Check(gs.HasItem("journal") == keepJournal,
             $"{ending}: Daniel {(keepJournal ? "keeps the journal for Leo" : "puts the journal back")}");
         var story = GD.Load<GodotInk.InkStory>(DialogueManager.StoryPath);
