@@ -41,6 +41,7 @@ public partial class Hud : CanvasLayer
     private TextureRect _image = null!;
     private TaskCompletionSource? _imageTcs;
     private TextureRect _title = null!;
+    private Control _pause = null!;
     private TextureRect _cursor = null!;
     private Texture2D _cursorTex = null!;
     private TaskCompletionSource<int>? _choiceTcs;
@@ -52,6 +53,11 @@ public partial class Hud : CanvasLayer
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
     public bool InventoryOpen => _inventory.Visible;
+    public bool TitleVisible => _title.Visible;
+    public bool PauseVisible => _pause.Visible;
+    public bool SpeechVisible => _speech.Visible;
+    public string SpeechText => _speech.Text;
+    public float FadeAlpha => _fade.Color.A;
 
     public static Label MakeOutlinedLabel(Color color) => new()
     {
@@ -62,12 +68,17 @@ public partial class Hud : CanvasLayer
     public override void _Ready()
     {
         Layer = 10;
-        // keeps the cursor, fades and the pause menu alive while the tree is paused
+        // keeps the pause input, cursor and menu alive while gameplay is paused
         ProcessMode = ProcessModeEnum.Always;
         Font = GD.Load<Font>("res://assets/fonts/Silkscreen-Regular.ttf");
         var theme = new Theme { DefaultFont = Font, DefaultFontSize = 8 };
 
-        var root = new Control { Theme = theme, MouseFilter = Control.MouseFilterEnum.Ignore };
+        var root = new Control
+        {
+            Theme = theme,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            ProcessMode = ProcessModeEnum.Pausable,
+        };
         root.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         AddChild(root);
 
@@ -151,6 +162,21 @@ public partial class Hud : CanvasLayer
         Puzzle = new PuzzlePanel { Name = "PuzzlePanel" };
         root.AddChild(Puzzle);
 
+        _pause = new Control
+        {
+            Visible = false,
+            MouseFilter = Control.MouseFilterEnum.Stop,
+            ProcessMode = ProcessModeEnum.Always,
+        };
+        _pause.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        var pauseLabel = MakeOutlinedLabel(VerbHover);
+        pauseLabel.Text = "Paused - Space to resume";
+        pauseLabel.HorizontalAlignment = HorizontalAlignment.Center;
+        pauseLabel.Position = new Vector2(0, 4);
+        pauseLabel.Size = new Vector2(ScreenW, 12);
+        _pause.AddChild(pauseLabel);
+        root.AddChild(_pause);
+
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.AddChild(_cursor);
@@ -166,7 +192,17 @@ public partial class Hud : CanvasLayer
     public override void _Input(InputEvent e)
     {
         if (e is InputEventMouse m) MousePos = m.Position;
+        if (e.IsAction("pause_game"))
+        {
+            if (e.IsActionPressed("pause_game") && e is not InputEventKey { Echo: true })
+                Game.Instance.TogglePause();
+            GetViewport().SetInputAsHandled();
+            return;
+        }
+        if (Game.Instance.IsPaused) GetViewport().SetInputAsHandled();
     }
+
+    public void ShowPause(bool show) => _pause.Visible = show;
 
     public override void _Process(double delta)
     {
@@ -317,8 +353,9 @@ public partial class Hud : CanvasLayer
             var empty = new StyleBoxEmpty();
             foreach (var s in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
                 b.AddThemeStyleboxOverride(s, empty);
-            b.Pressed += () =>
+            b.Pressed += async () =>
             {
+                await Game.Instance.WaitUntilResumed();
                 HideChoices();
                 _choiceTcs?.TrySetResult(idx);
             };
@@ -362,6 +399,7 @@ public partial class Hud : CanvasLayer
     public async Task Fade(float alpha, double seconds)
     {
         var tw = CreateTween();
+        tw.SetPauseMode(Tween.TweenPauseMode.Stop);
         tw.TweenProperty(_fade, "color:a", alpha, seconds);
         await ToSignal(tw, Tween.SignalName.Finished);
     }
@@ -395,6 +433,7 @@ public partial class Hud : CanvasLayer
 
     public void CloseImage()
     {
+        if (Game.Instance.IsPaused) return;
         _image.Visible = false;
         _image.MouseFilter = Control.MouseFilterEnum.Ignore;
         _interface.Visible = true;

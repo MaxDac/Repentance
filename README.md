@@ -26,6 +26,7 @@ Command-line options (after `--`):
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
+| `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
 
 ```powershell
 godot --path . -- --autoplay
@@ -41,6 +42,9 @@ godot --path . -- --autoplay
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
+- **Space** pauses/resumes gameplay, even mid-sentence. The current dialogue, movement, and timers
+  stay frozen until you resume; clicks do nothing while paused. Space is inactive on the title screen
+  and inside the Esc menu.
 - Puzzle close-ups have their own controls, **Reset**, and **Close / Esc**. They are untimed and allow
   unlimited retries. Unsubmitted settings reset when closed; collected clues remain available.
 - Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be

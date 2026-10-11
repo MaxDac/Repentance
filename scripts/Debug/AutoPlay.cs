@@ -68,6 +68,7 @@ public class AutoPlay
             await TitleMenuTest(game, expectSaves: false);
             game.AutosaveEnabled = autosave;
             await game.ChangeRoom("attic", "start");
+            await PauseTest(game);
             Check(game.Player.Character == "daniel", "prologue plays as Daniel");
             await Shot("attic");
             await WheelTest(game);
@@ -527,6 +528,15 @@ public class AutoPlay
             var confront = game.Perform(Verb.Walk, "door_right");
             await Until(() => game.Room?.Name == "MansionBedroom");
             await game.Wait(1.5);
+            await Until(() => game.Hud.SpeechVisible && game.Room?.Name == "MansionBedroom");
+            var mansionLine = game.Hud.SpeechText;
+            Check(game.Hud.SpeechVisible && !confront.IsCompleted, "Act Three confrontation is speaking before pause");
+            PressKey(Key.Space);
+            await Observe(8);
+            Check(game.IsPaused && game.Hud.SpeechVisible && game.Hud.SpeechText == mansionLine
+                && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
+                "Space freezes the Act Three confrontation mid-sentence");
+            PressKey(Key.Space);
             await Shot("mansion_bedroom");
             await Until(() => gs.HasFlag("eleanor_up"));
             await game.Wait(0.5);
@@ -653,6 +663,190 @@ public class AutoPlay
         game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 
+    public async Task RunPauseTests(Game game)
+    {
+        _game = game;
+        game.AutosaveEnabled = false;
+        try
+        {
+            await game.ChangeRoom("attic", "start");
+            await PauseTest(game);
+        }
+        catch (Exception ex)
+        {
+            _failures.Add(ex.ToString());
+        }
+        finally
+        {
+            if (game.IsPaused) game.TogglePause();
+        }
+        GD.Print(_failures.Count == 0 ? "PAUSE TEST OK" : "PAUSE TEST FAILED:\n  " + string.Join("\n  ", _failures));
+        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+    }
+
+    private async Task PauseTest(Game game)
+    {
+        double timeScale = Engine.TimeScale;
+        Engine.TimeScale = 1;
+        try
+        {
+            var speech = game.Run(() => game.Say("Pause test."));
+            await Observe(0.35);
+            var frame = game.Player.GetChildren().OfType<Sprite2D>().Single().Frame;
+            var playtime = game.CaptureSave().PlaytimeSeconds;
+            PressKey(Key.Space);
+            Check(game.IsPaused && game.GetTree().Paused && game.Hud.PauseVisible, "Space pauses mid-sentence");
+            _game.GetViewport().PushInput(new InputEventKey
+            {
+                Keycode = Key.Space, PhysicalKeycode = Key.Space, Pressed = true, Echo = true,
+            }, true);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            Click(game.Hud.SatchelCenter, MouseButton.Left);
+            PressKey(Key.Escape);
+            await Observe(2);
+            Check(game.IsPaused && !game.Hud.Menu.IsOpen, "repeat Space and Esc do not exit Space pause");
+            Check(!speech.IsCompleted && game.Hud.SpeechVisible && game.Hud.SpeechText == "Pause test.",
+                "paused speech survives its full duration and cannot be skipped");
+            Check(game.Player.GetChildren().OfType<Sprite2D>().Single().Frame == frame, "talk animation freezes");
+            Check(game.CaptureSave().PlaytimeSeconds == playtime && !game.Hud.InventoryOpen, "playtime and inventory input freeze");
+            PressKey(Key.Space);
+            await Observe(0.3);
+            Check(!game.IsPaused && !game.Hud.PauseVisible && !speech.IsCompleted, "resume retains remaining sentence duration");
+            await AwaitTest(speech, "speech finishes after resuming");
+            var nextSpeech = game.Run(() => game.Say("Click to skip."));
+            await Observe(0.3);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(0.3);
+            Check(nextSpeech.IsCompleted && !game.Hud.SpeechVisible, "click-to-skip still works after resuming");
+
+            var timer = game.Wait(0.8);
+            await Observe(0.2);
+            PressKey(Key.Space);
+            await Observe(1);
+            Check(!timer.IsCompleted, "gameplay timer does not expire while paused");
+            PressKey(Key.Space);
+            await Observe(0.2);
+            Check(!timer.IsCompleted, "gameplay timer retains its remaining duration");
+            await AwaitTest(timer, "gameplay timer completes after resuming");
+
+            var walk = game.WalkTo(new Vector2(300, 205));
+            await Observe(0.1);
+            var position = game.Player.Position;
+            PressKey(Key.Space);
+            Click(new Vector2(420, 220), MouseButton.Left);
+            await Observe(0.8);
+            Check(!walk.IsCompleted && game.Player.IsWalking && game.Player.Position == position, "walking path freezes without cancellation");
+            PressKey(Key.Space);
+            await AwaitTest(walk, "walking completes after resuming");
+            Check(await walk, "resume preserves the original walk");
+
+            game.Hud.ShowInventory(true);
+            PressKey(Key.Space);
+            Click(new Vector2(10, 220), MouseButton.Left);
+            await Observe(0.1);
+            Check(game.Hud.InventoryOpen, "paused inventory remains open despite outside clicks");
+            PressKey(Key.Space);
+            Check(game.Hud.InventoryOpen, "resume preserves open inventory");
+            game.Hud.ShowInventory(false);
+
+            var choices = game.Hud.ShowChoices(new[] { "Pause regression choice" });
+            var choiceButton = game.Hud.FindChildren("*", "Button", true, false).OfType<Button>()
+                .Single(b => b.Text == "Pause regression choice");
+            await Observe(0.1);
+            PressKey(Key.Space);
+            Click(choiceButton.GetGlobalRect().GetCenter(), MouseButton.Left);
+            await Observe(0.1);
+            Check(!choices.IsCompleted && game.Hud.ChoicesVisible, "dialogue choices cannot be selected while paused");
+            PressKey(Key.Space);
+            Click(choiceButton.GetGlobalRect().GetCenter(), MouseButton.Left);
+            await AwaitTest(choices, "dialogue choices work after resuming");
+
+            var image = game.Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
+            PressKey(Key.Space);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(0.1);
+            Check(!image.IsCompleted && game.Hud.ImageVisible, "paused close-up cannot be dismissed");
+            PressKey(Key.Space);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await AwaitTest(image, "close-up can be dismissed after resuming");
+
+            var wheel = game.Hud.Wheel.Open(new Vector2(240, 140), "Pause regression");
+            PressKey(Key.Space);
+            Click(game.Hud.Wheel.SlotCenter(Verb.Look), MouseButton.Left);
+            await Observe(0.1);
+            Check(!wheel.IsCompleted && game.Hud.Wheel.IsOpen, "paused verb wheel cannot be selected");
+            PressKey(Key.Space);
+            Click(game.Hud.Wheel.SlotCenter(Verb.Look), MouseButton.Left);
+            await AwaitTest(wheel, "verb wheel works after resuming");
+            Check(await wheel == Verb.Look, "verb wheel retains its selection layout");
+
+            var puzzle = game.Hud.Puzzle.Open(PuzzleKind.Lift);
+            PuzzleClick("s0");
+            PressKey(Key.Space);
+            PuzzleClick("submit");
+            PuzzleClick("reset");
+            PuzzleClick("s1");
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(game.IsPaused && game.Hud.Puzzle.IsOpen && !puzzle.IsCompleted,
+                "Space pause blocks puzzle submission, reset, controls, and Esc");
+            PressKey(Key.Space);
+            PuzzleClick("submit");
+            await AwaitTest(puzzle, "puzzle resumes with its settings preserved");
+            Check(await puzzle, "paused puzzle controls did not change the correct solution");
+
+            var fade = game.Hud.Fade(1, 0.8);
+            await Observe(0.2);
+            var alpha = game.Hud.FadeAlpha;
+            PressKey(Key.Space);
+            await Observe(1);
+            Check(!fade.IsCompleted && game.Hud.FadeAlpha == alpha && game.Hud.PauseVisible, "fade freezes with pause indicator above it");
+            PressKey(Key.Space);
+            await AwaitTest(fade, "fade completes after resuming");
+            await game.Hud.Fade(0, 0.1);
+
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(game.Hud.Menu.IsOpen && game.GetTree().Paused && !game.IsPaused, "Esc menu still pauses separately");
+            PressKey(Key.Space);
+            Check(game.Hud.Menu.IsOpen && game.GetTree().Paused && !game.IsPaused, "Space does not resume the Esc menu");
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc still resumes its own menu");
+
+            game.Hud.ShowTitle(true);
+            PressKey(Key.Space);
+            Check(!game.IsPaused && !game.GetTree().Paused, "Space does nothing on the title screen");
+            game.Hud.ShowTitle(false);
+            for (int i = 0; i < 3; i++)
+            {
+                PressKey(Key.Space);
+                Check(game.IsPaused, "repeated toggle pauses");
+                PressKey(Key.Space);
+                Check(!game.IsPaused && !game.GetTree().Paused, "repeated toggle resumes");
+            }
+        }
+        finally
+        {
+            if (game.IsPaused) game.TogglePause();
+            Engine.TimeScale = timeScale;
+        }
+    }
+
+    private async Task Observe(double seconds)
+    {
+        var timer = _game.GetTree().CreateTimer(seconds, processAlways: true, ignoreTimeScale: true);
+        await _game.ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
+    }
+
+    private async Task AwaitTest(Task task, string description)
+    {
+        for (int i = 0; i < 100 && !task.IsCompleted; i++) await Observe(0.05);
+        if (!task.IsCompleted) throw new TimeoutException(description);
+        await task;
+        Check(true, description);
+    }
+
     /// <summary>Right-click the trunk to open the verb wheel, then click the boot.</summary>
     private async Task WheelTest(Game game)
     {
@@ -683,6 +877,11 @@ public class AutoPlay
         Click(slot, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
+        PressKey(Key.Space);
+        Click(slot, MouseButton.Left);
+        await Observe(0.1);
+        Check(game.IsPaused && game.Carried == "crowbar", "Space pause preserves the carried inventory item");
+        PressKey(Key.Space);
         var trunk = new Vector2(432, 205);
         Move(trunk);
         await Shot("attic_carry_crowbar");
@@ -751,14 +950,14 @@ public class AutoPlay
         Check(auto is { Room: "lobby" } && auto.Flags.Contains("seen_lobby"), "autosave written after a room change");
 
         PressKey(Key.Escape);
-        await game.Wait(0.1);
+        await Observe(0.1);
         Check(game.Hud.Menu.IsOpen && game.GetTree().Paused, "Esc opens the pause menu and pauses the game");
         await Shot("pause_menu");
         Check(game.Hud.Menu.Press("Save game"), "pause menu offers Save game");
-        await game.Wait(0.1);
+        await Observe(0.1);
         await Shot("save_slots");
         Check(game.Hud.Menu.Press("Slot 1"), "save menu lists slot 1");
-        await game.Wait(0.1);
+        await Observe(0.1);
         var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
         Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("matchbook"), "saved to slot 1 from the menu");
         PressKey(Key.Escape);
@@ -1098,7 +1297,7 @@ public class AutoPlay
 
     private async Task Shot(string name)
     {
-        await _game.Wait(0.4);
+        await Observe(0.4 / Engine.TimeScale);
         await _game.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
         var img = _game.GetViewport().GetTexture().GetImage();
         img.SavePng($"{_dir}/{++_shot:00}_{name}.png");
