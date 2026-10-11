@@ -25,10 +25,6 @@ public static class Items
             "Eleanor's diary. Locked with a toy clasp. Some secrets come with training wheels."),
         ["ledger"] = new("ledger", "ledger", "res://assets/art/items/ledger.png",
             "Harrington Steel's other set of books. The numbers add up. That's the problem."),
-        ["map"] = new("map", "map", "res://assets/art/items/map.png",
-            "A hand-drawn map of the county road. An X past the last fence post, east of town."),
-        ["evidence"] = new("evidence", "tin box", "res://assets/art/items/evidence.png",
-            "A rusted tin box: Moretti's IOUs, signed by Teddy, and a gold cufflink. T.H."),
         ["suitcase_key"] = new("suitcase_key", "small key", "res://assets/art/items/suitcase_key.png",
             "A small brass key from the lining of an old suitcase. It opens something. Something small."),
         ["revolver"] = new("revolver", "revolver", "res://assets/art/items/revolver.png",
@@ -53,6 +49,10 @@ public static class Items
             "A white porcelain face with nothing behind its eyes. It looks like everybody and nobody."),
         ["cloak"] = new("cloak", "black cloak", "res://assets/art/items/cloak.png",
             "A long black cloak with a deep hood. It smells of cedar and somebody else's cigars."),
+        ["kitchen_key"] = new("kitchen_key", "iron key", "res://assets/art/items/kitchen_key.png",
+            "A black iron key off the lintel of the Harrington kitchen. The mob's delivery boys know where everything is."),
+        ["documents"] = new("documents", "documents", "res://assets/art/items/documents.png",
+            "A folder of Harrington Steel's dirty work: payoffs, a judge's name, a union man who fell off a girder. Insurance."),
     };
 
     public static ItemDef Get(string id) => All[id];

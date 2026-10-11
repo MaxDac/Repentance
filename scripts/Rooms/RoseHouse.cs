@@ -81,7 +81,7 @@ public partial class RoseHouse : Room
         await Game.ChangeRoom("chicago_map", "start");
     }
 
-    /// <summary>Act 3, giving up on Eleanor: Micah asks Rose out for a coffee, and that's the end of Act Three.</summary>
+    /// <summary>Ending 1, giving up on Eleanor: Micah asks Rose out for a coffee, and that's the end of Act Three.</summary>
     private Task Coffee() => Game.Run(async () =>
     {
         await Wait(0.6);
@@ -93,10 +93,6 @@ public partial class RoseHouse : Room
         State.SetFlag("rose_door");
         await Wait(0.6);
         await Talk("rose_coffee");
-        await Wait(1.0);
-        await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act Three");
-        // The story ends here for now; keep the game on the caption.
-        await new TaskCompletionSource().Task;
+        await Act3.Finish();
     });
 }

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdvgtsjdcc1g6"
-path="res://.godot/imported/evidence.png-78cd6b12af0c2990882e294c2b1ee3b4.ctex"
+uid="uid://bxpm17audavji"
+path="res://.godot/imported/mansion_kitchen_gas.png-5a9294ff47ce3d3f85d2c86232224348.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/items/evidence.png"
-dest_files=["res://.godot/imported/evidence.png-78cd6b12af0c2990882e294c2b1ee3b4.ctex"]
+source_file="res://assets/art/rooms/mansion_kitchen_gas.png"
+dest_files=["res://.godot/imported/mansion_kitchen_gas.png-5a9294ff47ce3d3f85d2c86232224348.ctex"]
 
 [params]
 

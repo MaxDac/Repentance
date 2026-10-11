@@ -28,7 +28,7 @@ public partial class ClubStage : Room
         await Game.WalkTo(new Vector2(212, 208));
         Player.Face(Facing.Up);
         await Wait(0.8);
-        await Say("And in the light, Eleanor. No mask. No fear in her face either. Three of them around her, like pall-bearers.");
+        await Say("And in the light, Eleanor. No mask. Not a stitch on her, and no fear in her face either. Three of them around her, like pall-bearers.");
         await Say("She wasn't a prisoner. Or she was, and she'd stopped minding. I couldn't tell which was worse.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);

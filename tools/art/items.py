@@ -75,23 +75,6 @@ def ledger(d, im):
     d.line([(6, 20), (27, 20)], fill=hx("e0d4b0"))
 
 
-def map_(d, im):
-    d.polygon([(3, 5), (11, 3), (20, 6), (29, 3), (29, 19), (20, 22), (11, 19), (3, 21)], fill=hx("d8c898"))
-    d.line([(11, 3), (11, 19)], fill=hx("a89060"))
-    d.line([(20, 6), (20, 22)], fill=hx("a89060"))
-    d.line([(5, 16), (10, 12), (16, 14), (22, 9)], fill=hx("6a5a40"))
-    d.line([(22, 8), (26, 12)], fill=hx("b02020"), width=2)
-    d.line([(26, 8), (22, 12)], fill=hx("b02020"), width=2)
-
-
-def evidence(d, im):
-    d.rectangle([4, 7, 28, 20], fill=hx("5a5a62"))
-    d.rectangle([4, 7, 28, 10], fill=hx("74747c"))
-    d.rectangle([14, 11, 18, 15], fill=hx("c8a040"))
-    d.polygon([(7, 4), (14, 6), (13, 9), (6, 8)], fill=hx("e0d8c0"))
-    d.ellipse([20, 3, 25, 8], fill=hx("d8b050"))
-
-
 def suitcase_key(d, im):
     d.ellipse([6, 8, 13, 15], fill=hx("b89040"))
     d.ellipse([8, 10, 11, 13], fill=(0, 0, 0, 0))
@@ -221,12 +204,32 @@ def cloak(d, im):
         d.line([(x + 1, 9), (x - 1 + (x - 15) // 3, 20)], fill=hx("2a2632"))
     d.line([(5, 21), (27, 21)], fill=hx("2e2a36"))
 
+def kitchen_key(d, im):
+    """A big black iron door key, the kind that lives on a lintel."""
+    d.ellipse([2, 6, 12, 16], fill=hx("3a3a3e"))
+    d.ellipse([5, 9, 9, 13], fill=(0, 0, 0, 0))
+    d.rectangle([11, 10, 28, 12], fill=hx("3a3a3e"))
+    d.rectangle([22, 12, 25, 18], fill=hx("3a3a3e"))
+    d.rectangle([26, 12, 28, 16], fill=hx("3a3a3e"))
+    d.line([(12, 10), (27, 10)], fill=hx("6a6a70"))
+
+
+def documents(d, im):
+    """A buff cardboard folder tied with red tape, papers sticking out."""
+    d.polygon([(4, 6), (27, 4), (28, 20), (5, 21)], fill=hx("c8a868"))
+    d.polygon([(7, 3), (25, 2), (26, 6), (7, 7)], fill=hx("ece4d0"))
+    d.line([(9, 4), (22, 3)], fill=hx("6a6a6a"))
+    d.line([(16, 5), (17, 21)], fill=hx("a02020"), width=2)
+    d.line([(4, 13), (28, 12)], fill=hx("a02020"))
+    d.text((7, 14), "HS", fill=hx("4a3a1a"))
+
 
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
-                     ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger), ("map", map_),
-                     ("evidence", evidence), ("suitcase_key", suitcase_key), ("revolver", revolver),
+                     ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger),
+                     ("suitcase_key", suitcase_key), ("revolver", revolver),
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),
-                     ("invitation", invitation), ("mask", mask), ("cloak", cloak)):
+                     ("invitation", invitation), ("mask", mask), ("cloak", cloak),
+                     ("kitchen_key", kitchen_key), ("documents", documents)):
         save(_icon(fn), "items", f"{name}.png")
