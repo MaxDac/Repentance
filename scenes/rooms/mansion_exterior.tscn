@@ -1,0 +1,248 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/MansionExterior.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_bin.png" id="10_mansion_exterior_bin"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_tie.png" id="11_mansion_exterior_tie"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_door.png" id="12_mansion_exterior_door"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_fire.png" id="13_mansion_exterior_fire"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="14_eleanor_sheet"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(38, 98)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(62, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(40, 34)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(32, 34)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(50, 40)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(50, 40)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(28, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(30, 44)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(30, 84)
+
+[node name="MansionExterior" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Harrington Mansion"
+FarY = 212
+NearY = 262
+FarScale = 0.92
+NearScale = 1.02
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 214, 479, 214, 479, 269, 0, 269)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(40, 238)
+metadata/facing = 4
+
+[node name="escape" type="Marker2D" parent="Entries"]
+position = Vector2(269, 222)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "kitchen door"
+LookText = "The service door. Green paint, a brass handle, three worn steps."
+WalkTo = Vector2(269, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(269.0, 147.0)
+shape = SubResource("Rect_1")
+
+[node name="Lintel" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lintel"
+DisplayName = "lintel"
+LookText = "A heavy stone lintel over the door. Tony said the key's up there."
+WalkTo = Vector2(269, 222)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lintel"]
+position = Vector2(269.0, 89.0)
+shape = SubResource("Rect_2")
+
+[node name="Wire" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "wire"
+DisplayName = "wire"
+LookText = "A thin wire from the door frame up the wall to the bell. Open the door, the bell rings."
+WalkTo = Vector2(300, 222)
+Face = 2
+ShowIfFlags = "alarm_noticed"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Wire"]
+position = Vector2(313.0, 111.0)
+shape = SubResource("Rect_3")
+
+[node name="Bell" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bell"
+DisplayName = "alarm bell"
+LookText = "A red box with a big brass gong and a little hammer. A burglar alarm."
+WalkTo = Vector2(331, 222)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bell"]
+position = Vector2(331.0, 77.0)
+shape = SubResource("Rect_4")
+
+[node name="Bin" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bin"
+DisplayName = "coal bin"
+LookText = "A wooden coal bin by the coal hole. Heavy, and on runners."
+WalkTo = Vector2(421, 222)
+Face = 2
+HideIfFlags = "bin_moved"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bin"]
+position = Vector2(421.0, 190.0)
+shape = SubResource("Rect_5")
+
+[node name="BinMoved" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bin_moved"
+DisplayName = "coal bin"
+LookText = "The coal bin, right under the bell. A step up in the world."
+WalkTo = Vector2(331, 222)
+Face = 2
+ShowIfFlags = "bin_moved"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/BinMoved"]
+position = Vector2(331.0, 190.0)
+shape = SubResource("Rect_6")
+
+[node name="CoalHole" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "coal_hole"
+DisplayName = "coal hole"
+LookText = "The coal hatch, for the coal man. Too small for anyone over nine."
+WalkTo = Vector2(458, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CoalHole"]
+position = Vector2(464.0, 200.0)
+shape = SubResource("Rect_7")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "lit window"
+LookText = "A light upstairs, at the corner. Somebody in this house isn't sleeping."
+WalkTo = Vector2(440, 222)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(457.0, 60.0)
+shape = SubResource("Rect_8")
+
+[node name="Gate" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "gate"
+DisplayName = "garden gate"
+LookText = "The garden gate, the way I came in."
+WalkTo = Vector2(30, 236)
+Face = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Gate"]
+position = Vector2(16.0, 172.0)
+shape = SubResource("Rect_9")
+
+[node name="BinMoved" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(304, 173)
+texture = ExtResource("10_mansion_exterior_bin")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "bin_moved"
+
+[node name="Tie" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(337, 69)
+texture = ExtResource("11_mansion_exterior_tie")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "bell_wedged"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(248, 96)
+texture = ExtResource("12_mansion_exterior_door")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "door_open"
+
+[node name="Fire" type="Sprite2D" parent="."]
+z_index = -8
+position = Vector2(0, 0)
+texture = ExtResource("13_mansion_exterior_fire")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "mansion_exploded"
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(262, 224)
+script = ExtResource("5_Actor")
+Id = "eleanor"
+DisplayName = "Eleanor"
+LookText = "Eleanor, in a bedsheet and my coat. Shivering. Alive."
+WalkTo = Vector2(262, 224)
+ShowIfFlags = "escaping,eleanor_convinced"
+monitoring = false
+monitorable = false
+Texture = ExtResource("14_eleanor_sheet")
+SpeechColor = Color(0.96, 0.78, 0.62, 1)

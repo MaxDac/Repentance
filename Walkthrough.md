@@ -271,7 +271,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   - Do nothing, and the same man from behind will knock him out nonetheless.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 
-#### Churc, outside
+#### Church, outside
 
 - Micah is supine on the pavement, again, beaten.
 - Again, his thoughts will appear as narrating voice, saying what is he doing.
@@ -280,14 +280,104 @@ described here (other verbs, flavour lines) is left to the implementation.
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
   to the end of act 3 (caption "End of Act Three").
 - If the player decide to keep pushing, keep to the next.
-- For now, continue with the temporary storyline. 
 
+#### Office
 
+- The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
+- He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the 
+  Blue Lantern, the mob.
+- Micah stands up, and walks through the door.
 
-#### Temporary storyline (from the Starlight)
+#### Behind Blue Lantern, previous location from Act 1
 
-The existing temporary storyline strings together the remaining locations:
+- <Placeholder> Simulate three puzzles to solve in this location to get the bartender and the gorilla out, and to knock
+  out the gorilla. The idea is that Micah would be alone with the bartender, and threaten him with the revolver.
+- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to 
+  Eleanor.
+- The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
+- At this point, the player must choose between fire the revolver on the leg, or to walk away, because it's not worth it.
+  The option to walk away would be available only if the player returned to the church at least one.
+- If the player walks out, he's going to his wife's house (caption *End of Act Three*).
+- If he's firing at the leg, you have to create a new model for the bartender supine, with a drop of blood from the leg.
+- The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
+  from the kitchen, because they provide them with booze.
+- Micah get out of the scene.
 
-- **Motel room 6**: a map is hidden in the bed.
-- **Outskirts**: digging where the map says reveals the bookkeeper's tin box... and Sal is waiting.
-  *To be continued.*
+#### Outside of the Harrington mansion, behind the kitchen
+
+- <Placeholder> The trick that the mob told Micah to do would actually set of an alarm, you have to simulate what the
+  bartender told him to do, the fact that Micah notice it before actually performing the action, and a couple of 
+  puzzles to actually access to the kitchen.
+- In the kitchen, for now, don't do anything, just generate a mansion kitchen in the darkness, the player can pass through.
+- Next area to generate is Harrington father studio, you have to generate a simple studio with a closet, a desk with a couple
+  of drawer; in one of those drawers, the player can take some incriminating documents, but this won't be possible afterwards,
+  and the player can pass the studio without noticing it, and nothing would stop them.
+- Next area is Harrington father's bedroom: huge bedroom with king size bed, Elearon under the sheet naked, Harrington
+  father in his dressing gown. He's talking with Eleanor, telling her that it's not too bad to have returned where she
+  belongs.
+- After the dialogue, Micah, who previusly hid behind something, shows up with his revolver pointed at the old man; the 
+  old man turns to Micah, Eleanor get out of bed covering herself with the sheets (you have to generate this character also).
+- The old man tells Micah that he doesn't have the guts to do that, and that Eleanor's place is here, she's just a whore.
+- The player has two choices: either shoots the old man or not:
+  - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
+    sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
+    - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
+    - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas 
+      and make the mansion explode.
+    - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
+  - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
+    **and** returned to the church at least once. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    and the scene skips to *End of Act 3*.
+
+### End of Act 3
+
+- Here, there are multiple endings, depending on the choices made in the previous selection:
+
+#### Option 1 - Outside Micah's wife
+
+- Previously used location
+- This ending is accessible if Micah refuses to go forward at any point, either outside of the Church, or if he refuses
+  to shoot the bartender, or the old man.
+- Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
+- In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
+
+#### Option 2 - Outskirts, with Eleanor
+
+- Previously generated location 
+- This ending is accessible only if Micah manages to convince Eleanor in the Harringtom mansion, and manages to make it explode
+  or finds the documents in the mansion.
+- They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
+- In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
+
+#### Option 3 - Outskirts, without Eleanor
+
+- Previously generated location
+- This ending is accessible if Micah didn't manage to convince Eleanor, and Micah either finds the documents in the mansion
+  or make it explode.
+- You have to generate the car in this case also, Micah gets out of the car.
+- In this case, the journal ends with Micah shooting himself, and the last entry is stained with alcohol and blood.
+
+#### Option 4 - Prison - With Eleanor
+
+- You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
+- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the 
+  documents.
+- Micah in this case has a jumpsuit for an inmate, you have to generate the model.
+- Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of 
+  jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
+- In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
+
+#### Option 5 - Prison - With brother
+
+- You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
+- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't 
+  find the documents.
+- Micah in this case has a jumpsuit for an inmate, you have to generate the model.
+- Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly 
+  says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
+- In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
+
+### Present
+
+The story ends with the father reading the last entry, commenting briefly, and then throwing back the journal in the 
+trunk.
