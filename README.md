@@ -33,6 +33,10 @@ Command-line options (after `--`):
 godot --path . -- --autoplay
 ```
 
+On Windows, use the Godot Mono **`_console.exe`** executable for automated runs when capturing output and
+exit status. The GUI executable (including some `godot` aliases) can return before the game finishes.
+Wait for `AUTOPLAY OK` from the console process rather than treating a successful launcher exit as a pass.
+
 ### Controls
 
 - **Left click** on the floor to walk. Left click on an object does the obvious thing: talk to people,
@@ -70,14 +74,13 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The ten-puzzle expansion preserves completed discoveries in compatible version-3 saves using separate
-original-puzzle and Act 3 schema markers. New saves do not grandfather unfinished puzzles on reload.
-Version-2 saves, including saves made on the puzzle branch before this merge, remain incompatible with
-main's completed Act 3, which removed the temporary ending route.
+The current save format is version 4; earlier saves are incompatible because they lack the original
+ring decision and use the previous Act 2/3 entry flow. The ten-puzzle expansion's separate original-puzzle
+and Act 3 schema markers preserve completed discoveries in compatible saves. New saves do not grandfather
+unfinished puzzles on reload.
 An older Act 2 save that skipped room 507 gets a temporary Hotel map marker to recover the card clues.
 
-The ring/cross story revision uses save version 4. Earlier saves are incompatible because they lack the original
-ring decision and use the previous Act 2/3 entry flow.
+The story/dialogue refinements retain version 4: ending requirements and saved decisions are unchanged.
 
 ## The demo
 
@@ -95,7 +98,8 @@ ring decision and use the previous Act 2/3 entry flow.
    open the closet and enter R 12 / L 31 / R 7 on the safe's close-up controls, then take the brass box.
    Open it in the satchel with the hand: a
    perfumed, blank calling card and a matchbook from the Blue Lantern.
-4. **Blue Lantern speakeasy**: Micah doesn't know the password and has to bribe Sal (mock him or refuse and
+4. **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with his wristwatch,
+   having spent his only dollar at the hotel (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
@@ -169,6 +173,36 @@ From here the story follows Walkthrough.md:
    alone (not convinced, ledgers or explosion); 4 prison, Eleanor visits (convinced, nothing to bargain with);
    5 prison, Caleb visits. Each ends Act Three; the next morning Daniel keeps the journal for Leo if Micah returned
    to Rose, saying "maybe Leo would like to read it some day". Otherwise, he puts it back in the trunk. *The End.*
+
+### Story notes
+
+The core plot, ten puzzles and five endings are unchanged. Sal no longer receives cash Micah does not have;
+the Club explains how it followed him to Eleanor. Caleb's leads refer to the established convent, and Rose's
+concern is not forgiveness earned by repeatedly asking. Reconciliation begins with coffee; the journal places
+the renewed vows a year later. On the explosion-without-Eleanor route, Micah sees her evacuate before the blast.
+
+Exact Scripture excerpts use **Douay-Rheims (Challoner)**, appropriate to the Catholic characters:
+
+| Dialogue | Reference |
+|---|---|
+| Sister Agatha's quiz | [Micheas 6:8](https://drbo.org/chapter/38006.htm) |
+| Caleb's invitation to turn back | [Acts 3:19](https://drbo.org/chapter/51003.htm) |
+| Caleb's warning before Harrington's office | [Ezechiel 33:11](https://drbo.org/chapter/31033.htm) |
+| Caleb before the masked Club visit | [Psalm 50:19](https://drbo.org/chapter/21050.htm) |
+
+Psalm 50:19 corresponds to Psalm 51:17 in modern Hebrew numbering. Caleb's prodigal-son account paraphrases
+[Luke 15:17-20](https://drbo.org/chapter/49015.htm); it is not marked as a direct quotation. Ring and cross remain
+reminders, not a bargain with God. Antagonists' threats and the tragic endings are not theological verdicts.
+
+**Scope and length:** Repentance is a compact, single-case adventure: four puzzles in each of the first two acts,
+then an alley encounter, an alarm puzzle and optional evidence in Act Three. Its mostly linear investigation is
+closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/) than
+[Kathy Rain (2016)](https://store.steampowered.com/app/370910/), whose published scope includes 40+ environments
+and 4,000+ dialogue lines. [Technobabylon](https://store.steampowered.com/app/307580/) and
+[Unavowed](https://store.steampowered.com/app/336140/) provide broader multi-protagonist/companion-based comparisons.
+Those are scope comparisons, not verified completion-time claims. Reading/skipping dialogue, solving puzzles
+without known answers, optional visits and replaying endings substantially change duration. Autoplay is accelerated
+and includes seeded regressions; its wall-clock duration must not be advertised as adventure length.
 
 ## Project layout
 

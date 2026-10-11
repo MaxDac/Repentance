@@ -155,6 +155,11 @@ public partial class MansionExterior : Room
         if (State.HasFlag("gas_on") && State.HasFlag("candle_lit"))
         {
             await Wait(1.0);
+            if (!State.HasFlag(Endings.EleanorConvinced))
+            {
+                await Say("Lights upstairs. The household spills onto the lawn, a woman wrapped in a white sheet among them.");
+                await Say("Eleanor. Out of the house, but not coming with me.");
+            }
             await Game.Hud.Fade(1, 0.08);
             State.SetFlag(Endings.MansionExploded);
             await Wait(0.25);

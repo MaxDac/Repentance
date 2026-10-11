@@ -204,10 +204,10 @@ SAL: Then you don't know nothin', and nothin' don't get in.
 MICAH: Matchbook says the Blue Lantern. Doesn't say a word about a password.
 SAL: Matches are free. The door ain't.
 - (bribe_opts)
-* [(Fold a ten into his paw)]
-    MICAH: Maybe Mr. Hamilton here knows the password.
-    SAL: ...
-    SAL: Yeah. Hamilton's a member.
+* [(Slip him my wristwatch)]
+    MICAH: It keeps better time than I do.
+    SAL: ...Swiss?
+    MICAH: Elgin. Same thing, after midnight.
     SAL: Go on in. Keep your hands where I can see 'em.
     ~ set_flag("sal_passed")
     -> END
@@ -289,9 +289,9 @@ NUN: And what would you want with her?
     NUN: Men always say that. Usually just before they make a woman less safe.
 - NUN: What is your name?
 MICAH: Micah. Micah Jones.
-NUN: Micah. Like the prophet. "He hath shewed thee, O man, what is good." Do you remember the rest?
-MICAH: My mother did. I stopped listening somewhere around "walk humbly".
-NUN: Then listen now, Micah. You would be better off finish the search now, and never have anything to do with that Jezebel.
+NUN: Micah. Like the prophet. "I will shew thee, O man, what is good." Do you remember the rest?
+MICAH: My mother did. I stopped listening somewhere around "love mercy".
+NUN: Then listen now, Micah. You would be better off finishing the search now, and never having anything to do with that Jezebel.
 MICAH: Jezebel? What do you mean by that?
 NUN: ...
 NUN: I have said too much already. It is not my place to judge. Only to pray.
@@ -324,7 +324,7 @@ ELEANOR: You could tell Teddy you never found me.
 MICAH: I could. I'm a lousy liar.
 ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
 MICAH: Come away from here. Not back to Teddy. Anywhere.
-ELEANOR: I can't return back there...
+ELEANOR: I can't go back there...
 -> END
 
 // ---------------------------------------------------------------- MOTEL, NIGHT
@@ -375,6 +375,7 @@ MOC: You are here because of Eleanor.
 MICAH: Do you know where she is?
 MOC: Of course! Thanks to your efforts, she is already with us, safe, and where she belongs!
 MICAH: My efforts...?
+MOC: You were followed, Mr. Jones. From the Aurelian to the Lantern, to the sisters, to that charming motor court.
 MOC: Bruno. The gentleman is leaving.
 BRUTE: This way, pal. Nice and easy, or the other way.
 -> END
@@ -416,7 +417,8 @@ CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
 CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
 CALEB: That's the Devil's work, brother. It's the oldest trick he has.
-CALEB: Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace.
+CALEB: "Be penitent, therefore, and be converted, that your sins may be blotted out." The Acts of the Apostles, Micah.
+CALEB: Turn back. Salvation isn't wages for being good; it's grace.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
@@ -554,7 +556,7 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
     -> opts
 + {pushes == 2} [I'm not asking you to take me back. Just to forgive me.]
     ~ pushes = 3
-    ROSE: Forgiving is easy, Micah. Forgetting is the part you keep asking for.
+    ROSE: Forgiveness isn't something you collect at the door, Micah. And it doesn't mean taking you back.
     -> opts
 + {pushes == 3} [I've done something terrible this week. I need to hear it from somebody. From you.]
     ~ pushes = 4
@@ -589,7 +591,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
 - else:
     ROSE: What do you want?
 }
-MICAH: Nothing. Not tonight.
+MICAH: Nothing you owe me.
 MICAH: I'm not asking you to believe I've changed. I'd like to start showing you.
 MICAH: I was wondering... if some time you'd be free for a cup of coffee. Daylight. A table between us.
 ROSE: ...
@@ -606,7 +608,7 @@ CALEB: ...I don't know anything about clubs.
 * [You went as white as the altar cloth, Caleb.]
     CALEB: It's late, Micah. Go home.
     -> opts
-* [You hid her in your sacristy. Now they've got her back. Help me.]
+* [They have her, Caleb. If you know anything, tell me.]
     CALEB: ...
     CALEB: There are women who go there. Performers, they call them. When the Club is done with them, the sisters at the convent take some of them in.
     CALEB: If anybody knows anything, it's the sisters. The convent is the best place to ask.
@@ -669,6 +671,7 @@ CALEB: Nobody is beyond the way back. Not even you.
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.
 CALEB: Repentance means more than asking nicely. Put the gun away.
+CALEB: "I desire not the death of the wicked, but that the wicked turn from his way, and live." Ezechiel, Micah. Turn, and live.
 CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose, go anywhere.
 CALEB: There's still a way back. There always is. But not where you're going.
 MICAH: Good night, Caleb.
@@ -678,7 +681,8 @@ MICAH: Good night, Caleb.
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
-CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
+CALEB: The fiftieth psalm: "a contrite and humbled heart, O God, thou wilt not despise."
+CALEB: You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
 -> END
 
@@ -735,7 +739,7 @@ MICAH: Get that leg looked at, Tony. Tell them you slipped.
 === harrington_eleanor ===
 HARRINGTON: There, now. It's not so bad, is it? Being back where you belong.
 ELEANOR: ...
-HARRINGTON: You ran to a priest, and then to a drunk who calls himself a detective. And where did they bring you? Home.
+HARRINGTON: You ran to the nuns, and then to a drunk who calls himself a detective. And where did they bring you? Home.
 HARRINGTON: Theodore will have you back. He always does. The Club will have you on Thursdays. And I will have you whenever I please.
 ELEANOR: Yes, Mr. Harrington.
 HARRINGTON: Good girl.
@@ -750,7 +754,7 @@ ELEANOR: Micah...
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")
 * {has_flag("can_spare")} [(Lower the gun.)]
-    MICAH: Yeah... I'm done with this world...
+    MICAH: Yeah... I'm done with this. All of it.
     ~ set_flag("spared_oldman")
 - -> END
 
@@ -803,7 +807,7 @@ ELEANOR: Goodbye, Chicago.
 
 === ending_alone ===
 MICAH: The last fence post. The last streetlight. The last place a man goes to bury something.
-MICAH: She stayed in that house. With him on the carpet and the whole Club on its way.
+MICAH: She wouldn't come with me. Even with him on the carpet and the whole Club on its way.
 {has_flag("took_documents"):
     MICAH: I've got the old man's papers in my coat. Enough to keep the cops off me for the rest of my life.
 }
@@ -863,10 +867,10 @@ DANIEL: Five more minutes.
 DANIEL: The last entry. The handwriting's different. Shakier.
 {
 - has_flag("ending_1"):
-    DANIEL: "Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
+    DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
     DANIEL: ...Huh. He made it. He actually made it.
-    DANIEL: maybe Leo would like to read it some day
+    DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_2"):
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
     DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."

@@ -20,7 +20,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Micah's office
 
-- Micah's thoughts, then the conversation with Teddy Harrington III about his missing fiancée, Eleanor
+- Micah's thoughts, then the conversation with Teddy Harrington III about his missing wife, Eleanor
   Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
 - The top drawer of the desk holds a revolver, the money (one dollar) and a lockpick. Micah takes all three
@@ -59,7 +59,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club (the Blue Lantern speakeasy)
 
-- At the door, Sal the guard asks for the password. Micah doesn't know it and has to bribe his way in again.
+- At the door, Sal the guard asks for the password. Micah doesn't know it and can offer his wristwatch as a bribe;
+  his only dollar was spent at the hotel. No additional inventory item is needed for this dialogue choice.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
 - Until Sal lets him in, Sal blocks the way to the bar.
 - If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
@@ -80,8 +81,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Two new locations in neo-gothic style: the convent corridor, and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
 - In the corridor, Sister Agatha interrogates Micah: what he's doing here and what he wants with Eleanor.
-  She hints at Micah's biblical name as a prophet, and says the exact words "you would be better off finish the
-  search now, and never have anything to do with that Jezebel". Micah asks what she means; she retreats, telling
+  She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "you would be better off finishing the
+  search now, and never having anything to do with that Jezebel". Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
 - **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
@@ -97,7 +98,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, he finds Eleanor there, outside, dressed in black. No one is passing.
 - She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
-- The scene ends when Eleanor says "I can't return back there..."
+- The scene ends when Eleanor says "I can't go back there..."
 
 #### Motel room, night
 
@@ -133,6 +134,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Existing location.
 - Micah thinks that, even though he couldn't turn her in, he can't think of anything else but her.
+  He returned to the motor court at noon, but Eleanor had left the key and no note.
 - After this thought, he walks up to the doors and enters the church.
 
 #### Inside the church
@@ -141,6 +143,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah walks over to his brother, Father Caleb, and talks about the situation. During the conversation he tells
   his brother that, right now, he's too far off to be saved.
 - Caleb replies that this is crap, no one is beyond salvation, and that thinking that is the Devil's work.
+  He quotes Acts 3:19 as an invitation to turn back, not a reward for carrying religious objects.
 - Micah replies "I'll think about that", then says that coming here was a mistake, and walks out. The scene moves
   to the map.
 
@@ -192,6 +195,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   of Eleanor.
   Micah will get near the MoC and ask whether he knows where she is, the MoC will say "Of course! Thanks to your 
   efforts, she is already with us, safe, and where she belongs!"
+  He explains that the Club's men followed Micah from the hotel to the Blue Lantern, the convent and the motor court.
   Then the MoC will call a brute (another character, in normal dress, tie and jacket) and ask to escort Micah out.
 
 #### Streets of Chicago
@@ -216,6 +220,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   phrase will be available.
 - If the player decides to keep pushing at least three times, before going out of the location, the wife will call him
   back with a "Wait!": Micah will turn, a pause of at least 3 seconds, then the wife will say "Don't get into trouble again."
+- Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
 - Then, the wife will close the door, and Micah will go out.
 
 #### Map of Chicago
@@ -337,6 +342,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the
   Blue Lantern, the mob.
 - Micah stands up and the player regains control, with a final opportunity to collect a left-behind wedding ring.
+- His thoughts acknowledge that Caleb may help him turn back, even though he cannot supply another lead.
 - Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
 - Act 3 church visits include Caleb's counsel and the cross offer (regardless of the original ring decision), unless
   already accepted. They count as a church return and lead back to the office without replaying the desk scene.
@@ -396,7 +402,7 @@ described here (other verbs, flavour lines) is left to the implementation.
     - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
-    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this. All of it."
     and the scene skips to *End of Act 3*.
 
 ### End of Act 3
@@ -411,12 +417,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
   progressively stricter requirements above; the other endings are unchanged.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
+- He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
+  happen later, after he has begun showing change rather than merely promising it.
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
 
 #### Option 2 - Outskirts, with Eleanor
 
 - Previously generated location
-- This ending is accessible only if Micah manages to convince Eleanor in the Harringtom mansion, and manages to make it explode
+- This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to make it explode
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
 - In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
@@ -426,14 +434,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Previously generated location
 - This ending is accessible if Micah didn't manage to convince Eleanor, and Micah either finds the documents in the mansion
   or make it explode.
+- If he caused the explosion without Eleanor following him, he sees her and the household evacuate before the blast.
+  Her escaping the house does not mean she chooses to leave Chicago with him.
 - You have to generate the car in this case also, Micah gets out of the car.
 - In this case, the journal ends with Micah shooting himself, and the last entry is stained with alcohol and blood.
 
 #### Option 4 - Prison - With Eleanor
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the
-  documents.
+- This ending is accessible if Micah managed to convince Eleanor, but neither made the mansion explode nor found the
+  signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
   jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
@@ -442,8 +452,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 5 - Prison - With brother
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't
-  find the documents.
+- This ending is accessible if Micah did not manage to convince Eleanor, and neither made the mansion explode nor
+  found the signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly
   says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
@@ -452,7 +462,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife, the father
-keeps the journal, saying "maybe Leo would like to read it some day". In all other endings, he throws the journal back
+keeps the journal, saying "Maybe Leo would like to read it some day." In all other endings, he throws the journal back
 in the trunk.
 
 ### Puzzle pacing and saves
@@ -465,6 +475,17 @@ motel map and burial survey are not part of the completed Act 3.
 
 All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
-The satchel has pages so every collected item remains accessible. Main's version-3 save format remains
-unchanged; completed discoveries in compatible older saves remain completed, using independent markers
+The satchel has pages so every collected item remains accessible. The current save format
+is version 4; earlier versions are incompatible with the ring/cross revision. Completed discoveries in
+compatible version-4 saves remain completed, using independent markers
 for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.
+
+### Scripture and adventure scope
+
+Direct quotations use Douay-Rheims (Challoner): Sister Agatha's Micheas 6:8 excerpt, Caleb's Acts 3:19,
+Ezechiel 33:11 excerpt before Harrington's office, and Psalm 50:19 excerpt before the masked Club visit.
+The prodigal son's return is a paraphrase of Luke 15:17-20, not a direct quotation. Religious objects remain
+reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
+
+The adventure remains a compact, single-case indie point-and-click: ten puzzles, the alley encounter, optional
+dialogue and five ending outcomes. No additional scenes or puzzles were added simply to inflate its length.

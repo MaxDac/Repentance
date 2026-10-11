@@ -21,6 +21,7 @@ public partial class ChurchExterior : Room
             State.SetFlag("act2_church_thought");
             await Wait(0.6);
             await Say("I couldn't turn her in. I'd decided that in a motel room, with my shirt half buttoned.");
+            await Say("I went back to the motor court at noon. Bed made, key on the table, no note.");
             await Say("So why couldn't I think of anything but her? Her voice. Her hair on the pillow. \"I can't go back there.\"");
             await Say("A man in my state ends up in one of two places. The bars knew me too well. So, the other one.");
             if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);

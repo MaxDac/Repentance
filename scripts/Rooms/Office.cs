@@ -70,9 +70,10 @@ public partial class Office : Room
         await Wait(1.0);
         await Say("Back behind my own desk. The whiskey's still there. Some things you can count on.");
         await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
-        await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
+        await Say("The convent's done with me. The cops are on somebody's payroll. Caleb can't find her for me, but he might help me stop.");
         await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
         await Say("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
+        await Say("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
         State.SetFlag("micah_at_desk", false);
         Player.Teleport(new Godot.Vector2(160, 172), Facing.Left);
         Player.Visible = true;

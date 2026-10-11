@@ -63,6 +63,7 @@ public class AutoPlay
             if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
             bool autosave = game.AutosaveEnabled;
             game.AutosaveEnabled = false;
+            await StoryDialogueTest(game);
             await PuzzleRecoveryTest(game);
             await ActThreePuzzleRecoveryTest(game);
             foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
@@ -245,6 +246,7 @@ public class AutoPlay
             await read;
             await WaitIdle(game);
             await RingAndCrossTest(game);
+            await RoseAppealsTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
             await game.Perform(Verb.Walk, "church");
@@ -623,6 +625,21 @@ public class AutoPlay
             await game.Wait(3);
             await Shot("ending_alone");
             await TheEnd("ending_3");
+
+            // Signed evidence alone preserves both outskirts outcomes without a fire.
+            foreach (bool convinced in new[] { false, true })
+            {
+                Seed(act3Flags.Append(Endings.TookDocuments), act3Items.Append("documents"),
+                    "Shoot him", convinced ? "I didn't come all this way" : "He had it coming", "I'll go to the police");
+                await game.ChangeRoom("mansion_bedroom", "start");
+                Check(gs.HasFlag(Endings.EleanorConvinced) == convinced, "documents-only route preserves Eleanor's decision");
+                _ = game.Perform(Verb.Walk, "back_door");
+                await Until(() => game.Room?.Name == "Outskirts");
+                string ending = convinced ? "ending_2" : "ending_3";
+                Check(gs.HasFlag(ending) && !gs.HasFlag(Endings.MansionExploded) &&
+                    !gs.HasFlag("gas_on") && !gs.HasFlag("candle_lit"), $"{ending}: signed evidence without explosion");
+                await TheEnd($"{ending} (documents only)");
+            }
 
             // Verify the actual Ink choices for each missing commitment, not only the helper predicates.
             foreach (string missing in new[] { "faith_ring", "cross" })
@@ -1367,6 +1384,82 @@ public class AutoPlay
         await game.ChangeRoom("chicago_map", "start");
     }
 
+    private async Task StoryDialogueTest(Game game)
+    {
+        var dialogue = DialogueManager.Instance;
+        _ = dialogue.Get("pushes");
+        var original = game.CaptureSave();
+        double scale = Engine.TimeScale;
+        var story = GD.Load<GodotInk.InkStory>(DialogueManager.StoryPath);
+        try
+        {
+            foreach (var (knot, excerpt) in new[]
+            {
+                ("nun", "\"I will shew thee, O man, what is good.\""),
+                ("caleb_act2", "\"Be penitent, therefore, and be converted, that your sins may be blotted out.\""),
+                ("caleb_warn", "\"I desire not the death of the wicked, but that the wicked turn from his way, and live.\""),
+                ("caleb_last", "\"a contrite and humbled heart, O God, thou wilt not despise.\""),
+            })
+            {
+                await game.LoadGame(original);
+                story.ChoosePathString(knot);
+                string lines = "";
+                for (int turn = 0; turn < 32; turn++)
+                {
+                    lines += story.ContinueMaximally();
+                    if (story.CurrentChoices.Count == 0) break;
+                    story.ChooseChoiceIndex(0);
+                }
+                Check(lines.Contains(excerpt, StringComparison.Ordinal), $"{knot}: compiled Douay-Rheims excerpt");
+            }
+            await game.LoadGame(original);
+            Engine.TimeScale = 1;
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            await game.ChangeRoom("office", "start");
+            timer.Stop();
+            Check(GameState.Instance.HasFlag("teddy_gone"), "unaccelerated office sample completes its real dialogue");
+            GD.Print($"[story timing] Office introduction at normal speed, automatic choices, no speech skipping: {timer.Elapsed.TotalSeconds:F1}s. Not a full-game or human playtime.");
+        }
+        finally
+        {
+            Engine.TimeScale = scale;
+            await game.LoadGame(original);
+        }
+    }
+
+    private async Task RoseAppealsTest(Game game)
+    {
+        var original = game.CaptureSave();
+        var dialogue = DialogueManager.Instance;
+        var choose = dialogue.AutoChoose!;
+        try
+        {
+            for (int appeals = 0; appeals <= 5; appeals++)
+            {
+                await game.LoadGame(original);
+                dialogue.ResetInk();
+                dialogue.AutoChoose = (knot, options) => knot == "rose_house"
+                    ? Task.FromResult(dialogue.Get("pushes").AsInt32() < appeals ? 0 : options.Count - 1)
+                    : choose(knot, options);
+                await game.ChangeRoom("rose_house", "start");
+                await game.Perform(Verb.Hand, "bell");
+                Check(dialogue.Get("pushes").AsInt32() == appeals, $"Rose visit records {appeals} appeals");
+                Check(GameState.Instance.HasFlag("rose_wait") == (appeals >= 3),
+                    $"Rose callback threshold after {appeals} appeals");
+                Check(game.Room?.Name == "ChicagoMap" && !GameState.Instance.HasFlag("rose_door"),
+                    "Rose closes the door and the visit returns to the map");
+                await game.LoadGame(game.CaptureSave());
+                Check(GameState.Instance.HasFlag("rose_wait") == (appeals >= 3) &&
+                    dialogue.Get("pushes").AsInt32() == appeals, "save/load preserves the actual doorstep decision");
+            }
+        }
+        finally
+        {
+            dialogue.AutoChoose = choose;
+            await game.LoadGame(original);
+        }
+    }
+
     private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
     {
         _game.Hud.ShowCaption(null);
@@ -1396,7 +1489,7 @@ public class AutoPlay
         {
             story.ChoosePathString("epilogue");
             string[] lines = story.ContinueMaximally().Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            Check(lines.Contains("DANIEL: maybe Leo would like to read it some day") == keepJournal,
+            Check(lines.Contains("DANIEL: Maybe Leo would like to read it some day.") == keepJournal,
                 $"{ending}: Leo's exact line only appears after reconciliation");
             Check(lines.Contains("DANIEL: That's enough of you for one lifetime, Micah Jones.") == !keepJournal,
                 $"{ending}: dismissal only appears without reconciliation");
