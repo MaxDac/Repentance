@@ -26,6 +26,7 @@ Command-line options (after `--`):
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
+| `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
 
 ```powershell
@@ -49,8 +50,16 @@ godot --path . -- --autoplay
   unlimited retries. Unsubmitted settings reset when closed; collected clues remain available.
 - Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be
   combined with an item on another page.
-- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Quit to title*. The title screen offers
-  *Continue* (most recent save), *New game* and *Load game*.
+- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers
+  *Continue* (most recent save), *New game*, *Load game* and *Settings*.
+
+### Content settings
+
+**Settings > Nudity** is **Off** by default. Off uses Eleanor's dressed club sprite; On uses the
+implied-nude variant, with hair and hand coverage. The choice updates the club scene immediately
+and applies in both Act Two and Act Three. Preferences are stored in `user://settings.cfg`,
+independently of saves, so loading an older save or starting a new game cannot override the choice.
+Automated checks use a separate `user://autoplay_settings.cfg` and never modify player preferences.
 
 ### Saving
 
@@ -227,6 +236,23 @@ The characters come from `tools/art/figure.py`, a small 3D-ish figure painter wh
 early-90s VGA adventures such as *Indiana Jones and the Fate of Atlantis*: tall, naturally proportioned
 bodies, shading lit from the top left, a darker outline on each material ("sel-out") and dithered fabric.
 Each character is a spec dict in `tools/art/sprites.py`.
+
+Story actions use articulated strips alongside the ordinary walk/talk sheets. Each action PNG has a matching
+JSON file with the frame dimensions and per-frame `anchor`, `head`, `bounds`, and `seconds`. Anchors and head
+points are measured in frame pixels; `PosePlayback` mirrors both with the artwork, plays in game time, and holds
+the final frame. `Player.PlayPose` and `Actor.PlayPose` return `false` when interrupted or removed from the room;
+call `SetPose(null)` after a completed action to restore ordinary animation. Existing single poses use the same
+metadata. Eleanor's motel rise uses its own bed-scale, lamp-lit strip and a separate near-rail layer, not her
+walking model.
+
+```powershell
+py -3.14 tools\gen_art.py sprites motel
+py -3.14 tests\test_character_art.py
+```
+
+The art checks cover strip geometry, bounds, clipping, intermediate frames, restoration frames and deterministic
+generation. `--autoplay` also captures each action frame, checks playback interruption and mirroring, and exercises
+both knockout/recovery branches. Character quality and motion still require viewing the captures at game scale.
 
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy

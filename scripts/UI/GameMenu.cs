@@ -115,7 +115,8 @@ public partial class GameMenu : Control
         Page("", 142, null,
             ("Continue", any, () => Finish(new MenuResult(MenuAction.Load, latest))),
             ("New game", true, () => Finish(new MenuResult(MenuAction.NewGame))),
-            ("Load game", any, () => SlotsPage(saving: false)));
+            ("Load game", any, () => SlotsPage(saving: false)),
+            ("Settings", true, SettingsPage));
     }
 
     private void PausePage()
@@ -124,7 +125,22 @@ public partial class GameMenu : Control
             ("Resume", true, () => Finish(new MenuResult(MenuAction.Resume))),
             ("Save game", Game.Instance.CanSave, () => SlotsPage(saving: true)),
             ("Load game", true, () => SlotsPage(saving: false)),
+            ("Settings", true, SettingsPage),
             ("Quit to title", true, () => Finish(new MenuResult(MenuAction.QuitToTitle))));
+    }
+
+    private void SettingsPage()
+    {
+        Action back = _title ? TitlePage : PausePage;
+        Page("Settings", -1, back,
+            ($"Nudity: {(Game.Instance.Settings.NudityEnabled ? "On" : "Off")}", true, () =>
+            {
+                bool enabled = !Game.Instance.Settings.NudityEnabled;
+                _status.Text = Game.Instance.Settings.SetNudity(enabled)
+                    ? "" : "Couldn't save settings.";
+                SettingsPage();
+            }),
+            ("Back", true, () => { _status.Text = ""; back(); }));
     }
 
     private void SlotsPage(bool saving)

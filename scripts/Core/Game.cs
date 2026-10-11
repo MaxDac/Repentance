@@ -20,6 +20,7 @@ public partial class Game : Node
     public Player Player { get; private set; } = null!;
     public Hud Hud { get; private set; } = null!;
     public Room? Room { get; private set; }
+    public GameSettings Settings { get; private set; } = null!;
 
     private Node2D _roomHost = null!;
     private string? _carried;
@@ -62,6 +63,12 @@ public partial class Game : Node
 
     public override async void _Ready()
     {
+        var args = OS.GetCmdlineUserArgs();
+        bool settingsTest = Array.IndexOf(args, "--settings-test") >= 0;
+        bool pauseTest = Array.IndexOf(args, "--pause-test") >= 0;
+        Settings = new GameSettings(settingsTest || pauseTest || Array.IndexOf(args, "--autoplay") >= 0
+            ? "user://autoplay_settings.cfg" : "user://settings.cfg");
+        Settings.Load();
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
         Player = new Player { Name = "Player" };
@@ -70,18 +77,17 @@ public partial class Game : Node
         Hud.ItemClicked += OnItemClicked;
         Hud.ItemHovered += id => _hoverItem = id;
 
-        var args = OS.GetCmdlineUserArgs();
         foreach (var a in args)
         {
             if (a.StartsWith("--room=")) StartRoom = a[7..];
             if (a.StartsWith("--entry=")) StartEntry = a[8..];
         }
-        if (Array.IndexOf(args, "--pause-test") >= 0)
+        if (pauseTest)
         {
             await new AutoPlay().RunPauseTests(this);
             return;
         }
-        if (Array.IndexOf(args, "--autoplay") >= 0)
+        if (settingsTest || Array.IndexOf(args, "--autoplay") >= 0)
         {
             await new AutoPlay().Run(this);
             return;
