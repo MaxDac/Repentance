@@ -42,7 +42,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Inside, there's a sheet of paper with the safe combination (key number).
 - Micah opens the closet to reveal the safe, and opens the safe using the combination on it.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
-  - a perfumed business card, blank except for some decorations;
+  - a perfumed business card, blank except for some decorations; Micah remarks that the perfume is strange, but quite attractive;
   - a matchbook with the name of the club, the Blue Lantern (next location).
 - Leaving the room goes back down to the lobby; the revolving door now leads to the club.
 
