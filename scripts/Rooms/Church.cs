@@ -7,6 +7,11 @@ public partial class Church : Room
 {
     public override async Task OnEnter(string entry)
     {
+        if (entry == "act3")
+        {
+            await Game.Run(Act3Return);
+            return;
+        }
         if (entry == "map")
         {
             await Game.Run(FromMap);
@@ -61,12 +66,37 @@ public partial class Church : Room
             State.SetFlag("church_before_club");
             await Talk("caleb_last");
         }
-        else
+        else if (State.HasFlag("nun_threatened"))
         {
             State.SetFlag("church_before_office");
             await Talk("caleb_warn");
         }
+        else
+        {
+            await Talk("caleb_repeat");
+        }
+        await OfferCross();
         await LeaveToMap();
+    }
+
+    private async Task OfferCross()
+    {
+        if (Endings.CanOfferCross(State.StoryAct, State.HasFlag))
+            await Talk("caleb_cross");
+    }
+
+    private async Task Act3Return()
+    {
+        if (FindActor("caleb") is { } caleb)
+        {
+            await Game.WalkTo(caleb.WalkTo);
+            Player.Face(Facing.Right);
+        }
+        State.SetFlag("church_act3_return");
+        await Talk("caleb_act3_return");
+        await OfferCross();
+        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
+        await Game.ChangeRoom("office", "from_caleb");
     }
 
     private async Task LeaveToMap()
@@ -79,6 +109,9 @@ public partial class Church : Room
     {
         switch (target.Id, verb)
         {
+            case ("doors", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
+                await Game.ChangeRoom("office", "from_caleb");
+                return true;
             case ("doors", Verb.Walk or Verb.Hand) when State.HasFlag("club_out"):
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;

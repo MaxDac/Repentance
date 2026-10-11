@@ -24,10 +24,11 @@ public partial class ChicagoMap : Room
     private bool NunThreatened => State.HasFlag("nun_threatened");
     private bool HarringtonDone => State.HasFlag("harrington_done");
 
-    /// <summary>Is a place on the map right now? Library and office drop off once the hunt narrows to Harrington.</summary>
+    /// <summary>Investigation leads close as the hunt narrows; the office stays available for the ring.</summary>
     private bool Shows(string id) => id switch
     {
-        "library" or "office" => !NunThreatened,
+        "library" => !NunThreatened,
+        "office" => true,
         "church" => true,
         "club" => State.HasFlag("club_unlocked") && (!NunThreatened || HarringtonDone),
         "convent" => State.HasFlag("caleb_club") && !NunThreatened,
@@ -76,17 +77,10 @@ public partial class ChicagoMap : Room
             case "church" when !ClubOut:
                 await Say("Caleb's sermons can wait. Coming there was a mistake once already.");
                 return true;
-            case "church" when !State.HasFlag("caleb_club"):
-            case "church" when NunThreatened:
+            case "church":
                 await Game.ChangeRoom("church_interior", "map");
                 return true;
-            case "church":
-                await Say("Caleb said the convent. I don't need the sermon that comes with it twice.");
-                return true;
 
-            case "office" when ClubOut:
-                await Say("An empty bottle and an empty chair. Neither of them knows where she is.");
-                return true;
             case "office":
                 await Game.ChangeRoom("office", "door");
                 return true;

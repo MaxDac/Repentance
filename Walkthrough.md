@@ -101,9 +101,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present Day
 
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
-  The caption "Chicago, 1927." leads to the church.
+  The caption "Chicago, 1927." leads to Micah's office.
 
 ### Chicago, 1927
+
+#### Office, before the cathedral
+
+- A bottle of whiskey and a cup are in the office. Micah raises the cup, drinks, and puts it down.
+- Micah chooses whether to take his wedding ring or leave it in the office; the original decision is saved.
+- A left-behind ring remains visible and can be collected on a later office visit without changing the original decision.
+- After the choice, Micah leaves for the cathedral steps.
 
 #### Outside of the church (cathedral steps)
 
@@ -190,6 +197,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Church
 
+- On repeat visits, Caleb offers Micah a cross pendant if he originally left the wedding ring in the office.
+  If he originally took the ring, Caleb does not offer the cross until Act 3. Later ring pickup does not change this timing.
+- Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
+  return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
@@ -214,7 +225,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Map of Chicago
 
-- Only the Cathedral and the office of Harringhton father will be available.
+- The Cathedral and Harrington father's office are available. Micah's office also remains accessible as an optional
+  return and ring-pickup location; no completed lead reopens.
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
   tell him not to go forward again.
   You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
@@ -286,7 +298,11 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
 - He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the 
   Blue Lantern, the mob.
-- Micah stands up, and walks through the door.
+- Micah stands up and the player regains control, with a final opportunity to collect a left-behind wedding ring.
+- Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
+- Act 3 church visits include Caleb's counsel and the cross offer (regardless of the original ring decision), unless
+  already accepted. They count as a church return and lead back to the office without replaying the desk scene.
+  Micah can return again after refusing. No new recovery route is available after choosing the Blue Lantern.
 
 #### Behind Blue Lantern, previous location from Act 1
 
@@ -296,7 +312,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Eleanor.
 - The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between fire the revolver on the leg, or to walk away, because it's not worth it.
-  The option to walk away would be available only if the player returned to the church at least one.
+  The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
+  office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
 - If the player walks out, he's going to his wife's house (caption *End of Act Three*).
 - If he's firing at the leg, you have to create a new model for the bartender supine, with a drop of blood from the leg.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
@@ -326,7 +343,8 @@ described here (other verbs, flavour lines) is left to the implementation.
       and make the mansion explode.
     - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
-    **and** returned to the church at least once. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
+    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
     and the scene skips to *End of Act 3*.
 
 ### End of Act 3
@@ -338,6 +356,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Previously used location
 - This ending is accessible if Micah refuses to go forward at any point, either outside of the Church, or if he refuses
   to shoot the bartender, or the old man.
+- The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
+  progressively stricter requirements above; the other endings are unchanged.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
 

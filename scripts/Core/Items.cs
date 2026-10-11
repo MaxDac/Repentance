@@ -9,6 +9,10 @@ public static class Items
 {
     public static readonly Dictionary<string, ItemDef> All = new()
     {
+        ["faith_ring"] = new("faith_ring", "wedding ring", "res://assets/art/items/faith_ring.png",
+            "My wedding ring. Rose kept her promises. It's time I kept mine."),
+        ["cross"] = new("cross", "cross pendant", "res://assets/art/items/cross.png",
+            "Caleb's cross, on a silver chain. A reminder that the way back isn't closed."),
         ["photo"] = new("photo", "photograph", "res://assets/art/items/photo.png",
             "Eleanor Harrington. Pretty, poised, and looking at the camera like it owed her money."),
         ["dollar"] = new("dollar", "dollar bill", "res://assets/art/items/dollar.png",

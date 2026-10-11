@@ -55,6 +55,10 @@ metadata/facing = 2
 position = Vector2(240, 248)
 metadata/facing = 2
 
+[node name="act3" type="Marker2D" parent="Entries"]
+position = Vector2(240, 248)
+metadata/facing = 2
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]

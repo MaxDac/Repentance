@@ -50,9 +50,12 @@ The game autosaves every time you enter a room, and there are 3 manual slots. Sa
 between actions, not during a cutscene or conversation. Saves are JSON files in `user://saves/`
 (on Windows, `%APPDATA%\Godot\app_userdata\Repentance\saves`). Each save stores the story flags, the
 inventory, the story act, the Ink state, the current room and the player's position. Loading a save
-doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when flags, items or rooms are
-renamed: older saves then show up as *Incompatible* instead of loading into a broken state. The
+doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
+change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
+
+The ring/cross story revision uses save version 4. Earlier saves are incompatible because they lack the original
+ring decision and use the previous Act 2/3 entry flow.
 
 ## The demo
 
@@ -80,7 +83,9 @@ autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
    and Micah drops the case.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
 10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
-11. **Cathedral steps**: Micah couldn't turn Eleanor in, and can't think of anything but her. He goes in.
+11. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
+    it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
+    unable to think of anything but Eleanor.
 12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
    Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
 13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
@@ -99,6 +104,8 @@ From here the story follows Walkthrough.md:
 18. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
    three times and Rose calls him back: "Don't get into trouble again."
 19. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
+    On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
+    only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
 20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
    try Harrington senior.
 21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
@@ -111,15 +118,17 @@ From here the story follows Walkthrough.md:
 25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: give up (ending 1), or keep going:
 27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+    After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
+    office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
 28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
    the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the leg, or (only if Micah went
-   back to Caleb while hunting for Eleanor) walk away (ending 1). Tony sends him to old Harrington's house.
+   back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house.
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key, push the coal bin under the bell, wedge it with the tie, then open the door.
 30. **Kitchen and study**: the right desk drawer holds Harrington's ledgers (take them to have something to
    bargain with).
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
-   Rose at least three times) lower the gun (ending 1). Then talk Eleanor into leaving ("I didn't come all this
+   Rose at least three times **and carries both ring and cross**) lower the gun (ending 1). Then talk Eleanor into leaving ("I didn't come all this
    way...", or later "Every time I've seen you...").
 32. **The escape**: in the kitchen, optionally turn on the gas and light the candle; the house blows up behind them.
 33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and ledgers or explosion); 3 out of town
