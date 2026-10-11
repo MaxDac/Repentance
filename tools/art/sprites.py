@@ -257,6 +257,8 @@ def door_strip(spec, name, yaw):
 
 def fall_strip(spec, name):
     """Drop onto both knees, pitch forward, and settle face-down without a final texture jump."""
+    from PIL import Image
+
     scaled = dict(spec, h=spec["h"] * SCALE)
     keys = [
         [(65, 67), (75, 43), (80, 29), (68, 88), (42, 91), (84, 63), (87, 76)],
