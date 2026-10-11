@@ -76,7 +76,8 @@ class CharacterArtTests(unittest.TestCase):
         _, shoulder, _, _, ankle, elbow, hand = sprites.REST
         self.assertGreater(elbow[1], shoulder[1])
         self.assertLessEqual(ankle[1] - elbow[1], 2)
-        self.assertEqual(hand[1], ankle[1])
+        self.assertEqual(hand[1], elbow[1])
+        self.assertEqual(hand[1], 91)
         held = Image.open(ART / "sprites" / "micah_supine.png")
         for name in ("micah_collapse", "micah_recover"):
             image = Image.open(ART / "sprites" / f"{name}.png")
@@ -240,7 +241,32 @@ class CharacterArtTests(unittest.TestCase):
 
     def test_ground_contact_does_not_skate(self):
         for joints in sprites.FALL + [sprites.SIT, sprites.CROUCH, sprites.HALF_UP, sprites.KNEEL]:
-            self.assertEqual(tuple(grounded_joints(joints)[4]), (98, 91))
+            ankle = grounded_joints(joints)[4]
+            self.assertEqual(ankle[0], 98)
+            if joints == sprites.REST:
+                self.assertEqual(ankle[1], 83)
+                self.assertEqual(grounded_joints(joints)[6][1], 91)
+            else:
+                self.assertEqual(ankle[1], 91)
+
+    def test_grounded_bodies_are_completely_horizontal(self):
+        for joints in (sprites.REST, sprites.HARRINGTON_PRONE):
+            hip, shoulder, head, knee, ankle, _, _ = grounded_joints(joints)
+            self.assertEqual({point[1] for point in (hip, shoulder, head, knee, ankle)}, {83})
+
+    def test_harrington_drops_to_knees_then_holds_the_same_face_down_frame(self):
+        clip = json.loads((ART / "sprites" / "harrington_fall.json").read_text())
+        image = Image.open(ART / "sprites" / "harrington_fall.png")
+        width, height = clip["width"], clip["height"]
+        standing = image.crop(((width - 56) // 2, 0, (width + 56) // 2, height))
+        normal = Image.open(ART / "sprites" / "harrington_gown.png").crop((0, 0, 56, 96))
+        self.assertEqual(standing.tobytes(), normal.tobytes(), "start without an idle-pose jump")
+        self.assertGreater(clip["frames"][1]["head"][1], clip["frames"][0]["head"][1])
+        self.assertGreaterEqual(clip["frames"][1]["seconds"], 0.3, "hold the kneeling stage")
+        final = image.crop((image.width - width, 0, image.width, height))
+        self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "harrington_shot.png").tobytes())
+        self.assertGreater(sprites.HARRINGTON_PRONE[2][0], sprites.HARRINGTON_PRONE[1][0],
+                           "right-facing head rotated downward toward the floor")
 
     def test_door_reach_is_the_idle_pose_then_an_extended_arm(self):
         for name, spec, yaw in (("micah_open_door", sprites.MICAH, sprites.PLAYER_IDLE_YAW),

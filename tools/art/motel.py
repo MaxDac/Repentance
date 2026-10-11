@@ -361,7 +361,7 @@ def _ell(d, c, rx, ry, col):
     d.ellipse([c[0] - rx, c[1] - ry, c[0] + rx, c[1] + ry], fill=col)
 
 
-def bed_night(img, occupied=True, rails=True):
+def bed_night(img, occupied=True, rails=True, white=False):
     """The iron bed, rumpled: Eleanor asleep under the sheet, head on the pillow, the blanket kicked to the foot."""
     X0, X1, Z0, Z1 = 52, 140, 4, 42
     d = ImageDraw.Draw(img)
@@ -370,11 +370,12 @@ def bed_night(img, occupied=True, rails=True):
     for x, top in ((X0, 30), (X1, 46)):
         R.line(img, (x, 0, Z0), (x, top, Z0), IRON, 2)
     R.box(img, X0 + 2, X1 - 2, 12, 15, Z0 + 2, Z1 - 2, IRON_L)
-    sheet, sheet_d, sheet_l = hx("cfc6ad"), hx("a59c84"), hx("e2dac6")
-    R.box(img, X0 + 2, X1 - 2, 15, 24, Z0 + 2, Z1 - 2, sheet, top=hx("ddd4bc"), side=sheet_d)
+    from .mansion import SHEET, SHEET_FOLD, SHEET_LIT, SHEET_SIDE
+    sheet, sheet_d, sheet_l = (SHEET, SHEET_FOLD, SHEET_LIT) if white else (hx("cfc6ad"), hx("a59c84"), hx("e2dac6"))
+    R.box(img, X0 + 2, X1 - 2, 15, 24, Z0 + 2, Z1 - 2, sheet, top=sheet if white else hx("ddd4bc"), side=SHEET_SIDE if white else sheet_d)
     # two pillows at the head end, the back one propped against the rail
-    R.box(img, X1 - 17, X1 - 4, 24, 31, Z0 + 3, Z0 + 16, hx("d8d0ba"), top=hx("e6dfcc"), side=hx("b0a690"))
-    R.box(img, X1 - 20, X1 - 4, 24, 28, Z0 + 12, Z1 - 5, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
+    R.box(img, X1 - 17, X1 - 4, 24, 31, Z0 + 3, Z0 + 16, sheet if white else hx("d8d0ba"), top=sheet_l if white else hx("e6dfcc"), side=sheet_d if white else hx("b0a690"))
+    R.box(img, X1 - 20, X1 - 4, 24, 28, Z0 + 12, Z1 - 5, sheet if white else hx("e2dac4"), top=sheet_l if white else hx("eee7d4"), side=sheet_d if white else hx("b8af98"))
     # the sheet over her body: shoulder, waist, hip, knees, feet
     ridge = [(X1 - 25, 31), (X1 - 36, 29.5), (X0 + 52, 33), (X0 + 40, 31), (X0 + 26, 32), (X0 + 14, 29),
              (X0 + 6, 26.5)]
@@ -383,10 +384,11 @@ def bed_night(img, occupied=True, rails=True):
     if occupied:
         d.polygon(top + front, fill=sheet)
         d.line(top, fill=sheet_l)
-        for (x, y) in ridge[1:-1]:
-            d.line([R.P(x, y, 24), R.P(x + 3, 24, Z1 - 1)], fill=sheet_d)
-        d.line([R.P(X1 - 25, 30.5, 22), R.P(X1 - 26, 24, Z1 - 1)], fill=hx("b8af98"))
-        shadow(img, "polygon", [R.P(x, y - 1.5, 24) for x, y in ridge] + front, 0.2, 2, hx("8a8070"))
+        if not white:
+            for (x, y) in ridge[1:-1]:
+                d.line([R.P(x, y, 24), R.P(x + 3, 24, Z1 - 1)], fill=sheet_d)
+        d.line([R.P(X1 - 25, 30.5, 22), R.P(X1 - 26, 24, Z1 - 1)], fill=sheet_d if white else hx("b8af98"))
+        shadow(img, "polygon", [R.P(x, y - 1.5, 24) for x, y in ridge] + front, 0.2, 2, SHEET_FOLD if white else hx("8a8070"))
     # the blanket kicked into a heap at the foot, half off the end
     R.quad(img, [(X0 - 2, 22, Z0 + 4), (X0 + 14, 27, Z0 + 6), (X0 + 18, 26, Z1 - 4), (X0 - 2, 22, Z1)],
            hx("6f7558"))
@@ -397,14 +399,16 @@ def bed_night(img, occupied=True, rails=True):
         bed_rails_night(img)
     if occupied:
         # The sheet hangs the length of the near side, so the bed frame is not a dark gap.
-        R.quad(img, [(X0 + 6, 16, Z1), (X1 - 8, 16, Z1), (X1 - 6, 1, Z1 + 2), (X0 + 4, 1, Z1 + 2)], sheet)
-        R.line(img, (X0 + 18, 15, Z1 + 1), (X0 + 16, 2, Z1 + 2), sheet_d)
-        R.line(img, (X0 + 36, 15, Z1 + 1), (X0 + 34, 2, Z1 + 2), sheet_l)
-        R.line(img, (X0 + 54, 15, Z1 + 1), (X0 + 56, 2, Z1 + 2), sheet_d)
-        R.line(img, (X0 + 70, 15, Z1 + 1), (X0 + 68, 2, Z1 + 2), sheet_d)
-        R.quad(img, [(X0 + 34, 24, Z1 - 1), (X0 + 58, 24, Z1 - 1), (X0 + 62, 5, Z1 + 1), (X0 + 30, 7, Z1 + 1)], sheet)
-        R.line(img, (X0 + 44, 22, Z1), (X0 + 46, 7, Z1 + 1), sheet_d)
-        R.line(img, (X0 + 54, 22, Z1), (X0 + 58, 6, Z1 + 1), sheet_d)
+        R.quad(img, [(X0 + 6, 16, Z1), (X1 - 8, 16, Z1), (X1 - 6, 1, Z1 + 2), (X0 + 4, 1, Z1 + 2)], SHEET_SIDE if white else sheet)
+        if not white:
+            R.line(img, (X0 + 18, 15, Z1 + 1), (X0 + 16, 2, Z1 + 2), sheet_d)
+            R.line(img, (X0 + 36, 15, Z1 + 1), (X0 + 34, 2, Z1 + 2), sheet_l)
+            R.line(img, (X0 + 54, 15, Z1 + 1), (X0 + 56, 2, Z1 + 2), sheet_d)
+            R.line(img, (X0 + 70, 15, Z1 + 1), (X0 + 68, 2, Z1 + 2), sheet_d)
+        R.quad(img, [(X0 + 34, 24, Z1 - 1), (X0 + 58, 24, Z1 - 1), (X0 + 62, 5, Z1 + 1), (X0 + 30, 7, Z1 + 1)], SHEET_SIDE if white else sheet)
+        if not white:
+            R.line(img, (X0 + 44, 22, Z1), (X0 + 46, 7, Z1 + 1), sheet_d)
+            R.line(img, (X0 + 54, 22, Z1), (X0 + 58, 6, Z1 + 1), sheet_d)
     R.quad(img, [(X0 - 1, 23, Z1), (X0 + 16, 24, Z1), (X0 + 14, 4, Z1 + 2), (X0 - 3, 6, Z1 + 2)], hx("6f7558"))
     R.line(img, (X0 + 6, 22, Z1 + 1), (X0 + 5, 6, Z1 + 2), hx("565b44"))
 
@@ -424,44 +428,34 @@ def bed_rails_night(img):
             d.ellipse([px - 1.5, py - 1.5, px + 1.5, py + 1.5], fill=BRASS)
 
 
+ELEANOR_ORIGIN = (111, 114)
+
+
+def white_bed_linen(img):
+    import numpy as np
+    before, after = Image.new("RGB", (W, H)), Image.new("RGB", (W, H))
+    bed_night(before, occupied=True, rails=False)
+    bed_night(after, occupied=True, rails=False, white=True)
+    changed = np.any(np.array(before) != np.array(after), axis=2)
+    yy, xx = np.mgrid[:H, :W].astype(float)
+    # Light falls off down the hanging side; broad curved gathers break up the flat sheet.
+    depth = np.clip((yy - 116) / 42, 0, 1)
+    crease_a = 70 + depth * 8 + np.sin(depth * 4) * 3
+    crease_b = 103 - depth * 7
+    shade = (5 - depth * 10
+             - 10 * np.exp(-((xx - crease_a) / 3.5) ** 2)
+             - 8 * np.exp(-((xx - crease_b) / 4.5) ** 2)
+             + 6 * np.exp(-((xx - crease_a - 5) / 4.0) ** 2))
+    softened = np.clip(np.array(after).astype(float) + shade[:, :, None], 0, 255).astype("uint8")
+    mask = Image.fromarray(changed.astype("uint8") * 255)
+    img.paste(Image.fromarray(softened), (0, TOP), mask)
+
+
 def sleeper(img):
-    """Eleanor's head and bare shoulder, painted after the relight in lamp-lit tones so they read clearly."""
-    X1, Z1 = 140, 42
-    d = ImageDraw.Draw(img)
-    hc = R.P(X1 - 12, 32, 25)
-    hc = (round(hc[0]), round(hc[1]))
-    sc = R.P(X1 - 21, 30, 26)
-    sc = (round(sc[0]), round(sc[1]))
-    # shoulder and upper arm
-    _ell(d, sc, 5, 3, hx("3a2418"))
-    _ell(d, sc, 4, 2, hx("e8b890"))
-    d.line([(sc[0] - 3, sc[1] - 2), (sc[0] + 2, sc[1] - 2)], fill=hx("fff2c8"))
-    d.line([(sc[0] - 4, sc[1] + 1), (sc[0] + 4, sc[1] + 2)], fill=hx("b88060"))
-    # dark brown wavy hair spread on the pillow, face turned towards the room
-    _ell(d, (hc[0] + 3, hc[1] + 1), 6, 4, hx("1e120c"))
-    _ell(d, (hc[0] + 3, hc[1] + 1), 5, 3, hx("3a2014"))
-    d.line([(hc[0] + 4, hc[1] + 4), (hc[0] + 7, hc[1] + 2), (hc[0] + 8, hc[1] + 4)], fill=hx("5a3422"))
-    _ell(d, (hc[0] + 1, hc[1]), 6, 5, hx("1e120c"))
-    _ell(d, (hc[0] + 1, hc[1]), 5, 4, hx("3a2014"))
-    _ell(d, (hc[0] + 1, hc[1] - 1), 4, 3, hx("5a3422"))
-    d.line([(hc[0] - 2, hc[1] - 4), (hc[0] + 3, hc[1] - 4)], fill=hx("8a5638"))
-    d.point((hc[0] + 3, hc[1] - 2), fill=hx("8a5638"))
-    d.line([(hc[0] + 4, hc[1]), (hc[0] + 5, hc[1] + 2)], fill=hx("8a5638"))
-    d.ellipse([hc[0] - 5, hc[1] - 2, hc[0] + 1, hc[1] + 4], fill=hx("1e120c"))
-    d.ellipse([hc[0] - 4, hc[1] - 1, hc[0], hc[1] + 3], fill=hx("e8b890"))
-    d.line([(hc[0] - 4, hc[1] - 2), (hc[0] + 1, hc[1] - 2)], fill=hx("5a3422"))
-    d.line([(hc[0] + 1, hc[1] - 1), (hc[0] + 1, hc[1] + 5)], fill=hx("3a2014"))
-    d.point((hc[0] - 3, hc[1]), fill=hx("5a3020"))
-    d.point((hc[0] - 2, hc[1] + 2), fill=hx("a83e3c"))
-    d.point((hc[0], hc[1] + 3), fill=hx("b88060"))
-    # the sheet's hem drawn up over her chest, and the line of her body beneath it
-    ridge = [(X1 - 25, 31), (X1 - 36, 29.5), (52 + 52, 33), (52 + 40, 31), (52 + 26, 32), (52 + 14, 29), (52 + 6, 27.5)]
-    pts = [R.P(x, y, 24) for x, y in ridge]
-    d.line([R.P(X1 - 18, 29, 26), pts[0]], fill=hx("f0dcb0"), width=2)
-    d.line(pts, fill=hx("f0dcb0"))
-    d.line([(x, y + 1) for x, y in pts[1:]], fill=hx("a88a64"))
-    for x, y in ridge[1:-1]:
-        d.line([R.P(x, y - 1, 24), R.P(x + 2, 26, Z1 - 4)], fill=hx("a88a64"))
+    from PIL import ImageOps
+    from .mansion import _eleanor_in_bed
+    eleanor = ImageOps.mirror(_eleanor_in_bed())
+    img.paste(eleanor, ELEANOR_ORIGIN, eleanor)
 
 def nightstand_night(img):
     X0, X1, Z0, Z1 = 148, 172, 3, 22
@@ -557,11 +551,12 @@ def paint_night(rails=False):
     bulb(img)
     img = relight_night(img)
     glass_night(img)
-    if not rails:
-        sleeper(img)
     lamp_night(img)
     img = tall(img, ceiling_night)
     vignette(img, 0.72, tint=(14, 12, 30), blur=46)
+    white_bed_linen(img)
+    if not rails:
+        sleeper(img)
     return img
 
 
@@ -579,7 +574,8 @@ def build():
     save(pixelize(made, pal), "rooms", "motel_room_made.png")
     save(pixelize(unmade, pal), "rooms", "motel_room_unmade.png")
     night = paint_night()
-    palette = palette_of(night, 102) + NIGHT_EXTRA
+    from .mansion import SHEET, SHEET_LIT, SHEET_FOLD, SHEET_SIDE
+    palette = palette_of(night, 102) + NIGHT_EXTRA + [SHEET, SHEET_LIT, SHEET_FOLD, SHEET_SIDE]
     save(pixelize(night, palette), "rooms", "motel_night.png")
     rail_mask = Image.new("RGBA", (W, H))
     bed_rails_night(rail_mask)
@@ -657,4 +653,3 @@ def eleanor_rise(palette):
         img.putalpha(alpha)
         frames.append((img, tuple(head)))
     action_strip("eleanor_sheet_rise", frames, [0.18, 0.24, 0.28, 0.26, 0.3, 0.25, 0.24, 0.24, 0.3], anchor=anchor)
-

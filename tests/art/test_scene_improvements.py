@@ -170,11 +170,32 @@ class SceneImprovementsTests(unittest.TestCase):
 
     def test_eleanor_sheet_covers_lower_torso_not_neck(self):
         image = np.asarray(mansion._eleanor_in_bed())
-        sheet = np.all(image[:, :, :3] == common.hx("e8e0d0"), axis=2) & (image[:, :, 3] == 255)
+        cloth = np.asarray(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT))
+        sheet = cloth[:, :, 3] == 255
+        np.testing.assert_array_equal(image[sheet], cloth[sheet])
         ys, _ = np.nonzero(sheet)
         self.assertGreater(len(ys), 20)
-        self.assertGreaterEqual(ys.min(), 27)
+        self.assertGreaterEqual(ys.min(), 19)
+        self.assertLessEqual(ys.min(), 22, "the white sheet must cover the marked chest area")
         self.assertGreater(ys.max(), 38)
+
+    def test_both_beds_use_the_same_visible_white_sheet_figure(self):
+        from PIL import ImageOps
+        from art import motel
+        figure = ImageOps.mirror(mansion._eleanor_in_bed())
+        opaque = np.array(figure.getchannel("A")) == 255
+        bedroom = mansion.paint_bedroom("eleanor")
+        bx, by = mansion._eleanor_origin(mansion.Room3D(mansion.BFL, 240, 100))
+        night = motel.paint_night()
+        for room, (x, y) in ((bedroom, (bx, by)), (night, motel.ELEANOR_ORIGIN)):
+            crop = np.array(room.crop((x, y, x + figure.width, y + figure.height)))
+            np.testing.assert_array_equal(crop[opaque], np.array(figure)[:, :, :3][opaque])
+        for name in ("motel_night", "mansion_bed"):
+            image = np.array(Image.open(self.generated / "rooms" / f"{name}.png").convert("RGB"))
+            white = (image.min(axis=2) >= 100) & (image.max(axis=2) - image.min(axis=2) <= 20)
+            self.assertGreater(np.count_nonzero(white), 60, f"{name}: white linen disappeared during quantization")
+            for color in (mansion.SHEET, mansion.SHEET_LIT):
+                self.assertLessEqual(max(color), 155, "linen should not glow against the night room")
 
     def test_bed_sprites_reconstruct_both_room_states(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()

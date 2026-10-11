@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 namespace Repentance.Rooms;
 
 /// <summary>
-/// A motel room, that same night. Micah gets dressed. Eleanor stays in the bed under the sheet, on her back,
-/// looking at the ceiling. They agree never to see each other again. End of the first act of the journal.
+/// A motel room, that same night. Micah gets dressed. Eleanor stays against the pillows under the white sheet.
+/// They agree never to see each other again. End of the first act of the journal.
 /// </summary>
 public partial class MotelNight : Room
 {

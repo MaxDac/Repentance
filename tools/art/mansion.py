@@ -1181,11 +1181,11 @@ SILK, SILK_D = hx("8a4a52"), hx("5a2a32")
 BED = dict(x0=306, x1=392, z0=10, z1=50, top=24)
 
 
-# Linen, not skin. The lamp grade would tan a cream sheet into her shoulder color, so the
-# visible cloth is stamped in these colors after the light, and they stay in the palette.
-SHEET = (248, 246, 242)
-SHEET_LIT = (255, 252, 248)
-SHEET_FOLD = (186, 198, 208)
+# Preserve neutral linen through the warm grade without making it emissive.
+SHEET = (126, 124, 117)
+SHEET_LIT = (151, 146, 135)
+SHEET_FOLD = (77, 79, 80)
+SHEET_SIDE = (99, 98, 93)
 
 
 def _bare_eleanor():
@@ -1198,14 +1198,24 @@ def _bare_eleanor():
     return f.crop((bb[0], bb[1], bb[2], bb[1] + 44))
 
 
-def _sheet_on(figure, fill, hem, fold):
-    sheet = Image.new("RGBA", figure.size)
-    d = ImageDraw.Draw(sheet)
+def _sheet_on(figure, fill, hem):
     w, h = figure.size
-    d.polygon([(0, 28), (w // 2, 30), (w - 1, 27), (w - 1, h), (0, h)], fill=fill + (255,))
-    d.line([(1, 29), (w // 2, 31), (w - 2, 28)], fill=hem + (255,), width=2)
-    for x in range(4, w - 2, 6):
-        d.line([(x, 33), (x - 2, h - 1)], fill=fold + (255,))
+    mask = Image.new("L", figure.size)
+    ImageDraw.Draw(mask).polygon([(0, 20), (w // 2, 22), (w - 1, 19), (w - 1, h), (0, h)], fill=255)
+    yy, xx = np.mgrid[:h, :w].astype(float)
+    depth = np.clip((yy - 20) / (h - 20), 0, 1)
+    # Soft gathers fan out from the held hem rather than three parallel ink strokes.
+    crease_a = w * 0.67 - depth * w * 0.48 + np.sin(depth * 3) * 1.5
+    crease_b = w * 0.8 + depth * w * 0.1
+    shade = (9 * (1 - depth) - 13 * depth
+             - 17 * np.exp(-((xx - crease_a) / 1.5) ** 2)
+             - 11 * np.exp(-((xx - crease_b) / 2.0) ** 2)
+             + 8 * np.exp(-((xx - crease_a - 2.5) / 2.0) ** 2))
+    rgb = np.clip(np.array(fill) + shade[:, :, None], 0, 255).astype("uint8")
+    sheet = Image.fromarray(rgb).convert("RGBA")
+    sheet.putalpha(ImageChops.multiply(mask, figure.getchannel("A")))
+    d = ImageDraw.Draw(sheet)
+    d.line([(1, 21), (w // 2, 23), (w - 2, 20)], fill=hem + (255,))
     sheet.putalpha(ImageChops.multiply(sheet.getchannel("A"), figure.getchannel("A")))
     return sheet
 
@@ -1213,7 +1223,7 @@ def _sheet_on(figure, fill, hem, fold):
 def _eleanor_in_bed():
     """Eleanor sitting up against the pillows, bare shoulders; the sheet covers her from the chest down."""
     figure = _bare_eleanor()
-    return Image.alpha_composite(figure, _sheet_on(figure, hx("e8e0d0"), hx("fff6e6"), hx("b8ab98")))
+    return Image.alpha_composite(figure, _sheet_on(figure, SHEET, SHEET_LIT))
 
 
 def _eleanor_origin(R):
@@ -1226,14 +1236,13 @@ def _eleanor_origin(R):
 def _restamp_white_sheet(img, R):
     """The lamp pool tans the painted sheet into her skin. Put the linen back, white, after the light."""
     from PIL import ImageOps
-    figure = _bare_eleanor()
-    sheet = ImageOps.mirror(_sheet_on(figure, SHEET, SHEET_LIT, SHEET_FOLD))
-    img.paste(sheet, _eleanor_origin(R), sheet)
+    figure = ImageOps.mirror(_eleanor_in_bed())
+    img.paste(figure, _eleanor_origin(R), figure)
 
 
 def bedroom_palette(base, occupied, empty):
     pal = palette_of(Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3), 124)
-    for color in (SHEET, SHEET_LIT, SHEET_FOLD):
+    for color in (SHEET, SHEET_LIT, SHEET_FOLD, SHEET_SIDE):
         if color not in pal:
             pal.append(color)
     return pal
