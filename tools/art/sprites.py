@@ -1,7 +1,7 @@
 """Character sprites, painted by figure.py in the manner of Fate of Atlantis-era VGA adventures.
 
 Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
-  row 0  side view, facing right : idle, walk 1-8, talk
+  row 0  facing right           : 3/4 idle, side walk 1-8, 3/4 talk
   row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
   row 2  back 3/4 view           : idle, walk 1-6
 NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view facing screen-right, then walk 1-8 in
@@ -21,6 +21,7 @@ FW, FH = 64, 96
 NPC_W = 56
 SCALE = 1.2  # FOTA-sized: about a third of the play area tall
 STRIDE_FRAMES = 8
+PLAYER_IDLE_YAW = 55
 
 
 def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
@@ -174,9 +175,9 @@ def _arms(kind_r, kind_l=None):
 
 
 def player_sheet(spec, name):
-    side = [figure(spec, pose(90), FW, FH)]
+    side = [figure(spec, pose(PLAYER_IDLE_YAW), FW, FH)]
     side += [figure(spec, walk_pose(90, i), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, pose(90, mouth=1, nod=0.004), FW, FH)]
+    side += [figure(spec, pose(PLAYER_IDLE_YAW, mouth=1, nod=0.004), FW, FH)]
     front = [figure(spec, pose(16), FW, FH)]
     front += [figure(spec, walk_pose(16, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
@@ -339,7 +340,7 @@ def action_sequences(spec, name):
     from PIL import Image
     scaled = dict(spec, h=spec["h"] * SCALE)
     stand = Image.new("RGBA", (192, FH))
-    stand.alpha_composite(figure(spec, pose(90), FW, FH), (64, 0))
+    stand.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
     standing = (stand, (96, 18))
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
