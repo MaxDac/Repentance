@@ -1385,8 +1385,26 @@ public class AutoPlay
         await Until(() => _game.Hud.CaptionVisible, 120);
         Check(_game.Hud.CaptionVisible, $"{ending}: End of Act Three");
         var gs = GameState.Instance;
-        await Until(() => _game.Room?.Name == "Attic" && !gs.HasItem("journal") && _game.Hud.CaptionVisible, 120);
-        Check(_game.Room?.Name == "Attic" && !gs.HasItem("journal"), $"{ending}: Daniel puts the journal back");
+        bool keepJournal = gs.HasFlag("ending_1");
+        await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible, 120);
+        Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionVisible, $"{ending}: final attic caption");
+        Check(gs.HasItem("journal") == keepJournal,
+            $"{ending}: Daniel {(keepJournal ? "keeps the journal for Leo" : "puts the journal back")}");
+        var story = GD.Load<GodotInk.InkStory>(DialogueManager.StoryPath);
+        string inkState = story.SaveState();
+        try
+        {
+            story.ChoosePathString("epilogue");
+            string[] lines = story.ContinueMaximally().Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            Check(lines.Contains("DANIEL: maybe Leo would like to read it some day") == keepJournal,
+                $"{ending}: Leo's exact line only appears after reconciliation");
+            Check(lines.Contains("DANIEL: That's enough of you for one lifetime, Micah Jones.") == !keepJournal,
+                $"{ending}: dismissal only appears without reconciliation");
+        }
+        finally
+        {
+            story.LoadState(inkState);
+        }
         if (!_theEndShot) await Shot("the_end");
         _theEndShot = true;
     }

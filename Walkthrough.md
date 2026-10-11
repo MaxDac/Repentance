@@ -451,8 +451,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 ### Present
 
-The story ends with the father reading the last entry, commenting briefly, and then throwing back the journal in the
-trunk.
+The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife, the father
+keeps the journal, saying "maybe Leo would like to read it some day". In all other endings, he throws the journal back
+in the trunk.
 
 ### Puzzle pacing and saves
 

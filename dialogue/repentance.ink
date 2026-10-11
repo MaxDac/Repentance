@@ -866,6 +866,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
     DANIEL: ...Huh. He made it. He actually made it.
+    DANIEL: maybe Leo would like to read it some day
 - has_flag("ending_2"):
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
     DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."
@@ -881,5 +882,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "They took my belt. They left me the sheets."
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-DANIEL: That's enough of you for one lifetime, Micah Jones.
+{not has_flag("ending_1"):
+    DANIEL: That's enough of you for one lifetime, Micah Jones.
+}
 -> END
