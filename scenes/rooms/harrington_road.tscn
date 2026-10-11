@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/HarringtonRoad.cs" id="1_HarringtonRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road.png" id="2_harrington_road"]
@@ -8,6 +8,15 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_fire.png" id="6_harrington_road_fire"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_crates.png" id="7_harrington_road_crates"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/watchman.png" id="8_watchman"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/packing_wedge.png" id="9_Wedge"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_catch.png" id="10_Catch"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_freed.png" id="11_Freed"]
+
+[sub_resource type="RectangleShape2D" id="WedgeShape"]
+size = Vector2(24, 18)
+
+[sub_resource type="RectangleShape2D" id="CatchShape"]
+size = Vector2(30, 32)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(38, 82)
@@ -56,6 +65,31 @@ centered = false
 script = ExtResource("5_FlagSprite")
 ShowIfFlags = "crates_stacked"
 
+[node name="WedgeSprite" type="Sprite2D" parent="."]
+position = Vector2(427, 182)
+z_index = -8
+texture = ExtResource("9_Wedge")
+centered = false
+script = ExtResource("5_FlagSprite")
+ShowIfFlags = "watchman_distracted"
+HideIfFlags = "wedge_taken,ladder_freed"
+
+[node name="CatchSprite" type="Sprite2D" parent="."]
+position = Vector2(323, 155)
+z_index = -8
+texture = ExtResource("10_Catch")
+centered = false
+script = ExtResource("5_FlagSprite")
+HideIfFlags = "ladder_freed"
+
+[node name="FreedSprite" type="Sprite2D" parent="."]
+position = Vector2(323, 155)
+z_index = -8
+texture = ExtResource("11_Freed")
+centered = false
+script = ExtResource("5_FlagSprite")
+ShowIfFlags = "ladder_freed"
+
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
 polygon = PackedVector2Array(0, 262, 480, 262, 480, 204, 0, 204)
@@ -70,6 +104,37 @@ metadata/facing = 4
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="PackingWedge" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "packing_wedge"
+DisplayName = "packing wedge"
+LookText = "A tapered wooden wedge among the crates. Good for holding a spring catch back."
+WalkTo = Vector2(440, 222)
+Face = 2
+ShowIfFlags = "watchman_distracted"
+HideIfFlags = "wedge_taken,ladder_freed"
+ClickPriority = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/PackingWedge"]
+position = Vector2(439, 191)
+shape = SubResource("WedgeShape")
+
+[node name="LadderCatch" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "ladder_catch"
+DisplayName = "jammed spring catch"
+WalkTo = Vector2(334, 218)
+Face = 2
+ClickPriority = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/LadderCatch"]
+position = Vector2(338, 171)
+shape = SubResource("CatchShape")
 
 [node name="BackDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

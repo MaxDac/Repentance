@@ -5,12 +5,10 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Eleanor's cell at the convent: a bed, a lampstand, a book and a nightstand. In the drawer, a comb and a little
-/// mirror with a strange symbol on the back. Micah won't leave without the mirror.
+/// waxed mirror. Warming and cleaning its back reveals the symbol; Micah won't leave until he has found it.
 /// </summary>
 public partial class ConventCell : Room
 {
-    private static readonly Texture2D Symbol = GD.Load<Texture2D>("res://assets/art/ui/triquetra.png");
-
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("cell_seen")) return;
@@ -42,14 +40,11 @@ public partial class ConventCell : Room
                 await Say("It isn't even locked. Nuns trust people. Must be nice.");
                 return true;
 
-            case ("mirror", Verb.Hand):
+            case ("mirror", Verb.Hand) when !State.HasFlag("took_mirror"):
                 await Say("A little hand mirror. Cheap glass, but somebody loved the frame.");
-                await Say("There's something on the back...");
-                await Game.Hud.ShowImage(Symbol);
-                await Say("Three loops tied in one knot. No beginning, no end. Scratched in deep, on purpose.");
-                await Say("Not the kind of thing the sisters teach in catechism. I'm keeping this.");
-                State.SetFlag("got_mirror");
-                State.GiveItem("mirror");
+                State.SetFlag("took_mirror");
+                State.GiveItem("mirror_waxed");
+                await Say("The wooden back is hidden under old wax. Gentle warmth, then a clean cloth. Not a flame.");
                 return true;
 
             case ("comb", Verb.Hand):
@@ -58,13 +53,23 @@ public partial class ConventCell : Room
                 return true;
 
             case ("lampstand", Verb.Hand):
-                await Say("If I turn it down, I won't be able to see. If I turn it up, I'll see too much.");
+            case ("lampstand", Verb.Look):
+                await Say("A little warmth above the lamp, away from the flame. Enough to soften old wax without harming the wood.");
+                return true;
+            case ("lampstand", Verb.UseItem) when item == "mirror_waxed":
+                State.SetFlag("mirror_warmed");
+                await Say("I hold the wooden back in the gentle warmth. The wax softens. A clean cloth should lift it now.");
                 return true;
             case ("book", Verb.Hand):
                 await Say("A breviary. Dog-eared at the Psalms. Somebody was looking for something.");
                 return true;
             case ("bed", Verb.Hand):
-                await Say("Thin mattress, nothing under it. I checked. Professional habit.");
+                if (!State.HasFlag("got_mirror"))
+                {
+                    State.GiveItem("cloth");
+                    await Say("A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.");
+                }
+                else await Say("Thin mattress, and the borrowed cloth back where it belongs.");
                 return true;
             case ("bed" or "nightstand" or "lampstand", Verb.Kick):
                 await Say("Kick a nun's furniture. Nice, Micah. Very nice.");

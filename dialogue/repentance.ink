@@ -176,6 +176,7 @@ BELLBOY: And no, I don't know it. But a guy like that leaves matches everywhere.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: Front desk won't give you the time of day, never mind a key. But that dollar buys you the back way.
+BELLBOY: Staff lift's in routing mode. Diagram by the service door. Trace the branches to 507 before you dispatch it.
 BELLBOY: Staff door, by the palm. Service elevator to five, room 507. Maids leave it on the latch.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
@@ -358,7 +359,7 @@ MOC: How edifying. And what does a gentleman like you read?
 * [Midsummer fires. Oak groves. Wells you whisper your sins into.]
     MOC: Farmers' tales. Why would a man like you care what farmers did on the longest night of the year?
     -> opts
-* [A book from the public library. Your address was tucked inside it.]
+* [A book from the public library. It helped me decipher a card with your address.]
     MOC: We are a club. People who like us write our address down. Why are you asking, Mr...?
     MICAH: Jones. Micah Jones.
     -> opts
@@ -415,6 +416,7 @@ CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
 CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
 CALEB: That's the Devil's work, brother. It's the oldest trick he has.
+CALEB: Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
@@ -490,10 +492,10 @@ LIBRARIAN: I've nothing to say to a man who won't tell me where he gets his mirr
 === librarian_threat ===
 MICAH: Let's try that again. Slower, this time.
 LIBRARIAN: Good Lord. Put that away! This is a library!
-MICAH: Then keep your voice down. The knot.
+MICAH: Then keep your voice down. Bell's "Rites of the Old Isles", C-17. The book about this knot.
 LIBRARIAN: C-Celtic. A triquetra. Old, very old, from before the saints ever reached Ireland.
 LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
-LIBRARIAN: There's a book. "Rites of the Old Isles." A rare thing. We had a request for it just last month.
+LIBRARIAN: Y-yes. Bell's book, C-17. A rare thing. We had a request for it just last month.
 LIBRARIAN: Take it. Take it and go away, and please don't come back.
 ~ give_item("book")
 MICAH: Pleasure doing business. Late fees are on me.
@@ -588,6 +590,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
     ROSE: What do you want?
 }
 MICAH: Nothing. Not tonight.
+MICAH: I'm not asking you to believe I've changed. I'd like to start showing you.
 MICAH: I was wondering... if some time you'd be free for a cup of coffee. Daylight. A table between us.
 ROSE: ...
 ROSE: Coffee.
@@ -612,6 +615,7 @@ CALEB: ...I don't know anything about clubs.
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
 MICAH: There's little left for me to do, at this point.
 CALEB: You know that that's not the case.
+CALEB: The prodigal thought so too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
 -> END
 
@@ -664,6 +668,7 @@ CALEB: Nobody is beyond the way back. Not even you.
 === caleb_warn ===
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.
+CALEB: Repentance means more than asking nicely. Put the gun away.
 CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose, go anywhere.
 CALEB: There's still a way back. There always is. But not where you're going.
 MICAH: Good night, Caleb.
@@ -673,6 +678,7 @@ MICAH: Good night, Caleb.
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
+CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
 -> END
 

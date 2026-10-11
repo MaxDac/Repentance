@@ -49,14 +49,12 @@ public partial class EleanorRoom : Room
                 await Say("Silk, cedar, and steel at the back.");
                 return true;
 
-            case ("safe", Verb.Hand) when !State.HasFlag("safe_open") && State.HasItem("combination"):
+            case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
             case ("safe", Verb.UseItem) when item == "combination" && !State.HasFlag("safe_open"):
+                if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
                 State.SetFlag("safe_open");
                 await Say("Right twelve. Left thirty-one. Right seven. The tumblers fell like dominoes.");
                 await Say("Whoever tossed the room scratched the dial raw and never got the door open.");
-                return true;
-            case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
-                await Say("A combination dial. Scratched up by somebody who tried and failed. I'd need the numbers.");
                 return true;
             case ("safe", Verb.Hand):
                 await Say(State.HasFlag("took_brass_box") ? "Empty now." : "Something brass, catching the light.");
@@ -68,6 +66,7 @@ public partial class EleanorRoom : Room
             case ("brass_box", Verb.Hand):
                 State.SetFlag("took_brass_box");
                 State.GiveItem("brass_box");
+                State.SetFlag("recover_hotel", false);
                 await Say("A little brass box, engraved with lilies. The only thing in this room she bothered to lock away twice.");
                 return true;
 
