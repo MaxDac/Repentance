@@ -1,6 +1,6 @@
 """A cheap roadside motel room in flat, dingy daytime light."""
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
-from .common import (W, H, TOP, tall, hx, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
+from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
                      floor_boards, text)
 from .furniture import Room3D
 
@@ -8,6 +8,17 @@ FLOOR = 136
 WOOD = hx("6a5038")
 WOOD_D = hx("342418")
 R = Room3D(FLOOR, 250, -250)
+
+def wall_mirror(img, box):
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = box
+    d.rectangle([x0 - 3, y0 - 3, x1 + 3, y1 + 3], fill=WOOD_D)
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 2], outline=hx("9a7850"), width=2)
+    vgrad(img, box, hx("657078"), hx("3c444a"))
+    d.rectangle(box, outline=hx("b0aaa0"))
+    d.line([(x0 + 4, y0 + 4), (x0 + 12, y0 + 12)], fill=hx("a4b0b4"))
+    d.line([(x0 + 4, y0 + 9), (x0 + 8, y0 + 13)], fill=hx("829298"))
+    d.line([(x0 + 2, y1 - 2), (x1 - 2, y1 - 2)], fill=hx("50504a"))
 
 
 def shell(img):
@@ -27,16 +38,10 @@ def shell(img):
         d.rectangle([x + 3, 104, x + 28, FLOOR - 8], outline=hx("443022"))
         d.line([(x + 4, 105), (x + 27, 105)], fill=hx("6e5740"))
 
-    # Peeling wallpaper
-    peel = (
-        [(128, 18), (148, 14), (160, 26), (156, 44), (138, 48), (124, 34)],
-        [(368, 20), (398, 18), (416, 32), (406, 54), (378, 56), (362, 38)],
-        [(214, 54), (242, 48), (256, 66), (248, 86), (222, 88), (206, 72)],
-    )
-    for pts in peel:
-        d.polygon(pts, fill=hx("a79d79"), outline=hx("5e543e"))
-        inner = [(x + (1 if i % 2 else -1), y + 2) for i, (x, y) in enumerate(pts)]
-        d.line(inner + [inner[0]], fill=hx("cec3a4"))
+    wall_mirror(img, (126, 16, 160, 47))
+    wall_mirror(img, (210, 53, 254, 86))
+    for x, y in ((184, 24), (278, 65), (92, 80)):
+        d.line([(x, y), (x + 3, y + 5), (x + 1, y + 9)], fill=hx("a79d79"))
 
     # Water stains and cracks
     for box in ([118, 2, 182, 42], [300, 0, 352, 34], [392, 64, 454, 110]):
@@ -79,9 +84,37 @@ def door(img):
 IRON, IRON_L, BRASS = hx("2a2422"), hx("4a403a"), hx("a49470")
 
 
+CURTAINS = (
+    ([(292, 22), (315, 22), (315, 98), (292, 98)], hx("c0b490")),
+    ([(383, 22), (406, 22), (406, 98), (383, 98)], hx("b8ac88")),
+)
+
+
+def curtains(img, night=False):
+    d = ImageDraw.Draw(img)
+    d.line([(288, 19), (410, 19)], fill=hx("34261e"), width=2)
+    for pts, col in CURTAINS:
+        if night:
+            col = mix(col, hx("584052"), 0.52)
+        shade, highlight = mul(col, 0.68), mix(col, hx("eedac0"), 0.15)
+        x0, x1 = min(p[0] for p in pts), max(p[0] for p in pts)
+        d.rectangle([x0 + 2, 24, x1 + 2, 101], fill=hx("251a1c"))
+        d.polygon(pts, fill=col)
+        for x in range(x0 + 2, x1 - 1, 6):
+            d.ellipse([x - 1, 17, x + 2, 23], outline=hx("7a6250"))
+            d.line([(x, 25), (x + 1, 98)], fill=shade, width=2)
+            d.line([(x + 2, 25), (x + 3, 97)], fill=highlight, width=2)
+            d.ellipse([x, 96, x + 5, 100], fill=col)
+            d.arc([x, 96, x + 5, 100], 0, 180, fill=shade)
+        d.line([(x0 + 1, 24), (x1 - 1, 24)], fill=highlight)
+        d.line([(x0, 26), (x0, 96)], fill=shade)
+
+
 def window(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 302, 26, 396, 92
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 7], fill=WOOD_D)
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 4], fill=WOOD)
     vgrad(img, (x0, y0, x1, y1), hx("dcd8b8"), hx("aeb89e"))
     d.rectangle([x0, 70, x1, y1], fill=hx("7b7554"))
     d.rectangle([x0, 62, x1, 70], fill=hx("938a63"))
@@ -89,25 +122,12 @@ def window(img):
     d.rectangle([346, 44, 356, 92], fill=hx("655f49"))
     d.rectangle([372, 54, 382, 92], fill=hx("595542"))
     light(img, "rect", [x0, y0, x1, y1], hx("f5efc6"), 0.18, 2)
-    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 7], fill=WOOD_D)
-    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 4], fill=WOOD)
     d.rectangle([x0, y0, x1, y1], outline=hx("20140e"))
     d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=hx("2a1a12"), width=2)
     d.line([(x0, 58), (x1, 58)], fill=hx("2a1a12"), width=2)
     d.rectangle([x0 - 8, y1 + 4, x1 + 8, y1 + 8], fill=hx("4e3a2a"))
 
-    # Thin grubby curtains
-    left = [(292, 18), (324, 22), (330, 36), (324, 84), (306, 88), (296, 58)]
-    right = [(406, 18), (374, 22), (368, 36), (374, 84), (392, 88), (402, 58)]
-    d.polygon(left, fill=hx("c0b490"))
-    d.polygon(right, fill=hx("b8ac88"))
-    for x in range(298, 328, 5):
-        d.line([(x, 22), (x + 1, 84)], fill=hx("a89b78"))
-    for x in range(372, 402, 5):
-        d.line([(x, 22), (x - 1, 84)], fill=hx("a0926e"))
-    noise(img, (294, 18, 404, 88), 5, 408)
-    d.line([(286, 18), (412, 18)], fill=hx("3a2c1e"), width=2)
-    d.line([(350, 18), (350, 12)], fill=hx("3a2c1e"))
+    curtains(img)
     shadow(img, "rect", [296, 26, 402, 90], 0.08, 2, hx("d8d0b0"))
 
     # Sickly daylight spill
@@ -291,14 +311,7 @@ def window_night(img):
     d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 4], fill=WOOD)
     d.rectangle([x0, y0, x1, y1], fill=hx("101420"))
     d.rectangle([x0 - 8, y1 + 4, x1 + 8, y1 + 8], fill=hx("4e3a2a"))
-    for pts, col, sh in (([(292, 18), (322, 22), (326, 36), (318, 84), (304, 88), (296, 58)], hx("c0b490"), hx("a89b78")),
-                         ([(406, 18), (378, 22), (374, 36), (380, 84), (394, 88), (402, 58)], hx("b8ac88"), hx("a0926e"))):
-        d.polygon(pts, fill=col)
-        for x in range(min(p[0] for p in pts) + 4, max(p[0] for p in pts) - 2, 5):
-            d.line([(x, 22), (x, 84)], fill=sh)
-    noise(img, (294, 18, 404, 88), 5, 408)
-    d.line([(286, 18), (412, 18)], fill=hx("3a2c1e"), width=2)
-    d.line([(350, 18), (350, 12)], fill=hx("3a2c1e"))
+    curtains(img)
 
 
 def glass_night(img, flicker=1.0):
@@ -324,13 +337,14 @@ def glass_night(img, flicker=1.0):
     m = Image.new("L", img.size, 0)
     md = ImageDraw.Draw(m)
     md.rectangle([x0, y0, x1, y1], fill=255)
-    md.polygon([(292, 18), (322, 22), (326, 36), (318, 84), (304, 88), (296, 58)], fill=0)
-    md.polygon([(406, 18), (378, 22), (374, 36), (380, 84), (394, 88), (402, 58)], fill=0)
+    for pts, _ in CURTAINS:
+        md.polygon(pts, fill=0)
     img.paste(layer, (0, 0), m)
     d = ImageDraw.Draw(img)
     d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=hx("140c0a"), width=2)
     d.line([(x0, 58), (x1, 58)], fill=hx("140c0a"), width=2)
     d.rectangle([x0, y0, x1, y1], outline=hx("140c0a"))
+    curtains(img, night=True)
 
 
 def _ell(d, c, rx, ry, col):

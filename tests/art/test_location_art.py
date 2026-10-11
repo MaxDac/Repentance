@@ -108,8 +108,8 @@ class LocationRenderingTests(unittest.TestCase):
 
     def test_destination_window_is_lit(self):
         image = act2_rooms.paint_road()
-        destination = image.crop((334, 24, 346, 38))
-        other_window = image.crop((244, 24, 256, 38))
+        destination = image.crop((336, 34, 350, 50))
+        other_window = image.crop((244, 34, 256, 50))
         self.assertGreater(luminance(destination), luminance(other_window) + 35)
 
     def test_office_floor_does_not_erase_furniture_bases(self):
@@ -125,7 +125,8 @@ class LocationRenderingTests(unittest.TestCase):
     def test_harrington_overlays_match_variants_at_scene_positions(self):
         for name, paint, variants in (
             ("harrington_road", act2_rooms.paint_road,
-             (("fire", dict(fire=True), {}), ("crates", dict(stacked=True), {}))),
+             (("fire", dict(fire=True), {}), ("crates", dict(stacked=True), {}),
+              ("ladder", dict(stacked=True, freed=True), dict(stacked=True)))),
             ("harrington_office", act2_rooms.paint_office,
              (("drawer_left", dict(left=True), {}), ("drawer_right", dict(right=True), {}),
               ("closet", dict(closet=True), {}),
@@ -134,8 +135,7 @@ class LocationRenderingTests(unittest.TestCase):
             scene = (ROOT / "scenes" / "rooms" / f"{name}.tscn").read_text()
             if name == "harrington_road":
                 base = paint()
-                pal = common.palette_of(Image.blend(
-                    Image.blend(base, paint(fire=True), 0.5), paint(stacked=True), 0.5), 120)
+                pal = act2_rooms.road_palette(base, paint(fire=True), paint(stacked=True))
             else:
                 blend = paint()
                 for _, flags, _ in variants:

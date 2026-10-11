@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/HarringtonRoad.cs" id="1_HarringtonRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road.png" id="2_harrington_road"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/packing_wedge.png" id="9_Wedge"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_catch.png" id="10_Catch"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_freed.png" id="11_Freed"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_ladder.png" id="12_Ladder"]
 
 [sub_resource type="RectangleShape2D" id="WedgeShape"]
 size = Vector2(24, 18)
@@ -28,10 +29,10 @@ size = Vector2(34, 44)
 size = Vector2(50, 32)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(36, 100)
+size = Vector2(96, 126)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(40, 42)
+size = Vector2(48, 74)
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
 size = Vector2(16, 56)
@@ -51,7 +52,7 @@ centered = false
 
 [node name="Fire" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(0, 71)
+position = Vector2(0, 69)
 texture = ExtResource("6_harrington_road_fire")
 centered = false
 script = ExtResource("5_FlagSprite")
@@ -75,7 +76,7 @@ ShowIfFlags = "watchman_distracted"
 HideIfFlags = "wedge_taken,ladder_freed"
 
 [node name="CatchSprite" type="Sprite2D" parent="."]
-position = Vector2(323, 155)
+position = Vector2(344, 138)
 z_index = -8
 texture = ExtResource("10_Catch")
 centered = false
@@ -83,9 +84,17 @@ script = ExtResource("5_FlagSprite")
 HideIfFlags = "ladder_freed"
 
 [node name="FreedSprite" type="Sprite2D" parent="."]
-position = Vector2(323, 155)
+position = Vector2(344, 138)
 z_index = -8
 texture = ExtResource("11_Freed")
+centered = false
+script = ExtResource("5_FlagSprite")
+ShowIfFlags = "ladder_freed"
+
+[node name="LoweredLadder" type="Sprite2D" parent="."]
+position = Vector2(328, 111)
+z_index = -9
+texture = ExtResource("12_Ladder")
 centered = false
 script = ExtResource("5_FlagSprite")
 ShowIfFlags = "ladder_freed"
@@ -133,7 +142,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/LadderCatch"]
-position = Vector2(338, 171)
+position = Vector2(351, 147)
 shape = SubResource("CatchShape")
 
 [node name="BackDoor" type="Area2D" parent="Hotspots"]
@@ -190,14 +199,14 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/FireEscape"]
-position = Vector2(334, 150)
+position = Vector2(350, 137)
 shape = SubResource("Rect_4")
 
 [node name="Window" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "window"
 DisplayName = "lit window"
-LookText = "Third floor, one light still on. Theodore Harrington's office, if the brass plate out front is honest."
+LookText = "One floor up, one light still on. Theodore Harrington's office, if the brass plate out front is honest."
 WalkTo = Vector2(334, 218)
 Face = 2
 ClickPriority = -1
@@ -205,7 +214,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
-position = Vector2(349, 40)
+position = Vector2(354, 63)
 shape = SubResource("Rect_5")
 
 [node name="Exit" type="Area2D" parent="Hotspots"]
