@@ -1,7 +1,7 @@
 """Character sprites, painted by figure.py in the manner of Fate of Atlantis-era VGA adventures.
 
 Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
-  row 0  side view, facing right : idle, walk 1-8, talk
+  row 0  facing right           : 3/4 idle, side walk 1-8, 3/4 talk
   row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
   row 2  back 3/4 view           : idle, walk 1-6
 NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view facing screen-right, then walk 1-8 in
@@ -21,6 +21,7 @@ FW, FH = 64, 96
 NPC_W = 56
 SCALE = 1.2  # FOTA-sized: about a third of the play area tall
 STRIDE_FRAMES = 8
+PLAYER_IDLE_YAW = 55
 
 
 def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
@@ -139,8 +140,7 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     hair="1e1610", hair_style="bob", soft_face=True, lips="a8303a", eye="2a1a14", mask=("half", "121014"),
                     torso="1a1820", sleeves="ecc6a6", neckline=0.262, coat=dict(col="1a1820", top=0.40, hem=0.66, flare=0.03),
                     stockings="c8a088", shoes="141014",
-                    decals=[("pearls", 0.226, "e8e2d4"), ("ribbon", 0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)),
-                            ("ribbon", -0.05, 0.21, 0.27, 0.006, "1a1820", ("torso",)), ("belt", 0.46, "6a5a70")])
+                    decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
 # Eleanor on stage: retain the dressed variant for players who opt out of nudity.
 ELEANOR_STAGE_CLOTHED = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
@@ -175,9 +175,9 @@ def _arms(kind_r, kind_l=None):
 
 
 def player_sheet(spec, name):
-    side = [figure(spec, pose(90), FW, FH)]
+    side = [figure(spec, pose(PLAYER_IDLE_YAW), FW, FH)]
     side += [figure(spec, walk_pose(90, i), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, pose(90, mouth=1, nod=0.004), FW, FH)]
+    side += [figure(spec, pose(PLAYER_IDLE_YAW, mouth=1, nod=0.004), FW, FH)]
     front = [figure(spec, pose(16), FW, FH)]
     front += [figure(spec, walk_pose(16, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
@@ -307,7 +307,7 @@ def aim_frame(spec, name):
 
 
 # Hip, shoulder, head, near knee/ankle, elbow/hand, before grounding into the wide action frame.
-REST = [(66, 83), (43, 81), (29, 79), (84, 86), (104, 91), (49, 87), (64, 91)]
+REST = [(66, 83), (43, 81), (29, 79), (84, 86), (104, 91), (51, 89), (66, 91)]
 SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
@@ -340,7 +340,7 @@ def action_sequences(spec, name):
     from PIL import Image
     scaled = dict(spec, h=spec["h"] * SCALE)
     stand = Image.new("RGBA", (192, FH))
-    stand.alpha_composite(figure(spec, pose(90), FW, FH), (64, 0))
+    stand.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
     standing = (stand, (96, 18))
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]

@@ -19,6 +19,85 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_player_horizontal_idle_and_talk_use_three_quarter_art(self):
+        self.assertGreater(sprites.PLAYER_IDLE_YAW, 45)
+        self.assertLess(sprites.PLAYER_IDLE_YAW, 75)
+        for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
+                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            self.assertEqual(image.size, (640, 288))
+            for column, extra in ((0, {}), (9, dict(mouth=1, nod=0.004))):
+                with self.subTest(character=name, column=column):
+                    actual = image.crop((column * 64, 0, (column + 1) * 64, 96))
+                    expected = sprites.figure(spec, sprites.pose(sprites.PLAYER_IDLE_YAW, **extra), 64, 96)
+                    profile = sprites.figure(spec, sprites.pose(90, **extra), 64, 96)
+                    self.assertEqual(actual.tobytes(), expected.tobytes())
+                    self.assertNotEqual(actual.crop((0, 0, 64, 30)).tobytes(),
+                                        profile.crop((0, 0, 64, 30)).tobytes(),
+                                        "the face must visibly change, not just the body")
+                    ys, xs = np.nonzero(np.array(actual.getchannel("A")) == 255)
+                    self.assertGreater(xs.min(), 0)
+                    self.assertLess(xs.max(), 63)
+                    self.assertGreater(ys.min(), 0)
+                    self.assertEqual(ys.max(), 93, "keep the soles at the existing baseline")
+            idle = np.array(image.crop((0, 0, 64, 96)))
+            talk = np.array(image.crop((576, 0, 640, 96)))
+            self.assertTrue(np.array_equal(idle[31:], talk[31:]),
+                            "talking must not move the body or feet")
+
+    def test_player_walk_and_vertical_views_keep_existing_poses(self):
+        for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
+                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            poses = [(0, i + 1, sprites.walk_pose(90, i)) for i in range(8)]
+            for row, yaw in ((1, 16), (2, 164)):
+                poses.append((row, 0, sprites.pose(yaw)))
+                poses += [(row, i + 1, sprites.walk_pose(yaw, i * 8 / 6, amp=0.8)) for i in range(6)]
+            poses += [(1, 7, sprites.pose(16, mouth=1)), (1, 8, sprites.pose(16, mouth=2, nod=0.004))]
+            for row, column, ps in poses:
+                with self.subTest(character=name, row=row, column=column):
+                    frame = image.crop((column * 64, row * 96, (column + 1) * 64, (row + 1) * 96))
+                    self.assertEqual(frame.tobytes(), sprites.figure(spec, ps, 64, 96).tobytes())
+
+    def test_collapse_starts_from_the_actual_player_idle(self):
+        for name in ("micah", "micah_masked"):
+            normal = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA").crop((0, 0, 64, 96))
+            collapse = Image.open(ART / "sprites" / f"{name}_collapse.png").convert("RGBA")
+            self.assertEqual(collapse.crop((64, 0, 128, 96)).tobytes(), normal.tobytes())
+
+    def test_player_sheet_generation_is_deterministic(self):
+        for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH)):
+            with patch.object(sprites, "save"):
+                first = sprites.player_sheet(spec, name)
+                second = sprites.player_sheet(spec, name)
+            self.assertEqual(first.tobytes(), second.tobytes())
+
+    def test_resting_arm_lies_along_the_ground(self):
+        _, shoulder, _, _, ankle, elbow, hand = sprites.REST
+        self.assertGreater(elbow[1], shoulder[1])
+        self.assertLessEqual(ankle[1] - elbow[1], 2)
+        self.assertEqual(hand[1], ankle[1])
+        held = Image.open(ART / "sprites" / "micah_supine.png")
+        for name in ("micah_collapse", "micah_recover"):
+            image = Image.open(ART / "sprites" / f"{name}.png")
+            frame = image.crop((image.width - held.width, 0, image.width, held.height)) \
+                if name.endswith("collapse") else image.crop((0, 0, *held.size))
+            self.assertEqual(frame.tobytes(), held.tobytes(), name)
+
+    def test_strapless_club_dresses_have_no_ribbon_spikes(self):
+        for spec in (sprites.MASKED_WOMAN, sprites.MASKED_WOMAN_B, sprites.ELEANOR_STAGE_CLOTHED):
+            self.assertFalse(any(decal[0] == "ribbon" for decal in spec["decals"]))
+            self.assertEqual(spec["neckline"], 0.262)
+
+    def test_supine_coat_covers_the_base_of_the_neck(self):
+        image = np.array(Image.open(ART / "sprites" / "micah_supine.png").convert("RGBA"))
+        shoulder = grounded_joints(sprites.REST)[1].astype(int)
+        x, y = shoulder
+        patch = image[y - 2:y + 2, x - 2:x + 3, :3]
+        skin = painter.ramp(sprites.MICAH["skin"])
+        self.assertFalse(np.any(np.all(patch[:, :, None] == skin, axis=3)),
+                         "the coat collar must cover the shoulder rather than expose a skin patch")
+
     def test_eleanor_marked_back_hair_patch_is_darker(self):
         spec = sprites.ELEANOR_STAGE
         pose = sprites.pose(35, arms=sprites._arms("cover", "side"))

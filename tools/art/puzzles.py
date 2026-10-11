@@ -57,16 +57,20 @@ def build():
     save(_icon(wedge).resize((24, 18), Image.Resampling.NEAREST), "rooms", "packing_wedge.png")
 
     for released in (False, True):
-        catch = Image.new("RGBA", (30, 32))
+        catch = Image.new("RGBA", (14, 18))
         d = ImageDraw.Draw(catch)
-        d.rectangle([2, 1, 27, 29], fill=hx("363944"), outline=hx("a0a0a6"))
-        d.line([(7, 5), (7, 25), (21, 25)], fill=hx("c6c6c0"), width=2)
-        d.line([(11, 8), (19, 8), (13, 13), (21, 13)], fill=hx("a28a62"))
-        d.line([(19, 15), (19, 23)], fill=hx("c6c6c0"), width=3)
+        d.polygon([(0, 2), (6, 2), (6, 6), (3, 6), (3, 16), (0, 16)], fill=hx("363944"))
+        d.line([(0, 2), (5, 2)], fill=hx("8a929a"))
+        d.line([(1, 6), (1, 16)], fill=hx("78808a"))
+        d.line([(3, 8), (5, 6), (6, 9), (8, 6), (9, 9)], fill=hx("a0a4aa"))
+        d.line([(3, 12), (10, 12), (11, 9)], fill=hx("606872"), width=2)
+        for x, y in ((1, 4), (1, 14)):
+            d.point((x, y), fill=hx("c4c4bc"))
         if released:
-            d.polygon([(9, 24), (23, 18), (23, 24)], fill=hx("d8b66c"))
+            d.polygon([(6, 11), (13, 8), (13, 11)], fill=hx("b88a4c"))
+            d.line([(7, 10), (12, 9)], fill=hx("e0ba78"))
         else:
-            d.line([(13, 23), (23, 23)], fill=hx("b45942"), width=3)
+            d.line([(10, 12), (10, 15), (5, 15)], fill=hx("92969c"), width=2)
         save(catch, "rooms", "ladder_freed.png" if released else "ladder_catch.png")
 
     plates = Image.new("RGBA", (230, 34))

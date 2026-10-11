@@ -28,9 +28,13 @@ Command-line options (after `--`):
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
+| `--clock=fast` | Default for the three checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time |
+| `--clock=normal` | Previous automated clock: 8× game time, display timing left alone. Use this when screenshots should be closer to the paced game |
 
 ```powershell
 godot --path . -- --autoplay
+godot --path . -- --autoplay --clock=normal
+godot --path . -- --pause-test --clock=fast
 ```
 
 On Windows, use the Godot Mono **`_console.exe`** executable for automated runs when capturing output and
@@ -305,6 +309,12 @@ The art checks cover strip geometry, bounds, clipping, intermediate frames, rest
 generation. `--autoplay` also captures each action frame, checks playback interruption and mirroring, and exercises
 both knockout/recovery branches. Character quality and motion still require viewing the captures at game scale.
 
+Room artwork is exported to PNGs and loaded as textures; Python is only used offline.
+After changing a room painter, regenerate its alternate-state overlays too and update scene positions to the
+printed crop origins. `py -3.14 -m unittest discover -s tests\art` checks committed images against their painters,
+lighting and geometry contracts, and pixel-exact state composition, including the lowered Harrington ladder and
+both mansion bed states.
+
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
@@ -314,7 +324,8 @@ py -3.14 -m unittest discover -s tests\art -v  # image contracts and location re
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: horizontal, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+Horizontal player idle/talk frames turn slightly toward the camera to reveal the face and chest; their walk cycles remain side-on.
 Puzzle overlays and foreground layers keep their own crop sizes and scene positions. After regeneration,
 check the printed overlay coordinates against the corresponding scene; moving a crop without its node
 misaligns the object. Club rooms use their own 128-colour palettes so the stage's darkness does not

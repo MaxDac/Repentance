@@ -6,8 +6,8 @@ namespace Repentance;
 
 /// <summary>
 /// The playable character (Micah, or Daniel in the prologue). Sprite sheet (64x96 frames, 10 columns, painted by
-/// tools/art/figure.py): row 0 side view: idle, walk x8, talk · row 1 front 3/4: idle, walk x6, talk A, talk B ·
-/// row 2 back 3/4: idle, walk x6. Side frames face right and are flipped for left. Position is the feet, which sit
+/// tools/art/figure.py): row 0: 3/4 idle, side walk x8, 3/4 talk · row 1 front 3/4: idle, walk x6, talk A, talk B ·
+/// row 2 back 3/4: idle, walk x6. Horizontal frames face right and are flipped for left. Position is the feet, which sit
 /// <see cref="Baseline"/> pixels above the bottom of each frame.
 /// </summary>
 public partial class Player : Node2D, ISpeaker

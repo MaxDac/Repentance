@@ -98,6 +98,17 @@ def paint_rose(opened=False):
         d.rectangle([x0, 24, x1 - 1, 32], fill=hx("8a8270"))
         d.line([(x0, 33), (x1 - 1, 33)], fill=hx("3a3024"))
         d.line([(x1 - 1, 24), (x1 - 1, 214)], fill=hx("2e1c16"))
+        d.rectangle([x0, 28, x1 - 1, 30], fill=hx("b0a18a"))
+        for x in range(x0 + 4, x1 - 4, 6):
+            d.rectangle([x, 34, x + 3, 37], fill=hx("493027"))
+        for y in (114, 188):
+            d.line([(x0, y), (x1 - 1, y)], fill=mul(col, 1.18))
+            d.line([(x0, y + 2), (x1 - 1, y + 2)], fill=mul(col, 0.65))
+        for px in (x0 + 5, x1 - 5):
+            d.line([(px, 32), (px, 211)], fill=hx("322e2a"), width=3)
+            d.line([(px - 1, 32), (px - 1, 211)], fill=hx("72685a"))
+            for py in (70, 132, 194):
+                d.line([(px - 2, py), (px + 2, py)], fill=hx("a09078"))
     # upper floor windows
     for x0, x1, _, _ in houses:
         cw = (x1 - x0)
@@ -113,6 +124,28 @@ def paint_rose(opened=False):
     door(d, 222, 110, 258, 198, hx("23402e"), "7", img)
     window(d, 278, 122, 320, 178, lit=True)
     window(d, 166, 122, 204, 178, lit=False)
+    for x0, y0, x1, y1 in (
+            (34, 52, 66, 104), (94, 52, 126, 104), (189, 52, 221, 104),
+            (261, 52, 293, 104), (363, 52, 395, 104), (423, 52, 455, 104),
+            (86, 124, 128, 178), (348, 124, 390, 178),
+            (278, 122, 320, 178), (166, 122, 204, 178)):
+        d.rectangle([x0 - 1, y0 - 1, x1 + 1, y1], outline=hx("594b3c"))
+        d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("ece0c4"))
+        d.line([(x0 - 4, y1 + 4), (x1 + 4, y1 + 4)], fill=hx("493a30"))
+        for x in range(x0 + 3, x0 + 9, 2):
+            d.line([(x, y0 + 3), (x, y1 - 3)], fill=hx("745c4c"))
+        for x in range(x1 - 8, x1 - 2, 2):
+            d.line([(x, y0 + 3), (x, y1 - 3)], fill=hx("4a3836"))
+        d.rectangle([x0 - 1, y1 + 1, x1 + 1, y1 + 2], fill=hx("c6bba6"))
+    for x0 in (30, 222, 410):
+        d.line([(x0 - 4, 120), (x0 - 4, 196)], fill=hx("d0c2a4"))
+        d.rectangle([x0 - 3, 151, x0 + 1, 156], fill=hx("b6a68c"))
+    d.rectangle([262, 120, 272, 127], fill=hx("302a24"), outline=hx("bca06a"))
+    d.rectangle([228, 174, 251, 177], fill=hx("8a783e"))
+    for x in (36, 112, 212, 286, 376, 440):
+        for y in range(9, 26, 5):
+            d.line([(x + 1, y), (x + 13, y)], fill=hx("765044"))
+            d.line([(x + 6 + (y // 5 % 2) * 3, y - 4), (x + 6 + (y // 5 % 2) * 3, y)], fill=hx("241a18"))
     # brass bell push beside the door
     d.rectangle([265, 146, 271, 156], fill=hx("8a6a2a"))
     d.ellipse([266, 149, 270, 153], fill=hx("e0c060"))
@@ -179,49 +212,102 @@ def crate(d, x0, y0, s=26):
     d.rectangle([x0, y0, x0 + s, y0 + 2], fill=hx("8a6c44"))
 
 
-def paint_road(fire=False, stacked=False):
+ROAD_WINDOW = (330, 26, 378, 100)
+LANDING_Y = 104
+
+
+def fire_escape(d, freed=False):
+    iron, edge = hx("141820"), hx("68707c")
+    d.rectangle([304, LANDING_Y, 398, LANDING_Y + 5], fill=iron)
+    d.line([(304, LANDING_Y), (398, LANDING_Y)], fill=edge)
+    for x in range(306, 398, 4):
+        d.line([(x, LANDING_Y + 1), (x + 2, LANDING_Y + 3)], fill=hx("3e444e"))
+    for y in (76, 90):
+        d.line([(304, y), (398, y)], fill=iron, width=2)
+        d.line([(304, y - 1), (398, y - 1)], fill=edge)
+    for x in range(304, 399, 8):
+        d.line([(x, 76), (x, LANDING_Y)], fill=iron, width=2)
+        d.line([(x, 77), (x, LANDING_Y - 1)], fill=hx("414854"))
+    for x in (308, 388):
+        d.line([(x, 110), (x + 8, 132), (x + 8, 110)], fill=hx("333944"), width=2)
+        d.point((x + 8, 131), fill=edge)
+    bottom = 196 if freed else 156
+    for x in (329, 345):
+        d.line([(x, 108), (x, bottom)], fill=iron, width=3)
+        d.line([(x - 1, 108), (x - 1, bottom)], fill=edge)
+        d.rectangle([x - 2, 120, x + 2, 124], fill=hx("444c58"))
+    for y in range(112, bottom, 8):
+        d.line([(329, y), (345, y)], fill=hx("161c24"), width=3)
+        d.line([(330, y - 1), (344, y - 1)], fill=hx("89909a"))
+    if not freed:
+        for x in (332, 342):
+            d.line([(x, 111), (x, 154)], fill=hx("404854"))
+
+
+def trash_fire(img):
+    light(img, "ellipse", [14, 125, 96, 218], hx("dc6020"), 0.24, 14)
+    light(img, "ellipse", [22, 201, 86, 236], hx("e89438"), 0.16, 8)
+    smoke = Image.new("RGBA", img.size)
+    sd = ImageDraw.Draw(smoke)
+    for i, box in enumerate(((47, 128, 61, 145), (42, 117, 60, 136), (39, 106, 57, 124),
+                              (43, 96, 58, 114), (37, 86, 51, 102), (35, 77, 44, 92))):
+        x0, y0, x1, y1 = box
+        opacity = 145 - i * 14
+        sd.ellipse(box, fill=hx("464650", opacity))
+        sd.arc([x0 + 2, y0 + 2, x1 - 2, y1 - 2], 160, 320, fill=hx("747078", opacity - 30), width=2)
+        sd.ellipse([x0 + 4, y0 + 5, x1 - 2, y1 - 3], fill=hx("26262e", opacity - 35))
+    sd.line([(40, 78), (36, 74), (37, 69)], fill=hx("5a5860", 60), width=2)
+    smoke = smoke.filter(ImageFilter.GaussianBlur(0.7))
+    img.paste(smoke, (0, 0), smoke)
+    d = ImageDraw.Draw(img)
+    d.ellipse([40, 165, 67, 176], fill=hx("251a14"))
+    for x, top, drift in ((42, 148, -3), (48, 138, 2), (55, 143, -2), (61, 150, 3)):
+        d.polygon([(x - 4, 173), (x - 5, 160), (x - 1, 153), (x + drift, top),
+                   (x + drift + 3, top + 9), (x + 2, 158), (x + 5, 168), (x + 3, 174)], fill=hx("be3d12"))
+        d.polygon([(x - 3, 172), (x - 2, 163), (x + 1, 157), (x + drift + 1, top + 5),
+                   (x + 4, 160), (x + 3, 170)], fill=hx("f88a20"))
+        d.polygon([(x - 2, 172), (x - 1, 162), (x + 1, 159), (x + 3, 165),
+                   (x + 4, 172)], fill=hx("ffe8a0"))
+    d.line([(40, 176), (66, 176)], fill=hx("d8a460"))
+    for x, y in ((43, 137), (58, 128), (65, 141), (51, 119)):
+        d.line([(x, y), (x + 1, y - 2)], fill=hx("ffc868"))
+    for x0, y, x1 in ((38, 209, 65), (34, 216, 72), (42, 224, 61)):
+        d.line([(x0, y), (x1, y)], fill=hx("946044"))
+
+
+def paint_road(fire=False, stacked=False, freed=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
     vgrad(img, (0, 0, W - 1, 60), hx("0a0c1c"), hx("1a1c34"))
     rnd = random.Random(41)
     for _ in range(26):
         d.point((rnd.randint(0, 120), rnd.randint(0, 50)), fill=hx("8a90b0"))
-    # the Harrington building: dark brick, six floors, a fire escape on the right
+    # A full-height ground floor and one accessible office floor above.
     bricks(img, (130, 0, W - 1, 200), hx("3a2a2a"), hx("221818"), 42, 5, 14)
     # a lower warehouse wall on the left, beyond the street mouth
     bricks(img, (0, 70, 128, 200), hx("33302e"), hx("1e1c1a"), 43, 5, 12)
     d.rectangle([0, 64, 128, 70], fill=hx("4a4642"))
-    for fy in (12, 62, 112):
+    for fy in (28, 122):
         for x in range(150, 460, 46):
             if 300 <= x <= 400 and fy < 120:
                 continue
-            d.rectangle([x, fy, x + 22, fy + 32], fill=hx("12141e"))
-            d.rectangle([x - 2, fy + 32, x + 24, fy + 35], fill=hx("4a3c38"))
+            d.rectangle([x - 2, fy - 3, x + 24, fy + 61], fill=hx("52443e"))
+            d.rectangle([x, fy, x + 22, fy + 58], fill=hx("12141e"))
+            d.line([(x + 11, fy), (x + 11, fy + 58)], fill=hx("383c46"))
+            d.line([(x, fy + 28), (x + 22, fy + 28)], fill=hx("383c46"))
+            d.rectangle([x - 3, fy + 59, x + 25, fy + 62], fill=hx("74645a"))
     # The one lit office window is also the player's destination.
-    d.rectangle([330, 20, 368, 60], fill=hx("c8a060"))
-    for x in range(332, 368, 5):
-        d.line([(x, 22), (x, 58)], fill=hx("9a7448"))
-    d.rectangle([326, 60, 372, 64], fill=hx("5a4a44"))
-    d.line([(349, 20), (349, 60)], fill=hx("3a3a4a"))
-    d.line([(330, 40), (368, 40)], fill=hx("3a3a4a"))
-    # fire escape: landing, stair and the pulled-up drop ladder
-    iron = hx("101014")
-    for ly in (64, 118):
-        d.rectangle([306, ly, 396, ly + 3], fill=iron)
-        d.line([(306, ly - 14), (396, ly - 14)], fill=iron)
-        for x in range(306, 397, 6):
-            d.line([(x, ly - 14), (x, ly)], fill=iron)
-        d.line([(306, ly), (396, ly)], fill=hx("565464"))
-    d.line([(312, 118), (390, 66)], fill=iron, width=2)
-    d.line([(319, 120), (397, 68)], fill=iron)
-    for i in range(12):
-        x, y = 314 + i * 6, 116 - i * 4
-        d.line([(x, y), (x + 7, y + 2)], fill=hx("5a5460"))
-    for x0 in (330, 338):
-        d.line([(x0, 120), (x0, 160)], fill=iron)
-    for y in range(124, 160, 6):
-        d.line([(330, y), (338, y)], fill=iron)
-        d.line([(331, y), (337, y)], fill=hx("5a5460"))
+    d.rectangle([325, 20, 383, 105], fill=hx("695a4a"))
+    d.rectangle([328, 24, 380, 102], fill=hx("24242a"))
+    vgrad(img, ROAD_WINDOW, hx("e8c888"), hx("ac783e"))
+    for x in (332, 335, 373, 376):
+        d.line([(x, 28), (x, 98)], fill=hx("875038"), width=2)
+    d.rectangle(ROAD_WINDOW, outline=hx("c0b098"), width=2)
+    d.line([(354, 26), (354, 100)], fill=hx("a49880"), width=2)
+    d.line([(330, 61), (378, 61)], fill=hx("a49880"), width=3)
+    d.line([(332, 29), (343, 40)], fill=hx("f0d8a8"))
+    d.rectangle([324, 101, 384, 104], fill=hx("988472"))
+    fire_escape(d, freed)
     d.line([(404, 0), (404, 198)], fill=hx("16161c"), width=3)
     d.line([(403, 0), (403, 198)], fill=hx("4a4248"))
     text(img, (255, 185), "HARRINGTON STEEL", hx("74685a"), 8)
@@ -261,25 +347,30 @@ def paint_road(fire=False, stacked=False):
     img.paste(ImageChops.multiply(img, Image.new("RGB", img.size, (120, 128, 176))))
     light(img, "polygon", [(170, 112), (180, 112), (232, 230), (118, 230)], hx("e8c070"), 0.5, 12)
     light(img, "ellipse", [162, 98, 188, 124], hx("fff0b0"), 0.8, 4)
-    light(img, "rect", [330, 20, 368, 60], hx("e0a050"), 0.18, 6)
+    light(img, "rect", ROAD_WINDOW, hx("e0a050"), 0.14, 6)
     if fire:
-        d = ImageDraw.Draw(img)
-        for i, (fx, fh) in enumerate(((44, 20), (50, 28), (56, 24), (62, 16))):
-            d.polygon([(fx - 4, 172), (fx, 172 - fh), (fx + 4, 172)], fill=hx("e86a20"))
-            d.polygon([(fx - 2, 172), (fx, 176 - fh), (fx + 2, 172)], fill=hx("ffd060"))
-        light(img, "ellipse", [0, 110, 110, 240], hx("e07030"), 0.6, 18)
+        trash_fire(img)
     vignette(img, 0.55, (8, 8, 24), 40)
     return img
+
+
+def road_palette(base, fire, stacked):
+    blend = Image.blend(Image.blend(base, fire, 0.5), stacked, 0.5)
+    return palette_of(blend, 108) + [hx(c) for c in (
+        "be3d12", "f88a20", "ffe8a0", "ffc868", "d8a460", "e26018", "946044", "edb048",
+        "30313a", "464650", "5a5860", "26262e")]
 
 
 def build_road():
     base = paint_road()
     variants = paint_road(fire=True), paint_road(stacked=True)
-    pal = palette_of(Image.blend(Image.blend(base, variants[0], 0.5), variants[1], 0.5), 120)
+    pal = road_palette(base, *variants)
     px = pixelize(base, pal)
     save(px, "rooms", "harrington_road.png")
     overlay(variants[0], px, pal, (0, 0, W, H), "harrington_road_fire")
     overlay(variants[1], px, pal, (300, 120, 476, 212), "harrington_road_crates")
+    overlay(paint_road(stacked=True, freed=True), pixelize(variants[1], pal), pal,
+            (300, 100, 400, 210), "harrington_road_ladder")
     return px
 
 
