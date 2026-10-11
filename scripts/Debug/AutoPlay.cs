@@ -8,10 +8,14 @@ namespace Repentance;
 
 /// <summary>
 /// Smoke test: plays the whole demo by itself, saving screenshots to screenshots/ and printing
-/// AUTOPLAY OK / AUTOPLAY FAILED. Run with: godot -- --autoplay
+/// AUTOPLAY OK / AUTOPLAY FAILED. Run with: godot -- --autoplay [--clock=fast|normal]
 /// </summary>
 public class AutoPlay
 {
+    /// <summary>Previous automated clock: 8× game time, display timing left alone.</summary>
+    private const double NormalTimeScale = 8;
+    /// <summary>Uncapped clock: dialogue and <see cref="Game.Wait"/> do not take wall-clock story time.</summary>
+    private const double FastTimeScale = 60;
     private Game _game = null!;
     private readonly HashSet<string> _shotKnots = new();
     private readonly List<string> _failures = new();
@@ -33,7 +37,12 @@ public class AutoPlay
         DirAccess.MakeDirRecursiveAbsolute(_dir);
         // keep Godot from importing the screenshots
         using (FileAccess.Open($"{_dir}/.gdignore", FileAccess.ModeFlags.Write)) { }
-        Engine.TimeScale = 8;
+        if (!ApplyClock(out var clockError))
+        {
+            GD.Print("AUTOPLAY FAILED:\n  " + clockError);
+            game.GetTree().Quit(1);
+            return;
+        }
         // never touch the player's own saves
         SaveSystem.Directory = "user://autoplay_saves/ten_puzzles_act3";
         foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
@@ -540,7 +549,8 @@ public class AutoPlay
             var mansionLine = game.Hud.SpeechText;
             Check(game.Hud.SpeechVisible && !confront.IsCompleted, "Act Three confrontation is speaking before pause");
             PressKey(Key.Space);
-            await Observe(8);
+            // Longer than the longest unpaused line (7s) at the current scale, so a failed pause would have finished.
+            await Observe(7.0 / Engine.TimeScale + 0.2);
             Check(game.IsPaused && game.Hud.SpeechVisible && game.Hud.SpeechText == mansionLine
                 && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
                 "Space freezes the Act Three confrontation mid-sentence");
@@ -796,6 +806,12 @@ public class AutoPlay
     public async Task RunPauseTests(Game game)
     {
         _game = game;
+        if (!ApplyClock(out var clockError))
+        {
+            GD.Print("PAUSE TEST FAILED:\n  " + clockError);
+            game.GetTree().Quit(1);
+            return;
+        }
         game.AutosaveEnabled = false;
         try
         {
@@ -961,6 +977,49 @@ public class AutoPlay
             if (game.IsPaused) game.TogglePause();
             Engine.TimeScale = timeScale;
         }
+    }
+
+    /// <summary>
+    /// <c>--clock=fast</c> (default) uncapped 60×, or <c>--clock=normal</c> for the previous 8× clock.
+    /// Pause assertions still force 1×. Fast also disables vsync so an unfocused run is not stuck at the refresh rate.
+    /// </summary>
+    private static bool ApplyClock(out string error)
+    {
+        error = "";
+        string? value = null;
+        foreach (var arg in OS.GetCmdlineUserArgs())
+        {
+            if (arg == "--clock")
+            {
+                error = "--clock requires =normal or =fast";
+                return false;
+            }
+            if (!arg.StartsWith("--clock=")) continue;
+            if (value != null)
+            {
+                error = "--clock given more than once";
+                return false;
+            }
+            value = arg["--clock=".Length..];
+        }
+        if (value is null or "fast")
+        {
+            Engine.TimeScale = FastTimeScale;
+            Engine.MaxPhysicsStepsPerFrame = 256;
+            Engine.MaxFps = 0;
+            OS.LowProcessorUsageMode = false;
+            DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
+            GD.Print("[autoplay] clock fast (60x, vsync off)");
+            return true;
+        }
+        if (value == "normal")
+        {
+            Engine.TimeScale = NormalTimeScale;
+            GD.Print("[autoplay] clock normal (8x)");
+            return true;
+        }
+        error = $"unknown --clock={value} (use normal or fast)";
+        return false;
     }
 
     private async Task Observe(double seconds)
