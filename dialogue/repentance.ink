@@ -619,6 +619,52 @@ CALEB: The prodigal thought so too. Then he turned for home, and his father ran 
 ~ set_flag("caleb_club")
 -> END
 
+=== office_ring ===
+MICAH: My wedding ring. On the desk, where I left it.
+MICAH: Rose kept hers on long after I stopped coming home.
+* [(Take the wedding ring.)]
+    ~ set_flag("ring_taken_act2")
+    ~ set_flag("took_faith_ring")
+    ~ give_item("faith_ring")
+    MICAH: A promise doesn't stop being a promise because I broke it.
+* [(Leave the wedding ring in the office.)]
+    ~ set_flag("ring_left_act2")
+    MICAH: Not yet. I don't know how to carry it.
+- -> END
+
+=== office_act3_destination ===
++ [(Visit Caleb at the church.)]
+    ~ set_flag("visit_caleb_act3")
++ [(Go to the Blue Lantern.)]
+- -> END
+
+=== caleb_repeat ===
+CALEB: The sisters may have answers. That doesn't mean you have to keep chasing them.
+MICAH: I know what you said, Caleb.
+CALEB: Then remember what else I said. You still have a family.
+-> END
+
+=== caleb_act3_return ===
+CALEB: Micah. Your face... Sit down.
+MICAH: If I sit down, I might not get up again.
+CALEB: Then stop running. Whatever happened tonight, don't make it worse.
+CALEB: Rose and Tommy are still there. You can still choose them.
+-> END
+
+=== caleb_cross ===
+CALEB: Take this cross, brother. Not as a bargain with God. As a reminder.
+CALEB: Nobody is beyond the way back. Not even you.
++ [(Accept the cross pendant.)]
+    ~ give_item("cross")
+    ~ set_flag("took_cross")
+    MICAH: I'll keep it with me, Caleb.
+    CALEB: Then remember what it means.
++ [(Refuse the cross pendant.)]
+    ~ set_flag("cross_refused")
+    MICAH: Keep it. I can't take it tonight.
+    CALEB: I'll ask again when you come back.
+- -> END
+
 === caleb_warn ===
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.

@@ -290,6 +290,12 @@ def aim_frame(spec, name):
     return img
 
 
+def build_drinking():
+    for kind in ("cup", "drink"):
+        ps = pose(90, arms={1: (kind, 0, 0, 0), -1: ("side", 0, 0, 0)}, cup=1)
+        save(figure(MICAH, ps, FW, FH), "sprites", f"micah_{kind}.png")
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -298,6 +304,7 @@ def build():
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")
+    build_drinking()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
     build_act3()

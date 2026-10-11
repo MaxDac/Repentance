@@ -224,6 +224,18 @@ def documents(d, im):
     d.text((7, 14), "HS", fill=hx("4a3a1a"))
 
 
+def faith_ring(d, im):
+    d.ellipse([7, 5, 25, 19], outline=hx("d8b050"), width=4)
+    d.arc([7, 5, 25, 19], 190, 285, fill=hx("fff0b0"), width=2)
+
+
+def cross(d, im):
+    d.arc([6, 1, 26, 16], 0, 180, fill=hx("b8c0c8"))
+    d.rectangle([15, 9, 18, 22], fill=hx("c8d0d8"))
+    d.rectangle([11, 13, 22, 16], fill=hx("c8d0d8"))
+    d.line([(16, 10), (16, 21)], fill=hx("f0f0e8"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger),
@@ -231,5 +243,6 @@ def build():
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),
                      ("invitation", invitation), ("mask", mask), ("cloak", cloak),
-                     ("kitchen_key", kitchen_key), ("documents", documents)):
+                     ("kitchen_key", kitchen_key), ("documents", documents),
+                     ("faith_ring", faith_ring), ("cross", cross)):
         save(_icon(fn), "items", f"{name}.png")

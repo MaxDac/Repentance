@@ -21,6 +21,7 @@ public class AutoPlay
     private readonly Dictionary<string, string[]> _offered = new();
     private bool _theEndShot;
     private string _act3Ink = "";
+    private int _crossOffers;
 
     public async Task Run(Game game)
     {
@@ -43,6 +44,7 @@ public class AutoPlay
                 game.Hud.HideChoices();
             }
             _offered[knot] = options.ToArray();
+            if (knot == "caleb_cross") _crossOffers++;
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -213,7 +215,14 @@ public class AutoPlay
             await Shot("attic_act2");
             var read = game.ItemVerb(Verb.Hand, "journal");
 
-            // ---- Act 2, 1927: the cathedral, then the map of Chicago
+            // ---- Act 2, 1927: whiskey and the ring, then the cathedral
+            await Until(() => game.Room?.Name == "Office" && gs.HasFlag("office_cup_held"));
+            await game.Wait(0.65);
+            await Shot("office_whiskey_drinking");
+            await Until(() => gs.HasFlag("act2_office_done"));
+            Check(gs.HasFlag("act2_whiskey_drunk") && gs.HasFlag("ring_taken_act2") && gs.HasItem("faith_ring"),
+                "Act 2 opens with whiskey and the recorded take-ring choice");
+            Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
             await Until(() => game.Room?.Name == "ChurchExterior");
             Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
             await game.Wait(1.5);
@@ -224,9 +233,11 @@ public class AutoPlay
             await Shot("church_act2");
             await Until(() => game.Room?.Name == "ChicagoMap");
             Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
+            Check(_crossOffers == 0, "no pendant offer on the initial confession");
             Check(!game.Player.Visible, "the player isn't drawn on the map");
             await read;
             await WaitIdle(game);
+            await RingAndCrossTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
             await game.Perform(Verb.Walk, "church");
@@ -312,7 +323,8 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
             await game.Perform(Verb.Walk, "church");
-            Check(game.Room?.Name == "ChicagoMap", "nothing new at the church yet");
+            Check(game.Room?.Name == "ChicagoMap" && !gs.HasFlag("church_before_office"), "repeat church visit doesn't anticipate the sister's threat");
+            Check(!gs.HasItem("cross"), "taking the ring initially postpones the cross until Act 3");
             Check(game.Room?.FindHotspot("convent")?.Visible == true, "the convent is on the map");
             await game.Perform(Verb.Walk, "convent");
             Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
@@ -323,7 +335,8 @@ public class AutoPlay
             await threat;
             Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
             Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("club")?.Visible == false
-                && game.Room?.FindHotspot("library")?.Visible == false, "only the church and Harrington are left on the map");
+                && game.Room?.FindHotspot("library")?.Visible == false
+                && game.Room?.FindHotspot("office")?.Visible == true, "office remains available for ring recovery");
             await Shot("map_harrington");
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
@@ -419,9 +432,32 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "Office");
             await game.Wait(1.5);
             await Shot("office_act3_desk");
-            await Until(() => game.Room?.Name == "Alley");
             await stage;
             await WaitIdle(game);
+            Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
+            _prefer = new[] { "Visit Caleb", "Refuse the cross" };
+            int offers = _crossOffers;
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "Office" && gs.HasFlag("church_act3_return") && !gs.HasItem("cross") && _crossOffers == offers + 1,
+                "Act 3 Caleb visit offers cross, refusal returns to office");
+            await game.Perform(Verb.Walk, "door");
+            Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Caleb offers again after refusal");
+            _prefer = new[] { "Visit Caleb", "Accept the cross" };
+            await game.Perform(Verb.Walk, "door");
+            Check(gs.HasItem("cross") && gs.HasFlag("took_cross") && gs.Inventory.Count(i => i == "cross") == 1,
+                "accepted pendant is recorded and given once");
+            await game.Perform(Verb.Walk, "door");
+            Check(_crossOffers == offers + 3 && game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"),
+                "accepted cross isn't offered again, desk scene isn't replayed");
+            var savedCommitments = game.CaptureSave();
+            Check(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(savedCommitments))?.Inventory.Contains("cross") == true,
+                "accepted pendant survives save serialization");
+            gs.TakeItem("cross");
+            await game.LoadGame(savedCommitments);
+            Check(gs.HasItem("cross") && gs.HasItem("faith_ring") && gs.HasFlag("ring_taken_act2") && game.Room is Rooms.Office,
+                "load restores ring, pendant and initial decision without replaying the desk");
+            _prefer = new[] { "Go to the Blue Lantern" };
+            await game.Perform(Verb.Walk, "door");
             Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
             var act3Flags = gs.Flags.ToArray();
             var act3Items = gs.Inventory.ToArray();
@@ -497,7 +533,7 @@ public class AutoPlay
             await Shot("mansion_bedroom_gun");
             await confront;
             await WaitIdle(game);
-            Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag), "sparing the old man follows Caleb and Rose");
+            Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
             Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
             await Shot("mansion_kitchen_escape");
             await game.Perform(Verb.Hand, "range");
@@ -519,7 +555,7 @@ public class AutoPlay
                 .Concat(new[] { "alley3_dark", "alley3_sal_out", "alley3_sal_down" }).ToArray();
 
             // 5: no visits to Caleb, so no walking away; shoot, Eleanor stays, nothing to bargain with
-            var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club")).Append("rose_wait");
+            var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club" or "church_act3_return")).Append("rose_wait");
             Seed(noChurch, act3Items, "Shoot him", "You can't stay", "Nobody's coming");
             await game.ChangeRoom("alley", "act3");
             await game.Perform(Verb.Talk, "back_door");
@@ -570,8 +606,20 @@ public class AutoPlay
             await Shot("ending_alone");
             await TheEnd("ending_3");
 
+            // Verify the actual Ink choices for each missing commitment, not only the helper predicates.
+            foreach (string missing in new[] { "faith_ring", "cross" })
+            {
+                Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "He had it coming", "I'll go to the police");
+                await game.ChangeRoom("mansion_bedroom", "start");
+                Check(!Offered("oldman_taunt", "Lower the gun"), $"without {missing}, the final return is unavailable");
+            }
+            Seed(alleyReady, act3Items.Where(i => i != "faith_ring"), "Shoot him");
+            await game.ChangeRoom("alley", "act3");
+            await game.Perform(Verb.Talk, "back_door");
+            Check(!Offered("bartender_gun", "Lower the gun"), "church return without ring doesn't allow walking away from Tony");
+
             // 1: walking away from Tony
-            Seed(alleyReady, act3Items, "Lower the gun");
+            Seed(alleyReady, act3Items.Where(i => i != "cross"), "Lower the gun");
             await game.ChangeRoom("alley", "act3");
             _ = game.Perform(Verb.Talk, "back_door");
             await Until(() => game.Room?.Name == "RoseHouse");
@@ -589,7 +637,7 @@ public class AutoPlay
             await TheEnd("ending_1 (old man)");
 
             // 1: giving up on the church steps
-            Seed(act3Flags.Where(f => f != "keep_going"), act3Items, "Give up");
+            Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
             _ = game.ChangeRoom("church_exterior", "beaten");
             await Until(() => game.Room?.Name == "RoseHouse");
             Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
@@ -930,6 +978,66 @@ public class AutoPlay
     }
 
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
+    private async Task RingAndCrossTest(Game game)
+    {
+        var gs = GameState.Instance;
+        var originalFlags = gs.Flags.ToArray();
+        var originalItems = gs.Inventory.ToArray();
+        var originalInk = DialogueManager.Instance.SaveInk();
+        var originalPrefer = _prefer;
+        int offers = _crossOffers;
+        var openingFlags = originalFlags.Where(f => f is not ("ring_taken_act2" or "took_faith_ring" or
+            "act2_office_done" or "act2_whiskey_drunk" or "caleb_met" or "act2_church_thought"))
+            .Append("act2_church");
+        gs.Restore(openingFlags, originalItems.Where(i => i != "faith_ring"), 2);
+        _prefer = new[] { "Leave the wedding ring" };
+        await game.ChangeRoom("office", "act2");
+        Check(gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") && !gs.HasItem("faith_ring"),
+            "leaving the ring records the original choice without granting it");
+        Check(_crossOffers == offers, "initial confession never offers the cross even when ring was left");
+        await game.Perform(Verb.Walk, "office");
+        Check(game.Room?.FindHotspot("faith_ring")?.Visible == true, "left ring remains visible at the office");
+        await Shot("office_ring_left");
+        await game.Perform(Verb.Walk, "door");
+        gs.SetFlag("club_out");
+        gs.SetFlag("caleb_club");
+        _prefer = new[] { "Refuse the cross" };
+        await game.Perform(Verb.Walk, "church");
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Act 2 refusal repeats the offer on the next visit");
+        await game.Perform(Verb.Walk, "office");
+        await game.Perform(Verb.Hand, "faith_ring");
+        Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") &&
+            game.Room?.FindHotspot("faith_ring")?.Visible == false, "recovering the ring preserves the original leave decision");
+        await game.Perform(Verb.Walk, "door");
+        _prefer = new[] { "Accept the cross" };
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 3 && gs.HasItem("cross") && gs.HasFlag("took_cross"),
+            "recovered ring doesn't postpone the Act 2 cross offer");
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 3 && gs.Inventory.Count(i => i == "cross") == 1, "Act 2 acceptance stops duplicate offers");
+        Rooms.Attic.StashMicahItems();
+        Check(!gs.HasItem("faith_ring") && !gs.HasItem("cross") && gs.HasFlag("ring_left_act2"),
+            "Daniel's interlude puts Micah's commitments aside without losing the original decision");
+        Rooms.Attic.RestoreMicahItems();
+        Check(gs.HasItem("faith_ring") && gs.HasItem("cross") && gs.HasFlag("took_cross"),
+            "both commitments return with Micah's inventory");
+        gs.TakeItem("faith_ring");
+        gs.SetFlag("took_faith_ring", false);
+        gs.SetFlag("micah_at_desk");
+        gs.SetFlag("keep_going");
+        gs.SetStoryAct(3);
+        await game.ChangeRoom("office", "act3");
+        Check(game.Room?.Name == "Office" && !game.Busy, "Act 3 office waits for player input");
+        await game.Perform(Verb.Hand, "faith_ring");
+        Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2"), "left ring can be recovered at the Act 3 office");
+
+        gs.Restore(originalFlags, originalItems, 2);
+        DialogueManager.Instance.LoadInk(originalInk);
+        _prefer = originalPrefer;
+        await game.ChangeRoom("chicago_map", "start");
+    }
+
     private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
     {
         _game.Hud.ShowCaption(null);

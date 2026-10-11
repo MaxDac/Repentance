@@ -21,14 +21,20 @@ public static class Endings
 
     /// <summary>Micah went back to Caleb at least once while hunting for Eleanor.</summary>
     public static bool ChurchReturned(Func<string, bool> has) =>
-        has("church_before_office") || has("church_before_club");
+        has("church_before_office") || has("church_before_club") || has("church_act3_return");
 
     /// <summary>Micah kept asking Rose for forgiveness on her doorstep.</summary>
     public static bool InsistedForgiveness(Func<string, bool> has) => has("rose_wait");
 
-    public static bool CanWalkAwayFromBartender(Func<string, bool> has) => ChurchReturned(has);
+    public static bool CanWalkAwayFromBartender(Func<string, bool> has, Func<string, bool> hasItem) =>
+        ChurchReturned(has) && hasItem("faith_ring");
 
-    public static bool CanSpareOldMan(Func<string, bool> has) => ChurchReturned(has) && InsistedForgiveness(has);
+    public static bool CanSpareOldMan(Func<string, bool> has, Func<string, bool> hasItem) =>
+        CanWalkAwayFromBartender(has, hasItem) && InsistedForgiveness(has) && hasItem("cross");
+
+    public static bool CanOfferCross(int act, Func<string, bool> has) =>
+        has("caleb_met") && !has("took_cross") &&
+        (act >= 3 || (act == 2 && has("ring_left_act2")));
 
     /// <summary>Documents or the explosion give Micah something to bargain with, which keeps him out of jail.</summary>
     public static bool StaysFree(Func<string, bool> has) => has(MansionExploded) || has(TookDocuments);

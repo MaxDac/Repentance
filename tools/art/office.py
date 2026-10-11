@@ -90,8 +90,6 @@ def cabinet(img):
     d.rectangle([117, 36, 121, 38], fill=hx("1a1a1a"))
     d.rectangle([116, 49, 122, 54], fill=hx("d8c890"))
     d.line([(116, 45), (116, 58)], fill=hx("c08040"))
-    d.rectangle([127, 52, 133, 59], fill=hx("9aa8a8"))
-    d.rectangle([128, 55, 132, 58], fill=hx("b06a20"))
     # diploma
     d.rectangle([110, 20, 144, 42], fill=hx("6a4a24"))
     d.rectangle([113, 23, 141, 39], fill=hx("d8cca8"))
@@ -287,4 +285,16 @@ def build():
     save(pixelize(paint(()), pal).crop(DRAWER_BOX), "rooms", "office_drawer_open.png")
     for item, box in ITEM_BOXES.items():
         save(pixelize(paint((item,)), pal).crop(box), "rooms", f"office_drawer_{item}.png")
+    ring = Image.new("RGBA", (14, 10))
+    d = ImageDraw.Draw(ring)
+    d.ellipse([2, 2, 11, 7], outline=hx("d8b050"), width=2)
+    d.line([(4, 2), (8, 2)], fill=hx("f8e0a0"))
+    save(ring, "rooms", "office_ring.png")
+    cup = Image.new("RGBA", (10, 12))
+    d = ImageDraw.Draw(cup)
+    d.rectangle([1, 2, 7, 10], fill=hx("b8b4a4"))
+    d.rectangle([2, 3, 6, 5], fill=hx("a86024"))
+    d.rectangle([7, 4, 9, 8], outline=hx("b8b4a4"))
+    d.line([(2, 9), (6, 9)], fill=hx("e0d8bc"))
+    save(cup, "rooms", "office_cup.png")
     return px

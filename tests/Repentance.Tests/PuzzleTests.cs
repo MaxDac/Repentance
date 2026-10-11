@@ -204,6 +204,7 @@ public class PuzzleTests
             Inventory = new() { "documents" },
         };
         if (originalStamped) save.Flags.Add(PuzzleMigration.SchemaFlag);
+        var originalVersion = save.Version;
         PuzzleMigration.Normalize(save);
         Assert.Contains(PuzzleMigration.Act3SchemaFlag, save.Flags);
         Assert.Contains("bell_wedged", save.Flags);
@@ -211,7 +212,7 @@ public class PuzzleTests
         Assert.Contains("audit_folder_taken", save.Flags);
         Assert.DoesNotContain("study_drawer_right_open", save.Flags);
         Assert.DoesNotContain("study_closet_open", save.Flags);
-        Assert.Equal(3, SaveData.CurrentVersion);
+        Assert.Equal(originalVersion, save.Version);
         var serialized = SaveSerializer.Serialize(save);
         PuzzleMigration.Normalize(save);
         Assert.Equal(serialized, SaveSerializer.Serialize(save));

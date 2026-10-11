@@ -263,14 +263,14 @@ public partial class Attic : Room
             State.SetFlag("sal_passed");
             State.SetFlag("photo_shown");
             State.SetFlag("club_lead");
-            // Act 2 opens at the cathedral, then Micah hunts for Eleanor across the city map
+            // The office opening leads to the cathedral, then the city map.
             State.SetFlag("act2_church");
             State.SetFlag("on_map");
             await Game.Hud.Fade(1, 1.5);
             Game.Hud.ShowCaption("Chicago, 1927.");
             await Wait(2.8);
             Game.Hud.ShowCaption(null);
-            await Game.ChangeRoom("church_exterior", "start");
+            await Game.ChangeRoom("office", "act2");
             return true;
         }
         await Talk("journal");
