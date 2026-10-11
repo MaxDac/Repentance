@@ -374,6 +374,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw - 0.01), 0.40, -0.035])
             wr = body([s * (hipw - 0.01), 0.50, -0.045])
             hand = body([s * (hipw - 0.012), 0.54, -0.04])
+        elif kind in ("cup", "drink"):
+            el = body([s * (sw + 0.02), 0.40, 0.15])
+            hand = body([s * 0.02, 0.2025 if kind == "drink" else 0.39, 0.10])
+            wr = hand + np.array([s * 0.015, 0.035, 0.018])
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
@@ -399,6 +403,16 @@ def figure(spec, ps, fw=56, fh=80):
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
+
+    if ps.get("cup"):
+        def cup(s=ps["cup"]):
+            hand = arm_pts[s][3]
+            tipped = ps["arms"][s][0] == "drink"
+            rim = hand + np.array([0, -0.07, -0.028 if tipped else 0])
+            bottom = hand + np.array([0, 0.015, 0.015])
+            c.put(c.capsule(P(bottom), P(rim), H * 0.035, H * 0.04), "b8b4a4", "cup", dither=False)
+            c.put(c.capsule(P(rim), P(rim), H * 0.025, H * 0.025), "a86024", "whiskey", dither=False)
+        add(3.0, cup)
 
     if ps.get("gun"):  # a revolver in the hand of arm ps["gun"], barrel along the forearm
         def gun(s=ps["gun"]):

@@ -11,7 +11,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Daniel (the dad) is in the attic, calling his son Leo, but Leo doesn't come over ("In a minute!").
 - Daniel can lift the dust sheet and knock over the boxes, spilling the old papers.
 - In the suitcase there is a key, but it can't open the large steamer trunk.
-- Only the crowbar hidden in the papers from the boxes can open the trunk.
+- **Puzzle 1 - Tool tin:** searching the spilled papers uncovers a locked tool tin with a small-key outline
+  stamped beside its lock. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
 - In the trunk Daniel finds Micah Jones's journal and starts reading it (hand on the journal in the satchel).
   The caption "Chicago, 1927." leads to Micah's office.
 
@@ -34,13 +35,23 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah has to bribe the bellboy with the dollar; the bellboy lets him take the staff elevator up to
   Eleanor's room (and mentions the Blue Lantern).
 - Before the bribe, the revolving door leads out to the street.
+- **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
+  The close-up shows three junctions: at A, upper goes to laundry and lower to B; at B, upper goes to C and
+  lower to the kitchen; at C, upper goes to room 507 and lower to the roof. Set **lower, upper, upper** and
+  dispatch the lift. A wrong route stays in the lobby and highlights where it went wrong.
+  Once solved, the lift works normally on return visits.
+- After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
+  room 507. Older saves that already passed the hotel without these clues get a temporary Hotel map
+  marker to retrieve them; returning to the lobby then leads back to the Act 2 map.
 
 #### Eleanor's room at the hotel (room 507)
 
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination (key number).
-- Micah opens the closet to reveal the safe, and opens the safe using the combination on it.
+- **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
+  its graphical controls, not the safe itself. Enter **R 12 / L 31 / R 7** in the three direction/number rows
+  and submit. The paper remains readable; wrong settings can be reset or retried.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for some decorations; Micah remarks that the perfume is strange, but quite attractive;
   - a matchbook with the name of the club, the Blue Lantern (next location).
@@ -72,10 +83,13 @@ described here (other verbs, flavour lines) is left to the implementation.
   search now, and never have anything to do with that Jezebel". Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
-- Behind the little mirror there is a strange symbol, a Celtic triquetra (trinity knot), shown as a full-screen
-  image when Micah takes the mirror (and again with the hand on the mirror in the inventory).
-- Micah only takes the little mirror; the comb stays in the drawer.
-- If the player tries to leave the cell before taking the mirror, Micah says "There is still something to be
+- **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
+  lamp explains that gentle warmth softens wax; searching the bed supplies a borrowed clean cloth.
+  Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax
+  and returns the cloth to the bed, revealing a Celtic triquetra (trinity knot).
+  The symbol is shown full screen, and can then be inspected again from the inventory.
+- Micah keeps the revealed mirror; the comb stays in the drawer.
+- If the player tries to leave the cell before revealing the symbol, Micah says "There is still something to be
   found in this room."
 
 #### Road outside the convent
@@ -101,9 +115,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present Day
 
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
-  The caption "Chicago, 1927." leads to the church.
+  The caption "Chicago, 1927." leads to Micah's office.
 
 ### Chicago, 1927
+
+#### Office, before the cathedral
+
+- A bottle of whiskey and a cup are in the office. Micah raises the cup, drinks, and puts it down.
+- Micah chooses whether to take his wedding ring or leave it in the office; the original decision is saved.
+- A left-behind ring remains visible and can be collected on a later office visit without changing the original decision.
+- After the choice, Micah leaves for the cathedral steps.
 
 #### Outside of the church (cathedral steps)
 
@@ -134,8 +155,13 @@ described here (other verbs, flavour lines) is left to the implementation.
   returns to both Micah and the librarian.
 - The librarian asks him where he got that mirror. Micah won't tell him, so the librarian answers that he won't
   tell him anything either.
+- **Puzzle 5 - Restricted catalogue:** after the refusal, inspect the desk catalogue. Compare the mirror's
+  connected triquetra with the motif plates: select Celtic traditions, whose index lists **A. R. Bell**.
+  The author listings identify **Rites of the Old Isles, shelf C-17**. Select that entry.
+  The volume is behind locked glass; Micah cannot simply take it from the shelves or ladder.
 - Micah has to threaten the librarian with the revolver (use the revolver on him; before asking about the symbol
-  Micah refuses to do it). The librarian tells him there's a book describing ancient Celtic rituals and gives it
+  Micah refuses to do it, and before the lookup he needs a precise title). He requests the identified book.
+  The librarian confirms that it describes ancient Celtic rituals and gives it
   to him if he goes away. The scene returns to the map.
 - After this the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -144,9 +170,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office
 
 - Leaving the office returns to the map.
-- In his office, if Micah opens the book (hand on it in the inventory), he finds some naturalistic rituals he
-  doesn't care about, and a little sheet of paper with an address: the Starlight club.
-  Opening the book anywhere else, Micah says he'll read it at the office.
+- **Puzzle 6 - Concealed calling card:** read the book at the office for instructions about gentle heat,
+  reflected writing and ornament order: **lily, leaf, feather**. Use the hotel calling card on the radiator,
+  then combine it with the revealed convent mirror in either order.
+  The reflection reveals three labelled fragments: feather = "Hubbard", lily = "The Club", leaf = "18 W.".
+  Arrange them using the book's ornament order in the close-up to obtain the existing address slip.
+  Heating, reflection and book-reading can happen in different orders; the last prerequisite offers the
+  deciphering panel. The complete address and map destination appear only when the order is correct.
+  The book, card and mirror remain available. Reading the book outside the office still receives a refusal.
 - A new location is now available on the map: the club (the Starlight).
 
 #### Club (remove Starlight, the location will be called only Club)
@@ -190,6 +221,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Church
 
+- On repeat visits, Caleb offers Micah a cross pendant if he originally left the wedding ring in the office.
+  If he originally took the ring, Caleb does not offer the cross until Act 3. Later ring pickup does not change this timing.
+- Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
+  return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
@@ -214,7 +249,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Map of Chicago
 
-- Only the Cathedral and the office of Harringhton father will be available.
+- The Cathedral and Harrington father's office are available. Micah's office also remains accessible as an optional
+  return and ring-pickup location; no completed lead reopens.
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
   tell him not to go forward again.
   You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
@@ -229,11 +265,19 @@ described here (other verbs, flavour lines) is left to the implementation.
   - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
-  - Step 3: climb the fire escape (hand on it, or on the window) and go in through the window: the office.
+  - **Puzzle 7 - Ladder catch:** after the distraction, take the tapered packing wedge visible among the
+    crates. Stack the crates to reach the jammed ladder catch, whose illustration shows the obstruction.
+    Use the wedge on the catch, then climb the fire escape (hand on it, or on the window).
+    Both stacked crates and a freed catch are necessary; the wedge stays installed and the guard never
+    returns on a gameplay timer.
 - Once in the office, the player will have to search for clues, and it will have to open at least two drawers and a
   closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
 - In the drawer, he will find an invitation card to the Club.
-- In the closet, he will have to find a double door inside the closet, hiding a white mask and a cloak.
+- **Puzzle 8 - Disguise compartment:** the invitation shows an ordered procession of crests:
+  raven, lion, stag. The portrait's heraldic key associates raven with star, lion with sun and stag with moon.
+  Open the closet and inspect its false-back panel. Set the three graphical wheels to
+  **STAR / SUN / MOON** and submit. Neither a hand nor lockpicks bypasses the lock.
+  The double doors reveal the original white mask and cloak.
 
 #### Map of Chicago
 
@@ -284,19 +328,25 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office
 
 - The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
-- He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the 
+- He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the
   Blue Lantern, the mob.
-- Micah stands up, and walks through the door.
+- Micah stands up and the player regains control, with a final opportunity to collect a left-behind wedding ring.
+- Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
+- Act 3 church visits include Caleb's counsel and the cross offer (regardless of the original ring decision), unless
+  already accepted. They count as a church return and lead back to the office without replaying the desk scene.
+  Micah can return again after refusing. No new recovery route is available after choosing the Blue Lantern.
 
 #### Behind Blue Lantern, previous location from Act 1
 
-- <Placeholder> Simulate three puzzles to solve in this location to get the bartender and the gorilla out, and to knock
-  out the gorilla. The idea is that Micah would be alone with the bartender, and threaten him with the revolver.
-- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to 
+- The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
+  Sal out, then use the revolver on him to knock him down. Only then knock on the back door to face Tony.
+  Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
+- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
   Eleanor.
 - The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between fire the revolver on the leg, or to walk away, because it's not worth it.
-  The option to walk away would be available only if the player returned to the church at least one.
+  The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
+  office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
 - If the player walks out, he's going to his wife's house (caption *End of Act Three*).
 - If he's firing at the leg, you have to create a new model for the bartender supine, with a drop of blood from the leg.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
@@ -305,28 +355,42 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Outside of the Harrington mansion, behind the kitchen
 
-- <Placeholder> The trick that the mob told Micah to do would actually set of an alarm, you have to simulate what the
-  bartender told him to do, the fact that Micah notice it before actually performing the action, and a couple of 
-  puzzles to actually access to the kitchen.
+- Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
+  the taut wire; move the coal bin under the bell to reach its hammer.
+- **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
+  the door wire. Cutting the wire releases it. Plan **hold hammer, tie hammer, release hand**, using
+  Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
+  option. Incorrect plans are rejected before touching the mechanism; no alarm sounds and retries
+  cost nothing. Close/reset preserves the unrestrained state. Use the lintel key only after securing it.
 - In the kitchen, for now, don't do anything, just generate a mansion kitchen in the darkness, the player can pass through.
-- Next area to generate is Harrington father studio, you have to generate a simple studio with a closet, a desk with a couple
-  of drawer; in one of those drawers, the player can take some incriminating documents, but this won't be possible afterwards,
-  and the player can pass the studio without noticing it, and nothing would stop them.
+- Harrington's study has a closet and a desk with two drawers. The bedroom door is always accessible:
+  Micah can pass straight through without collecting evidence.
+- **Puzzle 10 - Auditor's index (optional):** the right drawer contains a numbered account register,
+  not the signed evidence. The left drawer supplies a transparent index with the same Harrington Steel
+  stamp. Combine them in either order, or use the index on the register in the open drawer, at the study
+  desk. Match all three labelled BANK/JUDGE/CAPTAIN marks by rotating and sliding the index. Its note
+  puts BANK above JUDGE and CAPTAIN left of BANK; the asymmetric grid has one solution: one clockwise
+  turn, offset **(6, 3)**. The aligned window identifies the drawer pocket containing signed payoff
+  sheets, which Micah takes as the existing documents item. Cancellation keeps both clues.
+  Taking the register alone does not count as evidence. This opportunity ends on entering the bedroom,
+  as before: neither inventory combination during escape nor returning through the kitchen bypasses it.
+  Skipping the puzzle must retain the prison endings when the mansion does not explode.
 - Next area is Harrington father's bedroom: huge bedroom with king size bed, Elearon under the sheet naked, Harrington
   father in his dressing gown. He's talking with Eleanor, telling her that it's not too bad to have returned where she
   belongs.
-- After the dialogue, Micah, who previusly hid behind something, shows up with his revolver pointed at the old man; the 
+- After the dialogue, Micah, who previusly hid behind something, shows up with his revolver pointed at the old man; the
   old man turns to Micah, Eleanor get out of bed covering herself with the sheets (you have to generate this character also).
 - The old man tells Micah that he doesn't have the guts to do that, and that Eleanor's place is here, she's just a whore.
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
     - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
-    - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas 
+    - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas
       and make the mansion explode.
     - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
-    **and** returned to the church at least once. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
+    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
     and the scene skips to *End of Act 3*.
 
 ### End of Act 3
@@ -338,12 +402,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Previously used location
 - This ending is accessible if Micah refuses to go forward at any point, either outside of the Church, or if he refuses
   to shoot the bartender, or the old man.
+- The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
+  progressively stricter requirements above; the other endings are unchanged.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
 
 #### Option 2 - Outskirts, with Eleanor
 
-- Previously generated location 
+- Previously generated location
 - This ending is accessible only if Micah manages to convince Eleanor in the Harringtom mansion, and manages to make it explode
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
@@ -360,24 +426,38 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 4 - Prison - With Eleanor
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the 
+- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the
   documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
-- Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of 
+- Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
   jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
 - In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
 
 #### Option 5 - Prison - With brother
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't 
+- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't
   find the documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
-- Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly 
+- Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly
   says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
 - In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
 
 ### Present
 
-The story ends with the father reading the last entry, commenting briefly, and then throwing back the journal in the 
+The story ends with the father reading the last entry, commenting briefly, and then throwing back the journal in the
 trunk.
+
+### Puzzle pacing and saves
+
+The ten added/expanded puzzles are distributed **4 in Act 1, 4 in Act 2, and 2 in Act 3**.
+The final act also retains its existing three-step alley encounter. The alarm gives the pursuit route
+an interactive infiltration beat; the optional index provides investigation before the confrontation.
+Giving up or reconciling never requires completing a pursuit-route puzzle. The obsolete temporary
+motel map and burial survey are not part of the completed Act 3.
+
+All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
+Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
+The satchel has pages so every collected item remains accessible. Main's version-3 save format remains
+unchanged; completed discoveries in compatible older saves remain completed, using independent markers
+for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.

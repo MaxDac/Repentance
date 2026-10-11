@@ -15,6 +15,7 @@
     <!-- Godot-free logic is linked directly so tests don't need the Godot SDK. -->
     <Compile Include="..\..\scripts\Core\Items.cs" Link="Linked\Items.cs" />
     <Compile Include="..\..\scripts\Core\SaveData.cs" Link="Linked\SaveData.cs" />
+    <Compile Include="..\..\scripts\Core\PuzzleRules.cs" Link="Linked\PuzzleRules.cs" />
     <Compile Include="..\..\scripts\Core\Endings.cs" Link="Linked\Endings.cs" />
   </ItemGroup>
 </Project>

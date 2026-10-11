@@ -35,6 +35,11 @@ public partial class Library : Room
                 await Say("Pulling a gun on a librarian before I've even asked nicely? Even I have manners.");
                 return true;
             case ("librarian", Verb.UseItem) when item == "revolver":
+                if (!State.HasFlag("catalogue_identified"))
+                {
+                    await Say("I need the precise title before I make him retrieve anything. That desk catalogue might help.");
+                    return true;
+                }
                 await Talk("librarian_threat");
                 State.SetFlag("library_banned");
                 await Say("I'd just held up a library. Mother would have been so proud.");
@@ -60,6 +65,11 @@ public partial class Library : Room
                 await Say("Tucked in the back cover: a receipt from the Lakeview Motor Court. Room 6. Paid in cash by T. Harrington.");
                 return true;
             case ("shelves_right" or "shelves_left", Verb.Hand):
+                if (State.HasFlag("on_map"))
+                {
+                    await Say("Restricted books behind locked glass. The librarian has the key; I need a title from his catalogue.");
+                    return true;
+                }
                 await Say(State.HasFlag("found_ledger")
                     ? "I've got what I came for. The rest can stay alphabetized."
                     : "A hundred thousand books. I'd need to know which one before I started pulling.");
@@ -68,7 +78,25 @@ public partial class Library : Room
                 await Say("I spun it. It stopped on the Pacific. Story of my life: lots of water, no direction.");
                 return true;
             case ("desk", Verb.Hand):
+            case ("desk", Verb.Look) when State.HasFlag("on_map"):
+                if (State.HasFlag("on_map"))
+                {
+                    if (!State.HasFlag("librarian_refused"))
+                    {
+                        await Say("I'd better ask the librarian about the mirror before digging through his catalogue.");
+                        return true;
+                    }
+                    if (await Game.Hud.Puzzle.Open(PuzzleKind.Catalogue))
+                    {
+                        State.SetFlag("catalogue_identified");
+                        await Say("Connected triquetra. Celtic traditions. A. R. Bell: Rites of the Old Isles, C-17. Now I know what to ask for.");
+                    }
+                    return true;
+                }
                 await Say("Rose's desk. A drawer with my picture in it, face down. I left it the way she wanted it.");
+                return true;
+            case ("ladder", Verb.Hand) when State.HasFlag("on_map"):
+                await Say("The ladder won't unlock the restricted glass. The librarian has the key.");
                 return true;
         }
         return false;

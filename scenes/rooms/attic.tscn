@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Attic.cs" id="1_Attic"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic.png" id="2_attic"]
@@ -8,6 +8,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic_trunk_open.png" id="6_attic_trunk_open"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="8_Hotspot"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/tool_tin.png" id="9_ToolTin"]
+
+[sub_resource type="RectangleShape2D" id="TinShape"]
+size = Vector2(38, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(88, 54)
@@ -103,6 +107,29 @@ texture = ExtResource("5_attic_chair")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "sheet_lifted"
+
+[node name="ToolTinSprite" type="Sprite2D" parent="."]
+position = Vector2(306, 194)
+z_index = -4
+texture = ExtResource("9_ToolTin")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "tool_tin_found"
+
+[node name="ToolTin" type="Area2D" parent="Hotspots"]
+script = ExtResource("8_Hotspot")
+Id = "tool_tin"
+DisplayName = "locked tool tin"
+WalkTo = Vector2(326, 228)
+Face = 2
+ShowIfFlags = "tool_tin_found"
+ClickPriority = 3
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ToolTin"]
+position = Vector2(325, 206)
+shape = SubResource("TinShape")
 
 [node name="TrunkOpen" type="Sprite2D" parent="."]
 position = Vector2(388, 150)

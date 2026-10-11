@@ -5,7 +5,7 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Act 2: Theodore Harrington's office, reached through the window from the fire escape. The locked right drawer
-/// (lockpick) holds the invitation to the Club; a false back in the closet hides the white mask and the cloak.
+/// (lockpick) holds the invitation to the Club; the invitation and portrait decode the closet's disguise lock.
 /// Leaving through the window with all three takes Micah back to the map, with the Club open again.
 /// </summary>
 public partial class HarringtonOffice : Room
@@ -54,8 +54,8 @@ public partial class HarringtonOffice : Room
                 await Say("And bring the night watchman up here? He'll be done with the fire department any minute.");
                 return true;
 
-            case ("closet", Verb.Hand) when !State.HasFlag("closet_open"):
-                State.SetFlag("closet_open");
+            case ("closet", Verb.Hand) when !State.HasFlag("harrington_closet_open"):
+                State.SetFlag("harrington_closet_open");
                 await Say("Overcoats. Three of them, all the same cut. Cedar blocks for the moths.");
                 await Say("And the closet is deeper outside than it is inside. A good foot deeper.");
                 return true;
@@ -64,8 +64,14 @@ public partial class HarringtonOffice : Room
                 return true;
             case ("panel", Verb.Hand):
             case ("panel", Verb.UseItem) when item == "lockpick":
+                if (State.HasFlag("secret_open"))
+                {
+                    await Say("The little doors are already open.");
+                    return true;
+                }
+                if (!await Game.Hud.Puzzle.Open(PuzzleKind.Crests)) return true;
                 State.SetFlag("secret_open");
-                await Say("A fingernail in the gap, a push... and the back of the closet swings open like a pair of little doors.");
+                await Say("Star, sun, moon. The back of the closet swings open like a pair of little doors.");
                 await Say("A white mask, and a black cloak. Folded like vestments.");
                 return true;
             case ("panel", Verb.Kick):
@@ -82,8 +88,9 @@ public partial class HarringtonOffice : Room
             case ("filing", Verb.Hand):
                 await Say("Locked, and not worth picking. Whatever's in there, he'd never put the interesting part on paper.");
                 return true;
-            case ("portrait", Verb.Hand):
-                await Say("No safe behind it. Just wallpaper. Harrington's the kind who trusts his own walls.");
+            case ("portrait", Verb.Hand or Verb.Look):
+                State.SetFlag("portrait_key_seen");
+                await Say("A heraldic key painted beneath the portrait: raven and star, lion and sun, stag and moon. Old money labels its secrets.");
                 return true;
             case ("portrait", Verb.Talk):
                 await Say("Evening, Mr. Harrington. I'm just going through your drawers. Don't get up.");

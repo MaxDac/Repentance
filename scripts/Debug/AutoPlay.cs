@@ -21,6 +21,7 @@ public class AutoPlay
     private readonly Dictionary<string, string[]> _offered = new();
     private bool _theEndShot;
     private string _act3Ink = "";
+    private int _crossOffers;
 
     public async Task Run(Game game)
     {
@@ -29,9 +30,9 @@ public class AutoPlay
         DirAccess.MakeDirRecursiveAbsolute(_dir);
         // keep Godot from importing the screenshots
         using (FileAccess.Open($"{_dir}/.gdignore", FileAccess.ModeFlags.Write)) { }
-        Engine.TimeScale = 3;
+        Engine.TimeScale = 8;
         // never touch the player's own saves
-        SaveSystem.Directory = "user://autoplay_saves";
+        SaveSystem.Directory = "user://autoplay_saves/ten_puzzles_act3";
         foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
         DialogueManager.Instance.AutoChoose = async (knot, options) =>
         {
@@ -43,6 +44,7 @@ public class AutoPlay
                 game.Hud.HideChoices();
             }
             _offered[knot] = options.ToArray();
+            if (knot == "caleb_cross") _crossOffers++;
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -54,9 +56,17 @@ public class AutoPlay
         try
         {
             var gs = GameState.Instance;
+            bool autosave = game.AutosaveEnabled;
+            game.AutosaveEnabled = false;
+            await PuzzleRecoveryTest(game);
+            await ActThreePuzzleRecoveryTest(game);
+            foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
+            gs.Reset();
+            DialogueManager.Instance.ResetInk();
 
             // ---- prologue: the attic, played through the real mouse input where it matters
             await TitleMenuTest(game, expectSaves: false);
+            game.AutosaveEnabled = autosave;
             await game.ChangeRoom("attic", "start");
             await PauseTest(game);
             Check(game.Player.Character == "daniel", "prologue plays as Daniel");
@@ -72,7 +82,11 @@ public class AutoPlay
             await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
             Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
             await game.Perform(Verb.Hand, "papers");
-            Check(gs.HasItem("crowbar"), "found the crowbar");
+            Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "papers reveal a locked tin, not a free crowbar");
+            await game.Perform(Verb.Hand, "tool_tin");
+            Check(!gs.HasItem("crowbar"), "tin cannot be opened by hand");
+            await game.Perform(Verb.UseItem, "tool_tin", "suitcase_key");
+            Check(gs.HasItem("crowbar"), "small key opens the tool tin for the crowbar");
             await Shot("attic_mess");
             await InventoryTest(game);
             await ReadJournal(game);
@@ -105,7 +119,11 @@ public class AutoPlay
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
             Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
-            await game.Perform(Verb.Walk, "service_door");
+            await game.Perform(Verb.Walk, "revolving_door");
+            Check(game.Room?.Name == "Lobby", "cannot abandon newly required hotel clues before Blue Lantern departure");
+            await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
+            await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift,
+                new[] { ("s0", 1) }, "lift_route");
             Check(game.Room?.Name == "EleanorRoom", "staff elevator up to Eleanor's room");
 
             await Shot("eleanor_room");
@@ -118,7 +136,9 @@ public class AutoPlay
             Check(gs.HasItem("combination"), "got the combination");
             await game.Perform(Verb.Hand, "closet");
             Check(gs.HasFlag("closet_open"), "opened the closet");
-            await game.Perform(Verb.UseItem, "safe", "combination");
+            await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
+            await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
+                new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
             Check(gs.HasFlag("safe_open"), "opened the safe");
             await Shot("eleanor_safe");
             await game.Perform(Verb.Hand, "brass_box");
@@ -156,14 +176,25 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "nightstand");
             Check(gs.HasFlag("cell_drawer_open"), "opened the nightstand drawer");
             await Shot("convent_cell_drawer");
-            var take = game.Perform(Verb.Hand, "mirror");
+            await game.Perform(Verb.Hand, "mirror");
+            Check(gs.HasItem("mirror_waxed") && !gs.HasFlag("got_mirror") && !game.Hud.ImageVisible,
+                "taking waxed mirror does not reveal the symbol");
+            Check(game.Room?.FindHotspot("mirror")?.Visible == false, "taken mirror disappears from drawer");
+            await game.Perform(Verb.Hand, "bed");
+            await Combine("mirror_waxed", "cloth");
+            await WaitIdle(game);
+            Check(gs.HasItem("cloth") && !gs.HasFlag("got_mirror"), "cold wax refuses cleaning without losing cloth");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "ConventCell", "waxed mirror possession does not bypass symbol gate");
+            await game.Perform(Verb.UseItem, "lampstand", "mirror_waxed");
+            await Combine("cloth", "mirror_waxed");
             await Until(() => game.Hud.ImageVisible);
             Check(game.Hud.ImageVisible, "the symbol behind the mirror is shown full screen");
             await Shot("triquetra");
             game.Hud.CloseImage();
-            await take;
+            await WaitIdle(game);
             await game.Perform(Verb.Hand, "comb");
-            Check(gs.HasItem("mirror") && !gs.HasItem("comb"), "took only the mirror");
+            Check(gs.HasItem("mirror") && !gs.HasItem("comb") && !gs.HasItem("cloth"), "revealed mirror retained; comb and cloth left in cell");
             await Shot("convent_cell_after");
 
             var leave = game.Perform(Verb.Walk, "exit");
@@ -185,7 +216,14 @@ public class AutoPlay
             await Shot("attic_act2");
             var read = game.ItemVerb(Verb.Hand, "journal");
 
-            // ---- Act 2, 1927: the cathedral, then the map of Chicago
+            // ---- Act 2, 1927: whiskey and the ring, then the cathedral
+            await Until(() => game.Room?.Name == "Office" && gs.HasFlag("office_cup_held"));
+            await game.Wait(0.65);
+            await Shot("office_whiskey_drinking");
+            await Until(() => gs.HasFlag("act2_office_done"));
+            Check(gs.HasFlag("act2_whiskey_drunk") && gs.HasFlag("ring_taken_act2") && gs.HasItem("faith_ring"),
+                "Act 2 opens with whiskey and the recorded take-ring choice");
+            Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
             await Until(() => game.Room?.Name == "ChurchExterior");
             Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
             await game.Wait(1.5);
@@ -196,9 +234,11 @@ public class AutoPlay
             await Shot("church_act2");
             await Until(() => game.Room?.Name == "ChicagoMap");
             Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
+            Check(_crossOffers == 0, "no pendant offer on the initial confession");
             Check(!game.Player.Visible, "the player isn't drawn on the map");
             await read;
             await WaitIdle(game);
+            await RingAndCrossTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
             await game.Perform(Verb.Walk, "church");
@@ -218,6 +258,13 @@ public class AutoPlay
             await ask;
             Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
+            Check(!gs.HasItem("book"), "cannot retrieve book before identifying title");
+            await game.Perform(Verb.Hand, "shelves_right");
+            Check(!gs.HasItem("book"), "locked restricted shelves prevent a catalogue bypass");
+            await CancelPuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue, "catalogue_identified", "catalogue");
+            await SolvePuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue,
+                new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
+            await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(gs.HasItem("book") && gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "threatened the librarian into giving up the book");
             await game.Perform(Verb.Walk, "library");
             Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
@@ -227,7 +274,21 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "office");
             Check(game.Room?.Name == "Office", "back at the office");
             await game.ItemVerb(Verb.Hand, "book");
-            Check(gs.HasItem("address") && gs.HasFlag("club_unlocked"), "an address slipped out of the book");
+            Check(!gs.HasItem("address") && !gs.HasFlag("club_unlocked"), "book gives cipher instructions, not a free address");
+            await ReloadCheckpoint("cipher_book_only");
+            Check(gs.HasFlag("read_book") && !gs.HasItem("address") && !gs.HasFlag("club_unlocked"), "new save/load does not grandfather unfinished cipher");
+            await Combine("card", "mirror");
+            await WaitIdle(game);
+            Check(!gs.HasFlag("card_reflected"), "cold blank card does not yield an address");
+            var warming = game.Perform(Verb.UseItem, "radiator", "card");
+            await Until(() => game.Hud.ImageVisible);
+            await Shot("card_reversed");
+            game.Hud.CloseImage();
+            await warming;
+            await CancelPuzzle(() => CombineAndWait("card", "mirror"), PuzzleKind.Cipher, "card_decoded", "card_cipher");
+            await SolvePuzzle(() => CombineAndWait("mirror", "card"), PuzzleKind.Cipher,
+                new[] { ("s0", 1), ("s1", 2) }, "card_cipher");
+            Check(gs.HasItem("address") && gs.HasFlag("club_unlocked"), "heat, reflection and ornament order reveal Club address");
             await Shot("office_book");
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("club")?.Visible == true, "the club is on the map now");
@@ -263,7 +324,8 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
             await game.Perform(Verb.Walk, "church");
-            Check(game.Room?.Name == "ChicagoMap", "nothing new at the church yet");
+            Check(game.Room?.Name == "ChicagoMap" && !gs.HasFlag("church_before_office"), "repeat church visit doesn't anticipate the sister's threat");
+            Check(!gs.HasItem("cross"), "taking the ring initially postpones the cross until Act 3");
             Check(game.Room?.FindHotspot("convent")?.Visible == true, "the convent is on the map");
             await game.Perform(Verb.Walk, "convent");
             Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
@@ -274,7 +336,8 @@ public class AutoPlay
             await threat;
             Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
             Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("club")?.Visible == false
-                && game.Room?.FindHotspot("library")?.Visible == false, "only the church and Harrington are left on the map");
+                && game.Room?.FindHotspot("library")?.Visible == false
+                && game.Room?.FindHotspot("office")?.Visible == true, "office remains available for ring recovery");
             await Shot("map_harrington");
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
@@ -292,8 +355,18 @@ public class AutoPlay
             await Shot("harrington_road_fire");
             await game.Perform(Verb.Hand, "fire_escape");
             Check(game.Room?.Name == "HarringtonRoad", "the ladder is too high without the crates");
+            await game.Perform(Verb.Hand, "packing_wedge");
+            await game.Perform(Verb.UseItem, "ladder_catch", "wedge");
+            Check(!gs.HasFlag("ladder_freed") && gs.HasItem("wedge"), "catch cannot be reached before stacking crates; wedge retained");
             await game.Perform(Verb.Hand, "crates");
             Check(gs.HasFlag("crates_stacked"), "stacked the crates");
+            await game.Perform(Verb.Hand, "fire_escape");
+            Check(game.Room?.Name == "HarringtonRoad", "stacked crates alone do not bypass the jammed catch");
+            await game.Perform(Verb.Hand, "packing_wedge");
+            Check(gs.HasItem("wedge"), "collected packing wedge from distinct hotspot");
+            await ReloadCheckpoint("ladder_wedge");
+            await game.Perform(Verb.UseItem, "ladder_catch", "wedge");
+            Check(gs.HasFlag("ladder_freed") && !gs.HasItem("wedge"), "wedge remains installed holding catch clear");
             await Shot("harrington_road_crates");
             await game.Perform(Verb.Hand, "fire_escape");
             Check(game.Room?.Name == "HarringtonOffice", "climbed into Harrington's office");
@@ -307,7 +380,11 @@ public class AutoPlay
             await game.Perform(Verb.UseItem, "drawer_right", "lockpick");
             Check(gs.HasItem("invitation"), "picked the drawer: the invitation");
             await game.Perform(Verb.Hand, "closet");
-            await game.Perform(Verb.Hand, "panel");
+            Check(gs.HasFlag("harrington_closet_open"), "Harrington closet uses independent flag");
+            await game.Perform(Verb.Look, "portrait");
+            await CancelPuzzle(() => game.Perform(Verb.UseItem, "panel", "lockpick"), PuzzleKind.Crests, "secret_open", "crest_lock");
+            await SolvePuzzle(() => game.Perform(Verb.Hand, "panel"), PuzzleKind.Crests,
+                new[] { ("s0", 2), ("s2", 1) }, "crest_lock");
             await Shot("harrington_office_niche");
             await game.Perform(Verb.Hand, "niche");
             Check(gs.HasItem("mask") && gs.HasItem("cloak"), "took the mask and the cloak");
@@ -356,9 +433,32 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "Office");
             await game.Wait(1.5);
             await Shot("office_act3_desk");
-            await Until(() => game.Room?.Name == "Alley");
             await stage;
             await WaitIdle(game);
+            Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
+            _prefer = new[] { "Visit Caleb", "Refuse the cross" };
+            int offers = _crossOffers;
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "Office" && gs.HasFlag("church_act3_return") && !gs.HasItem("cross") && _crossOffers == offers + 1,
+                "Act 3 Caleb visit offers cross, refusal returns to office");
+            await game.Perform(Verb.Walk, "door");
+            Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Caleb offers again after refusal");
+            _prefer = new[] { "Visit Caleb", "Accept the cross" };
+            await game.Perform(Verb.Walk, "door");
+            Check(gs.HasItem("cross") && gs.HasFlag("took_cross") && gs.Inventory.Count(i => i == "cross") == 1,
+                "accepted pendant is recorded and given once");
+            await game.Perform(Verb.Walk, "door");
+            Check(_crossOffers == offers + 3 && game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"),
+                "accepted cross isn't offered again, desk scene isn't replayed");
+            var savedCommitments = game.CaptureSave();
+            Check(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(savedCommitments))?.Inventory.Contains("cross") == true,
+                "accepted pendant survives save serialization");
+            gs.TakeItem("cross");
+            await game.LoadGame(savedCommitments);
+            Check(gs.HasItem("cross") && gs.HasItem("faith_ring") && gs.HasFlag("ring_taken_act2") && game.Room is Rooms.Office,
+                "load restores ring, pendant and initial decision without replaying the desk");
+            _prefer = new[] { "Go to the Blue Lantern" };
+            await game.Perform(Verb.Walk, "door");
             Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
             var act3Flags = gs.Flags.ToArray();
             var act3Items = gs.Inventory.ToArray();
@@ -395,7 +495,11 @@ public class AutoPlay
             Check(game.Room?.Name == "MansionExterior" && !gs.HasFlag("bell_wedged"), "the bell is out of reach");
             await game.Perform(Verb.Hand, "bin");
             Check(gs.HasFlag("bin_moved"), "moved the coal bin under the bell");
-            await game.Perform(Verb.Hand, "bell");
+            await ReloadCheckpoint("alarm_unrestrained");
+            Check(!gs.HasFlag("bell_wedged"), "save/load does not restrain a new alarm");
+            await CancelPuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell, "bell_wedged", "alarm_restraint");
+            await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
+                new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
             Check(gs.HasFlag("bell_wedged"), "gagged the bell with the tie");
             await Shot("mansion_exterior_wedged");
             await game.Perform(Verb.Hand, "door");
@@ -410,7 +514,17 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "drawer_right");
             await Shot("mansion_study_drawer");
             await game.Perform(Verb.Hand, "documents");
-            Check(gs.HasFlag("took_documents") && gs.HasItem("documents"), "took Harrington's ledgers");
+            Check(gs.HasItem("audit_folder") && !gs.HasItem("documents") && !gs.HasFlag(Endings.TookDocuments),
+                "account register alone is not incriminating evidence");
+            await game.Perform(Verb.Hand, "drawer_left");
+            Check(gs.HasItem("audit_tracing"), "matching index found under the cigars");
+            await ReloadCheckpoint("audit_unsolved");
+            Check(!gs.HasFlag(Endings.TookDocuments) && gs.HasItem("audit_folder") && gs.HasItem("audit_tracing"),
+                "both audit clues survive save/load without granting evidence");
+            await CancelPuzzle(() => CombineAndWait("audit_tracing", "audit_folder"), PuzzleKind.Alignment, "audit_identified", "audit_alignment");
+            await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
+                new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+            Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "index identifies signed payoff sheets");
             var confront = game.Perform(Verb.Walk, "door_right");
             await Until(() => game.Room?.Name == "MansionBedroom");
             await game.Wait(1.5);
@@ -429,7 +543,7 @@ public class AutoPlay
             await Shot("mansion_bedroom_gun");
             await confront;
             await WaitIdle(game);
-            Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag), "sparing the old man follows Caleb and Rose");
+            Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
             Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
             await Shot("mansion_kitchen_escape");
             await game.Perform(Verb.Hand, "range");
@@ -451,14 +565,25 @@ public class AutoPlay
                 .Concat(new[] { "alley3_dark", "alley3_sal_out", "alley3_sal_down" }).ToArray();
 
             // 5: no visits to Caleb, so no walking away; shoot, Eleanor stays, nothing to bargain with
-            var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club")).Append("rose_wait");
+            var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club" or "church_act3_return")).Append("rose_wait");
             Seed(noChurch, act3Items, "Shoot him", "You can't stay", "Nobody's coming");
             await game.ChangeRoom("alley", "act3");
             await game.Perform(Verb.Talk, "back_door");
             Check(!Offered("bartender_gun", "Lower the gun") && gs.HasFlag("shot_bartender"), "without Caleb, Micah can't walk away from Tony");
-            await game.ChangeRoom("mansion_bedroom", "start");
+            await game.ChangeRoom("mansion_study", "start");
+            await game.Perform(Verb.Hand, "drawer_right");
+            await game.Perform(Verb.Hand, "drawer_left");
+            await CancelPuzzle(() => game.Perform(Verb.UseItem, "documents", "audit_tracing"), PuzzleKind.Alignment, "audit_identified", "audit_room_use");
+            Check(gs.HasItem("audit_folder") && gs.HasItem("audit_tracing") && !gs.HasFlag(Endings.TookDocuments),
+                "cancelled room-use alignment retains clues but no evidence");
+            await game.Perform(Verb.Walk, "door_right");
             Check(!Offered("oldman_taunt", "Lower the gun") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
             Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
+            // Seeded endings follow the permanent epilogue lock; exercise the recipe without reopening its blocked HUD.
+            await game.Run(game.TryReadAccounts);
+            Check(!game.Hud.Puzzle.IsOpen && !gs.HasFlag(Endings.TookDocuments), "escape kitchen cannot decode skipped evidence after confrontation");
+            await game.Perform(Verb.Walk, "baize_door");
+            Check(game.Room?.Name == "MansionKitchen", "skipped study cannot be revisited during escape");
             await Shot("mansion_kitchen_alone");
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Prison");
@@ -491,8 +616,20 @@ public class AutoPlay
             await Shot("ending_alone");
             await TheEnd("ending_3");
 
+            // Verify the actual Ink choices for each missing commitment, not only the helper predicates.
+            foreach (string missing in new[] { "faith_ring", "cross" })
+            {
+                Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "He had it coming", "I'll go to the police");
+                await game.ChangeRoom("mansion_bedroom", "start");
+                Check(!Offered("oldman_taunt", "Lower the gun"), $"without {missing}, the final return is unavailable");
+            }
+            Seed(alleyReady, act3Items.Where(i => i != "faith_ring"), "Shoot him");
+            await game.ChangeRoom("alley", "act3");
+            await game.Perform(Verb.Talk, "back_door");
+            Check(!Offered("bartender_gun", "Lower the gun"), "church return without ring doesn't allow walking away from Tony");
+
             // 1: walking away from Tony
-            Seed(alleyReady, act3Items, "Lower the gun");
+            Seed(alleyReady, act3Items.Where(i => i != "cross"), "Lower the gun");
             await game.ChangeRoom("alley", "act3");
             _ = game.Perform(Verb.Talk, "back_door");
             await Until(() => game.Room?.Name == "RoseHouse");
@@ -510,7 +647,7 @@ public class AutoPlay
             await TheEnd("ending_1 (old man)");
 
             // 1: giving up on the church steps
-            Seed(act3Flags.Where(f => f != "keep_going"), act3Items, "Give up");
+            Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
             _ = game.ChangeRoom("church_exterior", "beaten");
             await Until(() => game.Room?.Name == "RoseHouse");
             Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
@@ -642,6 +779,21 @@ public class AutoPlay
             Click(game.Hud.Wheel.SlotCenter(Verb.Look), MouseButton.Left);
             await AwaitTest(wheel, "verb wheel works after resuming");
             Check(await wheel == Verb.Look, "verb wheel retains its selection layout");
+
+            var puzzle = game.Hud.Puzzle.Open(PuzzleKind.Lift);
+            PuzzleClick("s0");
+            PressKey(Key.Space);
+            PuzzleClick("submit");
+            PuzzleClick("reset");
+            PuzzleClick("s1");
+            PressKey(Key.Escape);
+            await Observe(0.1);
+            Check(game.IsPaused && game.Hud.Puzzle.IsOpen && !puzzle.IsCompleted,
+                "Space pause blocks puzzle submission, reset, controls, and Esc");
+            PressKey(Key.Space);
+            PuzzleClick("submit");
+            await AwaitTest(puzzle, "puzzle resumes with its settings preserved");
+            Check(await puzzle, "paused puzzle controls did not change the correct solution");
 
             var fade = game.Hud.Fade(1, 0.8);
             await Observe(0.2);
@@ -782,7 +934,7 @@ public class AutoPlay
         var inv = GameState.Instance.Inventory;
         for (int i = 0; i < inv.Count; i++)
             if (inv[i] == item) return i;
-        return 0;
+        throw new InvalidOperationException($"Inventory does not contain '{item}'.");
     }
 
     /// <summary>
@@ -852,7 +1004,239 @@ public class AutoPlay
             _game.GetViewport().PushInput(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed }, true);
     }
 
+    private async Task ReloadCheckpoint(string label)
+    {
+        await WaitIdle(_game);
+        Check(_game.SaveToSlot(SaveSystem.ManualSlot(2)), $"saved {label}");
+        var saved = SaveSystem.Read(SaveSystem.ManualSlot(2));
+        Check(saved != null, $"read {label}");
+        if (saved == null) throw new InvalidOperationException($"Missing checkpoint {label}");
+        await _game.LoadGame(saved);
+        await WaitIdle(_game);
+    }
+
+    private async Task PuzzleRecoveryTest(Game game)
+    {
+        var legacy = new SaveData
+        {
+            Room = "chicago_map", RoomTitle = "Chicago", StoryAct = 2, X = 240, Y = 262, Facing = 1,
+            Flags = new List<string>
+            {
+                "on_map", "map_seen", "teddy_gone", "teddy_briefed", "took_revolver", "took_dollar",
+                "took_lockpick", "got_mirror", "took_mirror", "cell_drawer_open", "staff_elevator",
+                "knows_lantern", "library_banned", "librarian_refused",
+            },
+            Inventory = new List<string> { "mirror", "lockpick", "revolver", "book" },
+        };
+        await game.LoadGame(legacy);
+        var gs = GameState.Instance;
+        Check(game.Room?.FindHotspot("hotel")?.Visible == true && !gs.HasItem("card"), "legacy missed-card save has a real recovery route, not a fabricated item");
+        await Shot("legacy_hotel_recovery_map");
+        await game.Perform(Verb.Walk, "hotel");
+        await game.Perform(Verb.Walk, "service_door");
+        Check(game.Room?.Name == "EleanorRoom", "legacy hotel marker reaches room 507 through the lobby");
+        await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
+        await game.Perform(Verb.Hand, "paper");
+        await game.Perform(Verb.Hand, "closet");
+        await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
+            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "legacy_safe");
+        await game.Perform(Verb.Hand, "brass_box");
+        await game.ItemVerb(Verb.Hand, "brass_box");
+        await game.Perform(Verb.Walk, "exit");
+        await game.Perform(Verb.Walk, "revolving_door");
+        Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("hotel")?.Visible == false && gs.HasItem("card"),
+            "recovered card returns to Act 2 map and removes temporary hotel marker");
+        await game.Perform(Verb.Walk, "office");
+        var warm = game.Perform(Verb.UseItem, "radiator", "card");
+        await Until(() => game.Hud.ImageVisible);
+        game.Hud.CloseImage();
+        await warm;
+        await Combine("card", "mirror");
+        await WaitIdle(game);
+        Check(gs.HasFlag("card_reflected") && !gs.HasFlag("read_book") && !gs.HasFlag("club_unlocked"),
+            "heat and reflection before reading do not prematurely unlock Club");
+        await ReloadCheckpoint("cipher_read_last");
+        await SolvePuzzle(() => game.ItemVerb(Verb.Hand, "book"), PuzzleKind.Cipher,
+            new[] { ("s0", 1), ("s1", 2) }, "cipher_read_last");
+        Check(gs.HasFlag("club_unlocked") && gs.HasItem("address"), "reading last offers cipher without repeating heat or reflection");
+    }
+
+    private async Task ActThreePuzzleRecoveryTest(Game game)
+    {
+        var saved = new SaveData
+        {
+            Room = "mansion_study", RoomTitle = "Harrington's Study", StoryAct = 3, X = 242, Y = 222, Facing = 2,
+            Ink = DialogueManager.Instance.SaveInk(),
+            Flags = new List<string>
+            {
+                PuzzleMigration.SchemaFlag, "seen_mansion_study", "door_open",
+                "drawer_right_open", "closet_open", Endings.TookDocuments,
+            },
+            Inventory = new List<string> { "documents", "revolver" },
+        };
+        await game.LoadGame(saved);
+        var gs = GameState.Instance;
+        Check(gs.HasFlag("bell_wedged") && gs.HasFlag("audit_identified") && gs.HasItem("documents"),
+            "legacy Act 3 save keeps secured alarm and collected evidence despite original puzzle marker");
+        Check(!gs.HasFlag("study_drawer_left_open") && !gs.HasFlag("study_drawer_right_open") && !gs.HasFlag("study_closet_open") &&
+            game.Room?.FindHotspot("documents")?.Visible == false,
+            "legacy shared drawer flags do not open unrelated study drawers or duplicate register");
+        await ReloadCheckpoint("legacy_act3_completed");
+        Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "legacy Act 3 completion survives another reload");
+    }
+
+    private async Task CancelPuzzle(Func<Task> start, PuzzleKind kind, string flag, string name)
+    {
+        var action = start();
+        await Until(() => _game.Hud.Puzzle.IsOpen);
+        Check(_game.Hud.Puzzle.IsOpen && _game.Hud.Puzzle.Kind == kind, $"opened {name}");
+        Check(_game.Busy && !_game.CanSave && !_game.SaveToSlot(SaveSystem.ManualSlot(1)), $"{name} blocks saves");
+        var beforeAuto = SaveSystem.Read(SaveSystem.AutosaveSlot)?.SavedAtUtc;
+        if (kind == PuzzleKind.Catalogue)
+        {
+            PuzzleClick("motif0");
+            PuzzleClick("entry2");
+        }
+        else PuzzleClick("submit");
+        if (kind == PuzzleKind.Bell)
+        {
+            for (int i = 0; i < 3; i++) PuzzleClick("s0");
+            PuzzleClick("submit");
+            Check(_game.Hud.Puzzle.IsOpen && !GameState.Instance.HasFlag(flag), "cut-wire plan rejected before triggering alarm");
+        }
+        Check(_game.Hud.Puzzle.IsOpen && !GameState.Instance.HasFlag(flag), $"{name} rejects wrong answer");
+        Click(new Vector2(478, 268), MouseButton.Left);
+        _game.Hud.ShowInventory(true);
+        await _game.Wait(0.2);
+        Check(!_game.Hud.InventoryOpen && _game.Hud.Puzzle.IsOpen, $"{name} blocks underlying interface");
+        Check(SaveSystem.Read(SaveSystem.AutosaveSlot)?.SavedAtUtc == beforeAuto, $"{name} defers queued autosave");
+        await Shot(name + "_wrong");
+        PuzzleClick("reset");
+        PressKey(Key.Escape);
+        await action;
+        await WaitIdle(_game);
+        Check(!_game.Hud.Puzzle.IsOpen && !GameState.Instance.HasFlag(flag), $"{name} cancellation preserves unsolved state");
+    }
+
+    private async Task SolvePuzzle(Func<Task> start, PuzzleKind kind, (string Id, int Count)[] controls, string name, bool submit = true)
+    {
+        var action = start();
+        await Until(() => _game.Hud.Puzzle.IsOpen);
+        Check(_game.Hud.Puzzle.IsOpen && _game.Hud.Puzzle.Kind == kind, $"reopened {name}");
+        foreach (var (id, count) in controls)
+        {
+            for (int i = 0; i < count; i++) PuzzleClick(id);
+            await _game.Wait(0.1);
+        }
+        if (submit)
+        {
+            await Shot(name + "_solution");
+            PuzzleClick("submit");
+        }
+        await action;
+        await WaitIdle(_game);
+        Check(!_game.Hud.Puzzle.IsOpen, $"solved {name} through real controls");
+    }
+
+    private void PuzzleClick(string id)
+    {
+        var point = _game.Hud.Puzzle.ButtonCenter(id);
+        Move(point);
+        Click(point, MouseButton.Left);
+    }
+
+    private async Task SelectInventoryItem(string item)
+    {
+        await WaitIdle(_game);
+        if (!_game.Hud.InventoryOpen) Click(_game.Hud.SatchelCenter, MouseButton.Left);
+        await _game.Wait(0.1);
+        Check(_game.Hud.InventoryOpen, $"satchel open to select {item}");
+        if (!_game.Hud.InventoryOpen) throw new InvalidOperationException($"Satchel did not open for {item}");
+        int index = IndexOf(item);
+        int page = index / 12;
+        while (_game.Hud.InventoryPage != page)
+        {
+            Click(_game.Hud.InventoryPageCenter(_game.Hud.InventoryPage < page), MouseButton.Left);
+            await _game.Wait(0.1);
+        }
+        Click(_game.Hud.SlotCenter(index), MouseButton.Left);
+        await _game.Wait(0.1);
+    }
+
+    private async Task Combine(string first, string second)
+    {
+        await SelectInventoryItem(first);
+        Check(_game.Carried == first, $"picked {first} from paged inventory");
+        await SelectInventoryItem(second);
+    }
+
+    private async Task CombineAndWait(string first, string second)
+    {
+        await Combine(first, second);
+        while (_game.Busy) await _game.Wait(0.1);
+    }
+
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
+    private async Task RingAndCrossTest(Game game)
+    {
+        var gs = GameState.Instance;
+        var originalFlags = gs.Flags.ToArray();
+        var originalItems = gs.Inventory.ToArray();
+        var originalInk = DialogueManager.Instance.SaveInk();
+        var originalPrefer = _prefer;
+        int offers = _crossOffers;
+        var openingFlags = originalFlags.Where(f => f is not ("ring_taken_act2" or "took_faith_ring" or
+            "act2_office_done" or "act2_whiskey_drunk" or "caleb_met" or "act2_church_thought"))
+            .Append("act2_church");
+        gs.Restore(openingFlags, originalItems.Where(i => i != "faith_ring"), 2);
+        _prefer = new[] { "Leave the wedding ring" };
+        await game.ChangeRoom("office", "act2");
+        Check(gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") && !gs.HasItem("faith_ring"),
+            "leaving the ring records the original choice without granting it");
+        Check(_crossOffers == offers, "initial confession never offers the cross even when ring was left");
+        await game.Perform(Verb.Walk, "office");
+        Check(game.Room?.FindHotspot("faith_ring")?.Visible == true, "left ring remains visible at the office");
+        await Shot("office_ring_left");
+        await game.Perform(Verb.Walk, "door");
+        gs.SetFlag("club_out");
+        gs.SetFlag("caleb_club");
+        _prefer = new[] { "Refuse the cross" };
+        await game.Perform(Verb.Walk, "church");
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Act 2 refusal repeats the offer on the next visit");
+        await game.Perform(Verb.Walk, "office");
+        await game.Perform(Verb.Hand, "faith_ring");
+        Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") &&
+            game.Room?.FindHotspot("faith_ring")?.Visible == false, "recovering the ring preserves the original leave decision");
+        await game.Perform(Verb.Walk, "door");
+        _prefer = new[] { "Accept the cross" };
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 3 && gs.HasItem("cross") && gs.HasFlag("took_cross"),
+            "recovered ring doesn't postpone the Act 2 cross offer");
+        await game.Perform(Verb.Walk, "church");
+        Check(_crossOffers == offers + 3 && gs.Inventory.Count(i => i == "cross") == 1, "Act 2 acceptance stops duplicate offers");
+        Rooms.Attic.StashMicahItems();
+        Check(!gs.HasItem("faith_ring") && !gs.HasItem("cross") && gs.HasFlag("ring_left_act2"),
+            "Daniel's interlude puts Micah's commitments aside without losing the original decision");
+        Rooms.Attic.RestoreMicahItems();
+        Check(gs.HasItem("faith_ring") && gs.HasItem("cross") && gs.HasFlag("took_cross"),
+            "both commitments return with Micah's inventory");
+        gs.TakeItem("faith_ring");
+        gs.SetFlag("took_faith_ring", false);
+        gs.SetFlag("micah_at_desk");
+        gs.SetFlag("keep_going");
+        gs.SetStoryAct(3);
+        await game.ChangeRoom("office", "act3");
+        Check(game.Room?.Name == "Office" && !game.Busy, "Act 3 office waits for player input");
+        await game.Perform(Verb.Hand, "faith_ring");
+        Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2"), "left ring can be recovered at the Act 3 office");
+
+        gs.Restore(originalFlags, originalItems, 2);
+        DialogueManager.Instance.LoadInk(originalInk);
+        _prefer = originalPrefer;
+        await game.ChangeRoom("chicago_map", "start");
+    }
+
     private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
     {
         _game.Hud.ShowCaption(null);

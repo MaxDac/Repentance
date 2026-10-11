@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3]
+[gd_scene load_steps=37 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Office.cs" id="1_Office"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office.png" id="2_office"]
@@ -11,6 +11,14 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/teddy.png" id="8_teddy"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/micah_desk.png" id="11_micah_desk"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring.png" id="12_ring"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_cup.png" id="13_cup"]
+
+[sub_resource type="RectangleShape2D" id="Rect_ring"]
+size = Vector2(14, 10)
+
+[sub_resource type="RectangleShape2D" id="Rect_cup"]
+size = Vector2(10, 12)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(72, 109)
@@ -99,6 +107,14 @@ metadata/facing = 3
 position = Vector2(58, 172)
 metadata/facing = 1
 
+[node name="act2" type="Marker2D" parent="Entries"]
+position = Vector2(160, 172)
+metadata/facing = 3
+
+[node name="from_caleb" type="Marker2D" parent="Entries"]
+position = Vector2(58, 172)
+metadata/facing = 1
+
 [node name="act3" type="Marker2D" parent="Entries"]
 position = Vector2(249, 170)
 metadata/facing = 1
@@ -107,6 +123,21 @@ metadata/facing = 1
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="WeddingRing" type="Sprite2D" parent="."]
+position = Vector2(270, 130)
+texture = ExtResource("12_ring")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "act2_whiskey_drunk"
+HideIfFlags = "took_faith_ring"
+
+[node name="Cup" type="Sprite2D" parent="."]
+position = Vector2(126, 81)
+texture = ExtResource("13_cup")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "office_cup_held"
 
 [node name="MicahDesk" type="Sprite2D" parent="."]
 z_index = -9
@@ -183,8 +214,8 @@ shape = SubResource("Rect_2")
 [node name="Bottle" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")
 Id = "bottle"
-DisplayName = "bottle"
-LookText = "Bourbon. What's left of it, which is nothing."
+DisplayName = "whiskey bottle"
+LookText = "Whiskey. Another bottle, another night. It never fills the empty places."
 WalkTo = Vector2(124, 170)
 Face = 2
 monitoring = false
@@ -193,6 +224,39 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bottle"]
 position = Vector2(123.0, 77.5)
 shape = SubResource("Rect_3")
+
+[node name="WeddingRing" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "faith_ring"
+DisplayName = "wedding ring"
+LookText = "My wedding ring. A little gold circle, and everything I walked away from."
+WalkTo = Vector2(270, 190)
+Face = 2
+ClickPriority = 10
+ShowIfFlags = "act2_whiskey_drunk"
+HideIfFlags = "took_faith_ring"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/WeddingRing"]
+position = Vector2(277, 135)
+shape = SubResource("Rect_ring")
+
+[node name="Cup" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "cup"
+DisplayName = "cup of whiskey"
+LookText = "A cup of whiskey. No ice. No excuses."
+WalkTo = Vector2(124, 172)
+Face = 2
+ClickPriority = 10
+HideIfFlags = "office_cup_held"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cup"]
+position = Vector2(131, 87)
+shape = SubResource("Rect_cup")
 
 [node name="Diploma" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")

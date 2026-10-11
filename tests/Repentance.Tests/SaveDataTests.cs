@@ -40,6 +40,20 @@ public class SaveDataTests
         Assert.Equal(s.PlaytimeSeconds, back.PlaytimeSeconds);
     }
 
+    [Fact]
+    public void RecoveredRingAndAcceptedCrossPreserveOriginalChoice()
+    {
+        var data = Sample();
+        data.Flags.AddRange(new[] { "ring_left_act2", "took_faith_ring", "cross_refused", "took_cross", "church_act3_return", "act2_office_done" });
+        data.Inventory.AddRange(new[] { "faith_ring", "cross" });
+        var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
+        Assert.NotNull(back);
+        Assert.Equal(data.Flags, back.Flags);
+        Assert.Equal(data.Inventory, back.Inventory);
+        Assert.Contains("ring_left_act2", back.Flags);
+        Assert.DoesNotContain("ring_taken_act2", back.Flags);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
