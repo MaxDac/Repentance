@@ -24,8 +24,16 @@ public partial class Outskirts : Room
     private async Task Ending()
     {
         bool together = State.HasFlag("ending_2");
+        bool nextMorning = !together && State.HasFlag(Endings.MansionExploded);
+        if (nextMorning)
+        {
+            Game.Hud.ShowCaption("The next morning");
+            await Wait(2.6);
+            Game.Hud.ShowCaption(null);
+        }
         await Wait(1.0);
-        await Say(together ? "*Two car doors slam in the dark.*" : "*A car door slams in the dark.*");
+        await Say(together ? "*Two car doors slam in the dark.*"
+            : nextMorning ? "*A car door slams.*" : "*A car door slams in the dark.*");
         if (together && FindActor("eleanor") is { } eleanor)
             _ = eleanor.MoveTo(new Vector2(272, 250), 40);
         await Game.WalkTo(new Vector2(232, 252));

@@ -52,6 +52,7 @@ public partial class Hud : CanvasLayer
 
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
+    public string CaptionText => _caption.Text;
     public bool InventoryOpen => _inventory.Visible;
     public bool TitleVisible => _title.Visible;
     public bool PauseVisible => _pause.Visible;

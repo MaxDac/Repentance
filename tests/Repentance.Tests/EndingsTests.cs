@@ -22,6 +22,7 @@ public class EndingsTests
     [InlineData(true, true, true, 2)]
     [InlineData(false, true, false, 3)]
     [InlineData(false, false, true, 3)]
+    [InlineData(false, true, true, 3)]
     [InlineData(true, false, false, 4)]
     [InlineData(false, false, false, 5)]
     public void ShootingTheOldManEndsByEleanorAndLeverage(bool convinced, bool exploded, bool documents, int ending)

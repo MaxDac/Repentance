@@ -38,6 +38,8 @@ public partial class ChurchExterior : Room
         await Say("My ribs are talking to each other. My mouth tastes like a penny.");
         await Say("What am I doing? She told me to go home. She looked at me like a stranger who'd wandered onto the stage.");
         await Say("Caleb's in there, a hundred feet away, praying for me. Rose is across town, not praying for anybody.");
+        await Say("I keep calling it saving her. But it's her I want. Her voice. Her skin. Another night like that one.");
+        await Say("Rose and Tommy ought to be in my heart. Eleanor's there instead. And God help me, I don't want to let her go.");
         if (!await Player.PlayPose("micah_recover")) return;
         Player.SetPose(null);
         Player.Face(Facing.Down);

@@ -15,8 +15,8 @@ public static class Items
             "Caleb's cross, on a silver chain. A reminder that the way back isn't closed."),
         ["photo"] = new("photo", "photograph", "res://assets/art/items/photo.png",
             "Eleanor Harrington. Pretty, poised, and looking at the camera like it owed her money."),
-        ["dollar"] = new("dollar", "dollar bill", "res://assets/art/items/dollar.png",
-            "One whole dollar. My entire operating budget."),
+        ["dollar"] = new("dollar", "cash", "res://assets/art/items/dollar.png",
+            "My cash for the case. One dollar for the bellboy; ten to get past Sal."),
         ["matchbook"] = new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
             "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. Just matches."),
         ["crowbar"] = new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
@@ -70,4 +70,16 @@ public static class Items
     };
 
     public static ItemDef Get(string id) => All[id];
+}
+
+public static class CashRules
+{
+    public const int BellboyBribe = 1;
+    public const int SalBribe = 10;
+    public const int StartingCash = 2 * (BellboyBribe + SalBribe);
+
+    public static int Balance(System.Func<string, bool> hasFlag) =>
+        !hasFlag("took_dollar") ? 0 : StartingCash
+            - (hasFlag("knows_lantern") ? BellboyBribe : 0)
+            - (hasFlag("sal_passed") ? SalBribe : 0);
 }
