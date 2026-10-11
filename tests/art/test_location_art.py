@@ -165,5 +165,21 @@ class LocationRenderingTests(unittest.TestCase):
                 self.assert_images_equal(combined, common.pixelize(paint(**combined_flags), pal))
 
 
+    def test_club_portrait_reads_as_a_face(self):
+        image = Image.new("RGB", (80, 60))
+        club.painting(image, 4, 4, 60, 52)
+        face = image.crop((22, 14, 42, 32))
+        colors = {tuple(color) for _, color in face.getcolors(80)}
+        self.assertIn(common.hx("e0a878"), colors)
+        self.assertIn(common.hx("100c0a"), colors)
+
+    def test_bedroom_wife_crop_includes_a_shoulder(self):
+        _, _, wife = act2_rooms._bed_figures(1.2, 1.0)
+        box = wife.getbbox()
+        self.assertIsNotNone(box)
+        self.assertGreater(box[2] - box[0], box[3] - box[1])
+        self.assertGreater(box[2] - box[0], 24)
+
+
 if __name__ == "__main__":
     unittest.main()

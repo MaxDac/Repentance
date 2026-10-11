@@ -9,7 +9,6 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionBedroom : Room
 {
-    private static readonly Texture2D Falling = GD.Load<Texture2D>("res://assets/art/sprites/harrington_falling.png");
     private static readonly Texture2D Shot = GD.Load<Texture2D>("res://assets/art/sprites/harrington_shot.png");
 
     private static readonly Vector2 BehindScreen = new(107, 214);
@@ -68,9 +67,11 @@ public partial class MansionBedroom : Room
         }
 
         await Say("*BANG*");
-        harrington?.SetTexture(Falling);
-        await Wait(0.45);
-        harrington?.SetTexture(Shot);
+        if (harrington != null)
+        {
+            await harrington.PlayPose("harrington_fall");
+            harrington.SetTexture(Shot);
+        }
         await Wait(1.0);
         Player.SetPose(null);
         await Talk("eleanor_persuade");

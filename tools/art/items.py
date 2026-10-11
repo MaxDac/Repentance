@@ -89,8 +89,11 @@ def revolver(d, im):
     d.rectangle([16, 6, 22, 12], fill=hx("3a3a42"))
     d.polygon([(20, 10), (26, 10), (29, 20), (23, 21)], fill=hx("5a3420"))
     d.line([(24, 12), (26, 19)], fill=hx("7a4a2a"))
+    d.ellipse([10, 5, 17, 12], outline=hx("2a2a32"))
+    d.rectangle([12, 7, 15, 10], fill=hx("2e2e36"))
     d.arc([16, 10, 22, 16], 0, 180, fill=hx("3a3a42"))
-    d.point((5, 6), fill=hx("4a4a52"))
+    d.point((5, 6), fill=hx("c8c8d0"))
+    d.line([(6, 8), (8, 8)], fill=hx("7a7a84"))
 
 
 def lockpick(d, im):
@@ -124,6 +127,8 @@ def card(d, im):
     d.arc([10, 9, 16, 15], 90, 360, fill=hx("a0405a"))
     d.arc([16, 10, 22, 16], 270, 180, fill=hx("a0405a"))
     d.point((16, 12), fill=hx("c8a050"))
+    d.line([(8, 16), (22, 15)], fill=hx("6a5a4a"))
+    d.text((9, 8), "MJ", fill=hx("3a2a22"))
 
 
 def mirror(d, im):
@@ -219,6 +224,7 @@ def documents(d, im):
     d.polygon([(4, 6), (27, 4), (28, 20), (5, 21)], fill=hx("c8a868"))
     d.polygon([(7, 3), (25, 2), (26, 6), (7, 7)], fill=hx("ece4d0"))
     d.line([(9, 4), (22, 3)], fill=hx("6a6a6a"))
+    d.polygon([(6, 8), (12, 7), (13, 12), (7, 13)], fill=hx("f4efe2"))
     d.line([(16, 5), (17, 21)], fill=hx("a02020"), width=2)
     d.line([(4, 13), (28, 12)], fill=hx("a02020"))
     d.text((7, 14), "HS", fill=hx("4a3a1a"))

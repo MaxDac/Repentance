@@ -170,17 +170,155 @@ class SceneImprovementsTests(unittest.TestCase):
 
     def test_eleanor_sheet_covers_lower_torso_not_neck(self):
         image = np.asarray(mansion._eleanor_in_bed())
-        sheet = np.all(image[:, :, :3] == common.hx("e8e0d0"), axis=2) & (image[:, :, 3] == 255)
+        cloth = np.asarray(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT))
+        sheet = cloth[:, :, 3] == 255
+        np.testing.assert_array_equal(image[sheet], cloth[sheet])
         ys, _ = np.nonzero(sheet)
         self.assertGreater(len(ys), 20)
-        self.assertGreaterEqual(ys.min(), 27)
+        self.assertGreaterEqual(ys.min(), 19)
+        self.assertLessEqual(ys.min(), 22, "the white sheet must cover the marked chest area")
         self.assertGreater(ys.max(), 38)
+
+    def test_both_beds_use_the_same_eleanor_figure_with_room_linen(self):
+        from PIL import ImageOps
+        from art import motel
+        motel_figure = ImageOps.mirror(mansion._eleanor_in_bed())
+        mansion_figure = ImageOps.mirror(mansion._mansion_eleanor_in_bed())
+        np.testing.assert_array_equal(np.array(motel_figure.getchannel("A")), np.array(mansion_figure.getchannel("A")))
+        skin = np.array(ImageOps.mirror(mansion._bare_eleanor()))
+        cloth = np.array(ImageOps.mirror(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT)))
+        bare = (skin[:, :, 3] == 255) & (cloth[:, :, 3] == 0)
+        np.testing.assert_array_equal(np.array(motel_figure)[bare], np.array(mansion_figure)[bare])
+        bedroom = mansion.paint_bedroom("eleanor")
+        bx, by = mansion._eleanor_origin(mansion.Room3D(mansion.BFL, 240, 100))
+        night = motel.paint_night()
+        for room, (x, y), figure in ((bedroom, (bx, by), mansion_figure), (night, motel.ELEANOR_ORIGIN, motel_figure)):
+            opaque = np.array(figure.getchannel("A")) == 255
+            crop = np.array(room.crop((x, y, x + figure.width, y + figure.height)))
+            shown = opaque.copy()
+            if room is night:
+                # The motel trims only the lap-sheet spill behind its near head post.
+                shown[20:, motel.HEAD_POST_X - x:] = False
+            np.testing.assert_array_equal(crop[shown], np.array(figure)[:, :, :3][shown])
+        for name in ("motel_night", "mansion_bed"):
+            image = np.array(Image.open(self.generated / "rooms" / f"{name}.png").convert("RGB"))
+            white = (image.min(axis=2) >= 100) & (image.max(axis=2) - image.min(axis=2) <= 20)
+            self.assertGreater(np.count_nonzero(white), 60, f"{name}: white linen disappeared during quantization")
+        for color in (mansion.SHEET, mansion.SHEET_LIT):
+            self.assertLessEqual(max(color), 155, "motel linen should not glow against the night room")
+        from art import sprites
+        self.assertEqual(mansion.MANSION_SHEET, common.hx(sprites.ELEANOR_SHEET["torso"]),
+                         "Harrington's sheet is the white one Eleanor later wraps herself in")
+
+    def test_mansion_sheet_covers_the_whole_bed_with_her_body_beneath(self):
+        image = np.asarray(mansion.paint_bedroom("eleanor")).astype(int)
+        white = (image.min(axis=2) >= 150) & (image.max(axis=2) - image.min(axis=2) <= 24)
+        R = mansion.Room3D(mansion.BFL, 240, 100)
+        x0, x1, z1 = mansion.BED["x0"], mansion.BED["x1"], mansion.BED["z1"]
+        left, right = int(R.P(x0, 0, z1 + 4)[0]) + 2, int(R.P(x1, 0, z1)[0]) - 2
+        drape = white[187:198, left:right]
+        self.assertTrue(drape.all(axis=0).all(), "the sheet must hang over the full length of the bed")
+        crest = [int(np.argmax(white[150:190, x])) + 150 for x in range(left, right)]
+        feet, knees = min(crest[316 - left:328 - left]), min(crest[346 - left:360 - left])
+        hollow = max(crest[333 - left:340 - left])
+        mattress = int(R.P(x0, mansion.BED["top"], z1)[1])
+        self.assertLess(knees, mattress - 8, "her knees must lift the sheet")
+        self.assertLess(feet, mattress - 5, "her feet must lift the sheet")
+        self.assertGreater(hollow, max(feet, knees) + 1, "the shins dip between feet and knees")
+        outside = white[175:206, :int(R.P(x0 - 4, 0, z1)[0]) - 1]
+        self.assertFalse(outside.any(), "the sheet must not spill past the foot posts")
+        head_post = int(R.P(x1 + 4, 0, z1 + 4)[0]) + 1
+        self.assertFalse(white[186:206, head_post:head_post + 12].any(), "the sheet must not spill past the head posts")
+
+    def test_sheet_spreads_over_the_lap_instead_of_clipping_to_the_standing_body(self):
+        body = np.asarray(mansion._bare_eleanor())
+        cloth = np.asarray(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT))
+        mask = cloth[:, :, 3] == 255
+        self.assertGreater(np.count_nonzero(mask & (body[:, :, 3] == 0)), 100)
+        self.assertGreater(np.count_nonzero(mask[38]), np.count_nonzero(mask[25]) + 6)
+        lower_body = body[30:, :, 3] == 255
+        self.assertTrue(np.all(mask[30:][lower_body]), "the seated lap must cover the lower body")
+
+    def test_cotton_folds_have_finite_tapered_ends_and_curved_valleys(self):
+        outline = [(0, 0), (39, 0), (39, 39), (0, 39)]
+        flat = np.asarray(mansion.linen_surface((40, 40), outline, []), dtype=int)
+        with np.errstate(invalid="raise"):
+            folded = np.asarray(mansion.linen_surface((40, 40), outline, [
+                ([(10, 5), (13, 15), (23, 24), (20, 34)], 1.5, 30),
+            ]), dtype=int)
+        difference = flat[:, :, 0] - folded[:, :, 0]
+        self.assertGreater(difference[15, 13], 15)
+        self.assertGreater(difference[24, 23], 15)
+        self.assertLess(abs(difference[5, 10]), 2)
+        self.assertLess(abs(difference[34, 20]), 2)
+        self.assertGreater(difference[15, 13], difference[15, 23] + 10)
+        self.assertGreater(difference[24, 23], difference[24, 13] + 10)
+
+    def test_motel_head_moves_only_five_pixels_right_and_two_back(self):
+        from PIL import ImageOps
+        from art import sprites
+        figure = mansion._bare_eleanor()
+        skin = sprites.ELEANOR["skin"]
+        spec = dict(sprites.ELEANOR, torso=skin, pelvis=skin, sleeves=skin,
+                    coat=None, neckline=None, decals=[])
+        canonical = sprites.figure(spec, sprites.pose(16, arms=sprites._arms("side")),
+                                   sprites.FW, sprites.FH).convert("RGBA")
+        canonical.putalpha(canonical.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
+        bx, by, right, _ = canonical.getbbox()
+        self.assert_image_equal(figure.crop((8, 0, 28, 19)), canonical.crop((bx, by, right, by + 19)))
+        original = ImageOps.mirror(figure.crop((8, 0, 28, 19))).getbbox()
+        current = ImageOps.mirror(figure.crop((0, 0, figure.width, 19))).getbbox()
+        self.assertEqual(motel.ELEANOR_ORIGIN[0] + current[0] - (111 + original[0]), 5)
+        self.assertEqual(motel.ELEANOR_ORIGIN[1] + current[1] - (114 + original[1]), -2)
+
+    def test_motel_bed_shows_a_body_and_a_clean_frame(self):
+        flat = Image.new("RGBA", (480, 240), mansion.SHEET + (255,))
+        mound = np.asarray(motel.body_mound(flat, [motel.LEGS])).astype(int)[:, :, 0]
+        for x, y in motel.LEGS[1:-1]:
+            self.assertGreater(mound[y - 3, x], mound[y + 5, x] + 40, f"no leg relief at x={x}")
+        pair = np.asarray(motel.body_mound(flat, [motel.LEGS, motel.FAR_LEG])).astype(int)[:, :, 0]
+        self.assertFalse(np.array_equal(pair, mound), "the far leg adds no second ridge")
+        rails = np.asarray(Image.open(self.generated / "rooms" / "motel_night_rails.png").getchannel("A"))
+        self.assertEqual(rails[168:176, 50:130].max(), 0, "the near side rail reads as a floor line")
+        night = np.asarray(Image.open(self.generated / "rooms" / "motel_night.png").convert("RGB")).astype(int)
+        behind_post = night[130:165, motel.HEAD_POST_X + 2:motel.HEAD_POST_X + 7]
+        linen = (behind_post.min(axis=2) >= 70) & (np.ptp(behind_post, axis=2) <= 12)
+        self.assertEqual(np.count_nonzero(linen), 0, "cotton hangs through the head frame")
+
+    def test_neutral_linen_does_not_repaint_either_foreground_frame(self):
+        mask = Image.new("RGBA", (480, 240))
+        motel.bed_rails_night(mask)
+        foreground = np.asarray(mask.getchannel("A")) == 255
+        with patch.object(motel, "white_bed_linen"):
+            original = np.asarray(motel.paint_night(rails=True))[common.TOP:]
+        current = np.asarray(motel.paint_night(rails=True))[common.TOP:]
+        np.testing.assert_array_equal(current[foreground], original[foreground])
+
+        mask = Image.new("RGBA", (480, 270))
+        mansion._bed_front(mask, mansion.Room3D(mansion.BFL, 240, 100))
+        foreground = np.asarray(mask.getchannel("A")) == 255
+        with patch.object(mansion, "_restamp_white_sheet"):
+            original = np.asarray(mansion.paint_bedroom("eleanor"))
+        current = np.asarray(mansion.paint_bedroom("eleanor"))
+        np.testing.assert_array_equal(current[foreground], original[foreground])
+
+    def test_mansion_bed_has_no_side_rail_across_the_bedding(self):
+        R = mansion.Room3D(mansion.BFL, 240, 100)
+        mask = Image.new("RGBA", (480, 270))
+        mansion._bed_front(mask, R)
+        alpha = np.asarray(mask.getchannel("A")) == 255
+        x0, x1, z1 = mansion.BED["x0"], mansion.BED["x1"], mansion.BED["z1"]
+        left, right = R.P(x0 + 1, 0, z1)[0], R.P(x1 - 1, 0, z1)[0]
+        top_of_base = int(R.P(x0, 5, z1 + 3)[1])
+        bottom_of_cover = int(R.P(x0, 24, z1 + 1)[1])
+        between_posts = alpha[bottom_of_cover:top_of_base, int(left) + 1:int(right)]
+        self.assertFalse(between_posts.any(), "no frame rail may cross the hanging bedding")
 
     def test_bed_sprites_reconstruct_both_room_states(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
         base = mansion.paint_bedroom()
         occupied, empty = mansion.paint_bedroom("eleanor"), mansion.paint_bedroom("empty")
-        pal = common.palette_of(Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3), 124)
+        pal = mansion.bedroom_palette(base, occupied, empty)
         for name, variant, node in (("mansion_bed", occupied, "Bed"),
                                     ("mansion_bed_empty", empty, "BedEmpty")):
             block = re.search(rf'\[node name="{node}" type="Sprite2D"[^\]]*\]([^\[]*)', scene)[1]

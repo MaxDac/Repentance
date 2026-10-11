@@ -484,8 +484,11 @@ def l_walls(img):
     # cracks and damp in the old plaster
     d.line([LR.P(150, 96, 0), LR.P(156, 80, 0), LR.P(150, 66, 0), LR.P(158, 52, 0)], fill=hx("4a443c"))
     d.line([LR.P(XR, 90, 30), LR.P(XR, 74, 38), LR.P(XR, 66, 34)], fill=hx("4a443c"))
-    for box in ([160, 150, 230, 196], [XL - 40, 120, XL + 10, 210]):
+    for box in ([160, 150, 230, 196], [XL - 40, 120, XL + 10, 210], [250, 70, 310, 118]):
         shadow(img, "ellipse", box, 0.2, 12, hx("6a5a48"))
+    # a nail where a picture used to hang, and a tide-mark of damp. Still a poor cell.
+    d.point(LR.P(200, 78, 0), fill=hx("2a2620"))
+    d.line([LR.P(188, 92, 0), LR.P(214, 96, 0), LR.P(206, 108, 0)], fill=hx("7a6a58"))
     # dark skirting where floor meets the walls
     for x0, x1 in ((XL, XL), (XR, XR)):
         d.polygon([LR.P(x0, 0, 0), LR.P(x0, 6, 0), LR.P(x1, 6, L_ZM), LR.P(x1, 0, L_ZM)], fill=hx("3a3430"))

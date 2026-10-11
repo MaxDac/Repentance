@@ -228,33 +228,50 @@ def supine_frame(spec, name, wound=None):
     """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
     with the body resting on the row the standing figure's soles touch. wound: where along the body (0 = head, 1 = feet)
     a gunshot has soaked the clothes, with a pool of blood on the ground beneath it."""
-    if wound is None:
-        img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST)
-        action_strip(name, [(img, head)], [1])
-        return img
+    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST)
     from PIL import Image, ImageDraw, ImageChops
-    stand = figure(spec, pose(90), FW, FH)
-    a = stand.getchannel("A").point(lambda v: 255 if v >= 250 else 0)  # drop the soft ground shadow
-    stand.putalpha(a)
-    box = stand.getbbox()
-    body = stand.crop(box).rotate(90, expand=True)
-    w = max(FW, body.width + 6) + (20 if wound is not None else 0)
-    img = Image.new("RGBA", (w, FH), (0, 0, 0, 0))
-    x0, y0 = (w - body.width) // 2, box[3] - body.height
     if wound is not None:
-        wx = x0 + int(body.width * wound)
-        ImageDraw.Draw(img).ellipse([wx - 14, box[3] - 3, wx + 12, box[3] + 1], fill=(112, 14, 18, 255))
-    img.alpha_composite(body, (x0, y0))
-    if wound is not None:
-        stain = Image.new("RGBA", body.size, (0, 0, 0, 0))
+        stain = Image.new("RGBA", img.size)
         sd = ImageDraw.Draw(stain)
-        bx = int(body.width * wound)
-        sd.ellipse([bx - 5, -2, bx + 5, body.height // 2], fill=(138, 18, 22, 255))
-        sd.ellipse([bx - 2, 0, bx + 1, 3], fill=(176, 30, 30, 255))
-        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), body.getchannel("A")))
-        img.alpha_composite(stain, (x0, y0))
-    save(img, "sprites", f"{name}.png")
+        bx = round(head[0] + (98 - head[0]) * wound)
+        sd.ellipse([bx - 5, 79, bx + 5, 86], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+        img.alpha_composite(stain)
+    action_strip(name, [(img, head)], [1])
     return img
+
+
+def door_strip(spec, name, yaw):
+    """Reach for a knob, pull, and settle. The near arm (screen-right) does the work; facing left flips it."""
+    fw = FW + 28
+    poses = (
+        pose(yaw),
+        pose(yaw, arms={-1: ("swing", 78, 6, 4), 1: ("swing", 6, 6, 14)}, lean=5.0),
+        pose(yaw, arms={-1: ("swing", 34, 2, 36), 1: ("swing", 4, 6, 16)}, lean=8.0, shift=0.01),
+        pose(yaw),
+    )
+    frames = [(figure(spec, ps, fw, FH), (fw / 2, 18)) for ps in poses]
+    action_strip(name, frames, [0.16, 0.22, 0.28, 0.16], anchor=(fw / 2, FH - 3))
+    return frames
+
+
+def fall_strip(spec, name):
+    """Drop onto both knees, pitch forward, and settle face-down without a final texture jump."""
+    from PIL import Image
+
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    keys = [
+        [(65, 67), (75, 43), (80, 29), (68, 88), (42, 91), (84, 63), (87, 76)],
+        [(67, 76), (88, 62), (103, 58), (60, 88), (42, 91), (98, 78), (110, 90)],
+        HARRINGTON_PRONE,
+    ]
+    standing = Image.new("RGBA", (192, FH))
+    standing.alpha_composite(figure(spec, pose(35, arms=_arms("down", "pocket")), NPC_W, FH),
+                             ((192 - NPC_W) // 2, 0))
+    frames = [(standing, (96, 18))] + [action_figure(scaled, joints) for joints in keys]
+    action_strip(name, frames, [0.12, 0.35, 0.18, 0.3])
+    action_strip("harrington_shot", [frames[-1]], [1])
+    return frames
 
 
 def falling_frame(spec, name):
@@ -307,7 +324,8 @@ def aim_frame(spec, name):
 
 
 # Hip, shoulder, head, near knee/ankle, elbow/hand, before grounding into the wide action frame.
-REST = [(66, 83), (43, 81), (29, 79), (84, 86), (104, 91), (51, 89), (66, 91)]
+REST = [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (51, 91), (66, 91)]
+HARRINGTON_PRONE = [(78, 83), (101, 83), (115, 83), (60, 83), (42, 83), (100, 91), (114, 91)]
 SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
@@ -383,6 +401,9 @@ def build():
     aim_frame(MICAH, "micah_aim")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
+    door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
+    door_strip(TEDDY, "teddy_open_door", 35)
+    door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
@@ -393,7 +414,7 @@ def build_act3():
     supine_frame(SAL, "sal_supine")
     supine_frame(BARTENDER, "bartender_shot", wound=0.74)
     falling_frame(HARRINGTON_GOWN, "harrington_falling")
-    supine_frame(HARRINGTON_GOWN, "harrington_shot", wound=0.44)
+    fall_strip(HARRINGTON_GOWN, "harrington_fall")
     desk_frame(MICAH, "micah_desk")
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)

@@ -221,7 +221,12 @@ def labels(img):
     text(img, (196, 140), "LOOP", faint, size=8) if False else None
     text(img, (60, 128), "WEST SIDE", faint, size=8)
     text(img, (262, 28), "NORTH SIDE", faint, size=8)
-    text(img, (150, 252), "SOUTH SIDE", faint, size=8)
+    text(img, (78, 208), "SOUTH SIDE", faint, size=8)
+    # stock-yards hatch, west of the river so the south edge is not an empty paper margin
+    d = ImageDraw.Draw(img)
+    d.rectangle([16, 218, 58, 250], outline=mix(INK, PAPER_D, 0.35))
+    for x in range(20, 54, 6):
+        d.line([(x, 222), (x, 246)], fill=mix(INK, PAPER_D, 0.45))
 
 
 def creases(img):

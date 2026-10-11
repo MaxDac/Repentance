@@ -111,8 +111,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   bed, under the sheet.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
-- After their goodbye, Eleanor props herself up, sits at the bed's edge, plants her feet, and rises holding the
-  sheet over herself. The scene then fades back to the attic.
+- Eleanor remains in bed against the pillows, covered by the white sheet. She does not rise.
+  The scene then fades back to the attic.
 
 ### End of Act 1 - Present day
 
