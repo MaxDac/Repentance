@@ -179,15 +179,21 @@ class SceneImprovementsTests(unittest.TestCase):
         self.assertLessEqual(ys.min(), 22, "the white sheet must cover the marked chest area")
         self.assertGreater(ys.max(), 38)
 
-    def test_both_beds_use_the_same_visible_white_sheet_figure(self):
+    def test_both_beds_use_the_same_eleanor_figure_with_room_linen(self):
         from PIL import ImageOps
         from art import motel
-        figure = ImageOps.mirror(mansion._eleanor_in_bed())
-        opaque = np.array(figure.getchannel("A")) == 255
+        motel_figure = ImageOps.mirror(mansion._eleanor_in_bed())
+        mansion_figure = ImageOps.mirror(mansion._mansion_eleanor_in_bed())
+        np.testing.assert_array_equal(np.array(motel_figure.getchannel("A")), np.array(mansion_figure.getchannel("A")))
+        skin = np.array(ImageOps.mirror(mansion._bare_eleanor()))
+        cloth = np.array(ImageOps.mirror(mansion._sheet_on(mansion._bare_eleanor(), mansion.SHEET, mansion.SHEET_LIT)))
+        bare = (skin[:, :, 3] == 255) & (cloth[:, :, 3] == 0)
+        np.testing.assert_array_equal(np.array(motel_figure)[bare], np.array(mansion_figure)[bare])
         bedroom = mansion.paint_bedroom("eleanor")
         bx, by = mansion._eleanor_origin(mansion.Room3D(mansion.BFL, 240, 100))
         night = motel.paint_night()
-        for room, (x, y) in ((bedroom, (bx, by)), (night, motel.ELEANOR_ORIGIN)):
+        for room, (x, y), figure in ((bedroom, (bx, by), mansion_figure), (night, motel.ELEANOR_ORIGIN, motel_figure)):
+            opaque = np.array(figure.getchannel("A")) == 255
             crop = np.array(room.crop((x, y, x + figure.width, y + figure.height)))
             shown = opaque.copy()
             if room is night:
@@ -198,8 +204,31 @@ class SceneImprovementsTests(unittest.TestCase):
             image = np.array(Image.open(self.generated / "rooms" / f"{name}.png").convert("RGB"))
             white = (image.min(axis=2) >= 100) & (image.max(axis=2) - image.min(axis=2) <= 20)
             self.assertGreater(np.count_nonzero(white), 60, f"{name}: white linen disappeared during quantization")
-            for color in (mansion.SHEET, mansion.SHEET_LIT):
-                self.assertLessEqual(max(color), 155, "linen should not glow against the night room")
+        for color in (mansion.SHEET, mansion.SHEET_LIT):
+            self.assertLessEqual(max(color), 155, "motel linen should not glow against the night room")
+        from art import sprites
+        self.assertEqual(mansion.MANSION_SHEET, common.hx(sprites.ELEANOR_SHEET["torso"]),
+                         "Harrington's sheet is the white one Eleanor later wraps herself in")
+
+    def test_mansion_sheet_covers_the_whole_bed_with_her_body_beneath(self):
+        image = np.asarray(mansion.paint_bedroom("eleanor")).astype(int)
+        white = (image.min(axis=2) >= 150) & (image.max(axis=2) - image.min(axis=2) <= 24)
+        R = mansion.Room3D(mansion.BFL, 240, 100)
+        x0, x1, z1 = mansion.BED["x0"], mansion.BED["x1"], mansion.BED["z1"]
+        left, right = int(R.P(x0, 0, z1 + 4)[0]) + 2, int(R.P(x1, 0, z1)[0]) - 2
+        drape = white[187:198, left:right]
+        self.assertTrue(drape.all(axis=0).all(), "the sheet must hang over the full length of the bed")
+        crest = [int(np.argmax(white[150:190, x])) + 150 for x in range(left, right)]
+        feet, knees = min(crest[316 - left:328 - left]), min(crest[346 - left:360 - left])
+        hollow = max(crest[333 - left:340 - left])
+        mattress = int(R.P(x0, mansion.BED["top"], z1)[1])
+        self.assertLess(knees, mattress - 8, "her knees must lift the sheet")
+        self.assertLess(feet, mattress - 5, "her feet must lift the sheet")
+        self.assertGreater(hollow, max(feet, knees) + 1, "the shins dip between feet and knees")
+        outside = white[175:206, :int(R.P(x0 - 4, 0, z1)[0]) - 1]
+        self.assertFalse(outside.any(), "the sheet must not spill past the foot posts")
+        head_post = int(R.P(x1 + 4, 0, z1 + 4)[0]) + 1
+        self.assertFalse(white[186:206, head_post:head_post + 12].any(), "the sheet must not spill past the head posts")
 
     def test_sheet_spreads_over_the_lap_instead_of_clipping_to_the_standing_body(self):
         body = np.asarray(mansion._bare_eleanor())

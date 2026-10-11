@@ -1190,6 +1190,15 @@ LINEN_PALETTE = [SHEET, SHEET_LIT, SHEET_FOLD, SHEET_SIDE] + [
     tuple(round(a + (b - a) * k / 9) for a, b in zip(SHEET_FOLD, SHEET_LIT))
     for k in range(10)
 ]
+# Harrington's sheet is the same white cotton Eleanor later wraps herself in (sprites.ELEANOR_SHEET).
+MANSION_SHEET = hx("e8e4dc")
+MANSION_SHEET_LIT = hx("fffff8")
+MANSION_SHEET_SIDE = hx("c8c4bc")
+MANSION_SHEET_FOLD = hx("aca8a5")
+MANSION_LINEN_PALETTE = [MANSION_SHEET, MANSION_SHEET_LIT, MANSION_SHEET_SIDE, MANSION_SHEET_FOLD] + [
+    tuple(round(a + (b - a) * k / 9) for a, b in zip(MANSION_SHEET_FOLD, MANSION_SHEET_LIT))
+    for k in range(10)
+]
 
 
 def linen_surface(size, outline, folds, fill=SHEET, falloff=0.35, loft=None):
@@ -1246,7 +1255,7 @@ def _bare_eleanor():
     return seated
 
 
-def _sheet_on(figure, fill, hem):
+def _sheet_on(figure, fill, hem, side=SHEET_SIDE):
     w, h = figure.size
     outline = [(8, 20), (14, 21), (22, 20), (26, 19), (28, 23), (27, 29),
                (30, 34), (w - 1, 38), (w - 2, 41), (26, h - 1),
@@ -1260,14 +1269,50 @@ def _sheet_on(figure, fill, hem):
     ], fill, falloff=0.7, loft=[(17, 27, 8, 6, 11), (23, 35, 9, 3, 8)])
     d = ImageDraw.Draw(sheet)
     d.line([(8, 20), (14, 21), (22, 20), (26, 19)], fill=hem + (255,))
-    d.line([(9, 22), (14, 23), (21, 22)], fill=SHEET_SIDE + (255,))
+    d.line([(9, 22), (14, 23), (21, 22)], fill=side + (255,))
     return sheet
 
 
-def _eleanor_in_bed():
+def _eleanor_in_bed(fill=SHEET, hem=SHEET_LIT, side=SHEET_SIDE):
     """Eleanor sitting up against the pillows, bare shoulders; the sheet covers her from the chest down."""
     figure = _bare_eleanor()
-    return Image.alpha_composite(figure, _sheet_on(figure, SHEET, SHEET_LIT))
+    return Image.alpha_composite(figure, _sheet_on(figure, fill, hem, side))
+
+
+def _mansion_eleanor_in_bed():
+    return _eleanor_in_bed(MANSION_SHEET, MANSION_SHEET_LIT, MANSION_SHEET_SIDE)
+
+
+def _full_sheet(img):
+    """One white sheet over the whole mattress: feet and knees lift it toward the foot, it pools into her lap at the
+    head, and its front hangs in unequal scallops over the coverlet, kept inside the posts."""
+    w, h = img.size
+    side = linen_surface((w, h), [
+        (311, 184), (322, 185), (336, 184), (352, 185), (368, 184), (384, 185), (399, 184),
+        (399, 199), (396, 203), (387, 202), (378, 204), (367, 202), (356, 204),
+        (344, 202), (333, 204), (322, 202), (313, 204), (311, 199),
+    ], [
+        ([(318, 185), (316, 193), (318, 202)], 1.6, 30),
+        ([(331, 185), (334, 193), (332, 203)], 1.8, 34),
+        ([(350, 185), (347, 194), (350, 203)], 1.9, 34),
+        ([(366, 185), (369, 193), (366, 202)], 1.7, 30),
+        ([(383, 185), (380, 194), (383, 203)], 1.6, 28),
+    ], MANSION_SHEET_SIDE, falloff=0.9, loft=[(355, 185, 60, 2.5, -12)])
+    top = linen_surface((w, h), [
+        (310, 183), (314, 180), (318, 176), (323, 173), (327, 174), (331, 177),
+        (337, 178), (344, 174), (350, 170), (356, 169), (362, 171), (368, 175),
+        (376, 178), (388, 180), (399, 181), (399, 186), (384, 186), (368, 186),
+        (352, 186), (336, 186), (322, 186), (310, 186),
+    ], [
+        ([(316, 182), (330, 183), (348, 182), (366, 183)], 1.6, 46),
+        ([(330, 176), (333, 180), (337, 183)], 1.2, 30),
+        ([(360, 172), (364, 177), (370, 181)], 1.2, 26),
+        ([(343, 176), (349, 178), (356, 178)], 1.0, 18),
+    ], MANSION_SHEET, falloff=0.9, loft=[(323, 175, 4, 2, 8), (354, 172, 7, 3, 10)])
+    img.paste(side, (0, 0), side)
+    img.paste(top, (0, 0), top)
+    # the cotton tucked tight between her shins and hip
+    shadow(img, "ellipse", [336, 180, 346, 186], 0.12, 1)
 
 
 def _eleanor_origin(R):
@@ -1278,19 +1323,13 @@ def _eleanor_origin(R):
 
 
 def _restamp_white_sheet(img, R):
-    """Restore the shared lamp-lit face and neutral cotton after the room's rose-colored grade."""
+    """Restore the shared lamp-lit face and Harrington's white cotton after the room's rose-colored grade."""
     from PIL import ImageOps
     before = img.copy()
     frame = Image.new("RGBA", img.size)
     _bed_front(frame, R)
-    x1, z0, z1, top = BED["x1"], BED["z0"], BED["z1"], BED["top"]
-    head = linen_surface(img.size, [
-        R.P(x1 - 18, top, z0 + 1), R.P(x1 - 1, top, z0 + 1),
-        R.P(x1 - 1, top, z1 - 1), R.P(x1 - 1, 7, z1 - 1),
-        R.P(x1 - 12, 8, z1 - 1), R.P(x1 - 18, 11, z1 - 1),
-    ], [([(387, 184), (390, 190), (389, 201)], 1.3, 21)],
-        SHEET, falloff=0.7)
-    img.paste(head, (0, 0), head)
+    x1, z0, top = BED["x1"], BED["z0"], BED["top"]
+    _full_sheet(img)
     for dz, dy in ((z0 + 8, 0), (z0 + 22, 0), (z0 + 14, 5)):
         a, b = R.P(x1 - 20, top + 12 + dy, dz), R.P(x1 - 1, top + dy, dz + 14)
         ax, ay, bx, by = a[0], a[1], b[0], b[1]
@@ -1298,16 +1337,16 @@ def _restamp_white_sheet(img, R):
             (ax + 3, ay), (bx - 4, ay + 1), (bx - 1, ay + 4), (bx, by - 3),
             (bx - 3, by), (ax + 2, by - 1), (ax, by - 4), (ax + 1, ay + 3),
         ], [([(ax + 3, by - 2), (bx - 7, by - 3), (bx - 3, by - 6)], 1.1, 19)],
-            SHEET, falloff=0.5, loft=[((ax + bx) / 2, (ay + by) / 2, 9, 5, 15)])
+            MANSION_SHEET, falloff=0.5, loft=[((ax + bx) / 2, (ay + by) / 2, 9, 5, 15)])
         img.paste(pillow, (0, 0), pillow)
-    figure = ImageOps.mirror(_eleanor_in_bed())
+    figure = ImageOps.mirror(_mansion_eleanor_in_bed())
     img.paste(figure, _eleanor_origin(R), figure)
     img.paste(before, (0, 0), frame.getchannel("A"))
 
 
 def bedroom_palette(base, occupied, empty):
     pal = palette_of(Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3), 124)
-    for color in LINEN_PALETTE:
+    for color in MANSION_LINEN_PALETTE:
         if color not in pal:
             pal.append(color)
     return pal
@@ -1315,7 +1354,7 @@ def bedroom_palette(base, occupied, empty):
 
 def _bed(img, R, who):
     """The walnut bed, side-on with its head to the right by the nightstand: a tall carved headboard, a low footboard,
-    pillows and a rose satin coverlet hanging to the rail. who: "eleanor" (sitting up against the pillows) or "empty"."""
+    pillows and a bare white mattress. who: "eleanor" (sitting up under the sheet) or "empty"."""
     x0, x1, z0, z1, top = BED["x0"], BED["x1"], BED["z0"], BED["z1"], BED["top"]
     WAL, WAL_D, WAL_L = hx("4a2a18"), hx("24140a"), hx("7a4a2a")
     shadow(img, "polygon", [R.P(x0 - 6, 0, z0), R.P(x1 + 6, 0, z0), R.P(x1 + 8, 0, z1 + 6), R.P(x0 - 8, 0, z1 + 6)], 0.6, 3)
@@ -1338,35 +1377,11 @@ def _bed(img, R, who):
         d.line([(a[0] + 3, b[1] - 2), (b[0] - 3, b[1] - 2)], fill=hx("d8d0c0"))
         if who == "empty" and k == 2:
             d.ellipse([a[0] + 5, a[1] + 3, a[0] + 13, a[1] + 7], fill=hx("d8d0c0"))  # the dent where her head was
-    cover_end = x1 - 18 if who == "eleanor" else x1 - 44
     if who == "eleanor":
         from PIL import ImageOps
-        el = ImageOps.mirror(_eleanor_in_bed())
+        el = ImageOps.mirror(_mansion_eleanor_in_bed())
         img.paste(el, _eleanor_origin(R), el)
-        d = ImageDraw.Draw(img)
-    # the coverlet over the top and down the front, a turned-down sheet at its head
-    ce = cover_end
-    R.quad(img, [(x0 - 1, top + 2, z0 + 1), (ce, top + 2, z0 + 1), (ce, top + 1, z1 + 1), (x0 - 1, top + 1, z1 + 1)], hx("a85a66"))
-    R.quad(img, [(ce - 6, top + 2.5, z0 + 1), (ce, top + 2.5, z0 + 1), (ce, top + 1.5, z1 + 1), (ce - 6, top + 1.5, z1 + 1)], hx("f4f0e6"))
-    R.quad(img, [(x0 - 1, top + 1, z1 + 1), (ce, top + 1, z1 + 1), (ce, 4, z1 + 1), (x0 - 1, 4, z1 + 1)], hx("8a4450"))
-    R.quad(img, [(ce - 6, top + 1.5, z1 + 1), (ce, top + 1.5, z1 + 1), (ce, 8, z1 + 1), (ce - 6, 10, z1 + 1)], hx("e4dccc"))
-    d = ImageDraw.Draw(img)
-    a, b = R.P(x0 - 1, 4, z1 + 1), R.P(ce, 4, z1 + 1)
-    d.line([a, b], fill=GILT)
-    for x in range(int(a[0]) + 1, int(b[0]), 2):
-        d.point((x, a[1] + 1), fill=hx("e0c070"))
-    n = max(2, int((ce - x0) / 12))
-    for k in range(n):  # satin folds
-        xa = x0 + 6 + k * (ce - x0 - 10) / n
-        d.line([R.P(xa, top - 2, z1 + 1), R.P(xa + 3, 6, z1 + 1)], fill=hx("6a2a36"))
-        d.line([R.P(xa + 2, top - 3, z1 + 1), R.P(xa + 5, 8, z1 + 1)], fill=hx("c87a84"))
-    if who == "empty":  # the sheet went with her; the coverlet thrown back in a heap
-        R.quad(img, [(ce, top + 0.5, z1 + 1), (x1, top + 0.5, z1 + 1), (x1, 8, z1 + 1), (ce, 8, z1 + 1)], hx("ddd4c2"))
-        d = ImageDraw.Draw(img)
-        a = R.P(ce - 4, top + 6, z1 - 6)
-        d.ellipse([a[0] - 10, a[1] - 3, a[0] + 8, a[1] + 7], fill=hx("b0606c"), outline=hx("6a2a36"))
-        d.line([R.P(ce + 4, top + 1, z1 - 4), R.P(x1 - 22, top + 1, z0 + 6)], fill=hx("c0b6a2"))
-        d.line([R.P(ce + 2, 20, z1 + 1), R.P(ce + 8, 10, z1 + 1)], fill=hx("c0b6a2"))
+    # No coverlet: the sheet is all that covered the mattress, and it went with her when she rose.
     _bed_front(img, R)
 
 
