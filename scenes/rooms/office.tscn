@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=33 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Office.cs" id="1_Office"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office.png" id="2_office"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="6_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/teddy.png" id="8_teddy"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/micah_desk.png" id="11_micah_desk"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(72, 109)
@@ -98,10 +99,21 @@ metadata/facing = 3
 position = Vector2(58, 172)
 metadata/facing = 1
 
+[node name="act3" type="Marker2D" parent="Entries"]
+position = Vector2(249, 170)
+metadata/facing = 1
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="MicahDesk" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(249, 106)
+texture = ExtResource("11_micah_desk")
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "micah_at_desk"
 
 [node name="DrawerOpen" type="Sprite2D" parent="."]
 position = Vector2(276, 139)
