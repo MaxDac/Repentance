@@ -397,8 +397,8 @@ shape = SubResource("Rect_11")
 [node name="Dollar" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")
 Id = "dollar"
-DisplayName = "dollar bill"
-LookText = "A dollar. My life savings, in a single convenient note."
+DisplayName = "case cash"
+LookText = "Twenty-two dollars for the case. A day's fee and two dollars left from the last job."
 WalkTo = Vector2(309, 192)
 Face = 2
 ShowIfFlags = "drawer_open"

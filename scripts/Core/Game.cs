@@ -314,7 +314,9 @@ public partial class Game : Node
         switch (verb)
         {
             case Verb.Look:
-                await Say(Items.Get(item).Description);
+                await Say(item == "dollar"
+                    ? $"${CashRules.Balance(GameState.Instance.HasFlag)} in cash. A dollar for the bellboy; ten for Sal. What's left stays in my pocket."
+                    : Items.Get(item).Description);
                 break;
             case Verb.Hand:
                 Hud.ShowInventory(false);

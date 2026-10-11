@@ -20,11 +20,15 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Micah's office
 
-- Micah's thoughts, then the conversation with Teddy Harrington III about his missing fiancée, Eleanor
+- Micah's thoughts, then the conversation with Teddy Harrington III about his missing wife, Eleanor
   Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
-- The top drawer of the desk holds a revolver, the money (one dollar) and a lockpick. Micah takes all three
+- The top drawer of the desk holds a revolver, the money ($22 cash) and a lockpick. Micah takes all three
   (the bottom drawer only holds unpaid bills).
+  The cash is framed as his existing fictional $20 daily fee plus $2 from a previous job, not a claim
+  about average PI income. For purchasing-power context, the
+  [NBER/BLS manufacturing weekly-earnings series](https://fred.stlouisfed.org/series/M08261USM052NNBR)
+  reports $24.37 for October 1927; the $10 Sal bribe is a substantial payment, not an ordinary tip.
 - Micah can't get out of his office without having taken these items.
 - The door leads to the Aurelian Hotel lobby.
 
@@ -32,7 +36,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
-- Micah has to bribe the bellboy with the dollar; the bellboy lets him take the staff elevator up to
+- Micah has to bribe the bellboy with $1 from his cash; the bellboy lets him take the staff elevator up to
   Eleanor's room (and mentions the Blue Lantern).
 - Before the bribe, the revolving door leads out to the street.
 - **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
@@ -59,7 +63,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club (the Blue Lantern speakeasy)
 
-- At the door, Sal the guard asks for the password. Micah doesn't know it and has to bribe his way in again.
+- At the door, Sal the guard asks for the password. Micah doesn't know it and can give him $10 as a bribe.
+  Micah starts with $22, twice the combined $1 bellboy and $10 Sal payments. The cash remains in his inventory:
+  $21 after the bellboy and $11 after Sal. Repeated conversations never charge either bribe again.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
 - Until Sal lets him in, Sal blocks the way to the bar.
 - If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
@@ -80,8 +86,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Two new locations in neo-gothic style: the convent corridor, and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
 - In the corridor, Sister Agatha interrogates Micah: what he's doing here and what he wants with Eleanor.
-  She hints at Micah's biblical name as a prophet, and says the exact words "you would be better off finish the
-  search now, and never have anything to do with that Jezebel". Micah asks what she means; she retreats, telling
+  She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "you would be better off finishing the
+  search now, and never having anything to do with that Jezebel". Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
 - **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
@@ -97,7 +103,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, he finds Eleanor there, outside, dressed in black. No one is passing.
 - She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
-- The scene ends when Eleanor says "I can't return back there..."
+- The scene ends when Eleanor says "I can't go back there..."
 
 #### Motel room, night
 
@@ -141,6 +147,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah walks over to his brother, Father Caleb, and talks about the situation. During the conversation he tells
   his brother that, right now, he's too far off to be saved.
 - Caleb replies that this is crap, no one is beyond salvation, and that thinking that is the Devil's work.
+  His original counsel remains: "Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace."
 - Micah replies "I'll think about that", then says that coming here was a mistake, and walks out. The scene moves
   to the map.
 
@@ -192,6 +199,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   of Eleanor.
   Micah will get near the MoC and ask whether he knows where she is, the MoC will say "Of course! Thanks to your 
   efforts, she is already with us, safe, and where she belongs!"
+  How his efforts led them to her remains uncertain; the MoC does not confirm a tail.
   Then the MoC will call a brute (another character, in normal dress, tie and jacket) and ask to escort Micah out.
 
 #### Streets of Chicago
@@ -216,6 +224,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   phrase will be available.
 - If the player decides to keep pushing at least three times, before going out of the location, the wife will call him
   back with a "Wait!": Micah will turn, a pause of at least 3 seconds, then the wife will say "Don't get into trouble again."
+- Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
+  Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
 - Then, the wife will close the door, and Micah will go out.
 
 #### Map of Chicago
@@ -230,6 +240,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
   return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
+  Keep the choice "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
+  in his sacristy; the established refuge is the convent.
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
   Micah will answer "There's little left for me to do, at this point."
@@ -255,6 +267,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - The Cathedral and Harrington father's office are available. Micah's office also remains accessible as an optional
   return and ring-pickup location; no completed lead reopens.
+- Caleb's warning retains "Repentance means more than asking nicely. Put the gun away." without an added
+  exact Scripture quotation. Before the masked Club visit, keep "God doesn't turn away a contrite heart, Micah.
+  You don't have to be whole to turn to Him."
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
   tell him not to go forward again.
   You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
@@ -323,6 +338,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Church, outside
 
 - Micah is supine on the pavement, again, beaten.
+- Before recovering, he admits: "I keep calling it saving her. But it's her I want. Her voice. Her skin.
+  Another night like that one." Then: "Rose and Tommy ought to be in my heart. Eleanor's there instead.
+  And God help me, I don't want to let her go." His motive is lust, conflicting with repentance and returning home.
 - He sits up and pushes himself to standing before the choice, with the same staged recovery as the street.
 - Again, his thoughts will appear as narrating voice, saying what is he doing.
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
@@ -334,9 +352,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Office
 
 - The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
+- After the opening desk line, he reflects: "Thanks to my efforts, he said. How'd they find her through me?
+  Somebody on my heels? Something I let slip?" Then: "Aw, what's the difference? They've got her just the same."
+  Neither a tail nor a betrayal is established as fact.
 - He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the
   Blue Lantern, the mob.
 - Micah stands up and the player regains control, with a final opportunity to collect a left-behind wedding ring.
+- Keep the original dismissal: "The convent's done with me. Caleb would sooner pray than talk.
+  The cops are on somebody's payroll."
+- Keep the reminder: "Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed
+  to be coming home to."
 - Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
 - Act 3 church visits include Caleb's counsel and the cross offer (regardless of the original ring decision), unless
   already accepted. They count as a church return and lead back to the office without replaying the desk scene.
@@ -384,6 +409,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Next area is Harrington father's bedroom: huge bedroom with king size bed, Elearon under the sheet naked, Harrington
   father in his dressing gown. He's talking with Eleanor, telling her that it's not too bad to have returned where she
   belongs.
+- Harrington refers to her established refuge: "You ran to the nuns", not a priest.
 - After the dialogue, Micah, who previusly hid behind something, shows up with his revolver pointed at the old man; the
   old man turns to Micah, Eleanor get out of bed covering herself with the sheets (you have to generate this character also).
 - The old man tells Micah that he doesn't have the guts to do that, and that Eleanor's place is here, she's just a whore.
@@ -396,7 +422,7 @@ described here (other verbs, flavour lines) is left to the implementation.
     - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
-    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this world... "
+    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this. All of it."
     and the scene skips to *End of Act 3*.
 
 ### End of Act 3
@@ -411,12 +437,15 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
   progressively stricter requirements above; the other endings are unchanged.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
+- He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
+  happen later, after he has begun showing change rather than merely promising it.
+  Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee."
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
 
 #### Option 2 - Outskirts, with Eleanor
 
 - Previously generated location
-- This ending is accessible only if Micah manages to convince Eleanor in the Harringtom mansion, and manages to make it explode
+- This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to make it explode
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
 - In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
@@ -426,14 +455,23 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Previously generated location
 - This ending is accessible if Micah didn't manage to convince Eleanor, and Micah either finds the documents in the mansion
   or make it explode.
+- Her fate remains unknown during escape; there is no evacuation narration.
+- Only if the mansion exploded and Eleanor refused to follow, the outskirts scene begins with "The next morning"
+  and does not describe the car door slamming in the dark. Micah reads: "The morning paper lists the dead.
+  Eleanor Harrington. There it is, in black and white." He admits: "I told myself I was saving her.
+  I left her there and lit the fuse." The fuse is figurative; the mechanism remains gas and a candle.
+  "They know who died. They don't know what I did." replaces the same-night orange-sky/secrecy line.
+- Documents-only escape has no newspaper death report. With Eleanor following, the outskirts scene stays
+  that night and she survives. Keep "She wouldn't come with me. Even with him on the carpet and the whole Club
+  on its way." on both alone routes.
 - You have to generate the car in this case also, Micah gets out of the car.
 - In this case, the journal ends with Micah shooting himself, and the last entry is stained with alcohol and blood.
 
 #### Option 4 - Prison - With Eleanor
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah managed to convince Eleanor, but didn't make the mansion explode or didn't find the
-  documents.
+- This ending is accessible if Micah managed to convince Eleanor, but neither made the mansion explode nor found the
+  signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
   jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
@@ -442,8 +480,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 5 - Prison - With brother
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah did not manage to convince Eleanor, and didn't make the mansion explode or didn't
-  find the documents.
+- This ending is accessible if Micah did not manage to convince Eleanor, and neither made the mansion explode nor
+  found the signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly
   says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
@@ -452,7 +490,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife, the father
-keeps the journal, saying "maybe Leo would like to read it some day". In all other endings, he throws the journal back
+keeps the journal, saying "Maybe Leo would like to read it some day." In all other endings, he throws the journal back
 in the trunk.
 
 ### Puzzle pacing and saves
@@ -465,6 +503,23 @@ motel map and burial survey are not part of the completed Act 3.
 
 All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
-The satchel has pages so every collected item remains accessible. Main's version-3 save format remains
-unchanged; completed discoveries in compatible older saves remain completed, using independent markers
+The satchel has pages so every collected item remains accessible. The current save format
+is version 5; earlier versions are incompatible with the revised cash inventory. Completed discoveries in
+compatible version-5 saves remain completed, using independent markers
 for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.
+
+### Scripture and adventure scope
+
+Sister Agatha's direct quotation uses [Douay-Rheims (Challoner), Micheas 6:8](https://drbo.org/chapter/38006.htm):
+"I will shew thee, O man, what is good." Micah recalls "love mercy".
+Caleb retains his original counsel, warning and contrite-heart paraphrase, without the added exact quotations.
+His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49015.htm), not a direct quotation. Religious objects remain
+reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
+
+The adventure remains a compact, single-case indie point-and-click: ten puzzles, the alley encounter, optional
+dialogue and five ending outcomes. No additional scenes or puzzles were added simply to inflate its length.
+Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)
+than the broader [Kathy Rain (2016)](https://store.steampowered.com/app/370910/),
+[Technobabylon](https://store.steampowered.com/app/307580/) or [Unavowed](https://store.steampowered.com/app/336140/).
+These are scope comparisons, not measured human completion times. Reading, solving puzzles, optional visits
+and replaying endings change duration; accelerated autoplay must not be advertised as adventure length.

@@ -56,7 +56,11 @@ public partial class Speakeasy : Room
                 await Say("sal", "I don't smoke. And I don't read. Password.");
                 return true;
             case ("sal", Verb.UseItem) when item == "dollar":
-                await Say("sal", "A buck? I get a buck for breathing.");
+                await Talk("sal");
+                if (State.HasFlag("sal_passed") && FindActor("sal") is { } paidSal)
+                    await paidSal.MoveTo(SalAside, 45);
+                else if (State.HasFlag("thrown_out"))
+                    await ThrownOut();
                 return true;
             case ("sal", Verb.Kick or Verb.Hand):
                 await Say("I'd have better luck pushing the Wrigley Building.");
