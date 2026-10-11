@@ -1,5 +1,6 @@
-"""An opulent old private library: dark wood shelves, firelight and scholarly clutter."""
+"""An opulent old private library: dark wood shelves, lamplight and scholarly clutter."""
 from PIL import Image, ImageDraw
+import math
 import random
 from .common import (W, H, TOP, hx, mul, vgrad, noise, light, shadow, vignette,
                      pixelize, palette_of, tall, save, floor_boards)
@@ -98,38 +99,47 @@ def fireplace(img):
     firebox = [x0 + 18, y0 + 14, x1 - 18, y1]
     vgrad(img, tuple(firebox), hx("26140c"), hx("0f0705"))
     d.rectangle(firebox, outline=hx("120806"))
-    for lx in range(firebox[0] + 6, firebox[2] - 6, 12):
-        d.line([(lx, firebox[3]), (lx + 10, firebox[1] + 24)], fill=hx("2a2a2a"))
+    for y in range(firebox[1] + 8, firebox[3], 9):
+        d.line([(firebox[0] + 2, y), (firebox[2] - 2, y)], fill=hx("34241e"))
+        for x in range(firebox[0] + 6 + (y // 9 % 2) * 8, firebox[2], 16):
+            d.line([(x, y - 8), (x, y)], fill=hx("34241e"))
     logs = [(206, 144, 236, 150), (230, 140, 260, 148), (246, 144, 278, 151)]
     for ax, ay, bx, by in logs:
         d.rectangle([ax, ay, bx, by], fill=hx("5c351f"))
         d.line([(ax + 2, ay + 1), (bx - 2, ay + 1)], fill=hx("7d5133"))
-    flame_cols = [hx("ffda7a"), hx("f49a28"), hx("ffd7b0"), hx("d95819")]
-    flames = [
-        [(214, 146), (220, 128), (230, 146)],
-        [(226, 148), (238, 120), (250, 148)],
-        [(244, 146), (258, 126), (270, 147)],
-    ]
-    for pts, col in zip(flames, flame_cols):
-        d.polygon(pts, fill=col)
-    d.ellipse([222, 146, 262, 154], fill=hx("f07424"))
-    light(img, "ellipse", [194, 110, 286, 170], hx("ffb45a"), 0.48, 16)
-    light(img, "ellipse", [148, 86, 330, 182], hx("905428"), 0.18, 24)
-    mantle_items(img)
+    for x in range(204, 284, 9):
+        d.line([(x, 135), (x, 151)], fill=hx("24262a"), width=2)
+        d.line([(x, 135), (x, 139)], fill=hx("585452"))
+    d.rectangle([202, 147, 284, 150], fill=hx("363638"))
+    d.line([(202, 147), (284, 147)], fill=hx("68605a"))
 
 
 def mantle_items(img):
     d = ImageDraw.Draw(img)
-    d.ellipse([202, 30, 276, 54], fill=hx("2a1711"))
-    d.ellipse([208, 34, 270, 50], fill=hx("cdb890"))
-    d.line([(239, 42), (250, 37)], fill=hx("28160f"))
-    d.line([(239, 42), (239, 33)], fill=hx("28160f"))
-    for x in (184, 289):
-        d.rectangle([x, 28, x + 9, 52], fill=hx("8c7a5a"))
-        d.ellipse([x - 2, 24, x + 11, 31], fill=hx("bca670"))
-        d.ellipse([x, 25, x + 9, 29], fill=hx("eadcb0"))
     d.rectangle([158, 46, 322, 58], fill=MAHOGANY_L)
     d.line([(160, 48), (320, 48)], fill=hx("8a5a3e"))
+    d.ellipse([223, 13, 255, 39], fill=hx("342018"), outline=GOLD)
+    d.rectangle([223, 26, 255, 44], fill=hx("42291e"))
+    d.rectangle([219, 43, 259, 46], fill=hx("6a4430"), outline=hx("28160f"))
+    d.line([(225, 28), (225, 42)], fill=hx("9a7044"))
+    d.line([(253, 28), (253, 42)], fill=hx("26140e"))
+    d.ellipse([228, 18, 250, 40], fill=GOLD)
+    d.ellipse([230, 20, 248, 38], fill=hx("e8dfc8"), outline=hx("725638"))
+    for i in range(12):
+        angle = i * math.pi / 6
+        x, y = round(239 + 7 * math.sin(angle)), round(29 - 7 * math.cos(angle))
+        d.point((x, y), fill=hx("362a20"))
+        if i % 3 == 0:
+            d.point((round(239 + 6 * math.sin(angle)), round(29 - 6 * math.cos(angle))), fill=hx("362a20"))
+    d.line([(239, 29), (239, 23)], fill=hx("302418"))
+    d.line([(239, 29), (243, 31)], fill=hx("302418"))
+    d.point((239, 29), fill=hx("9a6434"))
+    for x in (188, 293):
+        d.ellipse([x - 5, 43, x + 5, 46], fill=hx("a88a50"))
+        d.line([(x, 33), (x, 43)], fill=hx("b89a5a"), width=2)
+        d.ellipse([x - 3, 32, x + 3, 35], fill=hx("8a6a38"))
+        d.rectangle([x - 2, 23, x + 2, 32], fill=hx("ded4b8"))
+        d.line([(x, 21), (x, 23)], fill=hx("342820"))
     shadow(img, "rect", [158, 56, 322, 63], 0.35, 4)
 
 
@@ -137,20 +147,22 @@ def book_rows(d, x0, y0, x1, y1, seed):
     rnd = random.Random(seed)
     x = x0 + 2
     while x < x1 - 3:
-        bw = rnd.randint(4, 8)
+        bw = min(rnd.randint(4, 8), x1 - 2 - x)
+        top = min(y1 - 3, y0 + rnd.randint(0, 4))
         col = rnd.choice([
             hx("7a2c22"), hx("5a1c1c"), hx("6b4c24"), hx("33441f"),
             hx("3b2e56"), hx("8c7a3c"), hx("7e5c3a"), hx("6a232f")
         ])
-        d.rectangle([x, y0, min(x1 - 1, x + bw), y1], fill=col)
-        if rnd.random() < 0.35:
-            stripe = x + max(1, bw // 2)
-            d.line([(stripe, y0 + 1), (stripe, y1 - 1)], fill=GOLD)
-        if rnd.random() < 0.16 and x + bw + 6 < x1:
-            lean = rnd.randint(2, 5)
-            d.polygon([(x, y1), (x + bw + 2, y1), (x + bw - lean, y0), (x - lean, y0)], fill=mul(col, 0.82))
-            x += bw + 2
-        x += bw + 1
+        d.rectangle([x, top, x + bw - 1, y1 - 1], fill=col)
+        d.line([(x, top), (x, y1 - 1)], fill=mul(col, 1.3))
+        d.line([(x + bw - 1, top), (x + bw - 1, y1 - 1)], fill=mul(col, 0.55))
+        d.line([(x + 1, top), (x + bw - 2, top)], fill=hx("a69a78"))
+        if bw >= 5 and y1 - top >= 8:
+            for yy in (top + 3, y1 - 4):
+                d.line([(x + 1, yy), (x + bw - 2, yy)], fill=mul(GOLD, 0.72))
+            d.rectangle([x + 2, top + 6, x + bw - 3, top + 7], fill=mul(col, 0.6))
+            d.point((x + 2, top + 6), fill=GOLD)
+        x += bw + rnd.choice((1, 1, 2))
 
 
 def bookcase(img, x0, x1, shelf_top=14, seed=0):
@@ -185,8 +197,6 @@ def shelves(img):
             d.rectangle([x0 + 4, sy, x1 - 4, sy + 3], fill=MAHOGANY_L)
             book_rows(d, x0 + 6, sy - 16, x1 - 6, sy, seed + sy)
         d.rectangle([x0, 20, x1, 108], outline=hx("160906"))
-    d.rectangle([144, 20, 334, 24], fill=hx("6d4b33"))
-    d.line([(144, 24), (334, 24)], fill=GOLD)
 
 
 def desk(img):
@@ -237,44 +247,51 @@ def desk_props(img):
 
 def chairs(img):
     d = ImageDraw.Draw(img)
-    # left chair
-    d.rounded_rectangle([86, 134, 150, 186], 12, fill=hx("4f2317"))
-    d.rounded_rectangle([94, 128, 142, 164], 10, fill=hx("6a2c1f"))
-    d.rectangle([90, 164, 146, 186], fill=hx("5a261b"))
-    for x in (98, 138):
-        d.line([(x, 182), (x - 8, 220)], fill=hx("38180f"), width=3)
-    for x in (110, 146):
-        d.line([(x, 182), (x + 8, 220)], fill=hx("38180f"), width=3)
-    # right chair
-    d.rounded_rectangle([338, 138, 400, 188], 12, fill=hx("482116"))
-    d.rounded_rectangle([344, 132, 394, 166], 10, fill=hx("60281c"))
-    d.rectangle([344, 166, 394, 188], fill=hx("542318"))
-    for x in (350, 388):
-        d.line([(x, 184), (x - 8, 220)], fill=hx("34140d"), width=3)
-    for x in (362, 398):
-        d.line([(x, 184), (x + 8, 220)], fill=hx("34140d"), width=3)
+    for x0, top in ((96, 142), (346, 146)):
+        x1, seat = x0 + 40, top + 31
+        shadow(img, "ellipse", [x0 - 6, seat + 17, x1 + 7, seat + 34], 0.25, 5)
+        for x, dx in ((x0 + 5, -3), (x1 - 5, 3)):
+            d.line([(x, seat + 5), (x + dx, seat + 31)], fill=hx("29160e"), width=3)
+            d.line([(x, seat + 6), (x + dx, seat + 28)], fill=hx("76503a"))
+        d.rounded_rectangle([x0 + 3, top, x1 - 3, seat], 5, fill=hx("3a1c16"), outline=hx("28120e"))
+        d.rounded_rectangle([x0 + 6, top + 3, x1 - 6, seat - 3], 4, fill=hx("70332a"), outline=hx("8a4a38"))
+        d.line([(x0 + 8, top + 7), (x1 - 8, top + 7)], fill=hx("864334"))
+        for x in (x0 + 14, x0 + 26):
+            for y in (top + 12, top + 23):
+                d.point((x, y), fill=hx("402019"))
+                d.point((x + 1, y + 1), fill=hx("94523e"))
+        d.rounded_rectangle([x0 + 4, seat - 2, x1 - 4, seat + 7], 2, fill=hx("76382c"), outline=hx("381a12"))
+        d.line([(x0 + 7, seat), (x1 - 7, seat)], fill=hx("a05a40"))
+        for x in (x0, x1 - 5):
+            d.rounded_rectangle([x, seat - 10, x + 5, seat + 8], 2, fill=hx("54281e"), outline=hx("2c160e"))
+            d.line([(x + 1, seat - 9), (x + 4, seat - 9)], fill=hx("9a5840"))
     # small side table
     d.ellipse([144, 176, 182, 184], fill=hx("744128"))
     d.line([(152, 180), (148, 214)], fill=hx("3a190f"), width=2)
     d.line([(174, 180), (178, 214)], fill=hx("3a190f"), width=2)
     d.ellipse([156, 166, 170, 176], fill=hx("6c8a52"))
     d.line([(162, 166), (162, 176)], fill=hx("8cb47a"))
-    shadow(img, "ellipse", [74, 184, 166, 226], 0.3, 7)
-    shadow(img, "ellipse", [330, 186, 412, 228], 0.3, 7)
 
 
 def ladder(img):
     d = ImageDraw.Draw(img)
-    rail = [(418, 28), (392, 156)]
-    d.line(rail, fill=hx("85603a"), width=4)
-    d.line([(430, 30), (404, 158)], fill=hx("5f3d23"), width=4)
-    for t in range(0, 7):
-        x = 416 - t * 4
-        y = 42 + t * 16
-        d.line([(x, y), (x + 18, y + 2)], fill=hx("a27a46"), width=2)
-    d.ellipse([382, 150, 438, 162], outline=hx("987246"), width=2)
-    d.ellipse([386, 152, 434, 160], outline=hx("3a2416"))
-    shadow(img, "polygon", [(390, 156), (432, 160), (442, 224), (378, 224)], 0.15, 8)
+    d.line([(354, 21), (462, 21)], fill=hx("202024"), width=3)
+    d.line([(354, 20), (462, 20)], fill=hx("82786a"))
+    for x in (360, 390, 454):
+        d.line([(x, 17), (x, 25)], fill=hx("54504a"), width=2)
+    for top_x in (420, 438):
+        d.arc([top_x - 3, 18, top_x + 3, 30], 180, 350, fill=hx("9a8868"), width=2)
+        d.line([(top_x, 26), (top_x - 29, 181)], fill=hx("362418"), width=4)
+        d.line([(top_x - 1, 27), (top_x - 30, 180)], fill=hx("a27a46"), width=2)
+    for y in range(38, 175, 11):
+        x = 420 - 29 * (y - 26) / 155
+        d.line([(x + 2, y + 1), (x + 16, y + 1)], fill=hx("38261a"), width=3)
+        d.line([(x + 2, y), (x + 16, y)], fill=hx("b8945e"), width=2)
+    for x in (391, 409):
+        d.rectangle([x - 2, 177, x + 2, 182], fill=hx("56504a"))
+        d.ellipse([x - 3, 180, x + 3, 186], fill=hx("242426"), outline=hx("867c6a"))
+        d.point((x, 183), fill=hx("b8aa90"))
+    shadow(img, "ellipse", [380, 183, 425, 189], 0.18, 3)
 
 
 def paint():
@@ -283,12 +300,12 @@ def paint():
     arched_window(img)
     fireplace(img)
     shelves(img)
+    mantle_items(img)
     parquet_floor(img)
     chairs(img)
     desk(img)
     desk_props(img)
     ladder(img)
-    light(img, "ellipse", [170, 150, 310, 230], hx("9a5426"), 0.11, 18)
     shadow(img, "ellipse", [0, 0, W - 1, 40], 0.22, 12, hx("2a130d"))
     return tall(img, ceiling)
 

@@ -19,6 +19,32 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
+    def test_resting_arm_lies_along_the_ground(self):
+        _, shoulder, _, _, ankle, elbow, hand = sprites.REST
+        self.assertGreater(elbow[1], shoulder[1])
+        self.assertLessEqual(ankle[1] - elbow[1], 2)
+        self.assertEqual(hand[1], ankle[1])
+        held = Image.open(ART / "sprites" / "micah_supine.png")
+        for name in ("micah_collapse", "micah_recover"):
+            image = Image.open(ART / "sprites" / f"{name}.png")
+            frame = image.crop((image.width - held.width, 0, image.width, held.height)) \
+                if name.endswith("collapse") else image.crop((0, 0, *held.size))
+            self.assertEqual(frame.tobytes(), held.tobytes(), name)
+
+    def test_strapless_club_dresses_have_no_ribbon_spikes(self):
+        for spec in (sprites.MASKED_WOMAN, sprites.MASKED_WOMAN_B, sprites.ELEANOR_STAGE_CLOTHED):
+            self.assertFalse(any(decal[0] == "ribbon" for decal in spec["decals"]))
+            self.assertEqual(spec["neckline"], 0.262)
+
+    def test_supine_coat_covers_the_base_of_the_neck(self):
+        image = np.array(Image.open(ART / "sprites" / "micah_supine.png").convert("RGBA"))
+        shoulder = grounded_joints(sprites.REST)[1].astype(int)
+        x, y = shoulder
+        patch = image[y - 2:y + 2, x - 2:x + 3, :3]
+        skin = painter.ramp(sprites.MICAH["skin"])
+        self.assertFalse(np.any(np.all(patch[:, :, None] == skin, axis=3)),
+                         "the coat collar must cover the shoulder rather than expose a skin patch")
+
     def test_eleanor_marked_back_hair_patch_is_darker(self):
         spec = sprites.ELEANOR_STAGE
         pose = sprites.pose(35, arms=sprites._arms("cover", "side"))

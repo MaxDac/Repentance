@@ -255,6 +255,12 @@ The art checks cover strip geometry, bounds, clipping, intermediate frames, rest
 generation. `--autoplay` also captures each action frame, checks playback interruption and mirroring, and exercises
 both knockout/recovery branches. Character quality and motion still require viewing the captures at game scale.
 
+Room artwork is exported to PNGs and loaded as textures; Python is only used offline.
+After changing a room painter, regenerate its alternate-state overlays too and update scene positions to the
+printed crop origins. `py -3.14 -m unittest discover -s tests\art` checks committed images against their painters,
+lighting and geometry contracts, and pixel-exact state composition, including the lowered Harrington ladder and
+both mansion bed states.
+
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything

@@ -6,7 +6,7 @@ top-left. The bedroom's bed is its own sprite, cut against a room painted withou
 import math
 import random
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageChops
 from .common import W, FULL_H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, palette_of, pixelize, save, floor_boards
 from .act2_rooms import bricks, overlay
 from .furniture import Room3D
@@ -898,6 +898,44 @@ def bookshelf(img, rnd, x0, y0, x1, y1, shelf=24):
     d.point((mx + 4, (y + y1) // 2), fill=hx("c8a858"))
 
 
+def steelworks_painting(img, box):
+    """A lakeside industrial landscape, distinct from the city office's heraldic portrait."""
+    x0, y0, x1, y1 = box
+    d = ImageDraw.Draw(img)
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 5], fill=hx("a8842e"))
+    d.rectangle([x0 - 4, y0 - 4, x1 + 4, y1 + 4], outline=hx("e0c078"))
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 2], outline=hx("4a3414"), width=2)
+    vgrad(img, box, hx("948678"), hx("c2ac80"))
+    rnd = random.Random(117)
+    for _ in range(90):
+        x, y = rnd.randint(x0 + 1, x1 - 3), rnd.randint(y0 + 1, y0 + 26)
+        d.line([(x, y), (min(x1 - 1, x + 3), y)], fill=rnd.choice((hx("a89880"), hx("8c8078"), hx("b6a28a"))))
+    d.polygon([(x0, y0 + 34), (x0 + 8, y0 + 29), (x0 + 19, y0 + 35),
+               (x0 + 30, y0 + 28), (x1, y0 + 33), (x1, y0 + 44), (x0, y0 + 44)], fill=hx("596064"))
+    for x, top, width in ((x0 + 6, y0 + 35, 17), (x0 + 26, y0 + 31, 19)):
+        d.rectangle([x, top, x + width, y0 + 47], fill=hx("563c30"))
+        d.polygon([(x - 2, top), (x + width // 2, top - 5), (x + width + 2, top)], fill=hx("34383c"))
+        for wx in range(x + 2, x + width - 1, 4):
+            d.rectangle([wx, top + 4, wx + 1, top + 7], fill=hx("d8ac60"))
+            d.line([(wx, top + 11), (wx + 1, top + 11)], fill=hx("a88858"))
+    for x, top in ((x0 + 12, y0 + 14), (x0 + 35, y0 + 10)):
+        d.rectangle([x, top, x + 3, y0 + 36], fill=hx("684c3c"))
+        d.line([(x, top + 2), (x + 3, top + 2)], fill=hx("342a26"))
+        for k in range(4):
+            d.ellipse([x - 2 - k * 3, top - 4 - k * 2, x + 3 - k * 3, top - k * 2],
+                      fill=hx("77736c"))
+    vgrad(img, (x0, y0 + 48, x1, y1), hx("63747a"), hx("374b56"))
+    for k in range(17):
+        y = rnd.randint(y0 + 49, y1 - 1)
+        x = rnd.randint(x0 + 1, x1 - 7)
+        d.line([(x, y), (x + rnd.randint(3, 6), y)], fill=rnd.choice((hx("8a9590"), hx("ba9c68"), hx("4a5e66"))))
+    d.polygon([(x0, y1 - 6), (x0 + 8, y1 - 10), (x0 + 25, y1 - 3), (x1, y1 - 2), (x1, y1), (x0, y1)],
+              fill=hx("31342e"))
+    d.rectangle(box, outline=hx("302820"))
+    d.rectangle([x0 + 12, y1 + 6, x1 - 12, y1 + 9], fill=hx("c8a048"))
+    d.line([(x0 + 15, y1 + 7), (x1 - 15, y1 + 7)], fill=hx("624a24"))
+
+
 def paint_study(left=False, right=False, docs=True, closet=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -970,7 +1008,7 @@ def paint_study(left=False, right=False, docs=True, closet=False):
             d.line([(wx1 - 6, a), (wx1 - 6, b)], fill=OAK_L)
         d.ellipse([wx1 - 9, 134, wx1 - 5, 138], fill=hx("c8a858"))
         d.rectangle([wx1 - 8, 140, wx1 - 6, 143], fill=hx("2a1a0a"))
-    # ---- the window over the lake: moon, its path on the water, heavy velvet drapes ----
+    # ---- the window over the lake: moon, distant shoreline and heavy velvet drapes ----
     gx0, gy0, gx1, gy1 = 242, 32, 318, 108
     d.rectangle([gx0 - 6, gy0 - 6, gx1 + 6, gy1 + 8], fill=OAK_L)
     vgrad(img, (gx0, gy0, gx1, gy1), hx("121834"), hx("2a3460"))
@@ -981,9 +1019,6 @@ def paint_study(left=False, right=False, docs=True, closet=False):
     light(img, "ellipse", [278, 28, 318, 64], hx("6a78b0"), 0.4, 6)
     d = ImageDraw.Draw(img)
     vgrad(img, (gx0, 78, gx1, gy1), hx("1a2440"), hx("0e1428"))  # Lake Michigan
-    for i, y in enumerate(range(80, gy1, 3)):
-        w2 = 2 + i
-        d.line([(298 - w2, y), (298 + w2, y)], fill=hx("c8ccd8") if i % 2 else hx("7a84a8"))
     d.line([(gx0, 78), (gx1, 78)], fill=hx("3a4470"))
     for x in range(gx0 + 2, 270, 5):  # the lights of the shore drive, far off
         d.point((x, 77), fill=hx("e8c070"))
@@ -1004,25 +1039,9 @@ def paint_study(left=False, right=False, docs=True, closet=False):
     d.rectangle([222, 16, 338, 24], fill=hx("6a1a20"))
     for x in range(224, 338, 6):
         d.polygon([(x, 24), (x + 6, 24), (x + 3, 28)], fill=hx("c8a048"))
-    # ---- portrait of the old man above the drinks cabinet, on the right ----
+    # ---- a lakeside steelworks painting above the drinks cabinet ----
     px0, py0, px1, py1 = 352, 34, 404, 100
-    d.rectangle([px0 - 5, py0 - 5, px1 + 5, py1 + 5], fill=hx("a8842e"))
-    d.rectangle([px0 - 3, py0 - 3, px1 + 3, py1 + 3], fill=hx("6a5018"))
-    vgrad(img, (px0, py0, px1, py1), hx("3a2e22"), hx("1a140e"))
-    d.polygon([(px0 + 6, py1), (px0 + 14, py0 + 46), (px1 - 14, py0 + 46), (px1 - 6, py1)], fill=hx("16161a"))
-    d.polygon([(372, py0 + 46), (384, py0 + 46), (378, py0 + 60)], fill=hx("d8d0c0"))
-    d.rectangle([374, py0 + 40, 382, py0 + 48], fill=hx("c89878"))  # neck
-    d.ellipse([368, py0 + 14, 388, py0 + 42], fill=hx("d8a888"))
-    d.ellipse([370, py0 + 15, 380, py0 + 22], fill=hx("ecc4a4"))  # the light on a bald crown
-    d.line([(367, py0 + 22), (367, py0 + 30)], fill=hx("e8e4dc"), width=2)  # white side hair
-    d.line([(389, py0 + 22), (389, py0 + 30)], fill=hx("e8e4dc"), width=2)
-    d.line([(372, py0 + 25), (376, py0 + 25)], fill=hx("6a4030"))  # stern brows
-    d.line([(380, py0 + 25), (384, py0 + 25)], fill=hx("6a4030"))
-    d.point((374, py0 + 27), fill=hx("1a1010"))
-    d.point((382, py0 + 27), fill=hx("1a1010"))
-    d.line([(378, py0 + 28), (378, py0 + 32)], fill=hx("a87858"))
-    d.polygon([(371, py0 + 35), (378, py0 + 33), (385, py0 + 35), (378, py0 + 37)], fill=hx("e8e4dc"))  # moustache
-    d.rectangle([px0 + 16, py1 + 6, px1 - 16, py1 + 9], fill=hx("c8a048"))  # nameplate
+    steelworks_painting(img, (px0, py0, px1, py1))
     d.line([(378, 14), (px0 + 2, py0 - 5)], fill=hx("6a5a3a"))
     d.line([(378, 14), (px1 - 2, py0 - 5)], fill=hx("6a5a3a"))
     # the drinks cabinet
@@ -1164,11 +1183,22 @@ BED = dict(x0=306, x1=392, z0=10, z1=50, top=24)
 
 def _eleanor_in_bed():
     """Eleanor sitting up against the pillows, bare shoulders; the sheet covers her from the chest down."""
-    from .sprites import ELEANOR_SHEET, figure, pose, _arms, FW, FH
-    f = figure(dict(ELEANOR_SHEET, torso="ecc4a2", decals=[]), pose(16, arms=_arms("fold")), FW, FH).convert("RGBA")
+    from .sprites import ELEANOR, figure, pose, _arms, FW, FH
+    skin = ELEANOR["skin"]
+    spec = dict(ELEANOR, torso=skin, pelvis=skin, sleeves=skin, coat=None, neckline=None, decals=[])
+    f = figure(spec, pose(16, arms=_arms("side")), FW, FH).convert("RGBA")
     f.putalpha(f.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     bb = f.getbbox()
-    return f.crop((bb[0], bb[1], bb[2], bb[1] + 44))
+    f = f.crop((bb[0], bb[1], bb[2], bb[1] + 44))
+    sheet = Image.new("RGBA", f.size)
+    d = ImageDraw.Draw(sheet)
+    w, h = f.size
+    d.polygon([(0, 28), (w // 2, 30), (w - 1, 27), (w - 1, h), (0, h)], fill=hx("e8e0d0", 255))
+    d.line([(1, 29), (w // 2, 31), (w - 2, 28)], fill=hx("fff6e6", 255), width=2)
+    for x in range(4, w - 2, 6):
+        d.line([(x, 33), (x - 2, h - 1)], fill=hx("b8ab98", 255))
+    sheet.putalpha(ImageChops.multiply(sheet.getchannel("A"), f.getchannel("A")))
+    return Image.alpha_composite(f, sheet)
 
 
 def _bed(img, R, who):
@@ -1204,7 +1234,6 @@ def _bed(img, R, who):
         ex, ey = int(hp[0] - el.width // 2), int(hp[1] - el.height + 10)
         img.paste(el, (ex, ey), el)
         d = ImageDraw.Draw(img)
-        cover_end = ex + el.width - 2
     # the coverlet over the top and down the front, a turned-down sheet at its head
     ce = cover_end
     R.quad(img, [(x0 - 1, top + 2, z0 + 1), (ce, top + 2, z0 + 1), (ce, top + 1, z1 + 1), (x0 - 1, top + 1, z1 + 1)], hx("a85a66"))
@@ -1319,14 +1348,14 @@ def paint_bedroom(bed=None):
         d.rectangle([x - 1, 88, x + 1, 102], fill=hx("c8a040"))
         d.rectangle([x - 3, 100, x + 3, 102], fill=hx("c8a040"))
         d.rectangle([x - 1, 82, x + 1, 88], fill=hx("f0ead8"))
-    # ---- the tall window, the moon over the lake, swagged drapes ----
+    # ---- the tall window, an unobstructed moon and swagged drapes ----
     gx0, gy0, gx1, gy1 = 240, 34, 290, 140
     d.rectangle([gx0 - 5, gy0 - 5, gx1 + 5, gy1 + 6], fill=IVORY)
     vgrad(img, (gx0, gy0, gx1, gy1), hx("121834"), hx("2a3460"))
-    d.ellipse([266, 44, 278, 56], fill=hx("f4f0d8"))
-    vgrad(img, (gx0, 104, gx1, gy1), hx("1a2440"), hx("0e1428"))
-    for i, y in enumerate(range(106, gy1, 3)):
-        d.line([(272 - 1 - i // 2, y), (272 + 1 + i // 2, y)], fill=hx("c8ccd8") if i % 2 else hx("7a84a8"))
+    light(img, "ellipse", [266, 40, 289, 63], hx("7a88b0"), 0.12, 5)
+    d.ellipse([270, 45, 283, 58], fill=hx("f4f0d8"))
+    d.ellipse([273, 48, 276, 51], fill=hx("c8c6b4"))
+    d.ellipse([278, 53, 280, 55], fill=hx("dcdbc8"))
     ed.rectangle([gx0, gy0, gx1, gy1], fill=170)
     d.rectangle([264, gy0, 266, gy1], fill=IVORY)
     for y in (gy0 + 34, gy0 + 70):

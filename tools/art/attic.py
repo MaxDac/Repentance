@@ -22,11 +22,11 @@ ACTS = {
         foliage=(hx("c86a2a"), hx("d8902a"), hx("a8501e")),
         glint=hx("ffffff"),
         shaft_beam=hx("ffe0a0"),
-        shaft_beam_k=0.32,
+        shaft_beam_k=0.07,
         shaft_floor=hx("ffd890"),
-        shaft_floor_k=0.35,
+        shaft_floor_k=0.09,
         shaft_halo=hx("fff0d0"),
-        shaft_halo_k=0.25,
+        shaft_halo_k=0.08,
         dust=DUST,
         dust_ratio=0.7,
         dust_count=70,
@@ -43,11 +43,11 @@ ACTS = {
         foliage=(hx("96725a"), hx("aa8464"), hx("6f594c")),
         glint=hx("d8e2ec"),
         shaft_beam=hx("d8e6ef"),
-        shaft_beam_k=0.18,
+        shaft_beam_k=0.05,
         shaft_floor=hx("c7d1de"),
-        shaft_floor_k=0.2,
+        shaft_floor_k=0.06,
         shaft_halo=hx("eef2f5"),
-        shaft_halo_k=0.12,
+        shaft_halo_k=0.04,
         dust=hx("d8d8d0"),
         dust_ratio=0.55,
         dust_count=48,
@@ -66,11 +66,11 @@ ACTS = {
         foliage=(hx("495160"), hx("5f6672"), hx("39404e")),
         glint=hx("bcc8da"),
         shaft_beam=hx("aebfd8"),
-        shaft_beam_k=0.12,
+        shaft_beam_k=0.03,
         shaft_floor=hx("8fa2be"),
-        shaft_floor_k=0.14,
+        shaft_floor_k=0.04,
         shaft_halo=hx("d7deee"),
-        shaft_halo_k=0.08,
+        shaft_halo_k=0.03,
         dust=hx("c8ccd6"),
         dust_ratio=0.45,
         dust_count=36,
@@ -336,10 +336,27 @@ def clutter(img):
     d.ellipse([86, 176, 108, 190], fill=hx("8a3a4a"))
     d.rectangle([86, 170, 108, 183], fill=hx("8a3a4a"))
     d.ellipse([86, 164, 108, 176], fill=hx("a84a5a"))
-    # unlit bulb hanging from the ridge
+    # Pendant socket; the emissive glass is painted after the room's colour grade.
     d.line([(260, 0), (260, 28)], fill=hx("1a1410"))
-    d.ellipse([256, 28, 264, 37], fill=hx("c8c4b0"))
-    d.line([(262, 36), (264, 52)], fill=hx("c8c4b0"))
+    d.rectangle([257, 27, 263, 31], fill=hx("3a3028"))
+    d.line([(266, 29), (268, 49)], fill=hx("9a8a70"))
+    d.ellipse([267, 49, 269, 52], fill=hx("6a5038"))
+
+
+def hanging_bulb(img):
+    light(img, "ellipse", [246, 20, 274, 52], hx("ffd080"), 0.48, 6)
+    d = ImageDraw.Draw(img)
+    d.rectangle([257, 27, 263, 31], fill=hx("504438"))
+    d.line([(258, 28), (262, 28)], fill=hx("a89870"))
+    d.ellipse([255, 31, 265, 41], fill=hx("ffda8a"), outline=hx("e0ad58"))
+    d.ellipse([257, 32, 263, 39], fill=hx("fff8dc"))
+    d.line([(259, 34), (261, 36), (259, 37)], fill=hx("ffffff"))
+
+
+def bulb_pool(img):
+    light(img, "ellipse", [140, -40, 380, 170], hx("ffc878"), 0.22, 28)
+    light(img, "polygon", [(254, 38), (266, 38), (420, 250), (100, 250)], hx("e8ac60"), 0.22, 26)
+    light(img, "ellipse", [140, 170, 380, 254], hx("ffd090"), 0.2, 26)
 
 
 NIGHT_EXTRA = [hx(c) for c in ("fff8d8", "ffe0a0", "ffd890", "f0b860", "d89848", "d88a3a", "c87830", "a86a2a",
@@ -374,8 +391,8 @@ def night_glass(img):
     d.line([(cx - 10, cy - 12), (cx - 4, cy - 15)], fill=hx("6a7898"))
 
 
-def lamp(img):
-    """An old standard lamp with a pleated fabric shade, switched on."""
+def lamp(img, lit=True):
+    """An old standard lamp; the ceiling pendant supplies the light when it is off."""
     d = ImageDraw.Draw(img)
     L = LAMP
     x, st, sb, tw, bw = L["x"], L["shade_top"], L["shade_bot"], L["top_w"], L["bot_w"]
@@ -386,12 +403,12 @@ def lamp(img):
     d.line([(x - 1, L["base"] - 3), (x - 1, sb)], fill=hx("b08a48"))
     d.ellipse([x - 2, 158, x + 2, 161], fill=hx("8a6a30"))
     # the bulb glows under the shade's lower rim
-    d.ellipse([x - 4, sb - 2, x + 4, sb + 4], fill=hx("fff8d8"))
+    d.ellipse([x - 4, sb - 2, x + 4, sb + 4], fill=hx("fff8d8") if lit else hx("9a8058"))
     shade = [(x - tw, st), (x + tw, st), (x + bw, sb), (x - bw, sb)]
     d.polygon(shade, fill=hx("f0b860"))
     tmp = Image.new("RGB", img.size)
-    hgrad(tmp, (x - bw, st, x + bw, sb), hx("d88a3a"), hx("ffd890"))
-    hgrad(tmp, (x, st, x + bw, sb), hx("ffe0a0"), hx("c87830"))
+    hgrad(tmp, (x - bw, st, x + bw, sb), hx("d88a3a") if lit else hx("8a6842"), hx("ffd890") if lit else hx("c8a878"))
+    hgrad(tmp, (x, st, x + bw, sb), hx("ffe0a0") if lit else hx("c8a878"), hx("c87830") if lit else hx("8a6842"))
     m = Image.new("L", img.size, 0)
     ImageDraw.Draw(m).polygon(shade, fill=255)
     img.paste(tmp, (0, 0), m)
@@ -401,26 +418,26 @@ def lamp(img):
     d.line([(x - bw, sb), (x + bw, sb)], fill=hx("a86a2a"), width=2)
     for k in (-10, -4, 2, 8):  # fringe
         d.line([(x + k, sb + 1), (x + k, sb + 3)], fill=hx("c88a3a"))
-    light(img, "ellipse", [x - 22, st - 10, x + 22, sb + 12], hx("ffd890"), 0.35, 6)
+    if lit:
+        light(img, "ellipse", [x - 22, st - 10, x + 22, sb + 12], hx("ffd890"), 0.35, 6)
 
 
 def relight_night(img):
-    """Darkens the whole attic to moonlit night, then lets the lamp throw a warm pool of light."""
-    x, sb = LAMP["x"], LAMP["shade_bot"]
+    """The ceiling bulb illuminates the gable and floor; moonlight remains secondary."""
+    x, sb = 260, 36
     dark = ImageChops.multiply(img, Image.new("RGB", img.size, (62, 70, 112)))
     warm = ImageChops.multiply(img, Image.new("RGB", img.size, (255, 206, 140)))
     warm = ImageChops.screen(warm, Image.new("RGB", img.size, (34, 18, 4)))
     m = Image.new("L", img.size, 0)
     md = ImageDraw.Draw(m)
-    md.ellipse([x - 190, sb - 120, x + 190, sb + 150], fill=70)
-    m = m.filter(ImageFilter.GaussianBlur(40))
+    md.ellipse([x - 230, -70, x + 230, 280], fill=150)
+    m = m.filter(ImageFilter.GaussianBlur(32))
     core = Image.new("L", img.size, 0)
     cd = ImageDraw.Draw(core)
-    cd.polygon([(x - 15, sb), (x + 15, sb), (x + 110, 250), (x - 120, 250)], fill=150)  # cone under the shade
-    cd.ellipse([x - 120, 168, x + 110, 230], fill=170)  # pool on the floorboards
-    cd.ellipse([x - 70, sb - 70, x + 70, sb + 40], fill=150)
-    cd.polygon([(x - 8, LAMP["shade_top"]), (x + 8, LAMP["shade_top"]), (x + 50, 20), (x - 50, 20)], fill=110)
-    core = core.filter(ImageFilter.GaussianBlur(18))
+    cd.ellipse([x - 95, -40, x + 95, 148], fill=220)
+    cd.polygon([(x - 8, sb), (x + 8, sb), (x + 160, 250), (x - 160, 250)], fill=200)
+    cd.ellipse([x - 130, 178, x + 130, 246], fill=180)
+    core = core.filter(ImageFilter.GaussianBlur(26))
     m = ImageChops.lighter(m, core)
     hatch_glow = Image.new("L", img.size, 0)
     ImageDraw.Draw(hatch_glow).polygon([(14, 236), (96, 236), (102, 270), (6, 270)], fill=230)
@@ -454,7 +471,9 @@ def paint(act=1, spill=False, lifted=False, opened=False):
     if mood["room_tint"] is not None:
         shadow(img, "rect", [0, 0, W - 1, H - 1], 0.12 if act == 2 else 0.18, 18 if act == 2 else 24,
                tint=mood["room_tint"])
+    bulb_pool(img)
     vignette(img, mood["vignette_k"], tint=mood["vignette_tint"], blur=mood["vignette_blur"])
+    hanging_bulb(img)
     return img
 
 
@@ -471,9 +490,11 @@ def paint_night(spill=False, lifted=False, opened=False):
         spilled(img)
     hatch(img)
     img = relight_night(img)
+    bulb_pool(img)
     night_glass(img)
-    lamp(img)
+    lamp(img, lit=False)
     vignette(img, 0.7, tint=(14, 14, 32), blur=46)
+    hanging_bulb(img)
     return img
 
 

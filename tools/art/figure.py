@@ -1131,8 +1131,14 @@ def action_figure(spec, joints, fw=192, fh=96):
         m = c.put(c.poly(points, curve=0.6), spec["cloak"]["col"], "cloak")
         seam = c.capsule(shoulder, hip + (knee - hip) * 0.6, 0.6, 0.8)[0]
         c.bias[m & seam] += 1
-    neck = shoulder + (head - shoulder) * 0.25
-    limb(shoulder, neck, 2.3, 2, skin, "neck")
+    head_axis = head - shoulder
+    if coat and abs(head_axis[0]) > abs(head_axis[1]):
+        neck = shoulder + head_axis * 0.55
+        limb(shoulder, neck, 2.3, 2, spec.get("collar", torso), "collar")
+        limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")
+    else:
+        neck = shoulder + head_axis * 0.25
+        limb(shoulder, neck, 2.3, 2, skin, "neck")
     img = c.render(shadow_box=((fw / 2, 94), 36, 1.2))
     # The screen-space head painter retains each character's hat, hair and mask.
     hc = Canvas(64, 64)

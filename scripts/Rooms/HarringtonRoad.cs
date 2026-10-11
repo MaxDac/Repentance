@@ -186,7 +186,7 @@ public partial class HarringtonRoad : Room
     {
         await Game.WalkTo(new Vector2(334, 218));
         Player.Face(Facing.Up);
-        await Say("Up the crates, up the ladder, up three floors of iron, and trying not to think about how far down it goes.");
+        await Say("Up the crates, down comes the ladder. One floor up to the office window, and trying not to look down.");
         await Game.ChangeRoom("harrington_office", "window");
     }
 }
