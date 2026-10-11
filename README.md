@@ -270,7 +270,8 @@ py -3.14 -m unittest discover -s tests\art -v  # image contracts and location re
 ```
 
 You can replace any PNG with hand-drawn art (Aseprite, Pixelorama...) as long as it keeps the same
-size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: side, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+size: backgrounds are 480×270, player frames are 64×96 in a 10×3 sheet (rows: horizontal, front, back; see `Player.cs` for the column layout), NPCs are 11-frame 56×96 strips (idle, two talk frames, walk 1-8 in side view), and items are 32×24.
+Horizontal player idle/talk frames turn slightly toward the camera to reveal the face and chest; their walk cycles remain side-on.
 Puzzle overlays and foreground layers keep their own crop sizes and scene positions. After regeneration,
 check the printed overlay coordinates against the corresponding scene; moving a crop without its node
 misaligns the object. Club rooms use their own 128-colour palettes so the stage's darkness does not
