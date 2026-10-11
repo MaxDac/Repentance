@@ -11,8 +11,8 @@ namespace Repentance;
 /// </summary>
 public sealed class SaveData
 {
-    /// <summary>Bump when flags, items or rooms are renamed so old saves are rejected instead of misbehaving.</summary>
-    public const int CurrentVersion = 3;
+    /// <summary>Bump when saved decisions, identifiers or room flow change incompatibly.</summary>
+    public const int CurrentVersion = 4;
 
     public int Version { get; set; } = CurrentVersion;
     public DateTime SavedAtUtc { get; set; }

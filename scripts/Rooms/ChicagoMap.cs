@@ -24,14 +24,16 @@ public partial class ChicagoMap : Room
     private bool NunThreatened => State.HasFlag("nun_threatened");
     private bool HarringtonDone => State.HasFlag("harrington_done");
 
-    /// <summary>Is a place on the map right now? Library and office drop off once the hunt narrows to Harrington.</summary>
+    /// <summary>Investigation leads close as the hunt narrows; the office stays available for the ring.</summary>
     private bool Shows(string id) => id switch
     {
-        "library" or "office" => !NunThreatened,
+        "library" => !NunThreatened,
+        "office" => true,
         "church" => true,
         "club" => State.HasFlag("club_unlocked") && (!NunThreatened || HarringtonDone),
         "convent" => State.HasFlag("caleb_club") && !NunThreatened,
         "harrington" => NunThreatened && !HarringtonDone,
+        "hotel" => State.HasFlag("recover_hotel") && !State.HasItem("card") && !State.HasItem("brass_box") && !ClubOut,
         _ => false,
     };
 
@@ -39,6 +41,7 @@ public partial class ChicagoMap : Room
     {
         ("library", "Library"), ("church", "Church"), ("office", "Office"),
         ("club", "Club"), ("convent", "Convent"), ("harrington", "Harrington"),
+        ("hotel", "Hotel"),
     };
 
     protected override void OnRefresh()
@@ -72,21 +75,18 @@ public partial class ChicagoMap : Room
             case "library":
                 await Game.ChangeRoom("library", "start");
                 return true;
+            case "hotel":
+                await Say("I left room 507 without its clues. The staff entrance is still there.");
+                await Game.ChangeRoom("lobby", "eleanor_room");
+                return true;
 
             case "church" when !ClubOut:
                 await Say("Caleb's sermons can wait. Coming there was a mistake once already.");
                 return true;
-            case "church" when !State.HasFlag("caleb_club"):
-            case "church" when NunThreatened:
+            case "church":
                 await Game.ChangeRoom("church_interior", "map");
                 return true;
-            case "church":
-                await Say("Caleb said the convent. I don't need the sermon that comes with it twice.");
-                return true;
 
-            case "office" when ClubOut:
-                await Say("An empty bottle and an empty chair. Neither of them knows where she is.");
-                return true;
             case "office":
                 await Game.ChangeRoom("office", "door");
                 return true;

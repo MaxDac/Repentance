@@ -14,6 +14,11 @@ public partial class Office : Room
 
     public override async Task OnEnter(string entry)
     {
+        if (entry == "act2" && !State.HasFlag("act2_office_done"))
+        {
+            await Game.Run(Act2Opening);
+            return;
+        }
         if (entry == "act3" && State.HasFlag("micah_at_desk"))
         {
             await Game.Run(AtTheDesk);
@@ -23,10 +28,31 @@ public partial class Office : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Another night, another empty bottle. And a client. A well-dressed one.");
+            await Say("Another night, another bottle of whiskey. And a client. A well-dressed one.");
             await Talk("teddy");
             await TeddyLeaves();
         });
+    }
+
+    private async Task Act2Opening()
+    {
+        await Game.WalkTo(new Godot.Vector2(124, 172));
+        Player.Face(Facing.Right);
+        State.SetFlag("office_cup_held");
+        Player.SetPose("micah_cup");
+        await Wait(0.5);
+        Player.SetPose("micah_drink");
+        await Wait(1.2);
+        Player.SetPose("micah_cup");
+        await Wait(0.5);
+        Player.SetPose(null);
+        State.SetFlag("office_cup_held", false);
+        State.SetFlag("act2_whiskey_drunk");
+        await Say("Whiskey. It burns going down. Doesn't burn away a thing.");
+        await Talk("office_ring");
+        State.SetFlag("act2_office_done");
+        await Game.WalkTo(new Godot.Vector2(58, 172));
+        await Game.ChangeRoom("church_exterior", "start");
     }
 
     private async Task TeddyLeaves()
@@ -42,7 +68,7 @@ public partial class Office : Room
     private async Task AtTheDesk()
     {
         await Wait(1.0);
-        await Say("Back behind my own desk. The bottle's still empty. Some things you can count on.");
+        await Say("Back behind my own desk. The whiskey's still there. Some things you can count on.");
         await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
         await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
         await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
@@ -51,7 +77,17 @@ public partial class Office : Room
         Player.Teleport(new Godot.Vector2(160, 172), Facing.Left);
         Player.Visible = true;
         await Wait(0.4);
-        await Game.WalkTo(new Godot.Vector2(58, 172));
+    }
+
+    private async Task LeaveAct3()
+    {
+        State.SetFlag("visit_caleb_act3", false);
+        await Talk("office_act3_destination");
+        if (State.HasFlag("visit_caleb_act3"))
+        {
+            await Game.ChangeRoom("church_interior", "act3");
+            return;
+        }
         // tonight Sal and Tony are inside; Micah has the alley to himself
         State.SetFlag("alley3");
         State.SetFlag("alley3_sal_inside");
@@ -68,6 +104,14 @@ public partial class Office : Room
     {
         switch (target.Id, verb)
         {
+            case ("door", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
+                await LeaveAct3();
+                return true;
+            case ("faith_ring", Verb.Hand):
+                State.GiveItem("faith_ring");
+                State.SetFlag("took_faith_ring");
+                await Say("I've left this behind long enough.");
+                return true;
             case ("teddy", Verb.Talk):
                 await Talk("teddy");
                 await TeddyLeaves();
@@ -124,7 +168,10 @@ public partial class Office : Room
                 return true;
 
             case ("bottle", Verb.Hand):
-                await Say("Empty. Like most of my promises.");
+                await Say("Whiskey. It never gave me a good answer.");
+                return true;
+            case ("cup", Verb.Hand):
+                await Say("I've had enough for tonight.");
                 return true;
             case ("phone", Verb.Hand or Verb.Talk):
                 await Say("Nobody to call. Nobody who'd answer, anyway.");
@@ -144,6 +191,12 @@ public partial class Office : Room
             case ("radiator", Verb.Hand or Verb.Kick):
                 await Say("It knocks all night. Like a creditor. Or a conscience.");
                 return true;
+            case ("radiator", Verb.UseItem) when item == "card":
+                State.SetFlag("card_warmed");
+                await Say("In the radiator's warmth, ink rises between the curlicues. Backward writing. I'll need a reflection.");
+                await Game.Hud.ShowImage(Godot.GD.Load<Godot.Texture2D>("res://assets/art/ui/card_reversed.png"));
+                await Game.TryDecodeCard();
+                return true;
         }
         return false;
     }
@@ -153,16 +206,16 @@ public partial class Office : Room
         if (item != "book" || verb != Verb.Hand) return false;
         if (State.HasFlag("read_book"))
         {
-            await Say("Groves, wells, bonfires on the hills. I've read enough of it for one lifetime.");
+            await Say("Concealed messages: gentle warmth, then a reflection. Ornament order: lily, leaf, feather.");
+            await Game.TryDecodeCard();
             return true;
         }
         State.SetFlag("read_book");
         await Say("\"Rites of the Old Isles.\" Midsummer fires. Oak groves. Wells you whisper your sins into.");
         await Say("Druids and dew and the turning of the seasons. Pretty, if you're a farmer. I'm not.");
-        await Say("Wait. Something slipped out from between the pages. A little sheet of paper.");
-        State.GiveItem("address");
-        State.SetFlag("club_unlocked");
-        await Say("An address, in a woman's hand. \"The Club, 18 W. Hubbard.\" Just that. A place that doesn't need a name.");
+        await Say("A page about concealed messages. Gentle warmth brings up the ink; a mirror turns the writing back.");
+        await Say("The ornaments give the order: lily first, leaf second, feather last. Those curlicues on the hotel card weren't just decoration.");
+        await Game.TryDecodeCard();
         return true;
     }
 }

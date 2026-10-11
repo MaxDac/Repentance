@@ -10,7 +10,7 @@ side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 from .common import save
 import json
 from pathlib import Path
-from .common import ART
+from . import common
 from .figure import figure as _figure, pose, walk_pose, sheet, action_figure
 
 
@@ -145,11 +145,12 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 # Eleanor on stage: retain the dressed variant for players who opt out of nudity.
 ELEANOR_STAGE_CLOTHED = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
                             eye="3a2416", brow="2e1a12", mask=None)
-# The implied-nude variant: long hair falls forward over her chest, one
+# The implied-nude variant: front locks define a subtle chest contour, one
 # hand lowered over her lap, the other arm hanging at her side.
 ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
                      eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e4b898", neckline=None,
-                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, front_line=(0.36, 0.53), rear=(0.04, 0.05),
+                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, hair_bulge=0.03,
+                     front_line=(0.36, 0.53), rear=(0.04, 0.05),
                      seamless=("torso", "leg1", "leg-1"), decals=[])
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
@@ -330,7 +331,7 @@ def action_strip(name, frames, seconds, anchor=(96, 93)):
         data.append(dict(anchor=list(anchor), head=list(head), seconds=duration,
                          bounds=[int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1),
                                  int(ys.max() - ys.min() + 1)]))
-    Path(ART, "sprites", f"{name}.json").write_text(
+    Path(common.ART, "sprites", f"{name}.json").write_text(
         json.dumps(dict(width=fw, height=fh, frames=data), indent=2) + "\n", encoding="utf-8")
 
 
@@ -364,6 +365,13 @@ def action_sequences(spec, name):
         action_strip("micah_kneel_rise", rise, times)
 
 
+def build_drinking():
+    for kind in ("cup", "drink"):
+        ps = pose(90, arms={1: (kind, 0, 0, 0), -1: ("side", 0, 0, 0)}, cup=1)
+        image = figure(MICAH, ps, FW, FH)
+        action_strip(f"micah_{kind}", [(image, (FW / 2, 18))], [1], anchor=(FW / 2, FH - 3))
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -374,6 +382,7 @@ def build():
     aim_frame(MICAH, "micah_aim")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
+    build_drinking()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
     build_act3()

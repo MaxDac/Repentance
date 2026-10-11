@@ -14,8 +14,8 @@ public static class Act3
     /// <summary>Sets the derived gate flags the Ink choices read (<c>can_walk_away</c>, <c>can_spare</c>).</summary>
     public static void UpdateGates()
     {
-        State.SetFlag("can_walk_away", Endings.CanWalkAwayFromBartender(State.HasFlag));
-        State.SetFlag("can_spare", Endings.CanSpareOldMan(State.HasFlag));
+        State.SetFlag("can_walk_away", Endings.CanWalkAwayFromBartender(State.HasFlag, State.HasItem));
+        State.SetFlag("can_spare", Endings.CanSpareOldMan(State.HasFlag, State.HasItem));
     }
 
     /// <summary>Resolves the ending, records it as <c>ending_N</c> and moves to its scene.</summary>

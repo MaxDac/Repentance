@@ -19,26 +19,41 @@ ART = ROOT / "assets" / "art"
 
 
 class CharacterArtTests(unittest.TestCase):
-    def test_eleanor_front_hair_stays_against_the_body(self):
+    def test_eleanor_front_locks_remain_in_all_animation_frames(self):
         original = painter._hair_front
         checks = []
 
         def check_lock(canvas, *args):
-            silhouette = canvas.parts_mask("torso", "hair", "hairback").copy()
             existing_hair = canvas.parts_mask("hair").copy()
             original(canvas, *args)
             new_hair = canvas.parts_mask("hair") & ~existing_hair
             checks.append(np.count_nonzero(new_hair))
-            self.assertFalse(np.any(new_hair & ~silhouette), "front hair must not project out from the chest")
 
         with patch.object(painter, "_hair_front", side_effect=check_lock):
-            for phi in (35, 90):
-                for mouth in (0, 1, 2):
-                    sprites.figure(sprites.ELEANOR_STAGE,
-                                   sprites.pose(phi, arms=sprites._arms("cover", "side"), mouth=mouth),
-                                   sprites.NPC_W, sprites.FH)
-        self.assertEqual(len(checks), 6)
+            arms = sprites._arms("cover", "side")
+            poses = [sprites.pose(35, arms=arms), sprites.pose(35, arms=arms, mouth=1),
+                     sprites.pose(35, arms=arms, mouth=2, nod=0.004)]
+            poses += [sprites.npc_walk_pose(arms, i) for i in range(8)]
+            for pose in poses:
+                sprites.figure(sprites.ELEANOR_STAGE, pose, sprites.NPC_W, sprites.FH)
+        self.assertEqual(len(checks), 11)
         self.assertTrue(all(count > 0 for count in checks), "retain front-hair coverage in every view")
+
+    def test_eleanor_hair_bump_is_smaller_than_the_original(self):
+        spec = sprites.ELEANOR_STAGE
+        self.assertEqual(spec["hair_front"], 0.34)
+        self.assertGreater(spec["hair_bulge"], 0)
+        self.assertLess(spec["hair_bulge"], 0.07)
+        for phi in (35, 90):
+            pose = sprites.pose(phi, arms=sprites._arms("cover", "side"))
+            subtle = np.array(sprites.figure(spec, pose, sprites.NPC_W, sprites.FH))
+            flat = np.array(sprites.figure(dict(spec, hair_bulge=0), pose, sprites.NPC_W, sprites.FH))
+            original = np.array(sprites.figure(dict(spec, hair_bulge=0.07), pose, sprites.NPC_W, sprites.FH))
+            self.assertFalse(np.array_equal(subtle, flat), "new art must differ from the rejected flat contour")
+            self.assertFalse(np.array_equal(subtle, original), "new art must differ from the original large projection")
+            self.assertLess(np.nonzero(subtle[:, :, 3] == 255)[1].max(),
+                            np.nonzero(original[:, :, 3] == 255)[1].max(),
+                            "front silhouette should project less than the original")
 
     def test_eleanor_club_variants_have_matching_animation_layouts(self):
         nude = Image.open(ART / "sprites" / "eleanor_stage.png")

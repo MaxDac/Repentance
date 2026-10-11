@@ -26,6 +26,7 @@ public partial class Hud : CanvasLayer
     public static Font Font { get; private set; } = null!;
     public VerbWheel Wheel { get; private set; } = null!;
     public GameMenu Menu { get; private set; } = null!;
+    public PuzzlePanel Puzzle { get; private set; } = null!;
 
     private Control _interface = null!;
     private Label _hover = null!;
@@ -43,6 +44,10 @@ public partial class Hud : CanvasLayer
     private TextureRect _cursor = null!;
     private Texture2D _cursorTex = null!;
     private TaskCompletionSource<int>? _choiceTcs;
+    private int _inventoryPage;
+    private Button _previousPage = null!, _nextPage = null!;
+    private Label _pageLabel = null!;
+    public int InventoryPage => _inventoryPage;
 
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
@@ -143,6 +148,9 @@ public partial class Hud : CanvasLayer
         Menu = new GameMenu { Name = "GameMenu" };
         root.AddChild(Menu);
 
+        Puzzle = new PuzzlePanel { Name = "PuzzlePanel" };
+        root.AddChild(Puzzle);
+
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.AddChild(_cursor);
@@ -209,16 +217,27 @@ public partial class Hud : CanvasLayer
             _inventory.AddChild(b);
             _slots.Add(b);
         }
+        _previousPage = new Button { Text = "<", Position = new Vector2(110, 249), Size = new Vector2(30, 18), FocusMode = Control.FocusModeEnum.None };
+        _nextPage = new Button { Text = ">", Position = new Vector2(340, 249), Size = new Vector2(30, 18), FocusMode = Control.FocusModeEnum.None };
+        _pageLabel = MakeOutlinedLabel(VerbHover);
+        _pageLabel.Position = new Vector2(197, 253);
+        _previousPage.Pressed += () => { _inventoryPage--; ItemHovered?.Invoke(null); RefreshInventory(); };
+        _nextPage.Pressed += () => { _inventoryPage++; ItemHovered?.Invoke(null); RefreshInventory(); };
+        _inventory.AddChild(_previousPage);
+        _inventory.AddChild(_nextPage);
+        _inventory.AddChild(_pageLabel);
     }
 
-    private static string? ItemInSlot(int slot)
+    private string? ItemInSlot(int slot)
     {
         var inv = GameState.Instance.Inventory;
+        slot += _inventoryPage * InvCols * InvRows;
         return slot < inv.Count ? inv[slot] : null;
     }
 
     /// <summary>Screen position of an inventory slot (used by the autoplay test).</summary>
-    public Vector2 SlotCenter(int slot) => _slots[slot].Position + _slots[slot].Size / 2;
+    public Vector2 SlotCenter(int slot) => _slots[slot % _slots.Count].Position + _slots[slot % _slots.Count].Size / 2;
+    public Vector2 InventoryPageCenter(bool next) => (next ? _nextPage : _previousPage).GetGlobalRect().GetCenter();
 
     public Vector2 SatchelCenter => SatchelPos + _satchel.Size / 2;
 
@@ -232,6 +251,11 @@ public partial class Hud : CanvasLayer
 
     public void RefreshInventory()
     {
+        int pages = Math.Max(1, (GameState.Instance.Inventory.Count + _slots.Count - 1) / _slots.Count);
+        _inventoryPage = Math.Clamp(_inventoryPage, 0, pages - 1);
+        _previousPage.Disabled = _inventoryPage == 0;
+        _nextPage.Disabled = _inventoryPage == pages - 1;
+        _pageLabel.Text = $"Page {_inventoryPage + 1}/{pages}";
         for (int s = 0; s < _slots.Count; s++)
         {
             var id = ItemInSlot(s);
@@ -242,6 +266,7 @@ public partial class Hud : CanvasLayer
 
     public void ShowInventory(bool show)
     {
+        if (show && Game.Instance.Busy) return;
         _inventory.Visible = show;
         if (!show) ItemHovered?.Invoke(null);
     }

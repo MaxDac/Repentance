@@ -31,27 +31,40 @@ public partial class MansionStudy : Room
                 return true;
 
             case ("drawer_left", Verb.Hand):
-                Toggle("drawer_left_open");
-                if (State.HasFlag("drawer_left_open")) await Say("A box of Havanas. The old man smokes better than he sleeps, I bet.");
+                Toggle("study_drawer_left_open");
+                if (State.HasFlag("study_drawer_left_open"))
+                {
+                    if (!State.HasFlag("audit_tracing_taken") && !State.HasFlag(Endings.TookDocuments))
+                    {
+                        State.SetFlag("audit_tracing_taken");
+                        State.GiveItem("audit_tracing");
+                        await Say("Under the cigars: an auditor's index, stamped Harrington Steel - Private. Bank, judge, captain. Three marks to match against the register.");
+                    }
+                    else await Say("The cigars can stay. I've got what I need.");
+                }
                 return true;
             case ("drawer_right", Verb.Hand):
-                Toggle("drawer_right_open");
-                if (State.HasFlag("drawer_right_open") && !State.HasFlag(Endings.TookDocuments))
-                    await Say("A folder, tied with red tape. \"Harrington Steel - Private\".");
+                Toggle("study_drawer_right_open");
+                if (State.HasFlag("study_drawer_right_open") && !State.HasFlag("audit_folder_taken"))
+                    await Say("A register of numbered accounts. \"Private. Use auditor's index to locate signed payment sheets.\" Might be something I could bargain with.");
                 return true;
             case ("documents", Verb.Look):
-                await Say("Ledgers. Payments to judges, an alderman, two police captains. Signed, initialled, dated.");
+                await Say("A register, not the evidence itself. BANK, JUDGE and CAPTAIN marks. The matching index should locate the signed sheets in this drawer.");
                 return true;
             case ("documents", Verb.Hand):
-                State.SetFlag(Endings.TookDocuments);
-                State.GiveItem("documents");
-                await Say("Payments to judges, an alderman, two police captains. Signed and dated. Harrington never threw anything away.");
-                await Say("Into the coat. A man could buy his way out of a lot of trouble with this.");
+                State.SetFlag("audit_folder_taken");
+                State.GiveItem("audit_folder");
+                await Say("A numbered register, not the signed sheets. The other drawer might have its index. I'd better sort it out before going into the bedroom; there'll be no coming back.");
+                return true;
+            case ("documents", Verb.UseItem) when item == "audit_tracing":
+                State.SetFlag("audit_folder_taken");
+                State.GiveItem("audit_folder");
+                await Game.TryReadAccounts();
                 return true;
 
             case ("closet", Verb.Hand):
-                Toggle("closet_open");
-                if (State.HasFlag("closet_open")) await Say("Coats, a dinner jacket, a hatbox. No skeletons. He keeps those in the bank.");
+                Toggle("study_closet_open");
+                if (State.HasFlag("study_closet_open")) await Say("Coats, a dinner jacket, a hatbox. No skeletons. He keeps those in the bank.");
                 return true;
         }
         return false;
