@@ -529,15 +529,6 @@ MICAH: Pleasure doing business. Late fees are on me.
     ROSE: Goodbye, Micah. Try the front door this time. You used to prefer the window.
     -> END
 
-// ---------------------------------------------------------------- THE OUTSKIRTS
-
-=== ending ===
-SAL: Hey. Gumshoe.
-SAL: Nice night for digging.
-SAL: Mr. Moretti would like a word. In private. Bring the box.
-MICAH: Funny. I was just about to ask for one.
--> END
-
 // ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
 
 === street_choice ===
@@ -582,8 +573,21 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
 
 === rose_coffee ===
 ROSE: Micah? It's the middle of the night. God, your face...
-MICAH: It looks worse than it is. It usually does.
-ROSE: What do you want? Last time you were here you wanted forgiving.
+{
+- has_flag("spared_oldman"):
+    MICAH: Tonight I had a gun on a man who deserved it more than anybody I ever met.
+    MICAH: I put it away and walked out. Nobody will ever know but me. And now you.
+- has_flag("walked_away"):
+    MICAH: Tonight I had a gun on a man who'd never done me any harm. I lowered it and walked away.
+    MICAH: First smart thing I've done all week.
+- else:
+    MICAH: It looks worse than it is. It usually does.
+}
+{has_flag("rose_done"):
+    ROSE: What do you want? Last time you were here you wanted forgiving.
+- else:
+    ROSE: What do you want?
+}
 MICAH: Nothing. Not tonight.
 MICAH: I'm not asking you to believe I've changed. I'd like to start showing you.
 MICAH: I was wondering... if some time you'd be free for a cup of coffee. Daylight. A table between us.
@@ -656,6 +660,138 @@ NUN: You might want to see Harrington senior.
     ~ set_flag("keep_going")
 * [(Give up.)]
 - -> END
+// ---------------------------------------------------------------- ACT 3: THE BLUE LANTERN, THE MANSION
+
+=== bartender_gun ===
+BARTENDER: Sal? Sal, what's all the... oh. Oh, no.
+MICAH: Evening, Tony. Sal's taking a nap. You and me are going to talk.
+MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
+BARTENDER: Are you out of your mind? Bug off, Jones. You don't know who these people are.
+BARTENDER: They own judges. They own cops. They own the men who own the cops.
+BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, too.
+* [(Shoot him in the leg.)]
+    ~ set_flag("shot_bartender")
+* {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
+    MICAH: ...You're right, Tony. It's not worth it. None of it is.
+    ~ set_flag("walked_away")
+- -> END
+
+=== bartender_shot ===
+BARTENDER: AAAAH! My leg! You shot me, you crazy son of a...
+MICAH: I've got five more. Where is she?
+BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
+BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday.
+BARTENDER: There's a key on the lintel over the kitchen door. Just walk in like the delivery boys do.
+MICAH: Get that leg looked at, Tony. Tell them you slipped.
+-> END
+
+=== harrington_eleanor ===
+HARRINGTON: There, now. It's not so bad, is it? Being back where you belong.
+ELEANOR: ...
+HARRINGTON: You ran to a priest, and then to a drunk who calls himself a detective. And where did they bring you? Home.
+HARRINGTON: Theodore will have you back. He always does. The Club will have you on Thursdays. And I will have you whenever I please.
+ELEANOR: Yes, Mr. Harrington.
+HARRINGTON: Good girl.
+-> END
+
+=== oldman_taunt ===
+HARRINGTON: Well. Mr. Jones. My son's money paid for that coat, I believe.
+MICAH: Get away from her.
+HARRINGTON: Or what? You'll shoot an old man in his dressing gown? You haven't got the guts. You'd have done it by now.
+HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one, I grant you. But her place is here.
+ELEANOR: Micah...
+* [(Shoot him.)]
+    ~ set_flag("shot_oldman")
+* {has_flag("can_spare")} [(Lower the gun.)]
+    MICAH: Yeah... I'm done with this world...
+    ~ set_flag("spared_oldman")
+- -> END
+
+=== eleanor_persuade ===
+ELEANOR: You... you killed him. Micah, what have you done?
+MICAH: Get dressed. We're leaving.
+ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
+* [You can't stay here. Not now. They'll pin it on you.]
+    ELEANOR: They'll pin it on whoever they like. They always do.
+* [I didn't come all this way to leave you here, Eleanor.]
+    ELEANOR: ...
+    ELEANOR: You mean it. God help you, you actually mean it.
+    ~ set_flag("eleanor_convinced")
+* [He had it coming. They all do.]
+    ELEANOR: And who decides that? You? With a gun in your hand?
+- {has_flag("eleanor_convinced"): -> eleanor_comes}
+ELEANOR: Please, Micah. Just go. Before they come.
+* [Nobody's coming. The house is asleep.]
+    ELEANOR: This house never sleeps.
+* [I'll go to the police. I'll tell them everything.]
+    ELEANOR: The police? The police dine here on Sundays.
+* [Every time I've seen you, you've said "I can't go back there". Now you don't have to.]
+    ELEANOR: ...
+    ~ set_flag("eleanor_convinced")
+    -> eleanor_comes
+- -> END
+
+=== eleanor_comes ===
+ELEANOR: All right. All right. Don't let go of my hand.
+-> END
+
+// ---------------------------------------------------------------- ACT 3: ENDINGS
+
+=== ending_together ===
+ELEANOR: So this is where Chicago ends.
+MICAH: It doesn't end. It just runs out of streetlights.
+ELEANOR: Where are we going?
+MICAH: West. Until the money runs out, or the road does.
+{has_flag("took_documents"):
+    MICAH: And if anybody comes asking, I've got a folder of Harrington Steel that'll make them stop asking.
+}
+{has_flag("mansion_exploded"):
+    ELEANOR: The whole house, Micah. There's nothing left of them back there.
+    MICAH: There's plenty left of them. Just not in that house.
+}
+ELEANOR: Say goodbye, then.
+MICAH: Goodbye, Chicago. You were never any good to me.
+ELEANOR: Goodbye, Chicago.
+-> END
+
+=== ending_alone ===
+MICAH: The last fence post. The last streetlight. The last place a man goes to bury something.
+MICAH: She stayed in that house. With him on the carpet and the whole Club on its way.
+{has_flag("took_documents"):
+    MICAH: I've got the old man's papers in my coat. Enough to keep the cops off me for the rest of my life.
+}
+{has_flag("mansion_exploded"):
+    MICAH: The sky over the Gold Coast is still orange. Nobody will ever know what happened in that bedroom.
+}
+MICAH: Free. That's the word for it. Free as a dog nobody wants.
+-> END
+
+=== prison_eleanor ===
+ELEANOR: Hello, Micah.
+MICAH: You came. The guard bet me a cigarette you wouldn't.
+ELEANOR: They said a lot of things about you. In court, mostly.
+MICAH: You were never in that courtroom. Not your name, not your face. I kept you out of it. Out of all of it.
+ELEANOR: I know. And I'm grateful, Micah. I really am.
+ELEANOR: But I have to move forward. I'm going back to Theodore.
+MICAH: To Teddy. After all of it.
+ELEANOR: He's the only door that was ever open to me. You knew that, the first night.
+ELEANOR: Goodbye, Micah.
+-> END
+
+=== prison_caleb ===
+CALEB: Micah.
+MICAH: Father.
+CALEB: How are you holding up?
+MICAH: Three meals a day. That's two more than I managed outside.
+CALEB: I went to see Rose.
+MICAH: And?
+CALEB: ...
+MICAH: She doesn't want anything to do with me. You can say it, Caleb.
+CALEB: She asked me not to bring Tommy. Not yet. Maybe not ever.
+MICAH: And Eleanor's living with Harrington's son. In the big house with the view of the lake. I read the papers.
+CALEB: I'll pray for you, brother.
+MICAH: You always say that. One of these days I'd like to know what you ask for.
+-> END
 
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
 
@@ -674,4 +810,29 @@ MOM: Who is?
 DANIEL: Micah. The detective. From the attic.
 MOM: ...Goodnight, Dan.
 DANIEL: Five more minutes.
+-> END
+
+=== epilogue ===
+DANIEL: The last entry. The handwriting's different. Shakier.
+{
+- has_flag("ending_1"):
+    DANIEL: "Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
+    DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
+    DANIEL: ...Huh. He made it. He actually made it.
+- has_flag("ending_2"):
+    DANIEL: "She left again. The third time. Took the car, and what was left of the money."
+    DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."
+    DANIEL: He got the girl. And then the girl got him.
+- has_flag("ending_3"):
+    DANIEL: "I see her every night. On the ceiling. At the bottom of the glass. The old man on the carpet, and the look on her face."
+    DANIEL: "One bullet left in the revolver. I always was bad at keeping things."
+    DANIEL: The rest of the page is stained. Whisky... and something darker.
+    DANIEL: ...Jesus, Micah.
+- else:
+    DANIEL: "Rose. Tommy. I know you won't come, and I don't blame you. I'd have stayed away from me too."
+    DANIEL: "Tommy, be a better man than your father. It isn't a high bar. Rose, I'm sorry. I always was. I just never said it right."
+    DANIEL: "They took my belt. They left me the sheets."
+    DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
+}
+DANIEL: That's enough of you for one lifetime, Micah Jones.
 -> END
