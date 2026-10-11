@@ -414,6 +414,15 @@ public class AutoPlay
             var confront = game.Perform(Verb.Walk, "door_right");
             await Until(() => game.Room?.Name == "MansionBedroom");
             await game.Wait(1.5);
+            await Until(() => game.Hud.SpeechVisible && game.Room?.Name == "MansionBedroom");
+            var mansionLine = game.Hud.SpeechText;
+            Check(game.Hud.SpeechVisible && !confront.IsCompleted, "Act Three confrontation is speaking before pause");
+            PressKey(Key.Space);
+            await Observe(8);
+            Check(game.IsPaused && game.Hud.SpeechVisible && game.Hud.SpeechText == mansionLine
+                && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
+                "Space freezes the Act Three confrontation mid-sentence");
+            PressKey(Key.Space);
             await Shot("mansion_bedroom");
             await Until(() => gs.HasFlag("eleanor_up"));
             await game.Wait(0.5);
