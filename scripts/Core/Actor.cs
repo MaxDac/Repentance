@@ -42,12 +42,18 @@ public partial class Actor : Hotspot, ISpeaker
     private float _moveSpeed;
     private TaskCompletionSource? _moveDone;
     private float _walkDistance;
+    private PosePlayback? _poses;
+    public PosePlayback? Poses => _poses;
 
     private bool CanWalk => Frames >= WalkStart + WalkFrames;
 
-    public Vector2 FrameSize => Texture == null ? new Vector2(16, 40) : new Vector2(Texture.GetWidth() / Frames, Texture.GetHeight());
+    public Vector2 FrameSize => _poses?.Active == true
+        ? new Vector2(_sprite!.Texture.GetWidth() / _sprite.Hframes, _sprite.Texture.GetHeight())
+        : Texture == null ? new Vector2(16, 40) : new Vector2(Texture.GetWidth() / Frames, Texture.GetHeight());
 
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, FrameSize.Y * GlobalScale.Y + 3);
+    public Vector2 HeadPosition => _poses?.Active == true
+        ? ToGlobal(_poses.HeadOffset - new Vector2(0, 7))
+        : GlobalPosition - new Vector2(0, FrameSize.Y * GlobalScale.Y + 3);
 
     public bool Talking
     {
@@ -66,6 +72,7 @@ public partial class Actor : Hotspot, ISpeaker
             Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y + Baseline),
         };
         AddChild(_sprite);
+        _poses = new PosePlayback(_sprite);
         ApplyDepthScale();
     }
 
@@ -78,6 +85,7 @@ public partial class Actor : Hotspot, ISpeaker
 
     public override void _Process(double delta)
     {
+        _poses?.Process(delta);
         if (_talking)
         {
             _talkTime += delta;
@@ -101,13 +109,14 @@ public partial class Actor : Hotspot, ISpeaker
     /// <summary>Walks the actor in a straight line to a point (room coordinates). Simple, but enough for cutscenes.</summary>
     public Task MoveTo(Vector2 target, float speed = 40)
     {
+        if (_poses?.Active == true) SetPose(null);
         _moveDone?.TrySetResult();
         _moveDone = new TaskCompletionSource();
         _moveTarget = target;
         _moveSpeed = speed;
         _walkDistance = 0;
         if (_sprite != null && Mathf.Abs(target.X - Position.X) > 1)
-            _sprite.FlipH = target.X < Position.X;
+            FaceLeft(target.X < Position.X);
         return _moveDone.Task;
     }
 
@@ -116,13 +125,43 @@ public partial class Actor : Hotspot, ISpeaker
     {
         FlipH = left;
         if (_sprite != null) _sprite.FlipH = left;
+        if (_poses?.Active == true) _poses.Flipped = left;
+    }
+
+    public void SetPose(string? id)
+    {
+        if (_sprite == null || _poses == null)
+            throw new System.InvalidOperationException($"Actor {Id} has no sprite.");
+        _moveTarget = null;
+        _moveDone?.TrySetResult();
+        if (id != null) { _poses.Hold(id, FlipH); return; }
+        _poses.Clear();
+        _sprite.Texture = Texture;
+        _sprite.Hframes = Frames;
+        _sprite.Vframes = 1;
+        _sprite.Offset = new Vector2(-Mathf.Floor(FrameSize.X / 2), -FrameSize.Y + Baseline);
+        UpdateFrame();
+    }
+
+    public Task<bool> PlayPose(string id)
+    {
+        if (_poses == null) throw new System.InvalidOperationException($"Actor {Id} has no sprite.");
+        _moveTarget = null;
+        _moveDone?.TrySetResult();
+        return _poses.Play(id, FlipH);
+    }
+
+    public override void _ExitTree()
+    {
+        _poses?.Clear();
+        _moveDone?.TrySetCanceled();
     }
 
     private static readonly int[] TalkCycle = { 1, 2, 1, 0, 2, 1, 2, 0 };
 
     private void UpdateFrame()
     {
-        if (_sprite == null) return;
+        if (_sprite == null || _poses?.Active == true) return;
         if (_moveTarget != null && CanWalk)
         {
             _sprite.Frame = WalkStart + (1 + (int)(_walkDistance / StridePerFrame)) % WalkFrames;
@@ -133,8 +172,8 @@ public partial class Actor : Hotspot, ISpeaker
         _sprite.Frame = Frames >= 3 ? TalkCycle[tick % TalkCycle.Length] : (tick % 2 == 0 ? 1 : 0);
     }
 
-    private Rect2 SpriteRect => new(new Vector2(-Mathf.Floor(FrameSize.X / 2) + 8, -FrameSize.Y + Baseline + 8),
-        FrameSize - new Vector2(16, 8));
+    private Rect2 SpriteRect => _poses?.Active == true ? _poses.Bounds
+        : new(new Vector2(-Mathf.Floor(FrameSize.X / 2) + 8, -FrameSize.Y + Baseline + 8), FrameSize - new Vector2(16, 8));
 
     public override bool Contains(Vector2 point)
     {

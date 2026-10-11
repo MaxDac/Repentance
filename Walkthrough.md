@@ -62,6 +62,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   Tony behind Sal.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else. The scene then moves to the convent.
+- Before leaving, Micah pushes up from his hands and knees through a supported crouch to standing.
 
 #### Convent
 
@@ -90,6 +91,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   bed, under the sheet.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
+- After their goodbye, Eleanor props herself up, sits at the bed's edge, plants her feet, and rises holding the
+  sheet over herself. The scene then fades back to the attic.
 
 ### End of Act 1 - Present day
 
@@ -164,7 +167,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
   questions about his life, why he abandoned his wife and son.
-- He get up, and the player will be presented with two choices:
+- His recovery is shown through sitting, a supported crouch, and standing rather than an instantaneous pose swap.
+  The player is then presented with two choices:
   - Go find his wife.
   - Push forward.
 - If Micah go find his wife, there will be another location, outside of a terrace house in a row of terrace.
@@ -270,10 +274,12 @@ described here (other verbs, flavour lines) is left to the implementation.
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
+- Micah's masked, cloaked collapse is shown before the blackout on either choice.
 
 #### Churc, outside
 
 - Micah is supine on the pavement, again, beaten.
+- He sits up and pushes himself to standing before the choice, with the same staged recovery as the street.
 - Again, his thoughts will appear as narrating voice, saying what is he doing.
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her

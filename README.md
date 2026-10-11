@@ -176,6 +176,23 @@ early-90s VGA adventures such as *Indiana Jones and the Fate of Atlantis*: tall,
 bodies, shading lit from the top left, a darker outline on each material ("sel-out") and dithered fabric.
 Each character is a spec dict in `tools/art/sprites.py`.
 
+Story actions use articulated strips alongside the ordinary walk/talk sheets. Each action PNG has a matching
+JSON file with the frame dimensions and per-frame `anchor`, `head`, `bounds`, and `seconds`. Anchors and head
+points are measured in frame pixels; `PosePlayback` mirrors both with the artwork, plays in game time, and holds
+the final frame. `Player.PlayPose` and `Actor.PlayPose` return `false` when interrupted or removed from the room;
+call `SetPose(null)` after a completed action to restore ordinary animation. Existing single poses use the same
+metadata. Eleanor's motel rise uses its own bed-scale, lamp-lit strip and a separate near-rail layer, not her
+walking model.
+
+```powershell
+py -3.14 tools\gen_art.py sprites motel
+py -3.14 tests\test_character_art.py
+```
+
+The art checks cover strip geometry, bounds, clipping, intermediate frames, restoration frames and deterministic
+generation. `--autoplay` also captures each action frame, checks playback interruption and mirroring, and exercises
+both knockout/recovery branches. Character quality and motion still require viewing the captures at game scale.
+
 ```powershell
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything

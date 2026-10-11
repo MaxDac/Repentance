@@ -8,7 +8,10 @@ NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view f
 side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 """
 from .common import save
-from .figure import figure as _figure, pose, walk_pose, sheet, kneel_figure as _kneel
+import json
+from pathlib import Path
+from .common import ART
+from .figure import figure as _figure, pose, walk_pose, sheet, action_figure
 
 
 def figure(spec, ps, fw, fh):
@@ -28,10 +31,12 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
 
 
 MICAH = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="fedora", hat_col="5c4838", band="1a120e",
+             face_w=0.050, jaw_w=0.041,
              torso="ae8848", collar="ae8848", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
              pants="4a433b", shoes="2b1b14",
              decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
+              face_w=0.047, jaw_w=0.037,
               shoes="ddd7ca", hipw=0.094, top_hem=0.47)
 # Teddy Harrington: a rich man's son in a tailored double-breasted grey suit with peaked lapels, a burgundy tie,
 # a white pocket square and polished brown oxfords.
@@ -56,6 +61,7 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                   ("belt", 0.42, "d8d0c0")])
 # Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, high black neckline, a single strand of pearls.
 ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
+               face_w=0.046, jaw_w=0.034,
                hair="4a2a1c", hair_style="long", soft_face=True, lips="a83e3c", eye="3a2416", brow="2e1a12",
                torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
                shoes="141014",
@@ -197,24 +203,15 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
 
 
 def supine_frame(spec, name):
-    """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
-    with the body resting on the row the standing figure's soles touch."""
-    from PIL import Image
-    stand = figure(spec, pose(90), FW, FH)
-    a = stand.getchannel("A").point(lambda v: 255 if v >= 250 else 0)  # drop the soft ground shadow
-    stand.putalpha(a)
-    box = stand.getbbox()
-    body = stand.crop(box).rotate(90, expand=True)
-    w = max(FW, body.width + 6)
-    img = Image.new("RGBA", (w, FH), (0, 0, 0, 0))
-    img.alpha_composite(body, ((w - body.width) // 2, box[3] - body.height))
-    save(img, "sprites", f"{name}.png")
+    """Articulated resting frame, head left, on the standing figure's sole line."""
+    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST)
+    action_strip(name, [(img, head)], [1])
     return img
 
 def kneel_frame(spec, name):
-    """Single 64x96 frame of a character down on hands and knees, soles' baseline shared with the player sheet."""
-    img, head = _kneel(dict(spec, h=spec["h"] * SCALE), FW, FH)
-    save(img, "sprites", f"{name}.png")
+    """Wide articulated hands-and-knees pose sharing the action strips' planted ankle."""
+    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), KNEEL)
+    action_strip(name, [(img, head)], [1])
     return img, head
 
 
@@ -223,8 +220,68 @@ def aim_frame(spec, name):
     ps = pose(90, arms={1: ("swing", 84, 2, 2), -1: ("swing", 2, 6, 14)}, gun=1, legs={1: (8, 4, 0), -1: (-8, 6, -4)},
               lean=-2.0)
     img = figure(spec, ps, FW + 32, FH)
-    save(img, "sprites", f"{name}.png")
+    action_strip(name, [(img, (FW / 2 + 16, 18))], [1], anchor=((FW + 32) / 2, FH - 3))
     return img
+
+
+# Hip, shoulder, head, near knee/ankle, elbow/hand, before grounding into the wide action frame.
+REST = [(66, 83), (43, 81), (29, 79), (84, 86), (104, 91), (49, 87), (64, 91)]
+SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
+CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
+HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
+UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
+KNEEL = [(60, 81), (79, 79), (85, 68), (62, 90), (41, 91), (82, 85), (88, 91)]
+FALL = [UPRIGHT,
+        [(64, 59), (60, 35), (57, 20), (70, 74), (74, 91), (69, 44), (78, 39)],
+        [(64, 67), (53, 45), (47, 30), (75, 78), (79, 91), (48, 59), (44, 72)],
+        [(65, 76), (47, 58), (37, 44), (80, 82), (90, 91), (44, 73), (40, 89)],
+        [(66, 82), (44, 71), (31, 60), (83, 85), (99, 91), (42, 84), (51, 91)], REST]
+
+
+def action_strip(name, frames, seconds, anchor=(96, 93)):
+    """PNG plus explicit per-frame contact/head/bounds metadata shared with runtime playback."""
+    import numpy as np
+    images, heads = zip(*frames)
+    fw, fh = images[0].size
+    save(sheet([images], fw, fh), "sprites", f"{name}.png")
+    data = []
+    for img, head, duration in zip(images, heads, seconds, strict=True):
+        ys, xs = np.nonzero(np.array(img.getchannel("A")) >= 250)
+        data.append(dict(anchor=list(anchor), head=list(head), seconds=duration,
+                         bounds=[int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1),
+                                 int(ys.max() - ys.min() + 1)]))
+    Path(ART, "sprites", f"{name}.json").write_text(
+        json.dumps(dict(width=fw, height=fh, frames=data), indent=2) + "\n", encoding="utf-8")
+
+
+def action_sequences(spec, name):
+    from PIL import Image
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    stand = Image.new("RGBA", (192, FH))
+    stand.alpha_composite(figure(spec, pose(90), FW, FH), (64, 0))
+    standing = (stand, (96, 18))
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def sequence(keys, end, timing):
+        frames, times = [], []
+        for i, (a, b) in enumerate(zip(keys, keys[1:])):
+            frames.append(standing if i == 0 and keys is FALL else action_figure(scaled, a))
+            frames.append(action_figure(scaled, between(a, b)))
+            times += [timing[i] / 2] * 2
+        return frames + [end], times + [timing[-1]]
+
+    falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
+    action_strip(f"{name}_collapse", falling, times)
+    if name == "micah":
+        recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
+                                   [0.28, 0.3, 0.28, 0.22, 0.12])
+        action_strip("micah_recover", recovery, times)
+        # Retain the planted hands/feet while lifting the bowed spine, then bring one knee underneath the body.
+        lifting = [(61, 73), (73, 54), (79, 44), (68, 87), (48, 91), (79, 71), (87, 88)]
+        keys = [KNEEL, lifting, CROUCH, HALF_UP, UPRIGHT]
+        rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12])
+        action_strip("micah_kneel_rise", rise, times)
 
 
 def build():
@@ -235,5 +292,7 @@ def build():
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")
+    action_sequences(MICAH, "micah")
+    action_sequences(MICAH_MASKED, "micah_masked")
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))

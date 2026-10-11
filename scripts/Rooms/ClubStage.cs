@@ -53,6 +53,7 @@ public partial class ClubStage : Room
         if (FindActor("brute") is { } brute)
             await brute.MoveTo(new Vector2(Player.Position.X - 24, Player.Position.Y + 4), 70);
         await Say("brute", "Night night, pal.");
+        if (!await Player.PlayPose("micah_masked_collapse")) return;
         await Game.Hud.Fade(1, 0.08);
         await Wait(1.6);
         State.SetFlag("masked", false);

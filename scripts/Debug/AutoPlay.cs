@@ -16,10 +16,13 @@ public class AutoPlay
     private readonly List<string> _failures = new();
     private string _dir = "";
     private int _shot;
+    private readonly Dictionary<string, int> _poseCounts = new();
+    private readonly Dictionary<PosePlayback, int> _lastPoseFrame = new();
 
     public async Task Run(Game game)
     {
         _game = game;
+        PosePlayback.FrameObserver = ObservePose;
         _dir = ProjectSettings.GlobalizePath("res://screenshots");
         DirAccess.MakeDirRecursiveAbsolute(_dir);
         // keep Godot from importing the screenshots
@@ -50,6 +53,7 @@ public class AutoPlay
             Check(game.Player.Character == "daniel", "prologue plays as Daniel");
             await Shot("attic");
             await WheelTest(game);
+            await PosePlaybackTest(game);
             await game.Perform(Verb.Talk, "hatch");
             await game.Perform(Verb.Hand, "sheet");
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
@@ -345,6 +349,8 @@ public class AutoPlay
             await stage;
             await WaitIdle(game);
             Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked"), "Micah keeps going, to the motel");
+            Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+            Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
 
             // ---- the motel, and the road out of town
             await game.Perform(Verb.Hand, "bed");
@@ -369,7 +375,17 @@ public class AutoPlay
 
             // ---- the other Act 3 ending: giving up, and a coffee with Rose
             game.Hud.ShowCaption(null);
-            _ = game.ChangeRoom("rose_house", "coffee");
+            // Replay the alternative from fresh Ink visit counts: its choices are once-only.
+            DialogueManager.Instance.ResetInk();
+            DialogueManager.Instance.AutoChoose = (knot, options) => Task.FromResult(knot is "club_caught" or "beaten_choice" ? 1 : 0);
+            gs.SetFlag("keep_going", false);
+            gs.SetFlag("brute_stage", false);
+            gs.SetFlag("masked");
+            var otherBranch = game.ChangeRoom("club_stage", "act3");
+            await Until(() => _poseCounts.GetValueOrDefault("micah_masked_collapse") == 2);
+            Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 2, "masked collapse also ran on the do-nothing branch");
+            await Until(() => game.Room?.Name == "ChurchExterior");
+            Check(game.Room?.Name == "ChurchExterior", "give-up route enters the actual beaten scene");
             await Until(() => game.Room?.Name == "RoseHouse");
             await Until(() => gs.HasFlag("rose_door"));
             await game.Wait(1);
@@ -377,6 +393,9 @@ public class AutoPlay
             for (int i = 0; i < 600 && !game.Hud.CaptionVisible; i++) await game.Wait(0.1);
             Check(game.Hud.CaptionVisible, "reached 'End of Act Three' with Rose");
             await Shot("ending_rose");
+            Check(_poseCounts.GetValueOrDefault("micah_kneel_rise") == 1, "alley played its kneeling rise");
+            Check(_poseCounts.GetValueOrDefault("micah_recover") == 3, "street and both cathedral branches played full recoveries");
+            Check(_poseCounts.GetValueOrDefault("eleanor_sheet_rise") == 1, "Eleanor played her sheet-covered rise");
         }
         catch (Exception ex)
         {
@@ -384,8 +403,66 @@ public class AutoPlay
         }
 
         GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
+        PosePlayback.FrameObserver = null;
         Engine.TimeScale = 1;
         game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+    }
+
+    private async Task ObservePose(PosePlayback pose)
+    {
+        string name = pose.Action!;
+        int frame = pose.Frame;
+        if (frame == 0)
+        {
+            _poseCounts[name] = _poseCounts.GetValueOrDefault(name) + 1;
+            _lastPoseFrame[pose] = -1;
+        }
+        Check(frame == _lastPoseFrame.GetValueOrDefault(pose, -1) + 1, $"{name}: ordered frame {frame}");
+        _lastPoseFrame[pose] = frame;
+        await _game.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+        Check(pose.Action == name && pose.Frame == frame, $"{name}: frame {frame} held for rendering");
+        if (name == "eleanor_sheet_rise")
+            Check(_game.Room!.GetNode<Sprite2D>("EleanorFigure").ZIndex == (frame >= 4 ? 2 : 0),
+                $"{name}: frame {frame} is on the correct side of the bed rail");
+        var image = _game.GetViewport().GetTexture().GetImage();
+        Check(image.SavePng($"{_dir}/{++_shot:00}_pose_{name}_{frame}.png") == Error.Ok, $"{name}: saved frame {frame}");
+    }
+
+    private async Task PosePlaybackTest(Game game)
+    {
+        var player = game.Player;
+        var character = player.Character;
+        var observer = PosePlayback.FrameObserver;
+        PosePlayback.FrameObserver = null;
+        var action = player.PlayPose("micah_recover");
+        await game.Wait(0.2);
+        player.SetCharacter(character);
+        Check(!await action && !player.Poses.Active, "character swap cancels awaited playback and restores animation");
+        player.SetPose("micah_supine");
+        player.Face(Facing.Right);
+        var right = player.HeadPosition - player.GlobalPosition;
+        player.Face(Facing.Left);
+        var left = player.HeadPosition - player.GlobalPosition;
+        Check(Mathf.IsEqualApprox(right.X, -left.X) && Mathf.IsEqualApprox(right.Y, left.Y), "wide-pose speech mirrors around the contact anchor");
+        var first = player.PlayPose("micah_recover");
+        var second = player.PlayPose("micah_kneel_rise");
+        Check(!await first, "a new pose cancels the previous await");
+        player.Stop();
+        Check(!await second && !player.Poses.Active, "stopping restores the sheet and cancels playback");
+        var actor = new Actor { Id = "pose_test", Texture = GD.Load<Texture2D>("res://assets/art/sprites/sal.png"), DepthScale = false };
+        game.Room!.World.AddChild(actor);
+        actor.SetPose("micah_supine");
+        actor.FaceLeft(false);
+        var rightBounds = actor.Bounds;
+        actor.FaceLeft(true);
+        Check(Mathf.IsEqualApprox(actor.Bounds.Size.X, rightBounds.Size.X), "actor wide-pose hit bounds survive mirroring");
+        Check(actor.Contains(actor.GlobalPosition + actor.Poses!.Bounds.GetCenter()), "actor hit testing uses the displayed pose");
+        var leaving = actor.PlayPose("micah_recover");
+        game.Room.World.RemoveChild(actor);
+        Check(!await leaving, "actor removal cancels playback");
+        actor.QueueFree();
+        player.SetCharacter(character);
+        PosePlayback.FrameObserver = observer;
     }
 
     /// <summary>Right-click the trunk to open the verb wheel, then click the boot.</summary>

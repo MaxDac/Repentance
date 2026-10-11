@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="4_Voice"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_rails.png" id="5_rails"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 64)
@@ -48,6 +49,15 @@ position = Vector2(125, 136)
 script = ExtResource("4_Voice")
 Id = "eleanor"
 SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="EleanorFigure" type="Sprite2D" parent="."]
+position = Vector2(110, 194)
+centered = false
+
+[node name="BedRails" type="Sprite2D" parent="."]
+z_index = 1
+texture = ExtResource("5_rails")
+centered = false
 
 [node name="Bed" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

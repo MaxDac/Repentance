@@ -28,11 +28,15 @@ public partial class Player : Node2D, ISpeaker
     private TaskCompletionSource<bool>? _walkDone;
     private double _animTime;
     private bool _talking;
+    private PosePlayback _poses = null!;
+    public PosePlayback Poses => _poses;
 
     public bool IsWalking => _path.Count > 0;
     public Facing Facing => _facing;
     /// <summary>Speech anchor: a few pixels above the top of the head (or hat), which sits ~83px above the feet.</summary>
-    public Vector2 HeadPosition => GlobalPosition - new Vector2(0, (_pose == null ? 92 : _pose.EndsWith("_supine") ? 34 : 62) * Scale.Y);
+    public Vector2 HeadPosition => _poses?.Active == true
+        ? ToGlobal(_poses.HeadOffset - new Vector2(0, 7))
+        : GlobalPosition - new Vector2(0, 92 * Scale.Y);
 
     public bool Talking
     {
@@ -52,6 +56,7 @@ public partial class Player : Node2D, ISpeaker
             Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + Baseline),
         };
         AddChild(_sprite);
+        _poses = new PosePlayback(_sprite);
         SetCharacter(Character);
     }
 
@@ -61,15 +66,13 @@ public partial class Player : Node2D, ISpeaker
         Character = id;
         SpeechColor = id == "daniel" ? new Color("b8d8e8") : new Color("f0e0a0");
         if (_sprite == null) return;
-        _pose = null;
+        _poses.Clear();
         _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
         _sprite.Hframes = Cols;
         _sprite.Vframes = 3;
         _sprite.Offset = new Vector2(-FrameSize.X / 2, -FrameSize.Y + Baseline);
         UpdateFrame();
     }
-
-    private string? _pose;
 
     /// <summary>
     /// Holds a single-frame pose (assets/art/sprites/{id}.png, one 64x96 frame, e.g. "micah_kneel") instead of the
@@ -78,20 +81,22 @@ public partial class Player : Node2D, ISpeaker
     public void SetPose(string? id)
     {
         if (id == null) { SetCharacter(Character); return; }
-        _pose = id;
-        _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");
-        _sprite.Hframes = 1;
-        _sprite.Vframes = 1;
-        _sprite.Frame = 0;
-        // Poses may be wider than a walk frame (e.g. lying on the ground); they stay centred on the feet.
-        var size = _sprite.Texture.GetSize();
-        _sprite.Offset = new Vector2(-size.X / 2, -size.Y + Baseline);
-        _sprite.FlipH = _facing == Facing.Left;
+        Stop();
+        _poses.Hold(id, _facing == Facing.Left);
     }
+
+    public Task<bool> PlayPose(string id)
+    {
+        Stop();
+        return _poses.Play(id, _facing == Facing.Left);
+    }
+
+    public override void _ExitTree() => _poses?.Clear();
 
     /// <summary>Walks along a path. Resolves to false if interrupted by another walk.</summary>
     public Task<bool> WalkPath(IEnumerable<Vector2> points)
     {
+        if (_poses.Active) SetCharacter(Character);
         _walkDone?.TrySetResult(false);
         _path.Clear();
         foreach (var p in points) _path.Enqueue(p);
@@ -102,6 +107,7 @@ public partial class Player : Node2D, ISpeaker
 
     public void Stop()
     {
+        if (_poses?.Active == true) SetCharacter(Character);
         _path.Clear();
         _walkDone?.TrySetResult(false);
     }
@@ -129,6 +135,7 @@ public partial class Player : Node2D, ISpeaker
 
     public override void _Process(double delta)
     {
+        _poses.Process(delta);
         _animTime += delta;
         if (_path.Count > 0)
         {
@@ -164,7 +171,8 @@ public partial class Player : Node2D, ISpeaker
 
     private void UpdateFrame()
     {
-        if (_sprite == null || _pose != null) return;
+        if (_sprite == null) return;
+        if (_poses.Active) { _poses.Flipped = _facing == Facing.Left; return; }
         bool walking = _path.Count > 0;
         int row, col;
         switch (_facing)

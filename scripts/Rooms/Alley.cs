@@ -41,6 +41,7 @@ public partial class Alley : Room
             if (FindActor("sal") is { } sal) _ = sal.MoveTo(new Vector2(322, 198), 50);
             if (FindActor("bartender") is { } tony) await tony.MoveTo(new Vector2(338, 196), 45);
             await Wait(0.4);
+            if (!await Player.PlayPose("micah_kneel_rise")) return;
             Player.SetPose(null);
             Player.Face(Facing.Right);
             await Say("A convent. Of all the places to hide a woman like that.");
