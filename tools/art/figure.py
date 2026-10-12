@@ -490,6 +490,8 @@ def figure(spec, ps, fw=56, fh=80):
         _face(c, col, P, body, H, cp, sp, nod, ps["mouth"])
         if col.get("mask"):
             _mask(c, col, P, body, H, cp, sp, nod)
+    elif col.get("mask") and col["mask"][0] == "animal":  # ears and antlers still show from behind
+        _mask(c, col, P, body, H, cp, sp, nod)
     shx = (P(legs[1][2])[0] + P(legs[-1][2])[0]) / 2
     return c.render(shadow_box=((shx, base + 0.6), H * 0.15, 1.7))
 
@@ -823,7 +825,10 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
 
 
 def _mask(c, col, P, body, H, cp, sp, nod):
-    """A ritual mask over the face: ("full", colour) covers the whole face, ("half", colour) is a domino over the eyes."""
+    """A ritual mask over the face: ("full", colour) covers the whole face, ("half", colour) is a domino over the eyes,
+    ("animal", kind, colour, accent) is a carved beast's face (see _animal_mask)."""
+    if col["mask"][0] == "animal":
+        return _animal_mask(c, col, P, body, H, cp, sp, nod)
     style, mc = col["mask"]
     fx, fy, _ = P(body([0, 0.08 + nod, 0.05]))
     hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
@@ -849,6 +854,101 @@ def _mask(c, col, P, body, H, cp, sp, nod):
         ex, ey2, _ = P(body([s * 0.022 * HEAD, 0.074 + nod, 0.056 * HEAD]))
         ex = math.floor(ex) - (fs if abs(sp) > 0.85 else 0)
         c.dot(ex, math.floor(ey2), "141016")
+
+
+def _animal_mask(c, col, P, body, H, cp, sp, nod):
+    """A carved wood or bone beast's face after the animals of Celtic folklore: the plate covers the face like the
+    white mask, a muzzle or beak juts forward along the facing direction, and ears or antlers rise through the cowl
+    so the silhouette names the beast even from behind. col["mask"] = ("animal", kind, plate colour, accent colour),
+    kind one of ANIMAL_MASKS."""
+    _, kind, mc, ac = col["mask"]
+    K = HEAD
+    facing = cp > -0.25
+
+    def S(x, y, z):  # head-relative point (head units: y from the eye line, z forward)
+        return P(body([x * K, 0.074 + nod + y * K, z * K]))[:2]
+
+    def cap(a, b, ra, rb, colour, part="snout"):
+        return c.put(c.capsule(S(*a), S(*b), ra, rb), colour, part, dither=False)
+
+    # ---- ears and antlers, rising through the cowl ----
+    for s in (1, -1):
+        if kind == "stag":  # branching antlers: a beam sweeping up, out and back, a brow tine and a top tine
+            cap((s * 0.03, -0.075, -0.005), (s * 0.06, -0.13, -0.025), 1.1, 0.8, ac, "horn")
+            cap((s * 0.06, -0.13, -0.025), (s * 0.085, -0.172, -0.05), 0.8, 0.5, ac, "horn")
+            cap((s * 0.06, -0.13, -0.025), (s * 0.034, -0.168, -0.01), 0.7, 0.4, ac, "horn")
+            cap((s * 0.042, -0.1, -0.012), (s * 0.08, -0.112, 0.02), 0.7, 0.4, ac, "horn")
+            cap((s * 0.045, -0.035, 0.0), (s * 0.08, -0.05, -0.01), 1.0, 0.5, mc, "horn")
+        elif kind == "boar":
+            cap((s * 0.035, -0.06, 0.0), (s * 0.06, -0.115, -0.01), 1.4, 0.5, mc, "horn")
+        elif kind == "wolf":  # tall pointed ears
+            c.put(c.poly([S(s * 0.008, -0.065, 0.012), S(s * 0.06, -0.05, -0.02), S(s * 0.047, -0.165, -0.012)]),
+                  mc, "horn", dither=False)
+            cap((s * 0.036, -0.085, 0.0), (s * 0.042, -0.115, -0.008), 0.5, 0.3, ac, "horn")
+        elif kind == "bear":  # small round ears
+            c.put(c.ellipse(S(s * 0.046, -0.074, -0.005), 1.9, 1.8), mc, "horn", dither=False)
+            c.dot(*S(s * 0.046, -0.074, 0.0), _dark(ac, 1))
+        elif kind == "hare":  # long upright ears with a darker inner groove
+            cap((s * 0.02, -0.07, -0.005), (s * 0.036, -0.192, -0.02), 1.5, 1.1, mc, "horn")
+            cap((s * 0.024, -0.095, 0.0), (s * 0.034, -0.18, -0.014), 0.45, 0.35, ac, "horn")
+    if kind == "boar":  # a bristled ridge over the crown
+        cap((0, -0.07, 0.01), (0, -0.115, -0.04), 1.3, 0.7, ac, "horn")
+    elif kind == "raven":  # a swept-back crest of carved feathers
+        cap((0, -0.07, 0.01), (0, -0.13, -0.05), 1.4, 0.5, mc, "horn")
+    if not facing:
+        return
+
+    # ---- the face plate ----
+    fx, fy, _ = P(body([0, 0.08 + nod, 0.05]))
+    hrx = H * K * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
+    frx, fry = max(hrx * (0.62 + 0.25 * abs(cp)), 2.6), H * 0.077 * K * 0.86
+    region = c.parts_mask("head")
+    plate = c.put(c.ellipse((fx, fy), frx, fry), mc, "mask", dither=False, cast=False, clip=region)
+    if plate is None or not plate.any():
+        return
+    c.ink = [(x, y, ic) for x, y, ic in c.ink if not (0 <= y < c.h and 0 <= x < c.w and region[y, x])]
+    ey = S(0, 0, 0.056)[1]
+    if kind in ("wolf", "boar", "bear"):  # a heavy carved brow over the eye holes
+        c.bias[plate & (c.Y > ey - 2.5) & (c.Y < ey - 0.5)] -= 1
+
+    # ---- muzzle, snout or beak ----
+    tip = None
+    if kind == "stag":
+        cap((0, 0.01, 0.06), (0, 0.045, 0.11), 1.6, 1.1, mc)
+        tip = (0, 0.045, 0.115)
+    elif kind == "boar":
+        cap((0, 0.02, 0.06), (0, 0.04, 0.1), 2.0, 2.0, mc)
+        cap((0, 0.04, 0.1), (0, 0.04, 0.112), 1.8, 1.8, ac)
+        for s in (1, -1):
+            if s * 0.4 * sp + 0.92 * cp > 0.1:
+                cap((s * 0.014, 0.052, 0.102), (s * 0.022, 0.024, 0.11), 0.6, 0.4, "e8e0cc", "tusk")
+        tip = (0, 0.04, 0.116)
+    elif kind == "wolf":
+        cap((0, 0.01, 0.06), (0, 0.05, 0.125), 1.8, 0.9, mc)
+        tip = (0, 0.05, 0.128)
+    elif kind == "bear":
+        cap((0, 0.02, 0.06), (0, 0.04, 0.098), 2.2, 1.8, mc)
+        c.put(c.ellipse(S(0, 0.036, 0.104), 1.1, 0.9), ac, "nose", dither=False)
+    elif kind == "raven":  # a long beak hooking down
+        cap((0, 0.005, 0.06), (0, 0.04, 0.12), 1.9, 1.2, ac)
+        cap((0, 0.04, 0.12), (0, 0.08, 0.15), 1.2, 0.4, ac)
+    elif kind == "hare":
+        cap((0, 0.03, 0.06), (0, 0.04, 0.086), 1.6, 1.4, mc)
+        tip = (0, 0.036, 0.09)
+    if tip is not None:
+        c.dot(*S(*tip), "141016")
+
+    # ---- the eye holes ----
+    fs = 0 if abs(sp) < 0.12 else (1 if sp > 0 else -1)
+    for s in (1, -1):
+        if s * 0.4 * sp + 0.92 * cp < 0.1:
+            continue
+        ex, ey2 = S(s * 0.022, 0.0, 0.056)
+        ex = math.floor(ex) - (fs if abs(sp) > 0.85 else 0)
+        c.dot(ex, math.floor(ey2), "141016")
+
+
+ANIMAL_MASKS = ("stag", "boar", "wolf", "bear", "raven", "hare")
 
 
 def _veil_back(c, col, P, body, H, cp, sp, nod):

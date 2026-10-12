@@ -146,7 +146,29 @@ public class AutoPlay
             await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
             await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift,
                 new[] { ("s0", 1) }, "lift_route");
-            Check(game.Room?.Name == "EleanorRoom", "staff elevator up to Eleanor's room");
+            Check(game.Room?.Name == "HotelLinen", "staff elevator up to the fifth-floor linen room");
+
+            // ---- the linen room: a hanger and the cart's pliers make a hook for the night bolt
+            await Shot("hotel_linen");
+            await game.Perform(Verb.Walk, "corridor_door");
+            Check(game.Room?.Name == "HotelLinen" && !gs.HasFlag("linen_door_open"), "the corridor door is bolted from the far side");
+            await game.Perform(Verb.UseItem, "corridor_door", "lockpick");
+            Check(!gs.HasFlag("linen_door_open") && gs.HasItem("lockpick"), "no keyhole for the lockpick on the linen side");
+            await game.Perform(Verb.Hand, "rack");
+            Check(gs.HasItem("hanger") && gs.HasFlag("took_hanger"), "took a wire hanger from the laundry rack");
+            await game.Perform(Verb.UseItem, "corridor_door", "hanger");
+            Check(!gs.HasFlag("linen_door_open") && gs.HasItem("hanger"), "a straight hanger alone can't work the bolt");
+            await game.Perform(Verb.Hand, "cart");
+            Check(gs.HasItem("pliers") && gs.HasFlag("took_pliers"), "took the pliers from the housekeeping cart");
+            await Shot("hotel_linen_taken");
+            await CombineAndWait("hanger", "pliers");
+            Check(gs.HasItem("wire_hook") && !gs.HasItem("hanger") && !gs.HasItem("pliers") && gs.HasFlag("made_wire_hook"),
+                "bent the hanger into a wire hook; the pliers go back on the cart");
+            await game.Perform(Verb.Hand, "cart");
+            Check(!gs.HasItem("pliers"), "the cart doesn't hand the pliers out twice");
+            await game.Perform(Verb.UseItem, "corridor_door", "wire_hook");
+            Check(gs.HasFlag("linen_door_open") && !gs.HasItem("wire_hook"), "hooked the night bolt through the transom");
+            Check(game.Room?.Name == "EleanorRoom", "across the corridor into Eleanor's room");
 
             await Shot("eleanor_room");
             await game.Perform(Verb.Hand, "desk_drawer");
@@ -169,10 +191,35 @@ public class AutoPlay
             await game.ItemVerb(Verb.Hand, "brass_box");
             Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
             await game.Perform(Verb.Walk, "exit");
+            Check(game.Room?.Name == "HotelLinen", "back across the corridor to the linen room");
+            await game.Perform(Verb.Walk, "lift");
             Check(game.Room?.Name == "Lobby", "back down in the lobby");
             await SaveLoadTest(game);
             await game.Perform(Verb.Walk, "revolving_door");
-            Check(game.Room?.Name == "Speakeasy", "entered the speakeasy");
+            Check(game.Room?.Name == "BlueLanternFront", "the Blue Lantern lead goes to Rizzo's Flowers");
+
+            // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
+            await Shot("blue_lantern_front");
+            await game.Perform(Verb.Look, "chalkboard");
+            await game.Perform(Verb.Hand, "grille");
+            Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened"), "the grille won't open for a bare lapel");
+            await game.Perform(Verb.Hand, "bucket");
+            Check(gs.HasItem("carnation"), "bought a white carnation");
+            await game.Perform(Verb.Hand, "bucket");
+            Check(gs.Inventory.Count(i => i == "carnation") == 1, "one buttonhole, one flower");
+            await game.Perform(Verb.UseItem, "grille", "carnation");
+            Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened") && gs.HasItem("carnation"),
+                "a white carnation gets a shut slot");
+            await game.Perform(Verb.Hand, "shelf");
+            Check(gs.HasItem("bluing") && gs.HasFlag("took_bluing"), "took the bottle of bluing");
+            await Shot("blue_lantern_front_taken");
+            await CombineAndWait("carnation", "bluing");
+            Check(gs.HasItem("blue_carnation") && !gs.HasItem("carnation") && !gs.HasItem("bluing") && gs.HasFlag("made_blue_carnation"),
+                "dyed the carnation blue; the bluing goes back on the shelf");
+            await game.Perform(Verb.UseItem, "grille", "blue_carnation");
+            Check(game.Room?.Name == "Speakeasy", "the grille opens for a blue carnation");
+            Check(gs.HasFlag("grille_opened") && !gs.HasItem("blue_carnation") && !gs.HasFlag("sal_passed"),
+                "past the florist's grille, but Sal is still to come");
 
             await Shot("speakeasy");
             await game.Perform(Verb.Talk, "bartender");
@@ -359,12 +406,42 @@ public class AutoPlay
             await Shot("convent_gun");
             await threat;
             Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
-            Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("club")?.Visible == false
+            Check(game.Room?.FindHotspot("tribune")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false
+                && game.Room?.FindHotspot("club")?.Visible == false
                 && game.Room?.FindHotspot("library")?.Visible == false
-                && game.Room?.FindHotspot("office")?.Visible == true, "office remains available for ring recovery");
-            await Shot("map_harrington");
+                && game.Room?.FindHotspot("office")?.Visible == true, "the Tribune before Harrington; office remains available for ring recovery");
+            await Shot("map_tribune");
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
+
+            // ---- the Tribune morgue: a clipping torn through the address, paste, and a pin in the Loop
+            await game.Perform(Verb.Walk, "tribune");
+            Check(game.Room?.Name == "NewspaperMorgue", "down in the Tribune morgue");
+            await WaitIdle(game);
+            await Shot("newspaper_morgue");
+            await game.Perform(Verb.Hand, "drawer_h");
+            Check(gs.HasItem("clipping_top") && gs.HasFlag("took_clipping_top"), "drawer H: the top half of the clipping");
+            await game.Perform(Verb.Hand, "spike");
+            Check(gs.HasItem("clipping_bottom") && gs.HasFlag("took_clipping_bottom"), "the copy spike: the bottom half");
+            await game.Perform(Verb.UseItem, "wall_map", "clipping_top");
+            Check(!gs.HasFlag("harrington_located"), "half a clipping is no address");
+            await CombineAndWait("clipping_top", "clipping_bottom");
+            Check(!gs.HasItem("clipping") && gs.HasItem("clipping_top") && gs.HasItem("clipping_bottom"), "the halves won't hold without paste");
+            await game.Perform(Verb.Hand, "paste_pot");
+            Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
+            await Shot("newspaper_morgue_taken");
+            await CombineAndWait("clipping_top", "clipping_bottom");
+            Check(gs.HasItem("clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
+                "pasted the halves together; the paste pot is kept");
+            await ReloadCheckpoint("morgue_clipping");
+            await game.Perform(Verb.UseItem, "wall_map", "clipping");
+            Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the clipping pins the Harrington Building on LaSalle");
+            await Shot("newspaper_morgue_pin");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "ChicagoMap" && !gs.HasItem("paste") && !gs.HasFlag("paste_out"), "the paste pot goes back on the way out");
+            Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("tribune")?.Visible == false,
+                "Harrington's office on the map, the Tribune off it");
+            await Shot("map_harrington");
 
             // ---- the alley behind the Harrington Building
             await game.Perform(Verb.Walk, "harrington");
@@ -420,10 +497,47 @@ public class AutoPlay
             Check(gs.HasFlag("church_before_club"), "Caleb's last warning before the Club");
 
             // ---- the Club, masked: end of Act Two, the bedroom, and the stage in Act 3
-            var rite = game.Perform(Verb.Walk, "club");
+            await game.Perform(Verb.Walk, "club");
+            await WaitIdle(game);
+            Check(game.Room?.Name == "ClubVestibule" && gs.HasFlag("masked") && game.Player.Character == "micah_masked",
+                "Micah goes in masked, by the vestibule");
+            await Shot("club_vestibule");
+            await game.Perform(Verb.Walk, "street_door");
+            Check(game.Room?.Name == "ClubVestibule", "no way back out to the street");
+            await game.Perform(Verb.UseItem, "slot", "invitation");
+            Check(game.Room?.Name == "ClubVestibule" && !gs.HasFlag("vestibule_passed") && gs.HasItem("invitation"),
+                "the slot refuses an unsealed invitation");
+            await game.Perform(Verb.Look, "plaque");
+            await game.Perform(Verb.Hand, "sealing_wax");
+            Check(gs.HasItem("sealing_wax") && gs.HasFlag("took_sealing_wax"), "took the sealing wax");
+            await CombineAndWait("sealing_wax", "invitation");
+            Check(gs.HasItem("sealing_wax") && gs.HasItem("invitation") && !gs.HasItem("invitation_waxed"), "cold wax won't take");
+            await CombineAndWait("matchbook", "sealing_wax");
+            Check(gs.HasItem("wax_soft") && !gs.HasItem("sealing_wax") && gs.HasItem("matchbook") && gs.HasFlag("wax_softened"),
+                "a match softens the wax; the matchbook is kept");
+            await CombineAndWait("wax_soft", "invitation");
+            Check(gs.HasItem("invitation_waxed") && !gs.HasItem("invitation") && !gs.HasItem("wax_soft"), "wax dripped on the invitation");
+            await game.Perform(Verb.UseItem, "slot", "invitation_waxed");
+            Check(!gs.HasFlag("vestibule_passed") && gs.HasItem("invitation_waxed"), "the slot refuses wax with no seal in it");
+            await game.Perform(Verb.Hand, "cloak_lion");
+            Check(gs.HasItem("signet_lion"), "borrowed the lion signet");
+            await CombineAndWait("signet_lion", "invitation_waxed");
+            Check(gs.HasItem("invitation_waxed") && !gs.HasItem("sealed_invitation") && gs.HasItem("signet_lion"),
+                "the lion is second in the procession, not first");
+            await game.Perform(Verb.Hand, "cloak_raven");
+            Check(gs.HasItem("signet_raven") && !gs.HasItem("signet_lion"), "taking the raven hangs the lion back up");
+            await ReloadCheckpoint("vestibule_raven");
+            await CombineAndWait("signet_raven", "invitation_waxed");
+            Check(gs.HasItem("sealed_invitation") && !gs.HasItem("invitation_waxed") && !gs.HasItem("signet_raven")
+                && gs.HasFlag("invitation_sealed"), "sealed with the raven, first of the procession; ring hung back up");
+            await Shot("club_vestibule_sealed");
+            var rite = game.Perform(Verb.UseItem, "slot", "sealed_invitation");
+            await Until(() => gs.HasFlag("vestibule_passed"));
+            await Shot("club_vestibule_open");
             await Until(() => game.Room?.Name == "ClubHall");
             await WaitIdle(game);
             Check(gs.HasFlag("masked") && game.Player.Character == "micah_masked", "Micah goes in masked");
+            Check(gs.HasItem("matchbook") && gs.HasItem("sealed_invitation"), "matchbook still held; the sealed card came back out of the slot");
             Check(game.Room?.FindHotspot("guest")?.Visible == true, "masked guests in the hall");
             await rite;
             await Shot("club_hall_masked");
@@ -535,6 +649,33 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "back_door");
             Check(!gs.HasFlag("gas_on") && game.Room?.Name == "MansionKitchen", "no gas, no leaving yet");
             await game.Perform(Verb.Walk, "baize_door");
+            Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag("baize_unbolted"), "the baize door is bolted from the house side");
+            // ---- the wine cellar: a lantern, kerosene and the matchbook light the bootleggers' stair up to the study
+            await game.Perform(Verb.Walk, "cellar_door");
+            Check(game.Room?.Name == "MansionCellar" && !gs.HasFlag("cellar_lit"), "down the trapdoor into the dark cellar");
+            await Shot("mansion_cellar_dark");
+            await game.Perform(Verb.Walk, "stair");
+            Check(game.Room?.Name == "MansionCellar", "no climbing the cellar stair blind");
+            await game.Perform(Verb.Hand, "lantern");
+            await game.Perform(Verb.Hand, "crates");
+            Check(gs.HasItem("lantern") && gs.HasItem("kerosene") && gs.HasItem("matchbook"), "lantern off the hook, kerosene off the crates, matchbook in pocket");
+            await Shot("mansion_cellar_taken");
+            await CombineAndWait("lantern", "matchbook");
+            Check(gs.HasItem("lantern") && !gs.HasItem("lantern_filled") && !gs.HasItem("lantern_lit") && gs.HasItem("matchbook"),
+                "a dry wick won't light");
+            await CombineAndWait("lantern", "kerosene");
+            Check(gs.HasItem("lantern_filled") && !gs.HasItem("lantern") && !gs.HasItem("kerosene"), "filled the lantern");
+            await CombineAndWait("lantern_filled", "matchbook");
+            Check(gs.HasItem("lantern_lit") && gs.HasFlag("lantern_lit") && gs.HasItem("matchbook"), "lit the lantern; the matchbook is kept");
+            await game.Perform(Verb.UseItem, "stair", "lantern_lit");
+            Check(gs.HasFlag("cellar_lit") && !gs.HasItem("lantern_lit"), "the lantern hung at the stair foot lights the cellar");
+            await Shot("mansion_cellar_lit");
+            await game.Perform(Verb.Walk, "stair");
+            Check(game.Room?.Name == "MansionStudy", "up the bootleggers' stair into the study");
+            await Shot("mansion_study_hatch");
+            await game.Perform(Verb.Walk, "door_left");
+            Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("baize_unbolted"), "unbolted the baize door from the study side");
+            await game.Perform(Verb.Walk, "baize_door");
             Check(game.Room?.Name == "MansionStudy", "into the study");
             await Shot("mansion_study");
             await game.Perform(Verb.Hand, "drawer_right");
@@ -573,6 +714,9 @@ public class AutoPlay
             Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
             Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
             await Shot("mansion_kitchen_escape");
+            await game.Perform(Verb.Walk, "baize_door");
+            await game.Perform(Verb.Walk, "cellar_door");
+            Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door or the cellar during the escape");
             await game.Perform(Verb.Hand, "range");
             await game.Perform(Verb.Hand, "candle");
             Check(gs.HasFlag("gas_on") && gs.HasFlag("candle_lit"), "gas on, candle lit");
@@ -611,6 +755,8 @@ public class AutoPlay
             Check(!game.Hud.Puzzle.IsOpen && !gs.HasFlag(Endings.TookDocuments), "escape kitchen cannot decode skipped evidence after confrontation");
             await game.Perform(Verb.Walk, "baize_door");
             Check(game.Room?.Name == "MansionKitchen", "skipped study cannot be revisited during escape");
+            await game.Perform(Verb.Walk, "cellar_door");
+            Check(game.Room?.Name == "MansionKitchen", "nor reached through the cellar");
             await Shot("mansion_kitchen_alone");
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Prison");
@@ -1271,7 +1417,12 @@ public class AutoPlay
         await Shot("legacy_hotel_recovery_map");
         await game.Perform(Verb.Walk, "hotel");
         await game.Perform(Verb.Walk, "service_door");
-        Check(game.Room?.Name == "EleanorRoom", "legacy hotel marker reaches room 507 through the lobby");
+        Check(game.Room?.Name == "HotelLinen", "legacy hotel marker reaches the linen room through the lobby");
+        await game.Perform(Verb.Hand, "rack");
+        await game.Perform(Verb.Hand, "cart");
+        await CombineAndWait("pliers", "hanger");
+        await game.Perform(Verb.UseItem, "corridor_door", "wire_hook");
+        Check(game.Room?.Name == "EleanorRoom", "legacy recovery bolts back the linen door into room 507");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
         await game.Perform(Verb.Hand, "paper");
         await game.Perform(Verb.Hand, "closet");
@@ -1280,6 +1431,8 @@ public class AutoPlay
         await game.Perform(Verb.Hand, "brass_box");
         await game.ItemVerb(Verb.Hand, "brass_box");
         await game.Perform(Verb.Walk, "exit");
+        Check(game.Room?.Name == "HotelLinen" && gs.HasFlag("linen_door_open"), "room 507 exits to the linen room");
+        await game.Perform(Verb.Walk, "lift");
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("hotel")?.Visible == false && gs.HasItem("card"),
             "recovered card returns to Act 2 map and removes temporary hotel marker");

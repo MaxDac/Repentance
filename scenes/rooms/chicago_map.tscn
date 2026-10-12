@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ChicagoMap.cs" id="1_ChicagoMap"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map.png" id="2_map"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_convent.png" id="m_convent"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_harrington.png" id="m_harrington"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_hotel.png" id="m_hotel"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_tribune.png" id="m_tribune"]
 
 [sub_resource type="RectangleShape2D" id="Rect_hotel"]
 size = Vector2(64, 28)
@@ -31,6 +32,9 @@ size = Vector2(54, 28)
 
 [sub_resource type="RectangleShape2D" id="Rect_harrington"]
 size = Vector2(69, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_tribune"]
+size = Vector2(49, 28)
 
 [node name="ChicagoMap" type="Node2D"]
 script = ExtResource("1_ChicagoMap")
@@ -73,6 +77,11 @@ centered = false
 [node name="Harrington" type="Sprite2D" parent="Markers"]
 position = Vector2(137, 174)
 texture = ExtResource("m_harrington")
+centered = false
+
+[node name="Tribune" type="Sprite2D" parent="Markers"]
+position = Vector2(325, 78)
+texture = ExtResource("m_tribune")
 centered = false
 
 [node name="Hotel" type="Sprite2D" parent="Markers"]
@@ -161,6 +170,18 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Harrington"]
 position = Vector2(170, 187)
 shape = SubResource("Rect_harrington")
+
+[node name="Tribune" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "tribune"
+DisplayName = "Tribune morgue"
+LookText = "The Tribune Tower. Down in the basement, the morgue: every name the paper ever printed, clipped and filed."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Tribune"]
+position = Vector2(348, 91)
+shape = SubResource("Rect_tribune")
 
 [node name="Hotel" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

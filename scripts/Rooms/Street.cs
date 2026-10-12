@@ -53,6 +53,10 @@ public partial class Street : Room
             case "club_door" when !State.HasFlag("club_lead"):
                 await Say("No sign, no knob on this side. A door for people who already know what's behind it.");
                 return true;
+            case "club_door" when State.HasFlag("masked") && !State.HasFlag("vestibule_passed"):
+                // the rite night goes in by the vestibule, sealed summons and all; no slipping round the side
+                await Say("Through the front tonight, with the procession.");
+                return true;
             case "hotel_door" when !State.HasItem("key"):
                 await Say("The doorman took one look at my coat and decided I was weather. I'd need a room key.");
                 return true;

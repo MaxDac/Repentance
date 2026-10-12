@@ -43,10 +43,23 @@ public partial class MansionKitchen : Room
                 return true;
 
             case ("baize_door", Verb.Hand or Verb.Walk) when Escaping:
+            case ("cellar_door", Verb.Hand or Verb.Walk) when Escaping:
                 await Say("Not back in there. Somebody's on the stairs by now.");
+                return true;
+            case ("baize_door", Verb.Hand or Verb.Walk) when !State.HasFlag("baize_unbolted"):
+                await Say("Bolted from the house side. There'll be another way up - houses like this always kept one for the deliveries.");
                 return true;
             case ("baize_door", Verb.Hand or Verb.Walk):
                 await Game.ChangeRoom("mansion_study", "start");
+                return true;
+            case ("baize_door", Verb.Kick):
+                await Say("And bring the whole house down the back stairs? No.");
+                return true;
+
+            case ("cellar_door", Verb.Hand or Verb.Walk):
+                if (!State.HasFlag("seen_mansion_cellar"))
+                    await Say("I haul on the ring. Cold air and the smell of old wine come up out of the black.");
+                await Game.ChangeRoom("mansion_cellar", "kitchen");
                 return true;
 
             case ("range", Verb.Hand) when !Escaping:
