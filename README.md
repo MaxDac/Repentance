@@ -87,6 +87,20 @@ unfinished puzzles on reload.
 
 The cash revision changes save compatibility, not the ending requirements or ring/cross decisions.
 
+### Releases
+
+Linux and Windows builds are published by the manual **Release** workflow (`.github/workflows/release.yml`). It runs
+the unit tests, exports both presets from `export_presets.cfg` with Godot 4.7.2 .NET, and attaches
+`Repentance-vX.Y.Z-<linux|windows>-x86_64.zip` to a new GitHub Release.
+
+```powershell
+# blank version = bump the patch of the latest v* tag (first release: v0.1.0); prerelease defaults to true
+gh workflow run release.yml -f version=0.2.0 -f prerelease=false
+```
+
+Exporting needs `Repentance.sln`: without it Godot exits 0 but silently leaves out the C# assemblies. AI agents can
+use the `release` skill in `.github/skills/release/SKILL.md`.
+
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock

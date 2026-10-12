@@ -1,7 +1,7 @@
 # Godot
 .godot/
 /android/
-export_presets.cfg
+/build/
 *.translation
 
 # .NET
