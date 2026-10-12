@@ -17,7 +17,12 @@ Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
 dotnet build
 # open the project in the Godot editor (imports assets + compiles the Ink story), then press F5
 godot --path . --editor
+# or, without the editor, import once after every fresh clone / new art:
+godot --path . --headless --import
 ```
+
+`.godot/` (the import cache) is not committed. Running `godot --path .` on a fresh clone before importing
+shows a grey title screen with a fallback font, because no texture or font can load.
 
 Command-line options (after `--`):
 
