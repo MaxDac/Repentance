@@ -25,6 +25,14 @@ public partial class Attic : Room
         GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_act3.png"),
     };
 
+    // once the tool tin is found the papers on top of it are swept aside, so it sits clear of the pile
+    private static readonly Texture2D[] ClearedPapersTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_act3.png"),
+    };
+
     private static readonly Texture2D[] ChairTextures =
     {
         GD.Load<Texture2D>("res://assets/art/rooms/attic_chair.png"),
@@ -70,6 +78,7 @@ public partial class Attic : Room
     // End of Act 1: the same evening, dark outside and the lamp on.
     private static readonly Texture2D NightBackground = GD.Load<Texture2D>("res://assets/art/rooms/attic_night.png");
     private static readonly Texture2D NightPapers = GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_night.png");
+    private static readonly Texture2D NightClearedPapers = GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_night.png");
     private static readonly Texture2D NightChair = GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_night.png");
     private static readonly Texture2D NightTrunkOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_night.png");
 
@@ -82,11 +91,12 @@ public partial class Attic : Room
 
     protected override void OnRefresh()
     {
+        bool tinFound = State.HasFlag("tool_tin_found");
         if (State.HasFlag("attic_night"))
         {
             if (GetNodeOrNull<Sprite2D>("Background") is { } night)
                 night.Texture = NightBackground;
-            SetTexture("Papers", NightPapers);
+            SetTexture("Papers", tinFound ? NightClearedPapers : NightPapers);
             SetTexture("Chair", NightChair);
             SetTexture("TrunkOpen", NightTrunkOpen);
             return;
@@ -94,7 +104,7 @@ public partial class Attic : Room
         int actIndex = Mathf.Clamp(State.StoryAct, 1, ActBackgrounds.Length) - 1;
         if (GetNodeOrNull<Sprite2D>("Background") is { } background)
             background.Texture = ActBackgrounds[actIndex];
-        SetTexture("Papers", PapersTextures[actIndex]);
+        SetTexture("Papers", (tinFound ? ClearedPapersTextures : PapersTextures)[actIndex]);
         SetTexture("Chair", ChairTextures[actIndex]);
         SetTexture("TrunkOpen", TrunkOpenTextures[actIndex]);
     }
@@ -171,7 +181,7 @@ public partial class Attic : Room
                 return true;
             case ("papers", Verb.Hand) when !State.HasFlag("got_crowbar"):
                 State.SetFlag("tool_tin_found");
-                await Say("A locked tool tin under the papers. Somebody stamped a small key beside the lock. Not much of a riddle, but I'll take it.");
+                await Say("A locked tool tin under the papers. I push the rest aside. A little brass padlock on it: a little key, then. Not much of a riddle, but I'll take it.");
                 return true;
             case ("papers", Verb.Hand):
                 await Say("I'll file them later. In the recycling bin.");

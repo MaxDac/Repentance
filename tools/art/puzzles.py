@@ -53,10 +53,13 @@ def build():
     d = ImageDraw.Draw(tin)
     d.rectangle([1, 4, 36, 22], fill=hx("55565e"), outline=hx("b6ac88"))
     d.rectangle([1, 4, 36, 9], fill=hx("84807a"))
-    d.rectangle([16, 9, 21, 15], fill=hx("d8b66c"))
-    d.ellipse([18, 10, 19, 12], fill=hx("25222a"))
-    d.line([(24, 15), (32, 15), (32, 17)], fill=hx("d8b66c"))
-    d.ellipse([22, 13, 26, 17], outline=hx("d8b66c"))
+    d.line([(2, 10), (35, 10)], fill=hx("34353c"))
+    # a hasp over the lid seam, shut with a little brass padlock
+    d.rectangle([17, 7, 20, 12], fill=hx("a8a49a"))
+    d.arc([15, 10, 22, 17], 180, 360, fill=hx("c8c4b8"))
+    d.rectangle([15, 13, 22, 19], fill=hx("d8b66c"), outline=hx("8a6a30"))
+    d.point((18, 15), fill=hx("25222a"))
+    d.line([(18, 16), (18, 17)], fill=hx("25222a"))
     save(tin, "rooms", "tool_tin.png")
     save(_icon(wedge).resize((24, 18), Image.Resampling.NEAREST), "rooms", "packing_wedge.png")
 

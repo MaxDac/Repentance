@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/BlueLanternFront.cs" id="1_BlueLanternFront"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front.png" id="2_blue_lantern_front"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_bluing.png" id="5_bluing"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_grille_open.png" id="6_grille_open"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="7_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(52, 180)
@@ -75,7 +76,7 @@ ShowIfFlags = "made_blue_carnation"
 
 [node name="GrilleOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(342, 74)
+position = Vector2(342, 73)
 texture = ExtResource("6_grille_open")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -273,3 +274,7 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Lamppost"]
 position = Vector2(28, 30)
 shape = SubResource("Rect_12")
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = 20
+script = ExtResource("7_Rain")

@@ -16,7 +16,7 @@ public static class Items
         ["photo"] = new("photo", "photograph", "res://assets/art/items/photo.png",
             "Eleanor Harrington. Pretty, poised, and looking at the camera like it owed her money."),
         ["dollar"] = new("dollar", "cash", "res://assets/art/items/dollar.png",
-            "My cash for the case. One dollar for the bellboy; ten to get past Sal."),
+            "My cash for the case. Two dollars for the bellboy; ten to get past Sal."),
         ["matchbook"] = new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
             "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. Just matches."),
         ["crowbar"] = new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
@@ -121,12 +121,15 @@ public static class Items
 
 public static class CashRules
 {
+    /// <summary>The bellboy's first dollar buys his memory, the second the staff door to Eleanor's room.</summary>
     public const int BellboyBribe = 1;
+    public const int BellboyRoomBribe = 1;
     public const int SalBribe = 10;
-    public const int StartingCash = 2 * (BellboyBribe + SalBribe);
+    public const int StartingCash = 22;
 
     public static int Balance(System.Func<string, bool> hasFlag) =>
         !hasFlag("took_dollar") ? 0 : StartingCash
             - (hasFlag("knows_lantern") ? BellboyBribe : 0)
+            - (hasFlag("bellboy_room_paid") ? BellboyRoomBribe : 0)
             - (hasFlag("sal_passed") ? SalBribe : 0);
 }
