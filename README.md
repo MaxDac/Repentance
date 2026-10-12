@@ -25,6 +25,7 @@ Command-line options (after `--`):
 |---|---|
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
+| `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
