@@ -141,7 +141,7 @@ public partial class PuzzlePanel : Control
 
     private void BuildLift()
     {
-        _clue.Text = "Trace the diagram from the loading bay to 507. A, B and C each choose an upper or lower route.";
+        _clue.Text = "Trace the diagram from the loading bay to the fifth-floor linen room, next to 507. A, B and C each choose an upper or lower route.";
         for (int i = 0; i < 3; i++)
         {
             int index = i;
@@ -328,7 +328,7 @@ public partial class PuzzlePanel : Control
             DrawLine(c, new Vector2(242, 96), _settings[2] == 1 ? new Color("65b8ef") : gold, 2);
             foreach (var (p, text) in new[] { (a, "A"), (b, "B"), (c, "C"),
                 (new Vector2(20, 95), "Laundry"), (new Vector2(144, 139), "Kitchen"),
-                (new Vector2(218, 36), "507"), (new Vector2(220, 114), "Roof") })
+                (new Vector2(218, 36), "Linen 5"), (new Vector2(220, 114), "Roof") })
                 DrawString(Hud.Font, p + new Vector2(2, -3), text, fontSize: 8, modulate: gold);
         }
         if (Kind == PuzzleKind.Crests)

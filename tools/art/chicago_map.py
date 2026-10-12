@@ -41,6 +41,7 @@ MARKERS = {
     "club": ((312, 206), "THE CLUB"),
     "convent": ((262, 84), "CONVENT"),
     "harrington": ((170, 178), "HARRINGTON"),
+    "tribune": ((348, 82), "TRIBUNE"),
 }
 
 

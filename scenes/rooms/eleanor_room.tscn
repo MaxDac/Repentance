@@ -112,6 +112,10 @@ polygon = PackedVector2Array(6, 262, 474, 262, 474, 200, 394, 200, 394, 208, 256
 position = Vector2(40, 200)
 metadata/facing = 4
 
+[node name="corridor" type="Marker2D" parent="Entries"]
+position = Vector2(40, 200)
+metadata/facing = 4
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]
@@ -121,11 +125,11 @@ y_sort_enabled = true
 script = ExtResource("3_Hotspot")
 Id = "exit"
 DisplayName = "door"
-LookText = "The way back to the service elevator. I'd rather not be found in here."
+LookText = "The way back across the corridor to the linen room and the service elevator. I'd rather not be found in here."
 WalkTo = Vector2(36, 190)
 Face = 2
-ExitTo = "lobby"
-ExitEntry = "eleanor_room"
+ExitTo = "hotel_linen"
+ExitEntry = "corridor"
 monitoring = false
 monitorable = false
 
