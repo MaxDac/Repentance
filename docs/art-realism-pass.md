@@ -26,7 +26,7 @@ The failures were not “needs more polygons.” They were shapes that did not r
 | Outskirts | A short, narrow skyline and round tree blobs with no underside. | Taller, wider blocks. Tree masses have a darker underside and a lit top. |
 | Harrington road windows | Lit windows were a flat night rectangle. | Dark interiors stay dark; some panes show a shade, a lamp, or a diagonal reflection. The locked lit `ROAD_WINDOW` crop was not moved. |
 | Rose house sidewalk | Even expansion joints. | Joints stagger, with a cracked slab. |
-| Bedroom | Wife crop was `0.3 * hW` (a head). Quilt started at `X0 + 23` and covered the shoulder. | Crop is `0.64 * hW` (head, neck, near shoulder). Quilt starts at `X0 + 36`. Daniel stays in profile so the journal hand offset still lands. |
+| Bedroom | Wife was a rotated head-and-shoulder crop on the near side, reading poorly. | Daniel sits up on the near side, in front; his wife is only a shape under the quilt pulled over her head on the far side, her lamp off. His lit lamp is on a near-side nightstand. |
 | Revolver icon | Barrel and grip only. | Cylinder, front sight, and a short sight line. |
 | Calling card | A heart and a gold point. | `MJ` and a baseline, so it reads as Micah’s card. |
 | Documents / cloth / wedge | Flat paper, one fold, a plain triangle. | A lifted paper corner, extra cloth folds, and wood grain on the wedge. |
