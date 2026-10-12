@@ -23,6 +23,7 @@ public partial class ChicagoMap : Room
     private bool ClubOut => State.HasFlag("club_out");
     private bool NunThreatened => State.HasFlag("nun_threatened");
     private bool HarringtonDone => State.HasFlag("harrington_done");
+    private bool HarringtonLocated => State.HasFlag("harrington_located");
 
     /// <summary>Investigation leads close as the hunt narrows; the office stays available for the ring.</summary>
     private bool Shows(string id) => id switch
@@ -32,7 +33,9 @@ public partial class ChicagoMap : Room
         "church" => true,
         "club" => State.HasFlag("club_unlocked") && (!NunThreatened || HarringtonDone),
         "convent" => State.HasFlag("caleb_club") && !NunThreatened,
-        "harrington" => NunThreatened && !HarringtonDone,
+        // after Agatha talks, the Tribune morgue has to give up the old man's address before his office is a place
+        "tribune" => NunThreatened && !HarringtonLocated,
+        "harrington" => NunThreatened && HarringtonLocated && !HarringtonDone,
         "hotel" => State.HasFlag("recover_hotel") && !State.HasItem("card") && !State.HasItem("brass_box") && !ClubOut,
         _ => false,
     };
@@ -40,7 +43,7 @@ public partial class ChicagoMap : Room
     private static readonly (string id, string node)[] Places =
     {
         ("library", "Library"), ("church", "Church"), ("office", "Office"),
-        ("club", "Club"), ("convent", "Convent"), ("harrington", "Harrington"),
+        ("club", "Club"), ("convent", "Convent"), ("tribune", "Tribune"), ("harrington", "Harrington"),
         ("hotel", "Hotel"),
     };
 
@@ -95,10 +98,10 @@ public partial class ChicagoMap : Room
                 await Say("No use returning there now.");
                 return true;
             case "club" when HarringtonDone:
-                // the invitation, the mask and the cloak: tonight Micah goes in as one of them
+                // the invitation, the mask and the cloak: tonight Micah goes in as one of them, through the vestibule
                 State.SetFlag("masked");
                 State.SetFlag("on_map", false);
-                await Game.ChangeRoom("club_hall", "from_street");
+                await Game.ChangeRoom("club_vestibule", "start");
                 return true;
             case "club":
                 State.SetFlag("on_map", false);
@@ -107,6 +110,9 @@ public partial class ChicagoMap : Room
 
             case "convent":
                 await Game.ChangeRoom("convent_corridor", "start");
+                return true;
+            case "tribune":
+                await Game.ChangeRoom("newspaper_morgue", "start");
                 return true;
             case "harrington":
                 await Game.ChangeRoom("harrington_road", "start");

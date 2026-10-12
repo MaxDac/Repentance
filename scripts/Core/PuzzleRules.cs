@@ -15,7 +15,7 @@ public static class PuzzleRules
         switches.Count != 3 ? "Invalid route" :
         switches[0] != 1 ? "A: laundry" :
         switches[1] != 0 ? "B: kitchen" :
-        switches[2] != 0 ? "C: roof" : "Room 507";
+        switches[2] != 0 ? "C: roof" : "5th floor: linen";
 
     public static bool Safe(IReadOnlyList<int> directions, IReadOnlyList<int> numbers) =>
         directions.SequenceEqual(new[] { 0, 1, 0 }) && numbers.SequenceEqual(new[] { 12, 31, 7 });

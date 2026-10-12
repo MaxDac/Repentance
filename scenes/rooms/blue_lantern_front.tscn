@@ -1,0 +1,275 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/BlueLanternFront.cs" id="1_BlueLanternFront"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front.png" id="2_blue_lantern_front"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_bluing.png" id="5_bluing"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_grille_open.png" id="6_grille_open"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(52, 180)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(96, 78)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(38, 34)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(30, 34)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(38, 102)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(44, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(48, 98)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(26, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(28, 86)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(18, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_12"]
+size = Vector2(12, 22)
+
+[sub_resource type="RectangleShape2D" id="Rect_13"]
+size = Vector2(282, 22)
+
+[node name="BlueLanternFront" type="Node2D"]
+script = ExtResource("1_BlueLanternFront")
+RoomName = "Rizzo's Flowers, State Street"
+FarY = 182
+NearY = 244
+FarScale = 0.86
+NearScale = 1.0
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_blue_lantern_front")
+centered = false
+
+[node name="Bluing" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(292, 114)
+texture = ExtResource("5_bluing")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "took_bluing"
+
+[node name="BluingReturned" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(292, 114)
+texture = ExtResource("5_bluing")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "made_blue_carnation"
+
+[node name="GrilleOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(342, 74)
+texture = ExtResource("6_grille_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "grille_opened"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(4, 244, 476, 244, 476, 182, 4, 182)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="street" type="Marker2D" parent="Entries"]
+position = Vector2(30, 220)
+metadata/facing = 4
+
+[node name="speakeasy" type="Marker2D" parent="Entries"]
+position = Vector2(386, 194)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Street" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "street"
+DisplayName = "State Street"
+LookText = "State Street, back toward the Aurelian. The rain hasn't let up since Tuesday."
+WalkTo = Vector2(14, 220)
+Face = 3
+ExitTo = "street"
+ExitEntry = "lobby"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Street"]
+position = Vector2(26, 160)
+shape = SubResource("Rect_1")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "display window"
+LookText = "Roses, lilies, carnations. Pretty enough to make you forget it's a front."
+WalkTo = Vector2(120, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(118, 111)
+shape = SubResource("Rect_2")
+
+[node name="Chalkboard" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "chalkboard"
+DisplayName = "chalkboard"
+LookText = "Chalk in a careful hand: \"Members' buttonholes – blue carnations only.\""
+WalkTo = Vector2(188, 196)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chalkboard"]
+position = Vector2(188, 132)
+shape = SubResource("Rect_3")
+
+[node name="Bucket" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bucket"
+DisplayName = "bucket of carnations"
+LookText = "White carnations, five cents a stem. An honest price for an honest flower."
+WalkTo = Vector2(142, 196)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bucket"]
+position = Vector2(142, 162)
+shape = SubResource("Rect_4")
+
+[node name="ShopDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shop_door"
+DisplayName = "shop door"
+LookText = "CLOSED. Rizzo keeps banker's hours for flowers and bootlegger's hours for everything else."
+WalkTo = Vector2(240, 194)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ShopDoor"]
+position = Vector2(240, 125)
+shape = SubResource("Rect_5")
+
+[node name="Shelf" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shelf"
+DisplayName = "sidewalk shelf"
+LookText = "Pots, a watering can, and a bottle of Mrs. Stewart's Bluing. Florists use it to dye white flowers."
+WalkTo = Vector2(287, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Shelf"]
+position = Vector2(287, 138)
+shape = SubResource("Rect_6")
+
+[node name="ColdDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cold_door"
+DisplayName = "cold-room door"
+LookText = "Steel, painted green, stencilled COLD ROOM. No handle on this side. Flowers don't need this much door."
+WalkTo = Vector2(386, 190)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/ColdDoor"]
+position = Vector2(386, 127)
+shape = SubResource("Rect_7")
+
+[node name="Grille" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "grille"
+DisplayName = "speaking grille"
+LookText = "A slot at eye height. Somebody inside checks lapels before they check faces."
+WalkTo = Vector2(386, 190)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Grille"]
+position = Vector2(386, 105)
+shape = SubResource("Rect_8")
+
+[node name="Regular" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "regular"
+DisplayName = "regular"
+LookText = "A fellow in a good coat, waiting on nothing in the rain. Blue carnation in his buttonhole."
+WalkTo = Vector2(420, 200)
+Face = 4
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Regular"]
+position = Vector2(442, 134)
+shape = SubResource("Rect_9")
+
+[node name="Lantern" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lantern"
+DisplayName = "blue lantern"
+LookText = "A blue glass lantern over the cold-room door. Unlit. Nobody here needs telling."
+WalkTo = Vector2(386, 190)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lantern"]
+position = Vector2(386, 70)
+shape = SubResource("Rect_10")
+
+[node name="Fascia" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "fascia"
+DisplayName = "sign"
+LookText = "RIZZO'S FLOWERS. Gold leaf on green. The flowers are the second-best thing they sell."
+WalkTo = Vector2(200, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Fascia"]
+position = Vector2(200, 42)
+shape = SubResource("Rect_13")
+
+[node name="Lamppost" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lamppost"
+DisplayName = "lamppost"
+LookText = "The only honest light on the block."
+WalkTo = Vector2(40, 216)
+Face = 3
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lamppost"]
+position = Vector2(28, 30)
+shape = SubResource("Rect_12")

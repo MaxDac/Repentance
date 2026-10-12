@@ -624,15 +624,14 @@ def build_office():
 # ------------------------------------------------------------------------------------------------ DANIEL'S BEDROOM
 
 # the couple were painted at the standing height of the other rooms and filled the bed; in bed they read smaller
-BED_FIGURE_H = 62
+BED_FIGURE_H = 54
 
 
-def _bed_figures(sD, sW):
-    """Daniel sitting up in bed reading, seen in profile, and his wife asleep on her side facing the room (head and
-    shoulders only: the quilt covers the rest, top of the head towards the headboard). Returns RGBA crops, the hands'
-    offset from Daniel's seat corner and the wife's crop."""
+def _bed_figures(sD):
+    """Daniel sitting up in bed reading, seen in profile. His wife is never painted: she sleeps behind him with the
+    quilt pulled over her head. Returns the RGBA crop and the hands' offset from his seat corner."""
     from .figure import figure, pose
-    from .sprites import DANIEL, ELEANOR
+    from .sprites import DANIEL
     hD = BED_FIGURE_H * sD
     ps = pose(90, legs={1: (86, 0, 0), -1: (84, 4, 0)}, arms={1: ("swing", 22, 4, 82), -1: ("swing", 28, 4, 78)},
               lean=-7.0, nod=0.01)
@@ -640,22 +639,13 @@ def _bed_figures(sD, sW):
     a.putalpha(a.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     a = a.crop(a.getbbox())
     hand = (0.31 * hD, -0.255 * hD)
-    hW = BED_FIGURE_H * sW
-    wife = dict(ELEANOR, h=hW, hair="2e1c14", torso="c4b0cc", sleeves="ecc4a2", neckline=0.262, asleep=True,
-                lips="b0645a", decals=[])
-    wife.pop("coat", None)
-    b = figure(wife, pose(0, arms={1: ("swing", 2, 4, 6), -1: ("swing", 2, 4, 6)}), int(hW * 0.6), int(hW * 1.1))
-    b.putalpha(b.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
-    bb = b.getbbox()
-    # head, neck and the near shoulder; the quilt covers everything below that
-    b = b.crop((bb[0], bb[1], bb[2], int(bb[1] + 0.64 * hW))).rotate(90, expand=True)
-    return a, hand, b
+    return a, hand
 
 
 def paint_bedroom():
     """Present day, past one in the morning. A double bed side-on, headboard against the left wall: Daniel sits up on
-    the far side reading Micah's journal by his lamp; his wife sleeps on the near side, turned towards the room.
-    Returns the picture, Daniel's head and the wife's head (speech anchors)."""
+    the near side reading Micah's journal by his lamp; behind him his wife sleeps on the far side, the quilt pulled
+    over her head and her lamp off. Returns the picture, Daniel's head and the wife's head (speech anchors)."""
     import math
     import numpy as np
     from .furniture import Room3D
@@ -739,21 +729,26 @@ def paint_bedroom():
     R.quad(img, [(196, 0, 108), (296, 0, 108), (296, 0, 150), (196, 0, 150)], hx("7a3a34"))
     R.quad(img, [(200, 0.05, 111), (292, 0.05, 111), (292, 0.05, 147), (200, 0.05, 147)], None, hx("c8a888"))
 
-    # ---- Daniel's nightstand, in the far corner ----
+    # ---- her nightstand, in the far corner: her lamp is off ----
     wood, wood_d, wood_l = hx("6a4630"), hx("46301e"), hx("86603f")
-    R.box(img, WX, WX + 22, 0, 26, 2, 22, wood, top=wood_l, side=wood_d)
-    R.quad(img, [(WX + 2, 15, 22), (WX + 20, 15, 22), (WX + 20, 23, 22), (WX + 2, 23, 22)], None, hx("2a1c10"))
-    R.box(img, WX + 12, WX + 19, 26, 29, 10, 13, hx("161616"), top=hx("2a2a2a"))  # the alarm clock
-    clk = R.P(WX + 15.5, 27.5, 13)
-    # his lamp (lit): painted bright so the night grade leaves it glowing warm
-    lamp = R.P(WX + 7, 26, 8)
-    d.rectangle([lamp[0] - 1, lamp[1] - 52, lamp[0] + 1, lamp[1]], fill=hx("b0a080"))
-    d.ellipse([lamp[0] - 5, lamp[1] - 2, lamp[0] + 5, lamp[1] + 2], fill=hx("8a7a5a"))
-    light(img, "ellipse", [lamp[0] - 26, lamp[1] - 80, lamp[0] + 26, lamp[1] - 30], hx("fff4d0"), 0.5, 8)
-    d.polygon([(lamp[0] - 10, lamp[1] - 50), (lamp[0] + 10, lamp[1] - 50), (lamp[0] + 8, lamp[1] - 64),
-               (lamp[0] - 8, lamp[1] - 64)], fill=hx("fffff0"))
-    d.line([(lamp[0] - 10, lamp[1] - 50), (lamp[0] + 10, lamp[1] - 50)], fill=hx("f0d090"))
-    # ---- the bed: X0 headboard .. X1 foot, Z0 far side .. Z1 near side ----
+
+    def nightstand(z0, z1, lit):
+        R.box(img, WX, WX + 22, 0, 26, z0, z1, wood, top=wood_l, side=wood_d)
+        R.quad(img, [(WX + 2, 15, z1), (WX + 20, 15, z1), (WX + 20, 23, z1), (WX + 2, 23, z1)], None, hx("2a1c10"))
+        k = R.s((z0 + z1) / 2) / R.s(12)
+        base = R.P(WX + 7, 26, (z0 + z1) / 2 - 4)
+        x, y = base
+        d.rectangle([x - 1, y - 52 * k, x + 1, y], fill=hx("b0a080"))
+        d.ellipse([x - 5 * k, y - 2 * k, x + 5 * k, y + 2 * k], fill=hx("8a7a5a"))
+        if lit:  # painted bright so the night grade leaves it glowing warm
+            light(img, "ellipse", [x - 26 * k, y - 80 * k, x + 26 * k, y - 30 * k], hx("fff4d0"), 0.5, 8)
+        shade = [(x - 10 * k, y - 50 * k), (x + 10 * k, y - 50 * k), (x + 8 * k, y - 64 * k), (x - 8 * k, y - 64 * k)]
+        d.polygon(shade, fill=hx("fffff0") if lit else hx("c8bca4"))
+        d.line(shade[:2], fill=hx("f0d090") if lit else hx("a89c84"))
+        return base
+
+    nightstand(2, 22, False)
+    # ---- the bed: X0 headboard .. X1 foot, Z0 far side (hers) .. Z1 near side (his) ----
     X0, X1, Z0, Z1, TOP_ = WX, WX + 92, 26, 98, 24
     shadow(img, "polygon", [R.P(X0, 0, Z0 - 2), R.P(X1 + 3, 0, Z0 - 2), R.P(X1 + 5, 0, Z1 + 3), R.P(X0, 0, Z1 + 3)],
            0.55, 3)
@@ -786,39 +781,38 @@ def paint_bedroom():
         cc = R.P(cx_ + lean, y1, cz_)
         d.polygon([(cc[0] + (p[0] - cc[0]) * 0.82, cc[1] + (p[1] - cc[1]) * 0.75) for p in crown], fill=hx("f2eee6"))
 
-    pillow(X0 + 5, X0 + 19, Z0 + 3, Z0 + 31, TOP_, 40, lean=1.0)  # Daniel's, propped up against the headboard
-    pillow(X0 + 5, X0 + 25, Z0 + 37, Z1 - 4, TOP_, 29)            # hers, flat
+    pillow(X0 + 5, X0 + 25, Z0 + 3, Z0 + 33, TOP_, 29)                # hers, flat, under the quilt
+    pillow(X0 + 5, X0 + 19, Z0 + 41, Z1 - 4, TOP_, 40, lean=1.0)      # his, propped up against the headboard
 
-    # ---- the people ----
-    zD, zW = Z0 + 17, Z0 + 52
-    dan, hand, wife = _bed_figures(R.s(zD), R.s(zW))
-    seat = R.P(X0 + 13, TOP_ - 1, zD)
-    img.paste(dan.convert("RGB"), (int(seat[0]), int(seat[1] - dan.height)), dan)
-    dan_head = (int(seat[0] + dan.width * 0.32), int(seat[1] - dan.height))
-    hp = R.P(X0 + 7, TOP_ + 7, zW)  # where the crown of her head rests on the pillow
-    wpos = (int(hp[0]), int(hp[1] - wife.height * 0.55))
-    img.paste(wife.convert("RGB"), wpos, wife)
-    wife_head = (int(hp[0] + wife.width * 0.3), wpos[1])
+    # ---- the quilt: a height field over the two of them. On her side it's pulled right up over her head; on his it
+    # starts at his waist, its edge folded back ----
+    zD, zW = Z0 + 55, Z0 + 18
+    QX1 = X1 + 1.5
 
-    # ---- the quilt: a height field over the two of them, its top edge folded back under her chin ----
-    QX0, QX1 = X0 + 36, X1 + 1.5
+    def qstart(z):
+        t = min(max((z - (Z0 + 34)) / 12.0, 0.0), 1.0)
+        return X0 + 6 + 18 * t * t * (3 - 2 * t)
 
     def hgt(x, z):
         h = TOP_ + 1.5
+        h += 5.5 * math.exp(-((x - (X0 + 15)) / 11.0) ** 4 - ((z - (Z0 + 18)) / 16.0) ** 4)  # her pillow
+        h += 4.5 * math.exp(-((x - (X0 + 15)) / 5.5) ** 2 - ((z - zW) / 6.0) ** 2)         # her head
+        # her body: one long ridge from shoulder to hip, so there's no dip at her waist
+        h += 5.5 * math.exp(-((x - (X0 + 44)) / 21.0) ** 4 - ((z - zW) / 9.5) ** 2)
+        h += 1.0 * math.exp(-((x - (X0 + 30)) / 6.0) ** 2 - ((z - zW) / 8.0) ** 2)         # shoulder
+        h += 2.0 * math.exp(-((x - (X0 + 55)) / 9.0) ** 2 - ((z - zW) / 10.0) ** 2)        # hip
+        h += 3.5 * math.exp(-((x - (X0 + 76)) / 8.0) ** 2 - ((z - zW - 7) / 9.0) ** 2)     # drawn-up knees
+        h += 2.5 * math.exp(-((x - (X1 - 10)) / 7.0) ** 2 - ((z - zW - 3) / 8.0) ** 2)     # feet
         t = min(max((x - (X0 + 20)) / (X1 - X0 - 24), 0), 1)
-        h += (3.6 - 1.2 * t) * math.exp(-((z - zD) / 7.5) ** 2)                      # his legs
-        h += 3.5 * math.exp(-((x - (X1 - 9)) / 4.0) ** 2 - ((z - zD) / 6.0) ** 2)    # toes
-        h += 6.0 * math.exp(-((x - (X0 + 27)) / 7.0) ** 2 - ((z - zW) / 10.0) ** 2)  # her shoulder
-        h += 7.5 * math.exp(-((x - (X0 + 54)) / 10.0) ** 2 - ((z - zW) / 11.0) ** 2)  # hip
-        h += 4.0 * math.exp(-((x - (X0 + 76)) / 8.0) ** 2 - ((z - zW - 7) / 9.0) ** 2)  # drawn-up knees
-        h += 2.5 * math.exp(-((x - (X1 - 10)) / 7.0) ** 2 - ((z - zW - 3) / 8.0) ** 2)  # feet
+        h += (3.6 - 1.2 * t) * math.exp(-((z - zD) / 7.5) ** 2)                            # his legs
+        h += 3.5 * math.exp(-((x - (X1 - 9)) / 4.0) ** 2 - ((z - zD) / 6.0) ** 2)          # toes
         return h + 0.35 * math.sin(x * 0.3 + z * 0.2)
 
     q_dark, q_light = np.array(hx("34506c")), np.array(hx("7c9ab4"))
     L = np.array([-0.45, 0.8, 0.4])
     L /= np.linalg.norm(L)
     step = 1.5
-    xs = np.arange(QX0, QX1 + 0.01, step)
+    xs = np.arange(X0 + 6, QX1 + 0.01, step)
     zs = np.arange(Z0 - 1, Z1 + 1.01, step)
     Hm = np.array([[hgt(x, z) for x in xs] for z in zs])
 
@@ -828,22 +822,39 @@ def paint_bedroom():
         c = q_dark + (q_light - q_dark) * (0.25 + 0.75 * k)
         return tuple(int(v * (0.9 if seam else 1.0)) for v in c)
 
-    for j in range(len(zs) - 1):
-        for i in range(len(xs) - 1):
-            x, z = xs[i], zs[j]
-            n = np.array([-(Hm[j, i + 1] - Hm[j, i]) / step, 1.0, -(Hm[j + 1, i] - Hm[j, i]) / step])
-            seam = (x - QX0) % 14 < step * 0.99 or (z - Z0) % 14 < step * 0.99
-            R.quad(img, [(x, Hm[j, i], z), (x + step, Hm[j, i + 1], z), (x + step, Hm[j + 1, i + 1], z + step),
-                         (x, Hm[j + 1, i], z + step)], qcol(n, seam))
-    # the folded-back band of sheet along the top edge
-    for j in range(len(zs) - 1):
-        z = zs[j]
-        R.quad(img, [(QX0 - 2.5, Hm[j, 0] + 0.5, z), (QX0 + 2, Hm[j, 1] + 0.5, z), (QX0 + 2, Hm[j + 1, 1] + 0.5, z + step),
-                     (QX0 - 2.5, Hm[j + 1, 0] + 0.5, z + step)], hx("f0ece4"))
-    R.line(img, (QX0 + 2, Hm[0, 1] + 0.5, zs[0]), (QX0 + 2, Hm[-1, 1] + 0.5, zs[-1]), hx("c0bab0"))
+    def quilt_rows(rows):
+        for j in rows:
+            z = zs[j]
+            x0 = qstart(z)
+            for i in range(len(xs) - 1):
+                x = xs[i]
+                if x < x0 - step / 2:
+                    continue
+                n = np.array([-(Hm[j, i + 1] - Hm[j, i]) / step, 1.0, -(Hm[j + 1, i] - Hm[j, i]) / step])
+                seam = (x - X0) % 14 < step * 0.99 or (z - Z0) % 14 < step * 0.99
+                R.quad(img, [(x, Hm[j, i], z), (x + step, Hm[j, i + 1], z), (x + step, Hm[j + 1, i + 1], z + step),
+                             (x, Hm[j + 1, i], z + step)], qcol(n, seam))
+            if x0 > X0 + 8:  # on his side the top edge is a folded-back band of sheet
+                x1 = qstart(z + step)
+                R.quad(img, [(x0 - 2.5, hgt(x0, z) + 0.5, z), (x0 + 2, hgt(x0 + 2, z) + 0.5, z),
+                             (x1 + 2, hgt(x1 + 2, z + step) + 0.5, z + step), (x1 - 2.5, hgt(x1, z + step) + 0.5, z + step)],
+                       hx("f0ece4"))
+
+    # her side of the bed first, then Daniel sitting up in front of it, then his lap and legs
+    split = int(np.searchsorted(zs, zD - 9))
+    quilt_rows(range(0, split))
+    dan, hand = _bed_figures(R.s(zD))
+    seat = R.P(X0 + 13, TOP_ - 1, zD)
+    img.paste(dan.convert("RGB"), (int(seat[0]), int(seat[1] - dan.height)), dan)
+    dan_head = (int(seat[0] + dan.width * 0.32), int(seat[1] - dan.height))
+    quilt_rows(range(split, len(zs) - 1))
+    wh = R.P(X0 + 54, hgt(X0 + 54, zW), zW)  # her hip: the one part of her that shows, behind him
+    wife_head = (int(wh[0]), int(wh[1]))
     # the drape over the near side and the foot, in soft vertical folds
     for i in range(len(xs) - 1):
         x = xs[i]
+        if x < qstart(Z1) - step / 2:
+            continue
         f = 0.5 + 0.5 * math.sin(x * 0.5)
         col = tuple(int(v) for v in q_dark + (q_light - q_dark) * (0.18 + 0.3 * f))
         R.quad(img, [(x, Hm[-1, i], Z1 + 1), (x + step, Hm[-1, i + 1], Z1 + 1), (x + step, 7, Z1 + 2 + f),
@@ -854,6 +865,11 @@ def paint_bedroom():
         col = tuple(int(v) for v in q_dark + (q_light - q_dark) * (0.3 + 0.3 * f))
         R.quad(img, [(QX1, Hm[j, -1], z), (QX1, Hm[j + 1, -1], z + step), (QX1 + 1 + f, 7, z + step),
                      (QX1 + 1 + f, 7, z)], col)
+
+    # ---- Daniel's nightstand, on his side in the near corner: the alarm clock and his lamp, lit ----
+    lamp = nightstand(Z1 + 6, Z1 + 26, True)
+    R.box(img, WX + 12, WX + 19, 26, 29, Z1 + 14, Z1 + 17, hx("161616"), top=hx("2a2a2a"))
+    clk = R.P(WX + 15.5, 27.5, Z1 + 17)
 
     # ---- the journal in Daniel's hands: open, its brown leather back towards us ----
     bx, by = seat[0] + hand[0], seat[1] + hand[1]

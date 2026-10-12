@@ -20,11 +20,11 @@ centered = false
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
-position = Vector2(174, 172)
+position = Vector2(153, 185)
 metadata/facing = 1
 
 [node name="Mom" type="Node2D" parent="."]
-position = Vector2(133, 118)
+position = Vector2(214, 117)
 script = ExtResource("3_Voice")
 Id = "mom"
 SpeechColor = Color(0.96, 0.8, 0.86, 1)

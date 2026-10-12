@@ -20,7 +20,22 @@ public partial class MansionStudy : Room
         switch (target.Id, verb)
         {
             case ("door_left", Verb.Hand or Verb.Walk):
+                if (!State.HasFlag("baize_unbolted"))
+                {
+                    State.SetFlag("baize_unbolted");
+                    await Say("The baize door's bolted on this side. I slide it back. Easier than the cellar.");
+                }
                 await Game.ChangeRoom("mansion_kitchen", "study");
+                return true;
+
+            case ("bar_panel", Verb.Hand or Verb.Walk) when State.HasFlag("cellar_lit"):
+                await Game.ChangeRoom("mansion_cellar", "stair");
+                return true;
+            case ("bar_panel", Verb.Hand):
+                await Say("Decanters and a soda siphon. The back panel's flush. Nothing to get a finger behind from this side.");
+                return true;
+            case ("bar_panel", Verb.Look) when State.HasFlag("cellar_lit"):
+                await Say("The bootleggers' hatch, standing open. The lantern's still burning at the bottom of the stair.");
                 return true;
             case ("door_right", Verb.Hand or Verb.Walk):
                 await Say("Voices. A man's. And hers.");
