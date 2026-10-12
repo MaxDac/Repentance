@@ -18,6 +18,7 @@ Thumbs.db
 
 # Local screenshots from --screenshot mode
 /screenshots/
+/frames/
 
 # Python
 __pycache__/
