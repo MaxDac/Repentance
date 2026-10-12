@@ -204,7 +204,8 @@ def desk_props(img):
 def window(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 352, 16, 470, 98
-    city(img, (x0, y0, x1, y1), seed=11, lit=0.28)
+    # the rain is animated in-game (Rain node in office.tscn)
+    city(img, (x0, y0, x1, y1), seed=11, lit=0.28, rain=False)
     # red neon HOTEL sign on the building across
     d.rectangle([428, 44, 438, 90], fill=hx("1a0c10"))
     for i, ch in enumerate("HOTEL"):

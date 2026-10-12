@@ -67,7 +67,7 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
   go through exits, look at everything else.
 - **Right click** on an object opens the **verb wheel**: 👁 *Look*, ✋ *Hand* (take, use, open, push),
   👄 *Talk*, 🥾 *Kick*. Click an icon, or hold the right button and release it over one.
-- **Satchel** (bottom right) opens the inventory. Left-click an item to hold it as the cursor, then click
+- **Satchel** (bottom right) opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
