@@ -387,10 +387,14 @@ public class AutoPlay
             await Until(() => gs.HasFlag("rose_door"));
             await game.Wait(1.5);
             await Shot("rose_house_door");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Wait!"));
+            Check(!game.Hud.InsetVisible, "no close-up yet while Rose calls \"Wait!\"");
             await Until(() => game.Hud.InsetVisible);
-            Check(game.Hud.InsetName.StartsWith("rose_closeup") && game.Room?.Name == "RoseHouse", "Rose's close-up framed over the door when she calls Micah back");
+            Check(game.Hud.InsetName.StartsWith("rose_closeup") && game.Room?.Name == "RoseHouse", "Rose's close-up framed over the door after she calls Micah back");
+            Check(!game.Hud.SpeechVisible, "the close-up opens on a silent look");
             Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "Rose's close-up fills most of the screen");
             await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText.Contains("trouble"), "after the pause, Rose's last line over the close-up");
             Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below Rose's face while the close-up is up");
             await game.Wait(1);
             await Shot("rose_house_wait");

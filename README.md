@@ -146,7 +146,7 @@ From here the story follows Walkthrough.md:
 17. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
    forward.
 18. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
-   three times and Rose calls him back: "Wait!", with a framed close-up of her at the door, then "Don't get into trouble again."
+   three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
 19. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
