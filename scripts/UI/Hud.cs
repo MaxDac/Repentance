@@ -61,6 +61,8 @@ public partial class Hud : CanvasLayer
     public bool PauseVisible => _pause.Visible;
     public bool SpeechVisible => _speech.Visible;
     public string SpeechText => _speech.Text;
+    public Rect2 SpeechRect => _speech.GetRect();
+    public Rect2 InsetRect => _inset.GetRect();
     public float FadeAlpha => _fade.Color.A;
 
     public static Label MakeOutlinedLabel(Color color) => new()
@@ -384,6 +386,11 @@ public partial class Hud : CanvasLayer
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
     public void ShowSpeech(string text, Vector2 head, Color color)
     {
+        if (_insetShown)
+        {
+            ShowSpeechOverInset(text, color);
+            return;
+        }
         const int width = 220;
         var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
         _speech.Text = text;
@@ -402,6 +409,19 @@ public partial class Hud : CanvasLayer
     }
 
     public void HideSpeech() => _speech.Visible = false;
+
+    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
+    private void ShowSpeechOverInset(string text, Color color)
+    {
+        const int width = 380;
+        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
+        _speech.Text = text;
+        _speech.LabelSettings.FontColor = color;
+        _speech.Size = new Vector2(width, size.Y);
+        float bottom = _inset.Position.Y + _inset.Size.Y - 8;
+        _speech.Position = new Vector2((ScreenW - width) / 2f, bottom - size.Y).Round();
+        _speech.Visible = true;
+    }
 
     public async Task Fade(float alpha, double seconds)
     {
@@ -438,7 +458,7 @@ public partial class Hud : CanvasLayer
         _inset.Texture = texture;
         var size = texture.GetSize();
         _inset.Size = size;
-        _inset.Position = new Vector2((ScreenW - size.X) / 2, (ScreenH - size.Y) / 2 - 20);
+        _inset.Position = ((new Vector2(ScreenW, ScreenH) - size) / 2).Floor();
         _inset.Visible = true;
         _insetShown = true;
         _inset.Modulate = new Color(1, 1, 1, seconds > 0 ? 0 : 1);

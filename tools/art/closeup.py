@@ -12,7 +12,9 @@ from PIL import Image, ImageDraw
 from .common import ROOT, hx, palette_of, pixelize, save
 
 SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
-IW, IH = 240, 123  # the picture's 1.95:1, so both masked men stay in view
+AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
+SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
+IW, IH = AW * SCALE, AH * SCALE
 FRAME = 5
 PW, PH = IW + 2 * FRAME, IH + 2 * FRAME
 COLOURS = 32
@@ -53,11 +55,11 @@ def dress(img):
 
 def shared_palette(src):
     """One palette for both variants, so they differ only where the dress is."""
-    nude = src.convert("RGB").resize((IW, IH), Image.BOX)
-    clothed = dress(src.convert("RGB")).resize((IW, IH), Image.BOX)
-    both = Image.new("RGB", (IW, IH * 2))
+    nude = src.convert("RGB").resize((AW, AH), Image.BOX)
+    clothed = dress(src.convert("RGB")).resize((AW, AH), Image.BOX)
+    both = Image.new("RGB", (AW, AH * 2))
     both.paste(nude, (0, 0))
-    both.paste(clothed, (0, IH))
+    both.paste(clothed, (0, AH))
     return palette_of(both, COLOURS)
 
 
@@ -66,8 +68,8 @@ def stage_closeup(src, clothed, pal=None):
     img = src.convert("RGB")
     if clothed:
         img = dress(img)
-    small = img.resize((IW, IH), Image.BOX)
-    inner = pixelize(small, pal or shared_palette(src), spread=8)
+    small = img.resize((AW, AH), Image.BOX)
+    inner = pixelize(small, pal or shared_palette(src), spread=8).resize((IW, IH), Image.NEAREST)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(inner, (FRAME, FRAME))
     d = ImageDraw.Draw(panel)

@@ -436,6 +436,9 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "ClubStage");
             await Until(() => game.Hud.InsetVisible);
             Check(game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
+            Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
             await game.Wait(4);
             await Shot("club_stage");
             await Until(() => game.Room?.Name == "Attic");
