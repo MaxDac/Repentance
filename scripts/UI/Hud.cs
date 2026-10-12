@@ -40,6 +40,9 @@ public partial class Hud : CanvasLayer
     private Label _caption = null!;
     private TextureRect _image = null!;
     private TaskCompletionSource? _imageTcs;
+    private TextureRect _inset = null!;
+    private Tween? _insetTween;
+    private bool _insetShown;
     private TextureRect _title = null!;
     private Control _pause = null!;
     private TextureRect _cursor = null!;
@@ -58,6 +61,8 @@ public partial class Hud : CanvasLayer
     public bool PauseVisible => _pause.Visible;
     public bool SpeechVisible => _speech.Visible;
     public string SpeechText => _speech.Text;
+    public Rect2 SpeechRect => _speech.GetRect();
+    public Rect2 InsetRect => _inset.GetRect();
     public float FadeAlpha => _fade.Color.A;
 
     public static Label MakeOutlinedLabel(Color color) => new()
@@ -82,6 +87,9 @@ public partial class Hud : CanvasLayer
         };
         root.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         AddChild(root);
+
+        _inset = new TextureRect { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        root.AddChild(_inset);
 
         _interface = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
         _interface.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
@@ -378,6 +386,11 @@ public partial class Hud : CanvasLayer
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
     public void ShowSpeech(string text, Vector2 head, Color color)
     {
+        if (_insetShown)
+        {
+            ShowSpeechOverInset(text, color);
+            return;
+        }
         const int width = 220;
         var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
         _speech.Text = text;
@@ -396,6 +409,19 @@ public partial class Hud : CanvasLayer
     }
 
     public void HideSpeech() => _speech.Visible = false;
+
+    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
+    private void ShowSpeechOverInset(string text, Color color)
+    {
+        const int width = 380;
+        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
+        _speech.Text = text;
+        _speech.LabelSettings.FontColor = color;
+        _speech.Size = new Vector2(width, size.Y);
+        float bottom = _inset.Position.Y + _inset.Size.Y - 8;
+        _speech.Position = new Vector2((ScreenW - width) / 2f, bottom - size.Y).Round();
+        _speech.Visible = true;
+    }
 
     public async Task Fade(float alpha, double seconds)
     {
@@ -416,6 +442,45 @@ public partial class Hud : CanvasLayer
     {
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
+    }
+
+    /// <summary>True from <see cref="ShowInset"/> until <see cref="HideInset"/>, even while it fades.</summary>
+    public bool InsetVisible => _insetShown;
+    public string InsetName => _inset.Texture?.ResourcePath.GetFile().GetBaseName() ?? "";
+
+    /// <summary>
+    /// Shows a framed picture centred over the scene without blocking it: the room, speech and choices stay live
+    /// around and above it. Stays until <see cref="HideInset"/> (or the next room change).
+    /// </summary>
+    public void ShowInset(Texture2D texture, double seconds = 0.4)
+    {
+        _insetTween?.Kill();
+        _inset.Texture = texture;
+        var size = texture.GetSize();
+        _inset.Size = size;
+        _inset.Position = ((new Vector2(ScreenW, ScreenH) - size) / 2).Floor();
+        _inset.Visible = true;
+        _insetShown = true;
+        _inset.Modulate = new Color(1, 1, 1, seconds > 0 ? 0 : 1);
+        if (seconds <= 0) return;
+        _insetTween = CreateTween();
+        _insetTween.TweenProperty(_inset, "modulate:a", 1f, seconds);
+    }
+
+    public void HideInset(double seconds = 0.3)
+    {
+        _insetTween?.Kill();
+        _insetTween = null;
+        _insetShown = false;
+        if (!_inset.Visible) return;
+        if (seconds <= 0)
+        {
+            _inset.Visible = false;
+            return;
+        }
+        _insetTween = CreateTween();
+        _insetTween.TweenProperty(_inset, "modulate:a", 0f, seconds);
+        _insetTween.TweenCallback(Callable.From(() => _inset.Visible = false));
     }
 
     public bool ImageVisible => _image.Visible;

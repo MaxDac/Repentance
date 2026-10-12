@@ -393,6 +393,7 @@ MOC: The stage, brother. They are waiting.
 
 === club_caught ===
 LEADER: You returned Eleanor to us. For that, the intrusion is forgiven. This is as far as you go.
+INSET: none
 * [(Draw the revolver.)]
     ~ set_flag("drew_revolver")
     MICAH: Nobody move. Eleanor, come down off that stage. We're leaving.

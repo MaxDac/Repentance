@@ -28,6 +28,7 @@ public class AutoPlay
     private bool _theEndShot;
     private string _act3Ink = "";
     private int _crossOffers;
+    private bool? _insetAtCaughtChoice;
 
     public async Task Run(Game game)
     {
@@ -57,6 +58,7 @@ public class AutoPlay
             }
             _offered[knot] = options.ToArray();
             if (knot == "caleb_cross") _crossOffers++;
+            if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -546,9 +548,15 @@ public class AutoPlay
             await Shot("club_lounge");
             var stage = game.Perform(Verb.Walk, "stage_exit");
             await Until(() => game.Room?.Name == "ClubStage");
+            await Until(() => game.Hud.InsetVisible);
+            Check(game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
+            Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
             await game.Wait(4);
             await Shot("club_stage");
             await Until(() => game.Room?.Name == "Attic");
+            Check(!game.Hud.InsetVisible, "the close-up is gone in the attic");
             await game.Wait(2);
             await Shot("attic_night2");
             await Until(() => game.Hud.CaptionVisible);
@@ -561,8 +569,10 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "ClubStage");
             Check(gs.HasItem("revolver") && gs.HasFlag("masked"), "back on the stage with Micah's things");
             await game.Wait(3);
+            Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
             await Shot("club_stage_act3");
             await Until(() => gs.HasFlag("brute_stage"));
+            Check(_insetAtCaughtChoice == false, "the close-up is removed before the revolver choice");
             await game.Wait(1);
             await Shot("club_stage_brute");
             await Until(() => game.Room?.Name == "ChurchExterior");

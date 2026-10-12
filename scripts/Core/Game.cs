@@ -512,6 +512,7 @@ public partial class Game : Node
     private void LoadRoomScene(string name)
     {
         UnloadRoom();
+        Hud.HideInset(0);
         Room = GD.Load<PackedScene>(RoomScenePath(name)).Instantiate<Room>();
         _roomScene = name;
         _roomHost.AddChild(Room);
