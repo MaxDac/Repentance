@@ -151,9 +151,11 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     stockings="c8a088", shoes="141014",
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
-# Eleanor on stage: retain the dressed variant for players who opt out of nudity.
+# Eleanor on stage: retain the dressed variant for players who opt out of nudity, in the close-up panel's red dress.
 ELEANOR_STAGE_CLOTHED = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
-                            eye="3a2416", brow="2e1a12", mask=None)
+                            eye="3a2416", brow="2e1a12", mask=None, torso="781f27",
+                            coat=dict(MASKED_WOMAN["coat"], col="781f27"),
+                            decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")])
 # The implied-nude variant: front locks define a subtle chest contour, one
 # hand lowered over her lap, the other arm hanging at her side.
 ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
