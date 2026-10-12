@@ -255,6 +255,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   phrase will be available.
 - If the player decides to keep pushing at least three times, before going out of the location, the wife will call him
   back with a "Wait!": Micah will turn, a pause of at least 3 seconds, then the wife will say "Don't get into trouble again."
+  On "Wait!" a framed close-up panel of Rose at her door pops up over the scene, in the same style as Eleanor's stage
+  close-up; the dialogue moves to the panel's bottom edge, and the panel is removed after "Don't get into trouble again.",
+  before the door closes.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
 - Then, the wife will close the door, and Micah will go out.

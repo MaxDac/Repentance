@@ -1,8 +1,9 @@
-"""Eleanor's close-up on the Club stage, the stag and the hooded mask behind her, framed over the scene.
+"""Framed close-ups over the scene: Eleanor on the Club stage, the stag and the hooded mask behind her, and Rose
+calling Micah back from her door.
 
-Built from an original generated picture committed at tools/art/src/stage_closeup.png and reduced to a
+Built from original generated pictures committed at tools/art/src/ and reduced to a
 Monkey Island 2 style VGA close-up: chunky pixels, a tight warm palette and ordered dithering.
-The clothed variant paints a dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+Eleanor's clothed variant paints a dark velvet dress over her shoulders and chest; the picture is otherwise the same.
 """
 import os
 
@@ -12,6 +13,7 @@ from PIL import Image, ImageDraw
 from .common import ROOT, hx, palette_of, pixelize, save
 
 SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
+ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
 SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
 IW, IH = AW * SCALE, AH * SCALE
@@ -64,12 +66,32 @@ def shared_palette(src):
 
 
 def stage_closeup(src, clothed, pal=None):
-    """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
+    """Eleanor on the stage, framed."""
     img = src.convert("RGB")
     if clothed:
         img = dress(img)
+    return framed(img, pal or shared_palette(src))
+
+
+def rose_crop(src):
+    """Rose in her doorway, trimmed evenly top and bottom to the panel's 1.95:1 so her face stays centred."""
+    img = src.convert("RGB")
+    w, h = img.size
+    ch = round(w * AH / AW)
+    top = (h - ch) // 2
+    return img.crop((0, top, w, top + ch))
+
+
+def rose_closeup(src):
+    """Rose calling Micah back from the door: "Wait!"."""
+    img = rose_crop(src)
+    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
+def framed(img, pal):
+    """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
     small = img.resize((AW, AH), Image.BOX)
-    inner = pixelize(small, pal or shared_palette(src), spread=8).resize((IW, IH), Image.NEAREST)
+    inner = pixelize(small, pal, spread=8).resize((IW, IH), Image.NEAREST)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(inner, (FRAME, FRAME))
     d = ImageDraw.Draw(panel)
@@ -84,3 +106,4 @@ def build():
     pal = shared_palette(src)
     save(stage_closeup(src, clothed=False, pal=pal), "ui", "stage_closeup.png")
     save(stage_closeup(src, clothed=True, pal=pal), "ui", "stage_closeup_clothed.png")
+    save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
