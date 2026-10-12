@@ -78,8 +78,9 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The current save format is version 5; earlier saves are incompatible because they used a single consumed
-dollar item instead of the remaining case cash. The ten-puzzle expansion's separate original-puzzle
+The current save format is version 6; earlier saves are incompatible because the five collect-and-combine
+locations reroute the staff lift, the Blue Lantern entrance, the Harrington lead, the masked Club entrance and the
+mansion entrance. The puzzle expansion's separate original-puzzle
 and Act 3 schema markers preserve completed discoveries in compatible saves. New saves do not grandfather
 unfinished puzzles on reload.
 An older Act 2 save that skipped room 507 gets a temporary Hotel map marker to recover the card clues.
@@ -180,7 +181,7 @@ From here the story follows Walkthrough.md:
 
 ### Story notes
 
-The core plot, ten puzzles and five endings are unchanged. Sal receives a cash bribe Micah can afford.
+The core plot and five endings are unchanged; the fifteen puzzles include five collect-and-combine locations. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
@@ -214,8 +215,8 @@ Caleb's counsel retains its original wording rather than added exact quotations.
 [Luke 15:17-20](https://drbo.org/chapter/49015.htm); it is not marked as a direct quotation. Ring and cross remain
 reminders, not a bargain with God. Antagonists' threats and the tragic endings are not theological verdicts.
 
-**Scope and length:** Repentance is a compact, single-case adventure: four puzzles in each of the first two acts,
-then an alley encounter, an alarm puzzle and optional evidence in Act Three. Its mostly linear investigation is
+**Scope and length:** Repentance is a compact, single-case adventure: six puzzles in each of the first two acts,
+then an alley encounter, an alarm puzzle, the wine-cellar lantern and optional evidence in Act Three. Its mostly linear investigation is
 closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/) than
 [Kathy Rain (2016)](https://store.steampowered.com/app/370910/), whose published scope includes 40+ environments
 and 4,000+ dialogue lines. [Technobabylon](https://store.steampowered.com/app/307580/) and
@@ -320,6 +321,7 @@ py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 

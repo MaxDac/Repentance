@@ -239,7 +239,11 @@ public partial class Game : Node
             await TryReadAccounts();
             return true;
         }
-        return false;
+        var outcome = Recipes.Evaluate(first, second, state.HasItem);
+        if (outcome == null) return false;
+        Recipes.Apply(outcome, id => state.TakeItem(id), id => state.GiveItem(id), id => state.SetFlag(id));
+        await Say(outcome.Line);
+        return true;
     }
 
     public async Task TryReadAccounts()

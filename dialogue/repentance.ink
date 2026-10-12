@@ -182,8 +182,8 @@ BELLBOY: And no, I don't know it. But a guy like that leaves matches everywhere.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: Front desk won't give you the time of day, never mind a key. But that dollar buys you the back way.
-BELLBOY: Staff lift's in routing mode. Diagram by the service door. Trace the branches to 507 before you dispatch it.
-BELLBOY: Staff door, by the palm. Service elevator to five, room 507. Maids leave it on the latch.
+BELLBOY: Staff lift's in routing mode. Diagram by the service door. Trace the branches to the fifth-floor linen room before you dispatch it.
+BELLBOY: Staff door, by the palm. Service elevator to the fifth-floor linen room, right next to 507. Night maid bolts the corridor door, though.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
 -> END

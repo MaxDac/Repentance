@@ -1,0 +1,203 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/ClubVestibule.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_vestibule.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_vestibule_wax.png" id="5_wax"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_vestibule_door.png" id="6_door"]
+
+[sub_resource type="RectangleShape2D" id="Rect_street"]
+size = Vector2(60, 130)
+
+[sub_resource type="RectangleShape2D" id="Rect_coat"]
+size = Vector2(124, 84)
+
+[sub_resource type="RectangleShape2D" id="Rect_wax"]
+size = Vector2(32, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_cloak"]
+size = Vector2(30, 112)
+
+[sub_resource type="RectangleShape2D" id="Rect_plaque"]
+size = Vector2(46, 26)
+
+[sub_resource type="RectangleShape2D" id="Rect_door"]
+size = Vector2(96, 150)
+
+[sub_resource type="RectangleShape2D" id="Rect_slot"]
+size = Vector2(24, 18)
+
+[node name="ClubVestibule" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Club Vestibule"
+FarY = 200
+NearY = 262
+FarScale = 0.92
+NearScale = 1.04
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="WaxTaken" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(154, 136)
+texture = ExtResource("5_wax")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "took_sealing_wax"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(320, 26)
+texture = ExtResource("6_door")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "vestibule_passed"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 262, 480, 262, 480, 200, 0, 200)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(60, 216)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="StreetDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "street_door"
+DisplayName = "street door"
+LookText = "The way I came in. It stays behind me tonight."
+WalkTo = Vector2(46, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/StreetDoor"]
+position = Vector2(44, 127)
+shape = SubResource("Rect_street")
+
+[node name="CoatCheck" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "coat_check"
+DisplayName = "coat check"
+LookText = "The cloakroom hatch, nobody minding it. On a rite night the members hang their own and seal their own."
+WalkTo = Vector2(142, 206)
+Face = 2
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CoatCheck"]
+position = Vector2(142, 108)
+shape = SubResource("Rect_coat")
+
+[node name="SealingWax" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "sealing_wax"
+DisplayName = "sealing wax"
+LookText = "A stick of red sealing wax beside an empty seal tray. Every summons gets sealed at the door."
+WalkTo = Vector2(164, 206)
+Face = 2
+HideIfFlags = "took_sealing_wax"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/SealingWax"]
+position = Vector2(166, 138)
+shape = SubResource("Rect_wax")
+
+[node name="CloakLion" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cloak_lion"
+DisplayName = "lion cloak"
+LookText = "A black cloak with a gold lion worked at the breast. A signet ring hangs from the clasp: the lion."
+WalkTo = Vector2(228, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CloakLion"]
+position = Vector2(228, 118)
+shape = SubResource("Rect_cloak")
+
+[node name="CloakStag" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cloak_stag"
+DisplayName = "stag cloak"
+LookText = "A black cloak with a bronze stag worked at the breast. A signet ring hangs from the clasp: the stag."
+WalkTo = Vector2(258, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CloakStag"]
+position = Vector2(258, 118)
+shape = SubResource("Rect_cloak")
+
+[node name="CloakRaven" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cloak_raven"
+DisplayName = "raven cloak"
+LookText = "A black cloak with a silver raven worked at the breast. A signet ring hangs from the clasp: the raven."
+WalkTo = Vector2(288, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CloakRaven"]
+position = Vector2(288, 118)
+shape = SubResource("Rect_cloak")
+
+[node name="Plaque" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "plaque"
+DisplayName = "brass plaque"
+LookText = "Present your summons, sealed by the first of the procession."
+WalkTo = Vector2(338, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Plaque"]
+position = Vector2(338, 106)
+shape = SubResource("Rect_plaque")
+
+[node name="InnerDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "inner_door"
+DisplayName = "inner door"
+LookText = "The inner door. Past it, the hall. Past the hall, Eleanor."
+WalkTo = Vector2(410, 206)
+Face = 2
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/InnerDoor"]
+position = Vector2(410, 117)
+shape = SubResource("Rect_door")
+
+[node name="Slot" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "slot"
+DisplayName = "card slot"
+LookText = "A brass slot in the inner door, just wide enough for a card. They take your summons before they take your coat."
+WalkTo = Vector2(410, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Slot"]
+position = Vector2(410, 121)
+shape = SubResource("Rect_slot")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true

@@ -5,7 +5,7 @@ namespace Repentance.Tests;
 public class PuzzleTests
 {
     [Fact]
-    public void LiftHasExactlyOneRouteTo507()
+    public void LiftHasExactlyOneRouteToFifthFloorLinen()
     {
         int solved = 0;
         for (int a = 0; a < 2; a++)
@@ -14,7 +14,7 @@ public class PuzzleTests
                 {
                     var route = new[] { a, b, c };
                     if (PuzzleRules.Lift(route)) solved++;
-                    Assert.Equal(PuzzleRules.Lift(route), PuzzleRules.LiftDestination(route) == "Room 507");
+                    Assert.Equal(PuzzleRules.Lift(route), PuzzleRules.LiftDestination(route) == "5th floor: linen");
                 }
         Assert.Equal(1, solved);
         Assert.False(PuzzleRules.Lift(new[] { 1, 0 }));

@@ -37,16 +37,30 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
 - Micah has to bribe the bellboy with $1 from his cash; the bellboy lets him take the staff elevator up to
-  Eleanor's room (and mentions the Blue Lantern).
+  the fifth-floor linen room next to Eleanor's room (and mentions the Blue Lantern).
 - Before the bribe, the revolving door leads out to the street.
 - **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
   The close-up shows three junctions: at A, upper goes to laundry and lower to B; at B, upper goes to C and
-  lower to the kitchen; at C, upper goes to room 507 and lower to the roof. Set **lower, upper, upper** and
+  lower to the kitchen; at C, upper goes to the fifth-floor linen room (next to 507) and lower to the roof. Set **lower, upper, upper** and
   dispatch the lift. A wrong route stays in the lobby and highlights where it went wrong.
   Once solved, the lift works normally on return visits.
 - After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
   room 507. Older saves that already passed the hotel without these clues get a temporary Hotel map
-  marker to retrieve them; returning to the lobby then leads back to the Act 2 map.
+  marker to retrieve them (through the linen room, as below); returning to the lobby then leads back to the
+  Act 2 map.
+
+#### Fifth-floor linen room at the hotel
+
+- New location: the Aurelian's linen room on the fifth floor, where the routed staff lift lets out. Linen
+  shelves, a laundry chute, a rack of maids' uniforms, a housekeeping cart and the corridor door to room 507.
+- The corridor door is night-bolted from the far side. Look: "Night bolt on the far side. The transom's cracked
+  open an inch - a hook could reach it." The lockpick is refused ("No keyhole on this side. The bolt's the only
+  lock.") and a plain hanger slides off the bolt.
+- **Puzzle 11 - Night bolt:** take a spare wire hanger from the laundry rack and the pliers from the
+  housekeeping cart. Combine the hanger with the pliers in the inventory to bend a wire hook (the pliers go
+  back on the cart). Use the wire hook on the corridor door: Micah draws the bolt through the transom and
+  crosses to room 507. From then on the door stays open both ways.
+- The staff lift goes back down to the lobby.
 
 #### Eleanor's room at the hotel (room 507)
 
@@ -59,11 +73,27 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for some decorations; Micah remarks that the perfume is strange, but quite attractive;
   - a matchbook with the name of the club, the Blue Lantern (next location).
-- Leaving the room goes back down to the lobby; the revolving door now leads to the club.
+- Leaving the room goes back across the corridor to the linen room and the staff lift; in the lobby the
+  revolving door now leads to the club's front.
+
+#### Rizzo's Flowers, State Street (the Blue Lantern front)
+
+- New location: a florist's on State Street in the rain, closed for the night. The Blue Lantern is behind its
+  cold room. A regular waits by the cold-room door with a blue carnation in his buttonhole, and the
+  chalkboard in the window reads "Members' buttonholes - blue carnations only".
+- The cold-room door has a speaking grille: "A slot at eye height. Somebody inside checks lapels before they
+  check faces." Knocking, or offering anything else, gets "No blue in my buttonhole, no hatch."; a white
+  carnation gets a hint toward the bluing.
+- **Puzzle 12 - Blue carnation:** take a white carnation from the bucket (a nickel in the tin) and the bottle of
+  Mrs. Stewart's Bluing from the sidewalk shelf. Combine them in the inventory to dye the carnation blue (the
+  bluing goes back on the shelf). Use the blue carnation on the grille: the hatch opens and Micah is let
+  through the cold room into the speakeasy. Afterwards the door opens for him directly.
+- The street exit on the left leads back to State Street; the speakeasy's steel door leads back out here.
 
 #### Club (the Blue Lantern speakeasy)
 
-- At the door, Sal the guard asks for the password. Micah doesn't know it and can give him $10 as a bribe.
+- Inside the cold-room entrance, Sal the guard still asks for the password; the blue carnation only got Micah
+  past the florist's grille. Micah doesn't know it and can give him $10 as a bribe.
   Micah starts with $22, twice the combined $1 bellboy and $10 Sal payments. The cash remains in his inventory:
   $21 after the bellboy and $11 after Sal. Repeated conversations never charge either bribe again.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
@@ -261,12 +291,34 @@ described here (other verbs, flavour lines) is left to the implementation.
   Sister: "You are of the same lot as that Jezebel. At this point, I'll let you burn in the flames of hell.
   She's a performer, you know. Almost caught me off guard, the whore. You might want to Harringhton senior.:
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
+  On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
+  name - I'd start there."
 - At this point, also the Convent won't be available as a location.
 
 #### Map of Chicago
 
-- The Cathedral and Harrington father's office are available. Micah's office also remains accessible as an optional
+- The Cathedral and the Tribune (the newspaper morgue) are available; Harrington father's office is not on the map
+  yet - Micah doesn't know where it is. Micah's office also remains accessible as an optional
   return and ring-pickup location; no completed lead reopens.
+
+#### Tribune morgue
+
+- The Chicago Tribune's archive in the basement: rows of steel filing cabinets, a copy spike and wastebasket, a
+  layout desk with a paste pot, and a wall map of the Loop studded with pins. No NPC.
+- **Puzzle 13 - The torn clipping:**
+  - Drawer H of the filing cabinets holds the top half of a clipping, "HARRINGTON BUILDS...", torn straight
+    through the address.
+  - The copy spike (with the wastebasket) holds the bottom half ("...Building, LaS").
+  - Combining the two halves without paste is refused: "Torn straight through the address. I'd need something
+    to hold them together." Take the paste pot from the layout desk, then combine the halves into the mended
+    clipping (the paste is kept; it goes back on the desk when Micah leaves, or by using it on the desk).
+  - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." Use the mended
+    clipping on it: Micah pins the Harrington Building, LaSalle Street (flag `harrington_located`).
+- The door leads back to the map.
+
+#### Map of Chicago
+
+- The Tribune disappears and Harrington father's office appears.
 - Caleb's warning retains "Repentance means more than asking nicely. Put the gun away." without an added
   exact Scripture quotation. Before the masked Club visit, keep "God doesn't turn away a contrite heart, Micah.
   You don't have to be whole to turn to Him."
@@ -303,6 +355,26 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The office of Harringhton father will disappear, and the Club will reappear. The Church will be still available,
   and you'll have to save to the state of the game whether the player will decide to go to the Church and talk
   with Micah's brother once more.
+- Choosing the Club puts Micah, masked, in the Club vestibule; there is no going back to the map from there. The
+  back door on the street is refused too ("Through the front tonight, with the procession.").
+
+#### Club vestibule
+
+- A small entry hall: a brass plaque, a coat-check counter, a rack with three hooded cloaks and a locked inner
+  door with a brass card slot. The street door won't let Micah back out.
+- **Puzzle 14 - The sealed summons:**
+  - The plaque reads: "Present your summons, sealed by the first of the procession."
+  - Take the stick of sealing wax from the coat-check counter. Cold wax on the invitation is refused ("Hard as a
+    church pew. Needs a flame.").
+  - Combine the matchbook with the sealing wax: soft wax (the matchbook is never consumed - it is needed again
+    in Act 3). Combine the soft wax with the invitation: the waxed invitation.
+  - Each cloak on the rack (lion, stag, raven) has a signet ring in its pocket; Micah only holds one at a time,
+    taking another hangs the previous one back up. The invitation's procession is raven, lion, stag, so the
+    raven is first: lion or stag on the wax is refused.
+  - Combine the raven signet with the waxed invitation: the sealed invitation (the ring goes back in its cloak).
+  - Use the sealed invitation on the door slot (a plain or waxed-but-unsealed invitation is refused): the door
+    opens (flag `vestibule_passed`) and Micah walks into the Club hall. The sealed card is returned to him and is
+    what the master of ceremonies wants to see inside.
 
 #### Club
 
@@ -393,7 +465,19 @@ described here (other verbs, flavour lines) is left to the implementation.
   Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
   option. Incorrect plans are rejected before touching the mechanism; no alarm sounds and retries
   cost nothing. Close/reset preserves the unrestrained state. Use the lintel key only after securing it.
-- In the kitchen, for now, don't do anything, just generate a mansion kitchen in the darkness, the player can pass through.
+- The kitchen is dark and quiet. The green baize door to the house is **bolted from the house side**: Micah
+  says so and notes that houses like this always kept another way up for the deliveries. In the floor by
+  the table is a cellar trapdoor with an iron ring.
+- **Puzzle 15 - The wine cellar:** the trapdoor leads down into the Harrington wine cellar, pitch black.
+  Micah can make out a storm lantern on a hook and some delivery crates; the stair at the back can't be
+  climbed blind. Take the lantern (empty) and look at/take from the crates: one sloshes, a can of
+  kerosene. Combine **lantern + kerosene** (filled lantern), then **filled lantern + matchbook** (lit
+  lantern; the matchbook is kept). Trying the matchbook on the empty lantern gets "Dry wick. Needs fuel
+  first." Use the lit lantern on the stair (or on the darkness): Micah hangs it on a nail, the cellar
+  lights up, and behind the wine racks a bootleggers' service stair climbs to a panel behind the old
+  man's study bar. It brings Micah into the study through the drinks cabinet. Going back through the
+  study's kitchen door slides the baize bolt, so afterwards the baize door works both ways. The cellar is
+  required for every entry into the mansion; the lantern isn't needed afterwards.
 - Harrington's study has a closet and a desk with two drawers. The bedroom door is always accessible:
   Micah can pass straight through without collecting evidence.
 - **Puzzle 10 - Auditor's index (optional):** the right drawer contains a numbered account register,
@@ -420,6 +504,8 @@ described here (other verbs, flavour lines) is left to the implementation.
     - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas
       and make the mansion explode.
     - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
+    - During the escape the way back is shut: the baize door and the cellar trapdoor both get "Not back in
+      there. Somebody's on the stairs by now.", so the bedroom confrontation can't be replayed.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
     at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this. All of it."
@@ -495,17 +581,22 @@ in the trunk.
 
 ### Puzzle pacing and saves
 
-The ten added/expanded puzzles are distributed **4 in Act 1, 4 in Act 2, and 2 in Act 3**.
+The fifteen added/expanded puzzles are distributed **6 in Act 1, 6 in Act 2, and 3 in Act 3**. Puzzles 11-15
+are collect-and-combine puzzles in five extra locations: the Aurelian linen room and Rizzo's Flowers (Act 1), the
+Tribune morgue and the Club vestibule (Act 2), and the Harrington wine cellar (Act 3). Each asks Micah to gather
+items in that location, join them in the satchel and use the result to continue. The matchbook is only ever a
+flame: no combination consumes it, so it is still in the satchel for the cellar lantern.
 The final act also retains its existing three-step alley encounter. The alarm gives the pursuit route
 an interactive infiltration beat; the optional index provides investigation before the confrontation.
 Giving up or reconciling never requires completing a pursuit-route puzzle. The obsolete temporary
 motel map and burial survey are not part of the completed Act 3.
 
-All ten puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
+All fifteen puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 5; earlier versions are incompatible with the revised cash inventory. Completed discoveries in
-compatible version-5 saves remain completed, using independent markers
+is version 6; earlier versions are incompatible with the five added locations and the rerouted lift,
+Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in
+compatible saves remain completed, using independent markers
 for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.
 
 ### Scripture and adventure scope
@@ -516,8 +607,10 @@ Caleb retains his original counsel, warning and contrite-heart paraphrase, witho
 His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49015.htm), not a direct quotation. Religious objects remain
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
-The adventure remains a compact, single-case indie point-and-click: ten puzzles, the alley encounter, optional
-dialogue and five ending outcomes. No additional scenes or puzzles were added simply to inflate its length.
+The adventure remains a compact, single-case indie point-and-click: fifteen puzzles, the alley encounter, optional
+dialogue and five ending outcomes. The five collect-and-combine locations each sit on a route the story already
+took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
+rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)
 than the broader [Kathy Rain (2016)](https://store.steampowered.com/app/370910/),
 [Technobabylon](https://store.steampowered.com/app/307580/) or [Unavowed](https://store.steampowered.com/app/336140/).

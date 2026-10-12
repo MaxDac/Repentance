@@ -71,6 +71,36 @@ public class SaveDataTests
     }
 
     [Fact]
+    public void VersionFiveSavesFromBeforeTheExpansionAreRejected()
+    {
+        Assert.Equal(6, SaveData.CurrentVersion);
+        var data = Sample();
+        data.Version = 5;
+        Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));
+    }
+
+    [Theory]
+    [InlineData("hotel_linen", "made_wire_hook", "wire_hook")]
+    [InlineData("blue_lantern_front", "made_blue_carnation", "blue_carnation")]
+    [InlineData("newspaper_morgue", "mended_clipping", "clipping")]
+    [InlineData("club_vestibule", "wax_softened", "invitation_waxed")]
+    [InlineData("club_vestibule", "invitation_sealed", "sealed_invitation")]
+    [InlineData("mansion_cellar", "lantern_lit", "lantern_filled")]
+    public void IntermediateCombinationStatesRoundTrip(string room, string flag, string item)
+    {
+        var data = Sample();
+        data.Room = room;
+        data.Flags.Add(flag);
+        data.Inventory.AddRange(new[] { item, "matchbook" });
+        var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
+        Assert.NotNull(back);
+        Assert.Equal(room, back!.Room);
+        Assert.Contains(flag, back.Flags);
+        Assert.Contains(item, back.Inventory);
+        Assert.Contains("matchbook", back.Inventory);
+    }
+
+    [Fact]
     public void MissingRoomIsRejected() =>
         Assert.Null(SaveSerializer.TryDeserialize($"{{\"Version\":{SaveData.CurrentVersion}}}"));
 
