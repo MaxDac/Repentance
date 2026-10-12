@@ -27,7 +27,14 @@ public partial class ClubStage : Room
         string sprite = Game.Settings.NudityEnabled ? "eleanor_stage" : "eleanor_stage_clothed";
         if (FindActor("eleanor") is { } eleanor)
             eleanor.SetTexture(GD.Load<Texture2D>($"res://assets/art/sprites/{sprite}.png"), 11);
+        if (Game.Hud.InsetVisible && Game.Hud.InsetName.StartsWith("stage_closeup"))
+            Game.Hud.ShowInset(CloseUp(), 0);
     }
+
+    /// <summary>Eleanor's face in the spotlight, the stag, boar and wolf behind her: framed over the stage.</summary>
+    private Texture2D CloseUp() => GD.Load<Texture2D>(Game.Settings.NudityEnabled
+        ? "res://assets/art/ui/stage_closeup.png"
+        : "res://assets/art/ui/stage_closeup_clothed.png");
 
     public override async Task OnEnter(string entry)
     {
@@ -45,6 +52,7 @@ public partial class ClubStage : Room
     {
         await Wait(0.5);
         await Say("The seats were full, and nobody was sitting. Everybody stood, facing the light.");
+        Game.Hud.ShowInset(CloseUp());
         await Game.WalkTo(new Vector2(212, 208));
         Player.Face(Facing.Up);
         await Wait(0.8);
@@ -54,6 +62,7 @@ public partial class ClubStage : Room
         await Say("She wasn't a prisoner. Or she was, and she'd stopped minding. I couldn't tell which was worse.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);
+        Game.Hud.HideInset(0);
         await Wait(1.0);
         await Game.ChangeRoom("attic", "night2");
     }
@@ -61,6 +70,7 @@ public partial class ClubStage : Room
     /// <summary>Act 3: the leader turns to Micah. Whatever he does, Bruno knocks him out from behind.</summary>
     private async Task Caught()
     {
+        Game.Hud.ShowInset(CloseUp());
         await Wait(1.0);
         await Say("leader", "Are you satisfied, now, mister Jones?");
         await Wait(0.4);
@@ -71,6 +81,7 @@ public partial class ClubStage : Room
         await Wait(1.6);
         await Say("Every mask in the room, turned my way. White porcelain and carved bone, antlers, tusks and beaks, and all of them smiling.");
         await Talk("club_caught");
+        Game.Hud.HideInset();
         State.SetFlag("brute_stage");
         if (FindActor("brute") is { } brute)
             await brute.MoveTo(new Vector2(Player.Position.X - 24, Player.Position.Y + 4), 70);

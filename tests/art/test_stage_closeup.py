@@ -1,0 +1,65 @@
+"""The framed close-up of Eleanor on the Club's stage, reduced to a VGA panel from the committed picture."""
+from pathlib import Path
+import sys
+import unittest
+
+import numpy as np
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools"))
+from art import closeup
+
+UI = ROOT / "assets" / "art" / "ui"
+
+
+def inner(panel):
+    return panel.crop((closeup.FRAME, closeup.FRAME, closeup.PW - closeup.FRAME, closeup.PH - closeup.FRAME))
+
+
+class StageCloseupTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        src = Image.open(closeup.SRC)
+        cls.nude = closeup.stage_closeup(src, clothed=False)
+        cls.clothed = closeup.stage_closeup(src, clothed=True)
+
+    def test_committed_panels_match_the_build_and_fit_the_screen(self):
+        self.assertLessEqual(closeup.PW, 480 - 120)
+        self.assertLessEqual(closeup.PH, 270 - 80)
+        for name, panel in (("stage_closeup", self.nude), ("stage_closeup_clothed", self.clothed)):
+            with self.subTest(name=name):
+                committed = Image.open(UI / f"{name}.png").convert("RGB")
+                self.assertEqual(committed.size, (closeup.PW, closeup.PH))
+                self.assertTrue((np.asarray(committed) == np.asarray(panel)).all(), "regenerate with gen_art.py closeup")
+
+    def test_frame_is_a_dark_border(self):
+        a = np.asarray(self.nude.convert("L"), dtype=float)
+        self.assertLess(a[0, :].mean(), 40)
+        self.assertLess(a[:, 0].mean(), 40)
+        self.assertLess(a[closeup.FRAME - 1, closeup.FRAME:-closeup.FRAME].mean(), 40)
+
+    def test_limited_palette(self):
+        for panel in (self.nude, self.clothed):
+            self.assertLessEqual(len(inner(panel).getcolors(4096)), closeup.COLOURS)
+
+    def test_her_face_is_lit_in_the_middle_over_the_darker_men(self):
+        a = np.asarray(inner(self.nude), dtype=float)
+        face = a[45:70, 110:130]
+        r, g, b = face[..., 0].mean(), face[..., 1].mean(), face[..., 2].mean()
+        self.assertTrue(r > g > b and r > 150, "warm skin tones")
+        self.assertGreater(face.mean(), a[100:, :40].mean() * 2)
+
+    def test_clothed_only_dresses_her_chest(self):
+        a = np.asarray(inner(self.nude), dtype=int)
+        c = np.asarray(inner(self.clothed), dtype=int)
+        ys, xs = np.nonzero((a != c).any(-1))
+        self.assertGreater(len(ys), 500)
+        self.assertGreater(ys.min(), 85)  # below the collarbones
+        self.assertTrue(70 < xs.min() and xs.max() < 175)  # not on the men
+        chest = c[110:, 100:140]
+        self.assertGreater(chest[..., 0].mean(), chest[..., 1].mean() * 2, "dark red velvet")
+
+
+if __name__ == "__main__":
+    unittest.main()

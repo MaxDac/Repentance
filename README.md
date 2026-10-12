@@ -153,10 +153,11 @@ From here the story follows Walkthrough.md:
    back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
    heraldic key; set the false-back lock to STAR / SUN / MOON.
 23. **Club, masked**: through the hall and the lounge, full of masked men and women (white masks and carved
-   bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf.
+   bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
+   of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
-25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
+25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: give up (ending 1), or keep going:
 27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
@@ -236,7 +237,7 @@ scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
 scripts/Rooms/       per-room puzzle scripts
-scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, cursor), VerbWheel and GameMenu (title/pause/save slots)
+scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-up insets, cursor), VerbWheel and GameMenu (title/pause/save slots)
 scripts/Debug/       AutoPlay smoke test
 tools/               Python art generator
 ```
@@ -322,6 +323,7 @@ py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up, reduced to VGA pixels from the original picture in tools\art\src\stage_closeup.png; the clothed variant paints her dress on
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 

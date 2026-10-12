@@ -314,6 +314,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 - When Micah will reach the stage, he will find Eleanor, with the same succint dress but without the black mask, at the 
   center of the stage, with three masked men around her: the leader in a horned stag mask (Cernunnos), one in a boar
   mask and one in a wolf mask.
+- After Micah's first line on the stage ("The seats were full..."), a framed close-up panel pops up over the scene:
+  Eleanor's face in the spotlight, zoomed and clearly defined, with hooded masked men (the stag among them) behind
+  her. The stage stays visible around the panel, which stays up until the fade to black (bare shoulders, or a dark
+  red dress when nudity is off).
 
 ### End of Act 2 - Present day, the attic
 
@@ -326,12 +330,12 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club
 
-- Same scene as the end of Act 2.
+- Same scene as the end of Act 2, with the close-up panel of Eleanor framed over the stage again.
 - The stag-masked leader turns to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
 - At this point, everyone turns to him.
 - The same man who spoke first continues: "Given that you returned Eleanor to us, you'll be forgiven for this intrusion,
   but this is enough for you."
-- At this point, the player has two choices in dialogue:
+- The close-up panel is removed, then the player has two choices in dialogue:
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
