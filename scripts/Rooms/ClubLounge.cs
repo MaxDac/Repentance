@@ -12,7 +12,7 @@ public partial class ClubLounge : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Sofas full of white faces, and none of them is a face. Half the city council could be in this room.");
+            await Say("Sofas full of white faces and carved animal heads, and none of them is a face. Half the city council could be in this room.");
         });
     }
 

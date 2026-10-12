@@ -855,7 +855,7 @@ LEO: DAD! DINNER!
 DANIEL: ...It's dark already? Again?
 LEO: Mom says it's the second night in a row, and the dog is getting used to your plate!
 DANIEL: Coming! I'm coming.
-DANIEL: White masks and a woman on a stage. What did you get yourself into, Micah?
+DANIEL: Animal masks and a woman on a stage. What did you get yourself into, Micah?
 -> END
 
 === bedroom ===

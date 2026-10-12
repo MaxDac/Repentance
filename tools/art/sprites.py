@@ -134,6 +134,15 @@ MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_
                   torso="16141a", collar="16141a", sleeves="16141a", cloak=dict(col="16141a", hem=0.96),
                   pants="16141a", shoes="0e0c10", decals=[])
 MICAH_MASKED = dict(MASKED_MAN, decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
+# The inner circle and some of the members wear carved beasts' faces instead of the white mask, after the animals
+# of Celtic folklore: aged wood and bone, antler-grey and ochre against the black cowl. The stag, horned like
+# Cernunnos, leads the rite; the boar and the wolf stand with him. Bear, raven and hare walk among the guests.
+MASKED_STAG = dict(MASKED_MAN, mask=("animal", "stag", "c4a676", "d4cab4"))
+MASKED_BOAR = dict(MASKED_MAN, h=65, sw=0.152, waist=0.1, hipw=0.104, mask=("animal", "boar", "8a6440", "4e3624"))
+MASKED_WOLF = dict(MASKED_MAN, h=67, sw=0.138, mask=("animal", "wolf", "a29a8a", "4a423c"))
+MASKED_BEAR = dict(MASKED_MAN, h=68, sw=0.158, hw=0.058, waist=0.104, hipw=0.106, mask=("animal", "bear", "9a7048", "3a2a20"))
+MASKED_RAVEN = dict(MASKED_MAN, h=65, mask=("animal", "raven", "b0a898", "6a5e58"))
+MASKED_HARE = dict(MASKED_MAN, h=64, sw=0.134, mask=("animal", "hare", "ccae7e", "8a6448"))
 # The women of the club: short, strapless black-fringed dresses above the knee, bare shoulders and arms, sheer
 # stockings and a black domino mask.
 MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.056, skin="ecc6a6",
@@ -219,6 +228,9 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
         ("moc", MOC, _arms("fold")), ("brute", BRUTE, _arms("fold")), ("watchman", WATCHMAN, _arms("down", "pocket")),
         ("masked_man", MASKED_MAN, _arms("fold")), ("masked_woman", MASKED_WOMAN, _arms("hip", "down")),
+        ("masked_stag", MASKED_STAG, _arms("fold")), ("masked_boar", MASKED_BOAR, _arms("fold")),
+        ("masked_wolf", MASKED_WOLF, _arms("fold")), ("masked_bear", MASKED_BEAR, _arms("fold")),
+        ("masked_raven", MASKED_RAVEN, _arms("fold")), ("masked_hare", MASKED_HARE, _arms("fold")),
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))

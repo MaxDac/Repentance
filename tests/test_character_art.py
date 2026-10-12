@@ -45,6 +45,32 @@ class CharacterArtTests(unittest.TestCase):
             self.assertTrue(np.array_equal(idle[31:], talk[31:]),
                             "talking must not move the body or feet")
 
+    def test_club_animal_masks_are_distinct_cloaked_figures(self):
+        plain = Image.open(ART / "sprites" / "masked_man.png").convert("RGBA")
+        npcs = {name: spec for name, spec, *_ in sprites.NPCS}
+        for kind in painter.ANIMAL_MASKS:
+            name = f"masked_{kind}"
+            self.assertIn(name, npcs)
+            self.assertEqual(npcs[name]["mask"][:2], ("animal", kind))
+            self.assertEqual(npcs[name]["hat"], sprites.MASKED_MAN["hat"], "animal masks keep the cowl")
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            self.assertEqual(image.size, plain.size)
+            for column in range(image.width // 56):
+                with self.subTest(mask=kind, column=column):
+                    box = (column * 56, 0, (column + 1) * 56, 96)
+                    frame, base = image.crop(box), plain.crop(box)
+                    self.assertNotEqual(frame.crop((0, 0, 56, 34)).tobytes(), base.crop((0, 0, 56, 34)).tobytes(),
+                                        "the head must show the animal mask")
+                    ys, xs = np.nonzero(np.array(frame.getchannel("A")) > 0)
+                    self.assertGreater(ys.min(), 0, "antlers and ears must not clip at the top")
+                    self.assertGreater(xs.min(), 0)
+                    self.assertLess(xs.max(), 55)
+        for kind in ("stag", "hare"):
+            image = Image.open(ART / "sprites" / f"masked_{kind}.png").convert("RGBA")
+            top = np.nonzero(np.array(image.crop((0, 0, 56, 96)).getchannel("A")) > 0)[0].min()
+            plain_top = np.nonzero(np.array(plain.crop((0, 0, 56, 96)).getchannel("A")) > 0)[0].min()
+            self.assertLess(top, plain_top, f"the {kind}'s crest must rise above the cowl")
+
     def test_player_walk_and_vertical_views_keep_existing_poses(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
                            ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):

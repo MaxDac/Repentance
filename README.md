@@ -25,6 +25,7 @@ Command-line options (after `--`):
 |---|---|
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
+| `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
@@ -151,8 +152,9 @@ From here the story follows Walkthrough.md:
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
    back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
    heraldic key; set the false-back lock to STAR / SUN / MOON.
-23. **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
-   stands among three masked men. **End of Act Two**: back in the attic, dinner again.
+23. **Club, masked**: through the hall and the lounge, full of masked men and women (white masks and carved
+   bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf.
+   **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
 25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: give up (ending 1), or keep going:
