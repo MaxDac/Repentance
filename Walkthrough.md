@@ -381,10 +381,12 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah's enters the Club, he will be dressed with a white mask and a cloak. You will have to generate this 
   new dress and sprite.
-- The club will be filled with a number of masked men with the same white mask as Micah (you can use the same model)
+- The club will be filled with a number of masked men, all in the same black cloak and cowl: some with the same white mask
+  as Micah, others with carved animal masks inspired by Celtic folklore (bear, raven, hare),
   and women dressed with a black mask and succint dresses (even here, you can use the smae model and sprite multiple times).
 - When Micah will reach the stage, he will find Eleanor, with the same succint dress but without the black mask, at the 
-  center of the stage, with three masked men around her.
+  center of the stage, with three masked men around her: the leader in a horned stag mask (Cernunnos), one in a boar
+  mask and one in a wolf mask.
 
 ### End of Act 2 - Present day, the attic
 
@@ -398,7 +400,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Club
 
 - Same scene as the end of Act 2.
-- One of the masked man turn to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
+- The stag-masked leader turns to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
 - At this point, everyone turns to him.
 - The same man who spoke first continues: "Given that you returned Eleanor to us, you'll be forgiven for this intrusion,
   but this is enough for you."
