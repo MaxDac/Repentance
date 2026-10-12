@@ -182,7 +182,7 @@ BELLBOY: And no, I don't know it. A fella like that leaves matches everywhere, t
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: Front desk won't give you the time of day, never mind a key. That dollar buys the back way.
-BELLBOY: Staff elevator's on the service board tonight. Diagram's by the door. Trace it to 507 before you send the car, or it won't stop where you want.
+BELLBOY: Staff elevator runs off the service board. Diagram's by the service door. Trace it to 507 before you send the car, or it won't stop where you want.
 BELLBOY: Staff door's by the palm. Up to five, room 507. Maids leave it on the latch.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
@@ -329,7 +329,7 @@ MICAH: I haven't decided yet. I'm not sure I want to.
 ELEANOR: You could tell Teddy you never found me.
 MICAH: I could. I'm a lousy liar.
 ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
-MICAH: I want you away from here. Not back to Teddy. Anywhere.
+MICAH: I want you to come away. Not back to Teddy. Anywhere.
 ELEANOR: I can't go back there...
 -> END
 
@@ -362,8 +362,8 @@ MOC: How edifying. And what does a gentleman like you read?
 * [Midsummer fires. Oak groves. Wells people whisper their sins into.]
     MOC: Farmers' tales. Why would a man like you care what farmers did on the longest night of the year?
     -> opts
-* [A library book. That's how I read the card with your address.]
-    MOC: We are a club. Anyone who belongs here already has the address. Why are you asking, Mr...?
+* [A library book. It helped me decipher the card with your address.]
+    MOC: We are a club. People who like us write our address down. Why are you asking, Mr...?
     MICAH: Jones. Micah Jones.
     -> opts
 * [Do the bonfires burn here too? Is that what the robe is for?]
@@ -498,7 +498,7 @@ LIBRARIAN: Good Lord. Put that away! This is a library!
 MICAH: Then keep your voice down. Bell. "Rites of the Old Isles." C-17. The book about this knot.
 LIBRARIAN: A triquetra. C-Celtic. Old. Older than the saints in Ireland.
 LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
-LIBRARIAN: Y-yes. Bell's book. C-17. Someone asked for it just last month.
+LIBRARIAN: Y-yes. Bell's book. C-17. A rare book. Someone asked for it just last month.
 LIBRARIAN: Take it. Take it and go, and please don't come back.
 ~ give_item("book")
 MICAH: Pleasure doing business. Late fees are on me.
@@ -582,7 +582,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
     MICAH: Tonight I had a gun on a man who deserved it more than anybody I ever met.
     MICAH: I put it away and walked out. Nobody will ever know but me. And now you.
 - has_flag("walked_away"):
-    MICAH: Tonight I had a gun on a man who wasn't worth the bullet. I lowered it and walked away.
+    MICAH: Tonight I had a gun on a man. I lowered it and walked away.
     MICAH: First smart thing I've done all week.
 - else:
     MICAH: It looks worse than it is. It usually does.
@@ -702,7 +702,7 @@ NUN: Are you crazy?!
 MICAH: Yeah. You can say that, sister. Where's Eleanor? What goes on at that club?
 NUN: You belong with that Jezebel. Burn with her, then. I am done with you.
 NUN: She's a performer. She nearly had me fooled, the whore.
-NUN: You want the man who keeps her? Harrington senior.
+NUN: You want answers? Go see Harrington senior.
 -> END
 
 === beaten_choice ===
