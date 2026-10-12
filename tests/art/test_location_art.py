@@ -173,12 +173,13 @@ class LocationRenderingTests(unittest.TestCase):
         self.assertIn(common.hx("e0a878"), colors)
         self.assertIn(common.hx("100c0a"), colors)
 
-    def test_bedroom_wife_crop_includes_a_shoulder(self):
-        _, _, wife = act2_rooms._bed_figures(1.2, 1.0)
-        box = wife.getbbox()
-        self.assertIsNotNone(box)
-        self.assertGreater(box[2] - box[0], box[3] - box[1])
-        self.assertGreater(box[2] - box[0], 24)
+    def test_bedroom_puts_daniel_in_front_and_hides_his_wife(self):
+        self.assertEqual(len(act2_rooms._bed_figures(1.2)), 2, "only Daniel is painted; she's under the quilt")
+        with contextlib.redirect_stdout(io.StringIO()):
+            _, dan, wife = act2_rooms.paint_bedroom()
+        self.assertGreater(wife[1], dan[1], "her shape under the quilt sits lower than his head")
+        self.assertGreater(wife[0], dan[0])
+
 
 
 if __name__ == "__main__":
