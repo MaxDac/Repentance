@@ -79,6 +79,9 @@ public partial class Hud : CanvasLayer
         // keeps the pause input, cursor and menu alive while gameplay is paused
         ProcessMode = ProcessModeEnum.Always;
         Font = GD.Load<Font>("res://assets/fonts/Silkscreen-Regular.ttf");
+        // .godot/ is not committed: a fresh checkout has no imported assets until the editor (or --import) runs
+        if (Font == null)
+            GD.PushError("Assets are not imported (fresh checkout?). Run `godot --path . --headless --import` once, then start the game again.");
         var theme = new Theme { DefaultFont = Font, DefaultFontSize = 8 };
 
         var root = new Control

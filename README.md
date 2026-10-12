@@ -13,11 +13,30 @@ Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (vi
 
 Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
 
+### Common commands
+
 ```powershell
+# 1. after a fresh clone, or after new/changed art, fonts or Ink: import assets (no editor needed)
+godot --path . --headless --import
+# 2. after C# changes
 dotnet build
-# open the project in the Godot editor (imports assets + compiles the Ink story), then press F5
-godot --path . --editor
+# play
+godot --path .
+# full automated playthrough (Windows: use godot_console.exe and wait for AUTOPLAY OK)
+godot_console --path . -- --autoplay
+# capture what the screen shows, without a visible window: writes frames to frames\f*.png
+godot_console --path . --write-movie frames\f.png --fixed-fps 30 --quit-after 120
+# unit tests and art tests
+dotnet test tests/Repentance.Tests/Repentance.Tests.csproj
+py -3.14 -m unittest discover -s tests\art -v
 ```
+
+You can also open the project in the editor (`godot --path . --editor`), which imports assets and compiles
+the Ink story, then press F5.
+
+`.godot/` (the import cache) is not committed. Running `godot --path .` on a fresh clone before importing
+shows a grey title screen with a fallback font, because no texture or font can load. The game logs
+`Assets are not imported` when this happens.
 
 Command-line options (after `--`):
 
