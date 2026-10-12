@@ -180,7 +180,8 @@ From here the story follows Walkthrough.md:
    tie hammer, release hand; cutting the wire would release the spring. Then open the door.
 30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
    door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
-   lantern, light it with the matchbook (kept) and climb the bootleggers' stair to the study's bar panel.
+   lantern, light it with the matchbook (kept), use the lit lantern on the dark stair, then climb the
+   bootleggers' stair to the study's bar panel.
    Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
