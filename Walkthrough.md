@@ -134,6 +134,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, he finds Eleanor there, outside, dressed in black. No one is passing.
 - She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
+- While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
+  same VGA style as the other close-ups. It fades when the conversation ends.
 - The scene ends when Eleanor says "I can't go back there..."
 
 #### Motel room, night

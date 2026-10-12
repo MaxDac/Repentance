@@ -7,6 +7,8 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
   dark velvet dress over her shoulders and chest; the picture is otherwise the same.
 - rose_closeup: Rose calling Micah back from her door.
 - beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
+- convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
+  in one panel split by a bar in the frame's colours.
 """
 import os
 
@@ -24,6 +26,12 @@ IW, IH = AW * SCALE, AH * SCALE
 FRAME = 5
 PW, PH = IW + 2 * FRAME, IH + 2 * FRAME
 COLOURS = 32
+# two-portrait panels: each half in art pixels, either side of a bar in the frame's colours
+BAR = 4
+HALF = (AW - BAR) // 2
+MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
+ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
+MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 
 # the neckline, in source pixels: a scoop between the shoulders, sleeves over the shoulder tops
 NECK_X, NECK_HALF = 1010, 290
@@ -108,17 +116,56 @@ def beaten_closeup(src):
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
+def portrait_crop(src, cx):
+    """One half of a two-portrait panel: the full height, as wide as the half's aspect, centred on the face at cx."""
+    img = src.convert("RGB")
+    w, h = img.size
+    cw = round(h * HALF / AH)
+    x = int(np.clip(cx - cw // 2, 0, w - cw))
+    return img.crop((x, 0, x + cw, h))
+
+
+def convent_closeup(micah, eleanor):
+    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right."""
+    left = portrait_crop(micah, MICAH_FACE_X)
+    right = portrait_crop(eleanor, ELEANOR_FACE_X)
+    return framed_pair(left, right)
+
+
+def frame_border(panel):
+    d = ImageDraw.Draw(panel)
+    d.rectangle([0, 0, PW - 1, PH - 1], outline=hx("000000"))
+    d.rectangle([2, 2, PW - 3, PH - 3], outline=hx("8a6a3a"))
+    d.rectangle([FRAME - 1, FRAME - 1, PW - FRAME, PH - FRAME], outline=hx("000000"))
+    return panel
+
+
 def framed(img, pal):
     """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
     small = img.resize((AW, AH), Image.BOX)
     inner = pixelize(small, pal, spread=8).resize((IW, IH), Image.NEAREST)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(inner, (FRAME, FRAME))
+    return frame_border(panel)
+
+
+def framed_pair(left, right, pal=None):
+    """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both."""
+    a = left.resize((HALF, AH), Image.BOX)
+    b = right.resize((HALF, AH), Image.BOX)
+    both = Image.new("RGB", (HALF * 2, AH))
+    both.paste(a, (0, 0))
+    both.paste(b, (HALF, 0))
+    pal = pal or palette_of(both, COLOURS)
+    panel = Image.new("RGB", (PW, PH), hx("08060a"))
+    panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
+    panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))
     d = ImageDraw.Draw(panel)
-    d.rectangle([0, 0, PW - 1, PH - 1], outline=hx("000000"))
-    d.rectangle([2, 2, PW - 3, PH - 3], outline=hx("8a6a3a"))
-    d.rectangle([FRAME - 1, FRAME - 1, PW - FRAME, PH - FRAME], outline=hx("000000"))
-    return panel
+    x0 = FRAME + HALF * SCALE
+    # the two halves' inner frames meet in the middle: black, gold, gold, black
+    for dx, colour in ((0, "000000"), (2, "8a6a3a"), (BAR * SCALE - 3, "8a6a3a"), (BAR * SCALE - 1, "000000")):
+        d.line([x0 + dx, FRAME, x0 + dx, PH - FRAME - 1], fill=hx(colour))
+    return frame_border(panel)
 
 
 def build():
@@ -128,3 +175,4 @@ def build():
     save(stage_closeup(src, clothed=True, pal=pal), "ui", "stage_closeup_clothed.png")
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
+    save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")

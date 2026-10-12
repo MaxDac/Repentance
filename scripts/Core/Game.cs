@@ -75,6 +75,7 @@ public partial class Game : Node
         Player = new Player { Name = "Player" };
         Hud = new Hud { Name = "Hud" };
         AddChild(Hud);
+        Hud.BindSettings(Settings);
         Hud.ItemClicked += OnItemClicked;
         Hud.ItemHovered += id => _hoverItem = id;
 
@@ -512,7 +513,7 @@ public partial class Game : Node
     private void LoadRoomScene(string name)
     {
         UnloadRoom();
-        Hud.HideInset(0);
+        Hud.HideCloseUp(0);
         Room = GD.Load<PackedScene>(RoomScenePath(name)).Instantiate<Room>();
         _roomScene = name;
         _roomHost.AddChild(Room);

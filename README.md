@@ -119,7 +119,8 @@ The cash revision changes save compatibility, not the ending requirements or rin
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
    the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
    mirror and cloth to reveal the symbol. Micah returns the cloth and won't leave before that discovery.
-7. **Outside the convent**: Eleanor, in black, is waiting for him.
+7. **Outside the convent**: Eleanor, in black, is waiting for him. While they talk, a framed close-up shows the two
+   of them side by side, Micah on the left and Eleanor on the right; it fades after "I can't go back there...".
 8. **Motel, that night**: Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
    and Micah drops the case.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
@@ -255,7 +256,7 @@ scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
 scripts/Rooms/       per-room puzzle scripts
-scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-up insets, cursor), VerbWheel and GameMenu (title/pause/save slots)
+scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-ups, cursor), CloseUp (the close-up catalog), VerbWheel and GameMenu (title/pause/save slots)
 scripts/Debug/       AutoPlay smoke test
 tools/               Python art generator
 ```
@@ -302,6 +303,18 @@ Micah speaks the choice text aloud, unless it starts with `(`.
 Start a conversation from a room script with `await Talk("knot")`.
 Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main_file=true`.
 
+### Close-up panels
+
+Framed close-ups pop up over a scene without blocking it; while one is up, speech sits along its bottom edge.
+Each is a `CloseUp` in `scripts/UI/CloseUp.cs` (the `CloseUps` catalog): an id, the picture under
+`assets/art/ui/` (or a function of the settings, for variants such as Eleanor's dressed stage close-up) and fade
+times. Show one with `Game.Hud.ShowCloseUp(CloseUps.Rose)` and `Game.Hud.HideCloseUp()`, or from ink with
+`INSET: rose` and `INSET: none`. The Hud handles the fades, the speech placement, swapping a variant when the
+settings change, and hiding it on a room change.
+
+To add one: commit the source picture under `tools/art/src/`, build the panel in `tools/art/closeup.py`
+(`framed` for one picture, `framed_pair` for two side by side), add a `CloseUps` entry, then show it.
+
 ### Regenerating the art
 
 All art is generated procedurally with Python and Pillow, so it can be tweaked and re-rendered. It is placeholder-quality but detailed.
@@ -343,7 +356,9 @@ py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lo
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
-                                     also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png
+                                     also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;
+                                     and Micah and Eleanor outside the convent, two portraits in one panel, from
+                                     tools\art\src\convent_micah.png and convent_eleanor.png
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 
