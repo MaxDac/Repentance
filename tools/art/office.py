@@ -60,9 +60,16 @@ def door(img, state="closed"):
         d.ellipse([(x0 + x1) // 2 - 6, y0 + 8, (x0 + x1) // 2 + 6, y0 + 18], fill=hx("f8e8b0"))
         d.rectangle([x0 + 8, y0 + 28, x1 - 18, y1 - 16], fill=hx("2e2a24"))
         if state == "ajar":
-            d.polygon([(x1 - 16, y0 + 2), (x1 - 2, y0 + 6), (x1 - 6, y1 - 2), (x1 - 22, y1 - 4)], fill=hx("4a2e1c"))
-            d.rectangle([x1 - 18, y0 + 12, x1 - 8, 62], fill=hx("c8c098"))
-            d.ellipse([x1 - 16, 80, x1 - 11, 85], fill=hx("c8a050"))
+            # hinged on the left; the knob edge swings in first, opening a gap on the right
+            fx = x1 - 18
+            d.polygon([(x0, y0), (fx, y0 - 2), (fx, y1 + 2), (x0, y1)], fill=hx("4e321c"))
+            vgrad(img, (x0 + 5, y0 + 6, fx - 5, 70), hx("c8c098"), hx("8a8a6a"))
+            noise(img, (x0 + 5, y0 + 6, fx - 5, 70), 6, 5)
+            d.rectangle([x0 + 5, y0 + 6, fx - 5, 70], outline=hx("2a180c"))
+            for py in (78, 102):
+                d.rectangle([x0 + 6, py, fx - 6, py + 18], outline=hx("2e1c0e"))
+            d.line([(fx, y0 - 2), (fx, y1 + 2)], fill=hx("2a180c"))
+            d.ellipse([fx - 9, 82, fx - 4, 87], fill=hx("c8a050"))
         else:
             d.rectangle([x0, y0, x0 + 9, y1], fill=hx("4e321c"))
             d.rectangle([x0 + 1, y0 + 8, x0 + 7, 66], fill=hx("c8c098"))

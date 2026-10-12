@@ -67,19 +67,22 @@ public partial class Office : Room
         await Say("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
     }
 
-    /// <summary>The frosted door swings, then the leaf is clear of the frame. Facing left reaches for the knob.</summary>
+    /// <summary>
+    /// The frosted door swings in on its left hinges, then the leaf is clear of the frame. The knob is on the right,
+    /// so the actor faces right to reach it.
+    /// </summary>
     private async Task OpenTheDoor(bool player)
     {
         State.SetFlag("office_door_ajar");
         await Wait(0.12);
         if (player)
         {
-            Player.Face(Facing.Left);
+            Player.Face(Facing.Right);
             await Player.PlayPose("micah_open_door");
         }
         else if (FindActor("teddy") is { } teddy)
         {
-            teddy.FaceLeft(true);
+            teddy.FaceLeft(false);
             await teddy.PlayPose("teddy_open_door");
             teddy.SetPose(null);
         }
