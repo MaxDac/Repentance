@@ -5,6 +5,7 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her. The clothed variant paints a
   dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+- rose_closeup: Rose calling Micah back from her door.
 - beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
 """
 import os
@@ -15,6 +16,7 @@ from PIL import Image, ImageDraw
 from .common import ROOT, hx, palette_of, pixelize, save
 
 SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
+ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
 BEATEN_SRC = os.path.join(ROOT, "tools", "art", "src", "beaten_closeup.png")
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
 SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
@@ -67,6 +69,29 @@ def shared_palette(src):
     return palette_of(both, COLOURS)
 
 
+def stage_closeup(src, clothed, pal=None):
+    """Eleanor on the stage, framed."""
+    img = src.convert("RGB")
+    if clothed:
+        img = dress(img)
+    return framed(img, pal or shared_palette(src))
+
+
+def rose_crop(src):
+    """Rose in her doorway, trimmed evenly top and bottom to the panel's 1.95:1 so her face stays centred."""
+    img = src.convert("RGB")
+    w, h = img.size
+    ch = round(w * AH / AW)
+    top = (h - ch) // 2
+    return img.crop((0, top, w, top + ch))
+
+
+def rose_closeup(src):
+    """Rose calling Micah back from the door: "Wait!"."""
+    img = rose_crop(src)
+    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
 def crop_to_panel(img):
     """Crops a picture to the panel's aspect, trimming the bottom first so heads and hats stay in view."""
     w, h = img.size
@@ -77,8 +102,15 @@ def crop_to_panel(img):
     return img.crop((0, 0, w, round(w * AH / AW)))
 
 
-def framed(small, pal):
-    """The art-pixel picture, dithered to its palette, doubled and set in a dark bevelled frame."""
+def beaten_closeup(src):
+    """Micah flat on his back on the cathedral steps, looking up from under his hat."""
+    img = crop_to_panel(src.convert("RGB"))
+    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
+def framed(img, pal):
+    """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
+    small = img.resize((AW, AH), Image.BOX)
     inner = pixelize(small, pal, spread=8).resize((IW, IH), Image.NEAREST)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(inner, (FRAME, FRAME))
@@ -89,23 +121,10 @@ def framed(small, pal):
     return panel
 
 
-def stage_closeup(src, clothed, pal=None):
-    """Eleanor's panel, nude or with the painted dress."""
-    img = src.convert("RGB")
-    if clothed:
-        img = dress(img)
-    return framed(img.resize((AW, AH), Image.BOX), pal or shared_palette(src))
-
-
-def beaten_closeup(src):
-    """Micah's panel on the cathedral steps."""
-    small = crop_to_panel(src.convert("RGB")).resize((AW, AH), Image.BOX)
-    return framed(small, palette_of(small, COLOURS))
-
-
 def build():
     src = Image.open(SRC)
     pal = shared_palette(src)
     save(stage_closeup(src, clothed=False, pal=pal), "ui", "stage_closeup.png")
     save(stage_closeup(src, clothed=True, pal=pal), "ui", "stage_closeup_clothed.png")
+    save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")

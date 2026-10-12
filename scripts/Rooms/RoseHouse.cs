@@ -81,9 +81,11 @@ public partial class RoseHouse : Room
         {
             await Say("rose", "Wait!");
             if (FindActor("rose") is { } rose) Player.FaceTowards(rose.Position);
-            // a long look, and nobody says anything
-            await Wait(3.5);
+            // he turns, and there she is: a long look, and nobody says anything
+            Game.Hud.ShowInset(GD.Load<Texture2D>("res://assets/art/ui/rose_closeup.png"));
+            await Wait(2.0);
             await Say("rose", "Don't get into trouble again.");
+            Game.Hud.HideInset();
             await Wait(0.8);
         }
         State.SetFlag("rose_door", false);

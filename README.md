@@ -146,7 +146,7 @@ From here the story follows Walkthrough.md:
 17. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
    forward.
 18. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
-   three times and Rose calls him back: "Don't get into trouble again."
+   three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
 19. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
@@ -342,7 +342,7 @@ py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
-py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up, reduced to VGA pixels from the original picture in tools\art\src\stage_closeup.png; the clothed variant paints her dress on;
+py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
                                      also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
