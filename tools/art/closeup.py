@@ -1,9 +1,12 @@
-"""Framed close-ups over the scene: Eleanor on the Club stage, the stag and the hooded mask behind her, and Rose
-calling Micah back from her door.
+"""Framed close-up panels popped up over a scene, Monkey Island 2 style.
 
-Built from original generated pictures committed at tools/art/src/ and reduced to a
-Monkey Island 2 style VGA close-up: chunky pixels, a tight warm palette and ordered dithering.
-Eleanor's clothed variant paints a dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+Each is built from an original generated picture committed under tools/art/src/ and reduced to a VGA close-up:
+chunky pixels, a tight palette and ordered dithering, inside a dark bevelled frame.
+
+- stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her. The clothed variant paints a
+  dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+- rose_closeup: Rose calling Micah back from her door.
+- beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
 """
 import os
 
@@ -14,6 +17,7 @@ from .common import ROOT, hx, palette_of, pixelize, save
 
 SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
 ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
+BEATEN_SRC = os.path.join(ROOT, "tools", "art", "src", "beaten_closeup.png")
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
 SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
 IW, IH = AW * SCALE, AH * SCALE
@@ -88,6 +92,22 @@ def rose_closeup(src):
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
+def crop_to_panel(img):
+    """Crops a picture to the panel's aspect, trimming the bottom first so heads and hats stay in view."""
+    w, h = img.size
+    if w / h > AW / AH:
+        cw = round(h * AW / AH)
+        x = (w - cw) // 2
+        return img.crop((x, 0, x + cw, h))
+    return img.crop((0, 0, w, round(w * AH / AW)))
+
+
+def beaten_closeup(src):
+    """Micah flat on his back on the cathedral steps, looking up from under his hat."""
+    img = crop_to_panel(src.convert("RGB"))
+    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
 def framed(img, pal):
     """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
     small = img.resize((AW, AH), Image.BOX)
@@ -107,3 +127,4 @@ def build():
     save(stage_closeup(src, clothed=False, pal=pal), "ui", "stage_closeup.png")
     save(stage_closeup(src, clothed=True, pal=pal), "ui", "stage_closeup_clothed.png")
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
+    save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")

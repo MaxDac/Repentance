@@ -29,6 +29,7 @@ public class AutoPlay
     private string _act3Ink = "";
     private int _crossOffers;
     private bool? _insetAtCaughtChoice;
+    private bool? _insetAtBeatenChoice;
 
     public async Task Run(Game game)
     {
@@ -59,6 +60,7 @@ public class AutoPlay
             _offered[knot] = options.ToArray();
             if (knot == "caleb_cross") _crossOffers++;
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
+            if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -589,9 +591,14 @@ public class AutoPlay
             await game.Wait(1);
             await Shot("club_stage_brute");
             await Until(() => game.Room?.Name == "ChurchExterior");
+            await Until(() => game.Hud.InsetVisible);
+            Check(game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
             await game.Wait(1.5);
+            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
+                "his thoughts sit below his face while the close-up is up");
             await Shot("church_exterior_beaten");
             await Until(() => game.Room?.Name == "Office");
+            Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");
             await game.Wait(1.5);
             await Shot("office_act3_desk");
             await stage;

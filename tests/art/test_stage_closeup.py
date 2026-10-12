@@ -1,4 +1,4 @@
-"""The framed close-up of Eleanor on the Club's stage, reduced to a VGA panel from the committed picture."""
+"""The framed close-ups (Eleanor on the Club's stage, Micah on the cathedral steps), reduced to VGA panels from the committed pictures."""
 from pathlib import Path
 import sys
 import unittest
@@ -66,6 +66,33 @@ class StageCloseupTests(unittest.TestCase):
         self.assertTrue(64 < xs.min() and xs.max() < 160)  # not on the men
         chest = c[101:, 92:128]
         self.assertGreater(chest[..., 0].mean(), chest[..., 1].mean() * 2, "dark red velvet")
+
+
+class BeatenCloseupTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.panel = closeup.beaten_closeup(Image.open(closeup.BEATEN_SRC))
+
+    def test_committed_panel_matches_the_build_and_the_stage_panel_size(self):
+        committed = Image.open(UI / "beaten_closeup.png").convert("RGB")
+        self.assertEqual(committed.size, (closeup.PW, closeup.PH))
+        self.assertTrue((np.asarray(committed) == np.asarray(self.panel)).all(), "regenerate with gen_art.py closeup")
+
+    def test_framed_chunky_and_limited(self):
+        a = np.asarray(self.panel)
+        self.assertLess(a[0, :].mean(), 40)
+        b = a[closeup.FRAME:-closeup.FRAME, closeup.FRAME:-closeup.FRAME]
+        self.assertTrue((b[0::2] == b[1::2]).all() and (b[:, 0::2] == b[:, 1::2]).all())
+        self.assertLessEqual(len(inner(self.panel).getcolors(4096)), closeup.COLOURS)
+
+    def test_his_face_is_lit_in_the_middle_above_the_yellow_coat(self):
+        a = np.asarray(inner(self.panel), dtype=float)
+        face = a[30:55, 98:122]
+        self.assertTrue(face[..., 0].mean() > face[..., 2].mean() + 30, "warm skin")
+        coat = a[95:, 30:70]
+        self.assertTrue(coat[..., 0].mean() > 120 and coat[..., 1].mean() > 90 and coat[..., 2].mean() < 70, "yellow trench coat")
+        stones = a[:60, :25]
+        self.assertLess(stones.mean(), face.mean())
 
 
 if __name__ == "__main__":
