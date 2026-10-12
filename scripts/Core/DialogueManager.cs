@@ -57,11 +57,11 @@ public partial class DialogueManager : Node
                 var line = story.Continue().Trim();
                 if (line.Length == 0) continue;
                 var (speaker, text) = Parse(line);
-                // "INSET: name" frames res://assets/art/ui/name.png over the scene; "INSET: none" removes it
+                // "INSET: id" frames the close-up CloseUps.Get(id) over the scene; "INSET: none" removes it
                 if (speaker == "INSET")
                 {
-                    if (text == "none") game.Hud.HideInset();
-                    else game.Hud.ShowInset(GD.Load<Texture2D>($"res://assets/art/ui/{text}.png"));
+                    if (text == "none") game.Hud.HideCloseUp();
+                    else game.Hud.ShowCloseUp(CloseUps.Get(text));
                     continue;
                 }
                 // "IMAGE: name" shows res://assets/art/ui/name.png full screen until clicked

@@ -30,6 +30,7 @@ public class AutoPlay
     private int _crossOffers;
     private bool? _insetAtCaughtChoice;
     private bool? _insetAtBeatenChoice;
+    private CloseUp? _closeUpAtRoadChoice;
 
     public async Task Run(Game game)
     {
@@ -61,6 +62,7 @@ public class AutoPlay
             if (knot == "caleb_cross") _crossOffers++;
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;
+            if (knot == "eleanor_road") _closeUpAtRoadChoice = game.Hud.CurrentCloseUp;
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -274,8 +276,22 @@ public class AutoPlay
             var leave = game.Perform(Verb.Walk, "exit");
             await Until(() => game.Room?.Name == "ConventRoad");
             Check(game.Room?.Name == "ConventRoad", "Eleanor is waiting outside the convent");
-            await game.Wait(3);
+            Check(!game.Hud.InsetVisible, "no close-up while Micah walks up to her");
+            await Until(() => game.Hud.InsetVisible);
+            Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
+                "Micah and Eleanor framed side by side when she starts talking");
+            Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the two-portrait close-up fills most of the screen");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText.Contains("Sister Agatha"), "Eleanor's first line over the close-up");
+            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
+                "speech sits below their faces while the close-up is up");
+            await game.Wait(1);
             await Shot("convent_road");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
+            Check(game.Hud.CurrentCloseUp == CloseUps.Convent, "the close-up stays up through the whole conversation");
+            await Until(() => !game.Hud.InsetVisible);
+            Check(game.Room?.Name == "ConventRoad", "the close-up fades before the motel");
+            Check(_closeUpAtRoadChoice == CloseUps.Convent, "the close-up is up while Micah answers her");
             await Until(() => game.Room?.Name == "MotelNight");
             Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
             await game.Wait(2);
@@ -392,7 +408,7 @@ public class AutoPlay
             await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Wait!"));
             Check(!game.Hud.InsetVisible, "no close-up yet while Rose calls \"Wait!\"");
             await Until(() => game.Hud.InsetVisible);
-            Check(game.Hud.InsetName.StartsWith("rose_closeup") && game.Room?.Name == "RoseHouse", "Rose's close-up framed over the door after she calls Micah back");
+            Check(game.Hud.CurrentCloseUp == CloseUps.Rose && game.Room?.Name == "RoseHouse", "Rose's close-up framed over the door after she calls Micah back");
             Check(!game.Hud.SpeechVisible, "the close-up opens on a silent look");
             Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "Rose's close-up fills most of the screen");
             await Until(() => game.Hud.SpeechVisible);
@@ -564,7 +580,7 @@ public class AutoPlay
             var stage = game.Perform(Verb.Walk, "stage_exit");
             await Until(() => game.Room?.Name == "ClubStage");
             await Until(() => game.Hud.InsetVisible);
-            Check(game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
+            Check(game.Hud.CurrentCloseUp == CloseUps.Stage && game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
             Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
             await Until(() => game.Hud.SpeechVisible);
             Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
@@ -592,7 +608,7 @@ public class AutoPlay
             await Shot("club_stage_brute");
             await Until(() => game.Room?.Name == "ChurchExterior");
             await Until(() => game.Hud.InsetVisible);
-            Check(game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
+            Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
             await game.Wait(1.5);
             Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
                 "his thoughts sit below his face while the close-up is up");
@@ -941,7 +957,13 @@ public class AutoPlay
             Check(game.Room.FindActor("eleanor")!.Texture!.ResourcePath.EndsWith("/eleanor_stage.png"),
                 $"Act {act}: enabling immediately restores the opted-in variant");
         }
+        game.Hud.ShowCloseUp(CloseUps.Stage, 0);
+        Check(game.Hud.InsetName == "stage_closeup", "stage close-up uses the opted-in variant");
         Check(game.Settings.SetNudity(false), "reset isolated preference");
+        Check(game.Hud.CurrentCloseUp == CloseUps.Stage && game.Hud.InsetName == "stage_closeup_clothed",
+            "a close-up's variant swaps in place when the setting changes");
+        game.Hud.HideCloseUp(0);
+        Check(!game.Hud.InsetVisible && game.Hud.CurrentCloseUp == null, "close-up hidden");
         await game.ChangeRoom("attic", "settings_test");
         await WaitIdle(game);
         GameState.Instance.Reset();

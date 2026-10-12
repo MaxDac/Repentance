@@ -312,6 +312,7 @@ NUN: The last door, at the end. Look if you must. Then go.
 // ---------------------------------------------------------------- OUTSIDE THE CONVENT
 
 === eleanor_road ===
+INSET: convent
 ELEANOR: Sister Agatha said a man came asking for me. A man with a split lip and a prophet's name.
 ELEANOR: Why are you looking for me, Mr. Jones?
 MICAH: Your husband hired me to bring you home.
@@ -331,6 +332,7 @@ MICAH: I could. I'm a lousy liar.
 ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
 MICAH: I want you to come away. Not back to Teddy. Anywhere.
 ELEANOR: I can't go back there...
+INSET: none
 -> END
 
 // ---------------------------------------------------------------- MOTEL, NIGHT

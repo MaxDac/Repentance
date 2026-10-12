@@ -43,6 +43,8 @@ public partial class Hud : CanvasLayer
     private TextureRect _inset = null!;
     private Tween? _insetTween;
     private bool _insetShown;
+    private CloseUp? _closeUp;
+    private GameSettings? _settings;
     private TextureRect _title = null!;
     private Control _pause = null!;
     private TextureRect _cursor = null!;
@@ -444,15 +446,53 @@ public partial class Hud : CanvasLayer
         _caption.Visible = text != null;
     }
 
-    /// <summary>True from <see cref="ShowInset"/> until <see cref="HideInset"/>, even while it fades.</summary>
+    /// <summary>True from <see cref="ShowCloseUp"/> until <see cref="HideCloseUp"/>, even while it fades.</summary>
     public bool InsetVisible => _insetShown;
+    /// <summary>The picture currently framed (its file name), e.g. "stage_closeup_clothed".</summary>
     public string InsetName => _inset.Texture?.ResourcePath.GetFile().GetBaseName() ?? "";
+    /// <summary>The close-up shown, or null.</summary>
+    public CloseUp? CurrentCloseUp => _insetShown ? _closeUp : null;
+
+    /// <summary>Lets close-ups follow the player's settings: a variant swaps in place when they change.</summary>
+    public void BindSettings(GameSettings settings)
+    {
+        if (_settings != null) _settings.Changed -= RefreshCloseUp;
+        _settings = settings;
+        _settings.Changed += RefreshCloseUp;
+    }
+
+    public override void _ExitTree()
+    {
+        if (_settings != null) _settings.Changed -= RefreshCloseUp;
+    }
+
+    private void RefreshCloseUp()
+    {
+        if (_insetShown && _closeUp != null) ShowInset(LoadCloseUp(_closeUp), 0);
+    }
+
+    private Texture2D LoadCloseUp(CloseUp closeUp) => GD.Load<Texture2D>(closeUp.TexturePath(_settings));
 
     /// <summary>
-    /// Shows a framed picture centred over the scene without blocking it: the room, speech and choices stay live
-    /// around and above it. Stays until <see cref="HideInset"/> (or the next room change).
+    /// Frames a close-up centred over the scene without blocking it: the room, speech and choices stay live around
+    /// and above it, and speech moves to the panel's bottom edge. Stays until <see cref="HideCloseUp"/> or the next
+    /// room change. Showing the one already up does nothing.
     /// </summary>
-    public void ShowInset(Texture2D texture, double seconds = 0.4)
+    public void ShowCloseUp(CloseUp closeUp, double? fadeIn = null)
+    {
+        if (_insetShown && _closeUp == closeUp) return;
+        _closeUp = closeUp;
+        ShowInset(LoadCloseUp(closeUp), fadeIn ?? closeUp.FadeIn);
+    }
+
+    public void HideCloseUp(double? fadeOut = null)
+    {
+        double seconds = fadeOut ?? _closeUp?.FadeOut ?? 0.3;
+        _closeUp = null;
+        HideInset(seconds);
+    }
+
+    private void ShowInset(Texture2D texture, double seconds)
     {
         _insetTween?.Kill();
         _inset.Texture = texture;
@@ -467,7 +507,7 @@ public partial class Hud : CanvasLayer
         _insetTween.TweenProperty(_inset, "modulate:a", 1f, seconds);
     }
 
-    public void HideInset(double seconds = 0.3)
+    private void HideInset(double seconds)
     {
         _insetTween?.Kill();
         _insetTween = null;
