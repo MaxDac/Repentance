@@ -802,35 +802,53 @@ public class AutoPlay
         var character = player.Character;
         var observer = PosePlayback.FrameObserver;
         PosePlayback.FrameObserver = null;
-        var action = player.PlayPose("micah_recover");
-        await game.Wait(0.2);
-        player.SetCharacter(character);
-        Check(!await action && !player.Poses.Active, "character swap cancels awaited playback and restores animation");
-        player.SetPose("micah_supine");
-        player.Face(Facing.Right);
-        var right = player.HeadPosition - player.GlobalPosition;
-        player.Face(Facing.Left);
-        var left = player.HeadPosition - player.GlobalPosition;
-        Check(Mathf.IsEqualApprox(right.X, -left.X) && Mathf.IsEqualApprox(right.Y, left.Y), "wide-pose speech mirrors around the contact anchor");
-        var first = player.PlayPose("micah_recover");
-        var second = player.PlayPose("micah_kneel_rise");
-        Check(!await first, "a new pose cancels the previous await");
-        player.Stop();
-        Check(!await second && !player.Poses.Active, "stopping restores the sheet and cancels playback");
-        var actor = new Actor { Id = "pose_test", Texture = GD.Load<Texture2D>("res://assets/art/sprites/sal.png"), DepthScale = false };
-        game.Room!.World.AddChild(actor);
-        actor.SetPose("micah_supine");
-        actor.FaceLeft(false);
-        var rightBounds = actor.Bounds;
-        actor.FaceLeft(true);
-        Check(Mathf.IsEqualApprox(actor.Bounds.Size.X, rightBounds.Size.X), "actor wide-pose hit bounds survive mirroring");
-        Check(actor.Contains(actor.GlobalPosition + actor.Poses!.Bounds.GetCenter()), "actor hit testing uses the displayed pose");
-        var leaving = actor.PlayPose("micah_recover");
-        game.Room.World.RemoveChild(actor);
-        Check(!await leaving, "actor removal cancels playback");
-        actor.QueueFree();
-        player.SetCharacter(character);
-        PosePlayback.FrameObserver = observer;
+        double timeScale = Engine.TimeScale;
+        try
+        {
+            // Same turn as PlayPose: a scaled wait can outlive the clip when the autoplay clock hitches.
+            var action = player.PlayPose("micah_recover");
+            player.Poses.Process(0.05);
+            Check(player.Poses.Playing && !action.IsCompleted, "pose is still playing before the character swap");
+            player.SetCharacter(character);
+            Check(!await action && !player.Poses.Active, "character swap cancels awaited playback and restores animation");
+
+            Engine.TimeScale = 1;
+            var normal = player.PlayPose("micah_recover");
+            await game.Wait(0.2);
+            Check(player.Poses.Playing && !normal.IsCompleted, "normal-speed check: pose is still playing before the character swap");
+            player.SetCharacter(character);
+            Check(!await normal && !player.Poses.Active, "normal-speed check: character swap cancels awaited playback and restores animation");
+
+            player.SetPose("micah_supine");
+            player.Face(Facing.Right);
+            var right = player.HeadPosition - player.GlobalPosition;
+            player.Face(Facing.Left);
+            var left = player.HeadPosition - player.GlobalPosition;
+            Check(Mathf.IsEqualApprox(right.X, -left.X) && Mathf.IsEqualApprox(right.Y, left.Y), "wide-pose speech mirrors around the contact anchor");
+            var first = player.PlayPose("micah_recover");
+            var second = player.PlayPose("micah_kneel_rise");
+            Check(!await first, "a new pose cancels the previous await");
+            player.Stop();
+            Check(!await second && !player.Poses.Active, "stopping restores the sheet and cancels playback");
+            var actor = new Actor { Id = "pose_test", Texture = GD.Load<Texture2D>("res://assets/art/sprites/sal.png"), DepthScale = false };
+            game.Room!.World.AddChild(actor);
+            actor.SetPose("micah_supine");
+            actor.FaceLeft(false);
+            var rightBounds = actor.Bounds;
+            actor.FaceLeft(true);
+            Check(Mathf.IsEqualApprox(actor.Bounds.Size.X, rightBounds.Size.X), "actor wide-pose hit bounds survive mirroring");
+            Check(actor.Contains(actor.GlobalPosition + actor.Poses!.Bounds.GetCenter()), "actor hit testing uses the displayed pose");
+            var leaving = actor.PlayPose("micah_recover");
+            game.Room.World.RemoveChild(actor);
+            Check(!await leaving, "actor removal cancels playback");
+            actor.QueueFree();
+        }
+        finally
+        {
+            Engine.TimeScale = timeScale;
+            player.SetCharacter(character);
+            PosePlayback.FrameObserver = observer;
+        }
     }
 
     public async Task RunPauseTests(Game game)
