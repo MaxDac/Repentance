@@ -171,7 +171,8 @@ From here the story follows Walkthrough.md:
    **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
-26. **Outside the cathedral**: give up (ending 1), or keep going:
+26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
+    he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
 27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
@@ -341,7 +342,8 @@ py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
-py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up, reduced to VGA pixels from the original picture in tools\art\src\stage_closeup.png; the clothed variant paints her dress on
+py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up, reduced to VGA pixels from the original picture in tools\art\src\stage_closeup.png; the clothed variant paints her dress on;
+                                     also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 

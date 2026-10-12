@@ -417,6 +417,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Church, outside
 
 - Micah is supine on the pavement, again, beaten.
+- A framed close-up panel of Micah's face pops up over the scene, like Eleanor's on the stage: flat on his back on the
+  stones, looking up from under his hat. It stays while he thinks, and closes before he gets up.
 - Before recovering, he admits: "I keep calling it saving her. But it's her I want. Her voice. Her skin.
   Another night like that one." Then: "Rose and Tommy ought to be in my heart. Eleanor's there instead.
   And God help me, I don't want to let her go." His motive is lust, conflicting with repentance and returning home.
