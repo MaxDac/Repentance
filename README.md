@@ -83,7 +83,6 @@ locations reroute the staff lift, the Blue Lantern entrance, the Harrington lead
 mansion entrance. The puzzle expansion's separate original-puzzle
 and Act 3 schema markers preserve completed discoveries in compatible saves. New saves do not grandfather
 unfinished puzzles on reload.
-An older Act 2 save that skipped room 507 gets a temporary Hotel map marker to recover the card clues.
 
 The cash revision changes save compatibility, not the ending requirements or ring/cross decisions.
 
@@ -96,14 +95,20 @@ The cash revision changes save compatibility, not the ending requirements or rin
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
    $22 in cash and a set of lockpicks. Micah won't leave without all three.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
-   staff elevator up to Eleanor's room. Trace its routing diagram and set the three junctions
-   lower, upper, upper to reach room 507.
-   Micah collects the brass box there before departing for the Blue Lantern.
-3. **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
+   staff elevator up to Eleanor's floor. Trace its routing diagram and set the three junctions
+   lower, upper, upper to reach the fifth-floor linen room.
+   Micah collects the brass box in room 507 before departing for the Blue Lantern.
+3. **Linen room**: the corridor door to 507 is night-bolted from the far side and has no keyhole. Take a wire
+   hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
+   go back on the cart) and use the hook on the door to lift the bolt through the transom.
+   **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
    open the closet and enter R 12 / L 31 / R 7 on the safe's close-up controls, then take the brass box.
    Open it in the satchel with the hand: a
    perfumed, blank calling card and a matchbook from the Blue Lantern.
-4. **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
+4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
+   for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
+   combine them and show the blue carnation at the cold-room grille to be let in.
+   **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
    leaving $11 after both bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
@@ -145,14 +150,21 @@ From here the story follows Walkthrough.md:
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
 20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
-   try Harrington senior.
+   try Harrington senior. Micah decides to look him up at the Tribune.
+    **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
+    bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
+    and pin the mended clipping on the Loop wall map. The Harrington Building replaces the Tribune on the map.
 21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
    back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
    heraldic key; set the false-back lock to STAR / SUN / MOON.
-23. **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
+23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
+   wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
+   matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
+   Post the sealed invitation in the door slot.
+   **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
    stands among three masked men. **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
 25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
@@ -166,7 +178,10 @@ From here the story follows Walkthrough.md:
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
    tie hammer, release hand; cutting the wire would release the spring. Then open the door.
-30. **Kitchen and study**: optionally take the right drawer's account register and the left drawer's auditor's
+30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
+   door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
+   lantern, light it with the matchbook (kept) and climb the bootleggers' stair to the study's bar panel.
+   Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.

@@ -45,9 +45,10 @@ described here (other verbs, flavour lines) is left to the implementation.
   dispatch the lift. A wrong route stays in the lobby and highlights where it went wrong.
   Once solved, the lift works normally on return visits.
 - After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
-  room 507. Older saves that already passed the hotel without these clues get a temporary Hotel map
-  marker to retrieve them (through the linen room, as below); returning to the lobby then leads back to the
-  Act 2 map.
+  room 507. Saves from before the five-location expansion (version 5 and earlier) are incompatible and do
+  not load. The temporary Hotel map recovery applies only to an accepted current-version save that reached
+  Act 2 without the card clues: it leads through the linen room, as below, and returning to the lobby then
+  leads back to the Act 2 map.
 
 #### Fifth-floor linen room at the hotel
 
