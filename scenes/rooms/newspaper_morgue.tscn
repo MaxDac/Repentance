@@ -1,0 +1,190 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/NewspaperMorgue.cs" id="1_Room"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/newspaper_morgue.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/newspaper_morgue_drawer.png" id="5_drawer"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/newspaper_morgue_spike.png" id="6_spike"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/newspaper_morgue_paste.png" id="7_paste"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/newspaper_morgue_pin.png" id="8_pin"]
+
+[sub_resource type="RectangleShape2D" id="Rect_door"]
+size = Vector2(64, 126)
+
+[sub_resource type="RectangleShape2D" id="Rect_cabinets"]
+size = Vector2(126, 100)
+
+[sub_resource type="RectangleShape2D" id="Rect_drawer"]
+size = Vector2(40, 26)
+
+[sub_resource type="RectangleShape2D" id="Rect_map"]
+size = Vector2(118, 94)
+
+[sub_resource type="RectangleShape2D" id="Rect_spike"]
+size = Vector2(48, 80)
+
+[sub_resource type="RectangleShape2D" id="Rect_desk"]
+size = Vector2(118, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_paste"]
+size = Vector2(24, 32)
+
+[node name="NewspaperMorgue" type="Node2D"]
+script = ExtResource("1_Room")
+RoomName = "Tribune Morgue"
+FarY = 200
+NearY = 262
+FarScale = 0.92
+NearScale = 1.04
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="DrawerOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(131, 144)
+texture = ExtResource("5_drawer")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "took_clipping_top"
+
+[node name="SpikeTaken" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(305, 124)
+texture = ExtResource("6_spike")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "took_clipping_bottom"
+
+[node name="PasteGone" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(428, 110)
+texture = ExtResource("7_paste")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "paste_out"
+
+[node name="MapPin" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(259, 79)
+texture = ExtResource("8_pin")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "harrington_located"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(0, 262, 480, 262, 480, 200, 0, 200)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(56, 214)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "door"
+LookText = "MORGUE, backwards from this side of the glass. The stairs up to the street."
+WalkTo = Vector2(52, 206)
+Face = 2
+ExitTo = "chicago_map"
+ExitEntry = "start"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(44, 129)
+shape = SubResource("Rect_door")
+
+[node name="Cabinets" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cabinets"
+DisplayName = "filing cabinets"
+LookText = "Every name the Tribune ever printed, clipped and filed by letter. A man named Harrington lives under H."
+WalkTo = Vector2(151, 206)
+Face = 2
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cabinets"]
+position = Vector2(151, 143)
+shape = SubResource("Rect_cabinets")
+
+[node name="DrawerH" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "drawer_h"
+DisplayName = "drawer H"
+WalkTo = Vector2(151, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/DrawerH"]
+position = Vector2(151, 158)
+shape = SubResource("Rect_drawer")
+
+[node name="WallMap" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "wall_map"
+DisplayName = "map of the Loop"
+WalkTo = Vector2(279, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/WallMap"]
+position = Vector2(279, 81)
+shape = SubResource("Rect_map")
+
+[node name="Spike" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "spike"
+DisplayName = "copy spike"
+WalkTo = Vector2(316, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Spike"]
+position = Vector2(316, 156)
+shape = SubResource("Rect_spike")
+
+[node name="LayoutDesk" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "layout_desk"
+DisplayName = "layout desk"
+LookText = "Tomorrow's pages, pasted up column by column. Half the news in Chicago is held together with glue."
+WalkTo = Vector2(404, 206)
+Face = 2
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/LayoutDesk"]
+position = Vector2(404, 166)
+shape = SubResource("Rect_desk")
+
+[node name="PastePot" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "paste_pot"
+DisplayName = "paste pot"
+WalkTo = Vector2(432, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/PastePot"]
+position = Vector2(437, 124)
+shape = SubResource("Rect_paste")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true

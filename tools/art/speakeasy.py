@@ -182,6 +182,14 @@ def paint():
     main_room(img)
     floor_boards(img, FLOOR, H - 1, (300, -300), 16, hx("2a1c16"), hx("1e140e"), hx("0e0806"), 9)
     noise(img, (0, FLOOR, W - 1, H - 1), 5, 33)
+    d = ImageDraw.Draw(img)
+    # the path from the curtain to the bar is worn pale; the corners stay black with spilled beer
+    d.polygon([(196, FLOOR + 6), (268, FLOOR + 2), (310, H - 1), (214, H - 1)], fill=hx("3a281c"))
+    for y in range(FLOOR + 12, H - 4, 8):
+        d.line([(188, y), (292, y + 2)], fill=hx("4a3424"))
+    for box in ((210, 168, 248, 176), (250, 190, 286, 198), (40, 200, 78, 210)):
+        d.ellipse(box, fill=hx("1a100c"))
+    d.ellipse([236, 176, 252, 184], fill=hx("6a5030"))
     vestibule(img)
     curtain(img)
     stage(img)

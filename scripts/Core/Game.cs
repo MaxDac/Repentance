@@ -16,6 +16,7 @@ public partial class Game : Node
 
     [Export] public string StartRoom = "attic";
     [Export] public string StartEntry = "start";
+    private readonly List<string> _startFlags = new();
 
     public Player Player { get; private set; } = null!;
     public Hud Hud { get; private set; } = null!;
@@ -81,6 +82,7 @@ public partial class Game : Node
         {
             if (a.StartsWith("--room=")) StartRoom = a[7..];
             if (a.StartsWith("--entry=")) StartEntry = a[8..];
+            if (a.StartsWith("--flag=")) _startFlags.AddRange(a[7..].Split(',', StringSplitOptions.RemoveEmptyEntries));
         }
         if (pauseTest)
         {
@@ -239,7 +241,11 @@ public partial class Game : Node
             await TryReadAccounts();
             return true;
         }
-        return false;
+        var outcome = Recipes.Evaluate(first, second, state.HasItem);
+        if (outcome == null) return false;
+        Recipes.Apply(outcome, id => state.TakeItem(id), id => state.GiveItem(id), id => state.SetFlag(id));
+        await Say(outcome.Line);
+        return true;
     }
 
     public async Task TryReadAccounts()
@@ -574,6 +580,7 @@ public partial class Game : Node
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
+        foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
         await ChangeRoom(StartRoom, StartEntry);
     }
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3]
+[gd_scene load_steps=39 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Office.cs" id="1_Office"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office.png" id="2_office"]
@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/micah_desk.png" id="11_micah_desk"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring.png" id="12_ring"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_cup.png" id="13_cup"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_door_ajar.png" id="14_door_ajar"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_door_open.png" id="15_door_open"]
 
 [sub_resource type="RectangleShape2D" id="Rect_ring"]
 size = Vector2(14, 10)
@@ -180,6 +182,23 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "drawer_open"
 HideIfFlags = "took_lockpick"
+
+[node name="DoorAjar" type="Sprite2D" parent="."]
+position = Vector2(17, 43)
+z_index = -6
+texture = ExtResource("14_door_ajar")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "office_door_ajar"
+HideIfFlags = "office_door_open"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+position = Vector2(17, 43)
+z_index = -6
+texture = ExtResource("15_door_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "office_door_open"
 
 [node name="Door" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")

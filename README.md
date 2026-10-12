@@ -25,6 +25,7 @@ Command-line options (after `--`):
 |---|---|
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
+| `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
@@ -78,11 +79,11 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The current save format is version 5; earlier saves are incompatible because they used a single consumed
-dollar item instead of the remaining case cash. The ten-puzzle expansion's separate original-puzzle
+The current save format is version 6; earlier saves are incompatible because the five collect-and-combine
+locations reroute the staff lift, the Blue Lantern entrance, the Harrington lead, the masked Club entrance and the
+mansion entrance. The puzzle expansion's separate original-puzzle
 and Act 3 schema markers preserve completed discoveries in compatible saves. New saves do not grandfather
 unfinished puzzles on reload.
-An older Act 2 save that skipped room 507 gets a temporary Hotel map marker to recover the card clues.
 
 The cash revision changes save compatibility, not the ending requirements or ring/cross decisions.
 
@@ -95,14 +96,20 @@ The cash revision changes save compatibility, not the ending requirements or rin
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
    $22 in cash and a set of lockpicks. Micah won't leave without all three.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
-   staff elevator up to Eleanor's room. Trace its routing diagram and set the three junctions
-   lower, upper, upper to reach room 507.
-   Micah collects the brass box there before departing for the Blue Lantern.
-3. **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
+   staff elevator up to Eleanor's floor. Trace its routing diagram and set the three junctions
+   lower, upper, upper to reach the fifth-floor linen room.
+   Micah collects the brass box in room 507 before departing for the Blue Lantern.
+3. **Linen room**: the corridor door to 507 is night-bolted from the far side and has no keyhole. Take a wire
+   hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
+   go back on the cart) and use the hook on the door to lift the bolt through the transom.
+   **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
    open the closet and enter R 12 / L 31 / R 7 on the safe's close-up controls, then take the brass box.
    Open it in the satchel with the hand: a
    perfumed, blank calling card and a matchbook from the Blue Lantern.
-4. **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
+4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
+   for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
+   combine them and show the blue carnation at the cold-room grille to be let in.
+   **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
    leaving $11 after both bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
@@ -144,15 +151,23 @@ From here the story follows Walkthrough.md:
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
 20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
-   try Harrington senior.
+   try Harrington senior. Micah decides to look him up at the Tribune.
+    **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
+    bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
+    and pin the mended clipping on the Loop wall map. The Harrington Building replaces the Tribune on the map.
 21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
    back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
    heraldic key; set the false-back lock to STAR / SUN / MOON.
-23. **Club, masked**: through the hall and the lounge, full of masked men and women, to the stage, where Eleanor
-   stands among three masked men. **End of Act Two**: back in the attic, dinner again.
+23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
+   wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
+   matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
+   Post the sealed invitation in the door slot.
+   **Club, masked**: through the hall and the lounge, full of masked men and women (white masks and carved
+   bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf.
+   **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
 25. **Club**: "Are you satisfied, now, mister Jones?" Draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: give up (ending 1), or keep going:
@@ -165,7 +180,11 @@ From here the story follows Walkthrough.md:
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
    tie hammer, release hand; cutting the wire would release the spring. Then open the door.
-30. **Kitchen and study**: optionally take the right drawer's account register and the left drawer's auditor's
+30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
+   door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
+   lantern, light it with the matchbook (kept), use the lit lantern on the dark stair, then climb the
+   bootleggers' stair to the study's bar panel.
+   Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
@@ -180,7 +199,7 @@ From here the story follows Walkthrough.md:
 
 ### Story notes
 
-The core plot, ten puzzles and five endings are unchanged. Sal receives a cash bribe Micah can afford.
+The core plot and five endings are unchanged; the fifteen puzzles include five collect-and-combine locations. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
@@ -214,8 +233,8 @@ Caleb's counsel retains its original wording rather than added exact quotations.
 [Luke 15:17-20](https://drbo.org/chapter/49015.htm); it is not marked as a direct quotation. Ring and cross remain
 reminders, not a bargain with God. Antagonists' threats and the tragic endings are not theological verdicts.
 
-**Scope and length:** Repentance is a compact, single-case adventure: four puzzles in each of the first two acts,
-then an alley encounter, an alarm puzzle and optional evidence in Act Three. Its mostly linear investigation is
+**Scope and length:** Repentance is a compact, single-case adventure: six puzzles in each of the first two acts,
+then an alley encounter, an alarm puzzle, the wine-cellar lantern and optional evidence in Act Three. Its mostly linear investigation is
 closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/) than
 [Kathy Rain (2016)](https://store.steampowered.com/app/370910/), whose published scope includes 40+ environments
 and 4,000+ dialogue lines. [Technobabylon](https://store.steampowered.com/app/307580/) and
@@ -320,6 +339,7 @@ py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 

@@ -45,6 +45,32 @@ class CharacterArtTests(unittest.TestCase):
             self.assertTrue(np.array_equal(idle[31:], talk[31:]),
                             "talking must not move the body or feet")
 
+    def test_club_animal_masks_are_distinct_cloaked_figures(self):
+        plain = Image.open(ART / "sprites" / "masked_man.png").convert("RGBA")
+        npcs = {name: spec for name, spec, *_ in sprites.NPCS}
+        for kind in painter.ANIMAL_MASKS:
+            name = f"masked_{kind}"
+            self.assertIn(name, npcs)
+            self.assertEqual(npcs[name]["mask"][:2], ("animal", kind))
+            self.assertEqual(npcs[name]["hat"], sprites.MASKED_MAN["hat"], "animal masks keep the cowl")
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            self.assertEqual(image.size, plain.size)
+            for column in range(image.width // 56):
+                with self.subTest(mask=kind, column=column):
+                    box = (column * 56, 0, (column + 1) * 56, 96)
+                    frame, base = image.crop(box), plain.crop(box)
+                    self.assertNotEqual(frame.crop((0, 0, 56, 34)).tobytes(), base.crop((0, 0, 56, 34)).tobytes(),
+                                        "the head must show the animal mask")
+                    ys, xs = np.nonzero(np.array(frame.getchannel("A")) > 0)
+                    self.assertGreater(ys.min(), 0, "antlers and ears must not clip at the top")
+                    self.assertGreater(xs.min(), 0)
+                    self.assertLess(xs.max(), 55)
+        for kind in ("stag", "hare"):
+            image = Image.open(ART / "sprites" / f"masked_{kind}.png").convert("RGBA")
+            top = np.nonzero(np.array(image.crop((0, 0, 56, 96)).getchannel("A")) > 0)[0].min()
+            plain_top = np.nonzero(np.array(plain.crop((0, 0, 56, 96)).getchannel("A")) > 0)[0].min()
+            self.assertLess(top, plain_top, f"the {kind}'s crest must rise above the cowl")
+
     def test_player_walk_and_vertical_views_keep_existing_poses(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
                            ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):
@@ -76,7 +102,8 @@ class CharacterArtTests(unittest.TestCase):
         _, shoulder, _, _, ankle, elbow, hand = sprites.REST
         self.assertGreater(elbow[1], shoulder[1])
         self.assertLessEqual(ankle[1] - elbow[1], 2)
-        self.assertEqual(hand[1], ankle[1])
+        self.assertEqual(hand[1], elbow[1])
+        self.assertEqual(hand[1], 91)
         held = Image.open(ART / "sprites" / "micah_supine.png")
         for name in ("micah_collapse", "micah_recover"):
             image = Image.open(ART / "sprites" / f"{name}.png")
@@ -240,12 +267,76 @@ class CharacterArtTests(unittest.TestCase):
 
     def test_ground_contact_does_not_skate(self):
         for joints in sprites.FALL + [sprites.SIT, sprites.CROUCH, sprites.HALF_UP, sprites.KNEEL]:
-            self.assertEqual(tuple(grounded_joints(joints)[4]), (98, 91))
+            ankle = grounded_joints(joints)[4]
+            self.assertEqual(ankle[0], 98)
+            if joints == sprites.REST:
+                self.assertEqual(ankle[1], 83)
+                self.assertEqual(grounded_joints(joints)[6][1], 91)
+            else:
+                self.assertEqual(ankle[1], 91)
+
+    def test_grounded_bodies_are_completely_horizontal(self):
+        for joints in (sprites.REST, sprites.HARRINGTON_PRONE):
+            hip, shoulder, head, knee, ankle, _, _ = grounded_joints(joints)
+            self.assertEqual({point[1] for point in (hip, shoulder, head, knee, ankle)}, {83})
+
+    def test_harrington_drops_to_knees_then_holds_the_same_face_down_frame(self):
+        clip = json.loads((ART / "sprites" / "harrington_fall.json").read_text())
+        image = Image.open(ART / "sprites" / "harrington_fall.png")
+        width, height = clip["width"], clip["height"]
+        standing = image.crop(((width - 56) // 2, 0, (width + 56) // 2, height))
+        normal = Image.open(ART / "sprites" / "harrington_gown.png").crop((0, 0, 56, 96))
+        self.assertEqual(standing.tobytes(), normal.tobytes(), "start without an idle-pose jump")
+        self.assertGreater(clip["frames"][1]["head"][1], clip["frames"][0]["head"][1])
+        self.assertGreaterEqual(clip["frames"][1]["seconds"], 0.3, "hold the kneeling stage")
+        final = image.crop((image.width - width, 0, image.width, height))
+        self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "harrington_shot.png").tobytes())
+        self.assertGreater(sprites.HARRINGTON_PRONE[2][0], sprites.HARRINGTON_PRONE[1][0],
+                           "right-facing head rotated downward toward the floor")
+
+    def test_door_reach_is_the_idle_pose_then_an_extended_arm(self):
+        for name, spec, yaw in (("micah_open_door", sprites.MICAH, sprites.PLAYER_IDLE_YAW),
+                                ("teddy_open_door", sprites.TEDDY, 35),
+                                ("rose_open_door", sprites.ROSE, 20)):
+            clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            width, height = clip["width"], clip["height"]
+            frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(4)]
+            expected = sprites.figure(spec, sprites.pose(yaw), width, height)
+            self.assertEqual(frames[0].tobytes(), expected.tobytes(), name)
+            self.assertEqual(frames[3].tobytes(), frames[0].tobytes(), name)
+            idle_right = np.nonzero(np.array(frames[0].getchannel("A")) >= 250)[1].max()
+            reach_right = np.nonzero(np.array(frames[1].getchannel("A")) >= 250)[1].max()
+            self.assertGreater(reach_right, idle_right + 6, name)
+            self.assertNotEqual(frames[1].tobytes(), frames[2].tobytes(), name)
+
+    def test_harrington_fall_topples_without_leaving_the_frame(self):
+        clip = json.loads((ART / "sprites" / "harrington_fall.json").read_text())
+        image = Image.open(ART / "sprites" / "harrington_fall.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        self.assertGreater(width, 64)
+        spans = []
+        for index in range(len(clip["frames"])):
+            frame = image.crop((index * width, 0, (index + 1) * width, height))
+            ys, xs = np.nonzero(np.array(frame.getchannel("A")) >= 250)
+            spans.append(int(xs.max() - xs.min()))
+            self.assertGreater(xs.min(), 0)
+            self.assertLess(xs.max(), width - 1)
+        self.assertGreater(spans[-1], spans[0] + 12, "the last frame should be the body gone over")
 
     def test_kneeling_rise_starts_from_the_actual_held_pose(self):
         held = Image.open(ART / "sprites" / "micah_kneel.png")
         rise = Image.open(ART / "sprites" / "micah_kneel_rise.png")
         self.assertEqual(held.tobytes(), rise.crop((0, 0, *held.size)).tobytes())
+
+    def test_motel_sleeper_stays_painted_in_the_bed(self):
+        source = (ROOT / "scripts" / "Rooms" / "MotelNight.cs").read_text(encoding="utf-8")
+        self.assertNotIn("eleanor_sheet_rise", source)
+        self.assertNotIn("eleanor_bed_turn", source)
+        night = np.array(Image.open(ART / "rooms" / "motel_night.png").convert("RGB"))
+        rails = np.array(Image.open(ART / "rooms" / "motel_night_rails.png").convert("RGB"))
+        pillow = np.abs(night[140:175, 90:150].astype(int) - rails[140:175, 90:150].astype(int)).sum()
+        self.assertGreater(pillow, 400, "the painted sleeper is missing from the pillow")
 
     def test_motel_foreground_is_a_transparent_rail_layer(self):
         rails = Image.open(ART / "rooms" / "motel_night_rails.png")

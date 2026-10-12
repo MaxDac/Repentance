@@ -169,8 +169,11 @@ def paint_rose(opened=False):
     railings(d, 464, W - 1, 202, 214)
     # pavement and kerb
     vgrad(img, (0, 214, W - 1, 256), hx("6a6660"), hx("4e4a46"))
-    for x in range(-40, W + 40, 40):
-        d.line([(x, 214), (x - 24, 256)], fill=hx("3e3a36"))
+    for i, x in enumerate(range(-40, W + 40, 40)):
+        shift = (i % 3 - 1) * 6
+        d.line([(x + shift, 214), (x - 24 + shift, 256)], fill=hx("3e3a36"))
+        if i % 4 == 0:
+            d.line([(x + 8, 230), (x + 22, 244)], fill=hx("2e2c28"))
     for y in (226, 240):
         d.line([(0, y), (W, y)], fill=hx("44403c"))
     d.rectangle([0, 256, W - 1, 260], fill=hx("8a8680"))
@@ -293,6 +296,15 @@ def paint_road(fire=False, stacked=False, freed=False):
                 continue
             d.rectangle([x - 2, fy - 3, x + 24, fy + 61], fill=hx("52443e"))
             d.rectangle([x, fy, x + 22, fy + 58], fill=hx("12141e"))
+            kind = (x // 46 + fy // 28) % 3
+            if kind == 0:
+                d.rectangle([x + 1, fy + 1, x + 21, fy + 16], fill=hx("2a241c"))
+                d.line([(x + 1, fy + 16), (x + 21, fy + 16)], fill=hx("4a4036"))
+            elif kind == 1:
+                d.polygon([(x + 8, fy + 36), (x + 14, fy + 36), (x + 15, fy + 44), (x + 7, fy + 44)], fill=hx("3a3024"))
+                d.point((x + 11, fy + 40), fill=hx("6a5844"))
+            else:
+                d.line([(x + 3, fy + 8), (x + 18, fy + 48)], fill=hx("1a1c28"))
             d.line([(x + 11, fy), (x + 11, fy + 58)], fill=hx("383c46"))
             d.line([(x, fy + 28), (x + 22, fy + 28)], fill=hx("383c46"))
             d.rectangle([x - 3, fy + 59, x + 25, fy + 62], fill=hx("74645a"))
@@ -635,7 +647,8 @@ def _bed_figures(sD, sW):
     b = figure(wife, pose(0, arms={1: ("swing", 2, 4, 6), -1: ("swing", 2, 4, 6)}), int(hW * 0.6), int(hW * 1.1))
     b.putalpha(b.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     bb = b.getbbox()
-    b = b.crop((bb[0], bb[1], bb[2], int(bb[1] + 0.3 * hW))).rotate(90, expand=True)
+    # head, neck and the near shoulder; the quilt covers everything below that
+    b = b.crop((bb[0], bb[1], bb[2], int(bb[1] + 0.64 * hW))).rotate(90, expand=True)
     return a, hand, b
 
 
@@ -788,7 +801,7 @@ def paint_bedroom():
     wife_head = (int(hp[0] + wife.width * 0.3), wpos[1])
 
     # ---- the quilt: a height field over the two of them, its top edge folded back under her chin ----
-    QX0, QX1 = X0 + 23, X1 + 1.5
+    QX0, QX1 = X0 + 36, X1 + 1.5
 
     def hgt(x, z):
         h = TOP_ + 1.5

@@ -241,8 +241,8 @@ DisplayName = "revolving door"
 LookText = "Out to State Street. It's raining. It's always raining."
 WalkTo = Vector2(434, 182)
 Face = 2
-ExitTo = "speakeasy"
-ExitEntry = "door"
+ExitTo = "blue_lantern_front"
+ExitEntry = "street"
 monitoring = false
 monitorable = false
 

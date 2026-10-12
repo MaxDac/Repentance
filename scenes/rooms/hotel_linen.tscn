@@ -1,0 +1,195 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/HotelLinen.cs" id="1_HotelLinen"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/hotel_linen.png" id="2_hotel_linen"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/hotel_linen_hanger.png" id="5_hanger"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/hotel_linen_pliers.png" id="6_pliers"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/hotel_linen_door_open.png" id="7_door_open"]
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(78, 108)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(96, 116)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(90, 96)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(68, 50)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(40, 32)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(56, 120)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(20, 14)
+
+[node name="HotelLinen" type="Node2D"]
+script = ExtResource("1_HotelLinen")
+RoomName = "The Aurelian - Fifth Floor Linen Room"
+FarY = 186
+NearY = 262
+FarScale = 0.86
+NearScale = 1.08
+PlayerCharacter = "micah"
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_hotel_linen")
+centered = false
+
+[node name="Hanger" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(275, 77)
+texture = ExtResource("5_hanger")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "took_hanger"
+
+[node name="Pliers" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(334, 136)
+texture = ExtResource("6_pliers")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "took_pliers"
+
+[node name="PliersReturned" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(334, 136)
+texture = ExtResource("6_pliers")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "made_wire_hook"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(369, 58)
+texture = ExtResource("7_door_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "linen_door_open"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(6, 262, 474, 262, 474, 186, 6, 186)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="lift" type="Marker2D" parent="Entries"]
+position = Vector2(52, 196)
+metadata/facing = 1
+
+[node name="corridor" type="Marker2D" parent="Entries"]
+position = Vector2(421, 196)
+metadata/facing = 1
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Lift" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lift"
+DisplayName = "staff elevator"
+LookText = "The staff cage. Down to the lobby, by way of every creak in the building."
+WalkTo = Vector2(52, 190)
+Face = 2
+ExitTo = "lobby"
+ExitEntry = "eleanor_room"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lift"]
+position = Vector2(50, 122)
+shape = SubResource("Rect_1")
+
+[node name="Shelves" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "shelves"
+DisplayName = "linen shelves"
+LookText = "Sheets folded square as a drill sergeant's conscience. Nothing up here but starch."
+WalkTo = Vector2(148, 192)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Shelves"]
+position = Vector2(148, 116)
+shape = SubResource("Rect_2")
+
+[node name="Rack" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "rack"
+DisplayName = "laundry rack"
+LookText = "Maids' uniforms on wire hangers, pressed and waiting. One hanger's hanging empty."
+WalkTo = Vector2(250, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Rack"]
+position = Vector2(250, 128)
+shape = SubResource("Rect_3")
+
+[node name="Cart" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cart"
+DisplayName = "housekeeping cart"
+LookText = "Towels, soap, a toolkit for the radiators. Somebody left a pair of pliers on the tray."
+WalkTo = Vector2(332, 198)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cart"]
+position = Vector2(332, 154)
+shape = SubResource("Rect_4")
+
+[node name="Chute" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "chute"
+DisplayName = "laundry chute"
+LookText = "Straight down to the basement laundry. Too narrow for a man, just right for evidence."
+WalkTo = Vector2(349, 192)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Chute"]
+position = Vector2(349, 85)
+shape = SubResource("Rect_5")
+
+[node name="CorridorDoor" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "corridor_door"
+DisplayName = "corridor door"
+LookText = "Night bolt on the far side. The transom's cracked open an inch – a hook could reach it."
+WalkTo = Vector2(421, 192)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/CorridorDoor"]
+position = Vector2(421, 118)
+shape = SubResource("Rect_6")
+
+[node name="Bulb" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bulb"
+DisplayName = "bare bulb"
+LookText = "Forty watts. The Aurelian spends its money where the guests can see it."
+WalkTo = Vector2(254, 196)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bulb"]
+position = Vector2(254, 38)
+shape = SubResource("Rect_7")

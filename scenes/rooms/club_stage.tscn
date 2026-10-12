@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ClubStage.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_stage.png" id="2_club_stage"]
@@ -6,6 +6,11 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_stage_clothed.png" id="91_eleanor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_man.png" id="93_masked_man"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_stag.png" id="96_masked_stag"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_boar.png" id="97_masked_boar"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_wolf.png" id="98_masked_wolf"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_bear.png" id="99_masked_bear"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/masked_raven.png" id="100_masked_raven"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman.png" id="94_masked_woman"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/masked_woman_b.png" id="95_masked_woman_b"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/brute.png" id="92_brute"]
@@ -129,11 +134,11 @@ SpeechColor = Color(0.96, 0.78, 0.62, 1)
 position = Vector2(290, 176)
 script = ExtResource("90_Actor")
 Id = "leader"
-DisplayName = "masked man"
-LookText = "One of the three around her. He stands half a step closer than the other two, like a man who owns the stage."
+DisplayName = "stag-masked man"
+LookText = "One of the three around her. A stag's face of pale bone, antlers climbing out of his cowl. He stands half a step closer than the other two, like a man who owns the stage."
 monitoring = false
 monitorable = false
-Texture = ExtResource("93_masked_man")
+Texture = ExtResource("96_masked_stag")
 FlipH = true
 SpeechColor = Color(0.9, 0.9, 0.94, 1)
 
@@ -141,22 +146,22 @@ SpeechColor = Color(0.9, 0.9, 0.94, 1)
 position = Vector2(198, 176)
 script = ExtResource("90_Actor")
 Id = "ritual1"
-DisplayName = "masked man"
-LookText = "A masked man at Eleanor's side, still as a statue in a churchyard."
+DisplayName = "boar-masked man"
+LookText = "A boar's face of dark wood, tusks and bristles and all, at Eleanor's side. Still as a statue in a churchyard."
 monitoring = false
 monitorable = false
-Texture = ExtResource("93_masked_man")
+Texture = ExtResource("97_masked_boar")
 SpeechColor = Color(0.82, 0.82, 0.86, 1)
 
 [node name="Ritual2" type="Area2D" parent="World"]
 position = Vector2(250, 160)
 script = ExtResource("90_Actor")
 Id = "ritual2"
-DisplayName = "masked man"
-LookText = "A masked man behind her, in the edge of the light."
+DisplayName = "wolf-masked man"
+LookText = "A grey wolf's face behind her, ears pricked, at the edge of the light."
 monitoring = false
 monitorable = false
-Texture = ExtResource("93_masked_man")
+Texture = ExtResource("98_masked_wolf")
 FlipH = true
 SpeechColor = Color(0.82, 0.82, 0.86, 1)
 
@@ -176,10 +181,10 @@ position = Vector2(156, 242)
 script = ExtResource("90_Actor")
 Id = "audience"
 DisplayName = "masked guest"
-LookText = "A man in a black cloak and a white mask. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
+LookText = "A man in a black cloak and a bear's face carved in dark wood. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
 monitoring = false
 monitorable = false
-Texture = ExtResource("93_masked_man")
+Texture = ExtResource("99_masked_bear")
 SpeechColor = Color(0.82, 0.82, 0.86, 1)
 
 [node name="Aud3" type="Area2D" parent="World"]
@@ -211,10 +216,10 @@ position = Vector2(404, 240)
 script = ExtResource("90_Actor")
 Id = "audience"
 DisplayName = "masked guest"
-LookText = "A man in a black cloak and a white mask. Under the mask, a banker or a judge or an alderman. Under the cloak, the same suit as always."
+LookText = "A man in a black cloak and a raven's beak of yellowed bone. He watches the room like a bird waiting on a battlefield."
 monitoring = false
 monitorable = false
-Texture = ExtResource("93_masked_man")
+Texture = ExtResource("100_masked_raven")
 FlipH = true
 SpeechColor = Color(0.82, 0.82, 0.86, 1)
 

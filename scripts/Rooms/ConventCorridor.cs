@@ -88,6 +88,7 @@ public partial class ConventCorridor : Room
                 Player.SetPose(null);
                 await Say("...");
                 await Say("(I put the revolver away. My hand was shaking. It never used to.)");
+                await Say("Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's name - I'd start there.");
                 await LeaveToMap();
                 return true;
             case ("cell_door", Verb.Walk or Verb.Hand):

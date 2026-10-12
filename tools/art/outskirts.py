@@ -24,15 +24,15 @@ def sky(img):
     noise(img, (0, 0, W - 1, HORIZON + 18), 4, 301)
 
 
-def skyline(img, x0=170, y_base=HORIZON + 2, width=110, seed=19):
+def skyline(img, x0=128, y_base=HORIZON + 2, width=168, seed=19):
     d = ImageDraw.Draw(img)
     rnd = random.Random(seed)
     haze = hx("7d7a78")
     d.rectangle([x0 - 8, y_base - 2, x0 + width + 8, y_base + 3], fill=mix(haze, hx("8e876e"), 0.25))
     x = x0
     while x < x0 + width:
-        bw = rnd.randint(3, 9)
-        bh = rnd.randint(6, 18)
+        bw = rnd.randint(6, 16)
+        bh = rnd.randint(12, 36)
         top = y_base - bh
         col = rnd.choice([hx("48484e"), hx("3d3f46"), hx("55535a")])
         d.rectangle([x, top, min(x0 + width, x + bw), y_base], fill=col)
@@ -91,9 +91,10 @@ def hedge(img, seed=41):
         y = rnd.randint(138, 196)
         if 214 < x < 302 and y < 170:
             continue
-        r = rnd.randint(2, 5)
+        r = rnd.randint(3, 8)
         col = rnd.choice([hx("314b2b"), hx("3b582f"), hx("243a22"), hx("4a6338")])
-        d.ellipse([x - r, y - r, x + r, y + r], fill=col)
+        d.ellipse([x - r, y - r, x + r, y + int(r * 0.4)], fill=col)
+        d.ellipse([x - r + 1, y - r + 1, x + r - 2, y - 1], fill=mul(col, 1.15))
     for x in range(18, W, 34):
         top = 146 + rnd.randint(-8, 5)
         d.line([(x, 190), (x + rnd.randint(-2, 2), top)], fill=hx("1f2919"))
