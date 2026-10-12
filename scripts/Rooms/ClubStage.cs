@@ -49,8 +49,8 @@ public partial class ClubStage : Room
         Player.Face(Facing.Up);
         await Wait(0.8);
         await Say(Game.Settings.NudityEnabled
-            ? "And in the light, Eleanor. No mask. Not a stitch on her, and no fear in her face either. Three of them around her, like pall-bearers."
-            : "And in the light, Eleanor. No mask, and no fear in her face. Three of them around her, like pall-bearers.");
+            ? "And in the light, Eleanor. No mask. Not a stitch on her, and no fear in her face either. Three of them around her, like pall-bearers: a stag, a boar and a wolf."
+            : "And in the light, Eleanor. No mask, and no fear in her face. Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
         await Say("She wasn't a prisoner. Or she was, and she'd stopped minding. I couldn't tell which was worse.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);
@@ -69,7 +69,7 @@ public partial class ClubStage : Room
             if (child is Actor a && a.Id != "brute" && a.Visible)
                 a.FaceLeft(a.Position.X > Player.Position.X);
         await Wait(1.6);
-        await Say("Every mask in the room, turned my way. White, blank, and all of them smiling.");
+        await Say("Every mask in the room, turned my way. White porcelain and carved bone, antlers, tusks and beaks, and all of them smiling.");
         await Talk("club_caught");
         State.SetFlag("brute_stage");
         if (FindActor("brute") is { } brute)
