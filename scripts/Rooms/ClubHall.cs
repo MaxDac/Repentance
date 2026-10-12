@@ -66,7 +66,7 @@ public partial class ClubHall : Room
             case ("moc", Verb.UseItem) when item == "revolver":
                 await Say("A gun in here would be the last thing I ever pulled. They have a lot more members than I have bullets.");
                 return true;
-            case ("moc", Verb.UseItem) when item == "invitation":
+            case ("moc", Verb.UseItem) when item == "sealed_invitation":
                 await Say("moc", "Yes, yes, brother. I have seen it. Go through.");
                 return true;
             case ("moc" or "brute" or "guest", Verb.Hand or Verb.Kick):

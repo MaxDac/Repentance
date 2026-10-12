@@ -73,11 +73,11 @@ y_sort_enabled = true
 script = ExtResource("3_Hotspot")
 Id = "door"
 DisplayName = "steel door"
-LookText = "The way back to State Street. And to the rain."
+LookText = "The way back out through Rizzo's cold room. And to the rain."
 WalkTo = Vector2(48, 176)
 Face = 2
-ExitTo = "street"
-ExitEntry = "lobby"
+ExitTo = "blue_lantern_front"
+ExitEntry = "speakeasy"
 monitoring = false
 monitorable = false
 

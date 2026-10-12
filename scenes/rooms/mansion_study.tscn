@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionStudy.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_study.png" id="2_bg"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_study_drawer_right.png" id="11_mansion_study_drawer_right"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_study_drawer_empty.png" id="12_mansion_study_drawer_empty"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_study_closet.png" id="13_mansion_study_closet"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_study_hatch.png" id="14_mansion_study_hatch"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(50, 118)
@@ -33,6 +34,9 @@ size = Vector2(78, 182)
 [sub_resource type="RectangleShape2D" id="Rect_8"]
 size = Vector2(74, 90)
 
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(72, 42)
+
 [node name="MansionStudy" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Harrington's Study"
@@ -56,6 +60,10 @@ polygon = PackedVector2Array(0, 208, 479, 208, 479, 269, 0, 269)
 [node name="start" type="Marker2D" parent="Entries"]
 position = Vector2(44, 228)
 metadata/facing = 4
+
+[node name="cellar" type="Marker2D" parent="Entries"]
+position = Vector2(381, 228)
+metadata/facing = 3
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -177,6 +185,20 @@ monitorable = false
 position = Vector2(281.0, 74.0)
 shape = SubResource("Rect_8")
 
+[node name="BarPanel" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bar_panel"
+DisplayName = "drinks cabinet"
+LookText = "A drinks cabinet. Decanters, soda siphon, a lock nobody bothers with."
+WalkTo = Vector2(381, 224)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/BarPanel"]
+position = Vector2(381.0, 186.0)
+shape = SubResource("Rect_9")
+
 [node name="DrawerLeft" type="Sprite2D" parent="."]
 z_index = -9
 position = Vector2(218, 181)
@@ -209,3 +231,11 @@ texture = ExtResource("13_mansion_study_closet")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "study_closet_open"
+
+[node name="BarHatch" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(337, 166)
+texture = ExtResource("14_mansion_study_hatch")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "cellar_lit"

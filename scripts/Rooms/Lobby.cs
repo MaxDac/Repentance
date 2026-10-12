@@ -51,8 +51,8 @@ public partial class Lobby : Room
                     if (!await Game.Hud.Puzzle.Open(PuzzleKind.Lift)) return true;
                     State.SetFlag("lift_routed");
                 }
-                await Say("Staff elevator. Fifth floor, room 507. Nobody looks twice at a man who uses the back door.");
-                await Game.ChangeRoom("eleanor_room", "lobby");
+                await Say("Staff elevator. Fifth floor, the linen room next to 507. Nobody looks twice at a man who uses the back door.");
+                await Game.ChangeRoom("hotel_linen", "lift");
                 return true;
             case ("service_door", Verb.Walk or Verb.Hand):
                 await Say("Staff only. And the concierge is watching it like it owes him money.");
