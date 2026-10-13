@@ -445,6 +445,8 @@ def build():
     build_drinking()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
+    # Rose on her doorstep, square to the camera once the door is open
+    npc_strip(ROSE, "rose_front", _arms("fold"), phi=0)
     build_act3()
 
 

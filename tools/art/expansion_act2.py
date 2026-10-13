@@ -74,6 +74,136 @@ def _loop_map(d, img, pin):
     text(img, (279, 130), "THE LOOP", hx("2a2010"), size=8)
 
 
+SPIKE_X = 314
+DESK_Y = 156  # top of the layout desk: about belt height on Micah standing in front of it
+
+
+def _sheet(d, x0, y, col, edge="6a6050"):
+    """A sheet of copy stuck flat on the spike, a little askew, typed lines across it and the hole the spike made."""
+    d.polygon([(x0, y), (x0 + 21, y - 2), (x0 + 22, y + 4), (x0 + 1, y + 6)], fill=hx(col), outline=hx(edge))
+    for k in (2, 4):
+        d.line([(x0 + 3, y + k), (x0 + 8, y + k - 1)], fill=hx("8a8270"))
+        d.line([(x0 + 13, y + k - 1), (x0 + 19, y + k - 2)], fill=hx("8a8270"))
+    d.point((SPIKE_X, y + 1), fill=hx("2a2a24"))
+
+
+def _spike_stand(d, taken):
+    sx = SPIKE_X
+    # a small oak stand, lit along its front edge, the wastebasket underneath
+    d.rectangle([292, 150, 340, 156], fill=hx("5a3c24"), outline=hx("1e1208"))
+    d.line([(293, 151), (339, 151)], fill=hx("7a5634"))
+    d.line([(293, 155), (339, 155)], fill=hx("3a2614"))
+    for lx in (296, 332):
+        d.rectangle([lx, 156, lx + 4, FLOOR + 4], fill=hx("3a2614"), outline=hx("1e1208"))
+        d.line([(lx + 1, 157), (lx + 1, FLOOR + 3)], fill=hx("5a3c24"))
+    d.polygon([(304, 166), (328, 166), (325, FLOOR + 6), (307, FLOOR + 6)], fill=hx("4a4a42"), outline=hx("1a1a14"))
+    d.line([(304, 167), (328, 167)], fill=hx("6a6a60"))
+    for x in range(308, 326, 4):
+        d.line([(x, 169), (x, FLOOR + 4)], fill=hx("2e2e28"))
+    d.ellipse([306, 160, 316, 168], fill=hx("c8c0a8"), outline=hx("6a6050"))
+    d.ellipse([314, 162, 324, 169], fill=hx("b8b098"), outline=hx("5a5242"))
+    # the spike: a cast-iron foot, a steel collar, and a needle of polished steel lit on the lamp side
+    d.ellipse([302, 144, 326, 153], fill=hx("1a1a18"), outline=hx("0a0a08"))
+    d.ellipse([305, 144, 323, 149], fill=hx("3a3a36"))
+    d.arc([305, 144, 323, 149], 190, 290, fill=hx("7a7a72"))
+    d.rectangle([sx - 2, 140, sx + 3, 145], fill=hx("5a5a54"), outline=hx("1a1a18"))
+    d.line([(sx - 1, 141), (sx - 1, 144)], fill=hx("9a9a92"))
+    d.line([(sx, 140), (sx, 102)], fill=hx("d4d4cc"))
+    d.line([(sx + 1, 140), (sx + 1, 104)], fill=hx("5a5a54"))
+    d.point((sx, 101), fill=hx("a8a8a0"))
+    d.point((sx, 100), fill=hx("f4f4ec"))
+    # dead copy, rammed down to the foot
+    for y, x0, c in ((136, 303, "c0b89c"), (132, 304, "d0c8ae"), (128, 303, "c8c0a8")):
+        _sheet(d, x0, y, c)
+    if taken:
+        return
+    # the torn bottom half of the Harrington clipping on top: ragged edge up, the photo caption, the address line
+    x0, y = 304, 123
+    d.polygon([(x0, y), (x0 + 21, y - 2), (x0 + 22, y + 5), (x0 + 1, y + 7)], fill=hx("ece4cc"), outline=hx("8a8270"))
+    for i, tx in enumerate(range(x0 + 1, x0 + 21, 2)):
+        d.point((tx, round(y - 2 * (tx - x0) / 21) - 1 - (i % 2)), fill=hx("ece4cc"))
+    d.rectangle([x0 + 3, y + 1, x0 + 8, y + 4], fill=hx("6a6458"))
+    d.line([(x0 + 4, y + 2), (x0 + 7, y + 2)], fill=hx("9a9282"))
+    d.line([(x0 + 10, y + 1), (x0 + 19, y)], fill=hx("2a2a2a"))
+    d.line([(x0 + 10, y + 3), (x0 + 18, y + 2)], fill=hx("6a6252"))
+    d.line([(x0 + 3, y + 6), (x0 + 18, y + 4)], fill=hx("8a8270"))
+    d.point((sx, y + 2), fill=hx("2a2a24"))
+
+
+def _layout_desk(d, paste):
+    y = DESK_Y
+    # the top, seen a little from above, a lit front edge, a shallow drawer, and a stretcher between the legs
+    d.rectangle([344, y - 4, 464, y], fill=hx("7a5634"))
+    d.line([(344, y - 4), (464, y - 4)], fill=hx("8e6a42"))
+    d.rectangle([342, y, 466, y + 5], fill=hx("6a4a2a"), outline=hx("1e1208"))
+    d.line([(343, y + 1), (465, y + 1)], fill=hx("8a643a"))
+    for lx in (348, 454):
+        d.rectangle([lx, y + 5, lx + 6, FLOOR + 6], fill=hx("4a3018"), outline=hx("1e1208"))
+        d.line([(lx + 1, y + 6), (lx + 1, FLOOR + 5)], fill=hx("6a4a2a"))
+    d.rectangle([388, y + 5, 428, y + 13], fill=hx("5a3c22"), outline=hx("1e1208"))
+    d.rectangle([404, y + 8, 412, y + 10], fill=hx("a08a40"), outline=hx("4a3a14"))
+    d.rectangle([354, y + 26, 454, y + 29], fill=hx("4a3018"), outline=hx("2a1a0c"))
+    # tomorrow's dummy pages, pasted up in columns
+    for x0 in (374, 402):
+        d.polygon([(x0 + 2, y - 5), (x0 + 25, y - 5), (x0 + 24, y - 1), (x0, y - 1)], fill=hx("e4dcc4"),
+                  outline=hx("8a8270"))
+        d.line([(x0 + 3, y - 4), (x0 + 22, y - 4)], fill=hx("3a3a34"))
+        for gx in range(x0 + 4, x0 + 23, 5):
+            d.line([(gx, y - 3), (gx - 1, y - 2)], fill=hx("8a8270"))
+    # gooseneck lamp: weighted foot, a brass-jointed arm, a green enamel shade tipped over the pages
+    bx = 360
+    d.ellipse([bx - 8, y - 6, bx + 8, y - 1], fill=hx("1a2e1c"), outline=hx("0a140a"))
+    d.ellipse([bx - 6, y - 6, bx + 6, y - 3], fill=hx("2e4e30"))
+    d.point((bx - 3, y - 5), fill=hx("7aaa7a"))
+    d.rectangle([bx + 4, y - 5, bx + 5, y - 4], fill=hx("a08a40"))
+    d.line([(bx, y - 6), (bx, y - 22)], fill=hx("b09a50"))
+    d.line([(bx + 1, y - 6), (bx + 1, y - 22)], fill=hx("4a3a14"))
+    d.ellipse([bx - 2, y - 26, bx + 3, y - 21], fill=hx("a08a40"), outline=hx("3a2a0c"))
+    d.line([(bx + 2, y - 25), (bx + 14, y - 35)], fill=hx("c8b060"))
+    d.line([(bx + 3, y - 24), (bx + 15, y - 34)], fill=hx("4a3a14"))
+    d.ellipse([bx + 13, y - 38, bx + 18, y - 33], fill=hx("a08a40"), outline=hx("3a2a0c"))
+    sx = bx + 16
+    d.polygon([(sx - 4, y - 37), (sx + 4, y - 37), (sx + 11, y - 25), (sx - 11, y - 25)], fill=hx("2a5a2e"),
+              outline=hx("0e1e10"))
+    d.line([(sx - 3, y - 36), (sx - 9, y - 26)], fill=hx("6a9a68"))
+    d.line([(sx + 3, y - 36), (sx + 9, y - 26)], fill=hx("1a3a1e"))
+    d.ellipse([sx - 5, y - 40, sx + 5, y - 35], fill=hx("1e3e22"), outline=hx("0e1e10"))
+    d.point((sx, y - 41), fill=hx("c8b060"))
+    d.line([(sx - 11, y - 25), (sx + 11, y - 25)], fill=hx("0e1e10"))
+    d.ellipse([sx - 10, y - 26, sx + 10, y - 22], fill=hx("e8dcb0"))
+    d.ellipse([sx - 3, y - 25, sx + 3, y - 21], fill=hx("fff4cc"))
+    # the paste pot at the end, brush standing in it
+    if paste:
+        d.ellipse([428, y - 3, 446, y + 1], fill=hx("5a3e22"))
+        return
+    d.rectangle([428, y - 14, 446, y], fill=hx("e8e4d8"), outline=hx("4a4a44"))
+    d.rectangle([428, y - 10, 446, y - 6], fill=hx("6a2a2a"))
+    d.line([(430, y - 9), (444, y - 9)], fill=hx("8a4a3a"))
+    d.ellipse([428, y - 17, 446, y - 11], fill=hx("f0ecdc"), outline=hx("4a4a44"))
+    d.line([(440, y - 14), (446, y - 28)], fill=hx("8a6a3a"), width=2)
+    d.rectangle([438, y - 16, 442, y - 13], fill=hx("c8c0a0"))
+
+
+def _ceiling_lamp(d):
+    """Enamel dome on a chain from a ceiling rose: brass socket, white underside, a bare bulb glowing in it."""
+    cx = 250
+    d.rectangle([cx - 5, 10, cx + 5, 13], fill=hx("3a3a30"), outline=hx("14140e"))
+    for y in range(14, 21):
+        d.point((cx, y), fill=hx("8a8a70") if y % 2 else hx("2a2a20"))
+        d.point((cx + 1, y), fill=hx("4a4a3a") if y % 2 else hx("1a1a14"))
+    d.rectangle([cx - 3, 20, cx + 4, 24], fill=hx("a08a40"), outline=hx("4a3a14"))
+    d.line([(cx - 2, 21), (cx - 2, 23)], fill=hx("e0c870"))
+    d.polygon([(cx - 6, 24), (cx + 7, 24), (cx + 16, 32), (cx + 22, 36), (cx - 21, 36), (cx - 15, 32)],
+              fill=hx("2a5a2e"), outline=hx("0e1e10"))
+    d.line([(cx - 5, 25), (cx - 16, 33)], fill=hx("7aaa78"))
+    d.line([(cx - 4, 25), (cx - 13, 32)], fill=hx("4a7a4a"))
+    d.line([(cx + 7, 25), (cx + 18, 34)], fill=hx("1a3a1e"))
+    d.line([(cx - 21, 36), (cx + 22, 36)], fill=hx("c8b060"))
+    d.ellipse([cx - 19, 35, cx + 20, 41], fill=hx("e8dcb0"), outline=hx("8a7a50"))
+    d.ellipse([cx - 5, 35, cx + 6, 43], fill=hx("fff4cc"), outline=hx("e0c070"))
+    d.point((cx - 2, 37), fill=hx("ffffff"))
+
+
 def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -116,51 +246,12 @@ def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
     for y in (85, 88):
         d.line([(180, y), (204, y)], fill=hx("6a6050"))
     _loop_map(d, img, pin)
-    # copy spike on a low stand, the wastebasket underneath
-    d.rectangle([292, 150, 340, 155], fill=hx("5a3c24"), outline=hx("1e1208"))
-    d.rectangle([296, 155, 300, FLOOR + 4], fill=hx("3a2614"))
-    d.rectangle([332, 155, 336, FLOOR + 4], fill=hx("3a2614"))
-    d.ellipse([306, 146, 322, 152], fill=hx("2a2a2a"))
-    d.line([(314, 148), (314, 116)], fill=hx("9a9a90"))
-    papers = [(140, "c8c0a8"), (136, "d8d0b8"), (132, "c0b89c")]
-    if not spike:
-        papers += [(126, "ece4cc")]
-    for y, c in papers:
-        d.polygon([(306, y), (322, y - 2), (323, y + 4), (305, y + 6)], fill=hx(c), outline=hx("6a6050"))
-    if not spike:
-        # the torn lower half of a clipping, ragged edge up
-        for i, tx in enumerate(range(306, 323, 3)):
-            d.line([(tx, 125 - (i % 2)), (tx + 2, 126)], fill=hx("ece4cc"))
-        d.line([(308, 129), (320, 128)], fill=hx("4a4a44"))
-    d.polygon([(304, 166), (328, 166), (325, FLOOR + 6), (307, FLOOR + 6)], fill=hx("4a4a42"), outline=hx("1a1a14"))
-    for x in range(308, 326, 4):
-        d.line([(x, 168), (x, FLOOR + 4)], fill=hx("2e2e28"))
-    d.ellipse([306, 160, 316, 168], fill=hx("c8c0a8"))
-    d.ellipse([314, 162, 324, 169], fill=hx("b8b098"))
-    # the layout desk: dummy pages pasted up, a gooseneck lamp, the paste pot at the end
-    d.rectangle([346, 138, 462, 146], fill=hx("6a4a2a"), outline=hx("1e1208"))
-    d.rectangle([350, 146, 356, FLOOR + 6], fill=hx("4a3018"))
-    d.rectangle([452, 146, 458, FLOOR + 6], fill=hx("4a3018"))
-    d.rectangle([356, 160, 452, 164], fill=hx("4a3018"))
-    for x0 in (366, 392):
-        d.rectangle([x0, 132, x0 + 22, 138], fill=hx("e4dcc4"), outline=hx("8a8270"))
-        for gx in range(x0 + 3, x0 + 22, 5):
-            d.line([(gx, 133), (gx, 137)], fill=hx("8a8270"))
-    d.line([(360, 138), (360, 116), (372, 108)], fill=hx("2a3a2a"), width=2)
-    d.polygon([(368, 104), (380, 104), (384, 114), (364, 114)], fill=hx("2a4a2a"))
-    if paste:
-        d.ellipse([428, 135, 446, 139], fill=hx("5a3e22"))
-    else:
-        d.rectangle([428, 124, 446, 138], fill=hx("e8e4d8"), outline=hx("4a4a44"))
-        d.rectangle([428, 128, 446, 132], fill=hx("6a2a2a"))
-        d.ellipse([428, 121, 446, 127], fill=hx("f0ecdc"), outline=hx("4a4a44"))
-        d.line([(440, 124), (446, 110)], fill=hx("8a6a3a"), width=2)
-        d.rectangle([438, 122, 442, 125], fill=hx("c8c0a0"))
-    # a green shaded lamp over the room
-    d.line([(250, 0), (250, 24)], fill=hx("1a1a14"))
-    d.polygon([(240, 24), (260, 24), (268, 32), (232, 32)], fill=hx("2a4a2a"))
-    light(img, "polygon", [(232, 32), (268, 32), (420, H - 1), (80, H - 1)], hx("c8a868"), 0.22, 18)
-    light(img, "ellipse", [356, 104, 448, 150], hx("e0c070"), 0.18, 8)
+    _spike_stand(d, spike)
+    _layout_desk(d, paste)
+    _ceiling_lamp(d)
+    light(img, "polygon", [(234, 38), (266, 38), (420, H - 1), (80, H - 1)], hx("c8a868"), 0.22, 18)
+    light(img, "ellipse", [236, 28, 264, 50], hx("ffe8a8"), 0.35, 5)
+    light(img, "ellipse", [358, 128, 420, 164], hx("e0c070"), 0.24, 7)
     shadow(img, "rect", [0, FLOOR, W - 1, FLOOR + 10], 0.25, 4)
     vignette(img, 0.55, (14, 14, 10), 40)
     return img
@@ -177,8 +268,8 @@ def build_morgue():
     px = pixelize(base, pal)
     save(px, "rooms", "newspaper_morgue.png")
     overlay(v["drawer"], px, pal, (126, 140, 178, 182), "newspaper_morgue_drawer")
-    overlay(v["spike"], px, pal, (300, 118, 328, 134), "newspaper_morgue_spike")
-    overlay(v["paste"], px, pal, (424, 104, 452, 142), "newspaper_morgue_paste")
+    overlay(v["spike"], px, pal, (298, 112, 330, 136), "newspaper_morgue_spike")
+    overlay(v["paste"], px, pal, (424, 124, 452, 160), "newspaper_morgue_paste")
     overlay(v["pin"], px, pal, (254, 74, 284, 96), "newspaper_morgue_pin")
     return px
 

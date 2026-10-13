@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="5_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/rose_house_door.png" id="6_rose_house_door"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/rose.png" id="7_rose"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/rose_front.png" id="7_rose"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(36, 88)
@@ -62,7 +62,7 @@ script = ExtResource("3_Hotspot")
 Id = "door"
 DisplayName = "front door"
 LookText = "Number 14. Green paint, brass knocker. I paid for that paint. She picked the colour."
-WalkTo = Vector2(240, 220)
+WalkTo = Vector2(258, 220)
 Face = 2
 HideIfFlags = "rose_door"
 monitoring = false
