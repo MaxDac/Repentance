@@ -64,6 +64,7 @@ public partial class MansionKitchen : Room
 
             case ("range", Verb.Hand) when !Escaping:
             case ("candle", Verb.Hand) when !Escaping:
+            case ("candle", Verb.UseItem) when !Escaping && item == MicahKit.LighterId:
                 await Say("Not why I'm here. Eleanor's somewhere upstairs.");
                 return true;
 
@@ -87,6 +88,11 @@ public partial class MansionKitchen : Room
                 return true;
             case ("candle", Verb.Hand):
                 await Say("A kitchen match off the box, and the candle catches.");
+                State.SetFlag("candle_lit");
+                await LeaveHint();
+                return true;
+            case ("candle", Verb.UseItem) when item == MicahKit.LighterId:
+                await Say("A flick of my lighter, and the candle catches.");
                 State.SetFlag("candle_lit");
                 await LeaveHint();
                 return true;

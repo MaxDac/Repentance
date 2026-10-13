@@ -257,6 +257,19 @@ def notepad(d, im):
     d.point((19, 22), fill=hx("2a2018"))
 
 
+def lighter(d, im):
+    """Micah's brass trench lighter, lid flipped open on its hinge and the flame up."""
+    d.rectangle([11, 11, 21, 22], fill=hx("b88a38"))
+    d.rectangle([11, 11, 13, 22], fill=hx("e0b860"))
+    d.line([(11, 14), (21, 14)], fill=hx("7a5a20"))
+    d.rectangle([20, 4, 24, 11], fill=hx("a07a30"))
+    d.rectangle([13, 8, 18, 11], fill=hx("8a8a8e"))
+    for x in (14, 16):
+        d.point((x, 9), fill=hx("3a3a3e"))
+    d.ellipse([13, 1, 18, 9], fill=hx("e88a28"))
+    d.ellipse([14, 4, 17, 8], fill=hx("fff0a0"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger),
@@ -265,5 +278,5 @@ def build():
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),
                      ("invitation", invitation), ("mask", mask), ("cloak", cloak),
                      ("kitchen_key", kitchen_key), ("documents", documents),
-                     ("faith_ring", faith_ring), ("cross", cross), ("notepad", notepad)):
+                     ("faith_ring", faith_ring), ("cross", cross), ("notepad", notepad), ("lighter", lighter)):
         save(_icon(fn), "items", f"{name}.png")

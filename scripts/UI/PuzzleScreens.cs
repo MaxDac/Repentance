@@ -337,10 +337,10 @@ public sealed class BellScreen : WheelScreen
     {
         canvas.DrawLine(new Vector2(28, 54), new Vector2(138, 54), Gold, 2);
         canvas.DrawRect(new Rect2(136, 46, 24, 16), Blue);
-        canvas.DrawArc(new Vector2(222, 54), 16, -Mathf.Pi / 2, Mathf.Pi / 2, 16, Gold, 3);
+        canvas.DrawArc(new Vector2(222, 56), 10, -Mathf.Pi / 2, Mathf.Pi / 2, 16, Gold, 3);
         Text(canvas, new Vector2(28, 44), "TAUT WIRE");
-        Text(canvas, new Vector2(118, 76), "HAMMER");
-        Text(canvas, new Vector2(205, 44), "GONG");
+        Text(canvas, new Vector2(126, 76), "HAMMER");
+        Text(canvas, new Vector2(210, 76), "GONG");
     }
 }
 

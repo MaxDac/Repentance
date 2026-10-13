@@ -5,7 +5,7 @@ namespace Repentance.Rooms;
 /// <summary>
 /// The Harrington wine cellar, under the kitchen: black as a coal hole. A storm lantern on a hook, delivery crates (one
 /// sloshes - kerosene) and, at the back, the bootleggers' stair up to a panel behind the old man's study bar. Fill the
-/// lantern, light it with the matchbook and the stair is there to be climbed. It is the only way into the house: the
+/// lantern, light it with Micah's lighter and the stair is there to be climbed. It is the only way into the house: the
 /// baize door upstairs is bolted from the study side.
 /// </summary>
 public partial class MansionCellar : Room
@@ -61,13 +61,13 @@ public partial class MansionCellar : Room
                 await LightCellar();
                 return true;
             case ("stair" or "dark", Verb.UseItem) when item == "lantern_filled":
-                await Say("Full of kerosene and not a flame in it. It wants a match.");
+                await Say("Full of kerosene and not a flame in it. It wants my lighter.");
                 return true;
             case ("stair" or "dark", Verb.UseItem) when item == "lantern":
                 await Say("An empty lantern lights nothing.");
                 return true;
-            case ("stair" or "dark", Verb.UseItem) when item == "matchbook":
-                await Say("A match gives me three seconds of cellar. I need something that stays lit.");
+            case ("stair" or "dark", Verb.UseItem) when item is MicahKit.LighterId or "matchbook":
+                await Say("A flame in my fist gives me three seconds of cellar. I need something that stays lit.");
                 return true;
 
             case ("stair", Verb.Hand or Verb.Walk) when State.HasFlag("escaping"):

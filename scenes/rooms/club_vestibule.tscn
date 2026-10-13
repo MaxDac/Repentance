@@ -44,7 +44,7 @@ centered = false
 
 [node name="WaxTaken" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(154, 136)
+position = Vector2(154, 135)
 texture = ExtResource("5_wax")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -52,7 +52,7 @@ ShowIfFlags = "took_sealing_wax"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(320, 26)
+position = Vector2(320, 46)
 texture = ExtResource("6_door")
 centered = false
 script = ExtResource("4_FlagSprite")
