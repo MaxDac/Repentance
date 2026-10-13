@@ -73,21 +73,29 @@ public partial class RoseHouse : Room
         await WalkAway();
     }
 
-    /// <summary>Micah leaves the stoop. If he pushed her hard enough, Rose calls him back once before she closes the door.</summary>
+    /// <summary>
+    /// Micah leaves the stoop. If he pushed her hard enough, Rose calls him back once before she closes the door;
+    /// otherwise she shuts it on him right away.
+    /// </summary>
     private async Task WalkAway()
     {
-        await Game.WalkTo(new Vector2(110, 236));
-        if (State.HasFlag("rose_wait"))
+        if (!State.HasFlag("rose_wait"))
         {
-            await Say("rose", "Wait!");
-            if (FindActor("rose") is { } rose) Player.FaceTowards(rose.Position);
-            // he turns, and there she is: a long look, and nobody says anything
-            Game.Hud.ShowCloseUp(CloseUps.Rose);
-            await Wait(2.0);
-            await Say("rose", "Don't get into trouble again.");
-            Game.Hud.HideCloseUp();
-            await Wait(0.8);
+            State.SetFlag("rose_door", false);
+            await Say("The door shut. Not hard. Just once, and for good.");
+            await Game.WalkTo(new Vector2(8, 236));
+            await Game.ChangeRoom("chicago_map", "start");
+            return;
         }
+        await Game.WalkTo(new Vector2(110, 236));
+        await Say("rose", "Wait!");
+        if (FindActor("rose") is { } rose) Player.FaceTowards(rose.Position);
+        // he turns, and there she is: a long look, and nobody says anything
+        Game.Hud.ShowCloseUp(CloseUps.Rose);
+        await Wait(2.0);
+        await Say("rose", "Don't get into trouble again.");
+        Game.Hud.HideCloseUp();
+        await Wait(0.8);
         State.SetFlag("rose_door", false);
         await Say("The door closed. Softly. She always closed doors softly. It was worse than slamming.");
         await Game.WalkTo(new Vector2(8, 236));
