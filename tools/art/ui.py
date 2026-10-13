@@ -133,10 +133,107 @@ def clamp_px(v):
     return 255 if v > 255 else int(v)
 
 
-TITLE_PLATE = (110, 70, 370, 120)
+TITLE_PLATE = (112, 64, 368, 118)
+# ziggurat plate: base, middle step, top step (x0, x1, top y); all share the base's bottom edge
+_PLATE_STEPS = ((112, 368, 80), (176, 304, 72), (208, 272, 64))
+_GW, _GH = 12, 22  # deco letter cell
 
 
-def _title_paint(logo):
+def _glyph(ch):
+    """Condensed Broadway-style capitals: heavy stems, hairline bars, high waist. Returns 22 rows of '#'/'.'."""
+    if ch == "E":
+        rows = ["#" * 12] * 2 + ["####" + "." * 8] * 5 + ["#########..."] + ["####" + "." * 8] * 12 + ["#" * 12] * 2
+    elif ch in "PR":
+        bowl = ["##########..", "###########."] + ["####....####"] * 4 + ["###########.", "##########.."]
+        if ch == "P":
+            rows = bowl + ["####" + "." * 8] * 14
+        else:
+            rows = bowl
+            for i in range(14):
+                s = 4 + round(4 * i / 13)
+                r = ["#" if x < 4 or s <= x < s + 4 else "." for x in range(12)]
+                rows.append("".join(r))
+    elif ch == "N":
+        rows = []
+        for y in range(22):
+            s = round(2 + 6 * y / 21)
+            rows.append("".join("#" if x < 2 or x >= 10 or s <= x < s + 4 else "." for x in range(12)))
+    elif ch == "T":
+        rows = ["#" * 12] * 2 + ["....####...."] * 20
+    elif ch == "A":
+        rows = []
+        for y in range(22):
+            left, right = round(5 - 5 * y / 21), round(6 + 5 * y / 21)
+            r = ["."] * 12
+            for x in range(left, left + 2):
+                r[x] = "#"
+            for x in range(max(left, right - 3), right + 1):
+                r[x] = "#"
+            if y == 14:
+                for x in range(left, right + 1):
+                    r[x] = "#"
+            rows.append("".join(r))
+    elif ch == "C":
+        rows = (["..##########", ".###########"] + ["####......##"] * 2 + ["####" + "." * 8] * 14 +
+                ["####......##"] * 2 + [".###########", "..##########"])
+    else:
+        raise ValueError(ch)
+    assert len(rows) == _GH and all(len(r) == _GW for r in rows), ch
+    return rows
+
+
+_GOLD_ROWS = [hx("f8e8b0")] * 4 + [hx("f0d080")] * 4 + [hx("e0b850")] * 5 + [hx("c89838")] * 5 + [hx("a07028")] * 4
+
+
+def _deco_word(img, s, cx, top, gap=6):
+    width = len(s) * _GW + (len(s) - 1) * gap
+    x0 = cx - width // 2
+    px = img.load()
+    for i, ch in enumerate(s):
+        for y, row in enumerate(_glyph(ch)):
+            for x, c in enumerate(row):
+                if c == "#":
+                    # a dark drop shadow, then the gold letter
+                    sx, sy = x0 + i * (_GW + gap) + x, top + y
+                    if px[sx + 1, sy + 1][3] == 255 and px[sx + 1, sy + 1][:3] == hx("0e0a10"):
+                        px[sx + 1, sy + 1] = hx("2a1808", 255)
+                    px[sx, sy] = _GOLD_ROWS[y] + (255,)
+    return x0, x0 + width
+
+
+def _plate_outline(inset):
+    (bx0, bx1, by0), (mx0, mx1, my0), (tx0, tx1, ty0) = _PLATE_STEPS
+    by1, i = TITLE_PLATE[3], inset
+    return [(bx0 + i, by1 - i), (bx0 + i, by0 + i), (mx0 + i, by0 + i), (mx0 + i, my0 + i), (tx0 + i, my0 + i),
+            (tx0 + i, ty0 + i), (tx1 - i, ty0 + i), (tx1 - i, my0 + i), (mx1 - i, my0 + i), (mx1 - i, by0 + i),
+            (bx1 - i, by0 + i), (bx1 - i, by1 - i)]
+
+
+def _title_plate():
+    """Art deco nameplate drawn crisply over the pixelised background: stepped ziggurat, sunburst, speed lines."""
+    plate = Image.new("RGBA", (480, 270))
+    d = ImageDraw.Draw(plate)
+    ink, gold, gold_d = hx("0e0a10", 255), hx("c8a040", 255), hx("6a5020", 255)
+    d.polygon(_plate_outline(0), fill=ink, outline=gold)
+    d.polygon(_plate_outline(3), outline=gold_d)
+    # sunburst rising from behind the word into the top step
+    cx, cy = 240, 87
+    sunburst(d, cx, cy, 18, 14, hx("4a3818", 255), ink)
+    d.arc([cx - 18, cy - 18, cx + 18, cy + 18], 180, 360, fill=gold_d)
+    d.pieslice([cx - 5, cy - 5, cx + 5, cy + 5], 180, 360, fill=gold)
+    d.rectangle([cx - 20, cy, cx + 20, cy + 1], fill=ink)
+    w0, w1 = _deco_word(plate, "REPENTANCE", 240, 90)
+    # streamline speed lines either side of the word
+    for k, (y, n) in enumerate(((96, 22), (100, 16), (104, 10))):
+        col = gold if k == 1 else gold_d
+        d.line([(w0 - 6 - n, y), (w0 - 6, y)], fill=col)
+        d.line([(w1 + 5, y), (w1 + 5 + n, y)], fill=col)
+    # a hairline under the word
+    d.line([(w0, 114), (w1 - 1, 114)], fill=gold_d)
+    return plate
+
+
+def _title_paint():
     img = Image.new("RGB", (480, 270))
     vgrad(img, (0, 0, 479, 200), hx("05060e"), hx("2e1e34"))
     for cx, cy, rx, ry in ((90, 30, 140, 14), (330, 18, 170, 12), (250, 52, 200, 10), (60, 64, 120, 8)):
@@ -158,35 +255,18 @@ def _title_paint(logo):
     for w, y in ((16, 104), (12, 96), (8, 90), (5, 85)):
         d.line([(385 - w, y), (385 + w, y)], fill=hx("34345a"))
     light(img, "rect", list(TITLE_PLATE), hx("e0a040"), 0.2, 12)
-    if logo:
-        d = ImageDraw.Draw(img)
-        x0, y0, x1, y1 = TITLE_PLATE
-        d.rectangle([x0, y0, x1, y1], fill=hx("0e0a10"))
-        d.rectangle([x0 + 4, y0 + 4, x1 - 4, y1 - 4], outline=hx("c8a040"))
-        d.rectangle([x0 + 8, y0 + 8, x1 - 8, y1 - 8], outline=hx("6a5020"))
-        text(img, (240, 95), "REPENTANCE", hx("e8c860"), size=24)
-        text(img, (240, 132), "CHICAGO  1927", hx("c8b088"), size=8)
     vignette(img, 0.7)
     return img
 
 
 def title():
-    """Background without rain (Hud animates it with a Rain node) and the gold plate drawn over the rain."""
-    plain, logo = _title_paint(False), _title_paint(True)
-    pal = palette_of(logo, 96)
-    bg, fg = pixelize(plain, pal), pixelize(logo, pal)
+    """Background without rain (Hud animates it with a Rain node) and the deco plate drawn over the rain."""
+    plain, plate = _title_paint(), _title_plate()
+    # keep the window and lamp golds exact; median cut alone washes them towards white
+    pal = palette_of(plain, 96) + [hx("e8c060"), hx("d8a040"), hx("f0e0a0"), hx("f8e0a0")]
+    bg = pixelize(plain, pal)
     save(bg, "ui", "title.png")
-    x0, y0, x1, y1 = TITLE_PLATE
-    mask = Image.new("L", bg.size, 0)
-    ImageDraw.Draw(mask).rectangle([x0, y0, x1, y1], fill=255)
-    # the subtitle letters are the only other pixels the logo pass changed
-    diff = ImageChops.difference(bg, fg).convert("L").point(lambda v: 255 if v > 0 else 0)
-    sub = Image.new("L", bg.size, 0)
-    sub.paste(diff.crop((150, 124, 330, 140)), (150, 124))
-    mask = ImageChops.lighter(mask, sub)
-    out = fg.convert("RGBA")
-    out.putalpha(mask)
-    save(out, "ui", "title_logo.png")
+    save(plate, "ui", "title_logo.png")
 
 
 def _icon(fn, size=24):
