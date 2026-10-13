@@ -472,6 +472,7 @@ public class AutoPlay
             await WaitIdle(game);
             await RingAndCrossTest(game);
             await RoseAppealsTest(game);
+            await RoseWalkAwayTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
             if (game.Room is Rooms.ChicagoMap map && map.FindHotspot("library") is { } libSpot)
@@ -487,8 +488,10 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "church");
             Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
 
-            await game.Perform(Verb.Walk, "library");
+            var libraryLines = await Listen(game, game.Perform(Verb.Walk, "library"));
             Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+            Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
+                "Micah is relieved Rose isn't on duty, but she's back on his mind");
             Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the daytime librarian is there, not Rose");
             CheckLibrarianOverLadder(game);
             await Shot("library_day");
@@ -2083,6 +2086,65 @@ public class AutoPlay
         finally
         {
             Engine.TimeScale = scale;
+            await game.LoadGame(original);
+        }
+    }
+
+    /// <summary>Awaits <paramref name="task"/>, collecting every speech line shown meanwhile.</summary>
+    private static async Task<System.Collections.Generic.List<string>> Listen(Game game, Task task)
+    {
+        var heard = new System.Collections.Generic.List<string>();
+        while (!task.IsCompleted)
+        {
+            if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
+                heard.Add(game.Hud.SpeechText);
+            await game.Wait(0.05);
+        }
+        await task;
+        return heard;
+    }
+
+    private async Task RoseWalkAwayTest(Game game)
+    {
+        var original = game.CaptureSave();
+        var dialogue = DialogueManager.Instance;
+        var choose = dialogue.AutoChoose!;
+        try
+        {
+            foreach (var walkAway in new[] { false, true })
+            {
+                await game.LoadGame(original);
+                dialogue.ResetInk();
+                string[]? offered = null;
+                dialogue.AutoChoose = (knot, options) =>
+                {
+                    if (knot != "rose_leave") return choose(knot, options);
+                    offered = options.ToArray();
+                    return Task.FromResult(walkAway ? 0 : 1);
+                };
+                await game.ChangeRoom("rose_house", "start");
+                var heard = await Listen(game, game.Perform(Verb.Walk, "exit"));
+                Check(offered is { Length: 2 } && offered[0].Contains("Walk away") && offered[1].Contains("Not yet"),
+                    "leaving Rose's house before ringing is an active choice");
+                Check(!GameState.Instance.HasFlag("rose_door") && !heard.Any(l => l.StartsWith("Good night") || l.Contains("Micah Jones")),
+                    "Rose never opens the door nor answers when Micah doesn't ring");
+                if (!walkAway)
+                {
+                    Check(game.Room?.Name == "RoseHouse" && !GameState.Instance.HasFlag("rose_avoided"), "\"Not yet\" keeps Micah at Rose's door");
+                    continue;
+                }
+                Check(game.Room?.Name == "ChicagoMap" && GameState.Instance.HasFlag("rose_avoided") &&
+                    !GameState.Instance.HasFlag("rose_wait") && !GameState.Instance.HasFlag("rose_done"),
+                    "walking away without a word returns to the map, like leaving without insisting");
+                Check(heard.Any(l => l.Contains("left the bell alone")), "Micah's closing thought as he walks away");
+                await game.LoadGame(game.CaptureSave());
+                Check(GameState.Instance.HasFlag("rose_avoided") && !GameState.Instance.HasFlag("rose_wait"),
+                    "save/load preserves walking away from Rose's door");
+            }
+        }
+        finally
+        {
+            dialogue.AutoChoose = choose;
             await game.LoadGame(original);
         }
     }
