@@ -1,11 +1,15 @@
 """A secretive private club: curtained privees, lounge, and a shadowy stage room."""
 import math
+import os
 import random
 from PIL import Image, ImageDraw
-from .common import (W, H, TOP, FULL_H, tall, hx, mix, mul, clamp, vgrad, noise, light, shadow, vignette, pixelize,
-                     save, floor_boards)
+from .common import (W, H, TOP, FULL_H, ROOT, tall, hx, mix, mul, clamp, vgrad, noise, light, shadow, vignette,
+                     pixelize, save, floor_boards)
 
 FLOOR = 146
+# the hall's portrait, reduced from an original picture: antler tips down to the collar and tie
+PAINTING_SRC = os.path.join(ROOT, "tools", "art", "src", "club_painting.png")
+PAINTING_CROP = (125, 0, 705, 774)
 WALL_TOP = hx("241117")
 WALL_MID = hx("34161d")
 WALL_LOW = hx("24100f")
@@ -309,26 +313,29 @@ def cigar_stand(img, x0, x1, y0):
     shadow(img, "rect", [x0 - 3, FLOOR - 1, x1 + 3, FLOOR + 4], 0.5, 2)
 
 
+def painting_source():
+    """The stag-headed member from the original picture: antlers, head and the collar and tie, no robe."""
+    with Image.open(PAINTING_SRC) as src:
+        return src.convert("RGB").crop(PAINTING_CROP)
+
+
 def painting(img, x0, y0, x1, y1):
     d = ImageDraw.Draw(img)
     d.rectangle([x0, y0, x1, y1], fill=hx("5a4220"), outline=hx("2a1a0a"))
-    d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 3], fill=hx("1c1410"))
-    vgrad(img, (x0 + 4, y0 + 4, x1 - 4, y1 - 4), hx("2a2018"), hx("120c0a"))
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=mul(hx("5a4220"), 1.4))
+    d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 3], fill=hx("0c0908"))
+    box = (x0 + 4, y0 + 4, x1 - 4, y1 - 4)
+    bw, bh = box[2] - box[0] + 1, box[3] - box[1] + 1
+    src = painting_source()
+    scale = min(bw / src.width, bh / src.height)
+    w, h = max(1, round(src.width * scale)), max(1, round(src.height * scale))
+    # the original is lit cold; warm and dim it so it hangs in the hall's lamplight
+    face = Image.blend(src.resize((w, h), Image.BOX), Image.new("RGB", (w, h), hx("3a2414")), 0.18)
+    img.paste(face, (box[0] + (bw - w) // 2, box[1] + (bh - h) // 2))
     cx = (x0 + x1) // 2
-    top = y0 + 8
-    # Suit and shirt stay far from the skin ramp so the bust does not collapse into one blob.
-    d.rectangle([cx - 14, top + 20, cx + 14, y1 - 5], fill=hx("12100e"))
-    d.polygon([(cx - 4, top + 18), (cx + 4, top + 18), (cx + 1, y1 - 6), (cx - 1, y1 - 6)], fill=hx("f4f0e4"))
-    d.rectangle([cx, top + 19, cx + 2, y1 - 8], fill=hx("8a1a22"))
-    d.ellipse([cx - 11, top, cx + 11, top + 16], fill=hx("100c0a"))
-    d.ellipse([cx - 7, top + 5, cx + 7, top + 19], fill=hx("e0a878"))
-    d.pieslice([cx - 11, top, cx + 11, top + 14], 200, 340, fill=hx("100c0a"))
-    d.rectangle([cx - 5, top + 9, cx - 3, top + 11], fill=hx("100c0a"))
-    d.rectangle([cx + 3, top + 9, cx + 5, top + 11], fill=hx("100c0a"))
-    d.line([(cx - 3, top + 14), (cx + 3, top + 14)], fill=hx("100c0a"))
-    d.point((cx, top + 12), fill=hx("a06848"))
-    d.rectangle([cx - 12, y0 + 5, cx + 12, y0 + 7], fill=BRASS)
-    light(img, "rect", [x0, y0, x1, y0 + 10], LAMPLIGHT, 0.12, 4)
+    d.rectangle([cx - 10, y0 - 3, cx + 10, y0 - 1], fill=BRASS)
+    d.line([(cx - 10, y0 - 3), (cx + 10, y0 - 3)], fill=hx("e8c880"))
+    light(img, "rect", [x0, y0, x1, y0 + 14], LAMPLIGHT, 0.12, 4)
 
 
 def hall_scene():
@@ -340,7 +347,7 @@ def hall_scene():
     lounge_arch(img)
     privee(img, 84, 170, 58, 1, 131)
     privee(img, 310, 396, 58, 2, 137)
-    painting(img, 214, 44, 266, 90)
+    painting(img, 215, 32, 265, 96)
     cigar_stand(img, 222, 258, 112)
     d = ImageDraw.Draw(img)
     rug = [hp(-62, 0, 1.3), hp(62, 0, 1.3), hp(62, 0, 2.5), hp(-62, 0, 2.5)]
