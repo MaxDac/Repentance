@@ -162,8 +162,11 @@ public partial class Game : Node
             _ = Execute(Verb.UseItem, target, item, pos);
             return;
         }
-        _ = Execute(target == null ? Verb.Walk : DefaultVerb(target), target, null, pos);
+        _ = Execute(target == null ? Verb.Walk : LeftClickVerb(target), target, null, pos);
     }
+
+    /// <summary>The verb a left click on this hotspot performs; the room may override the usual default.</summary>
+    public Verb LeftClickVerb(Hotspot h) => Room?.LeftClickVerb(h) ?? DefaultVerb(h);
 
     /// <summary>Left click on a hotspot: exits are walked through, people are talked to, the rest is looked at.</summary>
     private static Verb DefaultVerb(Hotspot h) => h switch

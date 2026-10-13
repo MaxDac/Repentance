@@ -498,7 +498,7 @@ CALEB: The library. And Micah... be kind to her.
 === librarian ===
 {has_flag("librarian_refused"): -> librarian.again}
 {not has_flag("librarian_met"):
-    LIBRARIAN: Shh. The reading room closes at ten, sir. What can I do for you?
+    LIBRARIAN: Shh. It's the middle of the day, sir, and folks are reading. What can I do for you?
     ~ set_flag("librarian_met")
 - else:
     LIBRARIAN: Yes?
@@ -510,11 +510,11 @@ CALEB: The library. And Micah... be kind to her.
     LIBRARIAN: ...
     LIBRARIAN: Where did you get that mirror?
     MICAH: That's between me and the mirror.
-    LIBRARIAN: Then what that knot means is between me and my books. Good evening, sir.
+    LIBRARIAN: Then what that knot means is between me and my books. Good day, sir.
     ~ set_flag("librarian_refused")
     -> END
-* [Where's the day librarian? Mrs. Jones.]
-    LIBRARIAN: Mrs. Jones keeps Christian hours, sir. I keep the other kind.
+* [Busy day?]
+    LIBRARIAN: Students, widows, and one gentleman who reads the obituaries for pleasure. Busy enough, sir.
     -> librarian.opts
 + [(Leave)]
     LIBRARIAN: Mind the step. And the silence.

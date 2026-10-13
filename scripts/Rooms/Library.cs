@@ -11,7 +11,7 @@ public partial class Library : Room
         {
             if (State.HasFlag("seen_library_night")) return;
             State.SetFlag("seen_library_night");
-            await Game.Run(() => Say("The library, after hours. Rose has the day shift. Small mercies."));
+            await Game.Run(() => Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper."));
             return;
         }
         if (State.HasFlag("seen_library")) return;

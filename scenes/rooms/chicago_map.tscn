@@ -103,7 +103,7 @@ y_sort_enabled = true
 script = ExtResource("3_Hotspot")
 Id = "library"
 DisplayName = "the public library"
-LookText = "The public library. Rose's library. Books, dust, and people who know things."
+LookText = "The public library. Books, dust, and people who know things."
 monitoring = false
 monitorable = false
 
