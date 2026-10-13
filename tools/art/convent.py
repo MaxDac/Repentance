@@ -40,12 +40,15 @@ def lightmap(img, ambient, lights):
     lm = Image.new("RGB", img.size, ambient)
     black = Image.new("RGB", img.size, (0, 0, 0))
     for shape, pts, col, k, blur in lights:
-        m = Image.new("L", img.size, 0)
-        d = ImageDraw.Draw(m)
-        if shape == "ellipse":
-            d.ellipse(pts, fill=int(255 * k))
+        if shape == "mask":
+            m = pts.point(lambda v: int(v * k))
         else:
-            d.polygon(pts, fill=int(255 * k))
+            m = Image.new("L", img.size, 0)
+            d = ImageDraw.Draw(m)
+            if shape == "ellipse":
+                d.ellipse(pts, fill=int(255 * k))
+            else:
+                d.polygon(pts, fill=int(255 * k))
         if blur:
             m = m.filter(ImageFilter.GaussianBlur(blur))
         lm = ImageChops.add(lm, Image.composite(Image.new("RGB", img.size, col), black, m))
@@ -533,7 +536,7 @@ def l_window(img):
 def l_door(img):
     """The way back out to the corridor, in the near left wall."""
     d = ImageDraw.Draw(img)
-    z0, z1, top = 42, 84, 68
+    z0, z1, top = 40, 64, 62
     frame = [LR.P(XL, 0, z0 - 4), LR.P(XL, top + 5, z0 - 4), LR.P(XL, top + 5, z1 + 4), LR.P(XL, 0, z1 + 4)]
     d.polygon(frame, fill=hx("5a4a3a"))
     leaf = [LR.P(XL, 0, z0), LR.P(XL, top, z0), LR.P(XL, top, z1), LR.P(XL, 0, z1)]
@@ -713,28 +716,46 @@ def paint_cell(drawer=False, comb=False, mirror=False):
     l_bed(img)
     l_nightstand(img, drawer, comb, mirror)
     fx, fy = l_lamp(img)
-    # moonbeam: the window's lancet thrown as a thin slanting sliver onto the floor
-    inner = lancet(WIN_X - 7, WIN_X + 7, WIN_Y0, 112, 14)
-    patch = [LR.P(x - 0.42 * y, 0, 0.5 * y) for x, y in inner]
-    beam = [LR.P(WIN_X - 7, WIN_Y0, -12), LR.P(WIN_X + 7, WIN_Y0 + 10, -12), patch[-1], patch[0]]
+    patch, beam, moon = moon_patch(img.size)
     lights = [
         ("ellipse", [fx - 110, fy - 70, fx + 110, fy + 110], hx("8a5428"), 0.9, 34),
         ("ellipse", [fx - 55, fy - 34, fx + 60, fy + 70], hx("b06a34"), 0.6, 18),
         ("ellipse", [fx - 22, fy - 18, fx + 22, fy + 20], hx("ffd090"), 0.45, 8),
         ("ellipse", [fx - 190, fy - 150, fx + 150, fy + 60], hx("4a3020"), 0.6, 40),
-        ("polygon", patch, hx("8090c0"), 0.85, 2),
+        ("mask", moon, hx("6878b0"), 0.75, 1),
         ("polygon", beam, hx("303a60"), 0.4, 6),
         ("polygon", g, hx("6070a0"), 0.8, 2),
     ]
     img = lightmap(img, (46, 46, 72), lights)
-    d = ImageDraw.Draw(img)
-    for k in (-3.5, 0, 3.5):  # bar shadows across the moonlit sliver
-        d.line([LR.P(WIN_X + k - 0.42 * WIN_Y0, 0, 0.5 * WIN_Y0), LR.P(WIN_X + k - 0.42 * 124, 0, 0.5 * 124)],
-               fill=hx("1e2030"))
     light(img, "ellipse", [fx - 7, fy - 9, fx + 7, fy + 7], hx("ffe0a0"), 0.5, 4)
     light(img, "polygon", beam, hx("8898c8"), 0.06, 5)
     vignette(img, 0.6, tint=(16, 14, 26), blur=40)
     return img
+
+
+# Moonlight falls steeply through the lancet: a window point at height y lands MOON_DEPTH * y in front of the
+# wall, leaning MOON_LEAN * y to the left. The arch's point therefore lands nearest the camera.
+MOON_DEPTH, MOON_LEAN = 0.55, 0.08
+
+
+def moon_on_floor(x, y):
+    return LR.P(x - MOON_LEAN * (y - WIN_Y0), 0, MOON_DEPTH * y)
+
+
+def moon_patch(size):
+    """The lancet's moonlit shape on the flagstones, with the shadows of its bars and transom cut out of it."""
+    inner = lancet(WIN_X - 7, WIN_X + 7, WIN_Y0, 112, 14)
+    patch = [moon_on_floor(x, y) for x, y in inner]
+    beam = [LR.P(WIN_X - 7, WIN_Y0, -12), LR.P(WIN_X + 7, WIN_Y0, -12), patch[-1], patch[0]]
+    m = Image.new("L", size, 0)
+    d = ImageDraw.Draw(m)
+    d.polygon(patch, fill=255)
+    for x in (WIN_X - 3.5, WIN_X, WIN_X + 3.5):
+        d.line([moon_on_floor(x, WIN_Y0), moon_on_floor(x, 126)], fill=0)
+    d.line([moon_on_floor(WIN_X - 7, 100), moon_on_floor(WIN_X + 7, 100)], fill=0)
+    clip = Image.new("L", size, 0)
+    ImageDraw.Draw(clip).polygon(patch, fill=255)
+    return patch, beam, ImageChops.darker(m, clip)
 
 
 def build():
