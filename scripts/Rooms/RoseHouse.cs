@@ -61,7 +61,20 @@ public partial class RoseHouse : Room
             rose.SetPose(null);
         }
         await Wait(0.3);
+        await StepAside();
     }
+
+    /// <summary>
+    /// Micah steps off to the right of the doorway, so Rose stands in it face to the camera and the two of them
+    /// talk side by side rather than one in front of the other.
+    /// </summary>
+    private async Task StepAside()
+    {
+        await Game.WalkTo(TalkSpot);
+        if (FindActor("rose") is { } rose) Player.FaceTowards(rose.Position);
+    }
+
+    public static readonly Vector2 TalkSpot = new(292, 224);
 
     private async Task RingTheBell()
     {

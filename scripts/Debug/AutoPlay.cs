@@ -567,6 +567,9 @@ public class AutoPlay
             await Until(() => gs.HasFlag("rose_door"));
             await game.Wait(1.5);
             await Shot("rose_house_door");
+            await Until(() => game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
+            Check(game.Player.Facing == Facing.Left && game.Room!.FindActor("rose")!.Texture!.ResourcePath.EndsWith("/rose_front.png"),
+                "Micah steps off to the right of the door and Rose faces the camera");
             await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Wait!"));
             Check(!game.Hud.InsetVisible, "no close-up yet while Rose calls \"Wait!\"");
             await Until(() => game.Hud.InsetVisible);
@@ -1035,6 +1038,8 @@ public class AutoPlay
             Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1"), "ending 1: walked away from Tony, coffee with Rose");
             await Until(() => gs.HasFlag("rose_door"));
             await game.Wait(1);
+            await Until(() => game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
+            Check(game.Player.Facing == Facing.Left, "Act 3: Micah stands aside of the door to ask Rose out");
             await Shot("rose_coffee");
             await TheEnd("ending_1 (Tony)");
 
