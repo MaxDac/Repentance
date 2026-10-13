@@ -64,7 +64,8 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
 ### Controls
 
 - **Left click** on the floor to walk. Left click on an object does the obvious thing: talk to people,
-  go through exits, look at everything else.
+  go through exits, look at everything else. A character drawn in front of an object is the one you point at.
+  On the map of Chicago, hovering a place shows its description at the bottom and a left click goes there.
 - **Right click** on an object opens the **verb wheel**: 👁 *Look*, ✋ *Hand* (take, use, open, push),
   👄 *Talk*, 🥾 *Kick*. Click an icon, or hold the right button and release it over one.
 - **Satchel** (bottom right) or **I** opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
@@ -132,7 +133,7 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
-   over the boxes and find a locked tool tin in the papers. The suitcase's small key opens that tin,
+   over the boxes, then search them again: the MISC box holds a locked tool tin. The suitcase's small key opens that tin,
    not the trunk; its crowbar opens the steamer trunk. Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
@@ -179,7 +180,7 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
 12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
    Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
 13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
-14. **Library, after hours**: ask the night librarian about the knot (shown full screen). He wants to know where
+14. **Library, by day**: ask the librarian about the knot (shown full screen). He wants to know where
    the mirror came from; Micah won't say, so neither will he. Consult the desk catalogue: match the
    Celtic triquetra and select Bell's *Rites of the Old Isles*, C-17. The restricted shelves are locked.
    Micah uses the revolver on the librarian to obtain that book. He hands
@@ -317,7 +318,7 @@ tools/               Python art generator
 | `GameState` (autoload) | Story flags and inventory; emits `Changed`. `CaptureInto`/`Restore` copy it to and from a save |
 | `SaveData` / `SaveSystem` | The save file model and its JSON serializer (Godot-free and unit tested), and the autosave plus slot files in `user://saves` |
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
-| `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine` and `ClampWalkTarget` |
+| `Room` | Base class for rooms. Handles walk area, perspective scaling, entries and hotspot lookup. Its `PlayerCharacter` export (`micah` or `daniel`) picks the player sprite. Override `OnEnter`, `OnInteract`, `OnItemVerb`, `OnCombine`, `ClampWalkTarget` and `LeftClickVerb` |
 | `Hotspot` | `Area2D` with a collision shape. Has `Id`, `DisplayName`, `LookText`, `WalkTo`, `Face`, `ExitTo`/`ExitEntry`, flag-based visibility and `ClickPriority` |
 | `Actor` | An NPC: a hotspot with an 11-frame sprite strip (idle, two talk frames, an 8-frame walk cycle), a speech colour, depth scaling and `MoveTo` (which plays the walk cycle) |
 | `Player` | The player character (Micah, or Daniel in the prologue): 4-direction walk cycles, pathfinding along the walk polygon |

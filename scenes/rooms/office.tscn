@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3]
+[gd_scene load_steps=41 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Office.cs" id="1_Office"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office.png" id="2_office"]
@@ -12,13 +12,14 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/teddy.png" id="8_teddy"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/micah_desk.png" id="11_micah_desk"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring.png" id="12_ring"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring_glint.png" id="12_ring_glint"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_cup.png" id="13_cup"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_door_ajar.png" id="14_door_ajar"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_door_open.png" id="15_door_open"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="16_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_ring"]
-size = Vector2(14, 10)
+size = Vector2(9, 7)
 
 [sub_resource type="RectangleShape2D" id="Rect_cup"]
 size = Vector2(10, 12)
@@ -140,12 +141,19 @@ metadata/facing = 1
 y_sort_enabled = true
 
 [node name="WeddingRing" type="Sprite2D" parent="."]
-position = Vector2(270, 130)
+position = Vector2(275, 134)
 texture = ExtResource("12_ring")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "act2_whiskey_drunk"
 HideIfFlags = "took_faith_ring"
+
+[node name="Glint" type="Sprite2D" parent="WeddingRing"]
+visible = false
+position = Vector2(-2, -3)
+texture = ExtResource("12_ring_glint")
+centered = false
+hframes = 5
 
 [node name="Cup" type="Sprite2D" parent="."]
 position = Vector2(126, 81)
@@ -271,7 +279,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/WeddingRing"]
-position = Vector2(277, 135)
+position = Vector2(276, 134.5)
 shape = SubResource("Rect_ring")
 
 [node name="Cup" type="Area2D" parent="Hotspots"]

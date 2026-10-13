@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh8yddcfxp2jt"
-path="res://.godot/imported/attic_papers_cleared.png-483ef98650cf179ae13ed562339f3316.ctex"
+uid="uid://ch3e7hqwx8jl8"
+path="res://.godot/imported/attic_box_open_act2.png-476e5db9a1ca3681eee73891e9367d33.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/attic_papers_cleared.png"
-dest_files=["res://.godot/imported/attic_papers_cleared.png-483ef98650cf179ae13ed562339f3316.ctex"]
+source_file="res://assets/art/rooms/attic_box_open_act2.png"
+dest_files=["res://.godot/imported/attic_box_open_act2.png-476e5db9a1ca3681eee73891e9367d33.ctex"]
 
 [params]
 

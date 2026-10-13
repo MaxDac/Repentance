@@ -317,6 +317,25 @@ def open_drawer(img, contents):
         d.line([(325, 123), (330, 123)], fill=hx("a8a8b0"))
 
 
+GLINT_FRAMES = 5
+GLINT_SIZE = 7
+
+
+def ring_glint():
+    """A horizontal strip of GLINT_FRAMES 7x7 frames: a four-pointed sparkle that flares from the ring's highlight
+    and fades back. The centre pixel (3, 3) sits on the highlight."""
+    strip = Image.new("RGBA", (GLINT_SIZE * GLINT_FRAMES, GLINT_SIZE))
+    core, arm, tip = (255, 250, 220, 255), (255, 236, 170, 220), (255, 224, 140, 120)
+    for f, reach in enumerate((0, 1, 3, 2, 1)):
+        ox, c = f * GLINT_SIZE, GLINT_SIZE // 2
+        strip.putpixel((ox + c, c), core)
+        for r in range(1, reach + 1):
+            col = arm if r < reach or reach == 1 else tip
+            for dx, dy in ((r, 0), (-r, 0), (0, r), (0, -r)):
+                strip.putpixel((ox + c + dx, c + dy), col)
+    return strip
+
+
 def build():
     base = paint()
     pal = palette_of(base, 128)
@@ -327,11 +346,15 @@ def build():
     save(pixelize(paint(()), pal).crop(DRAWER_BOX), "rooms", "office_drawer_open.png")
     for item, box in ITEM_BOXES.items():
         save(pixelize(paint((item,)), pal).crop(box), "rooms", f"office_drawer_{item}.png")
-    ring = Image.new("RGBA", (14, 10))
+    # the ring is only a glint of gold on the desk: two bright pixels and a shadowed band
+    ring = Image.new("RGBA", (3, 2))
     d = ImageDraw.Draw(ring)
-    d.ellipse([2, 2, 11, 7], outline=hx("d8b050"), width=2)
-    d.line([(4, 2), (8, 2)], fill=hx("f8e0a0"))
+    d.point((0, 0), fill=hx("b08838"))
+    d.point((1, 0), fill=hx("f0d070"))
+    d.point((2, 0), fill=hx("c89a40"))
+    d.point((1, 1), fill=hx("6a5020"))
     save(ring, "rooms", "office_ring.png")
+    save(ring_glint(), "rooms", "office_ring_glint.png")
     cup = Image.new("RGBA", (10, 12))
     d = ImageDraw.Draw(cup)
     d.rectangle([1, 2, 7, 10], fill=hx("b8b4a4"))

@@ -209,6 +209,10 @@ public partial class Actor : Hotspot, ISpeaker
         return SpriteRect.Grow(-2).HasPoint(ToLocal(point));
     }
 
+    /// <summary>Whether a drawn (opaque) pixel of the character is under <paramref name="point"/>.</summary>
+    public bool DrawnAt(Vector2 point) =>
+        IsVisibleInTree() && _sprite is { Visible: true } s && s.IsPixelOpaque(s.ToLocal(point));
+
     public override Rect2 Bounds
     {
         get

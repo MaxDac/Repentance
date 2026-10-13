@@ -109,7 +109,9 @@ public class AutoPlay
             await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
             Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
             await game.Perform(Verb.Hand, "papers");
-            Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "papers reveal a locked tin, not a free crowbar");
+            Check(!gs.HasFlag("tool_tin_found"), "nothing heavy hides under the papers");
+            await game.Perform(Verb.Hand, "boxes");
+            Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "searching the boxes again opens one on a locked tin");
             await game.Perform(Verb.Hand, "tool_tin");
             Check(!gs.HasItem("crowbar"), "tin cannot be opened by hand");
             await game.Perform(Verb.UseItem, "tool_tin", "suitcase_key");
@@ -453,13 +455,24 @@ public class AutoPlay
             await RoseAppealsTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
+            if (game.Room is Rooms.ChicagoMap map && map.FindHotspot("library") is { } libSpot)
+            {
+                map.UpdateCaption(libSpot.Bounds.GetCenter());
+                Check(map.CaptionText == libSpot.LookText && !map.CaptionText.Contains("Rose"),
+                    "hovering a place reads its description in the map caption");
+                map.UpdateCaption(new Vector2(20, 250));
+                Check(map.CaptionText == "", "the map caption hides away from the places");
+                Check(game.LeftClickVerb(libSpot) == Verb.Walk, "a left click on the map travels instead of looking");
+            }
+            else Check(false, "map caption test reached the map");
             await game.Perform(Verb.Walk, "church");
             Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
 
             await game.Perform(Verb.Walk, "library");
             Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
-            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the night librarian is there, not Rose");
-            await Shot("library_night");
+            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the daytime librarian is there, not Rose");
+            CheckLibrarianOverLadder(game);
+            await Shot("library_day");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(!gs.HasFlag("library_banned"), "no gun before asking");
             var ask = game.Perform(Verb.Talk, "librarian");
@@ -1605,6 +1618,28 @@ public class AutoPlay
                 new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
+    /// <summary>Wherever the librarian is drawn over the ladder, hovering or clicking there means him (#73).</summary>
+    private void CheckLibrarianOverLadder(Game game)
+    {
+        if (game.Room?.FindHotspot("librarian") is not Actor librarian || game.Room.FindHotspot("ladder") is not { } ladder)
+        {
+            Check(false, "library has the librarian and the ladder");
+            return;
+        }
+        var b = librarian.Bounds;
+        int overlap = 0, wrong = 0;
+        var winners = new HashSet<string>();
+        for (float y = b.Position.Y; y < b.End.Y; y++)
+            for (float x = b.Position.X; x < b.End.X; x++)
+            {
+                var p = new Vector2(x, y);
+                if (!librarian.DrawnAt(p)) continue;
+                if (ladder.Bounds.HasPoint(p)) overlap++;
+                if (game.Room.HotspotAt(p) is var h && h != librarian) { wrong++; winners.Add($"{h?.Id ?? "none"}@{p}"); }
+            }
+        Check(overlap > 0 && wrong == 0, $"the librarian wins over the ladder behind him ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
+    }
+
     private void CheckPortraitSpeech(Game game, bool right)
     {
         var panel = game.Hud.InsetRect;
@@ -1867,7 +1902,12 @@ public class AutoPlay
         Check(gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") && !gs.HasItem("faith_ring"),
             "leaving the ring records the original choice without granting it");
         Check(_crossOffers == offers, "initial confession never offers the cross even when ring was left");
+        gs.SetFlag("teddy_gone", false);
         await game.Perform(Verb.Walk, "office");
+        Check(gs.HasFlag("teddy_gone") && game.Room?.FindHotspot("teddy")?.Visible != true,
+            "Teddy doesn't come back to the office after Act 1");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("WeddingRing/Glint") != null
+            && game.Room?.FindHotspot("faith_ring")?.Bounds.Size is { X: <= 10, Y: <= 8 }, "the small ring glints on the desk");
         Check(game.Room?.FindHotspot("faith_ring")?.Visible == true, "left ring remains visible at the office");
         await Shot("office_ring_left");
         await game.Perform(Verb.Walk, "door");

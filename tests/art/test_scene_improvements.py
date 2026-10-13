@@ -147,6 +147,7 @@ class SceneImprovementsTests(unittest.TestCase):
         expected = Image.new("RGB", (480, 240))
         library.mantle_items(expected)
         common.shadow(expected, "ellipse", [0, 0, 479, 40], 0.22, 12, common.hx("2a130d"))
+        library.sunlight(expected)
         actual = library.paint()
         for y in (21, 22, 24):
             self.assertEqual(actual.getpixel((239, y + common.TOP)),

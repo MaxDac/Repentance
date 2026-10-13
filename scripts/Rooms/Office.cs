@@ -12,6 +12,28 @@ public partial class Office : Room
     // Micah starts Act 3 seated behind the desk (a sprite), so the walking player is hidden until he stands up.
     public override bool PlayerVisibleOnLoad => ShowPlayer && !State.HasFlag("micah_at_desk");
 
+    public override void _Ready()
+    {
+        // Teddy only waits here in Act 1; later acts (also when reached by a debug room jump) never show him.
+        if (State.StoryAct >= 2) State.SetFlag("teddy_gone");
+        base._Ready();
+        _glint = GetNodeOrNull<Godot.Sprite2D>("WeddingRing/Glint");
+    }
+
+    private const double GlintEvery = 3.5, GlintFrameTime = 0.08;
+    private Godot.Sprite2D? _glint;
+    private double _glintClock;
+
+    /// <summary>The ring is only a couple of gold pixels; every few seconds it catches the lamp light and sparkles.</summary>
+    public override void _Process(double delta)
+    {
+        if (_glint == null) return;
+        _glintClock = (_glintClock + delta) % GlintEvery;
+        int frame = (int)(_glintClock / GlintFrameTime);
+        _glint.Visible = frame < _glint.Hframes;
+        if (_glint.Visible) _glint.Frame = frame;
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "act2" && !State.HasFlag("act2_office_done"))

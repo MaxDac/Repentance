@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vyv32otur5pw"
-path="res://.godot/imported/attic_papers_cleared_act2.png-79947c46ebf2685299e72bb646be043e.ctex"
+uid="uid://c2hrnw8bugcec"
+path="res://.godot/imported/office_ring_glint.png-610a43b74178153da9bec1a2c4aa6bbf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/attic_papers_cleared_act2.png"
-dest_files=["res://.godot/imported/attic_papers_cleared_act2.png-79947c46ebf2685299e72bb646be043e.ctex"]
+source_file="res://assets/art/rooms/office_ring_glint.png"
+dest_files=["res://.godot/imported/office_ring_glint.png-610a43b74178153da9bec1a2c4aa6bbf.ctex"]
 
 [params]
 

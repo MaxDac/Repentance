@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gjkeou86833w"
-path="res://.godot/imported/tool_tin.png-ade1026888c3af7f343118911efd40f0.ctex"
+uid="uid://dljxd5f5hhg1n"
+path="res://.godot/imported/attic_box_open_night.png-230afdd29b6610a6a134adfee0565aec.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/tool_tin.png"
-dest_files=["res://.godot/imported/tool_tin.png-ade1026888c3af7f343118911efd40f0.ctex"]
+source_file="res://assets/art/rooms/attic_box_open_night.png"
+dest_files=["res://.godot/imported/attic_box_open_night.png-230afdd29b6610a6a134adfee0565aec.ctex"]
 
 [params]
 

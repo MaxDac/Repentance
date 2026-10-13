@@ -88,12 +88,19 @@ public partial class Room : Node2D
 
     public Hotspot? FindHotspot(string id) => Hotspots.FirstOrDefault(h => h.Id == id);
 
-    /// <summary>The topmost active hotspot under a point.</summary>
-    public Hotspot? HotspotAt(Vector2 p) => Hotspots
-        .Where(h => h.Visible && h.Contains(p))
-        .OrderByDescending(h => h.ClickPriority)
-        .ThenBy(h => h.Bounds.Area)
-        .FirstOrDefault();
+    /// <summary>The verb a left click performs on a hotspot here, or null for the game-wide default.</summary>
+    public virtual Verb? LeftClickVerb(Hotspot h) => null;
+
+    /// <summary>
+    /// The topmost active hotspot under a point. A character drawn over the point is in front of the scenery, so it
+    /// wins (the frontmost, by feet position, if several overlap); otherwise click priority, then the smallest area.
+    /// </summary>
+    public Hotspot? HotspotAt(Vector2 p)
+    {
+        var drawn = Hotspots.OfType<Actor>().Where(a => a.DrawnAt(p)).OrderByDescending(a => a.GlobalPosition.Y).FirstOrDefault();
+        return drawn ?? Hotspots.Where(h => h.Visible && h.Contains(p))
+            .OrderByDescending(h => h.ClickPriority).ThenBy(h => h.Bounds.Area).FirstOrDefault();
+    }
 
     /// <summary>Re-evaluates flag-driven visibility. Called automatically when the game state changes.</summary>
     public void Refresh()
