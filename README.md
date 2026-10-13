@@ -16,10 +16,10 @@ Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
 ### Common commands
 
 ```powershell
-# 1. after a fresh clone, or after new/changed art, fonts or Ink: import assets (no editor needed)
-godot --path . --headless --import
-# 2. after C# changes
+# 1. after C# changes, and before the first import: the Ink importer is a C# plugin
 dotnet build
+# 2. after a fresh clone, or after new/changed art, fonts or Ink: import assets (no editor needed)
+godot --path . --headless --import
 # play
 godot --path .
 # full automated playthrough (Windows: use godot_console.exe and wait for AUTOPLAY OK)
