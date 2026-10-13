@@ -107,7 +107,7 @@ public partial class Speakeasy : Room
                 await Talk("bartender");
                 await BartenderDislikes();
                 return true;
-            case ("bartender", Verb.UseItem) when item == "photo":
+            case ("bartender", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Talk(State.HasFlag("photo_shown") ? "bartender" : "bartender.photo");
                 await BartenderDislikes();
                 return true;

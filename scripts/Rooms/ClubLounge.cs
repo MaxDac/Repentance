@@ -28,7 +28,7 @@ public partial class ClubLounge : Room
             case ("guest", Verb.Hand or Verb.Kick):
                 await Say("Start a fight in here, and I'd be the one on the stage tonight.");
                 return true;
-            case ("guest", Verb.UseItem) when item == "photo":
+            case ("guest", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("Show Eleanor's photograph to a room full of masks. They'd know who I was before I put it away.");
                 return true;
         }

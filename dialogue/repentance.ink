@@ -6,6 +6,7 @@
 
 EXTERNAL has_item(id)
 EXTERNAL has_flag(flag)
+EXTERNAL knows_note(id)
 EXTERNAL cash_amount()
 EXTERNAL give_item(id)
 EXTERNAL take_item(id)
@@ -127,7 +128,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
 * [I'm looking for a woman.]
     CONCIERGE: Sir will find the Aurelian is not that sort of establishment.
     -> concierge.opts
-* {has_item("photo")} [Have you seen this woman?]
+* {has_item("photo") or knows_note("eleanor")} [Have you seen this woman?]
     CONCIERGE: The Aurelian prides itself on discretion, sir.
     CONCIERGE: I make a point of seeing nothing. And of remembering less. That is why they pay me.
     ~ set_flag("concierge_stonewall")
@@ -151,7 +152,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     BELLBOY: Gossip costs extra. Everything costs extra in this joint.
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
-* {has_item("photo")} [Seen this lady?]
+* {has_item("photo") or knows_note("eleanor")} [Seen this lady?]
     BELLBOY: Maybe I have, maybe I haven't. My memory works better when it's been fed.
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
@@ -504,7 +505,7 @@ CALEB: The library. And Micah... be kind to her.
     LIBRARIAN: Yes?
 }
 - (opts)
-* {has_item("mirror")} [I want to know about a symbol.]
+* {has_item("mirror") or knows_note("triquetra")} [I want to know about a symbol.]
     MICAH: Three loops in one knot. Scratched into the back of a lady's mirror.
     IMAGE: triquetra
     LIBRARIAN: ...

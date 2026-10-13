@@ -32,7 +32,7 @@ public partial class Library : Room
                 await Say("librarian", "Please. You have your book. Just go.");
                 return true;
             case ("librarian", Verb.Talk):
-            case ("librarian", Verb.UseItem) when item == "mirror":
+            case ("librarian", Verb.UseItem) when Shows(item, "mirror", "triquetra"):
                 await Talk("librarian");
                 return true;
             case ("librarian", Verb.UseItem) when item == "revolver" && !State.HasFlag("librarian_refused"):
@@ -57,7 +57,7 @@ public partial class Library : Room
             case ("rose", Verb.Talk):
                 await Talk("rose");
                 return true;
-            case ("rose", Verb.UseItem) when item == "photo":
+            case ("rose", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("rose", "She's beautiful. Is that why you're here? Work? Of course it is.");
                 return true;
             case ("rose", Verb.Hand):
