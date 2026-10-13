@@ -62,7 +62,7 @@ ShowIfFlags = "drawer_left_open"
 
 [node name="DrawerRight" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(270, 156)
+position = Vector2(271, 156)
 texture = ExtResource("6_harrington_office_drawer_right")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -70,7 +70,7 @@ ShowIfFlags = "drawer_right_open"
 
 [node name="Closet" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(358, 52)
+position = Vector2(358, 53)
 texture = ExtResource("7_harrington_office_closet")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -78,7 +78,7 @@ ShowIfFlags = "harrington_closet_open"
 
 [node name="Secret" type="Sprite2D" parent="."]
 z_index = -8
-position = Vector2(382, 152)
+position = Vector2(383, 153)
 texture = ExtResource("8_harrington_office_secret")
 centered = false
 script = ExtResource("4_FlagSprite")

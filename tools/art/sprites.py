@@ -151,6 +151,11 @@ MASKED_WOLF = dict(MASKED_MAN, h=67, sw=0.138, mask=("animal", "wolf", "a29a8a",
 MASKED_BEAR = dict(MASKED_MAN, h=68, sw=0.158, hw=0.058, waist=0.104, hipw=0.106, mask=("animal", "bear", "9a7048", "3a2a20"))
 MASKED_RAVEN = dict(MASKED_MAN, h=65, mask=("animal", "raven", "b0a898", "6a5e58"))
 MASKED_HARE = dict(MASKED_MAN, h=64, sw=0.134, mask=("animal", "hare", "ccae7e", "8a6448"))
+# Act 3: the stag unmasks. Harrington senior's own old face, the cowl pushed back onto his shoulders and the stag's
+# carved face held against his chest.
+LEADER_UNMASKED = dict(MASKED_STAG, skin=HARRINGTON["skin"], hair=HARRINGTON["hair"], hair_style="bald", old=True,
+                       eye=HARRINGTON["eye"], brow=HARRINGTON["brow"], mask=None, hat="cowl_down",
+                       held_mask=(1, "c4a676", "d4cab4"))
 # The women of the club: short, strapless black-fringed dresses above the knee, bare shoulders and arms, sheer
 # stockings and a black domino mask.
 MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.056, skin="ecc6a6",
@@ -241,6 +246,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("masked_stag", MASKED_STAG, _arms("fold")), ("masked_boar", MASKED_BOAR, _arms("fold")),
         ("masked_wolf", MASKED_WOLF, _arms("fold")), ("masked_bear", MASKED_BEAR, _arms("fold")),
         ("masked_raven", MASKED_RAVEN, _arms("fold")), ("masked_hare", MASKED_HARE, _arms("fold")),
+        ("leader_unmasked", LEADER_UNMASKED, _arms("fold")),
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))

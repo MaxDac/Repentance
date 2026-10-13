@@ -422,16 +422,34 @@ MOC: ...Welcome. The rite is about to begin. Go on through to the stage.
 MOC: The stage, brother. They are waiting.
 -> END
 
+// Act 3 opens with the stag taking his mask off: Harrington senior, in front of the whole Club.
+=== harrington_unmask ===
+~ set_flag("harrington_unmasked")
+HARRINGTON: No more masks, Mr. Jones. Not tonight. Let them all see.
+HARRINGTON: You look disappointed. What were you expecting? A high priest? Some farmers' god out of the woods?
+HARRINGTON: Bonfires. Antlers. Old words from the old country. Theatre, Mr. Jones. All of it.
+HARRINGTON: Look around you. Judges. Aldermen. A bishop. The man who owns the stockyards. A hundred men who run this city.
+HARRINGTON: And not one of them will lift a finger tonight unless I allow it.
+HARRINGTON: That is the whole rite. That is why we meet. Power that never shows itself is only a rumour.
+HARRINGTON: So now and then, it has to show its face. I show them mine. And they bow.
+HARRINGTON: And next Thursday they will come back, and bow again.
+-> END
+
 === club_caught ===
-LEADER: You returned Eleanor to us. For that, the intrusion is forgiven. This is as far as you go.
+HARRINGTON: You brought Eleanor back to us. For that, the intrusion is forgiven. This is as far as you go.
 INSET: none
 * [(Draw the revolver.)]
     ~ set_flag("drew_revolver")
     MICAH: Nobody move. Eleanor, come down off that stage. We're leaving.
-    ELEANOR: Oh, Micah. You never did understand.
+    HARRINGTON: Go on, my dear. Answer him.
+    ELEANOR: I am where I belong, Mr. Jones.
+    MICAH: Eleanor. Look at me.
+    ELEANOR: I am where I belong.
 * [(Do nothing.)]
     MICAH: ...
-    ELEANOR: Go home, Micah.
+    ELEANOR: Thank you for bringing me back, Mr. Jones. Go home, Mr. Jones.
+    MICAH: Eleanor...?
+    ELEANOR: Thank you for bringing me back.
 - -> END
 
 // ---------------------------------------------------------------- CATHEDRAL
@@ -535,35 +553,6 @@ LIBRARIAN: Take it. Take it and go, and please don't come back.
 ~ give_item("book")
 MICAH: Pleasure doing business. Late fees are on me.
 -> END
-
-=== rose ===
-{not has_flag("rose_met"):
-    ROSE: We're closing, sir, so unless you have a card-
-    ROSE: ...Micah.
-    MICAH: Hello, Rose.
-    ROSE: Eight months without a word, and you walk in here dripping on my floor.
-    ~ set_flag("rose_met")
-- else:
-    ROSE: You're still here. That's a first.
-}
-- (opts)
-* [I'm sorry.]
-    ROSE: You always are. It's the one thing you were ever reliable about.
-    -> rose.opts
-* [You look well.]
-    ROSE: I sleep now. Nobody calls at three in the morning to say you're in the hospital again.
-    -> rose.opts
-* {has_flag("library_lead")} [A woman hid something here. Dark hair, about this tall.]
-    ROSE: Last Tuesday. She asked for the county land records, then asked to be left alone.
-    ROSE: Right-hand stacks, top shelf. Nobody has touched those since the Taft administration.
-    ROSE: Is she in trouble?
-    MICAH: She's in the kind of trouble I'm good at.
-    ROSE: That's what worries me.
-    ~ set_flag("rose_tip")
-    -> END
-+ [(Leave)]
-    ROSE: Goodbye, Micah. Try the front door this time. You used to prefer the window.
-    -> END
 
 // ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
 
@@ -785,7 +774,7 @@ HARRINGTON: Good girl.
 -> END
 
 === oldman_taunt ===
-HARRINGTON: Well. Mr. Jones. My son's money paid for that coat, I believe.
+HARRINGTON: Well. Mr. Jones, again. You weren't listening the other night. My son's money paid for that coat, I believe.
 MICAH: Get away from her.
 HARRINGTON: Or what? You'll shoot an old man in his dressing gown? You haven't got the guts. You'd have done it by now.
 HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one, I grant you. But her place is here.

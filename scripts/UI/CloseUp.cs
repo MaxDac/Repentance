@@ -37,9 +37,13 @@ public static class CloseUps
     /// <summary>Outside the convent, end of Act 1: Micah on the left, Eleanor on the right.</summary>
     public static readonly CloseUp Convent = new("convent", "convent_closeup");
 
+    /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,
+    /// stag and moon.</summary>
+    public static readonly CloseUp Heraldry = new("heraldry", "heraldry_closeup");
+
     private static readonly Dictionary<string, CloseUp> ById = new()
     {
-        [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [Convent.Id] = Convent,
+        [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [Convent.Id] = Convent, [Heraldry.Id] = Heraldry,
     };
 
     public static CloseUp Get(string id) =>

@@ -281,25 +281,442 @@ CLOAKS = (("lion", 228, "d8b048"), ("stag", 258, "8a6a3a"), ("raven", 288, "c8cc
 INNER = (368, 46, 452, FLOOR + 2)
 
 
+GOLD, GOLD_D, GOLD_L, GOLD_DK = hx("c8a050"), hx("7a5a24"), hx("f0d088"), hx("4a3412")
+
+
 def _emblem(d, kind, cx, cy, col):
-    c = hx(col)
-    d.ellipse([cx - 4, cy - 4, cx + 4, cy + 4], fill=hx("1a1418"), outline=c)
+    """An embroidered roundel: a gold-thread ring around the house beast, worked in its own metal."""
+    c, c_d = hx(col), mul(hx(col), 0.6)
+    d.ellipse([cx - 7, cy - 7, cx + 7, cy + 7], fill=hx("120e14"), outline=GOLD_D)
+    d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], outline=c_d)
+    for a in range(0, 360, 45):
+        v = _dir(a)
+        d.point((cx + round(v[0] * 7), cy + round(v[1] * 7)), fill=GOLD)
     if kind == "raven":
-        d.polygon([(cx - 3, cy), (cx, cy - 2), (cx + 3, cy - 1), (cx + 1, cy + 2)], fill=c)
+        d.polygon([(cx - 4, cy + 2), (cx - 1, cy - 2), (cx + 2, cy - 3), (cx + 4, cy - 2), (cx + 2, cy),
+                   (cx + 1, cy + 3), (cx - 2, cy + 3)], fill=c)
+        d.line([(cx + 4, cy - 2), (cx + 5, cy - 1)], fill=GOLD)
+        d.line([(cx - 3, cy + 1), (cx + 1, cy - 1)], fill=c_d)
+        d.line([(cx - 4, cy + 3), (cx - 5, cy + 4)], fill=c)
+        d.point((cx + 2, cy - 2), fill=hx("120e14"))
     elif kind == "lion":
+        for a in range(0, 360, 30):
+            v = _dir(a)
+            d.line([(cx, cy), (cx + round(v[0] * 4), cy + round(v[1] * 4))], fill=c_d)
+        d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=c_d)
         d.ellipse([cx - 2, cy - 2, cx + 2, cy + 2], fill=c)
+        d.point((cx - 1, cy - 1), fill=hx("120e14"))
+        d.point((cx + 1, cy - 1), fill=hx("120e14"))
+        d.point((cx, cy + 1), fill=c_d)
     else:
-        d.line([(cx - 2, cy - 3), (cx, cy), (cx + 2, cy - 3)], fill=c)
-        d.line([(cx, cy), (cx, cy + 2)], fill=c)
+        d.polygon([(cx - 2, cy - 1), (cx + 2, cy - 1), (cx + 1, cy + 3), (cx - 1, cy + 3)], fill=c)
+        for s in (-1, 1):
+            d.line([(cx + s, cy - 1), (cx + 3 * s, cy - 4), (cx + 4 * s, cy - 6)], fill=c)
+            d.line([(cx + 3 * s, cy - 4), (cx + 5 * s, cy - 4)], fill=c)
+            d.line([(cx + 2 * s, cy - 2), (cx + 3 * s, cy - 2)], fill=c_d)
+        d.point((cx, cy + 3), fill=c_d)
+
+
+def _dir(deg):
+    import math
+    return math.cos(math.radians(deg)), math.sin(math.radians(deg))
+
+
+def _hung_cloak(d, x, hem, w, c, rnd, lining=None, fur=False):
+    """A member's coat on a wooden hanger in the cloakroom, numbered brass tag on the hook."""
+    d.line([(x, 84), (x, 87)], fill=hx("8a7a50"))
+    d.rectangle([x + 1, 86, x + 3, 88], fill=GOLD)
+    d.line([(x - 6, 90), (x, 87), (x + 6, 90)], fill=hx("6a4a28"))
+    body = [(x - 6, 90), (x + 6, 90), (x + 8, 96), (x + w, hem), (x + w // 2, hem + 1), (x, hem - 1),
+            (x - w // 2, hem + 1), (x - w, hem), (x - 8, 96)]
+    d.polygon(body, fill=c)
+    for k in range(-2, 3):
+        fx = x + k * w * 2 // 5
+        d.line([(x + k * 2, 94), (fx, hem - 1)], fill=mul(c, 0.55))
+        d.line([(x + k * 2 + 1, 95), (fx + 1, hem - 2)], fill=mul(c, 1.35))
+    d.line([(x - 8, 96), (x - w, hem)], fill=mul(c, 1.6))
+    if lining:
+        d.polygon([(x, 92), (x + 1, 92), (x + 3, hem - 1), (x - 1, hem - 1)], fill=hx(lining))
+    if fur:
+        for i in range(10):
+            d.point((x - 6 + i + rnd.randint(0, 1), 89 + rnd.randint(0, 3)), fill=hx(rnd.choice(("8a7a68", "6a5a4a", "a89880"))))
+    else:
+        d.polygon([(x - 6, 90), (x + 6, 90), (x + 3, 95), (x - 3, 95)], fill=mul(c, 0.7))
+    for by in range(100, hem - 6, 8):
+        d.point((x + 2, by), fill=hx("2a2a2a") if not lining else GOLD_D)
+
+
+def _hatch(d, img, gold, gold_d):
+    """The cloakroom hatch: a gilt frame, a rolled shutter, hats on the shelf and the members' coats behind."""
+    d.rectangle([84, 62, 200, 142], fill=gold_d)
+    d.line([(84, 62), (200, 62)], fill=GOLD_L)
+    d.line([(84, 62), (84, 142)], fill=gold)
+    d.line([(200, 62), (200, 142)], fill=GOLD_DK)
+    for x in range(86, 200, 4):
+        d.point((x, 63), fill=gold)
+        d.point((x + 2, 64), fill=GOLD_DK)
+    d.rectangle([87, 65, 197, 142], outline=GOLD_DK)
+    d.line([(88, 66), (88, 141)], fill=gold)
+    for cx, cy in ((85, 63), (199, 63)):
+        d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=gold, outline=GOLD_DK)
+        d.point((cx, cy), fill=GOLD_L)
+    vgrad(img, (90, 66, 194, 141), hx("221016"), hx("0a0406"))
+    for x in range(96, 194, 9):
+        d.line([(x, 72), (x, 141)], fill=hx("1a0a10"))
+    noise(img, (90, 66, 194, 141), 3, 1404)
+    # the roll-down shutter, rolled up into its box
+    d.rectangle([89, 66, 195, 71], fill=hx("3a2a1c"), outline=hx("140a06"))
+    for y in (68, 70):
+        d.line([(90, y), (194, y)], fill=hx("201610"))
+    d.line([(90, 67), (194, 67)], fill=hx("5a4430"))
+    # hat shelf, three hats
+    d.rectangle([90, 78, 194, 80], fill=hx("4a2a14"))
+    d.line([(90, 78), (194, 78)], fill=hx("7a4a24"))
+    d.line([(90, 81), (194, 81)], fill=hx("080204"))
+    d.ellipse([96, 72, 106, 80], fill=hx("3a3430"))
+    d.rectangle([96, 76, 106, 78], fill=hx("3a3430"))
+    d.line([(94, 77), (108, 77)], fill=hx("4a4440"))
+    d.line([(97, 76), (105, 76)], fill=hx("5a1a1a"))
+    d.rectangle([128, 70, 136, 77], fill=hx("26222a"))
+    d.line([(125, 77), (139, 77)], fill=hx("36323c"))
+    d.line([(128, 75), (136, 75)], fill=hx("6a1a22"))
+    d.line([(129, 71), (129, 74)], fill=hx("2e2a34"))
+    d.polygon([(170, 77), (172, 72), (176, 71), (180, 72), (182, 77)], fill=hx("5a4a36"))
+    d.line([(168, 77), (184, 77)], fill=hx("6a5a44"))
+    d.line([(173, 72), (179, 72)], fill=hx("221a12"))
+    d.polygon([(150, 77), (162, 77), (160, 74), (152, 74)], fill=hx("4a3a5a"))
+    d.line([(150, 76), (162, 76)], fill=hx("6a5a7a"))
+    # brass hanging rail
+    d.rectangle([90, 83, 194, 84], fill=gold_d)
+    d.line([(90, 83), (194, 83)], fill=gold)
+    for bx in (92, 192):
+        d.rectangle([bx - 1, 81, bx + 1, 85], fill=GOLD_DK)
+    # a hat box and an umbrella stand, half-hidden under the coats
+    d.rectangle([92, 128, 106, 141], fill=hx("5a2a3a"))
+    d.ellipse([92, 125, 106, 131], fill=hx("6a3448"), outline=hx("2a1018"))
+    d.line([(92, 134), (106, 134)], fill=hx("c8b080"))
+    d.rectangle([183, 122, 193, 141], fill=hx("3a3a40"), outline=hx("141418"))
+    d.line([(184, 123), (184, 140)], fill=hx("6a6a74"))
+    for ux, uc in ((185, "4a2a14"), (188, "1a1a1a"), (191, "6a4a24")):
+        d.line([(ux, 122), (ux, 108)], fill=hx("1a1a1e"))
+        d.arc([ux - 3, 104, ux + 1, 110], 180, 360, fill=hx(uc))
+    rnd = random.Random(1405)
+    coats = (("2a2a32", None, False), ("1e1a1a", "6a1420", False), ("2e2418", None, True), ("1a1c26", None, False),
+             ("241e22", "4a2a5a", False), ("2a2420", None, False), ("1c1a1e", "6a1420", True))
+    for i, (col, lining, fur) in enumerate(coats):
+        x = 100 + i * 13
+        if i % 2:
+            _hung_cloak(d, x, 130, 9, mul(hx(col), 0.75), rnd, lining, fur)
+    for i, (col, lining, fur) in enumerate(coats):
+        x = 100 + i * 13
+        if not i % 2:
+            _hung_cloak(d, x, 136, 10, hx(col), rnd, lining, fur)
+    shadow(img, "rect", [90, 66, 194, 92], 0.25, 5)
+    shadow(img, "rect", [90, 120, 194, 141], 0.35, 4)
+    # the CLOAKS cartouche above, scrolled at both ends
+    for sx in (114, 170):
+        d.ellipse([sx - 4, 52, sx + 4, 60], fill=gold_d, outline=GOLD_DK)
+        d.ellipse([sx - 2, 54, sx + 1, 57], outline=gold)
+    d.rectangle([114, 51, 170, 61], fill=gold, outline=GOLD_DK)
+    d.line([(115, 52), (169, 52)], fill=GOLD_L)
+    d.line([(115, 60), (169, 60)], fill=gold_d)
+    d.rectangle([117, 53, 167, 59], outline=gold_d)
+    text(img, (142, 57), "CLOAKS", hx("2a1808"), size=8)
+    for nx in (119, 165):
+        d.point((nx, 56), fill=GOLD_DK)
+
+
+def _counter(d, img, gold, gold_d, wax):
+    """The coat-check counter: mahogany, raised gilt panels, the bell, the ledger and the house wax."""
+    d.rectangle([82, 148, 202, FLOOR + 2], fill=hx("3a1018"), outline=hx("140408"))
+    rnd = random.Random(1406)
+    for _ in range(40):
+        gx, gy = rnd.randint(84, 200), rnd.randint(150, 180)
+        d.line([(gx, gy), (gx, gy + rnd.randint(3, 9))], fill=hx(rnd.choice(("461420", "300c14"))))
+    for px in (82, 121, 160, 198):
+        d.rectangle([px, 148, px + 4, 182], fill=hx("4a1620"))
+        d.line([(px, 148), (px, 182)], fill=hx("6a2a30"))
+        d.line([(px + 4, 148), (px + 4, 182)], fill=hx("1a0408"))
+        d.rectangle([px, 150, px + 4, 152], fill=gold_d)
+    for x0, x1 in ((88, 119), (127, 158), (166, 196)):
+        y0, y1 = 154, 180
+        d.rectangle([x0, y0, x1, y1], fill=hx("2a0810"), outline=gold_d)
+        d.polygon([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1), (x1 - 4, y0 + 4), (x0 + 4, y0 + 4)], fill=hx("5a2030"))
+        d.polygon([(x0 + 1, y0 + 1), (x0 + 4, y0 + 4), (x0 + 4, y1 - 4), (x0 + 1, y1 - 1)], fill=hx("4a1826"))
+        d.polygon([(x0 + 1, y1 - 1), (x0 + 4, y1 - 4), (x1 - 4, y1 - 4), (x1 - 1, y1 - 1)], fill=hx("1a0408"))
+        d.polygon([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1), (x1 - 4, y1 - 4), (x1 - 4, y0 + 4)], fill=hx("22060c"))
+        d.rectangle([x0 + 4, y0 + 4, x1 - 4, y1 - 4], fill=hx("401220"))
+        mx, my = (x0 + x1) // 2, (y0 + y1) // 2
+        d.polygon([(mx, my - 6), (mx + 8, my), (mx, my + 6), (mx - 8, my)], outline=gold_d)
+        d.ellipse([mx - 2, my - 2, mx + 2, my + 2], fill=gold, outline=GOLD_DK)
+        d.point((mx - 1, my - 1), fill=GOLD_L)
+    d.rectangle([80, 182, 204, FLOOR + 2], fill=hx("1e0608"))
+    d.line([(80, 182), (204, 182)], fill=gold)
+    d.line([(80, 184), (204, 184)], fill=gold_d)
+    # the top, overhanging, with a gilt nosing
+    d.rectangle([78, 141, 206, 148], fill=hx("5a1e14"))
+    d.line([(78, 141), (206, 141)], fill=hx("9a4a2c"))
+    d.line([(78, 142), (206, 142)], fill=hx("7a3220"))
+    d.line([(78, 145), (206, 145)], fill=gold_d)
+    d.line([(78, 146), (206, 146)], fill=gold)
+    d.line([(78, 148), (206, 148)], fill=hx("140408"))
+    shadow(img, "rect", [82, 149, 202, 154], 0.5, 2)
+    # service bell
+    d.ellipse([88, 139, 102, 142], fill=GOLD_DK)
+    d.ellipse([90, 133, 100, 141], fill=gold, outline=gold_d)
+    d.arc([91, 134, 99, 140], 200, 290, fill=GOLD_L)
+    d.point((92, 135), fill=hx("fff0c0"))
+    d.rectangle([94, 130, 96, 133], fill=gold_d)
+    d.point((95, 130), fill=GOLD_L)
+    # the claim ledger, open, a ribbon hanging over the edge
+    d.polygon([(106, 141), (136, 141), (133, 136), (109, 136)], fill=hx("e8dcc0"), outline=hx("6a5a40"))
+    d.line([(121, 136), (121, 141)], fill=hx("8a7a5a"))
+    for ly in (137, 139):
+        d.line([(110, ly), (119, ly)], fill=hx("8a8070"))
+        d.line([(123, ly), (132, ly)], fill=hx("8a8070"))
+    d.line([(124, 141), (125, 146)], fill=hx("a01818"))
+    # inkwell and pen
+    d.rectangle([140, 137, 145, 141], fill=hx("101018"), outline=hx("2a2a3a"))
+    d.rectangle([141, 135, 144, 137], fill=gold)
+    d.line([(143, 135), (148, 126)], fill=hx("e8e0d0"))
+    d.line([(147, 127), (149, 125)], fill=hx("c8c0b0"))
+    # the seal tray; the stick of house wax lies on it until it's taken
+    d.rectangle([150, 138, 182, 141], fill=hx("2a2028"), outline=gold_d)
+    d.line([(151, 138), (181, 138)], fill=gold)
+    d.rectangle([156, 139, 176, 140], fill=hx("3a1a2a"))
+    if not wax:
+        d.rectangle([154, 135, 176, 137], fill=hx("a01818"))
+        d.line([(154, 135), (172, 135)], fill=hx("e05050"))
+        d.line([(154, 137), (176, 137)], fill=hx("600a0a"))
+        d.rectangle([171, 135, 176, 137], fill=hx("e8e0d0"))
+        d.line([(172, 136), (175, 136)], fill=hx("a01818"))
+        d.point((154, 136), fill=hx("701010"))
+    # a chamberstick for melting it, and the claim tickets on their spike
+    d.ellipse([185, 139, 197, 142], fill=gold_d, outline=GOLD_DK)
+    d.arc([195, 137, 199, 141], 270, 90, fill=gold_d)
+    d.rectangle([189, 130, 192, 139], fill=hx("e8e0c8"))
+    d.line([(189, 130), (189, 139)], fill=hx("fff8e8"))
+    d.polygon([(190, 124), (192, 128), (190, 130), (189, 128)], fill=hx("f8e090"))
+    d.point((190, 128), fill=hx("fffff0"))
+    d.line([(201, 141), (201, 132)], fill=hx("8a8a8a"))
+    for ty in (136, 138, 140):
+        d.rectangle([198, ty, 204, ty + 1], fill=hx("d8c898") if ty % 4 else hx("c8a878"))
+    light(img, "ellipse", [174, 112, 206, 144], hx("f0c070"), 0.25, 6)
+
+
+def _cloak(d, kind, cx, col):
+    """A black ceremonial cloak hung by its hood: gold-thread hem, cord girdle, emblem roundel, signet on the clasp."""
+    black, deep, sheen, rim = hx("16141a"), hx("08060c"), hx("2a2632"), hx("3c3646")
+    d.line([(cx, 56), (cx, 60)], fill=GOLD)
+    d.arc([cx - 2, 58, cx + 2, 63], 0, 180, fill=GOLD)
+    hem = [(cx + 15, 172), (cx + 11, 175), (cx + 7, 171), (cx + 3, 174), (cx - 2, 172), (cx - 6, 175),
+           (cx - 10, 171), (cx - 15, 173)]
+    body = [(cx - 9, 80), (cx + 9, 80), (cx + 12, 92)] + hem + [(cx - 12, 92)]
+    d.polygon(body, fill=black)
+    # folds: deep troughs with a sheen on each crest, rim-lit from the sconces
+    for k in (-3, -1, 1, 3):
+        top, bot = cx + k * 2, cx + k * 4
+        d.line([(top, 92), (bot, 172)], fill=deep)
+        d.line([(top + 1, 94), (bot + 2, 170)], fill=sheen)
+    d.line([(cx - 12, 92), (cx - 15, 172)], fill=rim)
+    d.line([(cx + 12, 92), (cx + 15, 172)], fill=hx("0e0c12"))
+    # the cloak parts down the front over a crimson lining
+    d.polygon([(cx - 1, 106), (cx + 1, 106), (cx + 4, 173), (cx - 3, 173)], fill=hx("4a0c16"))
+    d.line([(cx - 1, 106), (cx - 3, 173)], fill=GOLD_D)
+    d.line([(cx + 1, 106), (cx + 4, 173)], fill=deep)
+    for i in range(len(hem) - 1):
+        (ax, ay), (bx, by) = hem[i], hem[i + 1]
+        d.line([(ax, ay - 3), (bx, by - 3)], fill=GOLD_D)
+    # the hood, hung from its peak; the face opening a black hollow
+    hood = [(cx - 1, 61), (cx + 1, 61), (cx + 9, 70), (cx + 11, 80), (cx + 7, 88), (cx - 7, 88), (cx - 11, 80),
+            (cx - 9, 70)]
+    d.polygon(hood, fill=hx("1c1822"))
+    d.line([(cx - 1, 62), (cx - 9, 71), (cx - 11, 80)], fill=rim)
+    d.line([(cx, 62), (cx - 4, 70)], fill=deep)
+    d.line([(cx, 62), (cx + 5, 70)], fill=deep)
+    d.polygon([(cx - 6, 86), (cx - 6, 76), (cx - 3, 70), (cx + 3, 70), (cx + 6, 76), (cx + 6, 86)], fill=hx("050308"))
+    d.line([(cx - 6, 86), (cx - 6, 76), (cx - 3, 70), (cx, 69)], fill=sheen)
+    d.line([(cx + 6, 76), (cx + 6, 86)], fill=hx("0e0c12"))
+    d.line([(cx - 4, 74), (cx - 4, 85)], fill=hx("100c14"))
+    # clasp, chain and the signet ring hanging from it
+    for sx in (cx - 5, cx + 5):
+        d.ellipse([sx - 2, 86, sx + 2, 90], fill=GOLD, outline=GOLD_DK)
+        d.point((sx - 1, 87), fill=GOLD_L)
+    d.line([(cx - 3, 88), (cx, 90), (cx + 3, 88)], fill=GOLD_D)
+    d.ellipse([cx - 2, 90, cx + 2, 95], outline=GOLD)
+    d.rectangle([cx - 1, 94, cx + 1, 96], fill=hx(col), outline=GOLD_DK)
+    _emblem(d, kind, cx, 106, col)
+    # a cord girdle, knotted, two tassels
+    d.line([(cx - 12, 124), (cx - 6, 127), (cx, 128), (cx + 6, 127), (cx + 12, 124)], fill=GOLD_D, width=2)
+    for x in range(cx - 10, cx + 11, 3):
+        d.point((x, 126 + (1 if abs(x - cx) < 6 else 0)), fill=GOLD)
+    d.ellipse([cx - 2, 126, cx + 2, 130], fill=GOLD)
+    for tx, ty in ((cx - 2, 144), (cx + 3, 140)):
+        d.line([(cx, 129), (tx, ty)], fill=GOLD_D)
+        d.polygon([(tx - 1, ty), (tx + 1, ty), (tx + 2, ty + 5), (tx - 2, ty + 5)], fill=GOLD)
+        d.line([(tx, ty + 1), (tx, ty + 5)], fill=GOLD_D)
+
+
+def _stand(d, img, gold, gold_d):
+    shadow(img, "ellipse", [226, FLOOR - 4, 290, FLOOR + 10], 0.6, 3)
+    for fx, fy in ((236, FLOOR + 3), (280, FLOOR + 3), (258, FLOOR + 7)):
+        d.line([(258, FLOOR - 6), (fx, fy)], fill=gold_d, width=3)
+        d.line([(258, FLOOR - 7), (fx, fy - 1)], fill=gold)
+        d.ellipse([fx - 3, fy - 2, fx + 3, fy + 2], fill=gold_d, outline=GOLD_DK)
+    d.rectangle([255, 56, 261, FLOOR - 4], fill=gold_d)
+    d.line([(256, 56), (256, FLOOR - 4)], fill=gold)
+    d.line([(257, 56), (257, FLOOR - 4)], fill=GOLD_L)
+    d.line([(261, 56), (261, FLOOR - 4)], fill=GOLD_DK)
+    for cy in (64, 120, 176, FLOOR - 6):
+        d.ellipse([252, cy - 2, 264, cy + 2], fill=gold, outline=GOLD_DK)
+        d.line([(254, cy - 1), (258, cy - 1)], fill=GOLD_L)
+    for s in (-1, 1):
+        d.line([(258, 74), (258 + 10 * s, 64), (258 + 16 * s, 57)], fill=gold_d, width=2)
+        d.arc([258 + (4 if s > 0 else -14), 60, 258 + (14 if s > 0 else -4), 70], 0, 360, fill=GOLD_DK)
+    d.rectangle([212, 51, 304, 56], fill=gold_d)
+    d.line([(212, 52), (304, 52)], fill=gold)
+    d.line([(212, 53), (304, 53)], fill=GOLD_L)
+    d.line([(212, 56), (304, 56)], fill=GOLD_DK)
+    for fx in (210, 306):
+        d.ellipse([fx - 3, 50, fx + 3, 57], fill=gold, outline=GOLD_DK)
+        d.point((fx - 1, 52), fill=GOLD_L)
+    d.ellipse([253, 43, 263, 53], fill=gold, outline=GOLD_DK)
+    d.point((256, 46), fill=GOLD_L)
+    d.polygon([(258, 36), (260, 43), (256, 43)], fill=gold)
+
+
+def _inner_door(d, img, gold, gold_d, door):
+    x0, y0, x1, y1 = INNER
+    mx = (x0 + x1) // 2
+    # fluted pilasters and an arched, gilt surround with a keystone and a fanlight
+    for px in (359, 453):
+        d.rectangle([px, 52, px + 8, y1], fill=gold_d, outline=GOLD_DK)
+        for fx in (px + 2, px + 4, px + 6):
+            d.line([(fx, 58), (fx, y1 - 12)], fill=GOLD_DK)
+            d.line([(fx + 1, 58), (fx + 1, y1 - 12)], fill=gold)
+        d.rectangle([px - 2, 46, px + 10, 52], fill=gold, outline=GOLD_DK)
+        d.line([(px - 1, 47), (px + 9, 47)], fill=GOLD_L)
+        for vx in (px + 1, px + 7):
+            d.ellipse([vx - 2, 47, vx + 2, 51], outline=GOLD_DK)
+        d.rectangle([px - 2, y1 - 10, px + 10, y1], fill=gold, outline=GOLD_DK)
+        d.line([(px - 2, y1 - 6), (px + 10, y1 - 6)], fill=GOLD_DK)
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1], fill=GOLD_DK)
+    d.pieslice([356, 20, 464, 72], 180, 360, fill=gold_d, outline=GOLD_DK)
+    d.arc([358, 22, 462, 70], 190, 350, fill=gold)
+    for a in range(190, 360, 14):
+        v = _dir(a)
+        d.line([(410 + v[0] * 46, 46 + v[1] * 20), (410 + v[0] * 54, 46 + v[1] * 26)], fill=GOLD_DK)
+    d.pieslice([x0, 28, x1, 64], 180, 360, fill=hx("1a080e"), outline=GOLD_DK)
+    for a in range(195, 360, 22):
+        v = _dir(a)
+        d.line([(410, 46), (410 + v[0] * 42, 46 + v[1] * 18)], fill=gold_d)
+    d.pieslice([400, 38, 420, 54], 180, 360, fill=gold_d, outline=GOLD_DK)
+    d.point((410, 42), fill=GOLD_L)
+    d.polygon([(404, 18), (416, 18), (414, 30), (406, 30)], fill=gold, outline=GOLD_DK)
+    d.ellipse([407, 20, 413, 26], fill=hx("1a080e"), outline=GOLD_L)
+    d.point((410, 23), fill=gold)
+    d.rectangle([x0 - 2, 45, x1 + 2, 46], fill=gold)
+    if door:
+        # the procession hall beyond: a red runner between candlelit walls, light at the far end
+        vx0, vx1, vy0, vy1 = mx - 8, mx + 8, 98, 142
+        d.rectangle([x0, y0, x1, y1], fill=hx("140408"))
+        d.polygon([(x0, y0), (x1, y0), (vx1, vy0), (vx0, vy0)], fill=hx("0e0206"))
+        d.polygon([(x0, y0), (vx0, vy0), (vx0, vy1), (x0, y1)], fill=hx("2e0a12"))
+        d.polygon([(x1, y0), (vx1, vy0), (vx1, vy1), (x1, y1)], fill=hx("220810"))
+        d.polygon([(x0, y1), (x1, y1), (vx1, vy1), (vx0, vy1)], fill=hx("3a1410"))
+        for t in (0.25, 0.5, 0.72):
+            lx = round(x0 + (vx0 - x0) * t)
+            d.line([(lx, round(y0 + (vy0 - y0) * t)), (lx, round(y1 + (vy1 - y1) * t))], fill=hx("1a0408"))
+            rx = round(x1 + (vx1 - x1) * t)
+            d.line([(rx, round(y0 + (vy0 - y0) * t)), (rx, round(y1 + (vy1 - y1) * t))], fill=hx("140206"))
+        d.polygon([(mx - 18, y1), (mx + 18, y1), (mx + 4, vy1), (mx - 4, vy1)], fill=hx("7a1418"))
+        d.line([(mx - 15, y1), (mx - 3, vy1)], fill=GOLD_D)
+        d.line([(mx + 15, y1), (mx + 3, vy1)], fill=GOLD_D)
+        vgrad(img, (vx0, vy0, vx1, vy1), hx("f0b060"), hx("c05028"))
+        for fx in (mx - 4, mx + 3):
+            d.polygon([(fx - 2, vy1), (fx + 2, vy1), (fx + 1, vy0 + 26), (fx, vy0 + 23), (fx - 1, vy0 + 26)], fill=hx("1a0a0a"))
+        for t, s in ((0.2, 4), (0.45, 3), (0.65, 2)):
+            for side in (x0 + (vx0 - x0) * t, x1 + (vx1 - x1) * t):
+                cy = round(y0 + (vy0 - y0) * t + 30 * (1 - t))
+                sx = round(side)
+                d.line([(sx, cy), (sx, cy + s)], fill=GOLD)
+                d.ellipse([sx - 1, cy - s, sx + 1, cy], fill=hx("f8d888"))
+                light(img, "ellipse", [sx - 3 * s, cy - 3 * s, sx + 3 * s, cy + 2 * s], hx("e08040"), 0.25, 2)
+        # the leaves, swung in against the walls
+        for a, b in ((x0, x0 + 12), (x1, x1 - 12)):
+            d.polygon([(a, y0), (b, y0 + 6), (b, y1 - 4), (a, y1)], fill=hx("2a0a10"), outline=hx("0a0204"))
+            d.polygon([(a + (b - a) // 4, y0 + 14), (b - (b - a) // 4, y0 + 17), (b - (b - a) // 4, y0 + 58),
+                       (a + (b - a) // 4, y0 + 60)], outline=gold_d)
+            d.polygon([(a + (b - a) // 4, y0 + 94), (b - (b - a) // 4, y0 + 94), (b - (b - a) // 4, y1 - 12),
+                       (a + (b - a) // 4, y1 - 10)], outline=gold_d)
+            d.line([(b, y0 + 6), (b, y1 - 4)], fill=hx("4a1420"))
+        light(img, "polygon", [(vx0, vy0), (vx1, vy0), (x1 + 30, H - 1), (x0 - 30, H - 1)], hx("e08040"), 0.3, 10)
+        return
+    for a, b in ((x0, mx), (mx, x1)):
+        vgrad(img, (a, y0, b, y1), hx("3a0e18"), hx("22060c"))
+    d.rectangle([x0, y0, x1, y1], outline=hx("0a0204"))
+    d.line([(mx, y0), (mx, y1)], fill=hx("0a0204"))
+    d.line([(mx + 1, y0), (mx + 1, y1)], fill=hx("4a1620"))
+    for a, b in ((x0 + 6, mx - 6), (mx + 6, x1 - 6)):
+        for p0, p1 in ((y0 + 10, y0 + 60), (y0 + 116, y1 - 10)):
+            d.rectangle([a, p0, b, p1], fill=hx("2a0810"), outline=gold_d)
+            d.polygon([(a + 1, p0 + 1), (b - 1, p0 + 1), (b - 4, p0 + 4), (a + 4, p0 + 4)], fill=hx("5a1a28"))
+            d.polygon([(a + 1, p0 + 1), (a + 4, p0 + 4), (a + 4, p1 - 4), (a + 1, p1 - 1)], fill=hx("4a1422"))
+            d.polygon([(a + 1, p1 - 1), (a + 4, p1 - 4), (b - 4, p1 - 4), (b - 1, p1 - 1)], fill=hx("12020a"))
+            d.polygon([(b - 1, p0 + 1), (b - 1, p1 - 1), (b - 4, p1 - 4), (b - 4, p0 + 4)], fill=hx("1a040c"))
+            d.rectangle([a + 4, p0 + 4, b - 4, p1 - 4], fill=hx("36101a"))
+            cx, cy = (a + b) // 2, (p0 + p1) // 2
+            r = min(8, (p1 - p0) // 2 - 6)
+            d.polygon([(cx, cy - r), (cx + 6, cy), (cx, cy + r), (cx - 6, cy)], outline=gold_d)
+            d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=gold, outline=GOLD_DK)
+            for v in ((-2, 0), (2, 0), (0, -2), (0, 2)):
+                d.point((cx + v[0], cy + v[1]), fill=GOLD_DK)
+            d.point((cx, cy), fill=GOLD_L)
+    # studs down the meeting stiles, hinges on the hanging stiles
+    for sy in range(y0 + 6, y1 - 4, 10):
+        for sx in (mx - 3, mx + 4):
+            d.point((sx, sy), fill=gold)
+            d.point((sx, sy + 1), fill=GOLD_DK)
+    for hy in (y0 + 16, y0 + 74, y1 - 24):
+        for hx0 in (x0, x1 - 3):
+            d.rectangle([hx0, hy, hx0 + 3, hy + 8], fill=gold_d, outline=GOLD_DK)
+            d.point((hx0 + 1, hy + 2), fill=gold)
+    # the card slot, in an engraved brass plate
+    d.rectangle([mx - 11, 111, mx + 11, 129], fill=hx("b08a3a"), outline=GOLD_DK)
+    d.line([(mx - 10, 112), (mx + 10, 112)], fill=GOLD_L)
+    d.line([(mx - 10, 112), (mx - 10, 128)], fill=hx("d8b060"))
+    d.line([(mx - 10, 128), (mx + 10, 128)], fill=gold_d)
+    d.rectangle([mx - 8, 114, mx + 8, 126], outline=gold_d)
+    for sx, sy in ((mx - 9, 113), (mx + 9, 113), (mx - 9, 127), (mx + 9, 127)):
+        d.point((sx, sy), fill=GOLD_DK)
+    d.line([(mx - 5, 116), (mx + 5, 116)], fill=gold_d)
+    d.rectangle([mx - 6, 119, mx + 6, 121], fill=hx("0a0204"))
+    d.line([(mx - 6, 122), (mx + 6, 122)], fill=GOLD_L)
+    d.line([(mx - 6, 118), (mx + 6, 118)], fill=GOLD_DK)
+    d.line([(mx - 3, 124), (mx + 3, 124)], fill=gold_d)
+    # pull handles on long backplates, a keyhole under the right one
+    for s in (-1, 1):
+        bx = mx + 7 * s
+        d.rounded_rectangle([bx - 3, 132, bx + 3, 158], 2, fill=gold_d, outline=GOLD_DK)
+        d.line([(bx - 2, 133), (bx - 2, 157)], fill=gold)
+        d.rectangle([bx - 1, 135, bx + 1, 151], fill=gold, outline=GOLD_DK)
+        d.line([(bx, 135), (bx, 151)], fill=GOLD_L)
+    d.ellipse([mx + 6, 153, mx + 8, 155], fill=hx("0a0204"))
+    # brass kick plates and the threshold
+    for a, b in ((x0 + 2, mx - 2), (mx + 2, x1 - 2)):
+        d.rectangle([a, y1 - 9, b, y1 - 2], fill=gold_d, outline=GOLD_DK)
+        d.line([(a + 1, y1 - 8), (b - 1, y1 - 8)], fill=gold)
+        for sx in (a + 2, b - 2):
+            d.point((sx, y1 - 5), fill=GOLD_DK)
+    d.rectangle([x0 - 4, y1 - 1, x1 + 4, y1 + 1], fill=gold, outline=GOLD_DK)
 
 
 def paint_vestibule(wax=False, door=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
-    gold, gold_d = hx("c8a050"), hx("7a5a24")
+    gold, gold_d = GOLD, GOLD_D
     # wine-dark damask walls, a gilt frieze, a black ceiling
     vgrad(img, (0, 0, W - 1, FLOOR), hx("4a1624"), hx("2a0a14"))
-    rnd = random.Random(1401)
     for y in range(40, 170, 16):
         for x in range((y // 16 % 2) * 12, W, 24):
             d.polygon([(x, y - 4), (x + 4, y), (x, y + 4), (x - 4, y)], fill=hx("561c2c"))
@@ -329,67 +746,24 @@ def paint_vestibule(wax=False, door=False):
     d.rectangle([40, 140, 42, 152], fill=gold)
     d.rectangle([46, 140, 48, 152], fill=gold)
     # the coat check: a hatch in the wall, a counter with the house wax laid out for the summons
-    d.rectangle([86, 66, 198, 142], fill=hx("120608"), outline=gold_d)
-    for x in range(98, 192, 14):
-        d.line([(x, 78), (x, 84)], fill=hx("8a7a50"))
-        d.polygon([(x - 5, 84), (x + 5, 84), (x + 6, 128), (x - 6, 128)], fill=hx("1e1a22"))
-    d.rectangle([116, 54, 168, 64], fill=gold_d, outline=hx("3a2a10"))
-    text(img, (142, 59), "CLOAKS", hx("1a1008"), size=8)
-    d.rectangle([80, 142, 204, 148], fill=hx("6a2a1a"), outline=gold)
-    d.rectangle([84, 148, 200, FLOOR + 2], fill=hx("3a1018"), outline=hx("140408"))
-    for x0 in (90, 130, 170):
-        d.rectangle([x0, 154, x0 + 26, FLOOR - 4], outline=gold_d)
-    d.ellipse([90, 136, 100, 143], fill=gold)
-    d.rectangle([94, 134, 96, 136], fill=gold)
-    d.rectangle([150, 139, 182, 142], fill=hx("2a2028"), outline=gold_d)
-    if not wax:
-        d.rectangle([154, 136, 176, 139], fill=hx("a01818"))
-        d.rectangle([154, 136, 176, 136], fill=hx("d04040"))
-        d.rectangle([176, 137, 178, 138], fill=hx("e8e0d0"))
-    # the cloak rack: three hooded cloaks, an emblem worked at each breast, a signet on each clasp
-    d.rectangle([214, 52, 302, 56], fill=gold_d)
-    d.rectangle([256, 56, 260, FLOOR], fill=gold_d)
-    d.ellipse([244, FLOOR - 4, 272, FLOOR + 4], fill=gold_d)
+    _hatch(d, img, gold, gold_d)
+    _counter(d, img, gold, gold_d, wax)
+    # the cloak stand: three hooded cloaks, an emblem worked at each breast, a signet on each clasp
+    _stand(d, img, gold, gold_d)
     for kind, cx, col in CLOAKS:
-        d.line([(cx, 56), (cx, 64)], fill=gold)
-        d.ellipse([cx - 8, 62, cx + 8, 78], fill=hx("1a161e"))
-        d.polygon([(cx - 8, 72), (cx + 8, 72), (cx + 14, 172), (cx - 14, 172)], fill=hx("16141a"))
-        d.line([(cx, 80), (cx, 172)], fill=hx("0c0a10"))
-        d.line([(cx - 8, 74), (cx - 13, 168)], fill=hx("26222c"))
-        _emblem(d, kind, cx, 98, col)
-        d.ellipse([cx - 2, 76, cx + 2, 80], outline=gold)
+        _cloak(d, kind, cx, col)
     # the brass plaque and the inner door with its card slot
-    d.rectangle([316, 94, 360, 118], fill=hx("b08a3a"), outline=hx("4a3412"))
-    d.rectangle([318, 96, 358, 116], outline=hx("e0c070"))
+    d.rectangle([314, 94, 354, 118], fill=hx("b08a3a"), outline=hx("4a3412"))
+    d.rectangle([316, 96, 352, 116], outline=hx("e0c070"))
     for y in (101, 105, 109):
-        d.line([(322, y), (354, y)], fill=hx("5a4418"))
-    x0, y0, x1, y1 = INNER
-    d.rectangle([x0 - 6, y0 - 6, x1 + 6, y1], fill=gold_d, outline=hx("2a1a08"))
-    d.pieslice([x0 - 6, y0 - 26, x1 + 6, y0 + 14], 180, 360, fill=gold_d)
-    d.pieslice([x0, y0 - 20, x1, y0 + 8], 180, 360, fill=hx("1a0a0e"))
-    mx = (x0 + x1) // 2
-    if door:
-        d.rectangle([x0, y0, x1, y1], fill=hx("2a0e0a"))
-        d.polygon([(mx - 16, y1), (mx + 16, y1), (mx + 8, y0 + 60), (mx - 8, y0 + 60)], fill=hx("6a1418"))
-        d.polygon([(x0, y0), (x0 + 12, y0 + 6), (x0 + 12, y1 - 4), (x0, y1)], fill=hx("2a0a10"), outline=hx("0a0204"))
-        d.polygon([(x1, y0), (x1 - 12, y0 + 6), (x1 - 12, y1 - 4), (x1, y1)], fill=hx("2a0a10"), outline=hx("0a0204"))
-    else:
-        d.rectangle([x0, y0, x1, y1], fill=hx("2a0a10"), outline=hx("0a0204"))
-        d.line([(mx, y0), (mx, y1)], fill=hx("0a0204"))
-        for a, b in ((x0 + 6, mx - 6), (mx + 6, x1 - 6)):
-            d.rectangle([a, y0 + 10, b, y0 + 60], outline=gold_d)
-            d.rectangle([a, y0 + 92, b, y1 - 10], outline=gold_d)
-        d.rectangle([mx - 9, 114, mx + 9, 128], fill=hx("b08a3a"), outline=hx("4a3412"))
-        d.rectangle([mx - 6, 120, mx + 6, 122], fill=hx("0a0204"))
-        d.rectangle([mx - 7, 140, mx - 5, 152], fill=gold)
-        d.rectangle([mx + 5, 140, mx + 7, 152], fill=gold)
+        d.line([(320, y), (348, y)], fill=hx("5a4418"))
+    _inner_door(d, img, gold, gold_d, door)
     # sconces
     for sx in (206, 310, 464):
         d.rectangle([sx - 2, 70, sx + 2, 80], fill=gold)
         d.polygon([(sx - 5, 62), (sx + 5, 62), (sx + 3, 70), (sx - 3, 70)], fill=hx("f0d088"))
         light(img, "ellipse", [sx - 34, 36, sx + 34, 110], hx("e0a050"), 0.2, 14)
-    if door:
-        light(img, "polygon", [(x0, y0), (x1, y0), (x1 + 30, H - 1), (x0 - 30, H - 1)], hx("e08040"), 0.3, 10)
+    shadow(img, "ellipse", [214, 168, 302, 196], 0.3, 6)
     vignette(img, 0.6, (16, 6, 12), 40)
     return img
 

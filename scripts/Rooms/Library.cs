@@ -7,21 +7,14 @@ public partial class Library : Room
 {
     public override async Task OnEnter(string entry)
     {
-        if (State.HasFlag("on_map"))
+        if (State.HasFlag("seen_library_night")) return;
+        State.SetFlag("seen_library_night");
+        await Game.Run(async () =>
         {
-            if (State.HasFlag("seen_library_night")) return;
-            State.SetFlag("seen_library_night");
-            await Game.Run(async () =>
-            {
-                await Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
-                await Say("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
-                await Say("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
-            });
-            return;
-        }
-        if (State.HasFlag("seen_library")) return;
-        State.SetFlag("seen_library");
-        await Game.Run(() => Say("The public library. Leather, dust and silence. Rose always said it was the only honest room in Chicago."));
+            await Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
+            await Say("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
+            await Say("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
+        });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -59,54 +52,26 @@ public partial class Library : Room
             case ("librarian", Verb.Hand):
                 await Say("He looks like he'd break. I'm not that desperate. Not yet.");
                 return true;
-            case ("rose", Verb.Talk):
-                await Talk("rose");
-                return true;
-            case ("rose", Verb.UseItem) when Shows(item, "photo", "eleanor"):
-                await Say("rose", "She's beautiful. Is that why you're here? Work? Of course it is.");
-                return true;
-            case ("rose", Verb.Hand):
-                await Say("The last time I reached for her she was already gone. I kept my hands in my pockets.");
-                return true;
 
-            case ("shelves_right" or "ladder", Verb.Hand) when State.HasFlag("rose_tip") && !State.HasFlag("found_ledger"):
-                State.SetFlag("found_ledger");
-                State.GiveItem("ledger");
-                await Say("Top shelf, behind the county land records... a green ledger with Harrington Steel's seal.");
-                await Say("Tucked in the back cover: a receipt from the Lakeview Motor Court. Room 6. Paid in cash by T. Harrington.");
-                return true;
             case ("shelves_right" or "shelves_left", Verb.Hand):
-                if (State.HasFlag("on_map"))
-                {
-                    await Say("Restricted books behind locked glass. The librarian has the key; I need a title from his catalogue.");
-                    return true;
-                }
-                await Say(State.HasFlag("found_ledger")
-                    ? "I've got what I came for. The rest can stay alphabetized."
-                    : "A hundred thousand books. I'd need to know which one before I started pulling.");
+                await Say("Restricted books behind locked glass. The librarian has the key; I need a title from his catalogue.");
                 return true;
             case ("globe", Verb.Hand):
                 await Say("I spun it. It stopped on the Pacific. Story of my life: lots of water, no direction.");
                 return true;
-            case ("desk", Verb.Hand):
-            case ("desk", Verb.Look) when State.HasFlag("on_map"):
-                if (State.HasFlag("on_map"))
+            case ("desk", Verb.Hand or Verb.Look):
+                if (!State.HasFlag("librarian_refused"))
                 {
-                    if (!State.HasFlag("librarian_refused"))
-                    {
-                        await Say("I'd better ask the librarian about the mirror before digging through his catalogue.");
-                        return true;
-                    }
-                    if (await Game.Hud.Puzzle.Open(PuzzleKind.Catalogue))
-                    {
-                        State.SetFlag("catalogue_identified");
-                        await Say("Connected triquetra. Celtic traditions. A. R. Bell: Rites of the Old Isles, C-17. Now I know what to ask for.");
-                    }
+                    await Say("I'd better ask the librarian about the mirror before digging through his catalogue.");
                     return true;
                 }
-                await Say("Rose's desk. A drawer with my picture in it, face down. I left it the way she wanted it.");
+                if (await Game.Hud.Puzzle.Open(PuzzleKind.Catalogue))
+                {
+                    State.SetFlag("catalogue_identified");
+                    await Say("Connected triquetra. Celtic traditions. A. R. Bell: Rites of the Old Isles, C-17. Now I know what to ask for.");
+                }
                 return true;
-            case ("ladder", Verb.Hand) when State.HasFlag("on_map"):
+            case ("ladder", Verb.Hand):
                 await Say("The ladder won't unlock the restricted glass. The librarian has the key.");
                 return true;
         }

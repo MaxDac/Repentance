@@ -1,10 +1,9 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Library.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library.png" id="2_library"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/rose.png" id="91_rose"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/librarian.png" id="92_librarian"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
@@ -194,20 +193,6 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
 position = Vector2(434.0, 88.0)
 shape = SubResource("Rect_9")
-
-[node name="Rose" type="Area2D" parent="World"]
-position = Vector2(392, 236)
-script = ExtResource("90_Actor")
-Id = "rose"
-DisplayName = "Rose"
-HideIfFlags = "on_map"
-LookText = "Rose. My wife, on paper. Gold spectacles, cardigan, and the patience of a woman who has run out of it."
-WalkTo = Vector2(346, 238)
-monitoring = false
-monitorable = false
-Texture = ExtResource("91_rose")
-FlipH = true
-SpeechColor = Color(0.78, 0.86, 1.0, 1)
 
 [node name="Librarian" type="Area2D" parent="World"]
 position = Vector2(392, 236)
