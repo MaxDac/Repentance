@@ -1118,6 +1118,8 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             nose_x = pt(0.0, 0.03, 0.072)[0]
             outer = 1 if ex > nose_x or (ex == nose_x and s * fs > 0) else -1
             ex, look = nose_x + 2 * outer, -outer
+            if col.get("level_eyes"):  # one shared row, so a slight turn does not tilt the eye line
+                ey = pt((1 if sp >= 0 else -1) * 0.022, 0.0, 0.056)[1]  # the near eye's row
         if col.get("asleep"):  # closed lids: just the curved lash line
             lash = _dark(col.get("brow") or col["hair"], 1)
             c.dot(ex, ey, lash)
