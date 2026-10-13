@@ -32,9 +32,11 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
     return d
 
 
-MICAH = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="fedora", hat_col="5c4838", band="1a120e",
-             face_w=0.050, jaw_w=0.041,
-             torso="ae8848", collar="ae8848", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
+MICAH_HEAD = dict(skin="d09670", hair="3a2a1e", hair_style="cropped", brow="2a1c14", stubble="8e6c52",
+                  face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2")
+MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
+             brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35,
+             torso="ae8848", collar="e3d7bf", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
              pants="4a433b", shoes="2b1b14",
              decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
@@ -63,7 +65,8 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                   ("belt", 0.42, "d8d0c0")])
 # Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, high black neckline, a single strand of pearls.
 ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
-               face_w=0.046, jaw_w=0.034, fringe=0.3,
+               face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85, fringe=0.3,
+               front_gaze=True, small_lips=True, eye_white="f4eee6",
                hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12",
                torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
                shoes="141014",
@@ -106,7 +109,7 @@ LIBRARIAN = dict(h=63, sw=0.118, hw=0.044, waist=0.07, hipw=0.082, skin="dcb496"
                                                        ("buttons", 0.34, 0.51, 3, "3a3228")])
 # Micah getting dressed: no hat or coat, an open white shirt with the tie hanging loose round the collar, braces
 # unclipped and hanging in loops at the hips.
-MICAH_DRESSING = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="e4ddcc", sleeves="e4ddcc",
+MICAH_DRESSING = dict(MICAH_HEAD, h=66, sw=0.142, torso="e4ddcc", sleeves="e4ddcc",
                       cuff="e4ddcc", collar="ece6d6", pants="4a433b", shoes="2b1b14", top_hem=0.43,
                       decals=[("strip", 0.205, 0.29, 0.03, 0.0, "d8a480"),
                               ("ribbon", 0.03, 0.212, 0.37, 0.005, "7b1f2a"),
@@ -178,7 +181,7 @@ ELEANOR_SHEET = dict(ELEANOR, torso="e8e4dc", sleeves="ecc4a2", neckline=0.262,
                      coat=dict(col="e8e4dc", top=0.40, hem=0.97, flare=0.03), stockings="e8e4dc", shoes="ecc4a2",
                      decals=[("strip", 0.30, 0.95, 0.01, 0.01, "c8c4bc")])
 # Micah in Joliet: a faded tan prison coverall buttoned to the throat.
-MICAH_INMATE = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", torso="b8743a", collar="b8743a", sleeves="b8743a",
+MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a", sleeves="b8743a",
                     cuff="b8743a", pants="b8743a", shoes="2b1b14",
                     decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
 

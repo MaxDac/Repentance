@@ -521,6 +521,11 @@ def _head(c, col, P, body, H, cp, sp, nod):
     c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
     jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), col.get("jaw_w", 0.039) * HEAD, 0.044 * HEAD, 0.05 * HEAD)
     c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
+    if col.get("chin_w") and facing:  # a square jaw: fill the round jaw out to its corners
+        cw = col["chin_w"] * HEAD
+        a = P(body([-cw, 0.118 + nod + 0.036 * HEAD, 0.024]))
+        b = P(body([cw, 0.118 + nod + 0.036 * HEAD, 0.024]))
+        c.put(c.capsule(a[:2], b[:2], H * 0.014, H * 0.014), skin, "head", dither=False)
     if abs(sp) > 0.3:
         ys = 0.074 + nod
         # brow ridge, nose and chin give the profile its shape
@@ -715,11 +720,15 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     style = col.get("hair_style", "short")
     hair = col["hair"]
     fs = sp
-    vol = col.get("hair_vol", {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5}[style])
-    m, nx, ny, nz = c.ellipse((hx_ - (0.25 + 0.012 * H) * fs, hy_ - 0.6), hrx + vol + 0.008 * H * abs(fs), hry + vol * 0.8)
+    vol = col.get("hair_vol", {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5, "cropped": 0.3}[style])
+    cropped = style == "cropped"  # short back and sides: close to the skull, ears and nape left bare
+    back_off, back_w = (0.1 + 0.004 * H, 0.003 * H) if cropped else (0.25 + 0.012 * H, 0.008 * H)
+    m, nx, ny, nz = c.ellipse((hx_ - back_off * fs, hy_ - 0.6), hrx + vol + back_w * abs(fs), hry + vol * 0.8)
     u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
     front = hy_ - hry * (0.5 if style in ("long", "bob") else 0.64) + (0.5 if style == "slick" else 0)
     nape = hy_ + hry * (0.55 if style != "bob" else 0.95)
+    if cropped:
+        nape = hy_ + hry * 0.45
     if style == "long":
         nape = hy_ + hry * 1.15
     # how much a column is "back of the head" vs face
@@ -730,7 +739,7 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         sides *= np.where(u * fs > 0, np.clip(1 - abs(sp) * (5.0 if style == "long" else 2.4), 0, 1), 1.0)
         side_line = hy_ + hry * (0.95 if style == "long" else 0.75)
     else:
-        side_line = hy_ + hry * 0.15
+        side_line = hy_ + hry * (-0.15 if cropped else 0.15)
     line = front + (nape - front) * back
     line = np.maximum(line, front + (side_line - front) * sides)
     fringe = None
@@ -763,14 +772,18 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         return
     hc = col["hat_col"]
     if hat == "fedora":
-        by = hy_ - hry * 0.42
-        brx = H * 0.092
-        bry = 1.0 + H * 0.092 * PITCH * abs(cp) * 0.9
+        by = hy_ - hry * col.get("brim_y", 0.42)
+        brx = H * col.get("brim_w", 0.092)
+        bry = 1.0 + brx * PITCH * abs(cp) * 0.9
         snap = 0.12 * sp
         m = c.put(c.ellipse((hx_ + 0.6 * sp, by), brx, bry, snap), hc, "brim")
         crx = H * math.sqrt((0.054 * cp) ** 2 + (0.062 * sp) ** 2)
-        ccy = by - H * 0.035
-        crown = c.ellipse((hx_ - 0.4 * sp, ccy), crx, H * 0.045)
+        crown_h = col.get("crown_h", 0.045)
+        ccy = by - H * crown_h * 0.78
+        crown = c.ellipse((hx_ - 0.4 * sp, ccy), crx, H * crown_h)
+        if col.get("crown_pinch"):  # the crown tapers towards a flat-topped, pinched peak
+            taper = np.clip((by - c.Y) / max(H * crown_h * 1.6, 1), 0, 1) * col["crown_pinch"]
+            crown = (crown[0] & (np.abs(c.X - (hx_ - 0.4 * sp)) <= crx * (1 - taper) + 0.5),) + tuple(crown[1:])
         c.put(crown, hc, "crown", clip=c.Y < by + 0.4)
         band = c.parts_mask("crown") & (c.Y >= by - 2.2) & (c.Y < by - 0.4)
         c.recolor(band, col.get("band", "1a120e"), dither=False)
@@ -1089,6 +1102,11 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             ex -= fs
         near = nD > 0.55 and not side
         look = fs or -s  # iris sits towards where the character looks; front view: towards the nose
+        if col.get("front_gaze") and abs(sp) < 0.5:
+            # facing the viewer: eyes set evenly either side of the nose, whites outside, pupils looking ahead
+            nose_x = pt(0.0, 0.03, 0.072)[0]
+            outer = 1 if ex > nose_x or (ex == nose_x and s * fs > 0) else -1
+            ex, look = nose_x + 2 * outer, -outer
         if col.get("asleep"):  # closed lids: just the curved lash line
             lash = _dark(col.get("brow") or col["hair"], 1)
             c.dot(ex, ey, lash)
@@ -1096,11 +1114,34 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             c.dot(ex, ey - 3 if female else ey - 2, brow)
             c.dot(ex - look, ey - 3 if female else ey - 2, brow)
             continue
+        if col.get("deep_eyes"):
+            # deep-set under a heavy, low brow: dark irises with only a sliver of muted white
+            if col.get("front_gaze") and abs(sp) < 0.5:
+                ex -= outer  # close-set, clear of the cheek outline
+            ey += 1  # set below a shaded socket so the iris does not merge into the brow
+            c.dot(ex, ey, eye)
+            if near or abs(cp) > 0.85:
+                c.dot(ex - look, ey, col.get("eye_white", "e6ded4"))
+                c.dot(ex - look, ey - 1, tone(2))
+            c.dot(ex, ey - 1, tone(2))
+            for dx in (-1, 0, 1):
+                c.dot(ex + dx, ey - 2, brow)
+            continue
         c.dot(ex, ey, eye)
-        if near or abs(cp) > 0.85:
-            c.dot(ex - look, ey, "e6ded4")
+        gaze = col.get("front_gaze") and abs(sp) < 0.5
+        wx = ex - look
+        if gaze:
+            # keep the white on the face: if it would sit on the outline, tuck it inside the iris instead
+            head = c.parts_mask("head")
+            on = lambda x: 0 <= x < c.w and 0 <= ey < c.h and head[ey, x]
+            if not (on(wx) and on(wx - look)):
+                wx = ex + look
+        if near or abs(cp) > 0.85 or gaze:
+            c.dot(wx, ey, col.get("eye_white", "e6ded4"))
         lash = _dark(col.get("brow") or col["hair"], 1) if female else tone(1)
         c.dot(ex, ey - 1, lash)
+        if gaze and female:  # the upper lid runs over the white too, so the eye reads as an almond
+            c.dot(wx, ey - 1, lash)
         if near and not female:
             c.dot(ex - look, ey - 1, lash)
         if not female:
@@ -1110,7 +1151,7 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
         c.dot(ex - look, by + (0 if female else 0), brow)
         if not female and near:
             c.dot(ex + look, by, brow)
-        if female and near:
+        if female and near and not gaze:
             c.dot(ex + (1 if s > 0 else -1) * (1 if fs == 0 else 0), by + 1, brow)
         if col.get("specs"):  # round wire rims round the eye and its white, with a bridge over the nose
             rim = col["specs"]
@@ -1126,9 +1167,11 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
     if side:
         nx_ -= fs
     if not side:
-        c.dot(nx_ + 1, ny_ - 2, tone(2))  # shadow down the right flank (key light from the left)
+        if not col.get("deep_eyes"):  # deep-set eyes sit on this row
+            c.dot(nx_ + 1, ny_ - 2, tone(2))  # shadow down the right flank (key light from the left)
         c.dot(nx_ + 1, ny_ - 1, tone(2))
-        c.dot(nx_ - 1 if fs >= 0 else nx_, ny_ - 2, tone(4))  # bridge highlight
+        if not col.get("deep_eyes"):
+            c.dot(nx_ - 1 if fs >= 0 else nx_, ny_ - 2, tone(4))  # bridge highlight
     c.dot(nx_ + (1 if fs >= 0 else 0), ny_, tone(1))  # nostril / underside
     c.dot(nx_ + (0 if fs >= 0 else 1), ny_ + 1, tone(2))
 
@@ -1143,7 +1186,10 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
     if col.get("mustache"):
         for x in xs + [xs[-1] + 1, xs[0] - 1]:
             c.dot(x, my - 1, _dark(col["hair"], 1))
-    if mouth == 0:
+    if mouth == 0 and col.get("small_lips") and female:  # a neat closed mouth: one row, two pixels at most
+        for x in (xs[:2] if not side else xs):
+            c.dot(x, my, lip)
+    elif mouth == 0:
         for x in xs:
             c.dot(x, my, lip if female else tone(1))
             if female:
@@ -1157,7 +1203,28 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             c.dot(x, my, lip if female else tone(1))
             c.dot(x, my + 1, "4a1a14")
     c.dot(mx, my + 3, tone(2))  # chin shadow
-    if female and not side:
+    if col.get("stubble"):
+        # a few days' growth: a broken stipple on the chin and along the jaw below the mouth
+        head = c.parts_mask("head")
+        rows = np.nonzero(head.any(1))[0]
+        bottom = rows.max() if len(rows) else my + 3
+        for y in range(ny_ + 1, bottom + 1):
+            xs_ = np.nonzero(head[y])[0] if 0 <= y < c.h else []
+            if not len(xs_):
+                continue
+            edge = {xs_[0], xs_[-1]}
+            for x in xs_:
+                if fs and (x - mx) * fs < -3:  # the back of the skull, not the jaw
+                    continue
+                if y <= my:  # above the mouth only the jawline itself
+                    if x in edge and y > ny_ + 1:
+                        c.dot(x, y, col["stubble"])
+                    continue
+                if y == my + 1 and x in xs and mouth != 0:  # keep the open mouth clear
+                    continue
+                if (x + y) % 2 == 0 or y >= bottom or x in edge:
+                    c.dot(x, y, col["stubble"])
+    if female and not side and not col.get("small_lips"):
         c.dot(mx + (2 if fs >= 0 else -2), my - 2, _dark(lip, 4))
     if col.get("old"):
         c.dot(nx_ + 2, ny_ + 1, tone(1))  # nasolabial fold
