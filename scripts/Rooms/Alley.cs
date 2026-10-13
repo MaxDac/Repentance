@@ -10,8 +10,11 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Alley : Room
 {
-    private static readonly Texture2D SalSupine = GD.Load<Texture2D>("res://assets/art/sprites/sal_supine.png");
+    private static readonly Texture2D SalOut = GD.Load<Texture2D>("res://assets/art/sprites/sal_out.png");
     private static readonly Texture2D BartenderShot = GD.Load<Texture2D>("res://assets/art/sprites/bartender_shot.png");
+
+    /// <summary>The far end of the passage on the left, where the alley opens onto the street.</summary>
+    private static readonly Vector2 StreetMouth = new(50, 192);
 
     private static readonly Vector2 SalAtTrash = new(398, 224);
     private static readonly Vector2 BehindSal = new(352, 222);
@@ -34,8 +37,9 @@ public partial class Alley : Room
         if (FindActor("sal") is { } sal && State.HasFlag("alley3_sal_out"))
         {
             sal.Position = SalAtTrash;
+            sal.FaceLeft(false);
             sal.WalkTo = BehindSal;
-            if (State.HasFlag("alley3_sal_down")) sal.SetTexture(SalSupine);
+            if (State.HasFlag("alley3_sal_down")) sal.SetTexture(SalOut);
         }
     }
 
@@ -186,7 +190,9 @@ public partial class Alley : Room
         Player.FaceTowards(sal.Position);
         await Say("Revolver by the barrel. The butt's the only part of it I ever hit anything with.");
         await Say("*THUNK*");
-        sal.SetTexture(SalSupine);
+        // hit from behind: down on his knees, then flat on his face
+        await sal.PlayPose("sal_knockout");
+        sal.SetTexture(SalOut);
         State.SetFlag("alley3_sal_down");
         await Wait(0.6);
         await Say("Down like a sack of coal. Nighty night, Sal.");
@@ -212,18 +218,20 @@ public partial class Alley : Room
             Player.SetPose(null);
             await Wait(0.6);
             await Say("I walked away. Down the alley, past the dead lamp, out into the street. Nobody followed.");
-            await Game.WalkTo(new Vector2(20, 230));
+            await Game.WalkTo(StreetMouth);
             await Act3.End();
             return;
         }
         await Say("*BANG*");
+        // the bullet takes him in the shoulder: he folds straight down and goes over on his back
+        await tony.PlayPose("bartender_fall");
         tony.SetTexture(BartenderShot);
         await Wait(0.8);
         await Talk("bartender_shot");
         Player.SetPose(null);
         State.SetFlag("alley3_done");
         await Say("The Gold Coast. The kitchen door. The delivery boys' key.");
-        await Game.WalkTo(new Vector2(20, 230));
+        await Game.WalkTo(StreetMouth);
         await Game.ChangeRoom("mansion_exterior", "start");
     }
 }

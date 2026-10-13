@@ -118,7 +118,7 @@ public static class Notes
             L("The leader on the stage: \"Are you satisfied, now, mister Jones?\""),
             L("Then Bruno, from behind.")),
         N("mansion", "The mansion", "shot_bartender",
-            L("Tony, with a bullet in his leg: the old man's place on the Gold Coast."),
+            L("Tony, with a bullet in his shoulder: the old man's place on the Gold Coast."),
             L("Round the back to the kitchen. Booze comes in that way every Thursday."),
             L("Key on the lintel over the kitchen door.")),
         N("alarm", "The alarm", "alarm_noticed",
