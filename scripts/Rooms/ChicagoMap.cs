@@ -9,6 +9,59 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ChicagoMap : Room
 {
+    private static readonly Rect2 CaptionRect = new(56, 234, 368, 24);
+    private Control _captionBox = null!;
+    private Label _caption = null!;
+
+    /// <summary>The description in the bottom caption strip, or "" when it is hidden.</summary>
+    public string CaptionText => _captionBox.Visible ? _caption.Text : "";
+
+    public override void _Ready()
+    {
+        base._Ready();
+        // a parchment strip at the foot of the map: hovering a place reads its description, no click needed
+        _captionBox = new Panel
+        {
+            Position = CaptionRect.Position,
+            Size = CaptionRect.Size,
+            ZIndex = 20,
+            Visible = false,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        _captionBox.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+        {
+            BgColor = new Color("ece0bc"),
+            BorderColor = new Color("4a3420"),
+            BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1,
+        });
+        _caption = new Label
+        {
+            Position = new Vector2(4, 1),
+            Size = CaptionRect.Size - new Vector2(8, 2),
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            LabelSettings = new LabelSettings { Font = Hud.Font, FontSize = 8, FontColor = new Color("3a2a1c"), LineSpacing = 0 },
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        _captionBox.AddChild(_caption);
+        AddChild(_captionBox);
+    }
+
+    public override void _Process(double delta) => UpdateCaption(Game.Hud.MousePos);
+
+    /// <summary>Shows the description of the place under <paramref name="mouse"/>, if any.</summary>
+    public void UpdateCaption(Vector2 mouse)
+    {
+        var hud = Game.Hud;
+        var spot = Game.Busy || hud.Wheel.IsOpen || hud.InventoryOpen ? null : HotspotAt(mouse);
+        _captionBox.Visible = spot != null && spot.LookText != "";
+        if (spot != null) _caption.Text = spot.LookText;
+    }
+
+    // on the map a left click goes there; looking is what hovering is for
+    public override Verb? LeftClickVerb(Hotspot h) => Verb.Walk;
+
     public override async Task OnEnter(string entry)
     {
         State.SetFlag("on_map");

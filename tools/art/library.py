@@ -1,4 +1,4 @@
-"""An opulent old private library: dark wood shelves, lamplight and scholarly clutter."""
+"""An opulent old private library by day: dark wood shelves, sunlight slanting in, the desk lamp cold."""
 from PIL import Image, ImageDraw
 import math
 import random
@@ -62,13 +62,11 @@ def arched_window(img):
     d.rectangle([x0 - 6, y0 + 14, x1 + 6, y1 + 4], fill=MAHOGANY_D)
     d.pieslice([x0 - 6, y0 - 34, x1 + 6, y0 + 38], 180, 360, fill=MAHOGANY_D)
     glass = Image.new("RGB", img.size, 0)
-    vgrad(glass, (x0, y0, x1, y1), hx("23344a"), hx("64728c"))
+    # a clear midday sky over sunlit treetops
+    vgrad(glass, (x0, y0 - 28, x1, y1), hx("a8cce8"), hx("e8eee4"))
     gd = ImageDraw.Draw(glass)
-    for cx, cy, r, col in ((344, 82, 18, hx("283522")), (372, 74, 22, hx("314126")), (396, 88, 16, hx("24301d"))):
+    for cx, cy, r, col in ((344, 82, 18, hx("6c9a4c")), (372, 74, 22, hx("7eac58")), (396, 88, 16, hx("5e8a42"))):
         gd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col)
-    gd.ellipse([338, 40, 356, 58], fill=hx("d8d2b0"))
-    gd.line([(346, 42), (346, 56)], fill=hx("f0ead0"))
-    gd.line([(339, 50), (353, 50)], fill=hx("f0ead0"))
     mask = Image.new("L", img.size, 0)
     md = ImageDraw.Draw(mask)
     md.rectangle([x0, y0 + 12, x1, y1], fill=255)
@@ -84,7 +82,7 @@ def arched_window(img):
     d.polygon([(436, 18), (398, 18), (376, 146), (412, 146)], fill=hx("47151c"))
     for x in (304, 420):
         d.line([(x, 18), (x + (-8 if x > 360 else 8), 142)], fill=hx("8a5c42"), width=2)
-    light(img, "polygon", [(328, 30), (404, 30), (468, 198), (286, 198)], hx("8094bc"), 0.18, 12)
+    light(img, "polygon", [(328, 30), (404, 30), (468, 198), (286, 198)], hx("fff2d0"), 0.22, 12)
     shadow(img, "polygon", [(300, 18), (332, 18), (318, 156), (284, 156)], 0.2, 7, hx("28140f"))
 
 
@@ -220,14 +218,12 @@ def desk(img):
 
 def desk_props(img):
     d = ImageDraw.Draw(img)
-    # oil lamp
+    # oil lamp, unlit in the daytime: cold glass chimney, a dark wick
     d.ellipse([199, 158, 211, 162], fill=hx("8a622a"))
     d.rectangle([204, 151, 206, 158], fill=hx("a67838"))
-    d.ellipse([201, 147, 209, 152], fill=hx("ead8a8"))
-    d.ellipse([202, 148, 208, 151], fill=hx("fff0b8"))
-    d.polygon([(204, 146), (205, 142), (206, 146)], fill=hx("ffd870"))
-    light(img, "ellipse", [180, 130, 232, 176], hx("ffd08a"), 0.5, 10)
-    light(img, "polygon", [(196, 160), (214, 160), (226, 168), (186, 168)], hx("fff0c8"), 0.4, 3)
+    d.ellipse([201, 147, 209, 152], fill=hx("a8a490"))
+    d.ellipse([202, 148, 208, 151], fill=hx("c8c4b0"))
+    d.line([(205, 144), (205, 146)], fill=hx("3a2c20"))
     # papers, quill, magnifier
     d.polygon([(222, 160), (242, 159), (243, 165), (220, 166)], fill=hx("d7c5a0"))
     d.line([(225, 161), (239, 161)], fill=hx("7a6a54"))
@@ -307,7 +303,28 @@ def paint():
     desk_props(img)
     ladder(img)
     shadow(img, "ellipse", [0, 0, W - 1, 40], 0.22, 12, hx("2a130d"))
+    sunlight(img)
     return tall(img, ceiling)
+
+
+def sunlight(img):
+    """Midday sun from the tall window on the right: an even daylight fill, slanting shafts and bright patches
+    on the parquet and rug."""
+    light(img, "rect", [0, 0, W - 1, H - 1], hx("fff0d8"), 0.13, 0)
+    for top, foot in (((330, 0), (380, 0)), ((392, 0), (430, 0))):
+        (a, _), (b, _) = top, foot
+        light(img, "polygon", [(a, 0), (b, 0), (b - 190, 212), (a - 210, 212)], hx("fff0c8"), 0.2, 9)
+    # the window's panes thrown across the rug, the mullions leaving darker bars
+    for i in range(2):
+        for j in range(3):
+            x, y = 112 + j * 26 - i * 9, 182 + i * 14
+            light(img, "polygon", [(x, y), (x + 22, y), (x + 15, y + 11), (x - 7, y + 11)], hx("ffe8b8"), 0.26, 1)
+    rnd = random.Random(73)
+    d = ImageDraw.Draw(img)
+    for _ in range(26):
+        y = rnd.randint(20, 190)
+        x = rnd.randint(250, 400) - (y * 200) // 212
+        d.point((x, y), fill=hx("f8ecd0"))
 
 
 def ceiling(img):
@@ -327,7 +344,7 @@ def ceiling(img):
 
 def build():
     base = paint()
-    vignette(base, 0.58, tint=(62, 40, 18), blur=42)
+    vignette(base, 0.32, tint=(120, 96, 70), blur=42)
     pal = palette_of(base, 128)
     px = pixelize(base, pal)
     save(px, "rooms", "library.png")

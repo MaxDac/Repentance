@@ -211,7 +211,10 @@ def cartouche(img):
     text(img, ((x0 + x1) // 2, y0 + 15), "CHICAGO", INK, size=16)
     d.line([(x0 + 14, y0 + 26), (x0 + 42, y0 + 26)], fill=INK)
     d.line([(x1 - 42, y0 + 26), (x1 - 14, y0 + 26)], fill=INK)
-    text(img, ((x0 + x1) // 2, y0 + 27), "1927", PIN_D, size=8)
+    # a small pin-red lozenge between the rules (the map carries no year; to Micah it's simply the current one)
+    cx, cy = (x0 + x1) // 2, y0 + 26
+    d.polygon([(cx, cy - 3), (cx + 4, cy), (cx, cy + 3), (cx - 4, cy)], fill=PIN_D)
+    d.point((cx, cy), fill=PLATE)
     text(img, ((x0 + x1) // 2, y1 + 9), "STREET GUIDE", mix(INK, PAPER_D, 0.35), size=8)
 
 

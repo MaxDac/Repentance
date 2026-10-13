@@ -45,7 +45,7 @@ metadata/facing = 3
 y_sort_enabled = true
 
 [node name="Eleanor" type="Node2D" parent="."]
-position = Vector2(125, 136)
+position = Vector2(125, 108)
 script = ExtResource("4_Voice")
 Id = "eleanor"
 SpeechColor = Color(0.96, 0.78, 0.62, 1)

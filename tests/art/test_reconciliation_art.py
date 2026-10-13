@@ -56,7 +56,7 @@ class ReconciliationArtTests(unittest.TestCase):
 
     def test_office_props_and_inventory_icons_have_transparency(self):
         for folder, name, size in (
-                ("rooms", "office_ring", (14, 10)), ("rooms", "office_cup", (10, 12)),
+                ("rooms", "office_ring", (3, 2)), ("rooms", "office_ring_glint", (35, 7)), ("rooms", "office_cup", (10, 12)),
                 ("items", "faith_ring", (32, 24)), ("items", "cross", (32, 24))):
             with self.subTest(asset=name), Image.open(self.generated / folder / f"{name}.png") as image:
                 self.assertEqual(image.size, size)

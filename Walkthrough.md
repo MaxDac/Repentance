@@ -220,14 +220,17 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Map of Chicago
 
-- New location: an old map of Chicago, 1927. Micah isn't drawn on the map.
+- New location: an old map of Chicago (no year printed on it). Micah isn't drawn on the map.
 - On the first visit, Micah says "I have to find her again".
 - Three locations are available: the Library, the Church (cathedral) and his Office.
+- Hovering over a location shows its description in a parchment caption strip along the bottom of the map.
+  Clicking a location travels there, or Micah says why he won't go.
 - Selecting the Church: Micah refuses to go back ("Coming there was a mistake once already").
 
 #### Library
 
-- At the library, after hours, there is a night librarian (new male character) instead of Rose.
+- The library visit happens during the day. There is a librarian (new male character); Rose is not there and the
+  librarian never mentions her.
 - Micah asks him about the strange symbol; it is shown full screen during the conversation, then the scene
   returns to both Micah and the librarian.
 - The librarian asks him where he got that mirror. Micah won't tell him, so the librarian answers that he won't
