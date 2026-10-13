@@ -32,7 +32,7 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
 
 
 MICAH_HEAD = dict(skin="d09670", hair="3a2a1e", hair_style="cropped", brow="2a1c14", stubble="8e6c52",
-                  face_w=0.050, jaw_w=0.044, front_gaze=True)
+                  face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2")
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
              brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35,
              torso="ae8848", collar="e3d7bf", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),

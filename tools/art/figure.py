@@ -521,6 +521,11 @@ def _head(c, col, P, body, H, cp, sp, nod):
     c.put(c.ellipse((hx_, hy_), hrx, hry), skin, "head", dither=False)
     jc, jrx, jry = ell3(body([0, 0.118 + nod, 0.018]), col.get("jaw_w", 0.039) * HEAD, 0.044 * HEAD, 0.05 * HEAD)
     c.put(c.ellipse(jc, jrx, jry), skin, "head", dither=False)
+    if col.get("chin_w") and facing:  # a square jaw: fill the round jaw out to its corners
+        cw = col["chin_w"] * HEAD
+        a = P(body([-cw, 0.118 + nod + 0.036 * HEAD, 0.024]))
+        b = P(body([cw, 0.118 + nod + 0.036 * HEAD, 0.024]))
+        c.put(c.capsule(a[:2], b[:2], H * 0.014, H * 0.014), skin, "head", dither=False)
     if abs(sp) > 0.3:
         ys = 0.074 + nod
         # brow ridge, nose and chin give the profile its shape
@@ -1102,6 +1107,19 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
             c.dot(ex, ey - 3 if female else ey - 2, brow)
             c.dot(ex - look, ey - 3 if female else ey - 2, brow)
             continue
+        if col.get("deep_eyes"):
+            # deep-set under a heavy, low brow: dark irises with only a sliver of muted white
+            if col.get("front_gaze") and abs(sp) < 0.5:
+                ex -= outer  # close-set, clear of the cheek outline
+            ey += 1  # set below a shaded socket so the iris does not merge into the brow
+            c.dot(ex, ey, eye)
+            if near or abs(cp) > 0.85:
+                c.dot(ex - look, ey, col.get("eye_white", "e6ded4"))
+                c.dot(ex - look, ey - 1, tone(2))
+            c.dot(ex, ey - 1, tone(2))
+            for dx in (-1, 0, 1):
+                c.dot(ex + dx, ey - 2, brow)
+            continue
         c.dot(ex, ey, eye)
         if near or abs(cp) > 0.85:
             c.dot(ex - look, ey, "e6ded4")
@@ -1132,9 +1150,11 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
     if side:
         nx_ -= fs
     if not side:
-        c.dot(nx_ + 1, ny_ - 2, tone(2))  # shadow down the right flank (key light from the left)
+        if not col.get("deep_eyes"):  # deep-set eyes sit on this row
+            c.dot(nx_ + 1, ny_ - 2, tone(2))  # shadow down the right flank (key light from the left)
         c.dot(nx_ + 1, ny_ - 1, tone(2))
-        c.dot(nx_ - 1 if fs >= 0 else nx_, ny_ - 2, tone(4))  # bridge highlight
+        if not col.get("deep_eyes"):
+            c.dot(nx_ - 1 if fs >= 0 else nx_, ny_ - 2, tone(4))  # bridge highlight
     c.dot(nx_ + (1 if fs >= 0 else 0), ny_, tone(1))  # nostril / underside
     c.dot(nx_ + (0 if fs >= 0 else 1), ny_ + 1, tone(2))
 
@@ -1182,7 +1202,7 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
                     continue
                 if y == my + 1 and x in xs and mouth != 0:  # keep the open mouth clear
                     continue
-                if (x + y) % 2 == 0 or y >= bottom - 1 or x in edge:
+                if (x + y) % 2 == 0 or y >= bottom or x in edge:
                     c.dot(x, y, col["stubble"])
     if female and not side:
         c.dot(mx + (2 if fs >= 0 else -2), my - 2, _dark(lip, 4))
