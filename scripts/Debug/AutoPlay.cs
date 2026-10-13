@@ -496,7 +496,7 @@ public class AutoPlay
             Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
             Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
                 "Micah is relieved Rose isn't on duty, but she's back on his mind");
-            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the daytime librarian is there, not Rose");
+            Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");
             CheckLibrarianOverLadder(game);
             await Shot("library_day");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
