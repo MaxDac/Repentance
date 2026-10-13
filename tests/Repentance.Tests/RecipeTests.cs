@@ -39,17 +39,18 @@ public class RecipeTests
     }
 
     [Fact]
-    public void MatchbookIsNeverConsumed()
+    public void LighterIsNeverConsumedAndTheMatchbookLightsNothing()
     {
-        Assert.All(Recipes.All, r => Assert.DoesNotContain("matchbook", r.Consumes));
-        Assert.All(Recipes.All.Where(r => r.Inputs.Contains("matchbook")),
-            r => Assert.Contains("matchbook", r.Catalysts ?? Array.Empty<string>()));
+        Assert.All(Recipes.All, r => Assert.DoesNotContain(MicahKit.LighterId, r.Consumes));
+        Assert.All(Recipes.All.Where(r => r.Inputs.Contains(MicahKit.LighterId)),
+            r => Assert.Contains(MicahKit.LighterId, r.Catalysts ?? Array.Empty<string>()));
+        Assert.DoesNotContain(Recipes.All, r => r.Inputs.Contains("matchbook"));
     }
 
     [Fact]
-    public void FullChainsEndWithTheUsableItemAndKeepTheMatchbook()
+    public void FullChainsEndWithTheUsableItemAndKeepTheLighter()
     {
-        var bag = new HashSet<string> { "matchbook", "hanger", "pliers", "carnation", "bluing",
+        var bag = new HashSet<string> { MicahKit.LighterId, "hanger", "pliers", "carnation", "bluing",
             "clipping_top", "clipping_bottom", "paste", "sealing_wax", "invitation", "signet_raven",
             "lantern", "kerosene" };
         void Combine(string a, string b)
@@ -61,12 +62,12 @@ public class RecipeTests
         Combine("hanger", "pliers");
         Combine("bluing", "carnation");
         Combine("clipping_bottom", "clipping_top");
-        Combine("sealing_wax", "matchbook");
+        Combine("sealing_wax", MicahKit.LighterId);
         Combine("invitation", "wax_soft");
         Combine("invitation_waxed", "signet_raven");
         Combine("kerosene", "lantern");
-        Combine("matchbook", "lantern_filled");
-        Assert.Equal(new[] { "blue_carnation", "clipping", "lantern_lit", "matchbook", "paste", "sealed_invitation", "wire_hook" },
+        Combine(MicahKit.LighterId, "lantern_filled");
+        Assert.Equal(new[] { "blue_carnation", "clipping", "lantern_lit", "lighter", "paste", "sealed_invitation", "wire_hook" },
             bag.Order());
     }
 
@@ -83,7 +84,9 @@ public class RecipeTests
     [InlineData("sealing_wax", "invitation", "flame")]
     [InlineData("signet_lion", "invitation_waxed", "not first")]
     [InlineData("signet_stag", "invitation_waxed", "first")]
-    [InlineData("lantern", "matchbook", "fuel")]
+    [InlineData("lantern", "lighter", "fuel")]
+    [InlineData("sealing_wax", "matchbook", "lighter")]
+    [InlineData("lantern_filled", "matchbook", "lighter")]
     public void WrongCombinationsAreRefusedWithAHint(string a, string b, string hint)
     {
         var outcome = Recipes.Evaluate(a, b, Holding(a, b));
