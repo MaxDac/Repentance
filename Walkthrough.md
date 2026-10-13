@@ -141,6 +141,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
 - **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
   lamp explains that gentle warmth softens wax; searching the bed supplies a borrowed clean cloth.
+  On the first search, Micah admits he ought to leave her bed alone but cannot quite turn away.
+  After finding the cloth, he notices her perfume and realises he has lifted it to his nose without thinking.
   Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax
   and returns the cloth to the bed, revealing a Celtic triquetra (trinity knot).
   The symbol is shown full screen, and can then be inspected again from the inventory.

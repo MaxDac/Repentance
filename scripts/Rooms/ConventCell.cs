@@ -66,8 +66,13 @@ public partial class ConventCell : Room
             case ("bed", Verb.Hand):
                 if (!State.HasFlag("got_mirror"))
                 {
+                    bool firstPickup = !State.HasItem("cloth");
+                    if (firstPickup)
+                        await Say("I ought to leave her bed alone. Somehow, I can't quite make myself turn away.");
                     State.GiveItem("cloth");
                     await Say("A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.");
+                    if (firstPickup)
+                        await Say("Her perfume. I've lifted the cloth to my nose before I even know I'm doing it.");
                 }
                 else await Say("Thin mattress, and the borrowed cloth back where it belongs.");
                 return true;
