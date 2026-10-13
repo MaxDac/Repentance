@@ -46,13 +46,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Before the bribe, the revolving door leads out to the street.
 - **Puzzle 2 - Service lift maze:** after the bribe, the bellboy explains that the staff cage runs a maze of
   shafts and laundry chutes behind the walls, that every floor has an identical linen room, that he wants the
-  fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (09, by the fire escape).
-  The close-up is a 9x6 maze: columns are the room positions along a floor, rows the floors from the basement
-  loading bay (B, bottom left, where the cage starts) to the fifth floor. The arrow buttons move the cage one
-  cell; walls stop it. Linen rooms (L) sit on the 5th floor by 501, the 4th floor by 403, the 3rd floor by 307
-  and the 5th floor by 507: only the last is right. The shortest way is about 30 moves and passes several dead
-  ends. Dispatching anywhere else stays in the lobby and says where the cage would have stopped; Reset brings the
-  cage back to the loading bay. Once solved, the lift works normally on return visits.
+  fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (13, by the fire escape).
+  The close-up is a dense 13x8 maze: columns are the room positions along a floor, rows the floors from the basement
+  loading bay (B, bottom left, where the cage starts) to the seventh floor. The arrow buttons move the cage one
+  cell; walls stop it. Linen rooms (L) sit on the 7th floor by 701, the 5th floor by 503 and 511, the 6th floor
+  by 607 and the 4th floor by 407 (directly above and below the right one), and the 5th floor by 507: only the
+  last is right. The shortest way is 54 moves, winds through the whole hotel and passes many dead ends; the
+  decoys next to the target are far away through the shafts. Dispatching anywhere else stays in the lobby and
+  says where the cage would have stopped; Reset brings the cage back to the loading bay. Once solved, the lift works normally on return visits.
 - After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
   room 507. Saves from before the five-location expansion (version 5 and earlier) are incompatible and do
   not load. The temporary Hotel map recovery applies only to an accepted current-version save that reached
@@ -148,7 +149,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   After finding the cloth, he notices her perfume and realises he has lifted it to his nose without thinking.
   Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax
   and returns the cloth to the bed, revealing a Celtic triquetra (trinity knot).
-  The symbol is shown full screen, and can then be inspected again from the inventory.
+  The symbol is shown full screen with Micah's remark over it; a click ends the remark and the next click
+  closes the picture. It can then be inspected again from the inventory.
 - Micah keeps the revealed mirror; the comb stays in the drawer.
 - If the player tries to leave the cell before revealing the symbol, Micah says "There is still something to be
   found in this room."
@@ -240,10 +242,11 @@ described here (other verbs, flavour lines) is left to the implementation.
   The author listings identify **Rites of the Old Isles, shelf C-17**. Select that entry.
   The volume is behind locked glass; Micah cannot simply take it from the shelves or ladder.
 - Micah has to threaten the librarian with the revolver (use the revolver on him; before asking about the symbol
-  Micah refuses to do it, and before the lookup he needs a precise title). He requests the identified book.
-  The librarian confirms that it describes ancient Celtic rituals and gives it
-  to him if he goes away. The scene returns to the map.
-- After this the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
+  Micah refuses to do it, and before the lookup he needs a precise title). Micah aims the revolver at him while
+  he requests the identified book. The librarian confirms that it describes ancient Celtic rituals and gives it
+  to him if he goes away. Micah stays in the library; the shaken librarian won't say another word, and the
+  player leaves through the exit to the map.
+- After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
 - Leaving the library normally returns to the map.
 

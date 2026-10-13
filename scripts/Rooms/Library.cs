@@ -24,9 +24,13 @@ public partial class Library : Room
         switch (target.Id, verb)
         {
             case ("exit", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
+                if (State.HasFlag("librarian_threatened")) State.SetFlag("library_banned");
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
 
+            case ("librarian", Verb.Talk or Verb.UseItem) when State.HasFlag("librarian_threatened"):
+                await Say("librarian", "Please. You have your book. Just go.");
+                return true;
             case ("librarian", Verb.Talk):
             case ("librarian", Verb.UseItem) when item == "mirror":
                 await Talk("librarian");
@@ -40,10 +44,12 @@ public partial class Library : Room
                     await Say("I need the precise title before I make him retrieve anything. That desk catalogue might help.");
                     return true;
                 }
+                Player.Face(Player.Position.X <= target.Position.X ? Facing.Right : Facing.Left);
+                Player.SetPose("micah_aim");
                 await Talk("librarian_threat");
-                State.SetFlag("library_banned");
+                State.SetFlag("librarian_threatened");
+                Player.SetPose(null);
                 await Say("I'd just held up a library. Mother would have been so proud.");
-                await Game.ChangeRoom("chicago_map", "start");
                 return true;
             case ("librarian", Verb.Hand):
                 await Say("He looks like he'd break. I'm not that desperate. Not yet.");
