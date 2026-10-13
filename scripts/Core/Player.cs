@@ -85,6 +85,9 @@ public partial class Player : Node2D, ISpeaker
         _poses.Hold(id, _facing == Facing.Left);
     }
 
+    /// <summary>The held or playing pose, or null while the normal sheet is shown.</summary>
+    public string? PoseName => _poses.Active ? _poses.Action : null;
+
     public Task<bool> PlayPose(string id)
     {
         Stop();

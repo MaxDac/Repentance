@@ -97,7 +97,7 @@ public abstract class WheelScreen : PuzzleScreen
 /// <summary>Issue #51: the staff cage, driven through the Drake's maze of service shafts to the right linen room.</summary>
 public sealed class LiftMazeScreen : PuzzleScreen
 {
-    private const float Cell = 19, OriginX = 32, OriginY = 54;
+    private const float Cell = 14, OriginX = 28, OriginY = 54;
     private GridPoint _car = LiftMaze.Start;
     private readonly List<GridPoint> _trail = new() { LiftMaze.Start };
 
@@ -109,10 +109,10 @@ public sealed class LiftMazeScreen : PuzzleScreen
 
     protected override void Build()
     {
-        Button("up", "^", 226, 84, 28, () => Drive("up"));
-        Button("left", "<", 208, 108, 28, () => Drive("left"));
-        Button("right", ">", 244, 108, 28, () => Drive("right"));
-        Button("down", "v", 226, 132, 28, () => Drive("down"));
+        Button("up", "^", 240, 84, 28, () => Drive("up"));
+        Button("left", "<", 222, 108, 28, () => Drive("left"));
+        Button("right", ">", 256, 108, 28, () => Drive("right"));
+        Button("down", "v", 240, 132, 28, () => Drive("down"));
     }
 
     private void Drive(string direction)
@@ -134,7 +134,7 @@ public sealed class LiftMazeScreen : PuzzleScreen
 
     private string Room(int column) =>
         column < 0 ? "the stairs" : column >= LiftMaze.Width ? "the fire escape" :
-        _car.Y == LiftMaze.Height - 1 ? "the boiler" : $"{LiftMaze.FloorName(_car.Y)}0{column + 1}";
+        _car.Y == LiftMaze.Height - 1 ? "the boiler" : $"{LiftMaze.FloorName(_car.Y)}{column + 1:D2}";
 
     public override (bool, string) Check() =>
         LiftMaze.Solved(_car) ? (true, "") :
@@ -153,12 +153,12 @@ public sealed class LiftMazeScreen : PuzzleScreen
 
     public override void Draw(CanvasItem canvas)
     {
-        for (int x = 0; x < LiftMaze.Width; x++) Text(canvas, Corner(x, 0) + new Vector2(4, -4), $"0{x + 1}");
-        for (int y = 0; y < LiftMaze.Height; y++) Text(canvas, Corner(0, y) + new Vector2(-12, 13), LiftMaze.FloorName(y));
+        for (int x = 0; x < LiftMaze.Width; x++) Text(canvas, Corner(x, 0) + new Vector2(1, -4), $"{x + 1:D2}");
+        for (int y = 0; y < LiftMaze.Height; y++) Text(canvas, Corner(0, y) + new Vector2(-10, 10), LiftMaze.FloorName(y));
         foreach (var p in LiftMaze.Cells())
             if (LiftMaze.IsLinen(p))
             {
-                canvas.DrawRect(new Rect2(Corner(p.X, p.Y) + new Vector2(3, 3), new Vector2(Cell - 6, Cell - 6)), new Color("3b3424"));
+                canvas.DrawRect(new Rect2(Corner(p.X, p.Y) + new Vector2(2, 2), new Vector2(Cell - 4, Cell - 4)), new Color("3b3424"));
                 Text(canvas, Center(p) + new Vector2(-3, 4), "L");
             }
         Text(canvas, Center(LiftMaze.Start) + new Vector2(-3, 4), "B", Dim.Lightened(0.4f));
@@ -173,11 +173,11 @@ public sealed class LiftMazeScreen : PuzzleScreen
             if (p.Y == 0) canvas.DrawLine(c, c + new Vector2(Cell, 0), wall, 2);
         }
         var car = Center(_car);
-        canvas.DrawRect(new Rect2(car - new Vector2(5, 5), new Vector2(10, 10)), Blue);
-        canvas.DrawRect(new Rect2(car - new Vector2(5, 5), new Vector2(10, 10)), new Color("171821"), false, 1);
-        Text(canvas, new Vector2(32, 184), "B loading bay   L linen room");
-        Text(canvas, new Vector2(32, 196), "west: stairs   east: fire escape");
-        Text(canvas, new Vector2(210, 74), "CAGE");
+        canvas.DrawRect(new Rect2(car - new Vector2(4, 4), new Vector2(8, 8)), Blue);
+        canvas.DrawRect(new Rect2(car - new Vector2(4, 4), new Vector2(8, 8)), new Color("171821"), false, 1);
+        Text(canvas, new Vector2(28, 184), "B loading bay   L linen room");
+        Text(canvas, new Vector2(28, 196), "west: stairs   east: fire escape");
+        Text(canvas, new Vector2(232, 74), "CAGE");
     }
 }
 

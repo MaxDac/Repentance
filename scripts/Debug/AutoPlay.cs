@@ -347,11 +347,29 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room is Rooms.ConventCell, "waxed mirror possession does not bypass symbol gate");
             await game.Perform(Verb.UseItem, "lampstand", "mirror_waxed");
-            await Combine("cloth", "mirror_waxed");
-            await Until(() => game.Hud.ImageVisible);
-            Check(game.Hud.ImageVisible, "the symbol behind the mirror is shown full screen");
-            await Shot("triquetra");
-            game.Hud.CloseImage();
+            // real time, so Micah's line over the symbol is still running when the first click lands
+            double mirrorScale = Engine.TimeScale;
+            Engine.TimeScale = 1;
+            try
+            {
+                await Combine("cloth", "mirror_waxed");
+                await Until(() => game.Hud.ImageVisible && game.Hud.SpeechVisible);
+                Check(game.Hud.ImageVisible && game.Hud.ImageHeld && game.Hud.SpeechText.StartsWith("Three loops", StringComparison.Ordinal),
+                    "Micah's line is spoken over the symbol behind the mirror");
+                await Shot("triquetra");
+                Check(game.Hud.ImageHeld, "the line is still showing after the screenshot");
+                Click(new Vector2(240, 140), MouseButton.Left);
+                await Until(() => !game.Hud.SpeechVisible);
+                await Observe(0.2);
+                Check(game.Hud.ImageVisible && !game.Hud.ImageHeld, "the first click ends the line but keeps the mirror on screen");
+                Click(new Vector2(240, 140), MouseButton.Left);
+                await Until(() => !game.Hud.ImageVisible);
+                Check(!game.Hud.ImageVisible, "the next click returns to the cell");
+            }
+            finally
+            {
+                Engine.TimeScale = mirrorScale;
+            }
             await WaitIdle(game);
             await game.Perform(Verb.Hand, "comb");
             Check(gs.HasItem("mirror") && !gs.HasItem("comb") && !gs.HasItem("cloth"), "revealed mirror retained; comb and cloth left in cell");
@@ -489,8 +507,18 @@ public class AutoPlay
             await CancelPuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue, "catalogue_identified", "catalogue");
             await SolvePuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue,
                 new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
-            await game.Perform(Verb.UseItem, "librarian", "revolver");
-            Check(gs.HasItem("book") && gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "threatened the librarian into giving up the book");
+            var threaten = game.Perform(Verb.UseItem, "librarian", "revolver");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Good Lord", StringComparison.Ordinal));
+            Check(game.Player.PoseName == "micah_aim", "Micah aims the revolver at the librarian");
+            await Shot("library_threat");
+            await threaten;
+            Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&
+                game.Room?.Name == "Library" && game.Player.PoseName == null,
+                "threatened the librarian into giving up the book; Micah stays until he leaves");
+            await game.Perform(Verb.Talk, "librarian");
+            Check(game.Room?.Name == "Library", "the cowed librarian won't talk any more");
+            await game.Perform(Verb.Walk, "exit");
+            Check(gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "leaving after the hold-up bans the library");
             await game.Perform(Verb.Walk, "library");
             Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
 

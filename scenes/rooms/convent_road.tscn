@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventRoad.cs" id="1_ConventRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_road.png" id="2_convent_road"]
@@ -7,16 +7,13 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="5_eleanor"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(44, 72)
+size = Vector2(56, 92)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(182, 44)
+size = Vector2(120, 36)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(48, 100)
-
-[sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(70, 180)
+size = Vector2(62, 124)
 
 [node name="ConventRoad" type="Node2D"]
 script = ExtResource("1_ConventRoad")
@@ -39,7 +36,7 @@ polygon = PackedVector2Array(0, 194, 480, 194, 480, 266, 0, 266)
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
-position = Vector2(110, 200)
+position = Vector2(120, 200)
 metadata/facing = 1
 
 [node name="street" type="Marker2D" parent="Entries"]
@@ -56,7 +53,7 @@ script = ExtResource("3_Hotspot")
 Id = "door"
 DisplayName = "convent door"
 LookText = "Oak and iron. Sister Agatha's already bolted it behind me."
-WalkTo = Vector2(110, 200)
+WalkTo = Vector2(120, 200)
 Face = 2
 ExitTo = "convent_corridor"
 ExitEntry = "start"
@@ -64,7 +61,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(110, 141)
+position = Vector2(120, 130)
 shape = SubResource("Rect_1")
 
 [node name="Fence" type="Area2D" parent="Hotspots"]
@@ -78,7 +75,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Fence"]
-position = Vector2(243, 170)
+position = Vector2(240, 172)
 shape = SubResource("Rect_2")
 
 [node name="Window" type="Area2D" parent="Hotspots"]
@@ -86,28 +83,14 @@ script = ExtResource("3_Hotspot")
 Id = "window"
 DisplayName = "stained glass"
 LookText = "Some saint in red and gold, glowing like he's got the last warm room in Chicago."
-WalkTo = Vector2(286, 205)
+WalkTo = Vector2(360, 205)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
-position = Vector2(286, 112)
+position = Vector2(360, 102)
 shape = SubResource("Rect_3")
-
-[node name="Tree" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "tree"
-DisplayName = "bare tree"
-LookText = "Not a leaf on it. It knows something about this winter I don't."
-WalkTo = Vector2(400, 225)
-Face = 2
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/Tree"]
-position = Vector2(424, 130)
-shape = SubResource("Rect_4")
 
 [node name="Eleanor" type="Area2D" parent="World"]
 position = Vector2(300, 214)

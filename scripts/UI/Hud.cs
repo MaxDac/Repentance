@@ -197,7 +197,10 @@ public partial class Hud : CanvasLayer
         _image.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _image.GuiInput += e =>
         {
-            if (e is InputEventMouseButton { Pressed: true }) CloseImage();
+            if (e is not InputEventMouseButton { Pressed: true }) return;
+            // while a held picture is being described, a click only skips the line
+            if (_imageHeld) Game.Instance.SkipSpeech();
+            else CloseImage();
         };
         root.AddChild(_image);
 
@@ -591,6 +594,7 @@ public partial class Hud : CanvasLayer
     }
 
     public bool ImageVisible => _image.Visible;
+    private bool _imageHeld;
 
     /// <summary>Shows a full-screen picture (a close-up) until the player clicks.</summary>
     public Task ShowImage(Texture2D texture)
@@ -604,9 +608,29 @@ public partial class Hud : CanvasLayer
         return _imageTcs.Task;
     }
 
+    /// <summary>
+    /// Shows a full-screen picture while the given lines are spoken over it: clicks skip the lines, and only once
+    /// they are done does the next click close the picture.
+    /// </summary>
+    public async Task ShowImageWithLines(Texture2D texture, Func<Task> lines)
+    {
+        var closed = ShowImage(texture);
+        _imageHeld = true;
+        _speech.ZIndex = 1;
+        try { await lines(); }
+        finally
+        {
+            _imageHeld = false;
+            _speech.ZIndex = 0;
+        }
+        await closed;
+    }
+
+    public bool ImageHeld => _imageHeld;
+
     public void CloseImage()
     {
-        if (Game.Instance.IsPaused) return;
+        if (Game.Instance.IsPaused || _imageHeld) return;
         _image.Visible = false;
         _image.MouseFilter = Control.MouseFilterEnum.Ignore;
         _interface.Visible = true;

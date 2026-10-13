@@ -200,7 +200,7 @@ MICAH: Another dollar. For the back way.
 BELLBOY: Front desk won't give you the time of day, never mind a key. That dollar buys the back way.
 BELLBOY: Staff door's by the palm. The service cage runs a maze of shafts and laundry chutes behind the walls. Chart's on the panel.
 BELLBOY: Every floor's got a linen room, and they all look the same. You want the fifth floor, the one right next to 507.
-BELLBOY: Rooms count up west to east, mister. 501's by the stairs. 509's by the fire escape. Night maid bolts the corridor door, though.
+BELLBOY: Rooms count up west to east, mister. 501's by the stairs. 513's by the fire escape. Night maid bolts the corridor door, though.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
 -> END

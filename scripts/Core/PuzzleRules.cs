@@ -8,37 +8,43 @@ public readonly record struct GridPoint(int X, int Y);
 
 /// <summary>
 /// The Drake's service cage, as a maze of shafts and chutes. Columns are the room numbers along a floor
-/// (01 west to 09 east), rows the floors (5th at the top, the basement loading bay at the bottom).
+/// (01 west to 13 east), rows the floors (5th at the top, the basement loading bay at the bottom).
 /// </summary>
 public static class LiftMaze
 {
-    public const int Width = 9, Height = 6;
+    public const int Width = 13, Height = 8;
 
     // '#' are walls; cells sit on odd rows/columns, gaps between them are open passages.
     private static readonly string[] Grid =
     {
-        "###################",
-        "#       #   #     #",
-        "# ##### ### # ### #",
-        "# #   #   # #   # #",
-        "# ### ### # ### # #",
-        "#   #     #   # # #",
-        "# # # ##### ### # #",
-        "# # # #   #     # #",
-        "### # # ### ##### #",
-        "#   # #       #   #",
-        "# ### ######### # #",
-        "# #             # #",
-        "###################",
+        "###########################",
+        "# #       #   # #         #",
+        "# # ##### # # # # ### ### #",
+        "#       # # #   #   #   # #",
+        "# ####### # # ##### ### ###",
+        "#   #     # # #   #   #   #",
+        "##### ##### ##### # ##### #",
+        "#   #     #     #   #     #",
+        "# # ##### # # # ##### #####",
+        "# #   #   # # #   #   #   #",
+        "# ### # ##### ### # ### # #",
+        "#   #   #     #   #     # #",
+        "### ### # # ### ######### #",
+        "#     #   # #   #       # #",
+        "##### ##### ##### ### ### #",
+        "#     #           #       #",
+        "###########################",
     };
 
     public static GridPoint Start { get; } = new(0, Height - 1);
     /// <summary>The fifth-floor linen room, right next to 507.</summary>
-    public static GridPoint Target { get; } = new(7, 0);
-    /// <summary>Linen rooms that look exactly like the right one.</summary>
+    public static GridPoint Target { get; } = new(7, 2);
+    /// <summary>Linen rooms that look exactly like the right one, two of them stacked right above and below it.</summary>
     public static IReadOnlyList<GridPoint> Decoys { get; } =
-        Array.AsReadOnly(new[] { new GridPoint(1, 0), new GridPoint(7, 2), new GridPoint(3, 1) });
-
+        Array.AsReadOnly(new[]
+        {
+            new GridPoint(7, 1), new GridPoint(7, 3), new GridPoint(3, 2), new GridPoint(11, 2), new GridPoint(1, 0),
+        });
     public static string FloorName(int row) => row == Height - 1 ? "B" : (Height - 1 - row).ToString();
 
     public static bool IsLinen(GridPoint p) => p == Target || Decoys.Contains(p);
@@ -59,7 +65,7 @@ public static class LiftMaze
     public static string Destination(GridPoint p)
     {
         if (p == Target) return "5th floor: linen room by 507";
-        if (IsLinen(p)) return $"{(p.Y == Height - 1 ? "basement" : FloorName(p.Y) + Ordinal(Height - 1 - p.Y))} floor: linen room by {FloorName(p.Y)}0{p.X}";
+        if (IsLinen(p)) return $"{(p.Y == Height - 1 ? "basement" : FloorName(p.Y) + Ordinal(Height - 1 - p.Y))} floor: linen room by {FloorName(p.Y)}{p.X:D2}";
         return p == Start ? "the loading bay" : "a blank wall between floors";
     }
 
