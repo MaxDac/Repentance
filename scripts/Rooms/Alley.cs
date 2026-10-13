@@ -41,6 +41,11 @@ public partial class Alley : Room
 
     protected override void OnRefresh()
     {
+        if (!InAct3)
+        {
+            if (FindActor("sal") is { } sal) sal.Visible = !State.HasFlag("alley_done");
+            if (FindActor("bartender") is { } tony) tony.Visible = !State.HasFlag("alley_done");
+        }
         // with the lamp out the alley goes blue-black, Micah included
         Modulate = Dark ? new Color(0.5f, 0.52f, 0.68f) : Colors.White;
     }
@@ -87,13 +92,20 @@ public partial class Alley : Room
             Player.Face(Facing.Right);
             await Say("A convent. Of all the places to hide a woman like that.");
             State.SetFlag("alley_done");
-            await Game.ChangeRoom("convent_corridor", "start");
         });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
-        if (!InAct3) return false;
+        if (!InAct3)
+        {
+            if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand) && State.HasFlag("alley_done"))
+            {
+                await Game.ChangeRoom("convent_road", "street");
+                return true;
+            }
+            return false;
+        }
         bool salOut = State.HasFlag("alley3_sal_out"), salDown = State.HasFlag("alley3_sal_down");
         switch (target.Id, verb)
         {

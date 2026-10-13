@@ -57,10 +57,11 @@ public partial class DialogueManager : Node
                 var line = story.Continue().Trim();
                 if (line.Length == 0) continue;
                 var (speaker, text) = Parse(line);
-                // "INSET: id" frames the close-up CloseUps.Get(id) over the scene; "INSET: none" removes it
+                // "none" fades out the inset; "none_now" removes it before the next line or choice.
                 if (speaker == "INSET")
                 {
                     if (text == "none") game.Hud.HideCloseUp();
+                    else if (text == "none_now") game.Hud.HideCloseUp(0);
                     else game.Hud.ShowCloseUp(CloseUps.Get(text));
                     continue;
                 }

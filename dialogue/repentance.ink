@@ -328,12 +328,24 @@ NUN: The last door, at the end. Look if you must. Then go.
 
 // ---------------------------------------------------------------- OUTSIDE THE CONVENT
 
+=== nun_farewell ===
+NUN: What do you hope to find in all this, Detective?
+MICAH: I don't know, sister, but I can't stop at this point.
+NUN: Then go with God. And remember that finding a thing is not the same as knowing what to do with it.
+~ set_flag("nun_farewell_done")
+-> END
+
 === eleanor_road ===
+ELEANOR: Not many people enter a convent this late, mister. Were you looking for someone?
 INSET: convent
+MICAH: Eleanor Harrington. You wouldn't happen to know her?
+ELEANOR: That depends on who's asking.
+MICAH: Micah Jones. Private detective.
 ELEANOR: Sister Agatha said a man came asking for me. A man with a split lip and a prophet's name.
 ELEANOR: Why are you looking for me, Mr. Jones?
 MICAH: Your husband hired me to bring you home.
 ELEANOR: Teddy. Of course. And what do you get, if you bring me home?
+INSET: none_now
 * [Twenty dollars a day, plus expenses.]
     ELEANOR: Twenty a day. I used to spend that on gloves.
 * [Right now, I'm not so sure.]
@@ -349,7 +361,6 @@ MICAH: I could. I'm a lousy liar.
 ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
 MICAH: I want you to come away. Not back to Teddy. Anywhere.
 ELEANOR: I can't go back there...
-INSET: none
 -> END
 
 // ---------------------------------------------------------------- MOTEL, NIGHT

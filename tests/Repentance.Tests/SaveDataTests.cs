@@ -70,13 +70,33 @@ public class SaveDataTests
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));
     }
 
-    [Fact]
-    public void VersionFiveSavesFromBeforeTheExpansionAreRejected()
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public void SavesFromBeforeTheConventTransitionsAreRejected(int version)
     {
-        Assert.Equal(6, SaveData.CurrentVersion);
+        Assert.Equal(7, SaveData.CurrentVersion);
         var data = Sample();
-        data.Version = 5;
+        data.Version = version;
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));
+    }
+
+    [Theory]
+    [InlineData("alley", "alley_done")]
+    [InlineData("convent_road", "seen_convent_exterior")]
+    [InlineData("convent_corridor", "got_mirror")]
+    [InlineData("convent_corridor", "nun_farewell_done")]
+    [InlineData("convent_road", "convent_departed")]
+    public void ConventProgressRoundTrips(string room, string flag)
+    {
+        var data = Sample();
+        data.Room = room;
+        data.StoryAct = 1;
+        data.Flags.Add(flag);
+        var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
+        Assert.NotNull(back);
+        Assert.Equal(room, back.Room);
+        Assert.Contains(flag, back.Flags);
     }
 
     [Theory]

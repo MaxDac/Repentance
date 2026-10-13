@@ -62,7 +62,12 @@ public class AutoPlay
             if (knot == "caleb_cross") _crossOffers++;
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;
-            if (knot == "eleanor_road") _closeUpAtRoadChoice = game.Hud.CurrentCloseUp;
+            if (knot == "eleanor_road")
+            {
+                _closeUpAtRoadChoice = game.Hud.CurrentCloseUp;
+                Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+                    "the convent panel is completely removed before the compensation choice");
+            }
             foreach (var want in _prefer)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -252,7 +257,36 @@ public class AutoPlay
             await bar;
 
             // ---- the convent
+            Check(game.Room is Rooms.Alley && gs.HasFlag("alley_done") && !game.Busy,
+                "the beating ends with player control in the alley");
+            Check(!game.Player.Poses.Active, "Micah stands before the player leaves the alley");
+            Check(game.Room?.FindActor("sal")?.Visible == false && game.Room?.FindActor("bartender")?.Visible == false,
+                "Sal and Tony have gone back inside");
+            Check(game.Room?.FindHotspot("street")?.Visible == true, "the alley street exit is available");
+            await ReloadCheckpoint("alley_standing");
+            Check(game.Room is Rooms.Alley && game.Room.FindHotspot("street")?.Visible == true &&
+                game.Room.FindActor("sal")?.Visible == false && game.Room.FindActor("bartender")?.Visible == false,
+                "loading the alley retains the exit and does not restore the departed men");
+            Click(game.Room!.FindHotspot("street")!.Bounds.GetCenter(), MouseButton.Left);
+            await Until(() => game.Room is Rooms.ConventRoad && game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText.StartsWith("Gothic arches", StringComparison.Ordinal),
+                "Micah comments on the architecture outside the convent");
+            Check(game.Room?.FindActor("eleanor")?.Visible == false && !game.Hud.InsetVisible,
+                "Eleanor and the close-up are absent on arrival");
+            await Until(() => !game.Busy && gs.HasFlag("seen_convent_exterior"));
+            Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
+                "arrival waits outside for the player to open the convent door");
+            await Shot("convent_arrival");
+            await ReloadCheckpoint("convent_arrival");
+            Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor")?.Visible == false &&
+                !game.Hud.SpeechVisible && !gs.HasFlag("convent_departed"),
+                "loading the exterior retains the arrival phase without repeating the remark");
+            Click(game.Room!.FindHotspot("door")!.Bounds.GetCenter(), MouseButton.Left);
+            await Until(() => game.Room is Rooms.ConventCorridor && gs.HasFlag("nun_talked") && !game.Busy);
             Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_talked"), "the nun questions Micah in the corridor");
+            await game.Perform(Verb.Walk, "entrance");
+            Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("convent_departed"),
+                "Micah must search the cell before leaving the convent");
             await Shot("convent_corridor");
             await game.Perform(Verb.Walk, "cell_door");
             Check(game.Room?.Name == "ConventCell", "entered Eleanor's cell");
@@ -327,25 +361,58 @@ public class AutoPlay
             Check(!gs.HasItem("cloth"), "bed search after cleaning does not borrow the cloth again");
             await Shot("convent_cell_after");
 
-            var leave = game.Perform(Verb.Walk, "exit");
+            await game.Perform(Verb.Walk, "exit");
+            Check(game.Room is Rooms.ConventCorridor && game.Player.Position.DistanceTo(new Vector2(410, 200)) < 2,
+                "the cell door returns Micah to the cell end of the corridor");
+            Check(!gs.HasFlag("nun_farewell_done") && !gs.HasFlag("convent_departed") && !game.Busy,
+                "returning from the cell leaves the farewell and departure under player control");
+            await Shot("convent_corridor_return");
+            await ReloadCheckpoint("convent_corridor_return");
+            Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("nun_farewell_done") &&
+                !game.Hud.SpeechVisible, "loading the corridor does not replay the initial interrogation");
+            await ConventFarewellTalkTest(game);
+
+            var leave = game.Perform(Verb.Walk, "entrance");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Detective, before you go...");
+            Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("convent_departed") &&
+                game.Hud.SpeechText == "Detective, before you go...",
+                "the nun calls Micah back if he tries to leave without talking");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "What do you hope to find in all this, Detective?");
+            Check(game.Hud.SpeechText == "What do you hope to find in all this, Detective?",
+                "intercepted departure starts the shared farewell");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "I don't know, sister, but I can't stop at this point.");
+            Check(game.Hud.SpeechText == "I don't know, sister, but I can't stop at this point.",
+                "Micah gives the same reply when the nun calls him back");
             await Until(() => game.Room?.Name == "ConventRoad");
-            Check(game.Room?.Name == "ConventRoad", "Eleanor is waiting outside the convent");
+            Check(game.Room?.Name == "ConventRoad" && gs.HasFlag("nun_farewell_done") && gs.HasFlag("convent_departed"),
+                "the intercepted exit continues outside after the farewell");
+            Check(game.Room?.FindActor("eleanor")?.Visible == true, "Eleanor is waiting on departure");
             Check(!game.Hud.InsetVisible, "no close-up while Micah walks up to her");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "Not many people enter a convent this late, mister. Were you looking for someone?");
+            Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Hud.SpeechText ==
+                "Not many people enter a convent this late, mister. Were you looking for someone?",
+                "Eleanor's new opening is spoken on the road before the close-up");
             await Until(() => game.Hud.InsetVisible);
             Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
-                "Micah and Eleanor framed side by side when she starts talking");
+                "the two-portrait close-up appears immediately after Eleanor's opening");
             Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the two-portrait close-up fills most of the screen");
-            await Until(() => game.Hud.SpeechVisible);
-            Check(game.Hud.SpeechText.Contains("Sister Agatha"), "Eleanor's first line over the close-up");
-            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
-                "speech sits below their faces while the close-up is up");
-            await game.Wait(1);
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Eleanor Harrington. You wouldn't happen to know her?");
+            CheckPortraitSpeech(game, right: false);
+            await Shot("convent_portrait_micah");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Sister Agatha"));
+            CheckPortraitSpeech(game, right: true);
+            await Shot("convent_portrait_eleanor");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves.");
+            Check(game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves." && !game.Hud.InsetDrawn,
+                "the compensation answer rejoins the existing conversation on the road");
+            Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
             await Shot("convent_road");
             await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
-            Check(game.Hud.CurrentCloseUp == CloseUps.Convent, "the close-up stays up through the whole conversation");
-            await Until(() => !game.Hud.InsetVisible);
-            Check(game.Room?.Name == "ConventRoad", "the close-up fades before the motel");
-            Check(_closeUpAtRoadChoice == CloseUps.Convent, "the close-up is up while Micah answers her");
+            Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.ConventRoad,
+                "the rest of Eleanor's conversation stays on the road without the panel");
             await Until(() => game.Room?.Name == "MotelNight");
             Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
             await game.Wait(2);
@@ -1505,6 +1572,67 @@ public class AutoPlay
     {
         foreach (var pressed in new[] { true, false })
             _game.GetViewport().PushInput(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed }, true);
+    }
+
+    private void CheckPortraitSpeech(Game game, bool right)
+    {
+        var panel = game.Hud.InsetRect;
+        var speech = game.Hud.SpeechRect;
+        float divider = panel.Position.X + panel.Size.X / 2;
+        Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.SpeechVisible &&
+            speech.Position.X >= (right ? divider : panel.Position.X) &&
+            speech.End.X <= (right ? panel.End.X : divider),
+            right ? "Eleanor's subtitle stays beneath the right portrait" : "Micah's subtitle stays beneath the left portrait");
+        Check(speech.Position.Y > panel.Position.Y + panel.Size.Y * 0.7f && speech.End.Y < panel.End.Y,
+            "portrait speech wraps below the face and inside the frame");
+    }
+
+    private async Task ConventFarewellTalkTest(Game game)
+    {
+        var original = game.CaptureSave();
+        var originalPrefer = _prefer;
+        try
+        {
+            var talk = game.Perform(Verb.Talk, "nun");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText == "What do you hope to find in all this, Detective?",
+                "talking to the nun starts the farewell without the exit-only call-back");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "I don't know, sister, but I can't stop at this point.");
+            Check(game.Hud.SpeechText == "I don't know, sister, but I can't stop at this point.",
+                "Micah's direct farewell reply matches the approved line");
+            await Shot("convent_farewell");
+            await talk;
+            Check(game.Room is Rooms.ConventCorridor && GameState.Instance.HasFlag("nun_farewell_done") &&
+                !GameState.Instance.HasFlag("convent_departed") && !game.Busy,
+                "talking first clears Micah to leave but does not leave for him");
+            await ReloadCheckpoint("convent_farewell");
+            Check(GameState.Instance.HasFlag("nun_farewell_done") && !game.Hud.SpeechVisible,
+                "loading after the farewell preserves permission without replaying it");
+            var again = game.Perform(Verb.Talk, "nun");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText == "Go with God, Detective.", "the completed farewell does not repeat on another talk");
+            await again;
+            _prefer = new[] { "Right now, I'm not so sure." };
+            Click(game.Room!.FindHotspot("entrance")!.Bounds.GetCenter(), MouseButton.Left);
+            await Until(() => game.Room is Rooms.ConventRoad || game.Hud.SpeechVisible);
+            Check(game.Room is Rooms.ConventRoad && GameState.Instance.HasFlag("convent_departed"),
+                "opening the entrance after talking leaves directly without a second farewell");
+            await Until(() => game.Hud.SpeechVisible &&
+                game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
+            Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
+                !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+                "the alternate compensation answer also continues on the road");
+            await Until(() => game.Room is Rooms.Attic && !game.Busy, timeout: 300);
+            if (game.Room is not Rooms.Attic || game.Busy)
+                throw new InvalidOperationException($"Convent departure did not finish: room={game.Room?.Name}, busy={game.Busy}.");
+            Check(game.Room is Rooms.Attic && !game.Busy, "the direct-talk exit completes the motel sequence");
+        }
+        finally
+        {
+            _prefer = originalPrefer;
+            await game.LoadGame(original);
+        }
     }
 
     private async Task ReloadCheckpoint(string label)

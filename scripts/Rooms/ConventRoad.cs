@@ -2,11 +2,21 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>The road outside the convent. Eleanor is waiting, dressed in black. Nobody else is around.</summary>
+/// <summary>The convent entrance on arrival; Eleanor waits outside when Micah leaves.</summary>
 public partial class ConventRoad : Room
 {
     public override async Task OnEnter(string entry)
     {
+        if (!State.HasFlag("convent_departed"))
+        {
+            if (State.HasFlag("seen_convent_exterior")) return;
+            await Game.Run(async () =>
+            {
+                await Say("Gothic arches, iron spikes and a saint in every window. They built the place to point toward heaven. From down here, it looks like a warning.");
+                State.SetFlag("seen_convent_exterior");
+            });
+            return;
+        }
         if (State.HasFlag("eleanor_found")) return;
         await Game.Run(async () =>
         {
@@ -19,5 +29,24 @@ public partial class ConventRoad : Room
             await Wait(0.8);
             await Game.ChangeRoom("motel_night", "start");
         });
+    }
+
+    public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
+    {
+        if (target.Id != "door") return false;
+        if (verb == Verb.Look)
+        {
+            await Say(State.HasFlag("convent_departed")
+                ? "Oak and iron. Sister Agatha's already bolted it behind me."
+                : "Oak and iron beneath a pointed arch. A heavy door for a house of mercy.");
+            return true;
+        }
+        if (verb is Verb.Walk or Verb.Hand)
+        {
+            if (State.HasFlag("convent_departed")) await Say("Bolted from the inside. The sister's said her last word.");
+            else await Game.ChangeRoom("convent_corridor", "start");
+            return true;
+        }
+        return false;
     }
 }
