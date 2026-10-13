@@ -602,8 +602,10 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
 + [Good night, Rose.]
     {pushes >= 3:
         ~ set_flag("rose_wait")
+        ROSE: Good night.
+    - else:
+        ROSE: You're running away again. It was always too hard for you... too hard on you. Don't bother ringing this bell again, Micah Jones.
     }
-    ROSE: Good night.
     -> END
 
 === rose_coffee ===

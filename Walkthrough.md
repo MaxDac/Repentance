@@ -296,6 +296,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   panel's bottom edge, then the panel is removed and the scene continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
+- If Micah leaves without insisting at least three times, Rose answers: "You're running away again. It was always
+  too hard for you... too hard on you. Don't bother ringing this bell again, Micah Jones." She then shuts the door
+  on him straight away, not harshly but decisively; Micah thinks: "The door shut. Not hard. Just once, and for good."
 - Then, the wife will close the door, and Micah will go out.
 
 #### Map of Chicago
