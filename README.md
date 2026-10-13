@@ -89,6 +89,13 @@ and applies in both Act Two and Act Three. Preferences are stored in `user://set
 independently of saves, so loading an older save or starting a new game cannot override the choice.
 Automated checks use a separate `user://autoplay_settings.cfg` and never modify player preferences.
 
+### Display settings
+
+**Settings > Full screen** is **Off** (windowed, 1440x810) by default. **F11** or **Alt+Enter** toggles it
+anywhere, including on the title screen and while paused. Full screen is borderless and keeps whole-pixel
+scaling, so the 480x270 picture is letterboxed when the monitor isn't an exact multiple. The choice is stored
+in `user://settings.cfg` alongside the content settings. Automated checks never change the real window.
+
 ### Saving
 
 The game autosaves every time you enter a room, and there are 3 manual slots. Saving is only possible

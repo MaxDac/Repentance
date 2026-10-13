@@ -525,6 +525,7 @@ public partial class Hud : CanvasLayer
         if (_settings != null) _settings.Changed -= RefreshCloseUp;
         _settings = settings;
         _settings.Changed += RefreshCloseUp;
+        Menu.BindSettings(settings);
     }
 
     public override void _ExitTree()
