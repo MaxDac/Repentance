@@ -447,42 +447,151 @@ HERALD_GROUND, HERALD_GILT = hx("1e1510"), hx("b08a3a")
 HERALD_BEAST, HERALD_SKY = hx("d4a848"), hx("f2e8c8")
 
 
-def _beast(d, kind, box, col):
-    """A heraldic beast passant, facing right, filling box (x, y, w, h)."""
+BEAST_SS = 8  # beasts are drawn this many times larger, then reduced, so their outlines stay smooth when small
+
+
+def _beast(img, kind, box, col):
+    """A heraldic beast facing right in box (x, y, w, h), drawn like an engraved gold charge: a smooth silhouette,
+    darker engraved lines for feathers, mane and muscle, and a pale catch-light along the top edges. The raven is
+    close (wings folded), the lion passant with its tail curled over its back, the stag trippant with a branched
+    rack of antlers."""
     bx, by, bw, bh = box
-    p = lambda u, v: (bx + u * bw, by + v * bh)
-    lw = max(1, round(bw * 0.06))
+    W, H = max(1, round(bw)), max(1, round(bh))
+    S = BEAST_SS
+    layer = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    P = lambda u, v: (u * W * S, v * H * S)
+    pts = lambda *uv: [P(u, v) for u, v in uv]
+    k = W * S / 100  # stroke widths are in hundredths of the box
+    body, shade = col + (255,), mul(col, 0.58) + (255,)
+    dark = HERALD_GROUND + (255,)
+    light = tuple(round(c + (255 - c) * 0.55) for c in col) + (255,)
+    face = tuple(round(c + (255 - c) * 0.2) for c in col) + (255,)
+    mane = mul(col, 0.78) + (255,)
+
+    def limb(path, width, fill=body):
+        d.line(pts(*path), fill=fill, width=max(1, round(width * k)), joint="curve")
+        for u, v in (path[0], path[-1]):
+            r = width * k / 2
+            x, y = P(u, v)
+            d.ellipse([x - r, y - r, x + r, y + r], fill=fill)
+
+    def line(path, width, fill=shade):
+        d.line(pts(*path), fill=fill, width=max(1, round(width * k)), joint="curve")
+
+    def dot(u, v, r, fill):
+        x, y = P(u, v)
+        d.ellipse([x - r * k, y - r * k, x + r * k, y + r * k], fill=fill)
+
     if kind == "raven":
-        d.polygon([p(0.15, 0.62), p(0.3, 0.42), p(0.55, 0.34), p(0.72, 0.38), p(0.74, 0.55), p(0.6, 0.7),
-                   p(0.4, 0.74)], fill=col)
-        d.ellipse([*p(0.6, 0.18), *p(0.84, 0.44)], fill=col)
-        d.polygon([p(0.8, 0.26), p(1.0, 0.33), p(0.8, 0.39)], fill=col)
-        d.polygon([p(0.2, 0.6), p(0.0, 0.74), p(0.05, 0.8), p(0.32, 0.7)], fill=col)
-        for u0, u1 in ((0.46, 0.44), (0.57, 0.6)):
-            d.line([p(u0, 0.7), p(u1, 0.92)], fill=col, width=lw)
-            d.line([p(u1 - 0.06, 0.94), p(u1 + 0.08, 0.94)], fill=col, width=lw)
-        d.line([p(0.32, 0.52), p(0.62, 0.44)], fill=HERALD_GROUND, width=max(1, lw // 2))
-        d.ellipse([*p(0.73, 0.27), *p(0.77, 0.32)], fill=HERALD_GROUND)
+        for leg in (((0.5, 0.7), (0.49, 0.83), (0.47, 0.92)), ((0.58, 0.68), (0.6, 0.82), (0.6, 0.92))):
+            limb(leg, 3.2, shade)
+            x = leg[-1][0]
+            for toe in ((x - 0.09, 0.95), (x + 0.08, 0.95), (x + 0.02, 0.97)):
+                limb((leg[-1], toe), 2.2, shade)
+        d.polygon(pts((0.0, 0.84), (0.08, 0.7), (0.22, 0.6), (0.34, 0.47), (0.46, 0.38), (0.56, 0.3),
+                      (0.62, 0.2), (0.7, 0.14), (0.78, 0.14), (0.84, 0.18), (0.89, 0.2), (1.0, 0.27),
+                      (0.88, 0.3), (0.8, 0.33), (0.79, 0.39), (0.74, 0.4), (0.77, 0.45), (0.71, 0.47),
+                      (0.74, 0.53), (0.72, 0.62), (0.66, 0.7), (0.54, 0.75), (0.4, 0.75), (0.3, 0.76),
+                      (0.18, 0.84), (0.12, 0.9), (0.04, 0.92)), fill=body)
+        # the folded wing: a dark outline from the shoulder, scalloped coverts, long primaries to the tail
+        line(((0.62, 0.34), (0.5, 0.36), (0.36, 0.48), (0.22, 0.64), (0.1, 0.8)), 2.2)
+        line(((0.66, 0.42), (0.64, 0.56), (0.54, 0.68), (0.36, 0.72), (0.2, 0.78)), 2.2)
+        for i in range(4):
+            t = i / 3
+            u0, v0 = 0.6 - 0.12 * t, 0.42 + 0.08 * t
+            line(((u0, v0), (u0 - 0.06, v0 + 0.05), (u0 - 0.12, v0 + 0.04)), 1.6)
+        for i in range(4):
+            t = i / 3
+            line(((0.52 - 0.04 * t, 0.56 + 0.04 * t), (0.14 + 0.02 * t, 0.8 + 0.02 * t)), 1.4)
+        for i in range(3):  # tail feathers
+            line(((0.22, 0.78), (0.02 + 0.04 * i, 0.86 + 0.02 * i)), 1.2)
+        line(((0.84, 0.25), (0.97, 0.27)), 1.2, dark)  # the split of the beak
+        line(((0.86, 0.18), (0.97, 0.26)), 1.4, light)
+        line(((0.58, 0.24), (0.66, 0.16), (0.76, 0.14)), 1.6, light)
+        line(((0.3, 0.5), (0.44, 0.39), (0.54, 0.32)), 1.6, light)
+        dot(0.76, 0.22, 3.0, dark)
+        dot(0.765, 0.21, 1.0, light)
     elif kind == "lion":
-        d.polygon([p(0.2, 0.46), p(0.62, 0.42), p(0.72, 0.5), p(0.7, 0.66), p(0.22, 0.68), p(0.14, 0.56)], fill=col)
-        d.ellipse([*p(0.55, 0.16), *p(0.9, 0.58)], fill=col)  # mane
-        d.ellipse([*p(0.7, 0.26), *p(0.92, 0.48)], fill=mul(col, 0.8))  # face
-        d.ellipse([*p(0.81, 0.31), *p(0.85, 0.35)], fill=HERALD_GROUND)
-        for u0, u1, v1 in ((0.62, 0.7, 0.94), (0.52, 0.59, 0.9), (0.22, 0.3, 0.94), (0.31, 0.37, 0.9)):
-            d.rectangle([*p(u0, 0.6), *p(u1, v1)], fill=col)
-        d.line([p(0.16, 0.52), p(0.06, 0.42), p(0.09, 0.26)], fill=col, width=lw)
-        d.ellipse([*p(0.03, 0.16), *p(0.15, 0.3)], fill=col)
+        # the tail, curled up over the back and ending in a tuft
+        limb(((0.2, 0.44), (0.1, 0.4), (0.06, 0.28), (0.1, 0.16), (0.2, 0.12)), 3.6)
+        d.polygon(pts((0.17, 0.14), (0.22, 0.04), (0.25, 0.1), (0.31, 0.06), (0.29, 0.14), (0.34, 0.16),
+                      (0.25, 0.19)), fill=body)
+        # far legs, in shade behind the body
+        limb(((0.27, 0.56), (0.3, 0.72), (0.28, 0.9)), 5.6, shade)
+        limb(((0.55, 0.56), (0.58, 0.74), (0.6, 0.9)), 5.4, shade)
+        # body, near legs and the raised forepaw
+        d.ellipse([*P(0.12, 0.36), *P(0.4, 0.66)], fill=body)
+        d.polygon(pts((0.22, 0.38), (0.42, 0.36), (0.6, 0.32), (0.68, 0.46), (0.64, 0.62), (0.46, 0.6),
+                      (0.3, 0.62)), fill=body)
+        limb(((0.2, 0.52), (0.15, 0.68), (0.18, 0.8), (0.14, 0.9)), 6.6)
+        limb(((0.62, 0.56), (0.65, 0.74), (0.66, 0.9)), 6.2)
+        limb(((0.66, 0.5), (0.76, 0.56), (0.82, 0.68), (0.88, 0.65)), 5.8)
+        for u, v, f in ((0.14, 0.9, body), (0.66, 0.9, body), (0.28, 0.9, shade), (0.6, 0.9, shade)):
+            d.ellipse([*P(u - 0.045, v - 0.03), *P(u + 0.06, v + 0.045)], fill=f)
+        # the mane: a ring of flame-shaped locks around the head
+        cx, cy = 0.74, 0.3
+        locks = []
+        for i in range(22):
+            a = math.pi * 2 * i / 22
+            r = 0.25 if i % 2 == 0 else 0.18
+            locks.append((cx - 0.02 + r * math.cos(a), cy + 0.02 + r * math.sin(a) * 1.1))
+        d.polygon(pts(*locks), fill=mane)
+        for i in range(9):
+            a = math.pi * 2 * (i + 0.5) / 9
+            line(((cx - 0.02 + 0.12 * math.cos(a), cy + 0.02 + 0.13 * math.sin(a)),
+                  (cx - 0.02 + 0.21 * math.cos(a + 0.18), cy + 0.02 + 0.23 * math.sin(a + 0.18))), 1.4, shade)
+        # the face, turned to the right
+        d.polygon(pts((0.72, 0.18), (0.82, 0.17), (0.88, 0.22), (0.95, 0.28), (0.96, 0.35), (0.9, 0.38),
+                      (0.88, 0.43), (0.8, 0.44), (0.74, 0.38), (0.7, 0.28)), fill=body)
+        line(((0.72, 0.18), (0.7, 0.28), (0.74, 0.38), (0.8, 0.44), (0.88, 0.43)), 1.4)
+        line(((0.8, 0.2), (0.88, 0.22), (0.95, 0.28)), 1.4, face)
+        line(((0.82, 0.25), (0.89, 0.26)), 1.6, dark)  # brow
+        dot(0.85, 0.28, 2.2, dark)
+        dot(0.95, 0.31, 1.8, dark)  # nose
+        line(((0.95, 0.35), (0.9, 0.37), (0.85, 0.37)), 1.4, dark)  # mouth
+        line(((0.88, 0.4), (0.84, 0.42)), 1.0, shade)
+        # muscle and a highlight along the back
+        line(((0.18, 0.46), (0.24, 0.56), (0.22, 0.62)), 1.6)
+        line(((0.6, 0.42), (0.64, 0.54)), 1.6)
+        line(((0.4, 0.58), (0.5, 0.6)), 1.2)
+        line(((0.2, 0.39), (0.36, 0.37), (0.54, 0.33)), 1.6, light)
+        for u in (0.11, 0.15, 0.64, 0.68, 0.88, 0.92):
+            v = 0.66 if u > 0.85 else 0.93
+            line(((u, v - 0.03), (u, v)), 0.9, dark)  # claws
     else:  # stag
-        d.polygon([p(0.18, 0.46), p(0.6, 0.43), p(0.68, 0.52), p(0.64, 0.64), p(0.2, 0.65), p(0.13, 0.54)], fill=col)
-        d.polygon([p(0.56, 0.48), p(0.64, 0.26), p(0.75, 0.26), p(0.7, 0.52)], fill=col)
-        d.polygon([p(0.64, 0.22), p(0.8, 0.22), p(0.95, 0.32), p(0.9, 0.37), p(0.72, 0.35)], fill=col)
-        for a in (((0.68, 0.22), (0.6, 0.02)), ((0.65, 0.12), (0.55, 0.1)), ((0.62, 0.06), (0.68, 0.0)),
-                  ((0.76, 0.22), (0.84, 0.02)), ((0.8, 0.12), (0.9, 0.1)), ((0.82, 0.06), (0.77, 0.0))):
-            d.line([p(*a[0]), p(*a[1])], fill=col, width=lw)
-        for u0, u1 in ((0.22, 0.2), (0.3, 0.32), (0.56, 0.55), (0.62, 0.65)):
-            d.line([p(u0, 0.62), p(u1, 0.96)], fill=col, width=lw)
-        d.polygon([p(0.15, 0.48), p(0.08, 0.42), p(0.14, 0.54)], fill=col)
-        d.ellipse([*p(0.8, 0.26), *p(0.84, 0.3)], fill=HERALD_GROUND)
+        # far legs in shade
+        limb(((0.28, 0.58), (0.3, 0.72), (0.27, 0.84), (0.28, 0.93)), 3.4, shade)
+        limb(((0.6, 0.58), (0.61, 0.76), (0.62, 0.93)), 3.2, shade)
+        # body and neck
+        d.ellipse([*P(0.12, 0.42), *P(0.34, 0.64)], fill=body)
+        d.polygon(pts((0.2, 0.43), (0.4, 0.44), (0.56, 0.42), (0.6, 0.36), (0.64, 0.28), (0.72, 0.28),
+                      (0.72, 0.36), (0.69, 0.5), (0.67, 0.6), (0.5, 0.64), (0.3, 0.63)), fill=body)
+        limb(((0.18, 0.52), (0.14, 0.68), (0.19, 0.8), (0.17, 0.93)), 4.6)
+        limb(((0.63, 0.56), (0.7, 0.66), (0.67, 0.77), (0.7, 0.8)), 3.6)  # the raised foreleg, bent at the knee
+        limb(((0.56, 0.58), (0.55, 0.76), (0.55, 0.93)), 3.8)
+        for u, v in ((0.17, 0.94), (0.55, 0.94), (0.28, 0.94), (0.62, 0.94), (0.7, 0.81)):
+            dot(u, v, 2.4, dark)  # hooves
+        d.polygon(pts((0.13, 0.46), (0.07, 0.43), (0.09, 0.5)), fill=light)  # the white scut
+        # head, ears and the rack
+        d.polygon(pts((0.63, 0.3), (0.66, 0.24), (0.72, 0.22), (0.8, 0.26), (0.9, 0.31), (0.92, 0.35),
+                      (0.86, 0.37), (0.76, 0.36), (0.71, 0.36)), fill=body)
+        d.polygon(pts((0.66, 0.25), (0.58, 0.2), (0.6, 0.18), (0.69, 0.23)), fill=shade)
+        dot(0.9, 0.33, 1.6, dark)
+        dot(0.77, 0.28, 2.0, dark)
+        dot(0.775, 0.275, 0.7, light)
+        for ox, fill, w in ((0.66, shade, 2.0), (0.72, body, 2.4)):
+            limb(((ox, 0.24), (ox - 0.02, 0.16), (ox + 0.02, 0.08), (ox + 0.0, 0.01)), w, fill)  # main beam
+            limb(((ox - 0.015, 0.19), (ox + 0.07, 0.15)), w * 0.75, fill)  # brow tine
+            limb(((ox - 0.01, 0.13), (ox + 0.06, 0.09)), w * 0.75, fill)
+            limb(((ox + 0.015, 0.07), (ox + 0.07, 0.03)), w * 0.75, fill)
+        # chest, haunch and a highlight along the back
+        line(((0.68, 0.38), (0.67, 0.5)), 1.4)
+        line(((0.2, 0.47), (0.26, 0.56), (0.24, 0.62)), 1.4)
+        line(((0.22, 0.44), (0.4, 0.45), (0.56, 0.43)), 1.4, light)
+        line(((0.68, 0.24), (0.8, 0.27), (0.9, 0.315)), 1.2, light)
+    small = layer.resize((W, H), Image.LANCZOS)
+    img.paste(small.convert("RGB"), (round(bx), round(by)), small.getchannel("A"))
 
 
 def _sky(d, kind, box, col, ground):
@@ -530,11 +639,12 @@ def heraldry(img, box):
         if i:
             d.rectangle([cx0 - edge // 2, y0, cx0 + (edge - 1) // 2, y1], fill=HERALD_GILT)
         inner_h = h - 4 * edge
-        size = min(inner_h, cw * 0.46)
-        gap = (cw - 2 * size) / 3
+        size = min(inner_h, cw * 0.6)  # the beast is the charge; its sign sits smaller beside it
+        sky = min(size * 0.55, cw * 0.3)
+        gap = (cw - size - sky) / 3
         top = y0 + (h - size) / 2
-        _beast(d, beast, (cx0 + gap, top, size, size), HERALD_BEAST)
-        _sky(d, sign, (cx0 + 2 * gap + size, top, size, size), HERALD_SKY, HERALD_GROUND)
+        _beast(img, beast, (cx0 + gap, top, size, size), HERALD_BEAST)
+        _sky(d, sign, (cx0 + 2 * gap + size, y0 + (h - sky) / 2, sky, sky), HERALD_SKY, HERALD_GROUND)
 
 
 PORTRAIT_BAND = 0.18  # the heraldry's share of the portrait's height, along the bottom
