@@ -6,7 +6,7 @@ namespace Repentance;
 
 /// <summary>
 /// An inventory combination. <see cref="Consumes"/> leave the satchel; <see cref="Catalysts"/> must be held and are
-/// never consumed (the matchbook is needed again in Act 3). <see cref="Requires"/> are held tools that aren't one of
+/// never consumed (Micah's lighter lights the wax and the lantern alike). <see cref="Requires"/> are held tools that aren't one of
 /// the two combined items (the morgue paste pot); <see cref="Missing"/> explains what is needed when they aren't held.
 /// </summary>
 public sealed record Recipe(string A, string B, string Result, string[] Consumes, string Line,
@@ -40,9 +40,9 @@ public static class Recipes
             Missing: "Torn straight through the address. I'd need something to hold them together.",
             Flag: "mended_clipping"),
         // 14 - Club vestibule.
-        new("matchbook", "sealing_wax", "wax_soft", new[] { "sealing_wax" },
-            "I hold a match under the stick until the end goes glossy and soft. The matchbook goes back in my pocket.",
-            Catalysts: new[] { "matchbook" }, Flag: "wax_softened"),
+        new(MicahKit.LighterId, "sealing_wax", "wax_soft", new[] { "sealing_wax" },
+            "I hold the lighter under the stick until the end goes glossy and soft. The lighter goes back in my pocket.",
+            Catalysts: new[] { MicahKit.LighterId }, Flag: "wax_softened"),
         new("wax_soft", "invitation", "invitation_waxed", new[] { "wax_soft", "invitation" },
             "A fat red drop of wax on the fold of the invitation. It won't stay soft for ever. It'll wait for a seal, though."),
         new("signet_raven", "invitation_waxed", "sealed_invitation", new[] { "signet_raven", "invitation_waxed" },
@@ -51,9 +51,9 @@ public static class Recipes
         // 15 - Harrington wine cellar.
         new("lantern", "kerosene", "lantern_filled", new[] { "lantern", "kerosene" },
             "I fill the lantern's font from the can and trim the wick. Smells like every garage in Cicero."),
-        new("lantern_filled", "matchbook", "lantern_lit", new[] { "lantern_filled" },
-            "One match, a careful hand on the chimney, and the cellar finds its edges again.",
-            Catalysts: new[] { "matchbook" }, Flag: "lantern_lit"),
+        new("lantern_filled", MicahKit.LighterId, "lantern_lit", new[] { "lantern_filled" },
+            "One flick of the lighter, a careful hand on the chimney, and the cellar finds its edges again.",
+            Catalysts: new[] { MicahKit.LighterId }, Flag: "lantern_lit"),
     };
 
     public static readonly Refusal[] Refusals =
@@ -64,8 +64,11 @@ public static class Recipes
         new("signet_stag", "invitation_waxed", "The stag walks last in the procession. The plaque wants the first."),
         new("signet_lion", "invitation", "No wax, and the wrong bird. Or beast."),
         new("signet_stag", "invitation", "No wax, and the wrong beast."),
-        new("lantern", "matchbook", "Dry wick. Needs fuel first."),
-        new("carnation", "matchbook", "Burning it won't make it blue."),
+        new("lantern", MicahKit.LighterId, "Dry wick. Needs fuel first."),
+        new("carnation", MicahKit.LighterId, "Burning it won't make it blue."),
+        // the matchbook is a clue now; an old save that still carries one is pointed at the lighter
+        new("sealing_wax", "matchbook", "These matches are the Blue Lantern's calling card. My lighter will do the job."),
+        new("lantern_filled", "matchbook", "I'll keep the Blue Lantern's matches. My lighter will do the job."),
     };
 
     public static bool Matches(string first, string second, string a, string b) =>
