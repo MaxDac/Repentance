@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Repentance;
 
@@ -42,7 +43,33 @@ public partial class GameState : Node
     {
         if (_inventory.Contains(id)) return;
         _inventory.Add(id);
+        SortPinned();
         EmitSignal(SignalName.Changed);
+    }
+
+    /// <summary>Gives Micah his pinned items (notepad, lighter), or moves them back to the first slots.</summary>
+    public void EnsurePinned()
+    {
+        if (_inventory.Take(MicahKit.Pinned.Count).SequenceEqual(MicahKit.Pinned) &&
+            _inventory.Skip(MicahKit.Pinned.Count).All(i => !MicahKit.IsPinned(i))) return;
+        _inventory.RemoveAll(MicahKit.IsPinned);
+        _inventory.InsertRange(0, MicahKit.Pinned);
+        EmitSignal(SignalName.Changed);
+    }
+
+    /// <summary>The pinned items are Micah's: present-day Daniel never carries them.</summary>
+    public void RemovePinned()
+    {
+        if (_inventory.RemoveAll(MicahKit.IsPinned) > 0) EmitSignal(SignalName.Changed);
+    }
+
+    // Pinned items held keep their fixed order at the front; everything else follows in pickup order.
+    private void SortPinned()
+    {
+        var pinned = MicahKit.Pinned.Where(_inventory.Contains).ToList();
+        if (pinned.Count == 0) return;
+        _inventory.RemoveAll(MicahKit.IsPinned);
+        _inventory.InsertRange(0, pinned);
     }
 
     public void TakeItem(string id)
@@ -70,6 +97,7 @@ public partial class GameState : Node
         _inventory.Clear();
         foreach (var id in inventory)
             if (!_inventory.Contains(id)) _inventory.Add(id);
+        SortPinned();
         _storyAct = Mathf.Clamp(storyAct, 1, 3);
         EmitSignal(SignalName.Changed);
     }

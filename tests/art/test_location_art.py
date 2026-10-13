@@ -165,13 +165,17 @@ class LocationRenderingTests(unittest.TestCase):
                 self.assert_images_equal(combined, common.pixelize(paint(**combined_flags), pal))
 
 
-    def test_club_portrait_reads_as_a_face(self):
-        image = Image.new("RGB", (80, 60))
-        club.painting(image, 4, 4, 60, 52)
-        face = image.crop((22, 14, 42, 32))
-        colors = {tuple(color) for _, color in face.getcolors(80)}
-        self.assertIn(common.hx("e0a878"), colors)
-        self.assertIn(common.hx("100c0a"), colors)
+    def test_club_portrait_is_the_stag_from_the_source_picture(self):
+        image = Image.new("RGB", (60, 72))
+        club.painting(image, 5, 4, 55, 68)
+        canvas = image.crop((9, 8, 52, 65))
+        self.assertGreater(len(canvas.getcolors(canvas.width * canvas.height)), 100, "a picture, not flat shapes")
+        self.assertNotIn(common.hx("e0a878"), {colour for _, colour in canvas.getcolors(4096)}, "no flat skin oval")
+        # the antlers' bone and the stag's brown head are the brightest, warmest part of the canvas
+        top = ImageStat.Stat(canvas.crop((0, 0, canvas.width, canvas.height // 2))).mean
+        self.assertGreater(top[0], top[2])
+        source = club.painting_source()
+        self.assertAlmostEqual(source.width / source.height, canvas.width / canvas.height, delta=0.03)
 
     def test_bedroom_puts_daniel_in_front_and_hides_his_wife(self):
         self.assertEqual(len(act2_rooms._bed_figures(1.2)), 2, "only Daniel is painted; she's under the quilt")

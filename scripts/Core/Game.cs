@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance;
@@ -136,6 +137,14 @@ public partial class Game : Node
             if (Room != null && !_onTitle && !Hud.Menu.IsOpen && !Hud.Puzzle.IsOpen && !Hud.Wheel.IsOpen &&
                 Hud.InterfaceVisible)
                 Hud.ShowInventory(!Hud.InventoryOpen);
+            return;
+        }
+        if (e.IsActionPressed("toggle_notepad") && e is not InputEventKey { Echo: true })
+        {
+            GetViewport().SetInputAsHandled();
+            if (Room != null && !_onTitle && !Busy && !Hud.Menu.IsOpen && !Hud.Puzzle.IsOpen && !Hud.Wheel.IsOpen &&
+                Hud.InterfaceVisible && GameState.Instance.HasItem(Notes.ItemId))
+                _ = ItemVerb(Verb.Look, Notes.ItemId);
             return;
         }
         if (e is not InputEventMouseButton { Pressed: true } mb) return;
@@ -300,6 +309,12 @@ public partial class Game : Node
     /// <summary>Applies a wheel verb to an inventory item (also used by the autoplay test).</summary>
     public Task ItemVerb(Verb verb, string item) => Run(async () =>
     {
+        if (item == Notes.ItemId && verb is Verb.Look or Verb.Hand)
+        {
+            Hud.ShowInventory(false);
+            await Hud.Notepad.Open();
+            return;
+        }
         if (Room != null && await Room.OnItemVerb(verb, item)) return;
         if (verb == Verb.Hand && item == "brass_box")
         {
@@ -307,6 +322,7 @@ public partial class Game : Node
             state.TakeItem("brass_box");
             state.GiveItem("card");
             state.GiveItem("matchbook");
+            state.SetFlag("opened_brass_box");
             await Say("The clasp gave with a click. Inside: a calling card, and a matchbook.");
             await Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
             await Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
@@ -537,8 +553,18 @@ public partial class Game : Node
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
+        SyncPinned();
         Player.Visible = Room.PlayerVisibleOnLoad;
     }
+
+    /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>
+    private void SyncPinned()
+    {
+        if (IsMicah) GameState.Instance.EnsurePinned();
+        else GameState.Instance.RemovePinned();
+    }
+
+    public bool IsMicah => Player.Character.StartsWith("micah");
 
     private void UnloadRoom()
     {
@@ -600,6 +626,14 @@ public partial class Game : Node
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
+        // a debug start past the attic gets the notes Micah would have taken on the way there, and the act's kit
+        if (StartRoom != "attic")
+        {
+            var gs = GameState.Instance;
+            foreach (var flag in Notes.DebugStartFlags(StartRoom).Concat(MicahKit.DebugFlags(StartRoom))) gs.SetFlag(flag);
+            foreach (var item in MicahKit.DebugItems(StartRoom)) gs.GiveItem(item);
+            if (MicahKit.DebugAct(StartRoom) > 1) gs.SetStoryAct(MicahKit.DebugAct(StartRoom));
+        }
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
         await ChangeRoom(StartRoom, StartEntry);
     }

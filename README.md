@@ -43,7 +43,7 @@ Command-line options (after `--`):
 | Option | Effect |
 |---|---|
 | `--skip-title` | Skip the title screen |
-| `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
+| `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
@@ -71,6 +71,12 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
 - **Satchel** (bottom right) or **I** opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
+- **N** (or look/hand on the notepad, always Micah's first satchel slot) opens Micah's notepad full screen.
+  **< / >**, the arrow keys or the mouse wheel turn its pages; **N**, **Esc** or **X** close it. Showing the
+  notepad works wherever only the information matters (Eleanor's likeness, the triquetra, the safe riddle,
+  the crests, the Harrington address). Micah's lighter is always the second slot and lights every fire.
+- Each act in 1927 starts with a reset satchel: the notepad, the lighter and only the items that act still
+  needs (`MicahKit.ActKeep`).
 - Click during speech to skip the line.
 - **Space** pauses/resumes gameplay, even mid-sentence. The current dialogue, movement, and timers
   stay frozen until you resume; clicks do nothing while paused. Space is inactive on the title screen
@@ -327,6 +333,8 @@ tools/               Python art generator
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
+| `MicahKit` | Godot-free: the pinned notepad and lighter, the items each act keeps when its journal starts, and debug-start kits |
+| `Notes` / `NotepadView` | Godot-free catalogue of Micah's notepad pages (unlocked by story flags, plus debug-start flags) and the full-screen reader |
 | `PuzzleRules` / `PuzzleMigration` | Godot-free puzzle validators and one-time legacy-save normalization |
 | `PuzzlePanel` / `PuzzleScreens` | Shared Art Deco puzzle frame and buttons; per-puzzle screens for the lift maze, dial, catalogue, cipher, crests, alarm plan and account index |
 
@@ -404,7 +412,8 @@ both mansion bed states.
 py -3.14 -m pip install --upgrade pillow numpy
 py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
-py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
+py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays; the hall's
+                                           # stag portrait is reduced from tools\art\src\club_painting.png (head, antlers, collar)
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
                                      also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;

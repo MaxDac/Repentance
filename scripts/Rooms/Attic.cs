@@ -57,13 +57,17 @@ public partial class Attic : Room
         var gs = GameState.Instance;
         foreach (var id in System.Linq.Enumerable.ToList(gs.Inventory))
         {
-            gs.SetFlag(StashPrefix + id);
+            // pinned items (notepad, lighter) aren't stashed: they are Micah's by definition and come back with him
+            if (!MicahKit.IsPinned(id)) gs.SetFlag(StashPrefix + id);
             gs.TakeItem(id);
         }
     }
 
-    /// <summary>Gives back everything <see cref="StashMicahItems"/> put away, and drops Daniel's journal.</summary>
-    public static void RestoreMicahItems()
+    /// <summary>
+    /// Starts <paramref name="act"/> in 1927: gives back the stashed items that act still needs, leaves the rest in the
+    /// past for good, and drops Daniel's journal.
+    /// </summary>
+    public static void RestoreMicahItems(int act)
     {
         var gs = GameState.Instance;
         gs.TakeItem("journal");
@@ -71,7 +75,8 @@ public partial class Attic : Room
         {
             if (!flag.StartsWith(StashPrefix)) continue;
             gs.SetFlag(flag, false);
-            gs.GiveItem(flag[StashPrefix.Length..]);
+            string id = flag[StashPrefix.Length..];
+            if (MicahKit.KeptInAct(act, id)) gs.GiveItem(id);
         }
     }
 
@@ -277,7 +282,7 @@ public partial class Attic : Room
         if (State.StoryAct >= 2)
         {
             await Talk("journal_act2");
-            RestoreMicahItems();
+            RestoreMicahItems(2);
             // pick up the 1927 story where the old lead from the Blue Lantern left it
             State.SetFlag("sal_passed");
             State.SetFlag("photo_shown");
