@@ -443,6 +443,23 @@ def figure(spec, ps, fw=56, fh=80):
             c.dot(g[0], g[1], "1a1a20")
         add(2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
 
+    if col.get("held_mask"):  # a mask taken off and held in the hand of arm side, face out: (side, plate, accent)
+        def held(spec_=col["held_mask"]):
+            s, mc, ac = spec_
+            hx_, hy_ = P(arm_pts[s][3])[:2]
+            hx_ += s * 1.0
+            for k in (1, -1):  # the antlers, branching up off the brow
+                c.put(c.capsule((hx_ + k * 1.2, hy_ - 2.6), (hx_ + k * 3.4, hy_ - 6.4), 0.7, 0.5), ac, "prop",
+                      dither=False)
+                c.put(c.capsule((hx_ + k * 2.6, hy_ - 5.0), (hx_ + k * 1.6, hy_ - 7.4), 0.5, 0.4), ac, "prop",
+                      dither=False)
+            c.put(c.ellipse((hx_, hy_ - 0.6), 2.3, 2.6), mc, "prop", dither=False)
+            c.put(c.capsule((hx_, hy_ + 0.8), (hx_, hy_ + 3.6), 1.4, 0.9), mc, "prop", dither=False)
+            for k in (1, -1):
+                c.dot(math.floor(hx_ + k * 1.0), math.floor(hy_ - 1.0), "141016")
+            c.dot(math.floor(hx_), math.floor(hy_ + 3.6), "141016")
+        add(3.0, held)
+
     # ---- head ----
     nod = ps["nod"]
     facing = cp > -0.25
@@ -853,6 +870,16 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         c.bias[rim] += 1
         # the head inside the cowl is lost in shadow except where the mask catches the light
         c.bias[c.parts_mask("head", "hair", "ear") & face] -= 2
+    elif hat == "cowl_down":
+        # the cowl pushed back off the head, bunched round the neck and lying over the shoulders
+        neck_ = P(body([0, 0.17, -0.02]))
+        lo = P(body([0, 0.26, -0.01]))
+        top_w = H * math.sqrt((0.06 * cp) ** 2 + (0.05 * sp) ** 2)
+        drape_w = H * math.sqrt((0.11 * cp) ** 2 + (0.09 * sp) ** 2)
+        drape = c.poly([(neck_[0] - top_w, neck_[1]), (neck_[0] + top_w, neck_[1]),
+                        (lo[0] + drape_w, lo[1]), (lo[0] - drape_w, lo[1])])
+        c.put(drape, hc, "veil", clip=~c.parts_mask("head", "ear", "hair"))
+        c.bias[c.parts_mask("veil") & (c.Y < neck_[1] + 1.5)] += 1
 
 
 def _mask(c, col, P, body, H, cp, sp, nod):
