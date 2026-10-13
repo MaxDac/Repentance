@@ -215,8 +215,9 @@ From here the story follows Walkthrough.md:
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
-   back are a white mask and a cloak. Match the invitation's raven/lion/stag procession to the portrait's
-   heraldic key; set the false-back lock to STAR / SUN / MOON.
+   back are a white mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
+   (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
+   false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
 23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
    wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
    matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
@@ -418,7 +419,8 @@ py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the fi
 py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
                                      also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;
                                      and Micah and Eleanor outside the convent, two portraits in one panel, from
-                                     tools\art\src\convent_micah.png and convent_eleanor.png
+                                     tools\art\src\convent_micah.png and convent_eleanor.png; and the heraldry band at the foot
+                                     of Harrington's portrait, painted by act2_rooms.heraldry
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 
