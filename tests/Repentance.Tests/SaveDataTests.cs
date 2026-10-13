@@ -111,13 +111,13 @@ public class SaveDataTests
         var data = Sample();
         data.Room = room;
         data.Flags.Add(flag);
-        data.Inventory.AddRange(new[] { item, "matchbook" });
+        data.Inventory.AddRange(new[] { item, MicahKit.LighterId });
         var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
         Assert.NotNull(back);
         Assert.Equal(room, back!.Room);
         Assert.Contains(flag, back.Flags);
         Assert.Contains(item, back.Inventory);
-        Assert.Contains("matchbook", back.Inventory);
+        Assert.Contains(MicahKit.LighterId, back.Inventory);
     }
 
     [Fact]

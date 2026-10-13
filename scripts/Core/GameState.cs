@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Repentance;
 
@@ -41,23 +42,35 @@ public partial class GameState : Node
     public void GiveItem(string id)
     {
         if (_inventory.Contains(id)) return;
-        // Micah's notepad always takes the first slot
-        if (id == Notes.ItemId) _inventory.Insert(0, id);
-        else _inventory.Add(id);
+        _inventory.Add(id);
+        SortPinned();
         EmitSignal(SignalName.Changed);
     }
 
-    /// <summary>Gives Micah his notepad, or moves it back to the first slot.</summary>
-    public void EnsureNotepad()
+    /// <summary>Gives Micah his pinned items (notepad, lighter), or moves them back to the first slots.</summary>
+    public void EnsurePinned()
     {
-        if (_inventory.Count > 0 && _inventory[0] == Notes.ItemId && _inventory.LastIndexOf(Notes.ItemId) == 0) return;
-        _inventory.RemoveAll(i => i == Notes.ItemId);
-        _inventory.Insert(0, Notes.ItemId);
+        if (_inventory.Take(MicahKit.Pinned.Count).SequenceEqual(MicahKit.Pinned) &&
+            _inventory.Skip(MicahKit.Pinned.Count).All(i => !MicahKit.IsPinned(i))) return;
+        _inventory.RemoveAll(MicahKit.IsPinned);
+        _inventory.InsertRange(0, MicahKit.Pinned);
         EmitSignal(SignalName.Changed);
     }
 
-    /// <summary>The notepad is Micah's: present-day Daniel never carries it.</summary>
-    public void RemoveNotepad() => TakeItem(Notes.ItemId);
+    /// <summary>The pinned items are Micah's: present-day Daniel never carries them.</summary>
+    public void RemovePinned()
+    {
+        if (_inventory.RemoveAll(MicahKit.IsPinned) > 0) EmitSignal(SignalName.Changed);
+    }
+
+    // Pinned items held keep their fixed order at the front; everything else follows in pickup order.
+    private void SortPinned()
+    {
+        var pinned = MicahKit.Pinned.Where(_inventory.Contains).ToList();
+        if (pinned.Count == 0) return;
+        _inventory.RemoveAll(MicahKit.IsPinned);
+        _inventory.InsertRange(0, pinned);
+    }
 
     public void TakeItem(string id)
     {
@@ -84,7 +97,7 @@ public partial class GameState : Node
         _inventory.Clear();
         foreach (var id in inventory)
             if (!_inventory.Contains(id)) _inventory.Add(id);
-        if (_inventory.Remove(Notes.ItemId)) _inventory.Insert(0, Notes.ItemId);
+        SortPinned();
         _storyAct = Mathf.Clamp(storyAct, 1, 3);
         EmitSignal(SignalName.Changed);
     }
