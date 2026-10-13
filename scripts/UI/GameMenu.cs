@@ -27,6 +27,8 @@ public partial class GameMenu : Control
     private TaskCompletionSource<MenuResult>? _tcs;
     private Action? _back;
     private bool _title;
+    private bool _onSettings;
+    private GameSettings? _settings;
 
     public bool IsOpen => Visible;
 
@@ -106,6 +108,10 @@ public partial class GameMenu : Control
         return b != null;
     }
 
+    /// <summary>True if the current page shows an entry starting with this label (used by the autoplay test).</summary>
+    public bool HasEntry(string label) =>
+        _list.GetChildren().OfType<Button>().Any(x => x.Text.StartsWith(label) && !x.IsQueuedForDeletion());
+
     // ------------------------------------------------------------------ pages
 
     private void TitlePage()
@@ -131,16 +137,39 @@ public partial class GameMenu : Control
 
     private void SettingsPage()
     {
+        var settings = Game.Instance.Settings;
         Action back = _title ? TitlePage : PausePage;
         Page("Settings", -1, back,
-            ($"Nudity: {(Game.Instance.Settings.NudityEnabled ? "On" : "Off")}", true, () =>
+            ($"Nudity: {(settings.NudityEnabled ? "On" : "Off")}", true, () =>
             {
-                bool enabled = !Game.Instance.Settings.NudityEnabled;
-                _status.Text = Game.Instance.Settings.SetNudity(enabled)
-                    ? "" : "Couldn't save settings.";
+                _status.Text = settings.SetNudity(!settings.NudityEnabled) ? "" : "Couldn't save settings.";
+                SettingsPage();
+            }),
+            ($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
+            {
+                _status.Text = settings.SetFullscreen(!settings.Fullscreen) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }),
             ("Back", true, () => { _status.Text = ""; back(); }));
+        _onSettings = true;
+    }
+
+    /// <summary>Keeps the settings page in sync when a setting changes elsewhere (e.g. the F11 shortcut).</summary>
+    public void BindSettings(GameSettings settings)
+    {
+        if (_settings != null) _settings.Changed -= OnSettingsChanged;
+        _settings = settings;
+        _settings.Changed += OnSettingsChanged;
+    }
+
+    public override void _ExitTree()
+    {
+        if (_settings != null) _settings.Changed -= OnSettingsChanged;
+    }
+
+    private void OnSettingsChanged()
+    {
+        if (Visible && _onSettings) Callable.From(() => { if (Visible && _onSettings) SettingsPage(); }).CallDeferred();
     }
 
     private void SlotsPage(bool saving)
@@ -183,6 +212,7 @@ public partial class GameMenu : Control
     private void Page(string heading, float top, Action? back, params (string text, bool enabled, Action onPress)[] rows)
     {
         _back = back;
+        _onSettings = false;
         foreach (var c in _list.GetChildren())
         {
             _list.RemoveChild(c);

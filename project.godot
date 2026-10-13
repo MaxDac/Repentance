@@ -53,6 +53,10 @@ toggle_inventory={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":73)]
 }
+toggle_fullscreen={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194342), Object(InputEventKey,"alt_pressed":true,"physical_keycode":4194309), Object(InputEventKey,"alt_pressed":true,"physical_keycode":4194310)]
+}
 
 [rendering]
 

@@ -70,6 +70,8 @@ public partial class Game : Node
         Settings = new GameSettings(settingsTest || pauseTest || Array.IndexOf(args, "--autoplay") >= 0
             ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
+        AddChild(new WindowModeController(Settings, !(settingsTest || pauseTest || Array.IndexOf(args, "--autoplay") >= 0))
+            { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
         Player = new Player { Name = "Player" };

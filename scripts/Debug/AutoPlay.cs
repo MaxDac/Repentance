@@ -1081,6 +1081,29 @@ public class AutoPlay
         var reloaded = new GameSettings(path);
         Check(reloaded.Load() && reloaded.NudityEnabled, "nudity persists across settings instances");
         await Shot("settings_nudity_on");
+
+        var windowMode = DisplayServer.WindowGetMode();
+        Check(!game.Settings.Fullscreen && game.Hud.Menu.HasEntry("Full screen: Off"), "full screen defaults to off");
+        Check(game.Hud.Menu.Press("Full screen: Off"), "settings offers a full-screen toggle");
+        await Observe(0.1);
+        Check(game.Settings.Fullscreen && game.Hud.Menu.HasEntry("Full screen: On"), "full screen enabled through settings");
+        Check(reloaded.Load() && reloaded.Fullscreen && reloaded.NudityEnabled,
+            "full screen persists without clobbering the nudity preference");
+        PressKey(Key.F11);
+        await Observe(0.1);
+        Check(!game.Settings.Fullscreen && game.Hud.Menu.HasEntry("Full screen: Off"),
+            "F11 toggles full screen and refreshes the open settings page");
+        PressKey(Key.Enter, alt: true);
+        await Observe(0.1);
+        Check(game.Settings.Fullscreen && game.Hud.Menu.HasEntry("Full screen: On"), "Alt+Enter toggles full screen");
+        Check(game.Settings.SetNudity(true) && reloaded.Load() && reloaded.Fullscreen,
+            "saving nudity keeps the full-screen preference");
+        PressKey(Key.F11);
+        await Observe(0.1);
+        Check(!game.Settings.Fullscreen && reloaded.Load() && !reloaded.Fullscreen && reloaded.NudityEnabled,
+            "full screen turned back off and persisted");
+        Check(DisplayServer.WindowGetMode() == windowMode, "automated runs never change the real window mode");
+
         PressKey(Key.Escape);
         await Observe(0.1);
         Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
@@ -1099,6 +1122,13 @@ public class AutoPlay
             await Observe(0.1);
             Check(game.GetTree().Paused && game.Hud.Menu.Press("Settings"), $"Act {act}: pause offers Settings");
             await Observe(0.1);
+            PressKey(Key.F11);
+            await Observe(0.1);
+            Check(game.GetTree().Paused && game.Settings.Fullscreen && game.Hud.Menu.HasEntry("Full screen: On"),
+                $"Act {act}: F11 works while paused");
+            PressKey(Key.F11);
+            await Observe(0.1);
+            Check(!game.Settings.Fullscreen, $"Act {act}: F11 toggles back while paused");
             Check(game.Hud.Menu.Press("Nudity: On"), $"Act {act}: nudity can be disabled");
             await Observe(0.1);
             Check(!game.Settings.NudityEnabled &&
@@ -1609,10 +1639,11 @@ public class AutoPlay
         game.Hud.ShowTitle(false);
     }
 
-    private void PressKey(Key key)
+    private void PressKey(Key key, bool alt = false)
     {
         foreach (var pressed in new[] { true, false })
-            _game.GetViewport().PushInput(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed }, true);
+            _game.GetViewport().PushInput(
+                new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
     /// <summary>Wherever the librarian is drawn over the ladder, hovering or clicking there means him (#73).</summary>
