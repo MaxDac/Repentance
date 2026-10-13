@@ -37,15 +37,22 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
 - Micah arrives from State Street through the revolving door and walks into the lobby.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
-- Micah has to bribe the bellboy with $1 from his cash for his memory (he mentions the Blue Lantern), then with
+- Micah has to bribe the bellboy with $1 from his cash for his memory, then with
   another $1 to visit Eleanor's room: the second dollar lets him take the staff elevator up to the fifth-floor
   linen room next to Eleanor's room. Between the two dollars, Micah won't leave through the revolving door.
+- The bellboy's memory: on Tuesday night, having a smoke out back, he saw two big fellas (broken nose, cheap suit,
+  expensive cigar) escort Eleanor out of the service door and away down the alley in a car with no lights,
+  without anybody seeing. He doesn't mention the Blue Lantern; the matchbook in the brass box makes that connection.
 - Before the bribe, the revolving door leads out to the street.
-- **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
-  The close-up shows three junctions: at A, upper goes to laundry and lower to B; at B, upper goes to C and
-  lower to the kitchen; at C, upper goes to the fifth-floor linen room (next to 507) and lower to the roof. Set **lower, upper, upper** and
-  dispatch the lift. A wrong route stays in the lobby and highlights where it went wrong.
-  Once solved, the lift works normally on return visits.
+- **Puzzle 2 - Service lift maze:** after the bribe, the bellboy explains that the staff cage runs a maze of
+  shafts and laundry chutes behind the walls, that every floor has an identical linen room, that he wants the
+  fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (09, by the fire escape).
+  The close-up is a 9x6 maze: columns are the room positions along a floor, rows the floors from the basement
+  loading bay (B, bottom left, where the cage starts) to the fifth floor. The arrow buttons move the cage one
+  cell; walls stop it. Linen rooms (L) sit on the 5th floor by 501, the 4th floor by 403, the 3rd floor by 307
+  and the 5th floor by 507: only the last is right. The shortest way is about 30 moves and passes several dead
+  ends. Dispatching anywhere else stays in the lobby and says where the cage would have stopped; Reset brings the
+  cage back to the loading bay. Once solved, the lift works normally on return visits.
 - After the bribe, Micah will not depart for the Blue Lantern until he has collected the brass box in
   room 507. Saves from before the five-location expansion (version 5 and earlier) are incompatible and do
   not load. The temporary Hotel map recovery applies only to an accepted current-version save that reached
@@ -69,13 +76,20 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
-- Inside, there's a sheet of paper with the safe combination (key number).
+- Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
+  "Those who sat at His table. The days of the month He was born. The day He rested."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. Enter **R 12 / L 31 / R 7** in the three direction/number rows
-  and submit. The paper remains readable; wrong settings can be reset or retried.
+  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
+  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
+  counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
+  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
+  settings can be reset or retried.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
-  - a perfumed business card, blank except for some decorations; Micah remarks that the perfume is strange, but quite attractive;
-  - a matchbook with the name of the club, the Blue Lantern (next location).
+  - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
+    perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
+    permeates the whole room, only stronger... hypnotic, even." The line conveys an early attraction;
+  - a matchbook with the name of the club, the Blue Lantern (next location). Micah connects it to the men the
+    bellboy saw: fellas like that drink somewhere, and that's where her trail goes next.
 - Leaving the room goes back across the corridor to the linen room and the staff lift; in the lobby the
   revolving door now leads to the club's front.
 
@@ -100,7 +114,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   Micah starts with $22, enough for the bellboy's two $1 payments and Sal's $10. The cash remains in his inventory:
   $21 after the bellboy's first dollar, $20 after the second and $10 after Sal. Repeated conversations never charge either bribe again.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
-- Until Sal lets him in, Sal blocks the way to the bar.
+- Until Sal lets him in, Micah can still try to walk past him to the bar: when he crosses the curtain line Sal
+  steps in front of him and the password conversation starts. Talking to Sal directly starts it as well. If
+  Micah leaves the conversation without paying, Sal walks him back to the door.
 - If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
   the entrance), and on to the next scene.

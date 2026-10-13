@@ -354,33 +354,119 @@ def florist_facade(img):
     shadow(img, "rect", [60, 64, 342, 74], 0.4, 3)
 
 
+ROSE = hx("b82838")
+STEM, STEM_D, LEAF = hx("3a6a3a"), hx("1e3a22"), hx("4a8a44")
+
+
+def bloom(d, x, y, kind, col):
+    """One flower head a few pixels across: a shaded silhouette, petal edges and a centre."""
+    sh, hi = mul(col, 0.62), mix(col, hx("ffffff"), 0.35)
+    if kind == "rose":
+        d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=sh)
+        d.ellipse([x - 2, y - 2, x + 1, y + 1], fill=col)
+        d.point((x, y), fill=mul(col, 0.45))
+        d.point((x - 1, y), fill=mul(col, 0.45))
+        d.point((x - 1, y - 1), fill=hi)
+    elif kind == "carnation":
+        d.ellipse([x - 2, y - 1, x + 2, y + 2], fill=col)
+        for k in (-2, 0, 2):
+            d.point((x + k, y - 2), fill=col)
+        for k in (-1, 1):
+            d.point((x + k, y - 1), fill=sh)
+        d.line([(x - 1, y + 2), (x + 1, y + 2)], fill=sh)
+        d.point((x, y + 3), fill=STEM)
+    elif kind == "lily":
+        for dx, dy in ((-3, 0), (3, 0), (-2, -2), (2, -2), (-1, 2), (1, 2)):
+            d.line([(x, y), (x + dx, y + dy)], fill=col)
+        d.point((x - 2, y - 1), fill=hi)
+        d.point((x + 2, y - 1), fill=sh)
+        d.point((x, y), fill=hx("c86a28"))
+        d.point((x, y - 1), fill=hx("e8a040"))
+    else:   # daisy / aster: a ring of petals round a dark eye
+        for dx, dy in ((0, -2), (-2, 0), (2, 0), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
+            d.point((x + dx, y + dy), fill=col)
+        d.point((x - 1, y - 2), fill=hi)
+        d.point((x, y), fill=hx("6a3a18") if kind == "daisy" else mul(col, 0.5))
+
+
+def potted(d, rnd, x, w, sy, col, kind, pot):
+    """A small pot on a shop shelf with a few stems, leaves and distinct blooms."""
+    d.polygon([(x, sy - 7), (x + w, sy - 7), (x + w - 1, sy), (x + 1, sy)], fill=pot)
+    d.rectangle([x - 1, sy - 8, x + w + 1, sy - 7], fill=mix(pot, hx("ffffff"), 0.18))
+    d.line([(x + w - 1, sy - 6), (x + w - 2, sy - 1)], fill=mul(pot, 0.7))
+    heads = []
+    for i in range(rnd.randint(4, 5)):
+        fx = x + 1 + (w - 2) * (i + 0.5) / 5 + rnd.randint(-1, 1)
+        fy = sy - 12 - rnd.randint(0, 9)
+        heads.append((round(fx), fy))
+        d.line([(round(fx), fy + 2), (x + w // 2 + (round(fx) - x - w // 2) // 2, sy - 8)], fill=STEM)
+    for _ in range(3):
+        lx, ly = x + rnd.randint(1, w - 1), sy - 9 - rnd.randint(0, 4)
+        s = rnd.choice((-1, 1))
+        d.line([(lx, ly), (lx + 2 * s, ly - 1)], fill=LEAF)
+    for fx, fy in sorted(heads, key=lambda h: h[1]):
+        bloom(d, fx, fy, kind, col)
+
+
+def bucket_flowers(d, bx, kind, col, avoid=None):
+    """An armful of cut flowers standing in a zinc bucket: stems, leaves, then clearly separate heads."""
+    r = random.Random(bx)
+    heads = []
+    tries = 0
+    while len(heads) < 13 and tries < 400:
+        tries += 1
+        fx, fy = bx + r.randint(-13, 13), 139 + r.randint(0, 13)
+        if avoid and avoid[0] <= fx <= avoid[2] and avoid[1] <= fy <= avoid[3]:
+            continue
+        if any(abs(fx - hx_) < 5 and abs(fy - hy) < 4 for hx_, hy in heads):
+            continue
+        heads.append((fx, fy))
+    for fx, fy in heads:
+        d.line([(fx, fy + 2), (bx + (fx - bx) // 3, 158)], fill=STEM)
+    for fx, fy in heads[::2]:
+        mx, my = (fx + bx) // 2, (fy + 158) // 2
+        s = 1 if fx < bx else -1
+        d.polygon([(mx, my), (mx - 3 * s, my - 2), (mx - 4 * s, my - 1)], fill=LEAF)
+        d.point((mx - 2 * s, my - 1), fill=STEM_D)
+    for fx, fy in sorted(heads, key=lambda h: h[1]):
+        bloom(d, fx, fy, kind, col)
+
+
+def zinc_bucket(img, bx):
+    d = ImageDraw.Draw(img)
+    pts = [(bx - 12, 157), (bx + 12, 157), (bx + 10, BASE - 1), (bx - 10, BASE - 1)]
+    d.polygon(pts, fill=hx("6a7078"))
+    hgrad(img, (bx - 6, 158, bx + 9, BASE - 2), hx("7a8088"), hx("4a5058"))
+    d.line([(bx - 11, 158), (bx - 9, BASE - 2)], fill=hx("9aa0a8"))
+    d.line([(bx + 11, 158), (bx + 9, BASE - 2)], fill=hx("3a4048"))
+    d.rectangle([bx - 13, 156, bx + 13, 157], fill=hx("a8b0b8"))
+    d.line([(bx - 13, 158), (bx + 13, 158)], fill=hx("4a5058"))
+    d.line([(bx - 11, 161), (bx + 11, 161)], fill=hx("4a5058"))
+    d.line([(bx - 11, 162), (bx + 11, 162)], fill=hx("8a9098"))
+    d.line([(bx - 10, BASE - 1), (bx + 10, BASE - 1)], fill=hx("3a4048"))
+
+
 def display_window(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 70, 72, 212, 150
     d.rectangle([x0 - 4, y0 - 4, x1 + 4, BASE], fill=mul(GREEN, 0.8))
     vgrad(img, (x0, y0, x1, y1), hx("6a7a4a"), hx("3a4a2a"))
     rnd = random.Random(611)
-    # shelves of flowers and ferns inside
+    # shelves of potted flowers inside the shop
+    kinds = ((hx("c83040"), "rose"), (hx("e8e4d8"), "carnation"), (hx("e8c040"), "daisy"), (hx("d878a0"), "aster"))
+    pots = (hx("8a5a3a"), hx("6a6a70"), hx("9a6a48"))
     for sy in (98, 124):
         d.rectangle([x0, sy, x1, sy + 2], fill=hx("4a3020"))
+        d.line([(x0, sy + 3), (x1, sy + 3)], fill=hx("2a1a10"))
         x = x0 + 4
         while x < x1 - 8:
             w = rnd.randint(8, 13)
-            d.rectangle([x, sy - 8, x + w, sy], fill=hx("6a6a70"))
-            fl = rnd.choice([hx("c83040"), hx("e8e4d8"), hx("e8c040"), hx("d878a0")])
-            for _ in range(7):
-                fx, fy = x + rnd.randint(0, w), sy - 10 - rnd.randint(0, 9)
-                d.ellipse([fx - 2, fy - 2, fx + 2, fy + 2], fill=fl)
-                d.point((fx, fy + 3), fill=hx("2a5a2a"))
+            col, kind = rnd.choice(kinds)
+            potted(d, rnd, x, w, sy, col, kind, rnd.choice(pots))
             x += w + 3
     # a fern hanging in the window
     for i in range(9):
         d.line([(110, y0 + 4), (100 + i * 3, y0 + 18 + (i % 3) * 3)], fill=hx("3a7a3a"))
-    # a customer inside, choosing - a blue carnation in his buttonhole
-    d.ellipse([146, 104, 156, 114], fill=hx("2a2620"))
-    d.rectangle([144, 102, 158, 105], fill=hx("1a1814"))
-    d.polygon([(140, 116), (162, 116), (164, 150), (138, 150)], fill=hx("23201c"))
-    d.ellipse([155, 119, 159, 123], fill=hx("4a80f0"))
     light(img, "rect", [x0, y0, x1, y1], hx("ffe8b0"), 0.3, 6)
     # reflections on the glass and the frame
     for k in range(3):
@@ -399,18 +485,10 @@ def display_window(img):
     # stall below the window with zinc buckets: roses, white carnations, lilies
     d.rectangle([x0 - 6, 150, x1 + 6, 156], fill=hx("4a3020"))
     d.line([(x0 - 6, 150), (x1 + 6, 150)], fill=hx("7a5a3a"))
-    for bx, fl in ((84, hx("b82838")), (142, hx("eeeae0")), (190, hx("e8d080"))):
-        d.polygon([(bx - 12, 157), (bx + 12, 157), (bx + 10, BASE - 1), (bx - 10, BASE - 1)], fill=hx("6a7078"))
-        d.line([(bx - 12, 157), (bx + 12, 157)], fill=hx("a8b0b8"))
-        d.line([(bx - 11, 166), (bx + 11, 166)], fill=hx("4a5058"))
-        r = random.Random(bx)
-        for _ in range(22):
-            fx, fy = bx + r.randint(-12, 12), 140 + r.randint(0, 15)
-            d.line([(fx, fy), (bx + (fx - bx) // 3, 158)], fill=hx("3a6a3a"))
-        for _ in range(22):
-            fx, fy = bx + r.randint(-13, 13), 138 + r.randint(0, 14)
-            d.ellipse([fx - 2, fy - 2, fx + 2, fy + 2], fill=fl)
-            d.point((fx - 1, fy - 1), fill=mul(fl, 1.12))
+    for bx, fl, kind in ((84, ROSE, "rose"), (142, hx("eeeae0"), "carnation"), (190, hx("e8d080"), "lily")):
+        zinc_bucket(img, bx)
+        # the lilies keep clear of the chalked blue carnation behind them
+        bucket_flowers(d, bx, kind, fl, avoid=(cx0 + 10, 132, cx0 + 24, 149) if kind == "lily" else None)
     text(img, (142, 170), "5c", hx("e8e4d0"), size=8)
 
 
@@ -496,65 +574,133 @@ def cold_door(img, open_):
 
 
 CARNATION = (hx("2e5ad8"), hx("5a8af0"), hx("a8c8ff"))
+EMBER = (hx("c84a20"), hx("ff8a3a"), hx("ffd890"))
+REGULAR_X = 442
+# the smoker's strip: idle, arm rising, hand at the mouth, drawing on it, arm falling with a puff, idle with the
+# puff drifting off. Each pose is the cigarette hand's elbow and hand offsets from the regular's centre line.
+SMOKE_POSES = (
+    {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": None},
+    {"elbow": (17, 136), "hand": (11, 126), "ember": 0, "puff": None},
+    {"elbow": (14, 130), "hand": (3, 114), "ember": 1, "puff": None},
+    {"elbow": (14, 130), "hand": (3, 114), "ember": 2, "puff": None},
+    {"elbow": (17, 136), "hand": (11, 126), "ember": 1, "puff": ((-3, 115, 2), (-6, 112, 2))},
+    {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": ((-13, 101, 3), (-17, 96, 2), (-9, 106, 2))},
+)
 
 
-def regular(img):
-    """A member waiting by the wall in a fedora and belted overcoat, a blue carnation bright in his buttonhole."""
-    d = ImageDraw.Draw(img)
-    cx = 442
-    coat, coat_d, coat_l = hx("3a3640"), hx("232028"), hx("5a5462")
+def _puff(d, cx, cy, r):
+    """A dithered cloud of smoke: dense in the middle, every other pixel towards the edge so the wall shows."""
+    dense, thin = hx("9a9eaa"), hx("6a6e7c")
+    for y in range(cy - r, cy + r + 1):
+        for x in range(cx - r - 1, cx + r + 2):
+            q = ((x - cx) / (r + 1)) ** 2 + ((y - cy) / r) ** 2
+            if q <= 0.5:
+                d.point((x, y), fill=dense)
+            elif q <= 1 and (x + y) % 2 == 0:
+                d.point((x, y), fill=thin)
+
+
+def regular(img, pose=0):
+    """A member waiting by the wall in a dark overcoat, head bowed so the fedora hides his face, a blue carnation
+    bright in his buttonhole and a cigarette in his hand. Painted on its own layer (the game animates the smoking);
+    returns the figure's mask."""
+    p = SMOKE_POSES[pose]
+    fig = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(fig)
+    cx = REGULAR_X
+    coat, coat_d, coat_l = hx("2c2a34"), hx("18171e"), hx("4a4856")
+    skin, skin_d = hx("8a6a58"), hx("4a3830")
+    hat, hat_d, hat_l, band = hx("3a3632"), hx("221f1d"), hx("5e5852"), hx("121012")
     # trouser legs and shoes
     d.rectangle([cx - 7, 162, cx - 2, BASE - 3], fill=hx("1c1a20"))
-    d.rectangle([cx + 2, 162, cx + 7, BASE - 3], fill=hx("1c1a20"))
-    d.line([(cx - 3, 163), (cx - 3, BASE - 4)], fill=hx("2c2a32"))
+    d.rectangle([cx + 2, 162, cx + 7, BASE - 3], fill=hx("16151a"))
+    d.line([(cx - 6, 163), (cx - 6, BASE - 4)], fill=hx("2c2a32"))
     d.rectangle([cx - 9, BASE - 3, cx - 1, BASE], fill=hx("0c0b0e"))
     d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0c0b0e"))
     d.line([(cx - 8, BASE - 3), (cx - 3, BASE - 3)], fill=hx("4a4650"))
-    # overcoat: shoulders, flared skirt, belt, lit left edge from the lamp
-    d.polygon([(cx - 10, 118), (cx + 10, 118), (cx + 12, 126), (cx + 12, 164), (cx - 12, 164), (cx - 12, 126)],
+    # overcoat: hunched shoulders, flared skirt, belt, the lamp catching its left edge
+    d.polygon([(cx - 10, 116), (cx + 10, 116), (cx + 12, 123), (cx + 13, 164), (cx - 13, 164), (cx - 12, 123)],
               fill=coat)
-    d.polygon([(cx + 3, 120), (cx + 10, 118), (cx + 12, 126), (cx + 12, 164), (cx + 4, 164)], fill=coat_d)
-    d.line([(cx - 11, 124), (cx - 12, 163)], fill=coat_l)
-    d.line([(cx - 10, 119), (cx - 4, 118)], fill=coat_l)
-    d.rectangle([cx - 12, 141, cx + 12, 143], fill=coat_d)
+    d.polygon([(cx + 3, 118), (cx + 10, 116), (cx + 12, 123), (cx + 13, 164), (cx + 4, 164)], fill=coat_d)
+    d.line([(cx - 12, 123), (cx - 13, 163)], fill=coat_l)
+    d.line([(cx + 12, 124), (cx + 13, 163)], fill=hx("34323e"))
+    d.line([(cx - 10, 117), (cx - 5, 116)], fill=coat_l)
+    d.rectangle([cx - 13, 141, cx + 13, 143], fill=coat_d)
     d.rectangle([cx - 1, 141, cx + 1, 143], fill=hx("8a8070"))
     d.line([(cx, 128), (cx, 163)], fill=coat_d)
     for y in (132, 150):
-        d.point((cx - 2, y), fill=hx("15131a"))
-    # lapels open on a white shirt and dark tie
-    d.polygon([(cx - 4, 118), (cx + 4, 118), (cx, 130)], fill=hx("d8d4c8"))
-    d.line([(cx, 120), (cx, 129)], fill=hx("6a1e24"))
-    d.line([(cx - 5, 118), (cx - 1, 130)], fill=coat_l)
-    d.line([(cx + 5, 118), (cx + 1, 130)], fill=coat_d)
-    # hands in pockets
-    d.line([(cx - 11, 146), (cx - 7, 148)], fill=coat_d)
-    d.line([(cx + 7, 148), (cx + 11, 146)], fill=hx("15131a"))
-    # face under the brim: lit cheek, shadowed eyes, a cigarette
-    d.rectangle([cx - 2, 114, cx + 2, 118], fill=hx("a07c64"))
-    d.ellipse([cx - 5, 101, cx + 5, 116], fill=hx("c49a7c"))
-    d.ellipse([cx + 1, 102, cx + 5, 116], fill=hx("9a7660"))
-    d.rectangle([cx - 4, 104, cx + 4, 106], fill=hx("7a5c4c"))
-    d.point((cx - 2, 107), fill=hx("2a2026"))
-    d.point((cx + 2, 107), fill=hx("2a2026"))
-    d.line([(cx - 1, 108), (cx - 1, 110)], fill=hx("a07c64"))
-    d.line([(cx - 2, 112), (cx + 1, 112)], fill=hx("6a3e38"))
-    d.line([(cx - 6, 112), (cx - 3, 112)], fill=hx("e8e4dc"))
-    d.point((cx - 7, 112), fill=hx("ff9040"))
-    light(img, "ellipse", [cx - 10, 108, cx - 4, 116], hx("ff9040"), 0.35, 2)
-    # fedora: pinched crown, band, wide snap brim
-    d = ImageDraw.Draw(img)
-    d.polygon([(cx - 6, 95), (cx - 3, 92), (cx + 3, 92), (cx + 6, 95), (cx + 6, 101), (cx - 6, 101)], fill=hx("3e3a36"))
-    d.line([(cx, 92), (cx, 95)], fill=hx("2a2724"))
-    d.rectangle([cx - 6, 99, cx + 6, 100], fill=hx("1a181a"))
-    d.polygon([(cx - 10, 102), (cx + 10, 101), (cx + 8, 103), (cx - 9, 104)], fill=hx("2e2a28"))
-    d.line([(cx - 6, 93), (cx - 6, 98)], fill=hx("5a5450"))
-    # blue carnation in the left buttonhole, catching the light
+        d.point((cx - 2, y), fill=hx("0e0d12"))
+    # a sliver of shirt and tie between the lapels
+    d.polygon([(cx - 3, 117), (cx + 3, 117), (cx, 126)], fill=hx("b8b4aa"))
+    d.line([(cx, 118), (cx, 125)], fill=hx("5a1a20"))
+    d.line([(cx - 5, 117), (cx - 1, 128)], fill=coat_l)
+    d.line([(cx + 5, 117), (cx + 1, 128)], fill=coat_d)
+    # collar turned up against the rain
+    d.polygon([(cx - 9, 117), (cx - 7, 109), (cx - 3, 112), (cx - 3, 117)], fill=coat)
+    d.line([(cx - 9, 116), (cx - 7, 109)], fill=coat_l)
+    d.polygon([(cx + 9, 117), (cx + 7, 109), (cx + 3, 112), (cx + 3, 117)], fill=coat_d)
+    # the other hand deep in its pocket
+    d.line([(cx - 12, 124), (cx - 11, 145)], fill=coat_d)
+    d.line([(cx - 11, 146), (cx - 6, 148)], fill=hx("0e0d12"))
+    # blue carnation in the left buttonhole, ruffled, catching the light
     dark, mid, hi = CARNATION
-    d.ellipse([cx - 9, 120, cx - 4, 125], fill=dark)
-    d.ellipse([cx - 8, 120, cx - 5, 123], fill=mid)
-    d.point((cx - 7, 121), fill=hi)
+    d.ellipse([cx - 10, 119, cx - 4, 125], fill=dark)
+    d.ellipse([cx - 9, 119, cx - 5, 123], fill=mid)
+    for x in (cx - 9, cx - 7, cx - 5):
+        d.point((x, 118), fill=mid)
+    d.point((cx - 8, 120), fill=hi)
+    d.point((cx - 6, 121), fill=hi)
+    d.point((cx - 7, 122), fill=dark)
+    d.point((cx - 9, 123), fill=mid)
     d.line([(cx - 6, 125), (cx - 5, 127)], fill=hx("3a7a3a"))
-    light(img, "ellipse", [cx - 12, 116, cx - 1, 129], hx("4a80f0"), 0.3, 3)
+    # the chin, just showing under the brim
+    d.rectangle([cx - 2, 111, cx + 2, 112], fill=skin_d)
+    d.line([(cx - 1, 113), (cx + 1, 113)], fill=skin_d)
+    # the smoking arm: sleeve, cuff, hand and cigarette
+    ex, ey = cx + p["elbow"][0], p["elbow"][1]
+    hx_, hy = cx + p["hand"][0], p["hand"][1]
+    d.line([(cx + 10, 119), (ex, ey), (hx_ + 1, hy + 2)], fill=coat_d, width=5, joint="curve")
+    d.line([(cx + 12, 121), (ex - 2, ey)], fill=coat, width=1)
+    d.ellipse([hx_ - 1, hy - 1, hx_ + 2, hy + 2], fill=skin)
+    d.point((hx_ + 2, hy + 1), fill=skin_d)
+    d.point((hx_ - 1, hy), fill=mix(skin, hx("e0b090"), 0.5))
+    ember = EMBER[p["ember"]]
+    if p["hand"][1] > 130:
+        d.line([(hx_ - 4, hy + 2), (hx_ - 2, hy + 2)], fill=hx("e8e4dc"))
+        d.point((hx_ - 5, hy + 2), fill=ember)
+        for k, (wx, wy) in enumerate(((-5, 0), (-4, -2), (-5, -4), (-6, -6), (-5, -8))):
+            if k % 2 == 0 or p["puff"] is None:
+                d.point((hx_ + wx, hy + wy), fill=hx("7a7e8a"))
+    else:
+        d.point((hx_ - 2, hy + 1), fill=hx("e8e4dc"))
+        d.point((hx_ - 3, hy + 1), fill=ember)
+    # fedora, tipped forward over the face and seen from above: a wide brim, the pinched crown sitting at its back,
+    # and the front lip dipping over where the eyes would be
+    d.ellipse([cx - 12, 101, cx + 12, 112], fill=hat_d)
+    d.arc([cx - 12, 101, cx + 12, 112], 160, 300, fill=hat_l)
+    d.polygon([(cx - 6, 105), (cx - 6, 98), (cx - 4, 95), (cx + 4, 95), (cx + 6, 98), (cx + 6, 105)], fill=hat)
+    d.polygon([(cx - 6, 105), (cx - 6, 98), (cx - 4, 95), (cx - 2, 95), (cx - 3, 98), (cx - 3, 105)],
+              fill=mix(hat, hat_l, 0.45))
+    d.ellipse([cx - 4, 95, cx + 4, 100], fill=mix(hat, hat_l, 0.3))
+    d.line([(cx, 95), (cx, 100)], fill=hat_d)
+    d.point((cx - 1, 96), fill=hat_l)
+    d.rectangle([cx - 6, 103, cx + 6, 105], fill=band)
+    d.chord([cx - 12, 101, cx + 12, 113], 0, 180, fill=hat_d)
+    d.arc([cx - 12, 101, cx + 12, 113], 25, 155, fill=hx("34302c"))
+    d.line([(cx - 11, 107), (cx - 5, 110)], fill=mix(hat_d, hat_l, 0.5))
+    if p["puff"]:
+        for px_, py_, r in p["puff"]:
+            _puff(d, cx + px_, py_, r)
+    img.paste(fig, (0, 0), fig)
+    mask = fig.getchannel("A")
+    light(img, "ellipse", [cx - 12, 115, cx - 1, 129], hx("4a80f0"), 0.3, 3)
+    if p["hand"][1] > 130:
+        tx, ty = hx_ - 5, hy + 2
+    else:
+        tx, ty = hx_ - 3, hy + 1
+    light(img, "ellipse", [tx - 3, ty - 3, tx + 3, ty + 2], hx("ff9040"), 0.15 + 0.15 * p["ember"], 1)
+    return mask
+
 
 def lamppost(img):
     d = ImageDraw.Draw(img)
@@ -588,20 +734,24 @@ def florist_ground(img):
     light(img, "rect", [20, BASE + 10, 36, CURB], hx("ffe0a0"), 0.18, 4)
 
 
-def paint_florist(bluing=True, grille_open=False):
+def paint_florist(bluing=True, grille_open=False, pose=None):
+    """The street front. The regular is animated in the scene, so he is only painted when a smoking pose is given;
+    returns the painting and the regular's mask (None without him)."""
     img = Image.new("RGB", (W, FULL_H))
     florist_facade(img)
     display_window(img)
     shop_door(img)
     bluing_shelf(img, bluing)
     cold_door(img, grille_open)
-    regular(img)
     florist_ground(img)
+    # where the regular always stands: his shadow belongs to the pavement
+    shadow(img, "ellipse", [REGULAR_X - 15, BASE - 2, REGULAR_X + 15, BASE + 5], 0.5, 2)
+    mask = None if pose is None else regular(img, pose)
     lamppost(img)
     shadow(img, "rect", [-40, -40, W + 40, FULL_H + 40], 0.15, 0, tint=hx("4050a0"))
     # the rain itself is animated in the scene (scripts/Core/Rain.cs)
     vignette(img, 0.5, tint=(20, 22, 44), blur=46)
-    return img
+    return img, mask
 
 
 # ============================================================================================ items
@@ -688,16 +838,30 @@ def build_linen():
 
 def build_florist():
     variants = {
-        "base": paint_florist(bluing=False),
-        "bluing": paint_florist(bluing=True),
-        "grille": paint_florist(bluing=False, grille_open=True),
+        "base": paint_florist(bluing=False)[0],
+        "bluing": paint_florist(bluing=True)[0],
+        "grille": paint_florist(bluing=False, grille_open=True)[0],
     }
-    # the carnation is a handful of pixels; pin its blues so quantising cannot grey it out
-    pal = palette_of(Image.blend(variants["base"], variants["grille"], 0.5), 128) + list(CARNATION)
+    frames = [paint_florist(bluing=False, pose=k) for k in range(len(SMOKE_POSES))]
+    box = frames[0][1].getbbox()
+    for _, mask in frames[1:]:
+        b = mask.getbbox()
+        box = (min(box[0], b[0]), min(box[1], b[1]), max(box[2], b[2]), max(box[3], b[3]))
+    # the palette sees the regular at full contrast; the carnation, the cigarette's ember and the stall's roses are a
+    # handful of pixels each, so their colours are pinned so quantising cannot grey them out or turn the roses orange
+    src = Image.blend(variants["base"], variants["grille"], 0.5)
+    src.paste(frames[0][0].crop(box), box[:2])
+    pal = palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45)]
     px = {k: pixelize(v, pal) for k, v in variants.items()}
     save(px["base"], "rooms", "blue_lantern_front.png")
     _overlay(px["base"], px["bluing"], "blue_lantern_front_bluing")
     _overlay(px["base"], px["grille"], "blue_lantern_front_grille_open")
+    fw, fh = box[2] - box[0], box[3] - box[1]
+    strip = Image.new("RGBA", (fw * len(frames), fh), (0, 0, 0, 0))
+    for k, (frame, mask) in enumerate(frames):
+        strip.paste(cut(pixelize(frame, pal), mask).crop(box), (k * fw, 0))
+    save(strip, "rooms", "blue_lantern_front_regular.png")
+    print(f"  blue_lantern_front_regular.png at {box[:2]}, {len(frames)} frames of {fw}x{fh}")
     return px["base"]
 
 

@@ -6,19 +6,121 @@ namespace Repentance;
 
 public readonly record struct GridPoint(int X, int Y);
 
+/// <summary>
+/// The Drake's service cage, as a maze of shafts and chutes. Columns are the room numbers along a floor
+/// (01 west to 09 east), rows the floors (5th at the top, the basement loading bay at the bottom).
+/// </summary>
+public static class LiftMaze
+{
+    public const int Width = 9, Height = 6;
+
+    // '#' are walls; cells sit on odd rows/columns, gaps between them are open passages.
+    private static readonly string[] Grid =
+    {
+        "###################",
+        "#       #   #     #",
+        "# ##### ### # ### #",
+        "# #   #   # #   # #",
+        "# ### ### # ### # #",
+        "#   #     #   # # #",
+        "# # # ##### ### # #",
+        "# # # #   #     # #",
+        "### # # ### ##### #",
+        "#   # #       #   #",
+        "# ### ######### # #",
+        "# #             # #",
+        "###################",
+    };
+
+    public static GridPoint Start { get; } = new(0, Height - 1);
+    /// <summary>The fifth-floor linen room, right next to 507.</summary>
+    public static GridPoint Target { get; } = new(7, 0);
+    /// <summary>Linen rooms that look exactly like the right one.</summary>
+    public static IReadOnlyList<GridPoint> Decoys { get; } =
+        Array.AsReadOnly(new[] { new GridPoint(1, 0), new GridPoint(7, 2), new GridPoint(3, 1) });
+
+    public static string FloorName(int row) => row == Height - 1 ? "B" : (Height - 1 - row).ToString();
+
+    public static bool IsLinen(GridPoint p) => p == Target || Decoys.Contains(p);
+
+    public static bool CanMove(GridPoint from, int dx, int dy)
+    {
+        if (Math.Abs(dx) + Math.Abs(dy) != 1) return false;
+        int x = from.X + dx, y = from.Y + dy;
+        if (from.X is < 0 or >= Width || from.Y is < 0 or >= Height || x is < 0 or >= Width || y is < 0 or >= Height) return false;
+        return Grid[2 * from.Y + 1 + dy][2 * from.X + 1 + dx] != '#';
+    }
+
+    public static GridPoint Move(GridPoint from, int dx, int dy) =>
+        CanMove(from, dx, dy) ? new GridPoint(from.X + dx, from.Y + dy) : from;
+
+    public static bool Solved(GridPoint p) => p == Target;
+
+    public static string Destination(GridPoint p)
+    {
+        if (p == Target) return "5th floor: linen room by 507";
+        if (IsLinen(p)) return $"{(p.Y == Height - 1 ? "basement" : FloorName(p.Y) + Ordinal(Height - 1 - p.Y))} floor: linen room by {FloorName(p.Y)}0{p.X}";
+        return p == Start ? "the loading bay" : "a blank wall between floors";
+    }
+
+    private static string Ordinal(int n) => n switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" };
+
+    private static readonly (string Id, int Dx, int Dy)[] Steps = { ("up", 0, -1), ("down", 0, 1), ("left", -1, 0), ("right", 1, 0) };
+
+    public static (int Dx, int Dy) Step(string id)
+    {
+        foreach (var s in Steps) if (s.Id == id) return (s.Dx, s.Dy);
+        throw new ArgumentException($"No lift direction '{id}'.", nameof(id));
+    }
+
+    /// <summary>Shortest sequence of "up"/"down"/"left"/"right" moves between two cells, or null if walled off.</summary>
+    public static IReadOnlyList<string>? Route(GridPoint from, GridPoint to)
+    {
+        var previous = new Dictionary<GridPoint, (GridPoint From, string Step)?> { [from] = null };
+        var queue = new Queue<GridPoint>();
+        queue.Enqueue(from);
+        while (queue.Count > 0)
+        {
+            var p = queue.Dequeue();
+            if (p == to) break;
+            foreach (var (id, dx, dy) in Steps)
+            {
+                if (!CanMove(p, dx, dy)) continue;
+                var next = new GridPoint(p.X + dx, p.Y + dy);
+                if (previous.ContainsKey(next)) continue;
+                previous[next] = (p, id);
+                queue.Enqueue(next);
+            }
+        }
+        if (!previous.ContainsKey(to)) return null;
+        var route = new List<string>();
+        for (var step = previous[to]; step is { } s; step = previous[s.From]) route.Add(s.Step);
+        route.Reverse();
+        return route;
+    }
+
+    public static IEnumerable<GridPoint> Cells()
+    {
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                yield return new GridPoint(x, y);
+    }
+}
+
 public static class PuzzleRules
 {
-    public static bool Lift(IReadOnlyList<int> switches) =>
-        switches.Count == 3 && switches[0] == 1 && switches[1] == 0 && switches[2] == 0;
-
-    public static string LiftDestination(IReadOnlyList<int> switches) =>
-        switches.Count != 3 ? "Invalid route" :
-        switches[0] != 1 ? "A: laundry" :
-        switches[1] != 0 ? "B: kitchen" :
-        switches[2] != 0 ? "C: roof" : "5th floor: linen";
-
     public static bool Safe(IReadOnlyList<int> directions, IReadOnlyList<int> numbers) =>
-        directions.SequenceEqual(new[] { 0, 1, 0 }) && numbers.SequenceEqual(new[] { 12, 31, 7 });
+        SafeTumblers(directions, numbers) == 3 && directions.Count == 3 && numbers.Count == 3;
+
+    /// <summary>How many stops, in order from the first, are set right: each one drops a tumbler you can hear.</summary>
+    public static int SafeTumblers(IReadOnlyList<int> directions, IReadOnlyList<int> numbers)
+    {
+        int[] wantDirections = { 0, 1, 0 }, wantNumbers = { 12, 31, 7 };
+        if (directions.Count != 3 || numbers.Count != 3) return 0;
+        int clicks = 0;
+        while (clicks < 3 && directions[clicks] == wantDirections[clicks] && numbers[clicks] == wantNumbers[clicks]) clicks++;
+        return clicks;
+    }
 
     public static bool Crests(IReadOnlyList<int> symbols) => symbols.SequenceEqual(new[] { 2, 0, 1 });
     public static bool Catalogue(int motif, int entry) => motif == 1 && entry == 2;

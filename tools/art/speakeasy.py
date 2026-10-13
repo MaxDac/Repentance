@@ -36,15 +36,18 @@ def vestibule(img):
     d.ellipse([86, 20, 94, 30], fill=hx("fff0b0"))
     light(img, "ellipse", [40, -10, 140, 100], hx("f0c070"), 0.4, 16)
     # crates and empty bottles
-    for (cx, cy, w, h) in ((96, 106, 30, 28), (102, 86, 22, 20)):
+    for (cx, cy, w, h, brace) in ((96, 106, 30, 28, False), (102, 86, 22, 20, True)):
         d.rectangle([cx, cy, cx + w, cy + h], fill=hx("6a4a28"))
+        for py in range(cy + 7, cy + h, 7):
+            d.line([(cx + 1, py), (cx + w - 1, py)], fill=hx("4a3018"))
         d.rectangle([cx, cy, cx + w, cy + h], outline=hx("2a1a0c"))
-        d.line([(cx, cy), (cx + w, cy + h)], fill=hx("4a3018"))
+        d.rectangle([cx + 1, cy + 1, cx + 2, cy + h - 1], fill=hx("5a3c20"))
+        d.rectangle([cx + w - 2, cy + 1, cx + w - 1, cy + h - 1], fill=hx("5a3c20"))
+        if brace:
+            d.line([(cx + 3, cy + 1), (cx + w - 3, cy + h - 1)], fill=hx("4a3018"))
         d.line([(cx + 2, cy + 2), (cx + w - 2, cy + 2)], fill=hx("8a6a3a"))
-    text(img, (107, 121), "SOAP", hx("2a1a0c"), size=8)
-    for x in (100, 106, 112):
-        d.rectangle([x, 80, x + 3, 86], fill=hx("2a5a2a"))
-        d.rectangle([x + 1, 77, x + 2, 80], fill=hx("2a5a2a"))
+    # stencilled label, centred on the lower crate face
+    text(img, (96 + 15, 106 + 15), "SOAP", hx("2a1a0c"), size=8)
     shadow(img, "rect", [0, FLOOR - 6, 140, FLOOR], 0.4, 3)
 
 
@@ -71,7 +74,11 @@ def main_room(img):
     d.line([(x0, 94), (W, 94)], fill=hx("6a5020"))
     # neon sign
     d.rectangle([340, 8, 476, 26], fill=hx("0a0c18"))
-    text(img, (408, 17), "BLUE LANTERN", hx("a8d0ff"), size=8)
+    d.rectangle([343, 11, 473, 23], outline=hx("4a8ae8"))
+    d.rectangle([345, 13, 471, 21], outline=hx("1a2a4a"))
+    d.line([(404, 13), (412, 13)], fill=hx("a8d0ff"))
+    d.polygon([(403, 15), (413, 15), (411, 21), (405, 21)], outline=hx("a8d0ff"))
+    d.line([(408, 15), (408, 21)], fill=hx("6aa8ff"))
     light(img, "rect", [334, 2, 482, 32], BLUE, 0.5, 8)
 
 
@@ -103,6 +110,38 @@ def piano(img):
     light(img, "rect", [240, 82, 250, 120], hx("8090c0"), 0.2, 2)
 
 
+GLYPHS = {
+    "P": ("111", "101", "111", "100", "100"),
+    "R": ("111", "101", "110", "101", "101"),
+    "I": ("1", "1", "1", "1", "1"),
+    "V": ("101", "101", "101", "101", "010"),
+    "A": ("010", "101", "111", "101", "101"),
+    "T": ("111", "010", "010", "010", "010"),
+    "E": ("111", "100", "110", "100", "111"),
+}
+
+
+def tiny_text(d, x, y, s, col):
+    for ch in s:
+        g = GLYPHS[ch]
+        for r, row in enumerate(g):
+            for c, bit in enumerate(row):
+                if bit == "1":
+                    d.point((x + c, y + r), fill=col)
+        x += len(g[0]) + 1
+
+
+def plaque(d, cx, cy):
+    """Small brass nameplate that sits well inside the door's upper panel."""
+    word = "PRIVATE"
+    tw = sum(len(GLYPHS[ch][0]) + 1 for ch in word) - 1
+    x0, y0 = cx - tw // 2 - 2, cy - 4
+    d.rectangle([x0, y0, x0 + tw + 3, y0 + 8], fill=hx("8a6a2a"))
+    d.rectangle([x0, y0, x0 + tw + 3, y0 + 8], outline=hx("3a2a10"))
+    d.line([(x0 + 1, y0 + 1), (x0 + tw + 2, y0 + 1)], fill=hx("d8b860"))
+    tiny_text(d, x0 + 2, y0 + 2, word, hx("1e140a"))
+
+
 def back_door(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 292, 52, 326, 133
@@ -110,9 +149,65 @@ def back_door(img):
     vgrad(img, (x0, y0, x1, y1), hx("2a4a34"), hx("16281c"))
     d.rectangle([x0 + 4, y0 + 6, x1 - 4, y0 + 34], outline=hx("102018"))
     d.rectangle([x0 + 4, y0 + 42, x1 - 4, y1 - 6], outline=hx("102018"))
-    text(img, ((x0 + x1) // 2, y0 + 20), "PRIVATE", hx("c0a050"), size=8)
+    plaque(d, (x0 + x1) // 2, y0 + 17)
     d.ellipse([x1 - 9, 92, x1 - 5, 96], fill=hx("c0a050"))
     light(img, "rect", [x0, y1 - 2, x1, y1 + 4], hx("f0c060"), 0.4, 2)
+
+
+def bottle(d, x, base, kind, rnd):
+    """Draws one back-bar bottle standing on `base`; returns its width."""
+    edge = hx("140a06")
+    if kind == "decanter":
+        w, body, neck = 8, rnd.randint(7, 8), 2
+        liquid, glass = hx("a8561a"), hx("7a8a90")
+    elif kind == "gin":
+        w, body, neck = 6, rnd.randint(8, 9), 4
+        liquid, glass = hx("9ab4bc"), hx("7a96a0")
+    elif kind == "wine":
+        w, body, neck = 6, rnd.randint(8, 9), 5
+        liquid, glass = hx("16301a"), hx("24481e")
+    elif kind == "rye":
+        w, body, neck = 6, rnd.randint(9, 10), 4
+        liquid, glass = hx("8a3c10"), hx("5a3014")
+    else:
+        w, body, neck = 7, rnd.randint(8, 10), 3
+        liquid, glass = hx("b8681a"), hx("6a3c16")
+    top = base - body + 1
+    hi = mix(liquid, hx("fff4d0"), 0.6)
+    d.rectangle([x, top, x + w - 1, base], fill=edge)
+    d.rectangle([x + 1, top, x + w - 2, base], fill=glass)
+    level = top + (0 if kind in ("gin", "wine") else rnd.randint(1, 3))
+    d.rectangle([x + 1, level, x + w - 2, base], fill=liquid)
+    d.line([(x + w - 2, level), (x + w - 2, base)], fill=mul(liquid, 0.55))
+    d.line([(x + 1, top + 1), (x + 1, base - 1)], fill=hi)
+    if kind == "decanter":
+        # squat cut-glass decanter with a ball stopper
+        d.line([(x + 1, top), (x + w - 2, top)], fill=mix(glass, hx("ffffff"), 0.3))
+        d.rectangle([x + 3, top - 2, x + 4, top - 1], fill=glass)
+        d.rectangle([x + 2, top - 5, x + 5, top - 3], fill=hx("b0c8d0"))
+        d.point((x + 2, top - 5), fill=edge)
+        d.point((x + 5, top - 5), fill=edge)
+        d.line([(x + 2, base - 2), (x + w - 3, base - 2)], fill=mul(liquid, 0.7))
+        return w
+    # rounded shoulder, neck and cap
+    d.point((x, top), fill=hx("2a1a12"))
+    d.point((x + w - 1, top), fill=hx("2a1a12"))
+    d.line([(x + 1, top - 1), (x + w - 2, top - 1)], fill=edge)
+    d.line([(x + 2, top - 1), (x + w - 3, top - 1)], fill=glass)
+    nx0 = x + (w - 2) // 2
+    nx1 = nx0 + 1
+    d.rectangle([nx0, top - 1 - neck, nx1, top - 2], fill=glass)
+    d.point((nx0, top - 1 - neck + 1), fill=mix(glass, hx("ffffff"), 0.3))
+    cap = rnd.choice([hx("c0a050"), hx("8a1a14"), hx("1e1e22"), hx("d8d0c0")])
+    d.rectangle([nx0, top - 2 - neck, nx1, top - 1 - neck], fill=cap)
+    # paper label across the middle of the body
+    if kind != "gin" or rnd.random() < 0.5:
+        ly = base - body // 2 - 1
+        lab = rnd.choice([hx("e0d0a8"), hx("d8c088"), hx("e8dcc0"), hx("c8a868")])
+        d.rectangle([x + 1, ly, x + w - 2, ly + 3], fill=lab)
+        d.line([(x + 1, ly + 3), (x + w - 2, ly + 3)], fill=mul(lab, 0.7))
+        d.line([(x + 2, ly + 1), (x + w - 3, ly + 1)], fill=rnd.choice([hx("7a1a10"), hx("1e2a4a"), hx("2a2a2a")]))
+    return w
 
 
 def bar(img):
@@ -121,16 +216,15 @@ def bar(img):
     d.rectangle([338, 28, 478, 94], fill=hx("2a1a12"))
     vgrad(img, (344, 32, 472, 54), hx("3a4a5a"), hx("1e2630"))
     rnd = random.Random(5)
+    kinds = ["whiskey", "whiskey", "whiskey", "decanter", "gin", "wine", "whiskey", "rye"]
     for sy in (58, 76):
+        base = sy + 13
         d.rectangle([340, sy + 14, 476, sy + 16], fill=hx("5a3a20"))
-        x = 344
-        while x < 472:
-            h = rnd.randint(8, 13)
-            col = rnd.choice([hx("6a3a14"), hx("2a5a2a"), hx("8a6a2a"), hx("4a2a4a"), hx("a8a8b0")])
-            d.rectangle([x, sy + 14 - h, x + 3, sy + 13], fill=col)
-            d.rectangle([x + 1, sy + 14 - h - 3, x + 2, sy + 14 - h], fill=col)
-            d.point((x, sy + 15 - h), fill=mul(col, 1.6))
-            x += rnd.randint(5, 8)
+        d.line([(340, sy + 14), (476, sy + 14)], fill=hx("8a6038"))
+        x = 345
+        while x < 464:
+            kind = rnd.choice(kinds)
+            x += bottle(d, x, base, kind, rnd) + rnd.randint(1, 3)
     light(img, "rect", [338, 28, 478, 94], BLUE, 0.15, 6)
     # bar counter (foreground layer)
     d.rectangle([334, 96, 480, 102], fill=hx("4a2a18"))
@@ -177,19 +271,85 @@ def haze(img):
         light(img, "ellipse", [x - 40, y - 8, x + 40, y + 8], hx("6070a0"), 0.18, 8)
 
 
+RUG_VP = (300, -300)
+RUG_BACK, RUG_FRONT = 148, 230
+RUG_X0, RUG_X1 = 192, 290  # front edge
+
+
+def _rug_x(xf, y):
+    vx, vy = RUG_VP
+    return vx + (xf - vx) * (y - vy) / (RUG_FRONT - vy)
+
+
+def runner(img):
+    """Long oriental runner from the curtain to the bar, in the floor's perspective."""
+    px = img.load()
+    vy = RUG_VP[1]
+    zb, zf = 1 / (RUG_BACK - vy), 1 / (RUG_FRONT - vy)
+    length = 4.2  # rug length in rug widths
+    field, field2 = hx("5a181a"), hx("4a1416")
+    border, gold, navy, cream = hx("1a2440"), hx("a8843e"), hx("121c32"), hx("c8b890")
+    shadow(img, "polygon", [(_rug_x(RUG_X0, RUG_BACK) - 2, RUG_BACK + 2), (_rug_x(RUG_X1, RUG_BACK) + 2, RUG_BACK + 2),
+                            (RUG_X1 + 3, RUG_FRONT + 3), (RUG_X0 - 3, RUG_FRONT + 3)], 0.45, 2)
+    for y in range(RUG_BACK, RUG_FRONT + 1):
+        xa, xb = _rug_x(RUG_X0, y), _rug_x(RUG_X1, y)
+        v = (zb - 1 / (y - vy)) / (zb - zf) * length
+        for x in range(int(round(xa)), int(round(xb)) + 1):
+            u = (x - xa) / (xb - xa)
+            ev = min(v, length - v)
+            edge = min(min(u, 1 - u), ev)
+            if edge < 0.03:
+                c = hx("2a1a14")
+            elif edge < 0.05:
+                c = gold
+            elif edge < 0.15:
+                # border band with a running chevron
+                t = (edge - 0.05) / 0.10
+                along = v if min(u, 1 - u) <= ev else u
+                c = border
+                if abs(((along * 6) % 1.0) - 0.5) * 2 < 0.3 and 0.3 < t < 0.7:
+                    c = cream
+                elif abs(t - 0.5) < 0.12:
+                    c = hx("7a2420")
+            elif edge < 0.17:
+                c = gold
+            else:
+                # field: alternating tones and repeating diamond medallions
+                c = field if int(v * 4) % 2 == 0 else field2
+                mv = (v - 0.2) % 1.0 - 0.5
+                du = abs(u - 0.5) * 2.4 + abs(mv) * 2.0
+                if du < 0.22:
+                    c = gold
+                elif du < 0.34:
+                    c = navy
+                elif du < 0.42:
+                    c = cream
+                elif du < 0.52:
+                    c = hx("7a2420")
+                # small corner sprigs between medallions
+                su, sv = abs(u - 0.5), abs(((v + 0.3) % 1.0) - 0.5)
+                if 0.18 < su < 0.24 and sv < 0.06:
+                    c = navy
+            px[x, y] = c
+    # fringe at both ends
+    d = ImageDraw.Draw(img)
+    for y, dy in ((RUG_BACK, -2), (RUG_FRONT, 3)):
+        xa, xb = _rug_x(RUG_X0, y), _rug_x(RUG_X1, y)
+        for x in range(int(xa) + 1, int(xb), 2):
+            d.line([(x, y + (1 if dy > 0 else -1)), (x, y + dy)], fill=cream)
+    # light falls from the stage onto the far end; the near end sits in the dark
+    light(img, "ellipse", [180, RUG_BACK - 10, 300, RUG_BACK + 50], hx("8090c0"), 0.15, 10)
+
+
 def paint():
     img = Image.new("RGB", (W, H))
     main_room(img)
     floor_boards(img, FLOOR, H - 1, (300, -300), 16, hx("2a1c16"), hx("1e140e"), hx("0e0806"), 9)
     noise(img, (0, FLOOR, W - 1, H - 1), 5, 33)
     d = ImageDraw.Draw(img)
-    # the path from the curtain to the bar is worn pale; the corners stay black with spilled beer
-    d.polygon([(196, FLOOR + 6), (268, FLOOR + 2), (310, H - 1), (214, H - 1)], fill=hx("3a281c"))
-    for y in range(FLOOR + 12, H - 4, 8):
-        d.line([(188, y), (292, y + 2)], fill=hx("4a3424"))
-    for box in ((210, 168, 248, 176), (250, 190, 286, 198), (40, 200, 78, 210)):
-        d.ellipse(box, fill=hx("1a100c"))
-    d.ellipse([236, 176, 252, 184], fill=hx("6a5030"))
+    runner(img)
+    # the corners stay black with spilled beer
+    d.ellipse((40, 200, 78, 210), fill=hx("1a100c"))
     vestibule(img)
     curtain(img)
     stage(img)

@@ -1236,8 +1236,10 @@ def grounded_joints(joints, fw=192):
     return [p + shift for p in points]
 
 
-def action_figure(spec, joints, fw=192, fh=96):
-    """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately."""
+def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
+    """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
+    chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
+    hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
@@ -1266,11 +1268,18 @@ def action_figure(spec, joints, fw=192, fh=96):
     coat = spec.get("coat")
     if coat:
         tail = hip + (knee - hip) * min(1, (coat["hem"] - 0.5) / 0.24)
-        pts = [waist - across * 5, hip - across * 6, tail - across * 5,
-               tail + across * 5, hip + across * 6, waist + across * 5]
+        if chest_down:
+            # The skirt wraps the upright thigh and its front panel hangs under the belly, rather than being spread
+            # across the trunk's axis (a sliver down the thigh).
+            back = np.array([-(tail - hip)[1], (tail - hip)[0]]) / np.linalg.norm(tail - hip)
+            back = back if back @ up < 0 else -back
+            pts = [waist - across * 5, hip + back * 6, tail + back * 5, tail - back * 4, waist + across * 5]
+        else:
+            pts = [waist - across * 5, hip - across * 6, tail - across * 5,
+                   tail + across * 5, hip + across * 6, waist + across * 5]
         c.put(c.poly(pts), coat["col"], "coat")
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
-    if not spec.get("cloak"):
+    if not spec.get("cloak") and not chest_down:
         shirt = shoulder - up * 5
         limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
         tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)

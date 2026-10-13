@@ -16,10 +16,54 @@ public partial class Speakeasy : Room
             sal.Position = SalAside;
     }
 
-    public override Vector2 ClampWalkTarget(Vector2 target)
+    private bool _intercepting;
+
+    /// <summary>Micah can try to walk past Sal; the moment he crosses the curtain line, Sal steps in and the talk starts.</summary>
+    public override void _Process(double delta)
     {
-        if (!State.HasFlag("sal_passed") && target.X > BarrierX) target.X = BarrierX;
-        return target;
+        if (_intercepting || State.HasFlag("sal_passed") || Game.Busy || Game.IsPaused) return;
+        if (!Player.Visible || Player.Position.X <= BarrierX) return;
+        _intercepting = true;
+        _ = Game.Run(async () =>
+        {
+            Player.Stop();
+            try { await Intercept(); }
+            finally { _intercepting = false; }
+        });
+    }
+
+    private async Task Intercept()
+    {
+        if (FindActor("sal") is { } sal)
+        {
+            await sal.MoveTo(new Vector2(Player.Position.X + 22, Player.Position.Y), 80);
+            Player.FaceTowards(sal.Position);
+        }
+        await Say("sal", Game.Pick("Whoa, whoa. Where do you think you're goin', pal?", "Not so fast. Nobody walks past me."));
+        await TalkToSal();
+    }
+
+    /// <summary>The door talk, whether Micah opens it or Sal stops him. If nobody gets anywhere, Sal walks him back.</summary>
+    private async Task TalkToSal()
+    {
+        await Talk("sal");
+        var sal = FindActor("sal");
+        if (State.HasFlag("sal_passed"))
+        {
+            if (sal != null) await sal.MoveTo(SalAside, 45);
+        }
+        else if (State.HasFlag("thrown_out"))
+            await ThrownOut();
+        else
+        {
+            if (Player.Position.X > BarrierX - 8)
+                await Game.WalkTo(new Vector2(BarrierX - 20, Player.Position.Y));
+            if (sal != null)
+            {
+                await sal.MoveTo(SalBlocking, 60);
+                Player.FaceTowards(sal.Position);
+            }
+        }
     }
 
     public override async Task OnEnter(string entry)
@@ -38,29 +82,22 @@ public partial class Speakeasy : Room
         bool beyondSal = target.Bounds.Position.X > BarrierX && target.Id != "sal";
         if (beyondSal && !State.HasFlag("sal_passed") && verb != Verb.Look)
         {
-            await Say(Game.Pick("The big guy at the curtain isn't letting me through.", "Not without getting past the bank vault first."));
+            await Intercept();
             return true;
         }
 
         switch (target.Id, verb)
         {
             case ("sal", Verb.Talk):
-                bool wasPassed = State.HasFlag("sal_passed");
-                await Talk("sal");
-                if (!wasPassed && State.HasFlag("sal_passed") && FindActor("sal") is { } sal)
-                    await sal.MoveTo(SalAside, 45);
-                else if (State.HasFlag("thrown_out"))
-                    await ThrownOut();
+                if (State.HasFlag("sal_passed")) await Talk("sal");
+                else await TalkToSal();
                 return true;
             case ("sal", Verb.UseItem) when item == "matchbook":
                 await Say("sal", "I don't smoke. And I don't read. Password.");
                 return true;
             case ("sal", Verb.UseItem) when item == "dollar":
-                await Talk("sal");
-                if (State.HasFlag("sal_passed") && FindActor("sal") is { } paidSal)
-                    await paidSal.MoveTo(SalAside, 45);
-                else if (State.HasFlag("thrown_out"))
-                    await ThrownOut();
+                if (State.HasFlag("sal_passed")) await Talk("sal");
+                else await TalkToSal();
                 return true;
             case ("sal", Verb.Kick or Verb.Hand):
                 await Say("I'd have better luck pushing the Wrigley Building.");

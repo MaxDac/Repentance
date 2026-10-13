@@ -157,8 +157,7 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
             await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
-            await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift,
-                new[] { ("s0", 1) }, "lift_route");
+            await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, LiftRoute(), "lift_route");
             Check(game.Room?.Name == "HotelLinen", "staff elevator up to the fifth-floor linen room");
 
             // ---- the linen room: a hanger and the cart's pliers make a hook for the night bolt
@@ -236,9 +235,13 @@ public class AutoPlay
 
             await Shot("speakeasy");
             await game.Perform(Verb.Talk, "bartender");
-            Check(game.Room?.Name == "Speakeasy", "Sal blocks the bar");
+            await Until(() => !game.Busy);
+            Check(game.Room?.Name == "Speakeasy" && _offered.Keys.Any(k => k.StartsWith("sal")),
+                "walking past Sal makes him step in and start the talk");
+            Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out") && !gs.HasFlag("photo_shown"),
+                "no password, but Sal takes the bribe before Micah reaches the bar");
             await game.Perform(Verb.Talk, "sal");
-            Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out"), "no password, but Sal takes the bribe");
+            Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
             Check(CashRules.Balance(gs.HasFlag) == 10 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves ten");
             await Shot("speakeasy_inside");
             var bar = game.Perform(Verb.Talk, "bartender");
@@ -1180,11 +1183,11 @@ public class AutoPlay
             Check(await wheel == Verb.Look, "verb wheel retains its selection layout");
 
             var puzzle = game.Hud.Puzzle.Open(PuzzleKind.Lift);
-            PuzzleClick("s0");
+            foreach (var (step, _) in LiftRoute()) PuzzleClick(step);
             PressKey(Key.Space);
             PuzzleClick("submit");
             PuzzleClick("reset");
-            PuzzleClick("s1");
+            PuzzleClick("down");
             PressKey(Key.Escape);
             await Observe(0.1);
             Check(game.IsPaused && game.Hud.Puzzle.IsOpen && !puzzle.IsCompleted,
@@ -1600,6 +1603,10 @@ public class AutoPlay
         await WaitIdle(_game);
         Check(!_game.Hud.Puzzle.IsOpen, $"solved {name} through real controls");
     }
+
+    /// <summary>The cage's shortest way through the service shafts, as arrow-button clicks.</summary>
+    private static (string Id, int Count)[] LiftRoute() =>
+        LiftMaze.Route(LiftMaze.Start, LiftMaze.Target)!.Select(step => (step, 1)).ToArray();
 
     private void PuzzleClick(string id)
     {
