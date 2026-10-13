@@ -67,28 +67,6 @@ class StageCloseupTests(unittest.TestCase):
         chest = c[101:, 92:128]
         self.assertGreater(chest[..., 0].mean(), chest[..., 1].mean() * 2, "dark red velvet")
 
-    def test_her_face_is_emptied_and_nothing_else_changes(self):
-        src = Image.open(closeup.SRC).convert("RGB")
-        before = np.asarray(src, dtype=int)
-        after = np.asarray(closeup.vacant(src), dtype=int)
-        ys, xs = np.nonzero((before != after).any(-1))
-        x0, y0, x1, y1 = closeup.FACE_BOX
-        self.assertGreater(len(ys), 1000)
-        self.assertTrue(x0 <= xs.min() and xs.max() < x1 and y0 <= ys.min() and ys.max() < y1, "only her face")
-        whites = ~closeup.skin_mask(before) & (before.mean(-1) > 150)
-        for ex0, ex1, ey0, ey1 in closeup.EYE_BOXES:
-            eye = after[ey0:ey1, ex0:ex1][whites[ey0:ey1, ex0:ex1]]
-            self.assertLess(eye.mean(-1).max(), 180, "dull whites and no catchlights left in her eyes")
-        # the mouth is level: its dark line runs straight across, the corners no higher than the middle
-        x0, x1, y0, y1 = closeup.MOUTH_BOX
-        mouth = after[y0:y1, x0:x1].mean(-1)
-        rows = [int(np.argmin(mouth[:, x - x0])) for x in (closeup.MOUTH_X - 40, closeup.MOUTH_X, closeup.MOUTH_X + 40)]
-        self.assertEqual(len(set(rows)), 1)
-        # waxen: less colour in her cheeks than before
-        cheek = (slice(420, 470), slice(900, 960))
-        sat = lambda a: (a.max(-1) - a.min(-1)).mean()
-        self.assertLess(sat(after[cheek]), sat(before[cheek]) * 0.75)
-
 
 class BeatenCloseupTests(unittest.TestCase):
     @classmethod

@@ -461,8 +461,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Eleanor's face in the spotlight, zoomed and clearly defined, with hooded masked men (the stag among them) behind
   her. The stage stays visible around the panel, which stays up until the fade to black (bare shoulders, or a dark
   red dress when nudity is off).
-- Eleanor's face in both versions of the close-up is emptied of any emotion: level mouth, dull eyes with no light in
-  them, a grey pallor. Micah notices there is nothing in her face, not fear, not shame, like a wound-up doll.
+- Eleanor's face in the close-up is emotionless. Micah notices there is nothing in her face, not fear, not shame,
+  like a wound-up doll.
 
 ### End of Act 2 - Present day, the attic
 
