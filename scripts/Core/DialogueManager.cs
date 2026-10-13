@@ -34,6 +34,7 @@ public partial class DialogueManager : Node
             var gs = GameState.Instance;
             _story.BindExternalFunction("has_item", new Func<string, Variant>(id => gs.HasItem(id)));
             _story.BindExternalFunction("has_flag", new Func<string, Variant>(f => gs.HasFlag(f)));
+        _story.BindExternalFunction("knows_note", new Func<string, Variant>(id => gs.HasItem(Notes.ItemId) && Notes.Known(id, gs.HasFlag)));
             _story.BindExternalFunction("cash_amount", new Func<Variant>(() => gs.HasItem("dollar") ? CashRules.Balance(gs.HasFlag) : 0));
             _story.BindExternalFunction("give_item", new Action<string>(gs.GiveItem));
             _story.BindExternalFunction("take_item", new Action<string>(gs.TakeItem));

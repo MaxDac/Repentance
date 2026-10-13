@@ -95,7 +95,7 @@ public class AutoPlay
             game.AutosaveEnabled = autosave;
             await game.ChangeRoom("attic", "start");
             await PauseTest(game);
-            Check(game.Player.Character == "daniel", "prologue plays as Daniel");
+            Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId), "prologue plays as Daniel, without Micah's notepad");
             await Shot("attic");
             await WheelTest(game);
             await PosePlaybackTest(game);
@@ -136,6 +136,7 @@ public class AutoPlay
             Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
             Check(CashRules.Balance(gs.HasFlag) == 22, "case cash covers every bribe");
             await Shot("office_drawer_empty");
+            await NotepadTest(game);
             await MouseTest(game);
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "Lobby", "entered the lobby");
@@ -471,6 +472,7 @@ public class AutoPlay
             await WaitIdle(game);
             await RingAndCrossTest(game);
             await RoseAppealsTest(game);
+            await RoseWalkAwayTest(game);
             await Shot("map");
             Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
             if (game.Room is Rooms.ChicagoMap map && map.FindHotspot("library") is { } libSpot)
@@ -486,19 +488,30 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "church");
             Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
 
-            await game.Perform(Verb.Walk, "library");
+            var libraryLines = await Listen(game, game.Perform(Verb.Walk, "library"));
             Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+            Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
+                "Micah is relieved Rose isn't on duty, but she's back on his mind");
             Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the daytime librarian is there, not Rose");
             CheckLibrarianOverLadder(game);
             await Shot("library_day");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(!gs.HasFlag("library_banned"), "no gun before asking");
-            var ask = game.Perform(Verb.Talk, "librarian");
+            gs.TakeItem("mirror");
+            var ask = game.Perform(Verb.UseItem, "librarian", Notes.ItemId);
             await Until(() => game.Hud.ImageVisible);
-            Check(game.Hud.ImageVisible, "the symbol is shown full screen during the talk");
+            Check(game.Hud.ImageVisible, "the notepad sketch of the symbol stands in for the mirror");
             await Shot("librarian_symbol");
             game.Hud.CloseImage();
             await ask;
+            gs.GiveItem("mirror");
+            var notes = game.ItemVerb(Verb.Hand, Notes.ItemId);
+            await game.Wait(0.1);
+            for (int i = 0; i < 40 && game.Hud.Notepad.PageId is not (null or "triquetra"); i++) game.Hud.Notepad.Turn(-1);
+            Check(game.Hud.Notepad.PageId == "triquetra" && game.Hud.Notepad.SketchVisible, "the notepad keeps the sketch from behind the mirror");
+            await Shot("notepad_triquetra");
+            game.Hud.Notepad.Close();
+            await notes;
             Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(!gs.HasItem("book"), "cannot retrieve book before identifying title");
@@ -756,14 +769,16 @@ public class AutoPlay
             await game.Wait(2);
             await Shot("attic_night2");
             await Until(() => game.Hud.CaptionVisible);
-            Check(game.Player.Character == "daniel" && !gs.HasItem("revolver") && gs.HasItem("journal"), "back in the attic, Micah's things put away");
+            Check(game.Player.Character == "daniel" && !gs.HasItem("revolver") && gs.HasItem("journal") && !gs.HasItem(Notes.ItemId),
+                "back in the attic, Micah's things put away");
             await Shot("end_of_act_two");
             await Until(() => game.Room?.Name == "Bedroom");
             Check(gs.StoryAct == 3, "Act Three");
             await game.Wait(2);
             await Shot("bedroom");
             await Until(() => game.Room?.Name == "ClubStage");
-            Check(gs.HasItem("revolver") && gs.HasFlag("masked"), "back on the stage with Micah's things");
+            Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.FirstOrDefault() == Notes.ItemId,
+                "back on the stage with Micah's things, notepad first");
             await game.Wait(3);
             Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
             await Shot("club_stage_act3");
@@ -1644,6 +1659,42 @@ public class AutoPlay
         game.Hud.ShowTitle(false);
     }
 
+    /// <summary>Micah's notepad: always the first slot, read full screen from N or the satchel, paged back and forth.</summary>
+    private async Task NotepadTest(Game game)
+    {
+        var gs = GameState.Instance;
+        Check(gs.Inventory.FirstOrDefault() == Notes.ItemId && gs.Inventory.Count(i => i == Notes.ItemId) == 1,
+            "Micah carries one notepad, in the first slot");
+        await WaitIdle(game);
+        PressKey(Key.N);
+        await game.Wait(0.1);
+        var pad = game.Hud.Notepad;
+        Check(pad.IsOpen && pad.PageCount >= 2 && pad.Page == pad.PageCount - 1 && pad.PageId == "eleanor",
+            "N opens the notepad on the newest note");
+        await Shot("notepad");
+        PressKey(Key.Left);
+        await game.Wait(0.05);
+        Check(pad.Page == pad.PageCount - 2 && pad.PageId == "case", "left arrow turns back a page");
+        Click(pad.PrevCenter, MouseButton.Left);
+        await game.Wait(0.05);
+        Check(pad.Page == 0, "cannot turn back past the first page");
+        Click(pad.NextCenter, MouseButton.Left);
+        await game.Wait(0.05);
+        Check(pad.Page == 1, "the next button turns forward");
+        PressKey(Key.N);
+        await WaitIdle(game);
+        Check(!pad.IsOpen && !game.Busy, "N puts the notepad away");
+
+        var read = game.ItemVerb(Verb.Look, Notes.ItemId);
+        await game.Wait(0.1);
+        Check(pad.IsOpen, "looking at the notepad in the satchel opens it");
+        Click(pad.CloseCenter, MouseButton.Left);
+        await AwaitTest(read, "the close button puts the notepad away");
+        gs.GiveItem("hanger");
+        Check(gs.Inventory[0] == Notes.ItemId, "new items never push the notepad out of the first slot");
+        gs.TakeItem("hanger");
+    }
+
     private void PressKey(Key key, bool alt = false)
     {
         foreach (var pressed in new[] { true, false })
@@ -1962,7 +2013,7 @@ public class AutoPlay
         await game.Perform(Verb.Walk, "church");
         Check(_crossOffers == offers + 3 && gs.Inventory.Count(i => i == "cross") == 1, "Act 2 acceptance stops duplicate offers");
         Rooms.Attic.StashMicahItems();
-        Check(!gs.HasItem("faith_ring") && !gs.HasItem("cross") && gs.HasFlag("ring_left_act2"),
+        Check(!gs.HasItem("faith_ring") && !gs.HasItem("cross") && gs.HasFlag("ring_left_act2") && !gs.HasItem(Notes.ItemId),
             "Daniel's interlude puts Micah's commitments aside without losing the original decision");
         Rooms.Attic.RestoreMicahItems();
         Check(gs.HasItem("faith_ring") && gs.HasItem("cross") && gs.HasFlag("took_cross"),
@@ -2040,6 +2091,65 @@ public class AutoPlay
         finally
         {
             Engine.TimeScale = scale;
+            await game.LoadGame(original);
+        }
+    }
+
+    /// <summary>Awaits <paramref name="task"/>, collecting every speech line shown meanwhile.</summary>
+    private static async Task<System.Collections.Generic.List<string>> Listen(Game game, Task task)
+    {
+        var heard = new System.Collections.Generic.List<string>();
+        while (!task.IsCompleted)
+        {
+            if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
+                heard.Add(game.Hud.SpeechText);
+            await game.Wait(0.05);
+        }
+        await task;
+        return heard;
+    }
+
+    private async Task RoseWalkAwayTest(Game game)
+    {
+        var original = game.CaptureSave();
+        var dialogue = DialogueManager.Instance;
+        var choose = dialogue.AutoChoose!;
+        try
+        {
+            foreach (var walkAway in new[] { false, true })
+            {
+                await game.LoadGame(original);
+                dialogue.ResetInk();
+                string[]? offered = null;
+                dialogue.AutoChoose = (knot, options) =>
+                {
+                    if (knot != "rose_leave") return choose(knot, options);
+                    offered = options.ToArray();
+                    return Task.FromResult(walkAway ? 0 : 1);
+                };
+                await game.ChangeRoom("rose_house", "start");
+                var heard = await Listen(game, game.Perform(Verb.Walk, "exit"));
+                Check(offered is { Length: 2 } && offered[0].Contains("Walk away") && offered[1].Contains("Not yet"),
+                    "leaving Rose's house before ringing is an active choice");
+                Check(!GameState.Instance.HasFlag("rose_door") && !heard.Any(l => l.StartsWith("Good night") || l.Contains("Micah Jones")),
+                    "Rose never opens the door nor answers when Micah doesn't ring");
+                if (!walkAway)
+                {
+                    Check(game.Room?.Name == "RoseHouse" && !GameState.Instance.HasFlag("rose_avoided"), "\"Not yet\" keeps Micah at Rose's door");
+                    continue;
+                }
+                Check(game.Room?.Name == "ChicagoMap" && GameState.Instance.HasFlag("rose_avoided") &&
+                    !GameState.Instance.HasFlag("rose_wait") && !GameState.Instance.HasFlag("rose_done"),
+                    "walking away without a word returns to the map, like leaving without insisting");
+                Check(heard.Any(l => l.Contains("left the bell alone")), "Micah's closing thought as he walks away");
+                await game.LoadGame(game.CaptureSave());
+                Check(GameState.Instance.HasFlag("rose_avoided") && !GameState.Instance.HasFlag("rose_wait"),
+                    "save/load preserves walking away from Rose's door");
+            }
+        }
+        finally
+        {
+            dialogue.AutoChoose = choose;
             await game.LoadGame(original);
         }
     }

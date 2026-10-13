@@ -11,7 +11,12 @@ public partial class Library : Room
         {
             if (State.HasFlag("seen_library_night")) return;
             State.SetFlag("seen_library_night");
-            await Game.Run(() => Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper."));
+            await Game.Run(async () =>
+            {
+                await Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
+                await Say("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
+                await Say("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
+            });
             return;
         }
         if (State.HasFlag("seen_library")) return;
@@ -32,7 +37,7 @@ public partial class Library : Room
                 await Say("librarian", "Please. You have your book. Just go.");
                 return true;
             case ("librarian", Verb.Talk):
-            case ("librarian", Verb.UseItem) when item == "mirror":
+            case ("librarian", Verb.UseItem) when Shows(item, "mirror", "triquetra"):
                 await Talk("librarian");
                 return true;
             case ("librarian", Verb.UseItem) when item == "revolver" && !State.HasFlag("librarian_refused"):
@@ -57,7 +62,7 @@ public partial class Library : Room
             case ("rose", Verb.Talk):
                 await Talk("rose");
                 return true;
-            case ("rose", Verb.UseItem) when item == "photo":
+            case ("rose", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("rose", "She's beautiful. Is that why you're here? Work? Of course it is.");
                 return true;
             case ("rose", Verb.Hand):

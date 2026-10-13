@@ -27,7 +27,7 @@ public partial class Lobby : Room
             case ("concierge", Verb.UseItem) when item == "dollar":
                 await Say("concierge", "A single dollar, sir? That is not a bribe. That is an insult.");
                 return true;
-            case ("concierge", Verb.UseItem) when item == "photo":
+            case ("concierge", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("concierge", "A lovely portrait, sir. I have never seen her in my life. Or yours.");
                 return true;
 
@@ -37,7 +37,7 @@ public partial class Lobby : Room
             case ("bellboy", Verb.UseItem) when item == "dollar":
                 await Talk("bellboy_tip");
                 return true;
-            case ("bellboy", Verb.UseItem) when item == "photo":
+            case ("bellboy", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("bellboy", "Pretty. But pictures don't pay my rent, mister.");
                 return true;
 

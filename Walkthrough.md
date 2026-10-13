@@ -188,6 +188,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
 - Micah's 1927 inventory is put aside during the present-day scenes and given back when the story returns to 1927.
 
+### Micah's notepad
+
+- Micah always carries a notepad, the first item in his satchel (Daniel never has it). It can be read full
+  screen at any time with **N** or look/hand in the satchel, one page per note, paged back and forth.
+- Notes are written as the story advances, from Teddy's briefing to the Harrington audit, including the
+  triquetra sketched from behind the mirror.
+- Where only the information matters, the notepad can be shown instead of the item: Eleanor's photo (to anyone
+  asked about her), the mirror (to the librarian), the combination (to the safe), the crests (to the closet
+  panel) and the mended clipping (to the morgue's wall map).
+
 ## Act 2
 
 ### Present Day
@@ -231,8 +241,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Library
 
-- The library visit happens during the day. There is a librarian (new male character); Rose is not there and the
-  librarian never mentions her.
+- The library visit happens during the day. There is a librarian (new male character); Rose works at the library,
+  but it is not her shift, and the librarian never mentions her.
+- On arrival Micah is openly relieved that Rose isn't on duty, but it is made clear that seeing her empty desk has
+  brought her back to his mind; this is part of the reason he later goes to her house.
 - Micah asks him about the strange symbol; it is shown full screen during the conversation, then the scene
   returns to both Micah and the librarian.
 - The librarian asks him where he got that mirror. Micah won't tell him, so the librarian answers that he won't
@@ -278,7 +290,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Streets of Chicago
 
 - Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
-  questions about his life, why he abandoned his wife and son.
+  questions about his life, why he abandoned his wife and son. He recalls Rose's empty desk at the library: he was
+  glad she wasn't there, yet she hasn't left his mind since.
 - His recovery is shown through sitting, a supported crouch, and standing rather than an instantaneous pose swap.
   The player is then presented with two choices:
   - Go find his wife.
@@ -289,6 +302,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Outside Micah's wife house
 
 - Micah is outside the house. The player can choose whether to get out of the location, or ring the bell.
+- Leaving before ringing must be an active choice: using the exit opens a dialogue choice between
+  "(Walk away without a word.)" and "(Not yet.)". "(Not yet.)" keeps Micah at the door. Walking away has the same
+  outcome as leaving without insisting three times (no callback, the bell is closed to him), except that Micah never
+  sees Rose and she never replies: Micah has a short closing thought and the scene returns to the map.
 - If the player let Micah ring the bell, a door will open and Micah's wife will get out.
 - Dialog is tense: the wife asks why he's here, he has no business being here.
 - Simulate a dialog where the player has two options: keep pushing for forgiveness, or just leave: keep pushing means that

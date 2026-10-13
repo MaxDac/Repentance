@@ -41,9 +41,23 @@ public partial class GameState : Node
     public void GiveItem(string id)
     {
         if (_inventory.Contains(id)) return;
-        _inventory.Add(id);
+        // Micah's notepad always takes the first slot
+        if (id == Notes.ItemId) _inventory.Insert(0, id);
+        else _inventory.Add(id);
         EmitSignal(SignalName.Changed);
     }
+
+    /// <summary>Gives Micah his notepad, or moves it back to the first slot.</summary>
+    public void EnsureNotepad()
+    {
+        if (_inventory.Count > 0 && _inventory[0] == Notes.ItemId && _inventory.LastIndexOf(Notes.ItemId) == 0) return;
+        _inventory.RemoveAll(i => i == Notes.ItemId);
+        _inventory.Insert(0, Notes.ItemId);
+        EmitSignal(SignalName.Changed);
+    }
+
+    /// <summary>The notepad is Micah's: present-day Daniel never carries it.</summary>
+    public void RemoveNotepad() => TakeItem(Notes.ItemId);
 
     public void TakeItem(string id)
     {
@@ -70,6 +84,7 @@ public partial class GameState : Node
         _inventory.Clear();
         foreach (var id in inventory)
             if (!_inventory.Contains(id)) _inventory.Add(id);
+        if (_inventory.Remove(Notes.ItemId)) _inventory.Insert(0, Notes.ItemId);
         _storyAct = Mathf.Clamp(storyAct, 1, 3);
         EmitSignal(SignalName.Changed);
     }

@@ -27,6 +27,7 @@ public partial class Hud : CanvasLayer
     public VerbWheel Wheel { get; private set; } = null!;
     public GameMenu Menu { get; private set; } = null!;
     public PuzzlePanel Puzzle { get; private set; } = null!;
+    public NotepadView Notepad { get; private set; } = null!;
 
     private Control _interface = null!;
     private Control _hoverLayer = null!;
@@ -203,6 +204,9 @@ public partial class Hud : CanvasLayer
             else CloseImage();
         };
         root.AddChild(_image);
+
+        Notepad = new NotepadView { Name = "Notepad" };
+        root.AddChild(Notepad);
 
         Menu = new GameMenu { Name = "GameMenu" };
         root.AddChild(Menu);

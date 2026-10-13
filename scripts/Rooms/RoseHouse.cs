@@ -30,7 +30,7 @@ public partial class RoseHouse : Room
     {
         switch (target.Id, verb)
         {
-            case ("bell" or "door", Verb.Hand) when State.HasFlag("rose_done"):
+            case ("bell" or "door", Verb.Hand) when State.HasFlag("rose_done") || State.HasFlag("rose_avoided"):
                 await Say("She said what she had to say. Ringing again would just be me not listening. Again.");
                 return true;
             case ("bell", Verb.Hand):
@@ -44,11 +44,27 @@ public partial class RoseHouse : Room
                 await Say("Talking to a door. It's how most of our conversations went, toward the end.");
                 return true;
 
+            case ("exit", Verb.Walk or Verb.Hand) when !State.HasFlag("rose_done") && !State.HasFlag("rose_avoided"):
+                await LeaveWithoutRinging();
+                return true;
             case ("exit", Verb.Walk or Verb.Hand):
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Walking off before ringing has to be chosen: Micah never sees Rose, she never answers, and it counts as not
+    /// insisting (no callback, the bell is closed to him).
+    /// </summary>
+    private async Task LeaveWithoutRinging()
+    {
+        await Talk("rose_leave");
+        if (!State.HasFlag("rose_avoided")) return;
+        await Say("Not tonight. I left the bell alone, the way I left everything else in that house.");
+        await Game.WalkTo(new Vector2(8, 236));
+        await Game.ChangeRoom("chicago_map", "start");
     }
 
     private async Task RoseOpens()
