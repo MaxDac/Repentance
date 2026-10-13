@@ -454,22 +454,87 @@ def c_bench(img):
     CR.box(img, X0 - 2, X1 + 2, 15, 18, Z0, Z1 + 1, mul(OAK, 1.15), top=hx("8e6240"), side=OAK_D)
 
 
-def c_crucifix(img, xc=463, y0=58):
-    d = ImageDraw.Draw(img)
+def crucifix_geom(xc=463, y0=58):
+    """Screen centre line, top and foot of the upright, and the crossbar row of the corridor crucifix."""
     a, b = CR.P(xc, y0 + 52, 1), CR.P(xc, y0, 1)
-    arm = CR.P(xc, y0 + 40, 1)[1]
-    d.rectangle([a[0] - 2, a[1], a[0] + 2, b[1]], fill=hx("4a2c18"))
-    d.rectangle([a[0] - 12, arm - 2, a[0] + 12, arm + 2], fill=hx("4a2c18"))
-    d.line([(a[0] - 2, a[1]), (a[0] - 2, b[1])], fill=hx("7a5032"))
-    d.line([(a[0] - 12, arm - 2), (a[0] + 12, arm - 2)], fill=hx("7a5032"))
-    x = a[0]
-    corpus = hx("d8ccb4")
-    d.line([(x - 10, arm), (x, arm + 2), (x + 10, arm)], fill=corpus)
-    d.ellipse([x - 2, arm - 3, x + 1, arm + 1], fill=corpus)
-    d.polygon([(x - 2, arm + 1), (x + 2, arm + 1), (x + 1, arm + 14), (x - 1, arm + 14)], fill=corpus)
-    d.line([(x, arm + 14), (x, arm + 22)], fill=corpus)
-    d.rectangle([x - 2, a[1] + 1, x + 2, a[1] + 3], fill=hx("ece0c0"))
-    shadow(img, "rect", [x - 10, a[1] + 2, x + 16, b[1] + 3], 0.25, 2)
+    return round(a[0]), round(a[1]), round(b[1]), round(CR.P(xc, y0 + 40, 1)[1])
+
+
+# hand-pixelled corpus: arms raised from the nailed hands, head bowed to his right under the crown of thorns,
+# white loincloth knotted at the hip, knees bent and the feet crossed over one nail
+CORPUS = ("n...................n",
+          "sS.................Ss",
+          ".sS.......tTtt....Ss.",
+          "..sS.....tHsHt...Ss..",
+          "...sS....HssSH..Ss...",
+          "....sSS..HsSH..SSs...",
+          "......sS..HS..SS.....",
+          ".......sSssSSSs......",
+          "........ssssSS.......",
+          "........sSsSSS.......",
+          "........ssSsSS.......",
+          "........sSsSSS.......",
+          "........sssSS........",
+          ".........ssSS........",
+          "........wwwWWW.......",
+          "........wwwwWWw......",
+          ".........wwWWw.......",
+          ".........ssSS........",
+          ".........ssSS........",
+          "..........sSS........",
+          "..........sS.........",
+          "..........sS.........",
+          ".........sSS.........",
+          ".........sSS.........",
+          ".........snS.........",
+          "..........bb.........")
+
+
+def crucifix_layer(size):
+    """The walnut cross, its INRI titulus and the ivory corpus on a transparent layer."""
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    x, top, foot, arm = crucifix_geom()
+    WOOD, WOOD_L, WOOD_D = hx("4e2e1a"), hx("8a5a36"), hx("2a180c")
+    # upright and crossbar, lit from the windows on the left, with little rounded finials
+    d.rectangle([x - 2, top, x + 2, foot], fill=WOOD)
+    d.line([(x - 2, top), (x - 2, foot)], fill=WOOD_L)
+    d.line([(x + 2, top), (x + 2, foot)], fill=WOOD_D)
+    d.rectangle([x - 12, arm - 2, x + 12, arm + 2], fill=WOOD)
+    d.line([(x - 12, arm - 2), (x + 12, arm - 2)], fill=WOOD_L)
+    d.line([(x - 12, arm + 2), (x + 12, arm + 2)], fill=WOOD_D)
+    for ex, ey in ((x - 13, arm), (x + 13, arm), (x, top - 1)):
+        d.rectangle([ex - 1, ey - 1, ex + 1, ey + 1], fill=WOOD_L)
+        d.point((ex + 1, ey + 1), fill=WOOD_D)
+    d.rectangle([x - 2, foot - 1, x + 2, foot], fill=WOOD_D)
+    # INRI titulus above his head
+    d.rectangle([x - 3, top + 2, x + 3, top + 5], fill=hx("e8dcb8"))
+    d.line([(x - 3, top + 5), (x + 3, top + 5)], fill=hx("a89670"))
+    for i, dy in ((-2, 3), (0, 3), (2, 3), (-1, 4), (1, 4)):
+        d.point((x + i, top + dy), fill=hx("6a3a24"))
+    # the corpus, hands on the crossbar
+    ink = {"s": hx("ecdcbe"), "S": hx("a88e6c"), "H": hx("6a4428"), "t": hx("a8955a"), "T": hx("5a4a28"),
+           "w": hx("fbf8f0"), "W": hx("b8b0a0"), "n": hx("2a2622"), "b": hx("8a1a18")}
+    ox, oy = x - len(CORPUS[0]) // 2, arm - 2
+    for r, row in enumerate(CORPUS):
+        for c, ch in enumerate(row):
+            if ch in ink:
+                d.point((ox + c, oy + r), fill=ink[ch])
+    return layer
+
+
+def c_crucifix(img):
+    """Only the cast shadow is painted under the dusk light; the cross itself goes on afterwards."""
+    x, top, foot, arm = crucifix_geom()
+    shadow(img, "rect", [x - 10, top + 2, x + 16, foot + 3], 0.3, 2)
+
+
+def c_crucifix_lit(img):
+    layer = crucifix_layer(img.size)
+    x, top, foot, _ = crucifix_geom()
+    tint = Image.new("RGB", img.size, hx("b8acb0"))
+    vgrad(tint, (0, top, img.width - 1, foot), hx("c4b6b0"), hx("948890"))
+    img.paste(ImageChops.multiply(layer.convert("RGB"), tint), (0, 0), layer.getchannel("A"))
 
 
 def c_floor(img):
@@ -512,6 +577,7 @@ def paint_corridor():
     lights.append(("ellipse", [160, 130, 214, 196], hx("c08040"), 0.4, 10))
     img = lightmap(img, (96, 86, 112), lights)
     c_statue(img)
+    c_crucifix_lit(img)
     for g in glass:
         light(img, "polygon", g, hx("f0a060"), 0.22, 3)
     for i in WINDOW_BAYS:
@@ -861,6 +927,7 @@ def build():
     px = pixelize(corridor, palette_of(corridor, 128))
     # Our Lady is too small for dithering: her face and robes keep their exact undithered colours
     px.paste(corridor, (0, 0), statue_layer(corridor.size)[0].getchannel("A"))
+    px.paste(corridor, (0, 0), crucifix_layer(corridor.size).getchannel("A"))
     save(px, "rooms", "convent_corridor.png")
 
     base = paint_cell()
