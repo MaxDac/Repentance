@@ -1,0 +1,180 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (X.Y.Z, no "v"). Leave blank to bump the patch of the latest v* tag (first release: 0.1.0).'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Mark the GitHub Release as a preview (pre-release).'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: 4.7.2
+  DOTNET_VERSION: 10.0.x
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
+      tag: ${{ steps.compute.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Compute version
+        id: compute
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION#v}"
+          if [ -z "$version" ]; then
+            latest="$(git tag -l 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)"
+            if [ -z "$latest" ]; then
+              version="0.1.0"
+            else
+              IFS=. read -r major minor patch <<< "${latest#v}"
+              version="${major}.${minor}.$((patch + 1))"
+            fi
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version '$version' is not X.Y.Z"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "::error::Tag v$version already exists"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$version (prerelease: ${{ inputs.prerelease }})" >> "$GITHUB_STEP_SUMMARY"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Unit tests
+        run: dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --configuration Release
+
+  export:
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: linux
+            preset: Linux
+            binary: Repentance.x86_64
+          - platform: windows
+            preset: Windows Desktop
+            binary: Repentance.exe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-mono-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot and export templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz"
+          tpl_dir=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
+          mkdir -p "$tpl_dir"
+          unzip -q /tmp/templates.tpz -d /tmp/tpl
+          mv /tmp/tpl/templates/* "$tpl_dir/"
+
+      - name: Locate Godot
+        run: |
+          godot="$(find ~/godot -type f -name 'Godot_v*_mono_linux.x86_64' | head -n1)"
+          chmod +x "$godot"
+          echo "GODOT=$godot" >> "$GITHUB_ENV"
+          "$godot" --headless --version
+
+      - name: Build C# and import assets
+        run: |
+          set -euo pipefail
+          dotnet build Repentance.csproj
+          "$GODOT" --headless --path . --import
+
+      - name: Export ${{ matrix.preset }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/${{ matrix.platform }}
+          "$GODOT" --headless --path . --export-release "${{ matrix.preset }}" "build/${{ matrix.platform }}/${{ matrix.binary }}"
+          ls -la build/${{ matrix.platform }}
+          test -f "build/${{ matrix.platform }}/${{ matrix.binary }}"
+          # Godot exits 0 even when the C# export step fails; the .NET data folder proves it ran.
+          ls -d build/${{ matrix.platform }}/data_Repentance_* >/dev/null
+          rm -f build/${{ matrix.platform }}/*.tmp
+
+      - name: Package
+        id: package
+        run: |
+          set -euo pipefail
+          name="Repentance-${{ needs.version.outputs.tag }}-${{ matrix.platform }}-x86_64.zip"
+          (cd build/${{ matrix.platform }} && zip -qr "../$name" .)
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: build/${{ steps.package.outputs.name }}
+          if-no-files-found: error
+
+  release:
+    needs: [version, export]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); else flags+=(--latest); fi
+          gh release create "$TAG" dist/*.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Repentance $TAG" \
+            --generate-notes \
+            "${flags[@]}"
+          echo "Release: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
