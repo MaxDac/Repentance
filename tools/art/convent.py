@@ -287,6 +287,100 @@ def c_cell_door(img):
     d.rectangle([cx - 4, a[1] + 15, cx + 4, a[1] + 18], fill=hx("2a1e14"))
 
 
+def our_lady(img, cx, fy, hy):
+    """The painted plaster Madonna: blue mantle over a cream gown, hands joined, on a cloud and crescent moon,
+    crowned with twelve stars.  cx is the centre line, fy the top of the pedestal and hy the top of her head."""
+    d = ImageDraw.Draw(img)
+    BLUE, BLUE_L, BLUE_D, RIM = hx("4a74c0"), hx("82a8e8"), hx("223c78"), hx("b8d0f0")
+    GOWN, GOWN_D, GOWN_L = hx("ece4d4"), hx("b4a894"), hx("fffaf0")
+    SKIN, SKIN_D = hx("f4cca8"), hx("b8805e")
+    GOLD, GOLD_D = hx("e8c050"), hx("9a7428")
+    # mantle: a hood over the head, falling wide to a flared hem
+    mantle = [(cx - 5, hy + 2), (cx - 4, hy - 1), (cx - 2, hy - 2), (cx + 2, hy - 2), (cx + 4, hy - 1), (cx + 5, hy + 2),
+              (cx + 6, hy + 9), (cx + 8, hy + 13), (cx + 9, hy + 24), (cx + 10, hy + 38), (cx + 12, fy - 2),
+              (cx + 9, fy - 1), (cx + 6, fy - 3), (cx - 6, fy - 3), (cx - 9, fy - 1), (cx - 12, fy - 2),
+              (cx - 10, hy + 38), (cx - 9, hy + 24), (cx - 8, hy + 13), (cx - 6, hy + 9)]
+    d.polygon(mantle, fill=BLUE)
+    # shadowed right side and folds
+    d.polygon([(cx + 4, hy + 10), (cx + 8, hy + 13), (cx + 9, hy + 24), (cx + 10, hy + 38), (cx + 12, fy - 2),
+               (cx + 9, fy - 1), (cx + 7, fy - 3), (cx + 6, hy + 26)], fill=BLUE_D)
+    d.line([(cx + 8, hy + 20), (cx + 9, fy - 4)], fill=BLUE)
+    d.line([(cx - 7, hy + 16), (cx - 8, fy - 5)], fill=BLUE_L)
+    d.line([(cx - 5, hy + 22), (cx - 6, fy - 6)], fill=hx("3a5ea8"))
+    d.line([(cx - 4, hy), (cx - 5, hy + 3)], fill=BLUE_L)
+    # pale rim along her left so she stands clear of the night-blue niche
+    d.line([(cx - 5, hy + 2), (cx - 6, hy + 9), (cx - 8, hy + 13), (cx - 9, hy + 24), (cx - 10, hy + 38),
+            (cx - 12, fy - 2)], fill=RIM)
+    d.line([(cx - 4, hy - 1), (cx - 2, hy - 2), (cx + 2, hy - 2)], fill=RIM)
+    # gown in the opening of the mantle
+    gown = [(cx - 2, hy + 10), (cx + 2, hy + 10), (cx + 4, hy + 28), (cx + 6, fy - 3), (cx - 6, fy - 3),
+            (cx - 4, hy + 28)]
+    d.polygon(gown, fill=GOWN)
+    d.polygon([(cx + 1, hy + 24), (cx + 3, hy + 24), (cx + 5, fy - 3), (cx + 2, fy - 3)], fill=GOWN_D)
+    d.line([(cx - 2, hy + 27), (cx - 3, fy - 4)], fill=GOWN_D)
+    d.line([(cx - 3, hy + 30), (cx - 4, fy - 5)], fill=GOWN_L)
+    d.line([(cx, hy + 28), (cx, fy - 4)], fill=GOWN_L)
+    # gold trim down both edges of the mantle and along the hem
+    d.line([(cx - 2, hy + 10), (cx - 4, hy + 28), (cx - 6, fy - 3)], fill=GOLD)
+    d.line([(cx + 2, hy + 10), (cx + 4, hy + 28), (cx + 6, fy - 3)], fill=GOLD_D)
+    d.line([(cx - 12, fy - 2), (cx - 9, fy - 1), (cx - 6, fy - 3)], fill=GOLD)
+    d.line([(cx + 6, fy - 3), (cx + 9, fy - 1), (cx + 12, fy - 2)], fill=GOLD_D)
+    # blue sash knotted at the waist, its ends hanging
+    d.line([(cx - 3, hy + 24), (cx + 3, hy + 24)], fill=BLUE_L)
+    d.line([(cx - 3, hy + 25), (cx + 3, hy + 25)], fill=BLUE)
+    d.line([(cx, hy + 26), (cx - 1, hy + 34)], fill=BLUE)
+    d.line([(cx + 1, hy + 26), (cx + 1, hy + 32)], fill=BLUE_D)
+    # sleeves meeting at the breast, hands joined in prayer
+    d.polygon([(cx - 5, hy + 16), (cx - 1, hy + 18), (cx - 1, hy + 21), (cx - 5, hy + 20)], fill=GOWN)
+    d.polygon([(cx + 5, hy + 16), (cx + 1, hy + 18), (cx + 1, hy + 21), (cx + 5, hy + 20)], fill=GOWN_D)
+    d.polygon([(cx - 1, hy + 21), (cx - 1, hy + 15), (cx, hy + 13), (cx + 1, hy + 15), (cx + 1, hy + 21)], fill=SKIN)
+    d.line([(cx + 1, hy + 15), (cx + 1, hy + 21)], fill=SKIN_D)
+    d.line([(cx - 2, hy + 16), (cx - 2, hy + 21)], fill=GOWN_D)
+    d.line([(cx + 2, hy + 16), (cx + 2, hy + 21)], fill=hx("8a7e6c"))
+    # white veil framing the face, under the hood
+    d.polygon([(cx - 4, hy + 1), (cx + 4, hy + 1), (cx + 4, hy + 9), (cx + 2, hy + 12), (cx - 2, hy + 12),
+               (cx - 4, hy + 9)], fill=hx("eef0f8"))
+    d.line([(cx + 4, hy + 2), (cx + 4, hy + 9)], fill=hx("a8acc0"))
+    # face, gently bowed: hand-placed pixels so it reads as a young woman at this size
+    face = ("..HHH..",
+            ".HHsHH.",
+            "HHssssH",
+            "HsesesH",
+            "HbsnsbH",
+            "HssssSH",
+            ".SsmsS.",
+            "..SsS..")
+    ink = {"H": hx("5a3826"), "s": SKIN, "S": SKIN_D, "e": hx("5a3428"), "b": hx("ec9c88"),
+           "n": hx("e8b896"), "m": hx("d47a74")}
+    for r, row in enumerate(face):
+        for c, ch in enumerate(row):
+            if ch in ink:
+                d.point((cx - 3 + c, hy + 1 + r), fill=ink[ch])
+    # slender neck and the round neckline of the gown, so the veil only frames her face
+    d.rectangle([cx - 1, hy + 9, cx + 1, hy + 10], fill=SKIN)
+    d.point((cx + 1, hy + 9), fill=SKIN_D)
+    d.line([(cx - 2, hy + 11), (cx + 2, hy + 11)], fill=GOWN)
+    d.point((cx - 2, hy + 10), fill=GOWN)
+    d.point((cx + 2, hy + 10), fill=GOWN_D)
+    # bare feet peeping from the hem, on a little cloud and a gilded crescent moon
+    for x in (cx - 2, cx + 1):
+        d.line([(x, fy - 3), (x + 1, fy - 3)], fill=SKIN)
+    d.polygon([(cx - 9, fy - 3), (cx - 7, fy - 1), (cx - 3, fy), (cx + 3, fy), (cx + 7, fy - 1), (cx + 9, fy - 3),
+               (cx + 7, fy - 2), (cx, fy - 1), (cx - 7, fy - 2)], fill=GOLD)
+    d.line([(cx - 3, fy), (cx + 3, fy)], fill=GOLD_D)
+    for x, r in ((cx - 6, 2), (cx - 2, 2), (cx + 3, 2), (cx + 7, 1)):
+        d.ellipse([x - r, fy - 1, x + r, fy + 2], fill=hx("d8d0c4"))
+    d.line([(cx - 8, fy + 2), (cx + 8, fy + 2)], fill=hx("8a8478"))
+    # crown of twelve stars
+    for k in range(12):
+        a = math.pi * (0.04 + 0.92 * k / 11)
+        sx, sy = round(cx - math.cos(a) * 10), round(hy + 4 - math.sin(a) * 10)
+        d.point((sx, sy), fill=hx("fff2a8"))
+        if k % 2 == 0:
+            d.point((sx, sy - 1), fill=GOLD)
+            d.point((sx, sy + 1), fill=GOLD_D)
+
+
 def c_niche(img):
     """Our Lady in a pointed niche, the votive stand burning beneath her."""
     d = ImageDraw.Draw(img)
@@ -300,23 +394,6 @@ def c_niche(img):
         d.point((sx, sy), fill=hx("c8a850"))
     # pedestal
     CR.box(img, xc - 11, xc + 11, 60, 66, -8, 4, hx("948a78"), top=hx("c8bca4"), side=hx("5a5248"))
-    fx, fy = CR.P(xc, 66, -2)
-    hx_, hy = CR.P(xc, 118, -2)
-    ht = fy - hy
-    # mantle, robe, veil, hands, crown of stars
-    d.polygon([(fx - 11, fy), (fx - 8, fy - ht * 0.5), (fx - 6, hy + 10), (fx, hy + 4), (fx + 6, hy + 10),
-               (fx + 8, fy - ht * 0.5), (fx + 11, fy)], fill=hx("3a5a9a"))
-    d.polygon([(fx - 5, fy), (fx - 4, hy + 14), (fx + 4, hy + 14), (fx + 5, fy)], fill=hx("ece4d4"))
-    d.line([(fx - 8, fy - 2), (fx - 7, hy + 14)], fill=hx("6a8ac8"))
-    d.line([(fx + 6, hy + 14), (fx + 9, fy - 2)], fill=hx("243c70"))
-    d.ellipse([hx_ - 4, hy, hx_ + 4, hy + 9], fill=hx("ead6c0"))
-    d.polygon([(hx_ - 5, hy + 1), (hx_, hy - 2), (hx_ + 5, hy + 1), (hx_ + 6, hy + 12), (hx_ + 4, hy + 5),
-               (hx_ - 4, hy + 5), (hx_ - 6, hy + 12)], fill=hx("ece4d4"))
-    d.polygon([(fx - 3, hy + 22), (fx + 3, hy + 22), (fx, hy + 16)], fill=hx("ead6c0"))
-    for k in range(7):
-        a = math.pi * (0.1 + 0.8 * k / 6)
-        d.point((hx_ - math.cos(a) * 9, hy + 4 - math.sin(a) * 9), fill=hx("f0d070"))
-    d.polygon([(fx - 12, fy), (fx + 12, fy), (fx + 8, fy - 3), (fx - 8, fy - 3)], fill=hx("6a7a4a"))
     # wrought-iron votive stand on the floor before her
     z = 12
     for x in (xc - 16, xc + 16):
@@ -341,6 +418,26 @@ def c_niche(img):
     CR.box(img, xc + 22, xc + 30, 0, 18, 6, 12, hx("5a3c22"), top=hx("8a6a3a"), side=hx("3a2614"))
     s = CR.P(xc + 26, 18, 9)
     d.line([(s[0] - 2, s[1]), (s[0] + 2, s[1])], fill=IRON)
+
+
+def statue_layer(size, xc=187):
+    """Our Lady alone on a transparent layer, at her place on the pedestal."""
+    fx, fy = CR.P(xc, 66, -2)
+    _, hy = CR.P(xc, 118, -2)
+    cx, fy, hy = round(fx), round(fy), round(hy)
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    our_lady(layer, cx, fy, hy)
+    return layer, cx, fy, hy
+
+
+def c_statue(img):
+    """Paints Our Lady after the dusk lightmap, under her own softer candle tint, so her colours survive."""
+    layer, cx, fy, hy = statue_layer(img.size)
+    light(img, "ellipse", [cx - 12, hy - 9, cx + 12, hy + 15], hx("e8c070"), 0.18, 3)
+    tint = Image.new("RGB", img.size, hx("e0d4d4"))
+    vgrad(tint, (0, hy - 2, img.width - 1, fy + 3), hx("e0d4d4"), hx("f0d0b0"))
+    lit = ImageChops.multiply(layer.convert("RGB"), tint)
+    img.paste(lit, (0, 0), layer.getchannel("A"))
 
 
 def c_bench(img):
@@ -414,6 +511,7 @@ def paint_corridor():
     lights.append(("ellipse", [117, 60, 257, 240], hx("a06030"), 0.55, 26))
     lights.append(("ellipse", [160, 130, 214, 196], hx("c08040"), 0.4, 10))
     img = lightmap(img, (96, 86, 112), lights)
+    c_statue(img)
     for g in glass:
         light(img, "polygon", g, hx("f0a060"), 0.22, 3)
     for i in WINDOW_BAYS:
@@ -760,7 +858,10 @@ def moon_patch(size):
 
 def build():
     corridor = paint_corridor()
-    save(pixelize(corridor, palette_of(corridor, 128)), "rooms", "convent_corridor.png")
+    px = pixelize(corridor, palette_of(corridor, 128))
+    # Our Lady is too small for dithering: her face and robes keep their exact undithered colours
+    px.paste(corridor, (0, 0), statue_layer(corridor.size)[0].getchannel("A"))
+    save(px, "rooms", "convent_corridor.png")
 
     base = paint_cell()
     full = paint_cell(drawer=True, comb=True, mirror=True)
