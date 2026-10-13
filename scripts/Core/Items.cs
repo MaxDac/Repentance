@@ -9,6 +9,8 @@ public static class Items
 {
     public static readonly Dictionary<string, ItemDef> All = new()
     {
+        [Notes.ItemId] = new(Notes.ItemId, "notepad", "res://assets/art/items/notepad.png",
+            "My notepad. Everything I've learned on the case, in pencil."),
         ["faith_ring"] = new("faith_ring", "wedding ring", "res://assets/art/items/faith_ring.png",
             "My wedding ring. Rose kept her promises. It's time I kept mine."),
         ["cross"] = new("cross", "cross pendant", "res://assets/art/items/cross.png",

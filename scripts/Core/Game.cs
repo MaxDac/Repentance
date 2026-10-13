@@ -138,6 +138,14 @@ public partial class Game : Node
                 Hud.ShowInventory(!Hud.InventoryOpen);
             return;
         }
+        if (e.IsActionPressed("toggle_notepad") && e is not InputEventKey { Echo: true })
+        {
+            GetViewport().SetInputAsHandled();
+            if (Room != null && !_onTitle && !Busy && !Hud.Menu.IsOpen && !Hud.Puzzle.IsOpen && !Hud.Wheel.IsOpen &&
+                Hud.InterfaceVisible && GameState.Instance.HasItem(Notes.ItemId))
+                _ = ItemVerb(Verb.Look, Notes.ItemId);
+            return;
+        }
         if (e is not InputEventMouseButton { Pressed: true } mb) return;
         if (mb.ButtonIndex is not (MouseButton.Left or MouseButton.Right)) return;
         GetViewport().SetInputAsHandled();
@@ -300,6 +308,12 @@ public partial class Game : Node
     /// <summary>Applies a wheel verb to an inventory item (also used by the autoplay test).</summary>
     public Task ItemVerb(Verb verb, string item) => Run(async () =>
     {
+        if (item == Notes.ItemId && verb is Verb.Look or Verb.Hand)
+        {
+            Hud.ShowInventory(false);
+            await Hud.Notepad.Open();
+            return;
+        }
         if (Room != null && await Room.OnItemVerb(verb, item)) return;
         if (verb == Verb.Hand && item == "brass_box")
         {
@@ -307,6 +321,7 @@ public partial class Game : Node
             state.TakeItem("brass_box");
             state.GiveItem("card");
             state.GiveItem("matchbook");
+            state.SetFlag("opened_brass_box");
             await Say("The clasp gave with a click. Inside: a calling card, and a matchbook.");
             await Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
             await Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
@@ -534,8 +549,18 @@ public partial class Game : Node
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
+        SyncNotepad();
         Player.Visible = Room.PlayerVisibleOnLoad;
     }
+
+    /// <summary>Micah always carries his notepad in the first slot; Daniel, in the present day, never does.</summary>
+    private void SyncNotepad()
+    {
+        if (IsMicah) GameState.Instance.EnsureNotepad();
+        else GameState.Instance.RemoveNotepad();
+    }
+
+    public bool IsMicah => Player.Character.StartsWith("micah");
 
     private void UnloadRoom()
     {
@@ -597,6 +622,9 @@ public partial class Game : Node
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
+        // a debug start past the attic gets the notes Micah would have taken on the way there
+        if (StartRoom != "attic")
+            foreach (var flag in Notes.DebugStartFlags(StartRoom)) GameState.Instance.SetFlag(flag);
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
         await ChangeRoom(StartRoom, StartEntry);
     }

@@ -186,6 +186,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
 - Micah's 1927 inventory is put aside during the present-day scenes and given back when the story returns to 1927.
 
+### Micah's notepad
+
+- Micah always carries a notepad, the first item in his satchel (Daniel never has it). It can be read full
+  screen at any time with **N** or look/hand in the satchel, one page per note, paged back and forth.
+- Notes are written as the story advances, from Teddy's briefing to the Harrington audit, including the
+  triquetra sketched from behind the mirror.
+- Where only the information matters, the notepad can be shown instead of the item: Eleanor's photo (to anyone
+  asked about her), the mirror (to the librarian), the combination (to the safe), the crests (to the closet
+  panel) and the mended clipping (to the morgue's wall map).
+
 ## Act 2
 
 ### Present Day

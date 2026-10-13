@@ -18,5 +18,6 @@
     <Compile Include="..\..\scripts\Core\PuzzleRules.cs" Link="Linked\PuzzleRules.cs" />
     <Compile Include="..\..\scripts\Core\Endings.cs" Link="Linked\Endings.cs" />
     <Compile Include="..\..\scripts\Core\Recipes.cs" Link="Linked\Recipes.cs" />
+    <Compile Include="..\..\scripts\Core\Notes.cs" Link="Linked\Notes.cs" />
   </ItemGroup>
 </Project>
