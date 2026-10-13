@@ -12,7 +12,7 @@ import json
 import math
 from pathlib import Path
 from . import common
-from .figure import figure as _figure, pose, walk_pose, sheet, action_figure
+from .figure import figure as _figure, pose, walk_pose, sheet, action_figure, grounded_joints
 
 
 def figure(spec, ps, fw, fh):
@@ -283,22 +283,49 @@ def door_strip(spec, name, yaw):
     return frames
 
 
-def fall_strip(spec, name):
-    """Drop onto both knees, pitch forward, and settle face-down without a final texture jump."""
+def npc_standing(spec, arms):
+    """An NPC's idle strip frame centred in a wide action frame, so an action strip starts without a pose jump."""
     from PIL import Image
-
-    scaled = dict(spec, h=spec["h"] * SCALE)
-    keys = [
-        [(65, 67), (75, 43), (80, 29), (68, 88), (42, 91), (84, 63), (87, 76)],
-        [(67, 76), (88, 62), (103, 58), (60, 88), (42, 91), (98, 78), (110, 90)],
-        HARRINGTON_PRONE,
-    ]
     standing = Image.new("RGBA", (192, FH))
-    standing.alpha_composite(figure(spec, pose(35, arms=_arms("down", "pocket")), NPC_W, FH),
-                             ((192 - NPC_W) // 2, 0))
-    frames = [(standing, (96, 18))] + [action_figure(scaled, joints) for joints in keys]
+    standing.alpha_composite(figure(spec, pose(35, arms=arms), NPC_W, FH), ((192 - NPC_W) // 2, 0))
+    return standing, (96, 18)
+
+
+def fall_strip(spec, name, final_name, arms):
+    """Drop onto both knees, pitch forward, and settle face-down; the last frame is also saved alone as final_name,
+    the texture held afterwards, so there's no jump at the end."""
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [npc_standing(spec, arms)] + [action_figure(scaled, joints) for joints in KNEES_PRONE]
     action_strip(name, frames, [0.12, 0.35, 0.18, 0.3])
-    action_strip("harrington_shot", [frames[-1]], [1])
+    action_strip(final_name, [frames[-1]], [1])
+    return frames
+
+
+def shoulder_shot_strip(spec, name, final_name, arms):
+    """Shot in the near shoulder while facing right: the hit snaps him back with both hands clutching it, the legs
+    give way straight down under him, he sits down hard and goes over onto his back. Blood soaks the shoulder from the
+    hit on, and pools on the ground under it once he's down. The last frame is saved alone as final_name."""
+    from PIL import Image, ImageDraw, ImageChops
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [npc_standing(spec, arms)]
+    for joints in SHOULDER_SHOT:
+        img, head = action_figure(scaled, joints)
+        hip, shoulder = grounded_joints(joints)[:2]
+        # the wound sits just below the shoulder joint, towards the hip
+        wx, wy = shoulder + (hip - shoulder) * 0.1
+        stain = Image.new("RGBA", img.size)
+        ImageDraw.Draw(stain).ellipse([wx - 3, wy - 3, wx + 3, wy + 3], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+        img.alpha_composite(stain)
+        frames.append((img, head))
+    down, head = frames[-1]
+    pool = Image.new("RGBA", down.size)
+    wx = grounded_joints(SHOULDER_SHOT[-1])[1][0] + 2
+    ImageDraw.Draw(pool).ellipse([wx - 8, 88, wx + 7, 93], fill=(104, 12, 16, 255))
+    pool.alpha_composite(down)
+    frames[-1] = (pool, head)
+    action_strip(name, frames, [0.1, 0.24, 0.16, 0.2, 0.3])
+    action_strip(final_name, [frames[-1]], [1])
     return frames
 
 
@@ -362,6 +389,20 @@ def aim_frame(spec, name):
 # Hip, shoulder, head, near knee/ankle, elbow/hand, before grounding into the wide action frame.
 REST = [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (51, 91), (66, 91)]
 HARRINGTON_PRONE = [(78, 83), (101, 83), (115, 83), (60, 83), (42, 83), (100, 91), (114, 91)]
+# Struck down facing right: onto both knees, pitching forward, then face-down with the head to the right.
+KNEES_PRONE = [
+    [(65, 67), (75, 43), (80, 29), (68, 88), (42, 91), (84, 63), (87, 76)],
+    [(67, 76), (88, 62), (103, 58), (60, 88), (42, 91), (98, 78), (110, 90)],
+    HARRINGTON_PRONE,
+]
+# Shot in the shoulder facing right: thrown back with the hands clutching the wound, knees folding straight down,
+# sitting down hard, then flat on his back (head to the left, like REST) with the hands still on the shoulder.
+SHOULDER_SHOT = [
+    [(64, 57), (61, 34), (58, 19), (66, 74), (66, 91), (70, 44), (62, 37)],
+    [(64, 68), (60, 46), (56, 32), (80, 76), (78, 91), (69, 55), (61, 49)],
+    [(64, 82), (58, 58), (54, 44), (82, 80), (97, 91), (66, 68), (58, 61)],
+    [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (54, 75), (45, 78)],
+]
 SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
@@ -451,10 +492,10 @@ def build():
 
 
 def build_act3():
-    supine_frame(SAL, "sal_supine")
-    supine_frame(BARTENDER, "bartender_shot", wound=0.74)
+    fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
+    shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
     falling_frame(HARRINGTON_GOWN, "harrington_falling")
-    fall_strip(HARRINGTON_GOWN, "harrington_fall")
+    fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
     desk_frame(MICAH, "micah_desk")
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)

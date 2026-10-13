@@ -266,6 +266,8 @@ public class AutoPlay
             Check(game.Room?.FindActor("sal")?.Visible == false && game.Room?.FindActor("bartender")?.Visible == false,
                 "Sal and Tony have gone back inside");
             Check(game.Room?.FindHotspot("street")?.Visible == true, "the alley street exit is available");
+            Check(game.Room?.FindHotspot("street")?.Bounds is { } exit && exit.Position.X < 10 && exit.End.X <= 100 &&
+                exit.End.Y <= 192 && exit.Size.Y > 120, "the alley street exit covers the painted passage on the left");
             await ReloadCheckpoint("alley_standing");
             Check(game.Room is Rooms.Alley && game.Room.FindHotspot("street")?.Visible == true &&
                 game.Room.FindActor("sal")?.Visible == false && game.Room.FindActor("bartender")?.Visible == false,
@@ -876,10 +878,19 @@ public class AutoPlay
             await Shot("alley_sal_out");
             await game.Perform(Verb.UseItem, "sal", "revolver");
             Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+            Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
+                !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
+            await Shot("alley_sal_down");
             _prefer = new[] { "Shoot him", "You can't stay", "Every time" };
-            await game.Perform(Verb.Talk, "back_door");
+            var tonyTalk = game.Perform(Verb.Talk, "back_door");
+            await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
+                t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
+            Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
+                "Tony falls, shot in the shoulder, and stays down on his back");
+            await Shot("alley_tony_shot");
+            await tonyTalk;
             Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
-            Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the leg, on to the Harrington mansion");
+            Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the shoulder, on to the Harrington mansion");
 
             // ---- the mansion: the alarm bell, the key, the study, the bedroom
             await Shot("mansion_exterior");

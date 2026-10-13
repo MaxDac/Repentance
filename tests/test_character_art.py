@@ -294,6 +294,46 @@ class CharacterArtTests(unittest.TestCase):
         self.assertGreater(sprites.HARRINGTON_PRONE[2][0], sprites.HARRINGTON_PRONE[1][0],
                            "right-facing head rotated downward toward the floor")
 
+    def test_sal_knocked_from_behind_kneels_then_lies_face_down(self):
+        clip = json.loads((ART / "sprites" / "sal_knockout.json").read_text())
+        image = Image.open(ART / "sprites" / "sal_knockout.png")
+        width, height = clip["width"], clip["height"]
+        standing = image.crop(((width - 56) // 2, 0, (width + 56) // 2, height))
+        idle = Image.open(ART / "sprites" / "sal.png").crop((0, 0, 56, 96))
+        self.assertEqual(standing.tobytes(), idle.tobytes(), "start from Sal's idle pose")
+        heads = [frame["head"] for frame in clip["frames"]]
+        self.assertGreater(heads[1][1], heads[0][1], "down on his knees")
+        self.assertGreaterEqual(clip["frames"][1]["seconds"], 0.3, "hold the kneeling stage")
+        self.assertGreater(heads[-1][0], heads[0][0] + 40, "pitched forward, head to the right")
+        final = image.crop((image.width - width, 0, image.width, height))
+        self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "sal_out.png").tobytes())
+        self.assertFalse((ART / "sprites" / "sal_supine.png").exists(), "the old on-his-back pose is gone")
+
+    def test_tony_shot_in_the_shoulder_folds_down_onto_his_back(self):
+        clip = json.loads((ART / "sprites" / "bartender_fall.json").read_text())
+        image = Image.open(ART / "sprites" / "bartender_fall.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(len(clip["frames"]))]
+        idle = Image.open(ART / "sprites" / "bartender.png").crop((0, 0, 56, 96))
+        self.assertEqual(frames[0].crop(((width - 56) // 2, 0, (width + 56) // 2, height)).tobytes(), idle.tobytes())
+        heads = [frame["head"][1] for frame in clip["frames"]]
+        self.assertEqual(heads, sorted(heads), "he only ever goes down")
+        self.assertLess(clip["frames"][-1]["head"][0], 96, "on his back, head away from where he faced")
+        final = frames[-1]
+        self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "bartender_shot.png").convert("RGBA").tobytes())
+
+        def blood(frame):
+            px = np.array(frame).astype(int)
+            return np.nonzero((px[..., 3] > 0) & (px[..., 0] > 90) & (px[..., 1] < 40) & (px[..., 2] < 40))
+
+        self.assertEqual(blood(frames[0])[0].size, 0, "no blood before the shot")
+        hip, shoulder = grounded_joints(sprites.SHOULDER_SHOT[-1])[:2]
+        ys, xs = blood(final)
+        self.assertGreater(xs.size, 10)
+        self.assertLess(abs(xs.mean() - shoulder[0]), abs(xs.mean() - hip[0]), "the wound is at the shoulder")
+        ankle = grounded_joints(sprites.SHOULDER_SHOT[-1])[4]
+        self.assertLess(xs.max(), (shoulder[0] + ankle[0]) / 2, "no blood down the legs")
+
     def test_door_reach_is_the_idle_pose_then_an_extended_arm(self):
         for name, spec, yaw in (("micah_open_door", sprites.MICAH, sprites.PLAYER_IDLE_YAW),
                                 ("teddy_open_door", sprites.TEDDY, 35),
