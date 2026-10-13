@@ -90,7 +90,11 @@ public partial class HarringtonOffice : Room
                 return true;
             case ("portrait", Verb.Hand or Verb.Look):
                 State.SetFlag("portrait_key_seen");
-                await Say("A heraldic key painted beneath the portrait: raven and star, lion and sun, stag and moon. Old money labels its secrets.");
+                // just the band of heraldry at the foot of the picture, close
+                Game.Hud.ShowCloseUp(CloseUps.Heraldry);
+                await Say("A band of heraldry along the foot of the portrait. Three beasts, each with a sign from the sky beside it.");
+                await Say("Old money labels its secrets.");
+                Game.Hud.HideCloseUp();
                 return true;
             case ("portrait", Verb.Talk):
                 await Say("Evening, Mr. Harrington. I'm just going through your drawers. Don't get up.");

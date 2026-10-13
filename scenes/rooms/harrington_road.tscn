@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/HarringtonRoad.cs" id="1_HarringtonRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road.png" id="2_harrington_road"]
@@ -12,6 +12,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_catch.png" id="10_Catch"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/ladder_freed.png" id="11_Freed"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_ladder.png" id="12_Ladder"]
+[ext_resource type="Script" path="res://scripts/Core/LoopStrip.cs" id="13_LoopStrip"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_flames.png" id="14_Flames"]
 
 [sub_resource type="RectangleShape2D" id="WedgeShape"]
 size = Vector2(24, 18)
@@ -52,11 +54,21 @@ centered = false
 
 [node name="Fire" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(0, 69)
+position = Vector2(0, 61)
 texture = ExtResource("6_harrington_road_fire")
 centered = false
 script = ExtResource("5_FlagSprite")
 ShowIfFlags = "fire_lit"
+
+[node name="Flames" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(24, 54)
+texture = ExtResource("14_Flames")
+centered = false
+hframes = 8
+script = ExtResource("13_LoopStrip")
+ShowIfFlags = "fire_lit"
+FrameSeconds = 0.11
 
 [node name="Crates" type="Sprite2D" parent="."]
 z_index = -9
