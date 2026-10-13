@@ -453,7 +453,7 @@ BEAST_SS = 8  # beasts are drawn this many times larger, then reduced, so their 
 def _beast(img, kind, box, col):
     """A heraldic beast facing right in box (x, y, w, h), drawn like an engraved gold charge: a smooth silhouette,
     darker engraved lines for feathers, mane and muscle, and a pale catch-light along the top edges. The raven is
-    close (wings folded), the lion passant with its tail curled over its back, the stag trippant with a branched
+    close (wings folded), the lion walking on all four paws with its tail curled over its back, the stag trippant with a branched
     rack of antlers."""
     bx, by, bw, bh = box
     W, H = max(1, round(bw)), max(1, round(bh))
@@ -520,13 +520,12 @@ def _beast(img, kind, box, col):
         # far legs, in shade behind the body
         limb(((0.27, 0.56), (0.3, 0.72), (0.28, 0.9)), 5.6, shade)
         limb(((0.55, 0.56), (0.58, 0.74), (0.6, 0.9)), 5.4, shade)
-        # body, near legs and the raised forepaw
+        # body and near legs
         d.ellipse([*P(0.12, 0.36), *P(0.4, 0.66)], fill=body)
         d.polygon(pts((0.22, 0.38), (0.42, 0.36), (0.6, 0.32), (0.68, 0.46), (0.64, 0.62), (0.46, 0.6),
                       (0.3, 0.62)), fill=body)
         limb(((0.2, 0.52), (0.15, 0.68), (0.18, 0.8), (0.14, 0.9)), 6.6)
         limb(((0.62, 0.56), (0.65, 0.74), (0.66, 0.9)), 6.2)
-        limb(((0.66, 0.5), (0.76, 0.56), (0.82, 0.68), (0.88, 0.65)), 5.8)
         for u, v, f in ((0.14, 0.9, body), (0.66, 0.9, body), (0.28, 0.9, shade), (0.6, 0.9, shade)):
             d.ellipse([*P(u - 0.045, v - 0.03), *P(u + 0.06, v + 0.045)], fill=f)
         # the mane: a ring of flame-shaped locks around the head
@@ -556,8 +555,8 @@ def _beast(img, kind, box, col):
         line(((0.6, 0.42), (0.64, 0.54)), 1.6)
         line(((0.4, 0.58), (0.5, 0.6)), 1.2)
         line(((0.2, 0.39), (0.36, 0.37), (0.54, 0.33)), 1.6, light)
-        for u in (0.11, 0.15, 0.64, 0.68, 0.88, 0.92):
-            v = 0.66 if u > 0.85 else 0.93
+        for u in (0.12, 0.16, 0.64, 0.68):
+            v = 0.93
             line(((u, v - 0.03), (u, v)), 0.9, dark)  # claws
     else:  # stag
         # far legs in shade
