@@ -95,7 +95,7 @@ public class AutoPlay
             game.AutosaveEnabled = autosave;
             await game.ChangeRoom("attic", "start");
             await PauseTest(game);
-            Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId), "prologue plays as Daniel, without Micah's notepad");
+            Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId) && !gs.HasItem(MicahKit.LighterId), "prologue plays as Daniel, without Micah's notepad or lighter");
             await Shot("attic");
             await WheelTest(game);
             await PosePlaybackTest(game);
@@ -458,6 +458,10 @@ public class AutoPlay
             Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
             await Until(() => game.Room?.Name == "ChurchExterior");
             Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+            Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
+                gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
+                !gs.HasItem("matchbook") && !gs.HasItem("photo") && !gs.HasItem("dollar"),
+                "Act 2 starts with notepad, lighter and the case kit; Act 1 clues stay behind");
             await game.Wait(1.5);
             await Shot("church_exterior_act2");
             await Until(() => game.Room?.Name == "ChurchInterior");
@@ -659,7 +663,7 @@ public class AutoPlay
             Check(!gs.HasFlag("crates_stacked"), "the watchman sees Micah going for the crates");
             await game.Perform(Verb.Hand, "fire_escape");
             Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
-            await game.Perform(Verb.UseItem, "trash_can", "matchbook");
+            await game.Perform(Verb.UseItem, "trash_can", MicahKit.LighterId);
             Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
             await Shot("harrington_road_fire");
             await game.Perform(Verb.Hand, "fire_escape");
@@ -720,9 +724,9 @@ public class AutoPlay
             Check(gs.HasItem("sealing_wax") && gs.HasFlag("took_sealing_wax"), "took the sealing wax");
             await CombineAndWait("sealing_wax", "invitation");
             Check(gs.HasItem("sealing_wax") && gs.HasItem("invitation") && !gs.HasItem("invitation_waxed"), "cold wax won't take");
-            await CombineAndWait("matchbook", "sealing_wax");
-            Check(gs.HasItem("wax_soft") && !gs.HasItem("sealing_wax") && gs.HasItem("matchbook") && gs.HasFlag("wax_softened"),
-                "a match softens the wax; the matchbook is kept");
+            await CombineAndWait(MicahKit.LighterId, "sealing_wax");
+            Check(gs.HasItem("wax_soft") && !gs.HasItem("sealing_wax") && gs.HasItem(MicahKit.LighterId) && gs.HasFlag("wax_softened"),
+                "the lighter softens the wax and is kept");
             await CombineAndWait("wax_soft", "invitation");
             Check(gs.HasItem("invitation_waxed") && !gs.HasItem("invitation") && !gs.HasItem("wax_soft"), "wax dripped on the invitation");
             await game.Perform(Verb.UseItem, "slot", "invitation_waxed");
@@ -745,7 +749,7 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "ClubHall");
             await WaitIdle(game);
             Check(gs.HasFlag("masked") && game.Player.Character == "micah_masked", "Micah goes in masked");
-            Check(gs.HasItem("matchbook") && gs.HasItem("sealed_invitation"), "matchbook still held; the sealed card came back out of the slot");
+            Check(gs.HasItem(MicahKit.LighterId) && gs.HasItem("sealed_invitation"), "lighter still held; the sealed card came back out of the slot");
             Check(game.Room?.FindHotspot("guest")?.Visible == true, "masked guests in the hall");
             await rite;
             await Shot("club_hall_masked");
@@ -774,8 +778,10 @@ public class AutoPlay
             await game.Wait(2);
             await Shot("bedroom");
             await Until(() => game.Room?.Name == "ClubStage");
-            Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.FirstOrDefault() == Notes.ItemId,
-                "back on the stage with Micah's things, notepad first");
+            Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned),
+                "back on the stage with Micah's things, notepad and lighter first");
+            Check(gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(3, i)) && !gs.HasItem("mirror") && !gs.HasItem("card") &&
+                !gs.HasItem("lockpick"), "Act 3 starts with only the revolver and Micah's commitments");
             await game.Wait(3);
             Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
             await Shot("club_stage_act3");
@@ -873,7 +879,7 @@ public class AutoPlay
             Check(!gs.HasFlag("gas_on") && game.Room?.Name == "MansionKitchen", "no gas, no leaving yet");
             await game.Perform(Verb.Walk, "baize_door");
             Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag("baize_unbolted"), "the baize door is bolted from the house side");
-            // ---- the wine cellar: a lantern, kerosene and the matchbook light the bootleggers' stair up to the study
+            // ---- the wine cellar: a lantern, kerosene and the lighter light the bootleggers' stair up to the study
             await game.Perform(Verb.Walk, "cellar_door");
             Check(game.Room?.Name == "MansionCellar" && !gs.HasFlag("cellar_lit"), "down the trapdoor into the dark cellar");
             await Shot("mansion_cellar_dark");
@@ -881,15 +887,15 @@ public class AutoPlay
             Check(game.Room?.Name == "MansionCellar", "no climbing the cellar stair blind");
             await game.Perform(Verb.Hand, "lantern");
             await game.Perform(Verb.Hand, "crates");
-            Check(gs.HasItem("lantern") && gs.HasItem("kerosene") && gs.HasItem("matchbook"), "lantern off the hook, kerosene off the crates, matchbook in pocket");
+            Check(gs.HasItem("lantern") && gs.HasItem("kerosene") && gs.HasItem(MicahKit.LighterId), "lantern off the hook, kerosene off the crates, lighter in pocket");
             await Shot("mansion_cellar_taken");
-            await CombineAndWait("lantern", "matchbook");
-            Check(gs.HasItem("lantern") && !gs.HasItem("lantern_filled") && !gs.HasItem("lantern_lit") && gs.HasItem("matchbook"),
+            await CombineAndWait("lantern", MicahKit.LighterId);
+            Check(gs.HasItem("lantern") && !gs.HasItem("lantern_filled") && !gs.HasItem("lantern_lit") && gs.HasItem(MicahKit.LighterId),
                 "a dry wick won't light");
             await CombineAndWait("lantern", "kerosene");
             Check(gs.HasItem("lantern_filled") && !gs.HasItem("lantern") && !gs.HasItem("kerosene"), "filled the lantern");
-            await CombineAndWait("lantern_filled", "matchbook");
-            Check(gs.HasItem("lantern_lit") && gs.HasFlag("lantern_lit") && gs.HasItem("matchbook"), "lit the lantern; the matchbook is kept");
+            await CombineAndWait("lantern_filled", MicahKit.LighterId);
+            Check(gs.HasItem("lantern_lit") && gs.HasFlag("lantern_lit") && gs.HasItem(MicahKit.LighterId), "lit the lantern; the lighter is kept");
             await game.Perform(Verb.UseItem, "stair", "lantern_lit");
             Check(gs.HasFlag("cellar_lit") && !gs.HasItem("lantern_lit"), "the lantern hung at the stair foot lights the cellar");
             await Shot("mansion_cellar_lit");
@@ -1660,6 +1666,8 @@ public class AutoPlay
         var gs = GameState.Instance;
         Check(gs.Inventory.FirstOrDefault() == Notes.ItemId && gs.Inventory.Count(i => i == Notes.ItemId) == 1,
             "Micah carries one notepad, in the first slot");
+        Check(gs.Inventory.ElementAtOrDefault(1) == MicahKit.LighterId && gs.Inventory.Count(i => i == MicahKit.LighterId) == 1,
+            "Micah carries one lighter, in the second slot");
         await WaitIdle(game);
         PressKey(Key.N);
         await game.Wait(0.1);
@@ -1686,7 +1694,8 @@ public class AutoPlay
         Click(pad.CloseCenter, MouseButton.Left);
         await AwaitTest(read, "the close button puts the notepad away");
         gs.GiveItem("hanger");
-        Check(gs.Inventory[0] == Notes.ItemId, "new items never push the notepad out of the first slot");
+        Check(gs.Inventory[0] == Notes.ItemId && gs.Inventory[1] == MicahKit.LighterId,
+            "new items never push the notepad and lighter out of the first slots");
         gs.TakeItem("hanger");
     }
 
@@ -2010,7 +2019,7 @@ public class AutoPlay
         Rooms.Attic.StashMicahItems();
         Check(!gs.HasItem("faith_ring") && !gs.HasItem("cross") && gs.HasFlag("ring_left_act2") && !gs.HasItem(Notes.ItemId),
             "Daniel's interlude puts Micah's commitments aside without losing the original decision");
-        Rooms.Attic.RestoreMicahItems();
+        Rooms.Attic.RestoreMicahItems(2);
         Check(gs.HasItem("faith_ring") && gs.HasItem("cross") && gs.HasFlag("took_cross"),
             "both commitments return with Micah's inventory");
         gs.TakeItem("faith_ring");
