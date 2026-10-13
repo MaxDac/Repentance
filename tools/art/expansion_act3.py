@@ -8,7 +8,7 @@ import os
 import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
-from .common import ART, W, FULL_H, hx, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text
+from .common import ART, W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text
 from .act2_rooms import bricks, overlay
 from .mansion import grade, flagstones
 from .furniture import Room3D
@@ -54,6 +54,54 @@ def _kerosene_can(d, x, y):
     d.line([(x + 3, y - 15), (x + 7, y - 21)], fill=hx("8a8a90"), width=2)  # spout
     d.arc([x - 5, y - 21, x + 1, y - 13], 180, 360, fill=hx("2a2a2c"), width=2)  # handle
     d.point((x + 2, y - 4), fill=hx("6a1a14"))  # the dent
+
+
+def _lying_barrel(img, xl, xr, cy, r):
+    """An oak barrel on its side, axis running left-right: bulging staves shaded round the belly, iron hoops, and the
+    head (with its planks, chime and a brass spigot) showing as an ellipse at the right end."""
+    shadow(img, "ellipse", [xl - 2, cy + r - 4, xr + 6, cy + r + 5], 0.6, 3)
+    d = ImageDraw.Draw(img)
+    for cx in (xl + 8, xr - 10):  # wooden chocks
+        d.polygon([(cx - 5, cy + r + 2), (cx + 5, cy + r + 2), (cx + 3, cy + r - 3), (cx - 3, cy + r - 3)],
+                  fill=hx("5a4228"), outline=hx("2a1a0c"))
+    hw = 5  # half-width of the head ellipse
+    body_r = xr - hw
+    xc, half = (xl + body_r) / 2, (body_r - xl) / 2
+    oak_l, oak, oak_d = hx("a8784a"), hx("7a5432"), hx("3a2414")
+    for x in range(xl, body_r + 1):
+        u = (x - xc) / half
+        h = r * (1 - 0.16 * u * u)
+        for y in range(int(cy - h), int(cy + h) + 1):
+            v = (y - cy) / h  # -1 top .. 1 bottom
+            k = 1.15 - 0.55 * (v + 1) / 2 - 0.25 * max(0.0, v) ** 2
+            c = mix(oak_d, oak_l, max(0.0, min(1.0, k - 0.25)))
+            d.point((x, y), fill=c)
+    for s in (-0.66, -0.3, 0.05, 0.4, 0.74):  # stave joints follow the bulge
+        pts = []
+        for x in range(xl, body_r + 1):
+            u = (x - xc) / half
+            pts.append((x, cy + s * r * (1 - 0.16 * u * u)))
+        d.line(pts, fill=mul(oak_d, 1.2))
+    d.line([(x, cy - r * (1 - 0.16 * ((x - xc) / half) ** 2) + 2) for x in range(xl + 3, body_r - 2)],
+           fill=hx("c89a64"))  # the sheen along the top
+    for hxp in (xl + 2, xl + 9, body_r - 9, body_r - 2):  # iron hoops
+        u = (hxp - xc) / half
+        h = r * (1 - 0.16 * u * u)
+        d.line([(hxp, cy - h), (hxp, cy + h)], fill=hx("2a2a2e"), width=2)
+        d.point((hxp, int(cy - h) + 1), fill=hx("7a7a84"))
+        d.point((hxp - 1, int(cy - h) + 3), fill=hx("5a5a62"))
+    # the left end turns away into shadow; the right end is the head
+    hr = r * 0.84
+    d.ellipse([xl - 3, cy - hr, xl + 3, cy + hr], fill=mul(oak_d, 0.8))
+    d.ellipse([body_r - hw, cy - hr, body_r + hw, cy + hr], fill=hx("8a6038"), outline=oak_d)
+    for k in (-0.5, 0, 0.5):  # head planks
+        yy = cy + k * hr
+        d.line([(body_r - hw + 1, yy), (body_r + hw - 1, yy)], fill=hx("5a3a20"))
+    d.arc([body_r - hw + 1, cy - hr + 2, body_r + hw - 1, cy + hr - 2], 260, 100, fill=hx("b08a5a"))
+    d.rectangle([body_r + hw - 1, cy + 2, body_r + hw + 3, cy + 4], fill=hx("b08a3a"))  # brass spigot
+    d.line([(body_r + hw + 3, cy + 4), (body_r + hw + 3, cy + 7)], fill=hx("806020"))
+    d.point((body_r + hw + 3, cy + 9), fill=hx("6a1a2a"))  # a drip of the old man's port
+    d.ellipse([xc - 2, cy - r + 2, xc + 2, cy - r + 5], fill=hx("4a2c16"))  # the bung on top
 
 
 def paint_cellar(lantern=True, can=True, lit=False):
@@ -161,10 +209,9 @@ def paint_cellar(lantern=True, can=True, lit=False):
     if can:
         p = R.P(*CAN)
         _kerosene_can(d, int(p[0]), int(p[1]))
-    # a barrel on its side under the stair foot
-    d.ellipse([336, 206, 366, 236], fill=hx("6a4a2a"), outline=hx("2a1a0c"))
-    d.ellipse([342, 212, 360, 230], outline=hx("3a3a3e"))
-    d.ellipse([348, 218, 354, 224], fill=hx("2a1a0c"))
+    # a barrel lying on its side under the stair foot, on chocks, its head and tap turned to the room
+    _lying_barrel(img, 324, 372, 224, 13)
+    d = ImageDraw.Draw(img)
     # ---- the lantern hung at the stair foot, once it is lit ----
     if lit:
         _storm_lantern(d, nx, ny, lit=True)
@@ -268,11 +315,36 @@ def _study_hatch(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 349, 169, 413, 203  # inside the drinks cabinet's front
     d.rectangle([x0, y0, x1, y1], fill=hx("0c0806"))
-    for k, y in enumerate((186, 193, 199)):  # stone steps going down into the dark
-        d.line([(x0 + 6 + k * 4, y), (x1 - 6 - k * 4, y)], fill=hx("4a4036"))
-        d.line([(x0 + 6 + k * 4, y + 1), (x1 - 6 - k * 4, y + 1)], fill=hx("1e1812"))
-    light(img, "ellipse", [x0 + 4, y1 - 14, x1 - 4, y1 + 8], hx("a86a2a"), 0.45, 5)  # the lantern, down below
+    # a narrow stone stair dropping away from the cabinet: each step a worn tread over a block riser, narrowing
+    # into the shaft, lit warmer the deeper it goes by a lantern burning somewhere below
+    stone, stone_d, joint = hx("4a4238"), hx("1e1a14"), hx("0a0806")
+    warm = hx("b87a36")
+    n, top = 5, y0 + 2
+    # the shaft walls, rough blocks fading into the dark
+    d.polygon([(x0, y0), (x0 + 7, y0 + 2), (x0 + 16, y1), (x0, y1)], fill=hx("16120e"))
+    d.polygon([(x1, y0), (x1 - 7, y0 + 2), (x1 - 16, y1), (x1, y1)], fill=hx("100c0a"))
+    for yy in range(y0 + 5, y1, 6):
+        d.line([(x0, yy), (x0 + 8 + (yy - y0) // 8, yy)], fill=joint)
+        d.line([(x1 - 8 - (yy - y0) // 8, yy), (x1, yy)], fill=joint)
+    for k in range(n):
+        t = k / (n - 1)
+        a, b = x0 + 8 + k * 2, x1 - 8 - k * 2
+        ty = top + k * 6
+        tread = mix(mul(stone, 0.9 - 0.25 * t), warm, 0.15 + 0.4 * t)  # nearer steps grey, deeper ones lamp-warm
+        d.rectangle([a, ty + 2, b, ty + 5], fill=tread)  # the tread, seen from above
+        d.line([(a, ty + 2), (b, ty + 2)], fill=mul(tread, 1.25))  # the worn nosing
+        d.rectangle([a, ty, b, ty + 1], fill=stone_d)  # the riser, in shadow under the step above
+        for jx in range(a + 4 + (k % 2) * 7, b - 2, 14):  # joints between the slabs
+            d.line([(jx, ty + 3), (jx, ty + 5)], fill=mul(tread, 0.6))
+        mid = (a + b) // 2
+        d.line([(mid - 6, ty + 4), (mid + 4, ty + 4)], fill=mul(tread, 0.88))  # the dip worn by feet
+    for bx, by in ((x1 - 5, y0 + 4), (x1 - 12, y1 - 6)):  # iron brackets holding a rope rail down the wall
+        d.rectangle([bx - 1, by - 1, bx + 1, by + 1], fill=hx("3a3632"))
+    d.line([(x1 - 5, y0 + 4), (x1 - 12, y1 - 6)], fill=hx("8a7448"))
+    d.line([(x1 - 4, y0 + 5), (x1 - 11, y1 - 5)], fill=hx("4a3a22"))
+    light(img, "ellipse", [x0 + 14, y1 - 10, x1 - 14, y1 + 10], hx("a86a2a"), 0.55, 5)  # the lantern, down below
     d = ImageDraw.Draw(img)
+    d.line([(x0, y0), (x1, y0)], fill=hx("040200"))  # the dark lip under the cabinet's top
     d.polygon([(346, 166), (337, 169), (337, 210), (346, 206)], fill=hx("2e1a0e"), outline=hx("140a04"))  # door leaves
     d.polygon([(416, 166), (425, 169), (425, 210), (416, 206)], fill=hx("2e1a0e"), outline=hx("140a04"))
     d.line([(339, 175), (339, 203)], fill=hx("4a2c16"))

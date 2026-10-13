@@ -497,7 +497,7 @@ public class AutoPlay
             Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
                 "Micah is relieved Rose isn't on duty, but she's back on his mind");
             Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose")?.Visible == false, "the daytime librarian is there, not Rose");
-            CheckLibrarianOverLadder(game);
+            CheckActorWins(game, "librarian", "ladder", "the librarian wins over the ladder behind him");
             await Shot("library_day");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(!gs.HasFlag("library_banned"), "no gun before asking");
@@ -871,6 +871,7 @@ public class AutoPlay
             await game.Perform(Verb.Kick, "trash");
             Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
             await Shot("alley_sal_out");
+            CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
             await game.Perform(Verb.UseItem, "sal", "revolver");
             Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
             _prefer = new[] { "Shoot him", "You can't stay", "Every time" };
@@ -960,8 +961,12 @@ public class AutoPlay
                 && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
                 "Space freezes the Act Three confrontation mid-sentence");
             PressKey(Key.Space);
+            Check(game.Player.Visible && game.Player.Position.Y < 218 && game.Player.Position.X is > 68 and < 148,
+                "Micah listens in view behind the lowered folding screen (#104)");
             await Shot("mansion_bedroom");
             await Until(() => gs.HasFlag("eleanor_up"));
+            Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
+                "Micah walks out from behind the screen to take aim (#104)");
             await game.Wait(0.5);
             await Shot("mansion_bedroom_gun");
             await confront;
@@ -1732,26 +1737,26 @@ public class AutoPlay
                 new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
-    /// <summary>Wherever the librarian is drawn over the ladder, hovering or clicking there means him (#73).</summary>
-    private void CheckLibrarianOverLadder(Game game)
+    /// <summary>Wherever a character is drawn over the scenery behind him, hovering or clicking there means him (#73, #97).</summary>
+    private void CheckActorWins(Game game, string actorId, string sceneryId, string what)
     {
-        if (game.Room?.FindHotspot("librarian") is not Actor librarian || game.Room.FindHotspot("ladder") is not { } ladder)
+        if (game.Room?.FindHotspot(actorId) is not Actor actor || game.Room.FindHotspot(sceneryId) is not { } scenery)
         {
-            Check(false, "library has the librarian and the ladder");
+            Check(false, $"{what}: the room has {actorId} and {sceneryId}");
             return;
         }
-        var b = librarian.Bounds;
+        var b = actor.Bounds;
         int overlap = 0, wrong = 0;
         var winners = new HashSet<string>();
         for (float y = b.Position.Y; y < b.End.Y; y++)
             for (float x = b.Position.X; x < b.End.X; x++)
             {
                 var p = new Vector2(x, y);
-                if (!librarian.DrawnAt(p)) continue;
-                if (ladder.Bounds.HasPoint(p)) overlap++;
-                if (game.Room.HotspotAt(p) is var h && h != librarian) { wrong++; winners.Add($"{h?.Id ?? "none"}@{p}"); }
+                if (!actor.DrawnAt(p)) continue;
+                if (scenery.Bounds.HasPoint(p)) overlap++;
+                if (game.Room.HotspotAt(p) is var h && h != actor) { wrong++; winners.Add($"{h?.Id ?? "none"}@{p}"); }
             }
-        Check(overlap > 0 && wrong == 0, $"the librarian wins over the ladder behind him ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
+        Check(overlap > 0 && wrong == 0, $"{what} ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
     }
 
     private void CheckPortraitSpeech(Game game, bool right)
