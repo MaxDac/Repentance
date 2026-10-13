@@ -65,17 +65,22 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                   ("belt", 0.42, "d8d0c0")])
 # Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, high black neckline, a single strand of pearls.
 ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
-               face_w=0.046, jaw_w=0.034,
-               hair="4a2a1c", hair_style="long", soft_face=True, lips="a83e3c", eye="3a2416", brow="2e1a12",
+               face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85, fringe=0.3,
+               front_gaze=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
+               hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12",
                torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
                shoes="141014",
                decals=[("strip", 0.235, 0.6, 0.0, 0.0, "2c2830"),
                        ("pearls", 0.232, "cfc8ba"), ("belt", 0.40, "1e1a20")])
-ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c49a52",
-            hair_style="bob", soft_face=True, glasses="b09a6a", lips="b06a64", torso="9a6672", abdomen="34465e", pelvis="34465e",
+# Rose, as in her close-up: long wavy blonde hair over the shoulders, blue-green eyes, a cream knit cardigan open
+# over a white collared blouse, and her navy skirt.
+ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c89c4a",
+            face_w=0.056, jaw_w=0.044, chin_cut=1, hair_style="long", hair_vol=1.6, hair_side=0.85, hair_back_width=0.85,
+            hair_front=0.22, soft_face=True, eye="2e6a70", brow="7a5a34", lips="b06a64",
+            torso="d8d0bc", sleeves="d8d0bc", abdomen="d8d0bc", pelvis="34465e",
             coat=dict(col="34465e", top=0.40, hem=0.80, flare=0.012), stockings="c49c84", shoes="3a2620",
-            decals=[("strip", 0.215, 0.235, 0.032, 0.026, "f0eadc"), ("strip", 0.235, 0.42, 0.02, 0.026, "34465e"),
-                    ("buttons", 0.27, 0.38, 3, "e8dcc8")])
+            decals=[("strip", 0.205, 0.40, 0.026, 0.018, "f2eee4"), ("strip", 0.205, 0.235, 0.036, 0.03, "fbf8f0"),
+                    ("ribbon", 0.024, 0.25, 0.40, 0.005, "a8a090"), ("ribbon", -0.024, 0.25, 0.40, 0.005, "a8a090")])
 # Theodore Harrington Jr., Teddy's father: old money in evening dress, white wing collar and a black bow tie.
 HARRINGTON = dict(h=63, sw=0.13, waist=0.09, hipw=0.096, skin="e2bca2", hair="e4e0d8", hair_style="bald", old=True,
                   eye="3a4a5a", brow="cfcac0", torso="1e1c24", collar="f2eee4",
