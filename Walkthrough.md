@@ -11,8 +11,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Daniel (the dad) is in the attic, calling his son Leo, but Leo doesn't come over ("In a minute!").
 - Daniel can lift the dust sheet and knock over the boxes, spilling the old papers.
 - In the suitcase there is a key, but it can't open the large steamer trunk.
-- **Puzzle 1 - Tool tin:** searching the spilled papers uncovers a locked tool tin with a small-key outline
-  stamped beside its lock. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
+- **Puzzle 1 - Tool tin:** searching the spilled papers uncovers a locked tool tin with a little brass
+  padlock; Daniel sweeps the papers off it. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
 - In the trunk Daniel finds Micah Jones's journal and starts reading it (hand on the journal in the satchel).
   The caption "Chicago, 1927." leads to Micah's office.
 
@@ -35,9 +35,11 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Hotel (Aurelian Hotel lobby)
 
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
+- Micah arrives from State Street through the revolving door and walks into the lobby.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
-- Micah has to bribe the bellboy with $1 from his cash; the bellboy lets him take the staff elevator up to
-  the fifth-floor linen room next to Eleanor's room (and mentions the Blue Lantern).
+- Micah has to bribe the bellboy with $1 from his cash for his memory (he mentions the Blue Lantern), then with
+  another $1 to visit Eleanor's room: the second dollar lets him take the staff elevator up to the fifth-floor
+  linen room next to Eleanor's room. Between the two dollars, Micah won't leave through the revolving door.
 - Before the bribe, the revolving door leads out to the street.
 - **Puzzle 2 - Service lift:** after the bribe, the bellboy points to the routing diagram beside the staff door.
   The close-up shows three junctions: at A, upper goes to laundry and lower to B; at B, upper goes to C and
@@ -95,8 +97,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Inside the cold-room entrance, Sal the guard still asks for the password; the blue carnation only got Micah
   past the florist's grille. Micah doesn't know it and can give him $10 as a bribe.
-  Micah starts with $22, twice the combined $1 bellboy and $10 Sal payments. The cash remains in his inventory:
-  $21 after the bellboy and $11 after Sal. Repeated conversations never charge either bribe again.
+  Micah starts with $22, enough for the bellboy's two $1 payments and Sal's $10. The cash remains in his inventory:
+  $21 after the bellboy's first dollar, $20 after the second and $10 after Sal. Repeated conversations never charge either bribe again.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
 - Until Sal lets him in, Sal blocks the way to the bar.
 - If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he

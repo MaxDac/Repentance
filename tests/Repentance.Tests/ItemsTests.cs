@@ -24,20 +24,22 @@ public class ItemsTests
         Assert.Throws<KeyNotFoundException>(() => Items.Get("nope"));
 
     [Theory]
-    [InlineData(false, false, false, 0)]
-    [InlineData(true, false, false, 22)]
-    [InlineData(true, true, false, 21)]
-    [InlineData(true, true, true, 11)]
-    public void CashTracksCollectedFundsAndEachBribe(bool collected, bool bellboy, bool sal, int expected)
+    [InlineData(false, false, false, false, 0)]
+    [InlineData(true, false, false, false, 22)]
+    [InlineData(true, true, false, false, 21)]
+    [InlineData(true, true, true, false, 20)]
+    [InlineData(true, true, true, true, 10)]
+    public void CashTracksCollectedFundsAndEachBribe(bool collected, bool bellboy, bool room, bool sal, int expected)
     {
         bool Has(string flag) => flag switch
         {
             "took_dollar" => collected,
             "knows_lantern" => bellboy,
+            "bellboy_room_paid" => room,
             "sal_passed" => sal,
             _ => false,
         };
         Assert.Equal(expected, CashRules.Balance(Has));
-        Assert.Equal(2 * (CashRules.BellboyBribe + CashRules.SalBribe), CashRules.StartingCash);
+        Assert.True(CashRules.StartingCash >= CashRules.BellboyBribe + CashRules.BellboyRoomBribe + CashRules.SalBribe);
     }
 }

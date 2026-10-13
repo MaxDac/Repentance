@@ -208,7 +208,7 @@ LookText = "My door. My name on the glass, backwards from in here. Like my life.
 WalkTo = Vector2(58, 168)
 Face = 2
 ExitTo = "lobby"
-ExitEntry = "office"
+ExitEntry = "street"
 monitoring = false
 monitorable = false
 
