@@ -1,6 +1,6 @@
-"""A quiet road outside the Sisters' convent at dusk: a neo-gothic stone house with its chapel gable, a tall arched
-oak door behind a wrought-iron fence, a bare tree, empty sidewalk and road, gas lamps just lit under a cold
-blue-violet sky.
+"""A quiet road outside the Sisters' convent at dusk: a neo-gothic stone house filling the whole view, with its
+entrance gable, chapel and cloister wing, a tall arched oak door behind a wrought-iron fence, empty sidewalk and
+road, gas lamps just lit under a sliver of cold blue-violet sky.
 
 The buildings are painted as albedo over a magenta key and lit (ambient dusk x albedo + light pools); the sky is
 painted separately and shows through wherever the key survives."""
@@ -17,10 +17,13 @@ FENCE = 192      # fence plinth foot = back edge of the sidewalk
 CURB = 240
 GUTTER = 246
 VP = (240, -520)
-DOOR = (90, 130)           # door jambs
-DOOR_SPRING = 130
-LAMPS = (46, 356)
-TREE = (424, 210)
+DOOR = (94, 146)           # door jambs
+DOOR_SPRING = 118
+DOOR_MID = (DOOR[0] + DOOR[1]) // 2
+LAMPS = (46, 440)
+CHAPEL = (300, 420)
+GREAT = (332, 388)         # the great lancet's jambs
+EAVES = 34
 STONE = hx("8a8a94")
 STONE_D = hx("5a5a66")
 STONE_L = hx("b4b4bc")
@@ -63,30 +66,6 @@ def sky():
         x, y = rnd.randint(-40, 520), rnd.randint(30, 120)
         light(img, "ellipse", [x - 90, y - 3, x + 90, y + 4], hx("9a7aa8"), 0.3, 4)
         shadow(img, "ellipse", [x - 70, y + 2, x + 60, y + 7], 0.15, 3, hx("3a3466"))
-    # crescent moon
-    d.ellipse([436, 18, 450, 32], fill=hx("eef0ff"))
-    d.ellipse([440, 15, 454, 29], fill=mix(hx("141634"), hx("3a3466"), 0.25))
-    light(img, "ellipse", [412, -6, 476, 56], hx("8a90c8"), 0.25, 16)
-    # far roofs beyond the garden wall: chimneys, a church tower and the odd lit window
-    far = hx("2a2640")
-    x = 330
-    while x < W:
-        bw, top = rnd.randint(16, 30), rnd.randint(104, 128)
-        d.rectangle([x, top, x + bw, 190], fill=far)
-        d.polygon([(x - 2, top), (x + bw // 2, top - 8), (x + bw + 2, top)], fill=far)
-        if rnd.random() < 0.6:
-            cx = x + rnd.randint(3, bw - 5)
-            d.rectangle([cx, top - 12, cx + 3, top], fill=far)
-        for wy in range(top + 6, 150, 9):
-            for wx in range(x + 3, x + bw - 3, 7):
-                if rnd.random() < 0.18:
-                    d.rectangle([wx, wy, wx + 2, wy + 3], fill=hx("e0a058"))
-        x += bw + rnd.randint(0, 4)
-    d.rectangle([452, 70, 464, 190], fill=hx("221e36"))
-    d.polygon([(450, 70), (458, 46), (466, 70)], fill=hx("221e36"))
-    d.line([(458, 38), (458, 46)], fill=hx("221e36"))
-    d.line([(455, 41), (461, 41)], fill=hx("221e36"))
-    light(img, "rect", [320, 100, W, 160], hx("8a6a8a"), 0.15, 14)
     return img
 
 
@@ -122,106 +101,143 @@ def buttress(img, x0, x1, top):
     d.line([(x1, top), (x1, FOOT)], fill=STONE_D)
 
 
-def main_block(img, rnd, glows):
-    d = ImageDraw.Draw(img)
-    # steep slate roof with two dormers and a chimney
-    d.polygon([(-6, 58), (238, 58), (224, 22), (8, 22)], fill=SLATE)
-    for y in range(24, 58, 3):
-        d.line([(8 - (y - 22) * 0.39, y), (224 + (y - 22) * 0.39, y)], fill=mul(SLATE, 0.8))
-    for x in range(0, 236, 5):
-        for y in range(24, 58, 6):
+def roof(d, x0, x1, top):
+    d.polygon([(x0, EAVES), (x1, EAVES), (x1 - 10, top), (x0 + 10, top)], fill=SLATE)
+    for y in range(top + 2, EAVES, 3):
+        d.line([(x0, y), (x1, y)], fill=mul(SLATE, 0.8))
+    for x in range(x0, x1, 5):
+        for y in range(top + 2, EAVES, 6):
             d.line([(x + (y // 3) % 2 * 2, y), (x + (y // 3) % 2 * 2, y + 2)], fill=mul(SLATE, 0.85))
-    d.line([(8, 22), (224, 22)], fill=mul(SLATE, 1.3))
-    d.rectangle([24, 4, 34, 24], fill=mul(STONE, 0.8))
-    d.rectangle([22, 2, 36, 5], fill=STONE_L)
-    for dx in (44, 178):
-        d.polygon([(dx, 54), (dx, 36), (dx + 9, 26), (dx + 18, 36), (dx + 18, 54)], fill=mul(STONE, 0.9))
-        d.polygon(arch_poly(dx + 4, dx + 14, 40, 52, 0.62, 6), fill=hx("1e2238"))
-        d.line([(dx - 1, 37), (dx + 9, 25), (dx + 19, 37)], fill=STONE_L, width=2)
-    stone(img, [rect(-6, 58, 238, FOOT)], STONE, 21, course=7, lo=10, hi=22)
-    d.rectangle([-6, 58, 238, 62], fill=STONE_L)
-    d.line([(-6, 63), (238, 63)], fill=STONE_D)
-    d.rectangle([-6, 108, 238, 110], fill=STONE_L)
-    d.rectangle([-6, FOOT - 8, 238, FOOT], fill=mul(STONE, 0.75))
-    d.line([(-6, FOOT - 8), (238, FOOT - 8)], fill=STONE_L)
-    for (x0, lit_up, lit_dn) in ((12, False, True), (44, True, False), (162, False, False), (196, True, True)):
-        p = lancet(d, x0, x0 + 18, 78, 102, lit_up, rnd)
+
+
+def wing(img, rnd, glows, x0, x1, windows, buttresses, seed):
+    """A two-storey stretch of the house: slate roof, ashlar wall, string courses and rows of lancets."""
+    d = ImageDraw.Draw(img)
+    roof(d, x0, x1, 2)
+    stone(img, [rect(x0, EAVES, x1, FOOT)], STONE, seed, course=7, lo=10, hi=22)
+    d.rectangle([x0, EAVES, x1, EAVES + 4], fill=STONE_L)
+    d.line([(x0, EAVES + 5), (x1, EAVES + 5)], fill=STONE_D)
+    d.rectangle([x0, 94, x1, 96], fill=STONE_L)
+    d.line([(x0, 97), (x1, 97)], fill=STONE_D)
+    d.rectangle([x0, FOOT - 8, x1, FOOT], fill=mul(STONE, 0.75))
+    d.line([(x0, FOOT - 8), (x1, FOOT - 8)], fill=STONE_L)
+    for (wx, lit_up, lit_dn) in windows:
+        p = lancet(d, wx, wx + 18, 56, 84, lit_up, rnd)
         if lit_up:
             glows.append(p)
-        p = lancet(d, x0, x0 + 18, 128, 158, lit_dn, rnd)
+        p = lancet(d, wx, wx + 18, 120, 158, lit_dn, rnd)
         if lit_dn:
             glows.append(p)
-    for x in (2, 70, 148, 228):
-        buttress(img, x, x + 8, 112)
+    for x in buttresses:
+        buttress(img, x, x + 8, 118)
+
+
+def main_block(img, rnd, glows):
+    d = ImageDraw.Draw(img)
+    wing(img, rnd, glows, -6, CHAPEL[0] + 6,
+         ((16, False, True), (44, True, False), (186, False, False), (222, True, True), (258, False, True)),
+         (2, 209, 245, 282), 21)
+    # dormers and a chimney stack on the main roof
+    for dx in (22, 200, 250):
+        d.polygon([(dx, 32), (dx, 14), (dx + 9, 4), (dx + 18, 14), (dx + 18, 32)], fill=mul(STONE, 0.9))
+        d.polygon(arch_poly(dx + 4, dx + 14, 18, 30, 0.62, 6), fill=hx("1e2238"))
+        d.line([(dx - 1, 15), (dx + 9, 3), (dx + 19, 15)], fill=STONE_L, width=2)
+    d.rectangle([230, -2, 242, 8], fill=mul(STONE, 0.8))
+    d.rectangle([228, 6, 244, 9], fill=STONE_L)
+
+
+def cloister_wing(img, rnd, glows):
+    wing(img, rnd, glows, CHAPEL[1] - 6, W + 6, ((430, True, False), (458, False, True)), (), 37)
 
 
 def entrance_bay(img, rnd, glows):
     d = ImageDraw.Draw(img)
-    stone(img, [[(74, 48), (110, 14), (146, 48), (146, FOOT), (74, FOOT)]], mul(STONE, 1.04), 23, course=6)
-    d.line([(72, 49), (110, 13), (148, 49)], fill=STONE_L, width=3)
-    d.line([(72, 51), (110, 16), (148, 51)], fill=STONE_D)
-    for x, y in ((80, 43), (90, 34), (100, 25), (120, 25), (130, 34), (140, 43)):
+    stone(img, [[(66, 40), (120, -14), (174, 40), (174, FOOT), (66, FOOT)]], mul(STONE, 1.04), 23, course=6)
+    d.line([(64, 41), (120, -15), (176, 41)], fill=STONE_L, width=3)
+    d.line([(64, 43), (120, -12), (176, 43)], fill=STONE_D)
+    for x, y in ((72, 35), (82, 25), (92, 15), (148, 15), (158, 25), (168, 35)):
         d.ellipse([x - 2, y - 3, x + 2, y + 1], fill=STONE_L)
-    # cross on the apex
-    d.rectangle([108, 0, 112, 14], fill=STONE_L)
-    d.rectangle([104, 3, 116, 6], fill=STONE_L)
+    # corner shafts framing the bay
+    for x in (66, 168):
+        d.rectangle([x, 40, x + 6, FOOT], fill=mul(STONE, 1.12))
+        d.line([(x + 6, 40), (x + 6, FOOT)], fill=STONE_D)
+        d.rectangle([x - 1, 40, x + 7, 43], fill=STONE_L)
     # roundel with a quatrefoil
-    d.ellipse([101, 27, 119, 45], fill=STONE_L)
-    d.ellipse([103, 29, 117, 43], fill=hx("c89048"))
-    for a in range(4):
-        ang = a * math.pi / 2 + math.pi / 4
-        cx, cy = 110 + 3.5 * math.cos(ang), 36 + 3.5 * math.sin(ang)
-        d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=hx("e8c070"))
-    d.line([(103, 36), (117, 36)], fill=STONE_D)
-    d.line([(110, 29), (110, 43)], fill=STONE_D)
-    glows.append([(103, 29), (117, 29), (117, 43), (103, 43)])
+    d.ellipse([109, 5, 131, 27], fill=STONE_L)
+    d.ellipse([111, 7, 129, 25], fill=hx("c89048"))
+    for k in range(4):
+        ang = k * math.pi / 2 + math.pi / 4
+        cx, cy = 120 + 4.5 * math.cos(ang), 16 + 4.5 * math.sin(ang)
+        d.ellipse([cx - 4, cy - 4, cx + 4, cy + 4], fill=hx("e8c070"))
+    d.line([(111, 16), (129, 16)], fill=STONE_D)
+    d.line([(120, 7), (120, 25)], fill=STONE_D)
+    glows.append([(111, 7), (129, 7), (129, 25), (111, 25)])
     # niche with the Virgin
-    d.polygon(arch_poly(101, 119, 62, 98, 0.7), fill=hx("2a2a3a"))
-    d.line(arch_curve(100, 120, 62, 0.7), fill=STONE_L, width=2)
-    d.rectangle([98, 98, 122, 101], fill=STONE_L)
+    d.polygon(arch_poly(110, 130, 48, 75, 0.7), fill=hx("2a2a3a"))
+    d.line(arch_curve(109, 131, 48, 0.7), fill=STONE_L, width=2)
+    d.rectangle([107, 75, 133, 78], fill=STONE_L)
     fig = hx("c8c8cc")
-    d.ellipse([107, 60, 113, 67], fill=fig)
-    d.polygon([(105, 66), (115, 66), (117, 97), (103, 97)], fill=hx("8a9ab8"))
-    d.polygon([(107, 68), (113, 68), (114, 96), (106, 96)], fill=fig)
-    d.line([(108, 74), (112, 78)], fill=mul(fig, 0.75))
-    d.arc([105, 56, 115, 66], 200, 340, fill=hx("e0c070"))
-    # moulded arch around the door
+    ox, oy = 9, -22
+    d.ellipse([107 + ox, 60 + oy, 113 + ox, 67 + oy], fill=fig)
+    d.polygon([(105 + ox, 66 + oy), (115 + ox, 66 + oy), (117 + ox, 97 + oy), (103 + ox, 97 + oy)], fill=hx("8a9ab8"))
+    d.polygon([(107 + ox, 68 + oy), (113 + ox, 68 + oy), (114 + ox, 96 + oy), (106 + ox, 96 + oy)], fill=fig)
+    d.line([(108 + ox, 74 + oy), (112 + ox, 78 + oy)], fill=mul(fig, 0.75))
+    d.arc([105 + ox, 56 + oy, 115 + ox, 66 + oy], 200, 340, fill=hx("e0c070"))
+    # moulded arch around the door, on clustered colonnettes with carved capitals
     a, b = DOOR
-    for i, (pa, pb) in enumerate(((a - 8, b + 8), (a - 5, b + 5), (a - 2, b + 2))):
+    for i, (pa, pb) in enumerate(((a - 12, b + 12), (a - 8, b + 8), (a - 4, b + 4))):
         col = (STONE_L, mul(STONE, 0.8), mul(STONE, 1.05))[i]
-        d.polygon(arch_poly(pa, pb, DOOR_SPRING, FOOT, 0.62, 18), fill=col)
-    d.rectangle([a - 10, DOOR_SPRING - 3, b + 10, DOOR_SPRING], fill=STONE_L)
+        d.polygon(arch_poly(pa, pb, DOOR_SPRING, FOOT, 0.62, 22), fill=col)
+        d.line(arch_curve(pa, pb, DOOR_SPRING, 0.62, 22), fill=STONE_D)
+    for x in (a - 10, a - 6, b + 6, b + 10):
+        d.line([(x, DOOR_SPRING + 2), (x, FOOT)], fill=STONE_D)
+    for x0 in (a - 13, b + 3):
+        d.rectangle([x0, DOOR_SPRING - 4, x0 + 10, DOOR_SPRING + 1], fill=STONE_L)
+        for k in range(3):
+            d.point((x0 + 2 + k * 3, DOOR_SPRING - 2), fill=STONE_D)
     door(img)
 
 
 def door(img):
     d = ImageDraw.Draw(img)
     a, b = DOOR
-    poly = arch_poly(a, b, DOOR_SPRING, FOOT, 0.62, 18)
+    poly = arch_poly(a, b, DOOR_SPRING, FOOT, 0.62, 22)
     d.polygon(poly, fill=OAK)
     m = mask_of(img.size, [poly])
     planks = Image.new("RGB", img.size, OAK)
     pd = ImageDraw.Draw(planks)
     for x in range(a, b + 1, 5):
-        pd.line([(x, 90), (x, FOOT)], fill=OAK_D)
-        pd.line([(x + 1, 90), (x + 1, FOOT)], fill=OAK_L)
+        pd.line([(x, 80), (x, FOOT)], fill=OAK_D)
+        pd.line([(x + 1, 80), (x + 1, FOOT)], fill=OAK_L)
+    rnd = random.Random(5)
+    for _ in range(40):  # grain and weathering
+        x, y = rnd.randint(a, b), rnd.randint(86, FOOT - 4)
+        pd.line([(x, y), (x, y + rnd.randint(3, 8))], fill=mul(OAK, rnd.uniform(0.75, 1.15)))
     img.paste(planks, (0, 0), m)
-    mid = (a + b) // 2
-    d.line([(mid, 104), (mid, FOOT)], fill=OAK_D, width=2)
-    # wrought strap hinges, a grille and a ring pull
-    for y in (124, 150, 168):
-        d.rectangle([a + 1, y, mid - 3, y + 2], fill=IRON)
-        d.rectangle([mid + 3, y, b - 1, y + 2], fill=IRON)
-        d.ellipse([mid - 7, y - 1, mid - 3, y + 3], fill=IRON)
-        d.ellipse([mid + 3, y - 1, mid + 7, y + 3], fill=IRON)
-    d.rectangle([mid - 6, 134, mid + 6, 142], fill=hx("161420"))
-    for x in range(mid - 5, mid + 6, 3):
-        d.line([(x, 134), (x, 142)], fill=IRON_L)
-    d.ellipse([mid + 4, 152, mid + 10, 158], outline=hx("8a7a50"))
-    d.line(arch_curve(a, b, DOOR_SPRING, 0.62, 18), fill=OAK_D, width=2)
+    mid = DOOR_MID
+    d.line([(mid, 88), (mid, FOOT)], fill=OAK_D, width=2)
+    # wrought strap hinges with curled ends, iron studs, a grille and two ring pulls
+    for y in (110, 140, 166):
+        d.rectangle([a + 1, y, mid - 4, y + 2], fill=IRON)
+        d.rectangle([mid + 4, y, b - 1, y + 2], fill=IRON)
+        d.ellipse([mid - 9, y - 2, mid - 3, y + 4], fill=IRON)
+        d.ellipse([mid + 3, y - 2, mid + 9, y + 4], fill=IRON)
+        d.arc([a + 1, y - 3, a + 7, y + 3], 90, 270, fill=IRON)
+        d.arc([b - 7, y - 3, b - 1, y + 3], 270, 90, fill=IRON)
+    for y in range(100, FOOT - 4, 12):
+        for x in (a + 4, mid - 7, mid + 7, b - 4):
+            d.point((x, y), fill=IRON_L)
+    d.rectangle([mid - 9, 120, mid + 9, 130], fill=hx("161420"))
+    d.rectangle([mid - 10, 119, mid + 10, 131], outline=IRON)
+    for x in range(mid - 8, mid + 9, 3):
+        d.line([(x, 120), (x, 130)], fill=IRON_L)
+    for x in (mid - 9, mid + 3):
+        d.ellipse([x, 148, x + 6, 154], outline=hx("8a7a50"))
+        d.point((x + 3, 147), fill=hx("8a7a50"))
+    d.line(arch_curve(a, b, DOOR_SPRING, 0.62, 22), fill=OAK_D, width=2)
     # stone steps down to the gate
     for i, y in enumerate((FOOT, FOOT + 5, FOOT + 10)):
-        x0, x1 = a - 10 - i * 3, b + 10 + i * 3
+        x0, x1 = a - 14 - i * 3, b + 14 + i * 3
         d.rectangle([x0, y, x1, y + 5], fill=mul(STONE, 0.85))
         d.line([(x0, y), (x1, y)], fill=STONE_L)
         d.line([(x0, y + 5), (x1, y + 5)], fill=STONE_D)
@@ -232,77 +248,81 @@ CHAPEL_GLASS = []
 
 def chapel(img, rnd, glows):
     d = ImageDraw.Draw(img)
-    x0, x1, apex = 238, 334, 14
-    stone(img, [[(x0, 62), (286, apex), (x1, 62), (x1, FOOT), (x0, FOOT)]], mul(STONE, 0.96), 29, course=7)
-    d.line([(x0 - 3, 64), (286, apex - 2), (x1 + 3, 64)], fill=STONE_L, width=3)
-    # bell-cote on the gable
-    d.rectangle([278, 0, 294, apex + 4], fill=mul(STONE, 0.95))
-    d.polygon(arch_poly(281, 291, 6, apex + 2, 0.62, 6), fill=hx("1a1a2a"))
-    d.ellipse([283, 6, 289, 12], fill=hx("8a7040"))
-    d.rectangle([276, 0, 296, 2], fill=STONE_L)
+    x0, x1 = CHAPEL
+    apex, top = (x0 + x1) // 2, -20
+    stone(img, [[(x0, 40), (apex, top), (x1, 40), (x1, FOOT), (x0, FOOT)]], mul(STONE, 0.96), 29, course=7)
+    d.line([(x0 - 3, 42), (apex, top - 2), (x1 + 3, 42)], fill=STONE_L, width=3)
+    # rose window high in the gable
+    d.ellipse([apex - 12, 2, apex + 12, 26], fill=STONE_L)
+    rose = Image.new("RGB", img.size, hx("201828"))
+    rd = ImageDraw.Draw(rose)
+    for k in range(8):
+        ang = k * math.pi / 4
+        cx, cy = apex + 6 * math.cos(ang), 14 + 6 * math.sin(ang)
+        rd.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=GLASS[k % len(GLASS)])
+    rd.ellipse([apex - 3, 11, apex + 3, 17], fill=GLASS[2])
+    rose_poly = [(apex + 10 * math.cos(t / 8 * math.pi), 14 + 10 * math.sin(t / 8 * math.pi)) for t in range(16)]
+    img.paste(rose, (0, 0), mask_of(img.size, [rose_poly]))
+    CHAPEL_GLASS.append(rose_poly)
     # the great lancet, alight for vespers
-    p = arch_poly(266, 306, 86, 160, 0.62, 16)
-    d.polygon(arch_poly(262, 310, 86, 162, 0.62, 16), fill=STONE_L)
+    ga, gb = GREAT
+    p = arch_poly(ga, gb, 80, 162, 0.62, 18)
+    d.polygon(arch_poly(ga - 5, gb + 5, 80, 164, 0.62, 18), fill=STONE_L)
     d.polygon(p, fill=hx("2a2040"))
     cells = Image.new("RGB", img.size, hx("201828"))
     cd = ImageDraw.Draw(cells)
-    for y in range(60, 160, 6):
-        for x in range(266, 306, 5):
+    for y in range(40, 162, 6):
+        for x in range(ga, gb, 5):
             cd.rectangle([x, y, x + 4, y + 5], fill=rnd.choice(GLASS), outline=hx("201828"))
+    # a saint in red and gold in the central light
+    cd.ellipse([apex - 5, 66, apex + 5, 76], fill=hx("e0c070"))
+    cd.ellipse([apex - 3, 68, apex + 3, 74], fill=hx("e8d8b0"))
+    cd.polygon([(apex - 6, 76), (apex + 6, 76), (apex + 8, 120), (apex - 8, 120)], fill=hx("b0283a"))
     img.paste(cells, (0, 0), mask_of(img.size, [p]))
-    for x in (279, 293):
-        d.line([(x, 74), (x, 160)], fill=STONE_D, width=2)
-    d.line(arch_curve(262, 310, 86, 0.62, 16), fill=STONE_L, width=2)
-    d.rectangle([258, 162, 314, 166], fill=STONE_L)
+    for x in (ga + 18, gb - 18):
+        d.line([(x, 62), (x, 162)], fill=STONE_D, width=2)
+    for y in (100, 130):
+        d.line([(ga, y), (gb, y)], fill=STONE_D)
+    d.line(arch_curve(ga - 5, gb + 5, 80, 0.62, 18), fill=STONE_L, width=2)
+    d.rectangle([ga - 8, 164, gb + 8, 168], fill=STONE_L)
     CHAPEL_GLASS.append(p)
     # small lancets either side
-    for xa in (246, 318):
-        lancet(d, xa, xa + 8, 116, 150, False, rnd, sill=False)
+    for xa in (x0 + 10, x1 - 20):
+        lancet(d, xa, xa + 10, 104, 150, False, rnd, sill=False)
     d.rectangle([x0, FOOT - 8, x1, FOOT], fill=mul(STONE, 0.75))
     d.line([(x0, FOOT - 8), (x1, FOOT - 8)], fill=STONE_L)
-    for (bx, top) in ((x0 - 2, 70), (x1 - 8, 70)):
-        buttress(img, bx, bx + 10, top)
-        d.polygon([(bx + 2, top - 10), (bx + 5, top - 24), (bx + 8, top - 10)], fill=STONE_L)
-
-
-def garden_wall(img):
-    d = ImageDraw.Draw(img)
-    stone(img, [rect(334, 150, W + 4, FENCE)], mul(STONE, 0.85), 41, course=8, lo=12, hi=24)
-    d.rectangle([334, 146, W, 151], fill=STONE_L)
-    d.line([(334, 152), (W, 152)], fill=STONE_D)
-    rnd = random.Random(42)
-    for _ in range(26):  # ivy over the coping
-        x, y = rnd.randint(336, W), rnd.randint(146, 176)
-        d.ellipse([x - 3, y - 2, x + 3, y + 2], fill=rnd.choice([hx("2a3a2a"), hx("34442e"), hx("223022")]))
+    for (bx, btop) in ((x0 - 4, 50), (x1 - 6, 50)):
+        buttress(img, bx, bx + 10, btop)
+        d.polygon([(bx + 2, btop - 10), (bx + 5, btop - 24), (bx + 8, btop - 10)], fill=STONE_L)
 
 
 def yard_and_fence(img):
     d = ImageDraw.Draw(img)
     # a strip of clipped box hedge behind the railings
-    d.rectangle([-2, FOOT, 334, FENCE - 8], fill=hx("2e3a2c"))
+    d.rectangle([-2, FOOT, W + 2, FENCE - 8], fill=hx("2e3a2c"))
     rnd = random.Random(7)
-    for x in range(0, 334, 6):
-        if DOOR[0] - 20 < x < DOOR[1] + 16:
+    for x in range(0, W + 6, 6):
+        if DOOR[0] - 24 < x < DOOR[1] + 20:
             continue
         d.ellipse([x - 4, FOOT - 6 + rnd.randint(0, 3), x + 5, FOOT + 6], fill=rnd.choice([hx("34422e"), hx("3c4a34"), hx("28342a")]))
     # plinth
-    d.rectangle([-2, FENCE - 8, 336, FENCE], fill=mul(STONE, 0.8))
-    d.line([(-2, FENCE - 8), (336, FENCE - 8)], fill=STONE_L)
-    for x in range(0, 336, 24):
+    d.rectangle([-2, FENCE - 8, W + 2, FENCE], fill=mul(STONE, 0.8))
+    d.line([(-2, FENCE - 8), (W + 2, FENCE - 8)], fill=STONE_L)
+    for x in range(0, W + 2, 24):
         d.line([(x, FENCE - 7), (x, FENCE)], fill=STONE_D)
     # railings with spear tips, broken by the gate
-    g0, g1 = DOOR[0] - 22, DOOR[1] + 22
-    for x in range(0, 334, 5):
+    g0, g1 = DOOR[0] - 26, DOOR[1] + 26
+    for x in range(0, W + 5, 5):
         if g0 - 4 < x < g1 + 4:
             continue
         d.line([(x, 152), (x, FENCE - 8)], fill=IRON)
         d.polygon([(x - 1, 152), (x, 147), (x + 1, 152)], fill=IRON)
     for y in (156, FENCE - 12):
         d.line([(0, y), (g0 - 4, y)], fill=IRON, width=2)
-        d.line([(g1 + 4, y), (334, y)], fill=IRON, width=2)
+        d.line([(g1 + 4, y), (W, y)], fill=IRON, width=2)
         d.line([(0, y - 1), (g0 - 4, y - 1)], fill=IRON_L)
-        d.line([(g1 + 4, y - 1), (334, y - 1)], fill=IRON_L)
-    for x in range(8, 334, 20):  # scroll ornaments
+        d.line([(g1 + 4, y - 1), (W, y - 1)], fill=IRON_L)
+    for x in range(8, W, 20):  # scroll ornaments
         if g0 - 6 < x < g1 + 6:
             continue
         d.arc([x - 4, 158, x + 4, 166], 0, 360, fill=IRON)
@@ -367,36 +387,6 @@ def ground(img):
         d.point((x + 1, y), fill=mul(c, 0.8))
 
 
-def tree(img):
-    d = ImageDraw.Draw(img)
-    bx, by = TREE
-    rnd = random.Random(12)
-    bark = hx("2a2428")
-    # iron grate round the tree pit
-    d.ellipse([bx - 16, by - 3, bx + 16, by + 4], fill=hx("2a2a32"))
-    for x in range(bx - 14, bx + 15, 3):
-        d.line([(x, by - 2), (x, by + 3)], fill=hx("4a4a56"))
-
-    def branch(x, y, ang, ln, wdt, depth):
-        if depth == 0 or ln < 3:
-            return
-        nx, ny = x + math.cos(ang) * ln, y - math.sin(ang) * ln
-        d.line([(x, y), (nx, ny)], fill=bark, width=max(1, int(wdt)))
-        n = 2 if depth > 2 else rnd.choice((1, 2, 2, 3))
-        for i in range(n):
-            spread = rnd.uniform(0.25, 0.6)
-            a2 = ang + (spread if i % 2 else -spread) + rnd.uniform(-0.15, 0.15)
-            branch(nx, ny, a2, ln * rnd.uniform(0.66, 0.82), wdt * 0.68, depth - 1)
-
-    d.polygon([(bx - 6, by), (bx - 3, by - 20), (bx - 3, by - 70), (bx + 3, by - 70), (bx + 3, by - 20), (bx + 7, by)],
-              fill=bark)
-    d.line([(bx - 1, by - 4), (bx - 1, by - 66)], fill=hx("4a4048"))
-    branch(bx, by - 68, math.pi / 2 + 0.35, 38, 5, 7)
-    branch(bx, by - 68, math.pi / 2 - 0.3, 42, 5, 7)
-    branch(bx - 1, by - 50, math.pi - 0.5, 30, 3, 5)
-    branch(bx + 1, by - 56, 0.45, 28, 3, 5)
-
-
 def gas_lamp(d, x):
     g = CURB - 2
     d.polygon([(x - 7, g), (x - 5, g - 4), (x - 4, g - 18), (x + 4, g - 18), (x + 5, g - 4), (x + 7, g)], fill=IRON)
@@ -422,13 +412,12 @@ def paint():
     glows = []
     CHAPEL_GLASS.clear()
     img = Image.new("RGB", (W, FULL_H), KEY)
-    garden_wall(img)
-    chapel(img, rnd, glows)
     main_block(img, rnd, glows)
+    cloister_wing(img, rnd, glows)
+    chapel(img, rnd, glows)
     entrance_bay(img, rnd, glows)
     yard_and_fence(img)
     ground(img)
-    tree(img)
     # anything still magenta is open sky
     r, g, b = img.split()
     scene = ImageChops.lighter(ImageChops.lighter(r.point(lambda v: 255 if v < 200 else 0),
@@ -437,12 +426,12 @@ def paint():
     # lighting: cool dusk ambient and sky fill, gas lamps, the door lantern, window spill
     lights = [
         ("rect", [-20, -20, W + 20, 120], (40, 40, 70), 1.0, 40),
-        ("ellipse", [-60, 160, 160, 262], WARM, 0.45, 20),
-        ("ellipse", [250, 160, 470, 262], WARM, 0.5, 20),
+        ("ellipse", [LAMPS[0] - 106, 160, LAMPS[0] + 114, 262], WARM, 0.45, 20),
+        ("ellipse", [LAMPS[1] - 110, 160, LAMPS[1] + 110, 262], WARM, 0.5, 20),
         ("ellipse", [LAMPS[0] - 30, 64, LAMPS[0] + 30, 160], WARM, 0.5, 16),
         ("ellipse", [LAMPS[1] - 30, 64, LAMPS[1] + 30, 160], WARM, 0.5, 16),
-        ("ellipse", [62, 96, 160, 210], WARM, 0.55, 16),   # lantern by the door
-        ("ellipse", [250, 150, 320, 200], (220, 120, 140), 0.35, 14),  # coloured spill under the great window
+        ("ellipse", [DOOR_MID - 60, 70, DOOR_MID + 60, 210], WARM, 0.55, 16),   # lanterns by the door
+        ("ellipse", [GREAT[0] - 20, 150, GREAT[1] + 20, 200], (220, 120, 140), 0.35, 14),  # coloured spill under the great window
     ]
     for p in glows:
         xs, ys = [q[0] for q in p], [q[1] for q in p]
@@ -458,18 +447,20 @@ def paint():
     for p in CHAPEL_GLASS:
         m = mask_of(out.size, [p])
         out.paste(Image.blend(out, ImageChops.screen(out, Image.new("RGB", out.size, (70, 50, 60))), 0.8), (0, 0), m)
-    lantern(d, 146, 112)
+    for lx in (DOOR[0] - 22, DOOR[1] + 22):
+        lantern(d, lx, 104)
     for x in LAMPS:
         gas_lamp(d, x)
         light(out, "ellipse", [x - 30, 62, x + 30, 128], hx("ffd890"), 0.5, 12)
         light(out, "ellipse", [x - 70, 30, x + 70, 170], hx("f0b060"), 0.16, 26)
         light(out, "ellipse", [x - 8, 84, x + 8, 106], hx("fff4d0"), 0.6, 3)
-    light(out, "ellipse", [126, 92, 166, 136], hx("ffd890"), 0.45, 10)
-    light(out, "rect", [264, 70, 308, 160], hx("c080a0"), 0.12, 8)
+    for lx in (DOOR[0] - 22, DOOR[1] + 22):
+        light(out, "ellipse", [lx - 20, 84, lx + 20, 128], hx("ffd890"), 0.45, 10)
+    light(out, "rect", [GREAT[0], 50, GREAT[1], 162], hx("c080a0"), 0.12, 8)
     # dusk gloom: shade the bottom of the facade and the near road, cold rim on the roofs
-    shadow(out, "rect", [-20, FOOT - 30, 340, FENCE], 0.2, 14, hx("4a4a80"))
+    shadow(out, "rect", [-20, FOOT - 30, W + 20, FENCE], 0.2, 14, hx("4a4a80"))
     shadow(out, "rect", [-20, GUTTER, W + 20, FULL_H + 20], 0.35, 10, hx("3a3a6a"))
-    light(out, "rect", [0, 20, 240, 26], hx("8a8ac0"), 0.15, 3)
+    light(out, "rect", [0, 0, W, 6], hx("8a8ac0"), 0.15, 3)
     vignette(out, 0.45, tint=(24, 22, 52), blur=44)
     return out
 

@@ -241,8 +241,8 @@ public partial class Game : Node
             state.GiveItem("mirror");
             state.SetFlag("got_mirror");
             await Say("The wax lifts cleanly. I put the borrowed cloth back on the bed.");
-            await Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
-            await Say("Three loops tied in one knot. No beginning, no end. Scratched deep, on purpose.");
+            await Hud.ShowImageWithLines(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"),
+                () => Say("Three loops tied in one knot. No beginning, no end. Scratched deep, on purpose."));
             return true;
         }
         if (PuzzleRules.Pair(first, second, "card", "mirror"))
@@ -331,8 +331,8 @@ public partial class Game : Node
         }
         if (verb == Verb.Hand && item == "mirror")
         {
-            await Hud.ShowImage(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"));
-            await Say("Three loops tied in one knot. No beginning, no end. It looks old. Older than the convent.");
+            await Hud.ShowImageWithLines(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"),
+                () => Say("Three loops tied in one knot. No beginning, no end. It looks old. Older than the convent."));
             return;
         }
         if (verb == Verb.Hand && item == "book")
@@ -499,6 +499,9 @@ public partial class Game : Node
             : Room?.FindSpeaker(id) ?? Player;
         return Say(who, text);
     }
+
+    /// <summary>Ends the current spoken line early, as a click would.</summary>
+    public void SkipSpeech() => _skipSpeech?.TrySetResult();
 
     public async Task Say(ISpeaker who, string text)
     {

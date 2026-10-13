@@ -11,7 +11,7 @@ public class PuzzleTests
         foreach (var cell in LiftMaze.Cells())
             Assert.NotNull(LiftMaze.Route(LiftMaze.Start, cell));
         var route = LiftMaze.Route(LiftMaze.Start, LiftMaze.Target)!;
-        Assert.True(route.Count >= 20, $"route is only {route.Count} moves");
+        Assert.True(route.Count >= 50, $"route is only {route.Count} moves");
         var p = LiftMaze.Start;
         foreach (var step in route)
         {
@@ -38,7 +38,11 @@ public class PuzzleTests
         }
         int deadEnds = LiftMaze.Cells().Count(c =>
             new[] { (0, -1), (0, 1), (-1, 0), (1, 0) }.Count(d => LiftMaze.CanMove(c, d.Item1, d.Item2)) == 1);
-        Assert.True(deadEnds >= 6, $"only {deadEnds} dead ends");
+        Assert.True(deadEnds >= 12, $"only {deadEnds} dead ends");
+        Assert.Contains(new GridPoint(LiftMaze.Target.X, LiftMaze.Target.Y - 1), LiftMaze.Decoys);
+        Assert.Contains(new GridPoint(LiftMaze.Target.X, LiftMaze.Target.Y + 1), LiftMaze.Decoys);
+        foreach (var decoy in LiftMaze.Decoys)
+            Assert.True(LiftMaze.Route(decoy, LiftMaze.Target)!.Count >= 10, $"decoy {decoy} is a shortcut to the target");
     }
 
     [Fact]

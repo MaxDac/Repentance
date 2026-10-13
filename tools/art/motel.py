@@ -251,18 +251,19 @@ def bulb(img):
 
 def details(img):
     d = ImageDraw.Draw(img)
-    # Crooked motel print
-    d.polygon([(78, 34), (118, 32), (120, 62), (76, 64)], fill=hx("6c5237"))
-    d.polygon([(82, 36), (114, 35), (116, 59), (80, 60)], fill=hx("cabf9f"))
+    # Motel print: a plain rectangular frame
+    d.rectangle([77, 33, 119, 63], fill=hx("6c5237"))
+    d.rectangle([81, 36, 115, 59], fill=hx("cabf9f"))
     d.rectangle([86, 40, 110, 54], fill=hx("8a8f6b"))
     d.rectangle([86, 50, 110, 54], fill=hx("7f684b"))
     d.line([(87, 42), (98, 47), (108, 41)], fill=hx("9ea47f"))
-    d.line([(84, 62), (112, 60)], fill=hx("2c2018"))
+    d.line([(79, 64), (117, 64)], fill=hx("2c2018"))
     # a second print and a tear-off calendar, so the wall is not one brown wash
-    d.polygon([(150, 28), (196, 26), (198, 58), (148, 60)], fill=hx("5c4632"))
-    d.polygon([(154, 31), (192, 29), (194, 54), (152, 56)], fill=hx("8aa0b0"))
-    d.polygon([(154, 44), (194, 42), (194, 54), (152, 56)], fill=hx("6a7a58"))
-    d.polygon([(168, 40), (178, 36), (182, 44)], fill=hx("d8d0c0"))
+    d.rectangle([149, 27, 197, 59], fill=hx("5c4632"))
+    d.rectangle([153, 30, 193, 55], fill=hx("8aa0b0"))
+    d.rectangle([153, 43, 193, 55], fill=hx("6a7a58"))
+    d.polygon([(168, 43), (176, 35), (184, 43)], fill=hx("d8d0c0"))
+    d.line([(151, 60), (195, 60)], fill=hx("2c2018"))
     d.rectangle([206, 30, 228, 52], fill=hx("efe6d0"), outline=hx("6a5038"))
     d.line([(206, 36), (228, 36)], fill=hx("a04040"))
     d.text((210, 38), "27", fill=hx("2a2018"))
