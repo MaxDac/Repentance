@@ -9,7 +9,12 @@ public partial class Lobby : Room
     {
         if (State.HasFlag("seen_lobby")) return;
         State.SetFlag("seen_lobby");
-        await Game.Run(() => Say("The Aurelian. Where the rich come to forget, and the help is paid to forget harder."));
+        await Game.Run(async () =>
+        {
+            // the first arrival comes in off State Street, through the revolving door
+            if (entry == "street") await Game.WalkTo(new Godot.Vector2(372, 204));
+            await Say("The Aurelian. Where the rich come to forget, and the help is paid to forget harder.");
+        });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -67,6 +72,10 @@ public partial class Lobby : Room
             case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator") &&
                 !State.HasFlag("took_brass_box") && !State.HasFlag("club_lead"):
                 await Say("Not yet. I bought a look at room 507. I should collect its clues before chasing the Blue Lantern.");
+                return true;
+            case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("knows_lantern") &&
+                !State.HasFlag("staff_elevator") && !State.HasFlag("club_lead"):
+                await Say("Not yet. Her room could tell me more than the bellboy did. Another dollar buys me the back way.");
                 return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern") || State.HasFlag("club_lead"):
                 await Game.ChangeRoom("street", "lobby");

@@ -248,7 +248,7 @@ def sheet_furniture(img, lifted=False):
 
 def boxes(img):
     d = ImageDraw.Draw(img)
-    stack = ((296, 152, 344, 190, "TAXES 87-94"), (336, 160, 376, 190, "XMAS"), (302, 120, 340, 152, "MISC"),
+    stack = ((296, 152, 344, 190, "TAXES\n87-94"), (336, 160, 376, 190, "XMAS"), (302, 120, 340, 152, "MISC"),
              (338, 136, 368, 160, ""))
     for (x0, y0, x1, y1, label) in stack:
         d.rectangle([x0, y0, x1, y1], fill=hx("a08458"))
@@ -257,19 +257,31 @@ def boxes(img):
         d.rectangle([x0, y0, x1, y1], outline=hx("5a4428"))
         d.line([(x1 - 1, y0), (x1 - 1, y1)], fill=hx("806640"))
         if label:
-            text(img, ((x0 + x1) // 2, (y0 + y1) // 2 + 2), label, hx("2a2a3a"), size=8)
+            lines = label.split("\n")
+            cy = (y0 + y1) // 2 + 2 - 4 * (len(lines) - 1)
+            for i, line in enumerate(lines):
+                text(img, ((x0 + x1) // 2, cy + 8 * i), line, hx("2a2a3a"), size=8)
     shadow(img, "rect", [294, 186, 380, 194], 0.4, 3)
     d.polygon([(304, 118), (318, 114), (322, 120)], fill=hx("e8e0d0"))  # paper peeking out
 
 
-def spilled(img):
+TIN_BOX = (306, 194, 344, 218)  # where the tool tin sprite sits once found (scenes/rooms/attic.tscn)
+
+
+def spilled(img, cleared=False):
+    """The tax returns across the floor. ``cleared``: the papers on top of the tool tin have been swept aside."""
     d = ImageDraw.Draw(img)
     rnd = random.Random(12)
+    tx0, ty0, tx1, ty1 = TIN_BOX
+    if cleared:
+        shadow(img, "rect", [tx0 + 1, ty1 - 3, tx1 + 4, ty1 + 3], 0.55, 2)
     for _ in range(26):
         x, y = rnd.randint(268, 374), rnd.randint(190, 212)
         w, h = rnd.randint(8, 13), rnd.randint(4, 6)
         sk = rnd.randint(-3, 3)
         col = rnd.choice([hx("e8e0d0"), hx("d8d0b8"), hx("f0ece0"), hx("c8d0d8")])
+        if cleared and x + w > tx0 - 2 and x < tx1 + 2 and y + h + 3 > ty0 - 2 and y - 3 < ty1:
+            continue
         d.polygon([(x, y), (x + w, y + sk), (x + w, y + h + sk), (x, y + h)], fill=col, outline=hx("8a8070"))
         d.line([(x + 2, y + 2), (x + w - 2, y + 2 + sk)], fill=hx("8a8a9a"))
 
@@ -449,9 +461,9 @@ def relight_night(img):
     return out
 
 
-def paint(act=1, spill=False, lifted=False, opened=False):
+def paint(act=1, spill=False, lifted=False, opened=False, cleared=False):
     if act == "night":
-        return paint_night(spill, lifted, opened)
+        return paint_night(spill, lifted, opened, cleared)
     mood = ACTS[act]
     img = Image.new("RGB", (W, H))
     shell(img)
@@ -462,7 +474,7 @@ def paint(act=1, spill=False, lifted=False, opened=False):
     sheet_furniture(img, lifted)
     trunk(img, opened)
     if spill:
-        spilled(img)
+        spilled(img, cleared)
     hatch(img)
     shaft(img, act)
     if mood["desat"] > 0:
@@ -477,7 +489,7 @@ def paint(act=1, spill=False, lifted=False, opened=False):
     return img
 
 
-def paint_night(spill=False, lifted=False, opened=False):
+def paint_night(spill=False, lifted=False, opened=False, cleared=False):
     img = Image.new("RGB", (W, H))
     shell(img)
     floor(img)
@@ -487,7 +499,7 @@ def paint_night(spill=False, lifted=False, opened=False):
     sheet_furniture(img, lifted)
     trunk(img, opened)
     if spill:
-        spilled(img)
+        spilled(img, cleared)
     hatch(img)
     img = relight_night(img)
     bulb_pool(img)
@@ -517,6 +529,8 @@ def build():
         for name, box in overlay_boxes:
             suffix = "" if act == 1 else f"_act{act}"
             save(alt.crop(box), "rooms", f"{name}{suffix}.png")
+        cleared = pixelize(paint(act, True, True, True, cleared=True), pal)
+        save(cleared.crop(SPILL_BOX), "rooms", f"attic_papers_cleared{suffix}.png")
 
     night, night_alt = paint("night"), paint("night", True, True, True)
     night_pal = palette_of(Image.blend(night, night_alt, 0.5), 116) + NIGHT_EXTRA
@@ -524,4 +538,6 @@ def build():
     night_alt = pixelize(night_alt, night_pal)
     for name, box in overlay_boxes:
         save(night_alt.crop(box), "rooms", f"{name}_night.png")
+    night_cleared = pixelize(paint("night", True, True, True, cleared=True), night_pal)
+    save(night_cleared.crop(SPILL_BOX), "rooms", "attic_papers_cleared_night.png")
     return outputs[1]
