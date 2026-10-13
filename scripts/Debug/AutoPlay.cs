@@ -266,12 +266,50 @@ public class AutoPlay
             Check(gs.HasItem("mirror_waxed") && !gs.HasFlag("got_mirror") && !game.Hud.ImageVisible,
                 "taking waxed mirror does not reveal the symbol");
             Check(game.Room?.FindHotspot("mirror")?.Visible == false, "taken mirror disappears from drawer");
-            await game.Perform(Verb.Hand, "bed");
+            var searchBed = game.Perform(Verb.Hand, "bed");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "I ought to leave her bed alone. Somehow, I can't quite make myself turn away.");
+            Check(!searchBed.IsCompleted && game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "I ought to leave her bed alone. Somehow, I can't quite make myself turn away.",
+                "first bed search voices Micah's reluctance before taking the cloth");
+            Check(!gs.HasItem("cloth"), "Micah hesitates before borrowing the cloth");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.");
+            Check(!searchBed.IsCompleted && game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.",
+                "first bed search retains the cloth's mirror-cleaning hint");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "Her perfume. I've lifted the cloth to my nose before I even know I'm doing it.");
+            Check(!searchBed.IsCompleted && game.Hud.SpeechVisible && game.Hud.SpeechText ==
+                "Her perfume. I've lifted the cloth to my nose before I even know I'm doing it.",
+                "Micah notices instinctively smelling her perfume after finding the cloth");
+            await searchBed;
+            Check(gs.HasItem("cloth") && !gs.HasFlag("got_mirror"), "bed search supplies cloth without revealing the symbol");
+            var searchBedAgain = game.Perform(Verb.Hand, "bed");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.",
+                "repeat bed search skips the first-pickup reluctance");
+            await searchBedAgain;
+            Check(game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.",
+                "repeat bed search skips the first-pickup perfume line");
+            await ReloadCheckpoint("convent_cloth");
+            Check(gs.HasItem("cloth") && !gs.HasFlag("got_mirror"), "save/load retains borrowed cloth and unfinished mirror");
+            var searchBedReloaded = game.Perform(Verb.Hand, "bed");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.",
+                "bed search after loading skips the first-pickup reluctance");
+            await searchBedReloaded;
+            Check(game.Hud.SpeechText ==
+                "A clean cloth folded by the pillow. I'll borrow it to wipe that mirror, then put it back.",
+                "bed search after loading skips the first-pickup perfume line");
             await Combine("mirror_waxed", "cloth");
             await WaitIdle(game);
             Check(gs.HasItem("cloth") && !gs.HasFlag("got_mirror"), "cold wax refuses cleaning without losing cloth");
             await game.Perform(Verb.Walk, "exit");
-            Check(game.Room?.Name == "ConventCell", "waxed mirror possession does not bypass symbol gate");
+            Check(game.Room is Rooms.ConventCell, "waxed mirror possession does not bypass symbol gate");
             await game.Perform(Verb.UseItem, "lampstand", "mirror_waxed");
             await Combine("cloth", "mirror_waxed");
             await Until(() => game.Hud.ImageVisible);
@@ -281,6 +319,12 @@ public class AutoPlay
             await WaitIdle(game);
             await game.Perform(Verb.Hand, "comb");
             Check(gs.HasItem("mirror") && !gs.HasItem("comb") && !gs.HasItem("cloth"), "revealed mirror retained; comb and cloth left in cell");
+            var searchBedAfterCleaning = game.Perform(Verb.Hand, "bed");
+            await Until(() => game.Hud.SpeechVisible);
+            Check(game.Hud.SpeechText == "Thin mattress, and the borrowed cloth back where it belongs.",
+                "bed search after cleaning keeps the returned-cloth response");
+            await searchBedAfterCleaning;
+            Check(!gs.HasItem("cloth"), "bed search after cleaning does not borrow the cloth again");
             await Shot("convent_cell_after");
 
             var leave = game.Perform(Verb.Walk, "exit");

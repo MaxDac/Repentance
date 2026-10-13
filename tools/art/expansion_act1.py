@@ -581,9 +581,9 @@ REGULAR_X = 442
 SMOKE_POSES = (
     {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": None},
     {"elbow": (17, 136), "hand": (11, 126), "ember": 0, "puff": None},
-    {"elbow": (14, 130), "hand": (3, 114), "ember": 1, "puff": None},
-    {"elbow": (14, 130), "hand": (3, 114), "ember": 2, "puff": None},
-    {"elbow": (17, 136), "hand": (11, 126), "ember": 1, "puff": ((-3, 115, 2), (-6, 112, 2))},
+    {"elbow": (14, 129), "hand": (3, 112), "ember": 1, "puff": None},
+    {"elbow": (14, 129), "hand": (3, 112), "ember": 2, "puff": None},
+    {"elbow": (17, 136), "hand": (11, 126), "ember": 1, "puff": ((-3, 113, 2), (-6, 110, 2))},
     {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": ((-13, 101, 3), (-17, 96, 2), (-9, 106, 2))},
 )
 
@@ -618,30 +618,45 @@ def regular(img, pose=0):
     d.rectangle([cx - 9, BASE - 3, cx - 1, BASE], fill=hx("0c0b0e"))
     d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0c0b0e"))
     d.line([(cx - 8, BASE - 3), (cx - 3, BASE - 3)], fill=hx("4a4650"))
-    # overcoat: hunched shoulders, flared skirt, belt, the lamp catching its left edge
-    d.polygon([(cx - 10, 116), (cx + 10, 116), (cx + 12, 123), (cx + 13, 164), (cx - 13, 164), (cx - 12, 123)],
+    outline = hx("0e0d12")
+    # head and neck under the brim, kept in the hat's shadow so the face stays hidden: jaw, chin and ear, lit a
+    # touch on the lamp side
+    face, face_d, face_l = hx("4e3a30"), hx("362820"), hx("664c3e")
+    d.rectangle([cx - 2, 112, cx + 2, 117], fill=face_d)
+    d.ellipse([cx - 5, 101, cx + 5, 115], fill=face)
+    d.line([(cx - 5, 106), (cx - 5, 110)], fill=face_l)
+    d.line([(cx - 4, 111), (cx - 2, 114)], fill=face_l)
+    d.line([(cx + 4, 110), (cx + 1, 114)], fill=face_d)
+    d.point((cx - 6, 107), fill=face)
+    d.point((cx - 6, 108), fill=face_d)
+    d.line([(cx - 1, 112), (cx + 1, 112)], fill=face_d)
+    # overcoat: hunched shoulders, a modest flare, belt, the lamp catching its left edge
+    d.polygon([(cx - 10, 116), (cx + 10, 116), (cx + 10, 123), (cx + 11, 164), (cx - 11, 164), (cx - 10, 123)],
               fill=coat)
-    d.polygon([(cx + 3, 118), (cx + 10, 116), (cx + 12, 123), (cx + 13, 164), (cx + 4, 164)], fill=coat_d)
-    d.line([(cx - 12, 123), (cx - 13, 163)], fill=coat_l)
-    d.line([(cx + 12, 124), (cx + 13, 163)], fill=hx("34323e"))
+    d.polygon([(cx + 3, 118), (cx + 10, 116), (cx + 10, 123), (cx + 11, 164), (cx + 4, 164)], fill=coat_d)
+    d.line([(cx - 10, 123), (cx - 11, 163)], fill=coat_l)
+    d.line([(cx + 10, 124), (cx + 11, 163)], fill=hx("34323e"))
     d.line([(cx - 10, 117), (cx - 5, 116)], fill=coat_l)
-    d.rectangle([cx - 13, 141, cx + 13, 143], fill=coat_d)
+    d.rectangle([cx - 11, 141, cx + 11, 143], fill=coat_d)
     d.rectangle([cx - 1, 141, cx + 1, 143], fill=hx("8a8070"))
     d.line([(cx, 128), (cx, 163)], fill=coat_d)
     for y in (132, 150):
-        d.point((cx - 2, y), fill=hx("0e0d12"))
+        d.point((cx - 2, y), fill=outline)
     # a sliver of shirt and tie between the lapels
     d.polygon([(cx - 3, 117), (cx + 3, 117), (cx, 126)], fill=hx("b8b4aa"))
     d.line([(cx, 118), (cx, 125)], fill=hx("5a1a20"))
     d.line([(cx - 5, 117), (cx - 1, 128)], fill=coat_l)
     d.line([(cx + 5, 117), (cx + 1, 128)], fill=coat_d)
-    # collar turned up against the rain
-    d.polygon([(cx - 9, 117), (cx - 7, 109), (cx - 3, 112), (cx - 3, 117)], fill=coat)
-    d.line([(cx - 9, 116), (cx - 7, 109)], fill=coat_l)
-    d.polygon([(cx + 9, 117), (cx + 7, 109), (cx + 3, 112), (cx + 3, 117)], fill=coat_d)
-    # the other hand deep in its pocket
-    d.line([(cx - 12, 124), (cx - 11, 145)], fill=coat_d)
-    d.line([(cx - 11, 146), (cx - 6, 148)], fill=hx("0e0d12"))
+    # collar turned up against the rain, framing the jaw
+    d.polygon([(cx - 10, 117), (cx - 8, 109), (cx - 5, 112), (cx - 4, 117)], fill=coat)
+    d.line([(cx - 10, 116), (cx - 8, 109)], fill=coat_l)
+    d.polygon([(cx + 10, 117), (cx + 8, 109), (cx + 5, 112), (cx + 4, 117)], fill=coat_d)
+    # the other arm, its hand deep in the coat pocket: an outlined sleeve down the lit side
+    d.line([(cx - 10, 119), (cx - 12, 133), (cx - 9, 145)], fill=outline, width=6, joint="curve")
+    d.line([(cx - 10, 119), (cx - 12, 133), (cx - 9, 145)], fill=coat, width=4, joint="curve")
+    d.line([(cx - 13, 122), (cx - 14, 133), (cx - 12, 142)], fill=coat_l)
+    d.line([(cx - 7, 146), (cx - 11, 146)], fill=coat_d)
+    d.line([(cx - 11, 147), (cx - 6, 148)], fill=outline)
     # blue carnation in the left buttonhole, ruffled, catching the light
     dark, mid, hi = CARNATION
     d.ellipse([cx - 10, 119, cx - 4, 125], fill=dark)
@@ -653,14 +668,16 @@ def regular(img, pose=0):
     d.point((cx - 7, 122), fill=dark)
     d.point((cx - 9, 123), fill=mid)
     d.line([(cx - 6, 125), (cx - 5, 127)], fill=hx("3a7a3a"))
-    # the chin, just showing under the brim
-    d.rectangle([cx - 2, 111, cx + 2, 112], fill=skin_d)
-    d.line([(cx - 1, 113), (cx + 1, 113)], fill=skin_d)
-    # the smoking arm: sleeve, cuff, hand and cigarette
+    # the smoking arm: an outlined sleeve in its own tone so it reads against the shaded coat, cuff, hand, cigarette
     ex, ey = cx + p["elbow"][0], p["elbow"][1]
     hx_, hy = cx + p["hand"][0], p["hand"][1]
-    d.line([(cx + 10, 119), (ex, ey), (hx_ + 1, hy + 2)], fill=coat_d, width=5, joint="curve")
-    d.line([(cx + 12, 121), (ex - 2, ey)], fill=coat, width=1)
+    sleeve = mix(coat, coat_l, 0.25)
+    arm = [(cx + 9, 119), (ex, ey), (hx_ + 1, hy + 2)]
+    d.line(arm, fill=outline, width=7, joint="curve")
+    d.line(arm, fill=sleeve, width=5, joint="curve")
+    d.line([(cx + 10, 118), (ex + 2, ey)], fill=mix(sleeve, coat_l, 0.6), width=1)
+    d.line([(ex - 1, ey + 1), (hx_ + 1, hy + 3)], fill=coat_d, width=1)
+    d.point((hx_ + 1, hy + 2), fill=hx("b8b4aa"))
     d.ellipse([hx_ - 1, hy - 1, hx_ + 2, hy + 2], fill=skin)
     d.point((hx_ + 2, hy + 1), fill=skin_d)
     d.point((hx_ - 1, hy), fill=mix(skin, hx("e0b090"), 0.5))
@@ -676,18 +693,20 @@ def regular(img, pose=0):
         d.point((hx_ - 3, hy + 1), fill=ember)
     # fedora, tipped forward over the face and seen from above: a wide brim, the pinched crown sitting at its back,
     # and the front lip dipping over where the eyes would be
-    d.ellipse([cx - 12, 101, cx + 12, 112], fill=hat_d)
-    d.arc([cx - 12, 101, cx + 12, 112], 160, 300, fill=hat_l)
-    d.polygon([(cx - 6, 105), (cx - 6, 98), (cx - 4, 95), (cx + 4, 95), (cx + 6, 98), (cx + 6, 105)], fill=hat)
-    d.polygon([(cx - 6, 105), (cx - 6, 98), (cx - 4, 95), (cx - 2, 95), (cx - 3, 98), (cx - 3, 105)],
-              fill=mix(hat, hat_l, 0.45))
-    d.ellipse([cx - 4, 95, cx + 4, 100], fill=mix(hat, hat_l, 0.3))
-    d.line([(cx, 95), (cx, 100)], fill=hat_d)
-    d.point((cx - 1, 96), fill=hat_l)
-    d.rectangle([cx - 6, 103, cx + 6, 105], fill=band)
-    d.chord([cx - 12, 101, cx + 12, 113], 0, 180, fill=hat_d)
-    d.arc([cx - 12, 101, cx + 12, 113], 25, 155, fill=hx("34302c"))
-    d.line([(cx - 11, 107), (cx - 5, 110)], fill=mix(hat_d, hat_l, 0.5))
+    hy0 = -3
+    d.ellipse([cx - 12, 101 + hy0, cx + 12, 112 + hy0], fill=hat_d)
+    d.arc([cx - 12, 101 + hy0, cx + 12, 112 + hy0], 160, 300, fill=hat_l)
+    d.polygon([(cx - 6, 105 + hy0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx + 4, 95 + hy0), (cx + 6, 98 + hy0),
+               (cx + 6, 105 + hy0)], fill=hat)
+    d.polygon([(cx - 6, 105 + hy0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx - 2, 95 + hy0), (cx - 3, 98 + hy0),
+               (cx - 3, 105 + hy0)], fill=mix(hat, hat_l, 0.45))
+    d.ellipse([cx - 4, 95 + hy0, cx + 4, 100 + hy0], fill=mix(hat, hat_l, 0.3))
+    d.line([(cx, 95 + hy0), (cx, 100 + hy0)], fill=hat_d)
+    d.point((cx - 1, 96 + hy0), fill=hat_l)
+    d.rectangle([cx - 6, 103 + hy0, cx + 6, 105 + hy0], fill=band)
+    d.chord([cx - 12, 101 + hy0, cx + 12, 113 + hy0], 0, 180, fill=hat_d)
+    d.arc([cx - 12, 101 + hy0, cx + 12, 113 + hy0], 25, 155, fill=hx("34302c"))
+    d.line([(cx - 11, 107 + hy0), (cx - 5, 110 + hy0)], fill=mix(hat_d, hat_l, 0.5))
     if p["puff"]:
         for px_, py_, r in p["puff"]:
             _puff(d, cx + px_, py_, r)
