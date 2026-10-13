@@ -609,6 +609,12 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
     }
     -> END
 
+=== rose_leave ===
++ [(Walk away without a word.)]
+    ~ set_flag("rose_avoided")
++ [(Not yet.)]
+- -> END
+
 === rose_coffee ===
 ROSE: Micah? It's the middle of the night. God, your face...
 {

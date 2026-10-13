@@ -32,6 +32,7 @@ public partial class Street : Room
         await Say("What am I doing, lying in the gutter for a woman I met four days ago?");
         await Say("I had a wife once. Still do, on paper. A boy who's eleven now, if I've counted right. Tommy.");
         await Say("I walked out on them because the bottle was easier to talk to. And now I'm walking into the night for a stranger.");
+        await Say("At the library I thanked God Rose wasn't at her desk. She's been in my head every minute since.");
         await Say("Maybe that's the joke. Maybe it's easier to save somebody you don't owe anything to.");
         if (!await Player.PlayPose("micah_recover")) return;
         Player.SetPose(null);
