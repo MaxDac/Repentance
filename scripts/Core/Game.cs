@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance;
@@ -552,15 +553,15 @@ public partial class Game : Node
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
-        SyncNotepad();
+        SyncPinned();
         Player.Visible = Room.PlayerVisibleOnLoad;
     }
 
-    /// <summary>Micah always carries his notepad in the first slot; Daniel, in the present day, never does.</summary>
-    private void SyncNotepad()
+    /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>
+    private void SyncPinned()
     {
-        if (IsMicah) GameState.Instance.EnsureNotepad();
-        else GameState.Instance.RemoveNotepad();
+        if (IsMicah) GameState.Instance.EnsurePinned();
+        else GameState.Instance.RemovePinned();
     }
 
     public bool IsMicah => Player.Character.StartsWith("micah");
@@ -625,9 +626,14 @@ public partial class Game : Node
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
-        // a debug start past the attic gets the notes Micah would have taken on the way there
+        // a debug start past the attic gets the notes Micah would have taken on the way there, and the act's kit
         if (StartRoom != "attic")
-            foreach (var flag in Notes.DebugStartFlags(StartRoom)) GameState.Instance.SetFlag(flag);
+        {
+            var gs = GameState.Instance;
+            foreach (var flag in Notes.DebugStartFlags(StartRoom).Concat(MicahKit.DebugFlags(StartRoom))) gs.SetFlag(flag);
+            foreach (var item in MicahKit.DebugItems(StartRoom)) gs.GiveItem(item);
+            if (MicahKit.DebugAct(StartRoom) > 1) gs.SetStoryAct(MicahKit.DebugAct(StartRoom));
+        }
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
         await ChangeRoom(StartRoom, StartEntry);
     }

@@ -6,7 +6,7 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Act 2, puzzle 14: the Club's vestibule on the rite night. Micah comes in masked from the map and can't go back out.
 /// The plaque wants the summons "sealed by the first of the procession": the coat-check's sealing wax, softened with the
-/// matchbook (never used up), dripped on the invitation and pressed with the raven signet from the cloak rack (the
+/// Micah's lighter (never used up), dripped on the invitation and pressed with the raven signet from the cloak rack (the
 /// invitation lists the procession raven, lion, stag). The sealed invitation goes through the inner door's slot and comes
 /// back out (the Master of Ceremonies inspects it in the hall), sets <c>vestibule_passed</c> and opens the club hall.
 /// Only one signet is borrowed at a time; any still held is hung back up on the way in.
