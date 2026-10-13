@@ -44,7 +44,7 @@ These are generated strips, not extra story beats. Playback uses the existing po
 
 | Strip | Size | What it does | Where it plays |
 |---|---|---|---|
-| `micah_open_door` | 4 × 92×96 | Idle at yaw 55, near arm reaches, pulls, returns to idle. | Act 2 office exit. Player faces left so the reach meets the door. |
+| `micah_open_door` | 4 × 92×96 | Idle at yaw 55, near arm reaches, pulls, returns to idle. | Act 2 office exit. Player faces right so the reach meets the knob on the right edge of the door. |
 | `teddy_open_door` | 4 × 92×96 | Same reach at Teddy’s yaw 35. | Teddy leaving the office. |
 | `rose_open_door` | 4 × 92×96 | Same reach at yaw 20. Rose’s profile silhouette only gains about 7 px; the arm is still past the idle edge. | Rose opening her door. She faces right. |
 | `harrington_fall` | 4 × 192×96 | Drops onto his knees, falls forward, then lies flat with his face toward the floor. `harrington_shot.png` matches the final frame. | Mansion bedroom, after the gunshot. |
