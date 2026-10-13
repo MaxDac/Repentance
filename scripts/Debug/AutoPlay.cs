@@ -1326,9 +1326,12 @@ public class AutoPlay
         Check(game.Hud.InventoryOpen, "I opens the inventory");
         Move(slot);
         await game.Wait(0.05);
+        var crosshair = game.Hud.CursorSize;
         Click(slot, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
+        Check(game.Hud.CursorItemVisible && game.Hud.CursorSize == crosshair,
+            "a held item shows as a badge while the crosshair keeps its size");
         PressKey(Key.Space);
         Click(slot, MouseButton.Left);
         await Observe(0.1);
@@ -1343,6 +1346,7 @@ public class AutoPlay
         await Shot("attic_trunk_open");
         await WaitIdle(game);
         Check(GameState.Instance.HasFlag("trunk_open") && GameState.Instance.HasItem("journal"), "crowbar opens the trunk");
+        Check(!game.Hud.CursorItemVisible, "using the item clears the cursor badge");
     }
 
     /// <summary>Right-click the journal in the satchel and choose the hand: reading it starts 1927.</summary>

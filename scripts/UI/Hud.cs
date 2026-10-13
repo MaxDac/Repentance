@@ -49,6 +49,7 @@ public partial class Hud : CanvasLayer
     private TextureRect _title = null!;
     private Control _pause = null!;
     private TextureRect _cursor = null!;
+    private TextureRect _cursorItem = null!;
     private Texture2D _cursorTex = null!;
     private TaskCompletionSource<int>? _choiceTcs;
     private int _inventoryPage;
@@ -155,6 +156,26 @@ public partial class Hud : CanvasLayer
             MouseFilter = Control.MouseFilterEnum.Ignore,
         };
         root.AddChild(_title);
+        // rain falls over the skyline and the river, behind the gold plate
+        _title.AddChild(new Rain
+        {
+            Name = "TitleRain",
+            Areas = new() { new Rect2(0, 0, ScreenW, ScreenH) },
+            Density = 2.6f,
+            Speed = 300f,
+            Slant = -0.22f,
+            Length = 6,
+            Layers = 3,
+            Tint = new Color(0.58f, 0.66f, 0.86f, 0.5f),
+            SplashAreas = new() { new Rect2(0, 210, ScreenW, ScreenH - 210) },
+            SplashRate = 4f,
+            Seed = 1927,
+        });
+        _title.AddChild(new TextureRect
+        {
+            Texture = GD.Load<Texture2D>("res://assets/art/ui/title_logo.png"),
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        });
 
         _fade = new ColorRect { Color = new Color(0, 0, 0, 1), MouseFilter = Control.MouseFilterEnum.Ignore };
         _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
@@ -203,6 +224,18 @@ public partial class Hud : CanvasLayer
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.AddChild(_cursor);
+        // a held item rides beside the crosshair as a half-size badge, so the pointer itself never changes size
+        _cursorItem = new TextureRect
+        {
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            Size = CursorItemSize,
+            // exactly half size: linear sampling averages each 2x2 block instead of dropping pixels
+            TextureFilter = CanvasItem.TextureFilterEnum.Linear,
+            Visible = false,
+        };
+        root.AddChild(_cursorItem);
         Input.MouseMode = Input.MouseModeEnum.Hidden;
 
         GameState.Instance.Changed += RefreshInventory;
@@ -230,6 +263,7 @@ public partial class Hud : CanvasLayer
     public override void _Process(double delta)
     {
         _cursor.Position = MousePos.Floor() - (_cursor.Texture.GetSize() / 2).Floor();
+        _cursorItem.Position = MousePos.Floor() + new Vector2(4, 4);
         _hoverLayer.Visible = _interface.Visible;
     }
 
@@ -344,9 +378,16 @@ public partial class Hud : CanvasLayer
         _hover.Position = pos.Round();
     }
 
-    /// <summary>Shows an inventory icon as the cursor while the player carries an item (null = crosshair).</summary>
-    public void SetCursorItem(string? item) =>
-        _cursor.Texture = item == null ? _cursorTex : GD.Load<Texture2D>(Items.Get(item).IconPath);
+    /// <summary>Shows the held inventory item as a small badge beside the crosshair (null = crosshair only).</summary>
+    public void SetCursorItem(string? item)
+    {
+        _cursorItem.Visible = item != null;
+        _cursorItem.Texture = item == null ? null : GD.Load<Texture2D>(Items.Get(item).IconPath);
+    }
+
+    public bool CursorItemVisible => _cursorItem.Visible;
+    public Vector2 CursorSize => _cursor.Texture.GetSize();
+    public static readonly Vector2 CursorItemSize = new(16, 12);
 
     /// <summary>Hides the satchel and labels during cutscenes (MI style).</summary>
     public void SetInterfaceVisible(bool visible)

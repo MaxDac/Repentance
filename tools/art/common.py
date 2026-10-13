@@ -134,8 +134,8 @@ def text(img, xy, s, col, size=8, mirror=False, anchor="mm"):
     img.paste(Image.new(img.mode, img.size, col), (0, 0), layer)
 
 
-def city(img, box, seed=7, lit=0.3, haze=hx("3a2a4a")):
-    """Night skyline with lit windows, deco spires and rain."""
+def city(img, box, seed=7, lit=0.3, haze=hx("3a2a4a"), rain=True):
+    """Night skyline with lit windows, deco spires and (unless it is animated in-game) painted rain."""
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = box
     vgrad(img, (x0, y0, x1, y1), hx("070a18"), haze)
@@ -163,6 +163,8 @@ def city(img, box, seed=7, lit=0.3, haze=hx("3a2a4a")):
                 if x0 <= wx <= x1 and rnd.random() < lit:
                     d.point((wx, wy), fill=rnd.choice([hx("e8c060"), hx("d8a040"), hx("f0e0a0")]))
         x += bw + rnd.randint(0, 3)
+    if not rain:
+        return
     for _ in range(int((x1 - x0) * (y1 - y0) / 60)):
         rx, ry = rnd.randint(x0 + 1, x1), rnd.randint(y0, y1 - 4)
         d.line([(rx, ry), (rx - 1, ry + 3)], fill=hx("4a5a7a"))

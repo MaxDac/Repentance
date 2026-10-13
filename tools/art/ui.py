@@ -1,26 +1,192 @@
 """Title card, verb-wheel icons, satchel, inventory chest and cursor."""
 import math
-from PIL import Image, ImageDraw
-from .common import hx, mix, vgrad, light, vignette, pixelize, text, city, save, sunburst, noise
+from PIL import Image, ImageChops, ImageDraw
+from .common import hx, mix, vgrad, light, shadow, vignette, palette_of, pixelize, text, city, save, sunburst, noise
 from .iconfx import _shade, _outline
 
 GOLD, GOLD_D = hx("d8b050"), hx("8a6a28")
 
 
-def title():
-    img = Image.new("RGB", (480, 270))
-    city(img, (0, 0, 479, 269), seed=3, lit=0.22, haze=hx("4a2a3a"))
+def _building(d, box, col, lit_cols, rnd, lit=0.3, step=(3, 4)):
+    x0, y0, x1, y1 = box
+    d.rectangle(box, fill=col)
+    for wy in range(y0 + 3, y1 - 1, step[1]):
+        for wx in range(x0 + 2, x1 - 1, step[0]):
+            if rnd.random() < lit:
+                d.point((wx, wy), fill=rnd.choice(lit_cols))
+
+
+def _skyline(img):
+    """Chicago, 1927, from across the river: Tribune Tower and the floodlit Wrigley Building on the left, the
+    Straus Building's beehive, the Chicago Temple spire and the Jewelers Building dome on the right."""
+    import random
     d = ImageDraw.Draw(img)
-    sunburst(d, 240, 150, 260, 36, hx("1a1420"), hx("221a2a"))
-    city(img, (0, 150, 479, 269), seed=9, lit=0.3, haze=hx("2a1a2a"))
-    d.rectangle([110, 70, 370, 120], fill=hx("0e0a10"))
-    d.rectangle([114, 74, 366, 116], outline=hx("c8a040"))
-    d.rectangle([118, 78, 362, 112], outline=hx("6a5020"))
-    text(img, (240, 95), "REPENTANCE", hx("e8c860"), size=24)
-    text(img, (240, 132), "CHICAGO  1927", hx("c8b088"), size=8)
-    light(img, "rect", [110, 70, 370, 120], hx("e0a040"), 0.2, 12)
+    rnd = random.Random(1927)
+    warm = [hx("e8c060"), hx("d8a040"), hx("f0e0a0")]
+    bank = 198
+    # far blocks, lost in the rain haze
+    x = -6
+    while x < 480:
+        bw = rnd.randint(10, 22)
+        _building(d, (x, rnd.randint(132, 168), x + bw, bank), hx("1c1a2c"), [hx("8a7050"), hx("6a5a48")], rnd, 0.18)
+        x += bw - 2
+    # nearer blocks
+    x = 120
+    while x < 372:
+        bw = rnd.randint(14, 28)
+        _building(d, (x, rnd.randint(140, 176), x + bw, bank), hx("0e0e1a"), warm, rnd, 0.26)
+        x += bw + rnd.randint(-2, 2)
+
+    # Tribune Tower: a slender gothic shaft, crown ringed with flying buttresses
+    stone = hx("3a3640")
+    _building(d, (24, 100, 46, bank), stone, warm, rnd, 0.3)
+    d.rectangle([22, 86, 48, 100], fill=stone)
+    d.rectangle([26, 78, 44, 86], fill=stone)
+    for bx in (22, 27, 32, 37, 42, 47):
+        d.line([(bx, 72), (bx, 86)], fill=stone)
+        d.point((bx, 71), fill=hx("5a5460"))
+    d.rectangle([28, 88, 42, 96], fill=hx("6a5030"))
+    for bx in range(29, 42, 3):
+        d.line([(bx, 89), (bx, 95)], fill=hx("c89040"))
+
+    # Wrigley Building: white terra cotta, floodlit, clock tower at its south end
+    white, white_d = hx("b8b2a4"), hx("8a8478")
+    _building(d, (50, 132, 140, bank), white_d, [hx("f0d890"), hx("d8b060")], rnd, 0.35)
+    d.rectangle([50, 128, 140, 132], fill=white)
+    _building(d, (56, 96, 78, 132), white, [hx("f0d890")], rnd, 0.2)
+    d.rectangle([58, 82, 76, 96], fill=white)
+    d.ellipse([62, 84, 72, 94], fill=hx("f8f0d0"), outline=hx("6a6050"))
+    d.line([(67, 89), (67, 86)], fill=hx("2a2418"))
+    d.line([(67, 89), (69, 89)], fill=hx("2a2418"))
+    d.rectangle([60, 74, 74, 82], fill=white)
+    d.rectangle([62, 68, 72, 74], fill=white_d)
+    for bx in (62, 66, 70):
+        d.line([(bx, 68), (bx, 74)], fill=white)
+    d.polygon([(63, 68), (71, 68), (67, 58)], fill=white)
+    d.line([(67, 50), (67, 58)], fill=white_d)
+    light(img, "polygon", [(46, 200), (90, 200), (78, 60), (56, 60)], hx("fff0c8"), 0.22, 6)
+
+    # Straus Building: a stepped pyramid, the glass beehive on top lit blue
+    dark = hx("14141f")
+    _building(d, (366, 112, 404, bank), dark, warm, rnd, 0.32)
+    for i, (w, y) in enumerate(((16, 104), (12, 96), (8, 90), (5, 85))):
+        d.rectangle([385 - w, y, 385 + w, y + 8], fill=dark)
+    d.ellipse([381, 78, 389, 87], fill=hx("4a7ad8"))
+    d.point((385, 80), fill=hx("c0e0ff"))
+    light(img, "ellipse", [374, 68, 396, 96], hx("3a6ae0"), 0.45, 6)
+
+    # Chicago Temple: the Methodist church's gothic spire on top of an office tower
+    _building(d, (414, 104, 440, bank), hx("1a1824"), warm, rnd, 0.3)
+    d.rectangle([418, 92, 436, 104], fill=hx("1a1824"))
+    d.polygon([(420, 92), (434, 92), (427, 50)], fill=hx("22202e"))
+    for bx in (418, 436):
+        d.polygon([(bx - 2, 92), (bx + 2, 92), (bx, 80)], fill=hx("22202e"))
+    d.line([(427, 44), (427, 50)], fill=hx("22202e"))
+    d.line([(425, 46), (429, 46)], fill=hx("22202e"))
+    for wy in (66, 74, 82):
+        d.point((427, wy), fill=hx("e8c060"))
+
+    # Jewelers Building: a squat tower with a domed temple on top
+    _building(d, (448, 124, 480, bank), hx("12121c"), warm, rnd, 0.3)
+    d.rectangle([454, 112, 474, 124], fill=hx("12121c"))
+    d.pieslice([456, 100, 472, 120], 180, 360, fill=hx("1c1c2a"))
+    d.point((464, 99), fill=hx("ff4040"))
+    # aircraft lights on the tall ones
+    for px, py in ((35, 70), (67, 49), (427, 43)):
+        d.point((px, py), fill=hx("ff4040"))
+
+    # river wall and its lamps
+    d.rectangle([0, bank, 479, bank + 7], fill=hx("1a1620"))
+    d.line([(0, bank), (479, bank)], fill=hx("3a3440"))
+    for lx in range(18, 480, 44):
+        d.line([(lx, bank - 10), (lx, bank)], fill=hx("2a2630"))
+        d.rectangle([lx - 1, bank - 13, lx + 1, bank - 11], fill=hx("f8e0a0"))
+        light(img, "ellipse", [lx - 8, bank - 20, lx + 8, bank - 4], hx("f0c060"), 0.5, 4)
+
+
+def _river(img, top):
+    """Dark water reflecting the skyline, broken into wavering horizontal strokes."""
+    import random
+    rnd = random.Random(31)
+    w, h = img.size
+    src = img.crop((0, top - (h - top), w, top)).transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    water = Image.new("RGB", (w, h - top))
+    vgrad(water, (0, 0, w - 1, h - top - 1), hx("0c0e1c"), hx("06070e"))
+    sp, wp = src.load(), water.load()
+    for y in range(h - top):
+        fade = 0.55 * (1 - y / (h - top)) + 0.12
+        shift = int(round(2.5 * math.sin(y * 0.9) + rnd.uniform(-1.5, 1.5)))
+        for x in range(w):
+            r, g, b = sp[min(w - 1, max(0, x + shift)), y]
+            # only the lights carry onto the water
+            k = fade if r + g + b > 300 else fade * 0.25
+            wr, wg, wb = wp[x, y]
+            wp[x, y] = (clamp_px(wr + r * k), clamp_px(wg + g * k), clamp_px(wb + b * k))
+    d = ImageDraw.Draw(water)
+    for _ in range(140):
+        x, y = rnd.randint(0, w - 1), rnd.randint(2, h - top - 1)
+        d.line([(x, y), (x + rnd.randint(3, 10), y)], fill=hx("1a2236"))
+    img.paste(water, (0, top))
+
+
+def clamp_px(v):
+    return 255 if v > 255 else int(v)
+
+
+TITLE_PLATE = (110, 70, 370, 120)
+
+
+def _title_paint(logo):
+    img = Image.new("RGB", (480, 270))
+    vgrad(img, (0, 0, 479, 200), hx("05060e"), hx("2e1e34"))
+    for cx, cy, rx, ry in ((90, 30, 140, 14), (330, 18, 170, 12), (250, 52, 200, 10), (60, 64, 120, 8)):
+        shadow(img, "ellipse", [cx - rx, cy - ry, cx + rx, cy + ry], 0.5, 8, hx("100c18"))
+    light(img, "rect", [0, 150, 479, 200], hx("6a3a3a"), 0.3, 20)
+    _skyline(img)
+    _river(img, 206)
+    d = ImageDraw.Draw(img)
+    for lx in range(18, 480, 44):
+        for y in range(208, 262, 3):
+            k = 1 - (y - 208) / 54
+            half = 1 + (y - 208) // 18
+            d.line([(lx - half, y), (lx + half, y)], fill=mix(hx("0c0e1c"), hx("e8b860"), 0.75 * k))
+    # Wrigley's piers and cornice catch the floodlights
+    for px in range(52, 140, 6):
+        d.line([(px, 134), (px, 196)], fill=hx("a29c90"))
+    d.line([(50, 128), (140, 128)], fill=hx("e8e0cc"))
+    # outline the Straus pyramid against the sky
+    for w, y in ((16, 104), (12, 96), (8, 90), (5, 85)):
+        d.line([(385 - w, y), (385 + w, y)], fill=hx("34345a"))
+    light(img, "rect", list(TITLE_PLATE), hx("e0a040"), 0.2, 12)
+    if logo:
+        d = ImageDraw.Draw(img)
+        x0, y0, x1, y1 = TITLE_PLATE
+        d.rectangle([x0, y0, x1, y1], fill=hx("0e0a10"))
+        d.rectangle([x0 + 4, y0 + 4, x1 - 4, y1 - 4], outline=hx("c8a040"))
+        d.rectangle([x0 + 8, y0 + 8, x1 - 8, y1 - 8], outline=hx("6a5020"))
+        text(img, (240, 95), "REPENTANCE", hx("e8c860"), size=24)
+        text(img, (240, 132), "CHICAGO  1927", hx("c8b088"), size=8)
     vignette(img, 0.7)
-    save(pixelize(img, n=96), "ui", "title.png")
+    return img
+
+
+def title():
+    """Background without rain (Hud animates it with a Rain node) and the gold plate drawn over the rain."""
+    plain, logo = _title_paint(False), _title_paint(True)
+    pal = palette_of(logo, 96)
+    bg, fg = pixelize(plain, pal), pixelize(logo, pal)
+    save(bg, "ui", "title.png")
+    x0, y0, x1, y1 = TITLE_PLATE
+    mask = Image.new("L", bg.size, 0)
+    ImageDraw.Draw(mask).rectangle([x0, y0, x1, y1], fill=255)
+    # the subtitle letters are the only other pixels the logo pass changed
+    diff = ImageChops.difference(bg, fg).convert("L").point(lambda v: 255 if v > 0 else 0)
+    sub = Image.new("L", bg.size, 0)
+    sub.paste(diff.crop((150, 124, 330, 140)), (150, 124))
+    mask = ImageChops.lighter(mask, sub)
+    out = fg.convert("RGBA")
+    out.putalpha(mask)
+    save(out, "ui", "title_logo.png")
 
 
 def _icon(fn, size=24):
