@@ -449,6 +449,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Eleanor's face in the spotlight, zoomed and clearly defined, with hooded masked men (the stag among them) behind
   her. The stage stays visible around the panel, which stays up until the fade to black (bare shoulders, or a dark
   red dress when nudity is off).
+- Eleanor's face in both versions of the close-up is emptied of any emotion: level mouth, dull eyes with no light in
+  them, a grey pallor. Micah notices there is nothing in her face, not fear, not shame, like a wound-up doll.
 
 ### End of Act 2 - Present day, the attic
 
@@ -464,12 +466,20 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Same scene as the end of Act 2, with the close-up panel of Eleanor framed over the stage again.
 - The stag-masked leader turns to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
 - At this point, everyone turns to him.
-- The same man who spoke first continues: "Given that you returned Eleanor to us, you'll be forgiven for this intrusion,
-  but this is enough for you."
-- The close-up panel is removed, then the player has two choices in dialogue:
+- The close-up panel is removed. Before anything else happens, the stag takes his mask off and pushes back his cowl
+  in front of everyone: he is Harrington senior, the old man whose portrait Micah saw in the LaSalle Street office
+  (new sprite: bald, white-haired, the stag mask held against his chest). Nobody in the room is surprised.
+- Harrington explains himself: the bonfires, the antlers and the old gods are theatre. The whole meeting exists only
+  so that he can exercise his power and make it manifest; a hundred men who run the city will not lift a finger
+  unless he allows it, and they come back every Thursday to bow.
+- Harrington, unmasked, continues: "You brought Eleanor back to us. For that, the intrusion is forgiven. This is as
+  far as you go."
+- Then the player has two choices in dialogue:
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
+- Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
+  you for bringing me back."), never calling him Micah.
 - Micah's masked, cloaked collapse is shown before the blackout on either choice.
 
 #### Church, outside

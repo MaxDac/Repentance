@@ -3,8 +3,9 @@
 Each is built from an original generated picture committed under tools/art/src/ and reduced to a VGA close-up:
 chunky pixels, a tight palette and ordered dithering, inside a dark bevelled frame.
 
-- stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her. The clothed variant paints a
-  dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+- stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her. Her face is emptied first
+  (vacant): a level, closed mouth, glassy eyes and waxen skin. The clothed variant paints a dark velvet dress over
+  her shoulders and chest; the picture is otherwise the same.
 - rose_closeup: Rose calling Micah back from her door.
 - beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
@@ -40,6 +41,17 @@ DRESS = np.array(hx("4a0e16"), float)  # oxblood velvet
 DRESS_LIGHT = np.array(hx("a8323a"), float)
 TRIM = np.array(hx("c89a48"), float)  # a thin gold edge along the neckline
 
+# Eleanor's emptied face, in source pixels
+FACE_BOX = (855, 270, 1155, 630)
+EYE_BOXES = ((896, 980, 352, 396), (1030, 1114, 350, 394))
+MOUTH_BOX = (936, 1078, 484, 546)  # x0, x1, y0, y1
+MOUTH_X, MOUTH_HALF = 1006, 48
+LIP = np.array((176, 112, 100), float)  # pale, unpainted
+LIP_LINE = np.array((98, 58, 52), float)
+IRIS = np.array((22, 16, 16), float)
+SCLERA = np.array((170, 164, 162), float)
+PALLOR = 0.45
+
 
 def neckline(x):
     """Top edge of the dress at source column x."""
@@ -67,10 +79,58 @@ def dress(img):
     return Image.fromarray(np.clip(a, 0, 255).astype("uint8"), "RGB")
 
 
+def _box_mean(mask, k):
+    """Share of mask set in the (2k)x(2k) window around each pixel."""
+    h, w = mask.shape
+    c = np.pad(mask.astype(float), k).cumsum(0).cumsum(1)
+    return ((c[2 * k:, 2 * k:] - c[:-2 * k, 2 * k:] - c[2 * k:, :-2 * k] + c[:-2 * k, :-2 * k]) / (4 * k * k))[:h, :w]
+
+
+def _row_smooth(row, k=31):
+    pad = np.pad(row, ((k // 2, k // 2), (0, 0)), mode="edge")
+    c = np.cumsum(np.vstack([np.zeros((1, 3)), pad]), 0)
+    return (c[k:] - c[:-k]) / k
+
+
+def vacant(img):
+    """Empties Eleanor's face: the smile becomes a closed, level mouth, the eyes lose their catchlights and go glassy,
+    and the colour drains out of her skin. Only pixels inside FACE_BOX change."""
+    a = np.array(img.convert("RGB"), float)
+    h, w = a.shape[:2]
+    yy, xx = np.mgrid[0:h, 0:w]
+    # the mouth: paint the lips out with the skin above and below, then a level line with a thin lower lip
+    x0, x1, y0, y1 = MOUTH_BOX
+    top = _row_smooth(a[y0 - 3:y0, x0:x1].mean(0))
+    bot = _row_smooth(a[y1:y1 + 3, x0:x1].mean(0))
+    t = ((np.arange(y0, y1) - y0) / (y1 - y0))[:, None, None]
+    a[y0:y1, x0:x1] = top * (1 - t) + bot * t
+    d = np.abs(xx - MOUTH_X) / MOUTH_HALF
+    a[(yy >= 507) & (yy < 511) & (d < 0.95)] = LIP
+    a[(yy >= 511) & (yy < 514) & (d <= 1)] = LIP_LINE
+    a[(yy >= 514) & (yy < 519) & (d < 0.7)] = LIP * 0.93
+    # the eyes: whites dulled to grey, catchlights (bright pixels inside the dark iris) filled in
+    lum = a.mean(-1)
+    around = _box_mean(lum < 90, 9)
+    not_skin = ~skin_mask(a)
+    for ex0, ex1, ey0, ey1 in EYE_BOXES:
+        box = (xx >= ex0) & (xx < ex1) & (yy >= ey0) & (yy < ey1) & not_skin
+        catch = box & (lum > 40) & (around > 0.5)
+        a[catch] = IRIS
+        a[box & ~catch & (lum > 150)] = SCLERA
+    # waxen: the face's skin pulled halfway to grey
+    fx0, fy0, fx1, fy1 = FACE_BOX
+    cx, cy, rx, ry = (fx0 + fx1) / 2, (fy0 + fy1) / 2, (fx1 - fx0) / 2, (fy1 - fy0) / 2
+    face = skin_mask(a) & (((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 < 1)
+    grey = a.mean(-1, keepdims=True) * np.array([1.02, 0.98, 0.97])
+    a[face] = (a * (1 - PALLOR) + grey * PALLOR)[face]
+    return Image.fromarray(np.clip(a, 0, 255).astype("uint8"), "RGB")
+
+
 def shared_palette(src):
     """One palette for both variants, so they differ only where the dress is."""
-    nude = src.convert("RGB").resize((AW, AH), Image.BOX)
-    clothed = dress(src.convert("RGB")).resize((AW, AH), Image.BOX)
+    face = vacant(src)
+    nude = face.resize((AW, AH), Image.BOX)
+    clothed = dress(face).resize((AW, AH), Image.BOX)
     both = Image.new("RGB", (AW, AH * 2))
     both.paste(nude, (0, 0))
     both.paste(clothed, (0, AH))
@@ -78,8 +138,8 @@ def shared_palette(src):
 
 
 def stage_closeup(src, clothed, pal=None):
-    """Eleanor on the stage, framed."""
-    img = src.convert("RGB")
+    """Eleanor on the stage, framed, with nothing left in her face."""
+    img = vacant(src)
     if clothed:
         img = dress(img)
     return framed(img, pal or shared_palette(src))

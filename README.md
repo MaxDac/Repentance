@@ -411,7 +411,7 @@ py -3.14 tools\gen_art.py            # everything
 py -3.14 tools\gen_art.py lobby      # a single step: sprites, items, office, lobby, eleanor_room, speakeasy, alley, convent, convent_road, chicago_map, ui
 py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's building/office, including puzzle overlays
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
-py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
+py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's stage face is emptied first (level mouth, dead eyes, grey pallor) and her clothed variant paints her dress on;
                                      also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;
                                      and Micah and Eleanor outside the convent, two portraits in one panel, from
                                      tools\art\src\convent_micah.png and convent_eleanor.png

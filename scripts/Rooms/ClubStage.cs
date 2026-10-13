@@ -50,9 +50,9 @@ public partial class ClubStage : Room
         Player.Face(Facing.Up);
         await Wait(0.8);
         await Say(Game.Settings.NudityEnabled
-            ? "And in the light, Eleanor. No mask. Not a stitch on her, and no fear in her face either. Three of them around her, like pall-bearers: a stag, a boar and a wolf."
-            : "And in the light, Eleanor. No mask, and no fear in her face. Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
-        await Say("She wasn't a prisoner. Or she was, and she'd stopped minding. I couldn't tell which was worse.");
+            ? "And in the light, Eleanor. No mask. Not a stitch on her, and nothing in her face. Not fear, not shame. Nothing. Three of them around her, like pall-bearers: a stag, a boar and a wolf."
+            : "And in the light, Eleanor. No mask, and nothing in her face. Not fear, not shame. Nothing. Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
+        await Say("She looked like a doll somebody had wound up and set down. Whoever lived behind those eyes had gone out and left the lights on.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.HideCloseUp(0);
@@ -60,7 +60,10 @@ public partial class ClubStage : Room
         await Game.ChangeRoom("attic", "night2");
     }
 
-    /// <summary>Act 3: the leader turns to Micah. Whatever he does, Bruno knocks him out from behind.</summary>
+    /// <summary>
+    /// Act 3: the leader turns to Micah, then takes off the stag's face in front of everyone. He is Harrington senior,
+    /// and the whole Club is a show of his power. Whatever Micah does, Bruno knocks him out from behind.
+    /// </summary>
     private async Task Caught()
     {
         Game.Hud.ShowCloseUp(CloseUps.Stage);
@@ -73,6 +76,10 @@ public partial class ClubStage : Room
                 a.FaceLeft(a.Position.X > Player.Position.X);
         await Wait(1.6);
         await Say("Every mask in the room, turned my way. White porcelain and carved bone, antlers, tusks and beaks, and all of them smiling.");
+        Game.Hud.HideCloseUp();
+        await Wait(0.8);
+        await Unmask();
+        await Talk("harrington_unmask");
         await Talk("club_caught");
         Game.Hud.HideCloseUp();
         State.SetFlag("brute_stage");
@@ -87,6 +94,20 @@ public partial class ClubStage : Room
         await Game.ChangeRoom("church_exterior", "beaten");
     }
 
+    /// <summary>The stag lowers his cowl and lifts the mask away: from here on the leader speaks as HARRINGTON.</summary>
+    private async Task Unmask()
+    {
+        if (FindActor("leader") is not { } leader) return;
+        await Say("All but one. The stag put a hand to his jaw and lifted the face away, and pushed the cowl back off his head.");
+        leader.SetTexture(GD.Load<Texture2D>("res://assets/art/sprites/leader_unmasked.png"), leader.Frames);
+        leader.Id = "harrington";
+        leader.DisplayName = "Mr. Harrington";
+        leader.LookText = "Harrington senior. Bald as an egg, white at the temples, the stag's face held against his chest like a hat at a funeral.";
+        await Wait(1.2);
+        await Say("I knew the face. I'd seen it in oils, over a desk on LaSalle Street. The old man himself.");
+        await Say("Nobody else in the room even blinked. They'd always known. That was the point.");
+    }
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
@@ -94,7 +115,7 @@ public partial class ClubStage : Room
             case ("eleanor", Verb.Talk):
                 await Say("Not from down here. Not with them around her.");
                 return true;
-            case ("leader" or "ritual1" or "ritual2" or "audience", Verb.Talk):
+            case ("leader" or "harrington" or "ritual1" or "ritual2" or "audience", Verb.Talk):
                 await Say("Silence. The only sound in the room is the spotlight humming.");
                 return true;
         }

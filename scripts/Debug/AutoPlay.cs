@@ -776,6 +776,17 @@ public class AutoPlay
             await game.Wait(3);
             Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
             await Shot("club_stage_act3");
+            await Until(() => gs.HasFlag("harrington_unmasked"));
+            var unmasked = game.Room?.FindActor("harrington");
+            Check(!game.Hud.InsetVisible && unmasked != null && game.Room?.FindActor("leader") == null
+                  && unmasked.Texture?.ResourcePath == "res://assets/art/sprites/leader_unmasked.png",
+                "the stag takes off his mask in front of everyone: Harrington senior, close-up gone");
+            await game.Wait(1);
+            await Shot("club_stage_unmasked");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Power that never shows itself"));
+            Check(game.Hud.SpeechText.Contains("rumour"), "Harrington says the meeting is only the exercise of his power");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("I am where I belong", StringComparison.Ordinal));
+            Check(game.Hud.SpeechText == "I am where I belong, Mr. Jones.", "Eleanor answers flatly, like a recording");
             await Until(() => gs.HasFlag("brute_stage"));
             Check(_insetAtCaughtChoice == false, "the close-up is removed before the revolver choice");
             await game.Wait(1);
