@@ -7,8 +7,8 @@ Godot 4.7 .NET (C#) point-and-click game. See `README.md` for the full guide.
 Always use `godot_console.exe`; the GUI `godot.exe` can return before the game finishes.
 
 ```powershell
+dotnet build                                 # after C# changes; before the first import (Ink importer is C#)
 godot_console --path . --headless --import   # required on a fresh checkout and after art/font/Ink changes
-dotnet build                                 # after C# changes
 godot_console --path . -- --autoplay         # pass = output contains "AUTOPLAY OK"
 godot_console --path . -- --settings-test    # pass = "AUTOPLAY OK"
 godot_console --path . -- --pause-test       # pass = "PAUSE TEST OK"
