@@ -715,7 +715,7 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     style = col.get("hair_style", "short")
     hair = col["hair"]
     fs = sp
-    vol = {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5}[style]
+    vol = col.get("hair_vol", {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5}[style])
     m, nx, ny, nz = c.ellipse((hx_ - (0.25 + 0.012 * H) * fs, hy_ - 0.6), hrx + vol + 0.008 * H * abs(fs), hry + vol * 0.8)
     u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
     front = hy_ - hry * (0.5 if style in ("long", "bob") else 0.64) + (0.5 if style == "slick" else 0)
@@ -726,13 +726,17 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     back = np.clip(-u * fs * 1.8 + 0.15, 0, 1)
     sides = np.clip((np.abs(u) - 0.72) * 4.0, 0, 1) * abs(cp)
     if style in ("long", "bob"):
-        sides = np.clip((np.abs(u) - 0.55) * 3.0, 0, 1) * max(abs(cp), 0.3)
+        sides = np.clip((np.abs(u) - col.get("hair_side", 0.55)) * 3.0, 0, 1) * max(abs(cp), 0.3)
         sides *= np.where(u * fs > 0, np.clip(1 - abs(sp) * (5.0 if style == "long" else 2.4), 0, 1), 1.0)
         side_line = hy_ + hry * (0.95 if style == "long" else 0.75)
     else:
         side_line = hy_ + hry * 0.15
     line = front + (nape - front) * back
     line = np.maximum(line, front + (side_line - front) * sides)
+    fringe = None
+    if col.get("fringe") and cp > -0.25:  # a straight fringe cut just above the brows
+        fringe = (np.abs(u) < 0.95) & (c.Y < hy_ - hry * col["fringe"])
+        line = np.where(np.abs(u) < 0.95, np.maximum(line, hy_ - hry * col["fringe"]), line)
     if cp < -0.25:  # seen from behind: all hair
         line = np.full_like(line, nape)
     mask = m & (c.Y < line)
@@ -748,6 +752,9 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     if style in ("long", "bob"):
         stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
         c.bias[c.parts_mask("hair", "hairback") & stripe] -= 1
+    if fringe is not None:  # combed-down strands: darker partings running down to the cut
+        hm = c.parts_mask("hair") & fringe & (c.Y > hy_ - hry * 0.95)
+        c.bias[hm & (np.floor(c.X) % 3 == 0)] -= 1
 
 
 def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
