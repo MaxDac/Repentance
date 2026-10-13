@@ -242,6 +242,21 @@ def cross(d, im):
     d.line([(16, 10), (16, 21)], fill=hx("f0f0e8"))
 
 
+def notepad(d, im):
+    """Micah's reporter's pad: cream pages on a card back, a spiral binding across the top, and a pencil."""
+    d.polygon([(6, 5), (23, 4), (24, 22), (7, 22)], fill=hx("6a5038"))
+    d.polygon([(7, 5), (22, 4), (23, 21), (8, 21)], fill=hx("e8dcb8"))
+    for y in (9, 12, 15, 18):
+        d.line([(9, y), (21, y - 1)], fill=hx("9aa4b8"))
+    d.line([(10, 8), (18, 7)], fill=hx("3a3028"))
+    d.line([(10, 11), (16, 10)], fill=hx("3a3028"))
+    for x in range(9, 23, 3):
+        d.ellipse([x - 1, 2, x + 1, 6], outline=hx("b8c0c8"))
+    d.line([(20, 21), (29, 9)], fill=hx("d8a838"), width=2)
+    d.line([(29, 9), (30, 8)], fill=hx("e0b8a0"), width=2)
+    d.point((19, 22), fill=hx("2a2018"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger),
@@ -250,5 +265,5 @@ def build():
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),
                      ("invitation", invitation), ("mask", mask), ("cloak", cloak),
                      ("kitchen_key", kitchen_key), ("documents", documents),
-                     ("faith_ring", faith_ring), ("cross", cross)):
+                     ("faith_ring", faith_ring), ("cross", cross), ("notepad", notepad)):
         save(_icon(fn), "items", f"{name}.png")
