@@ -86,7 +86,7 @@ ShowIfFlags = "grille_opened"
 
 [node name="Regular" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(422, 95)
+position = Vector2(422, 92)
 texture = ExtResource("8_regular")
 centered = false
 hframes = 6
