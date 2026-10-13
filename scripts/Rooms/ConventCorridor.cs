@@ -44,7 +44,7 @@ public partial class ConventCorridor : Room
                 }
                 else await Talk("nun");
                 return true;
-            case ("nun", Verb.UseItem) when item == "photo":
+            case ("nun", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("nun", "I know her face, young man. I have prayed for it.");
                 return true;
             case ("nun", Verb.UseItem):

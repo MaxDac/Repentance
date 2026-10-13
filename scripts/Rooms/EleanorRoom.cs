@@ -50,7 +50,7 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
-            case ("safe", Verb.UseItem) when item == "combination" && !State.HasFlag("safe_open"):
+            case ("safe", Verb.UseItem) when Shows(item, "combination", "safe_riddle") && !State.HasFlag("safe_open"):
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
                 State.SetFlag("safe_open");
                 await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");

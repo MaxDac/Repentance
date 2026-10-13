@@ -87,8 +87,8 @@ public partial class NewspaperMorgue : Room
                 await Say("Map of the Loop, pins for every address the paper ever printed.");
                 if (Located) await Say("And one with my clipping under it: the Harrington Building, LaSalle Street.");
                 return true;
-            case ("wall_map", Verb.UseItem) when item == "clipping":
-                State.TakeItem("clipping");
+            case ("wall_map", Verb.UseItem) when item == "clipping" || (!Located && Shows(item, "", "harrington_building")):
+                if (item == "clipping") State.TakeItem("clipping");
                 State.SetFlag("harrington_located");
                 await Say("\"Harrington senior keeps his offices at the Harrington Building, LaSalle Street.\"");
                 await Say("I pin it where it belongs. The Harrington Building, LaSalle Street - right in the middle of the Loop, where the money sleeps.");

@@ -43,7 +43,7 @@ Command-line options (after `--`):
 | Option | Effect |
 |---|---|
 | `--skip-title` | Skip the title screen |
-| `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room) |
+| `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`) |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
@@ -71,6 +71,10 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
 - **Satchel** (bottom right) or **I** opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
+- **N** (or look/hand on the notepad, always Micah's first satchel slot) opens Micah's notepad full screen.
+  **< / >**, the arrow keys or the mouse wheel turn its pages; **N**, **Esc** or **X** close it. Showing the
+  notepad works wherever only the information matters (Eleanor's likeness, the triquetra, the safe riddle,
+  the crests, the Harrington address).
 - Click during speech to skip the line.
 - **Space** pauses/resumes gameplay, even mid-sentence. The current dialogue, movement, and timers
   stay frozen until you resume; clicks do nothing while paused. Space is inactive on the title screen
@@ -327,6 +331,7 @@ tools/               Python art generator
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
+| `Notes` / `NotepadView` | Godot-free catalogue of Micah's notepad pages (unlocked by story flags, plus debug-start flags) and the full-screen reader |
 | `PuzzleRules` / `PuzzleMigration` | Godot-free puzzle validators and one-time legacy-save normalization |
 | `PuzzlePanel` / `PuzzleScreens` | Shared Art Deco puzzle frame and buttons; per-puzzle screens for the lift maze, dial, catalogue, cipher, crests, alarm plan and account index |
 
