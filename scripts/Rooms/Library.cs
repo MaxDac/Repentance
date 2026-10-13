@@ -11,7 +11,12 @@ public partial class Library : Room
         {
             if (State.HasFlag("seen_library_night")) return;
             State.SetFlag("seen_library_night");
-            await Game.Run(() => Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper."));
+            await Game.Run(async () =>
+            {
+                await Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
+                await Say("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
+                await Say("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
+            });
             return;
         }
         if (State.HasFlag("seen_library")) return;
