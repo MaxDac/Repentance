@@ -648,6 +648,11 @@ public class AutoPlay
             Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
             await game.Perform(Verb.UseItem, "trash_can", "matchbook");
             Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
+            var flames = game.Room?.GetNodeOrNull<LoopStrip>("Flames");
+            var flameFrame = flames?.Frame ?? -1;
+            await game.Wait(0.35);
+            Check(flames != null && flames.Visible && flames.Hframes > 1 && flames.Frame != flameFrame,
+                "the trash-can fire's flames and smoke loop while it burns");
             await Shot("harrington_road_fire");
             await game.Perform(Verb.Hand, "fire_escape");
             Check(game.Room?.Name == "HarringtonRoad", "the ladder is too high without the crates");
@@ -677,7 +682,17 @@ public class AutoPlay
             Check(gs.HasItem("invitation"), "picked the drawer: the invitation");
             await game.Perform(Verb.Hand, "closet");
             Check(gs.HasFlag("harrington_closet_open"), "Harrington closet uses independent flag");
-            await game.Perform(Verb.Look, "portrait");
+            var lookPortrait = game.Perform(Verb.Look, "portrait");
+            await Until(() => game.Hud.InsetVisible);
+            Check(game.Hud.CurrentCloseUp == CloseUps.Heraldry && game.Hud.InsetName == "heraldry_closeup",
+                "looking at the portrait frames the band of heraldry at its foot");
+            await Until(() => game.Hud.SpeechVisible);
+            await Shot("harrington_portrait_heraldry");
+            await lookPortrait;
+            await Until(() => !game.Hud.InsetVisible);
+            Check(gs.HasFlag("portrait_key_seen") && !game.Hud.InsetVisible, "the heraldry close-up closes after Micah's look");
+            Check(new CrestsScreen().Clue == "Three dials. Three symbols.",
+                "the false-back lock's clue box gives nothing away");
             await CancelPuzzle(() => game.Perform(Verb.UseItem, "panel", "lockpick"), PuzzleKind.Crests, "secret_open", "crest_lock");
             await SolvePuzzle(() => game.Perform(Verb.Hand, "panel"), PuzzleKind.Crests,
                 new[] { ("s0", 2), ("s2", 1) }, "crest_lock");

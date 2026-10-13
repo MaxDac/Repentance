@@ -394,7 +394,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   closet. The drawer will be locked, and Micah will have to use his lockpick to access to it.
 - In the drawer, he will find an invitation card to the Club.
 - **Puzzle 8 - Disguise compartment:** the invitation shows an ordered procession of crests:
-  raven, lion, stag. The portrait's heraldic key associates raven with star, lion with sun and stag with moon.
+  raven, lion, stag. The portrait's heraldic key associates raven with star, lion with sun and stag with moon:
+  looking at the portrait opens a close-up of the heraldry band painted along its foot. The lock itself gives no
+  hints; its clue box only reads "Three dials. Three symbols."
   Open the closet and inspect its false-back panel. Set the three graphical wheels to
   **STAR / SUN / MOON** and submit. Neither a hand nor lockpicks bypasses the lock.
   The double doors reveal the original white mask and cloak.

@@ -288,19 +288,10 @@ public sealed class CrestsScreen : WheelScreen
     public override string Title => "HARRINGTON - FALSE BACK";
     protected override string[] Options { get; } = { "SUN", "MOON", "STAR" };
 
-    public override string Clue
-    {
-        get
-        {
-            var gs = GameState.Instance;
-            return (gs.HasItem("invitation") ? "Invitation procession:\nRaven, lion, stag.\n\n" : "Find an invitation in the desk.\n\n") +
-                (gs.HasFlag("portrait_key_seen") ? "Portrait's heraldic key:\nRaven = star\nLion = sun\nStag = moon" :
-                "Inspect the portrait for the heraldic key.");
-        }
-    }
+    public override string Clue => "Three dials. Three symbols.";
 
     public override (bool, string) Check() =>
-        (PuzzleRules.Crests(Settings), "The doors hold. Translate each crest in procession order.");
+        (PuzzleRules.Crests(Settings), "The doors hold.");
 
     public override void Draw(CanvasItem canvas)
     {

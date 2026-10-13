@@ -168,6 +168,28 @@ def framed_pair(left, right, pal=None):
     return frame_border(panel)
 
 
+def heraldry_closeup():
+    """The foot of Harrington senior's portrait, close: the hem of his black coat, the band of heraldry, the gilt
+    frame. The same painting as the portrait's band in the office (act2_rooms.heraldry), only nearer."""
+    from .act2_rooms import heraldry
+    from .common import noise, vgrad
+    w, h = AW * 4, AH * 4
+    img = Image.new("RGB", (w, h))
+    coat, band = round(h * 0.16), round(h * 0.84)
+    vgrad(img, (0, 0, w - 1, coat), hx("1a1626"), hx("100e18"))
+    d = ImageDraw.Draw(img)
+    for x in (w // 2 - 160, w // 2 + 4, w // 2 + 210):  # folds in the coat
+        d.line([(x, 0), (x + 12, coat)], fill=hx("26223a"), width=6)
+    d.line([(w // 2, 0), (w // 2, coat)], fill=hx("08060c"), width=4)  # where the coat closes
+    heraldry(img, (0, coat, w - 1, band))
+    vgrad(img, (0, band + 1, w - 1, h - 1), hx("d8b860"), hx("6a4a1a"))
+    d.line([(0, band + 1), (w - 1, band + 1)], fill=hx("3a2a0c"), width=4)
+    for x in range(0, w, 40):  # beading on the frame
+        d.ellipse([x + 14, band + 24, x + 26, band + 36], fill=hx("f0d890"), outline=hx("7a5a22"))
+    noise(img, (0, 0, w - 1, h - 1), 5, 91)
+    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
 def build():
     src = Image.open(SRC)
     pal = shared_palette(src)
@@ -176,3 +198,4 @@ def build():
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")
+    save(heraldry_closeup(), "ui", "heraldry_closeup.png")
