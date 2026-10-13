@@ -541,24 +541,114 @@ def lamp_night(img):
 def clothes(img):
     """Micah's trench coat flung over the chair back and his fedora dropped on the seat."""
     X0, X1, Z0, Z1 = 236, 258, 6, 24
-    coat, coat_d, coat_l = hx("ae8848"), hx("7a5c2c"), hx("c8a060")
-    R.quad(img, [(X0 - 2, 48, Z0 + 1), (X1 + 2, 47, Z0 + 1), (X1 + 3, 20, Z0 + 4), (X0 - 3, 21, Z0 + 4)], coat)
-    R.quad(img, [(X0 - 3, 21, Z0 + 4), (X1 + 3, 20, Z0 + 4), (X1 + 2, 21, Z0 + 12), (X0 - 2, 21, Z0 + 10)], coat_d)
-    R.line(img, (X0 - 2, 48, Z0 + 1), (X1 + 2, 47, Z0 + 1), coat_l)
-    R.line(img, (X0 + 9, 46, Z0 + 1), (X0 + 7, 22, Z0 + 4), coat_d)  # lapel fold
-    R.line(img, (X0 + 13, 44, Z0 + 1), (X0 + 14, 30, Z0 + 2), coat_d)
-    # a sleeve hanging down the side to the floor, and the belt trailing
-    R.quad(img, [(X0 - 3, 40, Z0 + 2), (X0 + 2, 40, Z0 + 2), (X0 + 1, 3, Z0 + 6), (X0 - 5, 4, Z0 + 6)], coat_d)
-    R.line(img, (X0 - 4, 38, Z0 + 2), (X0 - 4, 6, Z0 + 6), coat)
-    R.line(img, (X1 + 2, 26, Z0 + 4), (X1 + 4, 8, Z0 + 8), hx("6a4e26"), 2)
-    # fedora on the seat
+    trench_coat(img, R.P(X0, 46, Z0 + 1), R.P(X1, 21, Z0 + 1))
+    fedora(img, R.P(X0 + 12, 21, Z1 - 1))
+
+
+COAT = dict(deep=hx("4e3818"), dark=hx("765a2a"), mid=hx("a07c40"), base=hx("b08a4a"), light=hx("c8a262"),
+            lit=hx("dcbc80"), seam=hx("62481e"), button=hx("2e2014"), brass=hx("d8b050"))
+LINING = (hx("d8c8a0"), hx("8a2a22"), hx("2a201a"))
+
+
+def trench_coat(img, top_left, seat_right):
+    """A belted, double-breasted trench coat folded over a chair back, lit from the lamp on the left.
+
+    ``top_left`` is the screen point of the chair's top rail at its left post and ``seat_right`` the back of the
+    seat at its right post; the coat is painted pixel by pixel around them so its details stay legible."""
+    c = COAT
     d = ImageDraw.Draw(img)
-    hx_, hy_ = R.P(X0 + 13, 21, Z1 - 6)
-    d.ellipse([hx_ - 8, hy_ - 2, hx_ + 8, hy_ + 2], fill=hx("4a3a2c"))
-    d.rectangle([hx_ - 5, hy_ - 6, hx_ + 5, hy_], fill=hx("5c4838"))
-    d.ellipse([hx_ - 5, hy_ - 8, hx_ + 5, hy_ - 4], fill=hx("6c5644"))
-    d.line([(hx_ - 1, hy_ - 7), (hx_ + 1, hy_ - 5)], fill=hx("4a3a2c"))
-    d.rectangle([hx_ - 5, hy_ - 2, hx_ + 5, hy_ - 1], fill=hx("1a120e"))
+    x0, y0 = round(top_left[0]), round(top_left[1])
+    x1, y1 = round(seat_right[0]), round(seat_right[1])
+    cx = (x0 + x1) // 2
+    # the body hangs over the rail, wider than the chair, and bunches where it meets the seat
+    body = [(x0 - 3, y0 + 2), (x0 + 2, y0 - 2), (x1 - 2, y0 - 2), (x1 + 3, y0 + 2), (x1 + 4, y1 - 3), (x1 + 2, y1),
+            (x0 - 2, y1), (x0 - 4, y1 - 3)]
+    d.polygon(body, fill=c["base"], outline=c["deep"])
+    # broad vertical folds: shadow on the right of each ridge, light on its left
+    for fx, depth in ((x0 + 3, 9), (cx + 4, 12), (x1 - 3, 8)):
+        d.line([(fx, y0 + 6), (fx + 1, y1 - 2)], fill=c["dark"])
+        d.line([(fx + 1, y0 + 8), (fx + 2, y1 - 3)], fill=c["mid"])
+        d.line([(fx - 1, y0 + depth), (fx - 1, y1 - 2)], fill=c["light"])
+    d.line([(x0 - 3, y0 + 3), (x0 - 3, y1 - 3)], fill=c["lit"])
+    d.line([(x1 + 3, y0 + 3), (x1 + 3, y1 - 3)], fill=c["dark"])
+    # the turned-up collar over the rail, with the check lining showing underneath
+    collar = [(x0 + 1, y0 - 3), (cx - 1, y0 - 4), (cx + 1, y0 - 4), (x1 - 1, y0 - 3), (x1 - 3, y0 + 2),
+              (x0 + 3, y0 + 2)]
+    d.polygon(collar, fill=c["light"], outline=c["deep"])
+    d.line([(x0 + 2, y0 - 3), (cx - 1, y0 - 4)], fill=c["lit"])
+    pale, red, dark = LINING
+    d.line([(cx - 4, y0 - 1), (cx + 4, y0 - 1)], fill=mix(pale, c["mid"], 0.45))
+    for lx in (cx - 3, cx + 1):
+        d.point((lx, y0 - 1), fill=red)
+    d.point((cx + 3, y0 - 1), fill=dark)
+    # notched lapels running down to the double-breasted front
+    lap_y = y0 + 11
+    d.polygon([(x0 + 3, y0 + 2), (cx - 2, y0 + 2), (cx, lap_y), (x0 + 5, y0 + 7)], fill=c["light"], outline=c["seam"])
+    d.polygon([(x1 - 3, y0 + 2), (cx + 2, y0 + 2), (cx, lap_y), (x1 - 5, y0 + 7)], fill=c["mid"], outline=c["seam"])
+    d.point((x0 + 5, y0 + 4), fill=c["deep"])
+    d.point((x1 - 5, y0 + 4), fill=c["deep"])
+    d.line([(cx, lap_y), (cx + 1, y1 - 1)], fill=c["seam"])
+    for by in (lap_y + 1, lap_y + 5):
+        for bx in (cx - 4, cx + 4):
+            d.point((bx, by), fill=c["button"])
+            d.point((bx - 1, by - 1), fill=c["light"])
+    # shoulder epaulette and a gun flap on the left breast
+    d.rectangle([x0 - 2, y0 + 1, x0 + 3, y0 + 2], fill=c["mid"], outline=c["seam"])
+    d.point((x0 + 2, y0 + 1), fill=c["button"])
+    d.line([(x0 + 1, y0 + 9), (x0 + 6, y0 + 8)], fill=c["seam"])
+    # the belt, buckled, with its tail hanging down past the chair
+    by = y1 - 6
+    d.rectangle([x0 - 4, by, x1 + 4, by + 2], fill=c["dark"])
+    d.line([(x0 - 4, by), (x1 + 4, by)], fill=c["mid"])
+    d.rectangle([cx - 2, by - 1, cx + 2, by + 3], outline=c["brass"])
+    d.point((cx - 2, by - 1), fill=hx("f0d890"))
+    d.line([(cx, by), (cx, by + 2)], fill=c["deep"])
+    d.polygon([(x1 + 3, by), (x1 + 6, by + 1), (x1 + 7, by + 16), (x1 + 5, by + 17), (x1 + 4, by + 2)], fill=c["dark"],
+              outline=c["deep"])
+    d.line([(x1 + 5, by + 2), (x1 + 6, by + 15)], fill=c["mid"])
+    # slanted pockets either side of the belt
+    d.line([(x0 + 1, by + 3), (x0 + 5, by + 5)], fill=c["seam"])
+    d.line([(x1 - 1, by + 3), (x1 - 5, by + 5)], fill=c["seam"])
+    # a sleeve slipped off the left side, almost to the floor, with its strapped cuff
+    sl_top, sl_bot = y0 + 3, y1 + 16
+    d.polygon([(x0 - 4, sl_top), (x0 + 1, sl_top + 2), (x0 - 1, sl_bot), (x0 - 7, sl_bot - 1)], fill=c["mid"],
+              outline=c["deep"])
+    d.line([(x0 - 4, sl_top + 2), (x0 - 6, sl_bot - 2)], fill=c["lit"])
+    d.line([(x0 - 2, sl_top + 6), (x0 - 3, sl_top + 14)], fill=c["dark"])
+    d.line([(x0 - 7, sl_bot - 4), (x0 - 1, sl_bot - 3)], fill=c["deep"])
+    d.point((x0 - 3, sl_bot - 3), fill=c["brass"])
+    d.line([(x0 - 6, sl_bot), (x0 - 2, sl_bot + 1)], fill=pale)
+
+
+def fedora(img, centre):
+    """A brown felt fedora, pinched at the front, with a dark band and bow; lit from the left."""
+    d = ImageDraw.Draw(img)
+    x, y = round(centre[0]), round(centre[1])
+    felt_d, felt, felt_l, felt_lit = hx("140c06"), hx("3e2818"), hx("6e4a30"), hx("a87a4c")
+    band = hx("0a0604")
+    shadow(img, "ellipse", [x - 12, y - 1, x + 13, y + 6], 0.6, 1)
+    # brim: the far half shaded, the near edge rolled down and catching the lamp
+    d.ellipse([x - 11, y - 4, x + 11, y + 4], fill=felt, outline=felt_d)
+    d.arc([x - 11, y - 4, x + 11, y + 4], 190, 350, fill=mix(felt, felt_d, 0.5))
+    d.line([(x - 9, y + 2), (x + 2, y + 4)], fill=felt_lit)
+    d.line([(x + 3, y + 3), (x + 8, y + 2)], fill=felt_l)
+    d.point((x - 11, y - 1), fill=felt_lit)
+    d.point((x + 11, y - 1), fill=felt_l)
+    # tapered crown: lit left plane, shaded right plane, a centre crease and two front pinches
+    crown = [(x - 7, y - 1), (x - 6, y - 7), (x - 4, y - 10), (x, y - 9), (x + 4, y - 10), (x + 6, y - 7),
+             (x + 7, y - 1)]
+    d.polygon(crown, fill=felt, outline=felt_d)
+    d.polygon([(x - 6, y - 2), (x - 5, y - 7), (x - 3, y - 9), (x - 1, y - 8), (x - 2, y - 2)], fill=felt_l)
+    d.line([(x - 5, y - 3), (x - 5, y - 7)], fill=felt_lit)
+    d.line([(x - 3, y - 9), (x - 2, y - 9)], fill=felt_lit)
+    d.polygon([(x + 2, y - 2), (x + 2, y - 7), (x + 5, y - 7), (x + 6, y - 2)], fill=mix(felt, felt_d, 0.45))
+    d.line([(x, y - 8), (x, y - 5)], fill=felt_d)
+    d.point((x - 2, y - 6), fill=felt_d)
+    d.point((x + 2, y - 6), fill=felt_d)
+    # grosgrain band with its bow on the left
+    d.rectangle([x - 7, y - 3, x + 7, y - 2], fill=band)
+    d.line([(x - 6, y - 3), (x - 2, y - 3)], fill=hx("3a2a1c"))
+    d.rectangle([x - 6, y - 4, x - 5, y - 1], fill=band)
 
 
 def relight_night(img):

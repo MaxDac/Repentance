@@ -125,7 +125,7 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
 ## The demo
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
-   over the boxes and find a locked tool tin in the papers. The suitcase's small key opens that tin,
+   over the boxes, then search them again: the MISC box holds a locked tool tin. The suitcase's small key opens that tin,
    not the trunk; its crowbar opens the steamer trunk. Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,

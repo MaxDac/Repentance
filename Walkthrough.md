@@ -11,8 +11,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Daniel (the dad) is in the attic, calling his son Leo, but Leo doesn't come over ("In a minute!").
 - Daniel can lift the dust sheet and knock over the boxes, spilling the old papers.
 - In the suitcase there is a key, but it can't open the large steamer trunk.
-- **Puzzle 1 - Tool tin:** searching the spilled papers uncovers a locked tool tin with a little brass
-  padlock; Daniel sweeps the papers off it. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
+- **Puzzle 1 - Tool tin:** the tin is too heavy to hide under loose papers. Searching the boxes again opens the
+  MISC box; inside is a locked tool tin with a little brass padlock, which Daniel sets on top of the box below. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
 - In the trunk Daniel finds Micah Jones's journal and starts reading it (hand on the journal in the satchel).
   The caption "Chicago, 1927." leads to Micah's office.
 

@@ -25,12 +25,12 @@ public partial class Attic : Room
         GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_act3.png"),
     };
 
-    // once the tool tin is found the papers on top of it are swept aside, so it sits clear of the pile
-    private static readonly Texture2D[] ClearedPapersTextures =
+    // the MISC carton searched open, with the tool tin set down on the box below it
+    private static readonly Texture2D[] BoxOpenTextures =
     {
-        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared.png"),
-        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_act2.png"),
-        GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_act3.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_act3.png"),
     };
 
     private static readonly Texture2D[] ChairTextures =
@@ -78,7 +78,7 @@ public partial class Attic : Room
     // End of Act 1: the same evening, dark outside and the lamp on.
     private static readonly Texture2D NightBackground = GD.Load<Texture2D>("res://assets/art/rooms/attic_night.png");
     private static readonly Texture2D NightPapers = GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_night.png");
-    private static readonly Texture2D NightClearedPapers = GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_cleared_night.png");
+    private static readonly Texture2D NightBoxOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_night.png");
     private static readonly Texture2D NightChair = GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_night.png");
     private static readonly Texture2D NightTrunkOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_night.png");
 
@@ -91,12 +91,12 @@ public partial class Attic : Room
 
     protected override void OnRefresh()
     {
-        bool tinFound = State.HasFlag("tool_tin_found");
         if (State.HasFlag("attic_night"))
         {
             if (GetNodeOrNull<Sprite2D>("Background") is { } night)
                 night.Texture = NightBackground;
-            SetTexture("Papers", tinFound ? NightClearedPapers : NightPapers);
+            SetTexture("Papers", NightPapers);
+            SetTexture("BoxOpen", NightBoxOpen);
             SetTexture("Chair", NightChair);
             SetTexture("TrunkOpen", NightTrunkOpen);
             return;
@@ -104,7 +104,8 @@ public partial class Attic : Room
         int actIndex = Mathf.Clamp(State.StoryAct, 1, ActBackgrounds.Length) - 1;
         if (GetNodeOrNull<Sprite2D>("Background") is { } background)
             background.Texture = ActBackgrounds[actIndex];
-        SetTexture("Papers", (tinFound ? ClearedPapersTextures : PapersTextures)[actIndex]);
+        SetTexture("Papers", PapersTextures[actIndex]);
+        SetTexture("BoxOpen", BoxOpenTextures[actIndex]);
         SetTexture("Chair", ChairTextures[actIndex]);
         SetTexture("TrunkOpen", TrunkOpenTextures[actIndex]);
     }
@@ -172,16 +173,24 @@ public partial class Attic : Room
                 await Say(verb == Verb.Kick ? "Oops." : "Let's start with the top one... whoa, whoa, WHOA!");
                 await Say("Great. Thirty years of tax returns, all over the floor.");
                 return true;
+            case ("boxes", Verb.Look) when State.HasFlag("boxes_spilled") && !State.HasFlag("tool_tin_found"):
+                await Say("TAXES gave up everything it had. MISC is still taped shut, and something in it went CLUNK when the stack came down.");
+                return true;
+            case ("boxes", Verb.Hand) when State.HasFlag("boxes_spilled") && !State.HasFlag("tool_tin_found"):
+                State.SetFlag("tool_tin_found");
+                await Say("Let's try that again. Gently. MISC first...");
+                await Say("Old newspaper, a broken picture frame... and a tool tin. Heavy. I'll set it on the box below.");
+                await Say("A little brass padlock on it: a little key, then. Not much of a riddle, but I'll take it.");
+                return true;
+            case ("boxes", Verb.Kick) when State.HasFlag("boxes_spilled") && !State.HasFlag("tool_tin_found"):
+                await Say("Kicking them is how the tax returns ended up on the floor. Something's rattling in MISC, though.");
+                return true;
             case ("boxes", Verb.Hand or Verb.Kick):
                 await Say("I've done enough damage to those boxes for one day.");
                 return true;
 
-            case ("papers", Verb.Look) when !State.HasFlag("got_crowbar"):
-                await Say("Receipts, bank statements, a 1994 Pizza Hut menu... and something heavy underneath.");
-                return true;
-            case ("papers", Verb.Hand) when !State.HasFlag("got_crowbar"):
-                State.SetFlag("tool_tin_found");
-                await Say("A locked tool tin under the papers. I push the rest aside. A little brass padlock on it: a little key, then. Not much of a riddle, but I'll take it.");
+            case ("papers", Verb.Look):
+                await Say("Receipts, bank statements, a 1994 Pizza Hut menu. Nothing worth keeping.");
                 return true;
             case ("papers", Verb.Hand):
                 await Say("I'll file them later. In the recycling bin.");
@@ -233,7 +242,7 @@ public partial class Attic : Room
                 State.SetFlag("got_suitcase_key");
                 State.GiveItem("suitcase_key");
                 await Say("Empty... no, wait. Something's sewn into the lining.");
-                await Say("A key! Small, brass. Maybe it fits something among the papers.");
+                await Say("A key! Small, brass. Maybe it fits something else up here.");
                 await SatchelHint();
                 return true;
             case ("suitcase", Verb.Hand):

@@ -8,10 +8,10 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic_trunk_open.png" id="6_attic_trunk_open"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="8_Hotspot"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/tool_tin.png" id="9_ToolTin"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_box_open.png" id="9_attic_box_open"]
 
 [sub_resource type="RectangleShape2D" id="TinShape"]
-size = Vector2(38, 24)
+size = Vector2(24, 16)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(88, 54)
@@ -26,7 +26,7 @@ size = Vector2(96, 78)
 size = Vector2(26, 74)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(80, 76)
+size = Vector2(100, 82)
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
 size = Vector2(119, 31)
@@ -108,10 +108,10 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "sheet_lifted"
 
-[node name="ToolTinSprite" type="Sprite2D" parent="."]
-position = Vector2(306, 194)
-z_index = -4
-texture = ExtResource("9_ToolTin")
+[node name="BoxOpen" type="Sprite2D" parent="."]
+position = Vector2(276, 104)
+z_index = -5
+texture = ExtResource("9_attic_box_open")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "tool_tin_found"
@@ -120,7 +120,7 @@ ShowIfFlags = "tool_tin_found"
 script = ExtResource("8_Hotspot")
 Id = "tool_tin"
 DisplayName = "locked tool tin"
-WalkTo = Vector2(326, 228)
+WalkTo = Vector2(300, 200)
 Face = 2
 ShowIfFlags = "tool_tin_found"
 ClickPriority = 3
@@ -128,7 +128,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/ToolTin"]
-position = Vector2(325, 206)
+position = Vector2(297, 145)
 shape = SubResource("TinShape")
 
 [node name="TrunkOpen" type="Sprite2D" parent="."]
@@ -221,7 +221,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Boxes"]
-position = Vector2(336.0, 152.0)
+position = Vector2(333.0, 149.0)
 shape = SubResource("Rect_5")
 
 [node name="Papers" type="Area2D" parent="Hotspots"]

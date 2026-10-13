@@ -109,7 +109,9 @@ public class AutoPlay
             await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
             Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
             await game.Perform(Verb.Hand, "papers");
-            Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "papers reveal a locked tin, not a free crowbar");
+            Check(!gs.HasFlag("tool_tin_found"), "nothing heavy hides under the papers");
+            await game.Perform(Verb.Hand, "boxes");
+            Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "searching the boxes again opens one on a locked tin");
             await game.Perform(Verb.Hand, "tool_tin");
             Check(!gs.HasItem("crowbar"), "tin cannot be opened by hand");
             await game.Perform(Verb.UseItem, "tool_tin", "suitcase_key");

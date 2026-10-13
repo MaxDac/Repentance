@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(70, 136)
+size = Vector2(42, 110)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
 size = Vector2(115, 85)
@@ -90,7 +90,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
-position = Vector2(40, 198)
+position = Vector2(60, 192)
 shape = SubResource("Rect_1")
 
 [node name="Bed" type="Area2D" parent="Hotspots"]
