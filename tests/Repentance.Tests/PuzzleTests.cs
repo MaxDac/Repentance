@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace Repentance.Tests;
@@ -5,19 +6,39 @@ namespace Repentance.Tests;
 public class PuzzleTests
 {
     [Fact]
-    public void LiftHasExactlyOneRouteToFifthFloorLinen()
+    public void LiftMazeConnectsEveryShaftAndTakesARealRoute()
     {
-        int solved = 0;
-        for (int a = 0; a < 2; a++)
-            for (int b = 0; b < 2; b++)
-                for (int c = 0; c < 2; c++)
-                {
-                    var route = new[] { a, b, c };
-                    if (PuzzleRules.Lift(route)) solved++;
-                    Assert.Equal(PuzzleRules.Lift(route), PuzzleRules.LiftDestination(route) == "5th floor: linen");
-                }
-        Assert.Equal(1, solved);
-        Assert.False(PuzzleRules.Lift(new[] { 1, 0 }));
+        foreach (var cell in LiftMaze.Cells())
+            Assert.NotNull(LiftMaze.Route(LiftMaze.Start, cell));
+        var route = LiftMaze.Route(LiftMaze.Start, LiftMaze.Target)!;
+        Assert.True(route.Count >= 20, $"route is only {route.Count} moves");
+        var p = LiftMaze.Start;
+        foreach (var step in route)
+        {
+            var (dx, dy) = LiftMaze.Step(step);
+            Assert.True(LiftMaze.CanMove(p, dx, dy));
+            p = LiftMaze.Move(p, dx, dy);
+        }
+        Assert.True(LiftMaze.Solved(p));
+        Assert.Equal("5th floor: linen room by 507", LiftMaze.Destination(p));
+    }
+
+    [Fact]
+    public void LiftMazeHasWallsDecoysAndDeadEnds()
+    {
+        Assert.False(LiftMaze.CanMove(LiftMaze.Start, -1, 0));
+        Assert.False(LiftMaze.CanMove(LiftMaze.Start, 0, 1));
+        Assert.False(LiftMaze.CanMove(LiftMaze.Start, 1, 1));
+        Assert.Equal(LiftMaze.Start, LiftMaze.Move(LiftMaze.Start, 0, 1));
+        foreach (var decoy in LiftMaze.Decoys)
+        {
+            Assert.True(LiftMaze.IsLinen(decoy));
+            Assert.False(LiftMaze.Solved(decoy));
+            Assert.NotEqual(LiftMaze.Destination(LiftMaze.Target), LiftMaze.Destination(decoy));
+        }
+        int deadEnds = LiftMaze.Cells().Count(c =>
+            new[] { (0, -1), (0, 1), (-1, 0), (1, 0) }.Count(d => LiftMaze.CanMove(c, d.Item1, d.Item2)) == 1);
+        Assert.True(deadEnds >= 6, $"only {deadEnds} dead ends");
     }
 
     [Fact]
@@ -38,6 +59,9 @@ public class PuzzleTests
             wrongDirection[row] = 1 - wrongDirection[row];
             Assert.False(PuzzleRules.Safe(wrongDirection, numbers));
         }
+        Assert.Equal(3, PuzzleRules.SafeTumblers(directions, numbers));
+        Assert.Equal(1, PuzzleRules.SafeTumblers(directions, new[] { 12, 30, 7 }));
+        Assert.Equal(0, PuzzleRules.SafeTumblers(new[] { 1, 1, 0 }, numbers));
         Assert.False(PuzzleRules.Safe(new[] { 0, 1 }, numbers));
         Assert.False(PuzzleRules.Safe(directions, new[] { 12, 31, 7, 0 }));
     }

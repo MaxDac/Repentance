@@ -302,9 +302,11 @@ public partial class Game : Node
             state.TakeItem("brass_box");
             state.GiveItem("card");
             state.GiveItem("matchbook");
-            await Say("The clasp gave with a click. Inside: a calling card, blank but for the curlicues, and a perfume that wasn't hers.");
-            await Say("Strange perfume. Quite attractive, though.");
-            await Say("And a matchbook. A blue lantern on the cover. The Blue Lantern, then. That's where her trail goes next.");
+            await Say("The clasp gave with a click. Inside: a calling card, and a matchbook.");
+            await Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
+            await Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
+            await Say("The matchbook: a blue lantern on the cover. The Blue Lantern, State Street.");
+            await Say("Two big fellas walked her out the back door without a soul seeing. Fellas like that drink somewhere. That's where her trail goes next.");
             return;
         }
         if (verb == Verb.Hand && item == "mirror")

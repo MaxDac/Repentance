@@ -329,6 +329,19 @@ class CharacterArtTests(unittest.TestCase):
         rise = Image.open(ART / "sprites" / "micah_kneel_rise.png")
         self.assertEqual(held.tobytes(), rise.crop((0, 0, *held.size)).tobytes())
 
+    def test_kneeling_micah_is_on_hands_and_knees_without_a_red_tie_streak(self):
+        hip, shoulder, head, knee, ankle, elbow, hand = sprites.KNEEL
+        self.assertLess(knee[1] - hip[1], 20)
+        self.assertGreater(knee[1] - hip[1], 14, "hips raised over the knees")
+        self.assertLess(abs(hand[0] - shoulder[0]), 6, "hands planted under the shoulders")
+        self.assertGreater(head[1], shoulder[1], "head hanging below the shoulders")
+        spec = dict(sprites.MICAH, h=sprites.MICAH["h"] * sprites.SCALE)
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+        img, _ = sprites.kneeling_figure(spec, sprites.KNEEL)
+        pixels = np.array(img.convert("RGB")).reshape(-1, 3).astype(int)
+        red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
+        self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any(), "tie painted along the bent-over trunk")
+
     def test_motel_sleeper_stays_painted_in_the_bed(self):
         source = (ROOT / "scripts" / "Rooms" / "MotelNight.cs").read_text(encoding="utf-8")
         self.assertNotIn("eleanor_sheet_rise", source)

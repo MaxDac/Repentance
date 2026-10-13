@@ -162,7 +162,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     BELLBOY: I'll be here. I'm always here.
     -> END
 = after
-BELLBOY: Blue Lantern, mister. Steel door, State Street alley. You didn't hear it from me.
+BELLBOY: Back door, Tuesday night, two of Tony's boys either side of her. Nobody saw nothin'. Including me.
 {has_flag("staff_elevator"):
     BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
 - else:
@@ -179,11 +179,11 @@ BELLBOY: Blue Lantern, mister. Steel door, State Street alley. You didn't hear i
 }
 BELLBOY: Now you're speaking my language, mister.
 MICAH: One dollar. For your memory.
-BELLBOY: The dame in the picture? Tuesday night. Left with a big fella. Broken nose, cheap suit, expensive cigar.
-BELLBOY: Out the revolving door, toward State Street. Toward the Blue Lantern, if you catch my drift.
-MICAH: The Blue Lantern?
-BELLBOY: Speakeasy. Down the alley, steel door. You'll need the password.
-BELLBOY: And no, I don't know it. A fella like that leaves matches everywhere, though. Cigarette butts, too. You could follow him by the ash.
+BELLBOY: The dame in the picture? Tuesday night. Late. I was out back having a smoke I ain't allowed to have.
+BELLBOY: Service door opens, and out she comes. Big fella either side of her. Broken nose, cheap suit, expensive cigar.
+BELLBOY: Not dragging her, mister. Escorting her. Like she was the guest of honour and the party didn't want her to leave.
+MICAH: Who were they?
+BELLBOY: The kind of fellas who make sure nobody saw 'em. Nobody did. Car with no lights, gone down the alley. That's all my memory's got.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: That's another dollar, mister. The first one bought my memory. The back way costs extra.
@@ -198,8 +198,9 @@ BELLBOY: Now you're learning.
 MICAH: Another dollar. For the back way.
 ~ set_flag("bellboy_room_paid")
 BELLBOY: Front desk won't give you the time of day, never mind a key. That dollar buys the back way.
-BELLBOY: Staff lift's in routing mode. Diagram's by the service door. Trace the branches to the fifth-floor linen room before you dispatch it.
-BELLBOY: Staff door's by the palm. Linen room's right next to 507. Night maid bolts the corridor door, though.
+BELLBOY: Staff door's by the palm. The service cage runs a maze of shafts and laundry chutes behind the walls. Chart's on the panel.
+BELLBOY: Every floor's got a linen room, and they all look the same. You want the fifth floor, the one right next to 507.
+BELLBOY: Rooms count up west to east, mister. 501's by the stairs. 509's by the fire escape. Night maid bolts the corridor door, though.
 BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't housekeeping.
 ~ set_flag("staff_elevator")
 -> END

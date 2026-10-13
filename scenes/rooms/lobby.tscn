@@ -277,6 +277,7 @@ DisplayName = "bellboy"
 LookText = "A bellboy. Sixteen going on forty. Knows everything that happens in this building."
 WalkTo = Vector2(268, 202)
 Face = 4
+ClickPriority = 2
 monitoring = false
 monitorable = false
 Texture = ExtResource("7_bellboy")

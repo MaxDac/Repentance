@@ -80,7 +80,7 @@ public partial class BlueLanternFront : Room
                 return true;
             case ("regular", Verb.Talk):
                 await Say("Evening.");
-                await Say("He glances at my bare lapel, then back at the rain. Conversation over.");
+                await Say("The brim tips up an inch. He takes in my bare lapel, then goes back to studying the pavement. Conversation over.");
                 return true;
             case ("regular", Verb.Hand):
                 await Say("Lift a flower off a man's coat on State Street and I'll be wearing it in the river.");
