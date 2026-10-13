@@ -57,7 +57,8 @@ public partial class Attic : Room
         var gs = GameState.Instance;
         foreach (var id in System.Linq.Enumerable.ToList(gs.Inventory))
         {
-            gs.SetFlag(StashPrefix + id);
+            // the notepad isn't stashed: it is Micah's by definition and comes back with him
+            if (id != Notes.ItemId) gs.SetFlag(StashPrefix + id);
             gs.TakeItem(id);
         }
     }

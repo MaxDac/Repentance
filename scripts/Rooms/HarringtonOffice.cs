@@ -63,7 +63,7 @@ public partial class HarringtonOffice : Room
                 await Say("Overcoats, cedar, and a back panel that doesn't belong.");
                 return true;
             case ("panel", Verb.Hand):
-            case ("panel", Verb.UseItem) when item == "lockpick":
+            case ("panel", Verb.UseItem) when item == "lockpick" || Shows(item, "", "crests"):
                 if (State.HasFlag("secret_open"))
                 {
                     await Say("The little doors are already open.");
