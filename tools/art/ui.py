@@ -273,13 +273,16 @@ def chest():
 
 
 def cursor():
-    im = Image.new("RGBA", (11, 11))
-    d = ImageDraw.Draw(im)
-    for c, w in ((hx("101010"), 3), (hx("f0e8c8"), 1)):
-        d.line([(5, 0), (5, 3)], fill=c, width=w)
-        d.line([(5, 7), (5, 10)], fill=c, width=w)
-        d.line([(0, 5), (3, 5)], fill=c, width=w)
-        d.line([(7, 5), (10, 5)], fill=c, width=w)
+    """9x9 crosshair; the hotspot is the centre dot at (4, 4), so the click point is always visible."""
+    im = Image.new("RGBA", (9, 9))
+    light = {(4, 1), (4, 2), (4, 6), (4, 7), (1, 4), (2, 4), (6, 4), (7, 4), (4, 4)}
+    for x, y in light:
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                if (x + dx, y + dy) not in light:
+                    im.putpixel((x + dx, y + dy), hx("101010") + (255,))
+    for p in light:
+        im.putpixel(p, hx("f0e8c8") + (255,))
     save(im, "ui", "cursor.png")
 
 

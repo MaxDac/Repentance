@@ -124,7 +124,7 @@ def shelves(img):
     shadow(img, "rect", [x1 + 1, y0 + 4, x1 + 6, FLOOR], 0.3, 3)
 
 
-GARMENTS = ((216, "maid"), (229, "jacket"), (242, "maid"), (255, "jacket"), (268, "maid"))
+GARMENTS = ((220, "maid"), (242, "jacket"), (264, "maid"))
 RAIL_Y = 82
 
 
@@ -134,6 +134,57 @@ def hanger_shape(d, cx, y, col):
     d.line([(cx, y), (cx - 9, y + 7)], fill=col)
     d.line([(cx, y), (cx + 9, y + 7)], fill=col)
     d.line([(cx - 9, y + 7), (cx + 9, y + 7)], fill=col)
+
+
+def maid_uniform(d, cx, y):
+    """Black dress with puffed sleeves, white collar and cuffs, a bibbed white apron tied at the waist."""
+    black, black_hi, black_d = hx("26262e"), hx("40404c"), hx("101014")
+    white, white_d = hx("e4dece"), hx("aaa490")
+    waist = y + 30
+    # puffed sleeves behind the shoulders, white cuffs
+    for s in (-1, 1):
+        d.polygon([(cx + s * 7, y + 8), (cx + s * 12, y + 11), (cx + s * 12, y + 19), (cx + s * 8, y + 20)], fill=black)
+        d.line([(cx + s * 12, y + 18), (cx + s * 9, y + 20)], fill=white)
+    # bodice narrowing to the waist, then a full skirt
+    d.polygon([(cx - 8, y + 8), (cx + 8, y + 8), (cx + 6, waist), (cx - 6, waist)], fill=black)
+    d.polygon([(cx - 6, waist), (cx + 6, waist), (cx + 11, y + 80), (cx - 11, y + 80)], fill=black)
+    d.line([(cx - 8, y + 9), (cx - 6, waist), (cx - 11, y + 79)], fill=black_hi)
+    d.line([(cx + 8, y + 9), (cx + 6, waist), (cx + 11, y + 79)], fill=black_d)
+    d.line([(cx - 11, y + 80), (cx + 11, y + 80)], fill=black_d)
+    for fx in (-5, 0, 5):  # skirt folds
+        d.line([(cx + fx * 0.6, waist + 6), (cx + fx, y + 79)], fill=black_d)
+    # collar
+    d.polygon([(cx - 4, y + 8), (cx, y + 12), (cx + 4, y + 8)], fill=white)
+    # apron: straps over the shoulders, bib, waistband, skirt with a hem
+    d.line([(cx - 5, y + 9), (cx - 4, y + 16)], fill=white)
+    d.line([(cx + 5, y + 9), (cx + 4, y + 16)], fill=white)
+    d.rectangle([cx - 4, y + 16, cx + 4, waist - 1], fill=white)
+    d.line([(cx + 4, y + 16), (cx + 4, waist - 1)], fill=white_d)
+    d.rectangle([cx - 7, waist, cx + 7, waist + 1], fill=white)
+    d.polygon([(cx - 6, waist + 2), (cx + 6, waist + 2), (cx + 8, y + 70), (cx - 8, y + 70)], fill=white)
+    d.line([(cx + 6, waist + 2), (cx + 8, y + 70)], fill=white_d)
+    d.line([(cx - 7, y + 67), (cx + 7, y + 67)], fill=white_d)
+    d.line([(cx - 2, waist + 4), (cx - 3, y + 66)], fill=white_d)
+
+
+def porter_jacket(d, cx, y):
+    """A short white porter's jacket: sleeves hanging at the sides, lapels, a row of brass buttons."""
+    white, white_d, white_dd = hx("d8d2c0"), hx("a49e8a"), hx("7a7464")
+    hem = y + 52
+    for s in (-1, 1):
+        d.polygon([(cx + s * 8, y + 9), (cx + s * 11, y + 12), (cx + s * 11, y + 46), (cx + s * 8, y + 46)],
+                  fill=white_d)
+        d.line([(cx + s * 11, y + 44), (cx + s * 8, y + 44)], fill=white_dd)
+    d.polygon([(cx - 8, y + 8), (cx + 8, y + 8), (cx + 9, hem), (cx - 9, hem)], fill=white)
+    d.line([(cx + 8, y + 9), (cx + 9, hem)], fill=white_d)
+    d.line([(cx - 9, hem), (cx + 9, hem)], fill=white_dd)
+    # lapels and the opening
+    d.line([(cx - 4, y + 8), (cx, y + 18)], fill=white_dd)
+    d.line([(cx + 4, y + 8), (cx, y + 18)], fill=white_dd)
+    d.line([(cx, y + 18), (cx, hem)], fill=white_d)
+    for by in range(y + 22, hem - 2, 7):
+        d.point((cx + 2, by), fill=BRASS)
+    d.line([(cx - 7, y + 34), (cx - 3, y + 34)], fill=white_d)  # pocket
 
 
 def rack(img, with_hanger):
@@ -150,19 +201,7 @@ def rack(img, with_hanger):
     d.line([(x0 - 2, RAIL_Y + 1), (x1 + 2, RAIL_Y + 1)], fill=chrome_d)
     for cx, kind in GARMENTS:
         hanger_shape(d, cx, RAIL_Y + 1, hx("8a8c90"))
-        if kind == "maid":
-            d.polygon([(cx - 9, RAIL_Y + 8), (cx + 9, RAIL_Y + 8), (cx + 12, RAIL_Y + 82), (cx - 12, RAIL_Y + 82)],
-                      fill=hx("1c1c22"))
-            d.polygon([(cx - 5, RAIL_Y + 30), (cx + 5, RAIL_Y + 30), (cx + 7, RAIL_Y + 74), (cx - 7, RAIL_Y + 74)],
-                      fill=hx("dcd6c4"))
-            d.rectangle([cx - 4, RAIL_Y + 8, cx + 4, RAIL_Y + 12], fill=hx("e8e2d0"))
-        else:
-            d.polygon([(cx - 9, RAIL_Y + 8), (cx + 9, RAIL_Y + 8), (cx + 10, RAIL_Y + 52), (cx - 10, RAIL_Y + 52)],
-                      fill=hx("d4cfbc"))
-            d.line([(cx, RAIL_Y + 10), (cx, RAIL_Y + 52)], fill=hx("9a9480"))
-            for by in range(RAIL_Y + 16, RAIL_Y + 50, 8):
-                d.point((cx + 2, by), fill=BRASS)
-        d.line([(cx + 9, RAIL_Y + 10), (cx + 11, RAIL_Y + 60)], fill=hx("0e0e12"))
+        (maid_uniform if kind == "maid" else porter_jacket)(d, cx, RAIL_Y)
     if with_hanger:
         hanger_shape(d, 284, RAIL_Y + 1, hx("c8ccd0"))
     shadow(img, "rect", [x0 - 4, FLOOR + 4, x1 + 10, FLOOR + 12], 0.4, 3)
@@ -456,26 +495,66 @@ def cold_door(img, open_):
     d.rectangle([x0 - 6, BASE - 2, x1 + 6, BASE + 2], fill=hx("4a4a52"))
 
 
+CARNATION = (hx("2e5ad8"), hx("5a8af0"), hx("a8c8ff"))
+
+
 def regular(img):
-    """A member waiting by the wall, a blue carnation bright in his buttonhole."""
+    """A member waiting by the wall in a fedora and belted overcoat, a blue carnation bright in his buttonhole."""
     d = ImageDraw.Draw(img)
     cx = 442
-    d.polygon([(cx - 9, 114), (cx + 9, 114), (cx + 11, 160), (cx - 11, 160)], fill=hx("26232a"))
-    d.line([(cx, 116), (cx - 2, 158)], fill=hx("16141a"))
-    d.rectangle([cx - 7, 160, cx - 2, BASE - 2], fill=hx("16141a"))
-    d.rectangle([cx + 2, 160, cx + 7, BASE - 2], fill=hx("16141a"))
-    d.rectangle([cx - 9, BASE - 3, cx - 1, BASE], fill=hx("0a0a0c"))
-    d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0a0a0c"))
-    d.ellipse([cx - 5, 100, cx + 5, 114], fill=hx("b08870"))
-    d.ellipse([cx - 9, 98, cx + 9, 103], fill=hx("1a181c"))
-    d.rectangle([cx - 5, 92, cx + 5, 100], fill=hx("1a181c"))
-    d.line([(cx - 5, 98), (cx + 5, 98)], fill=hx("4a3a3a"))
-    # cigarette glow
-    d.point((cx - 7, 110), fill=hx("ff9040"))
-    d.ellipse([cx - 7, 119, cx - 2, 124], fill=hx("4a80f0"))
-    d.point((cx - 5, 121), fill=hx("a0c8ff"))
-    light(img, "ellipse", [cx - 10, 116, cx, 126], hx("4a80f0"), 0.35, 3)
-
+    coat, coat_d, coat_l = hx("3a3640"), hx("232028"), hx("5a5462")
+    # trouser legs and shoes
+    d.rectangle([cx - 7, 162, cx - 2, BASE - 3], fill=hx("1c1a20"))
+    d.rectangle([cx + 2, 162, cx + 7, BASE - 3], fill=hx("1c1a20"))
+    d.line([(cx - 3, 163), (cx - 3, BASE - 4)], fill=hx("2c2a32"))
+    d.rectangle([cx - 9, BASE - 3, cx - 1, BASE], fill=hx("0c0b0e"))
+    d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0c0b0e"))
+    d.line([(cx - 8, BASE - 3), (cx - 3, BASE - 3)], fill=hx("4a4650"))
+    # overcoat: shoulders, flared skirt, belt, lit left edge from the lamp
+    d.polygon([(cx - 10, 118), (cx + 10, 118), (cx + 12, 126), (cx + 12, 164), (cx - 12, 164), (cx - 12, 126)],
+              fill=coat)
+    d.polygon([(cx + 3, 120), (cx + 10, 118), (cx + 12, 126), (cx + 12, 164), (cx + 4, 164)], fill=coat_d)
+    d.line([(cx - 11, 124), (cx - 12, 163)], fill=coat_l)
+    d.line([(cx - 10, 119), (cx - 4, 118)], fill=coat_l)
+    d.rectangle([cx - 12, 141, cx + 12, 143], fill=coat_d)
+    d.rectangle([cx - 1, 141, cx + 1, 143], fill=hx("8a8070"))
+    d.line([(cx, 128), (cx, 163)], fill=coat_d)
+    for y in (132, 150):
+        d.point((cx - 2, y), fill=hx("15131a"))
+    # lapels open on a white shirt and dark tie
+    d.polygon([(cx - 4, 118), (cx + 4, 118), (cx, 130)], fill=hx("d8d4c8"))
+    d.line([(cx, 120), (cx, 129)], fill=hx("6a1e24"))
+    d.line([(cx - 5, 118), (cx - 1, 130)], fill=coat_l)
+    d.line([(cx + 5, 118), (cx + 1, 130)], fill=coat_d)
+    # hands in pockets
+    d.line([(cx - 11, 146), (cx - 7, 148)], fill=coat_d)
+    d.line([(cx + 7, 148), (cx + 11, 146)], fill=hx("15131a"))
+    # face under the brim: lit cheek, shadowed eyes, a cigarette
+    d.rectangle([cx - 2, 114, cx + 2, 118], fill=hx("a07c64"))
+    d.ellipse([cx - 5, 101, cx + 5, 116], fill=hx("c49a7c"))
+    d.ellipse([cx + 1, 102, cx + 5, 116], fill=hx("9a7660"))
+    d.rectangle([cx - 4, 104, cx + 4, 106], fill=hx("7a5c4c"))
+    d.point((cx - 2, 107), fill=hx("2a2026"))
+    d.point((cx + 2, 107), fill=hx("2a2026"))
+    d.line([(cx - 1, 108), (cx - 1, 110)], fill=hx("a07c64"))
+    d.line([(cx - 2, 112), (cx + 1, 112)], fill=hx("6a3e38"))
+    d.line([(cx - 6, 112), (cx - 3, 112)], fill=hx("e8e4dc"))
+    d.point((cx - 7, 112), fill=hx("ff9040"))
+    light(img, "ellipse", [cx - 10, 108, cx - 4, 116], hx("ff9040"), 0.35, 2)
+    # fedora: pinched crown, band, wide snap brim
+    d = ImageDraw.Draw(img)
+    d.polygon([(cx - 6, 95), (cx - 3, 92), (cx + 3, 92), (cx + 6, 95), (cx + 6, 101), (cx - 6, 101)], fill=hx("3e3a36"))
+    d.line([(cx, 92), (cx, 95)], fill=hx("2a2724"))
+    d.rectangle([cx - 6, 99, cx + 6, 100], fill=hx("1a181a"))
+    d.polygon([(cx - 10, 102), (cx + 10, 101), (cx + 8, 103), (cx - 9, 104)], fill=hx("2e2a28"))
+    d.line([(cx - 6, 93), (cx - 6, 98)], fill=hx("5a5450"))
+    # blue carnation in the left buttonhole, catching the light
+    dark, mid, hi = CARNATION
+    d.ellipse([cx - 9, 120, cx - 4, 125], fill=dark)
+    d.ellipse([cx - 8, 120, cx - 5, 123], fill=mid)
+    d.point((cx - 7, 121), fill=hi)
+    d.line([(cx - 6, 125), (cx - 5, 127)], fill=hx("3a7a3a"))
+    light(img, "ellipse", [cx - 12, 116, cx - 1, 129], hx("4a80f0"), 0.3, 3)
 
 def lamppost(img):
     d = ImageDraw.Draw(img)
@@ -509,16 +588,6 @@ def florist_ground(img):
     light(img, "rect", [20, BASE + 10, 36, CURB], hx("ffe0a0"), 0.18, 4)
 
 
-def rain(img, seed=641):
-    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    rnd = random.Random(seed)
-    for _ in range(420):
-        x, y = rnd.randint(0, W), rnd.randint(0, FULL_H - 6)
-        d.line([(x, y), (x - 1, y + 4)], fill=M["rain"] + (90,))
-    img.paste(Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB"))
-
-
 def paint_florist(bluing=True, grille_open=False):
     img = Image.new("RGB", (W, FULL_H))
     florist_facade(img)
@@ -530,7 +599,7 @@ def paint_florist(bluing=True, grille_open=False):
     florist_ground(img)
     lamppost(img)
     shadow(img, "rect", [-40, -40, W + 40, FULL_H + 40], 0.15, 0, tint=hx("4050a0"))
-    rain(img)
+    # the rain itself is animated in the scene (scripts/Core/Rain.cs)
     vignette(img, 0.5, tint=(20, 22, 44), blur=46)
     return img
 
@@ -623,7 +692,8 @@ def build_florist():
         "bluing": paint_florist(bluing=True),
         "grille": paint_florist(bluing=False, grille_open=True),
     }
-    pal = palette_of(Image.blend(variants["base"], variants["grille"], 0.5), 128)
+    # the carnation is a handful of pixels; pin its blues so quantising cannot grey it out
+    pal = palette_of(Image.blend(variants["base"], variants["grille"], 0.5), 128) + list(CARNATION)
     px = {k: pixelize(v, pal) for k, v in variants.items()}
     save(px["base"], "rooms", "blue_lantern_front.png")
     _overlay(px["base"], px["bluing"], "blue_lantern_front_bluing")

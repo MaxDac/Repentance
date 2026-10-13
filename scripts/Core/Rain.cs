@@ -44,6 +44,8 @@ public partial class Rain : Node2D
     public override void _Ready()
     {
         _rng.Seed = (ulong)Seed;
+        if (Areas.Count == 0)
+            Areas.Add(new Rect2(0, 0, 480, 270));
         for (int a = 0; a < Areas.Count; a++)
         {
             var r = Areas[a];

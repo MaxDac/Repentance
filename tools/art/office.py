@@ -289,11 +289,21 @@ def open_drawer(img, contents):
     d.rectangle([304, 131, 312, 133], fill=hx("b8904a"))
     d.polygon([(289, 118), (329, 118), (332, 127), (286, 127)], fill=hx("24140a"))
     if "revolver" in contents:
-        d.line([(291, 123), (302, 122)], fill=hx("4a4a52"), width=2)
-        d.polygon([(300, 121), (305, 121), (306, 126), (302, 126)], fill=hx("3a2416"))
+        # a snub .38 lying on its side, barrel to the left: steel barrel and cylinder, walnut grip
+        d.rectangle([290, 120, 298, 121], fill=hx("9a9aa4"))
+        d.line([(290, 120), (297, 120)], fill=hx("c8c8d0"))
+        d.rectangle([297, 119, 302, 123], fill=hx("6a6a74"))
+        d.line([(298, 120), (301, 120)], fill=hx("b0b0b8"))
+        d.point((303, 119), fill=hx("6a6a74"))
+        d.line([(299, 124), (301, 125)], fill=hx("6a6a74"))
+        d.polygon([(301, 122), (304, 121), (306, 126), (303, 127)], fill=hx("8a5430"))
+        d.line([(304, 122), (305, 125)], fill=hx("b07848"))
     if "dollar" in contents:
-        d.polygon([(309, 120), (318, 119), (319, 125), (310, 126)], fill=hx("8aa878"))
-        d.line([(311, 122), (317, 121)], fill=hx("4a6a48"))
+        # a flat greenback, pale border and a dark portrait oval
+        d.rectangle([309, 120, 319, 125], fill=hx("a8c098"))
+        d.rectangle([310, 121, 318, 124], fill=hx("6a8a5a"))
+        d.ellipse([312, 121, 316, 124], fill=hx("c8d8b0"))
+        d.point((314, 122), fill=hx("4a6a48"))
     if "lockpick" in contents:
         d.rectangle([322, 121, 326, 125], fill=hx("4a2a1a"))
         d.line([(325, 121), (330, 120)], fill=hx("a8a8b0"))

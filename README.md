@@ -67,7 +67,7 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
   go through exits, look at everything else.
 - **Right click** on an object opens the **verb wheel**: 👁 *Look*, ✋ *Hand* (take, use, open, push),
   👄 *Talk*, 🥾 *Kick*. Click an icon, or hold the right button and release it over one.
-- **Satchel** (bottom right) opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
+- **Satchel** (bottom right) or **I** opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
   it on an object or person to use or give it (or on another item to combine them). Right-click
   anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
 - Click during speech to skip the line.
@@ -114,7 +114,7 @@ The cash revision changes save compatibility, not the ending requirements or rin
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
    $22 in cash and a set of lockpicks. Micah won't leave without all three.
-2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory and buys the
+2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory; another buys the
    staff elevator up to Eleanor's floor. Trace its routing diagram and set the three junctions
    lower, upper, upper to reach the fifth-floor linen room.
    Micah collects the brass box in room 507 before departing for the Blue Lantern.
@@ -129,7 +129,7 @@ The cash revision changes save compatibility, not the ending requirements or rin
    for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
    combine them and show the blue carnation at the cold-room grille to be let in.
    **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
-   leaving $11 after both bribes (mock him or refuse and
+   leaving $10 after all the bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
@@ -237,7 +237,7 @@ The fuse is figurative; the explosion still uses gas and a candle. "They know wh
 replaces the previous claim that nobody will know what happened. Documents-only escape has no death report;
 when Eleanor accompanies him, the scene remains that night and she survives. The existing ending outcomes remain unchanged.
 
-Micah carries **$22 = 2 x ($1 bellboy + $10 Sal)** at the start of the case, framed as a day's fee plus $2
+Micah carries **$22** at the start of the case, enough for two $1 bellboy payments and the $10 Sal bribe, framed as a day's fee plus $2
 from a previous job. The story already quotes his fee as $20 a day plus expenses. This is a fictional cash
 holding, not a documented average PI income. Historical purchasing-power context comes from the
 [NBER/BLS manufacturing weekly-earnings series](https://fred.stlouisfed.org/series/M08261USM052NNBR):

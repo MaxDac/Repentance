@@ -29,6 +29,7 @@ public partial class Hud : CanvasLayer
     public PuzzlePanel Puzzle { get; private set; } = null!;
 
     private Control _interface = null!;
+    private Control _hoverLayer = null!;
     private Label _hover = null!;
     private TextureButton _satchel = null!;
     private Control _inventory = null!;
@@ -60,6 +61,9 @@ public partial class Hud : CanvasLayer
     public bool CaptionVisible => _caption.Visible;
     public string CaptionText => _caption.Text;
     public bool InventoryOpen => _inventory.Visible;
+    public bool InterfaceVisible => _interface.Visible;
+    public Rect2 HoverRect => _hover.Visible && _hoverLayer.Visible ? _hover.GetGlobalRect() : new Rect2();
+    public bool HoverDrawsOverInventory => _hoverLayer.GetIndex() > _inventory.GetIndex();
     public bool TitleVisible => _title.Visible;
     public bool PauseVisible => _pause.Visible;
     public bool SpeechVisible => _speech.Visible;
@@ -102,7 +106,6 @@ public partial class Hud : CanvasLayer
         root.AddChild(_interface);
 
         _hover = MakeOutlinedLabel(VerbHover);
-        _interface.AddChild(_hover);
 
         _satchel = new TextureButton
         {
@@ -117,6 +120,12 @@ public partial class Hud : CanvasLayer
         _interface.AddChild(_satchel);
 
         BuildInventory(root);
+
+        // above the inventory case, so item names over the top row aren't hidden behind its frame
+        _hoverLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
+        _hoverLayer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _hoverLayer.AddChild(_hover);
+        root.AddChild(_hoverLayer);
 
         _choicesBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.06f, 0.88f), Visible = false };
         root.AddChild(_choicesBg);
@@ -253,8 +262,9 @@ public partial class Hud : CanvasLayer
 
     public override void _Process(double delta)
     {
-        _cursor.Position = (MousePos - _cursor.Texture.GetSize() / 2).Round();
-        _cursorItem.Position = (MousePos + new Vector2(4, 4)).Round();
+        _cursor.Position = MousePos.Floor() - (_cursor.Texture.GetSize() / 2).Floor();
+        _cursorItem.Position = MousePos.Floor() + new Vector2(4, 4);
+        _hoverLayer.Visible = _interface.Visible;
     }
 
     private void BuildInventory(Control root)

@@ -128,6 +128,14 @@ public partial class Game : Node
             else if (CanSave && !Hud.Menu.IsOpen) _ = PauseMenu();
             return;
         }
+        if (e.IsActionPressed("toggle_inventory") && e is not InputEventKey { Echo: true })
+        {
+            GetViewport().SetInputAsHandled();
+            if (Room != null && !_onTitle && !Hud.Menu.IsOpen && !Hud.Puzzle.IsOpen && !Hud.Wheel.IsOpen &&
+                Hud.InterfaceVisible)
+                Hud.ShowInventory(!Hud.InventoryOpen);
+            return;
+        }
         if (e is not InputEventMouseButton { Pressed: true } mb) return;
         if (mb.ButtonIndex is not (MouseButton.Left or MouseButton.Right)) return;
         GetViewport().SetInputAsHandled();
@@ -322,7 +330,7 @@ public partial class Game : Node
         {
             case Verb.Look:
                 await Say(item == "dollar"
-                    ? $"${CashRules.Balance(GameState.Instance.HasFlag)} in cash. A dollar for the bellboy; ten for Sal. What's left stays in my pocket."
+                    ? $"${CashRules.Balance(GameState.Instance.HasFlag)} in cash. Two dollars for the bellboy; ten for Sal. What's left stays in my pocket."
                     : Items.Get(item).Description);
                 break;
             case Verb.Hand:

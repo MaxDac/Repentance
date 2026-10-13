@@ -163,11 +163,16 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     -> END
 = after
 BELLBOY: Blue Lantern, mister. Steel door, State Street alley. You didn't hear it from me.
-BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
+{has_flag("staff_elevator"):
+    BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
+- else:
+    BELLBOY: Her room's another dollar, mister. The first one only bought my memory.
+}
 -> END
 
 === bellboy_tip ===
-{has_flag("knows_lantern"): -> bellboy.after}
+{has_flag("staff_elevator"): -> bellboy.after}
+{has_flag("knows_lantern"): -> bellboy_tip.room}
 {cash_amount() < 1:
     MICAH: His memory's for sale, and I'm a dollar short.
     -> END
@@ -181,6 +186,17 @@ BELLBOY: Speakeasy. Down the alley, steel door. You'll need the password.
 BELLBOY: And no, I don't know it. A fella like that leaves matches everywhere, though. Cigarette butts, too. You could follow him by the ash.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
+BELLBOY: That's another dollar, mister. The first one bought my memory. The back way costs extra.
+MICAH: Everything costs extra in this joint.
+BELLBOY: Now you're learning.
+-> END
+= room
+{cash_amount() < 1:
+    MICAH: The back way costs a dollar, and I'm a dollar short.
+    -> END
+}
+MICAH: Another dollar. For the back way.
+~ set_flag("bellboy_room_paid")
 BELLBOY: Front desk won't give you the time of day, never mind a key. That dollar buys the back way.
 BELLBOY: Staff lift's in routing mode. Diagram's by the service door. Trace the branches to the fifth-floor linen room before you dispatch it.
 BELLBOY: Staff door's by the palm. Linen room's right next to 507. Night maid bolts the corridor door, though.
