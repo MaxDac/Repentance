@@ -37,7 +37,12 @@ public partial class ConventCorridor : Room
         switch (target.Id, verb)
         {
             case ("nun", Verb.Talk):
-                await Talk("nun");
+                if (State.HasFlag("got_mirror"))
+                {
+                    if (!State.HasFlag("nun_farewell_done")) await Talk("nun_farewell");
+                    else await Say("nun", "Go with God, Detective.");
+                }
+                else await Talk("nun");
                 return true;
             case ("nun", Verb.UseItem) when item == "photo":
                 await Say("nun", "I know her face, young man. I have prayed for it.");
@@ -56,7 +61,24 @@ public partial class ConventCorridor : Room
                 await Say("Kicking a door in a convent. Straight to the hot place, no stops.");
                 return true;
             case ("entrance", Verb.Walk or Verb.Hand):
-                await Say("I didn't take a beating to come all this way for the architecture.");
+                if (!State.HasFlag("got_mirror"))
+                {
+                    await Say("I didn't take a beating to come all this way for the architecture.");
+                    return true;
+                }
+                if (!State.HasFlag("nun_farewell_done"))
+                {
+                    await Say("nun", "Detective, before you go...");
+                    if (FindActor("nun") is { } sister)
+                    {
+                        await Game.WalkTo(sister.WalkTo);
+                        Player.FaceTowards(sister.Position);
+                    }
+                    await Talk("nun_farewell");
+                    await Game.WalkTo(target.WalkTo);
+                }
+                State.SetFlag("convent_departed");
+                await Game.ChangeRoom("convent_road", "start");
                 return true;
             case ("statue" or "candles", Verb.Hand):
                 await Say("I'd light one, but I'm not sure who I'd be lighting it for.");

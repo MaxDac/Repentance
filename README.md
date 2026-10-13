@@ -98,8 +98,10 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The current save format is version 6; earlier saves are incompatible because the five collect-and-combine
-locations reroute the staff lift, the Blue Lantern entrance, the Harrington lead, the masked Club entrance and the
+The current save format is version 7; earlier saves are incompatible because the Act One convent visit now
+includes a playable exterior arrival and a return to the corridor for Sister Agatha's farewell.
+The preceding five collect-and-combine locations reroute the staff lift, the Blue Lantern entrance,
+the Harrington lead, the masked Club entrance and the
 mansion entrance. The puzzle expansion's separate original-puzzle
 and Act 3 schema markers preserve completed discoveries in compatible saves. New saves do not grandfather
 unfinished puzzles on reload.
@@ -149,13 +151,17 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
-   him Eleanor is "hot stuff" and that he sent her to the nuns.
-6. **The convent** (corridor → cell): Sister Agatha questions Micah, warns him off "that Jezebel", then lets
+   him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit.
+6. **The convent** (exterior → corridor → cell → corridor): Micah remarks on the architecture outside;
+   click the convent door to enter. Sister Agatha questions Micah, warns him off "that Jezebel", then lets
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
    the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
    mirror and cloth to reveal the symbol. Micah returns the cloth and won't leave before that discovery.
-7. **Outside the convent**: Eleanor, in black, is waiting for him. While they talk, a framed close-up shows the two
-   of them side by side, Micah on the left and Eleanor on the right; it fades after "I can't go back there...".
+   The cell door returns to the corridor. Talk to the sister for her farewell, or click the front door and
+   she calls Micah back for the same exchange before letting him leave.
+7. **Outside the convent**: Eleanor, in black, opens with a question about his late visit. After that opening,
+   a framed close-up shows Micah on the left and Eleanor on the right, each speaking beneath their own portrait.
+   It disappears before the compensation choice; the remaining conversation takes place on the road.
 8. **Motel, that night**: Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
    and Micah drops the case.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
@@ -341,10 +347,12 @@ Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main
 ### Close-up panels
 
 Framed close-ups pop up over a scene without blocking it; while one is up, speech sits along its bottom edge.
+The convent's paired portraits place each speaker's speech beneath their own half.
 Each is a `CloseUp` in `scripts/UI/CloseUp.cs` (the `CloseUps` catalog): an id, the picture under
 `assets/art/ui/` (or a function of the settings, for variants such as Eleanor's dressed stage close-up) and fade
 times. Show one with `Game.Hud.ShowCloseUp(CloseUps.Rose)` and `Game.Hud.HideCloseUp()`, or from ink with
-`INSET: rose` and `INSET: none`. The Hud handles the fades, the speech placement, swapping a variant when the
+`INSET: rose` and `INSET: none`. Use `INSET: none_now` (or `HideCloseUp(0)`) to remove a panel immediately
+before a line or choice, without a lingering fade. The Hud handles the fades, the speech placement, swapping a variant when the
 settings change, and hiding it on a room change.
 
 To add one: commit the source picture under `tools/art/src/`, build the panel in `tools/art/closeup.py`

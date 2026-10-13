@@ -70,6 +70,7 @@ public partial class Hud : CanvasLayer
     public string SpeechText => _speech.Text;
     public Rect2 SpeechRect => _speech.GetRect();
     public Rect2 InsetRect => _inset.GetRect();
+    public bool InsetDrawn => _inset.Visible && _inset.Modulate.A > 0;
     public float FadeAlpha => _fade.Color.A;
 
     public static Label MakeOutlinedLabel(Color color) => new()
@@ -440,11 +441,13 @@ public partial class Hud : CanvasLayer
     public void HideChoices() => _choices.Visible = _choicesBg.Visible = false;
 
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
-    public void ShowSpeech(string text, Vector2 head, Color color)
+    public void ShowSpeech(string text, ISpeaker speaker)
     {
+        var head = speaker.HeadPosition;
+        var color = speaker.SpeechColor;
         if (_insetShown)
         {
-            ShowSpeechOverInset(text, color);
+            ShowSpeechOverInset(text, speaker);
             return;
         }
         const int width = 220;
@@ -467,15 +470,24 @@ public partial class Hud : CanvasLayer
     public void HideSpeech() => _speech.Visible = false;
 
     /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
-    private void ShowSpeechOverInset(string text, Color color)
+    private void ShowSpeechOverInset(string text, ISpeaker speaker)
     {
-        const int width = 380;
+        float width = 380;
+        float x = (ScreenW - width) / 2f;
+        if (_closeUp == CloseUps.Convent)
+        {
+            const int padding = 12;
+            float half = _inset.Size.X / 2f;
+            width = half - padding * 2;
+            x = _inset.Position.X + padding;
+            if (speaker is Actor { Id: "eleanor" }) x += half;
+        }
         var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
         _speech.Text = text;
-        _speech.LabelSettings.FontColor = color;
+        _speech.LabelSettings.FontColor = speaker.SpeechColor;
         _speech.Size = new Vector2(width, size.Y);
         float bottom = _inset.Position.Y + _inset.Size.Y - 8;
-        _speech.Position = new Vector2((ScreenW - width) / 2f, bottom - size.Y).Round();
+        _speech.Position = new Vector2(x, bottom - size.Y).Round();
         _speech.Visible = true;
     }
 

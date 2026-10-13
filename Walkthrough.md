@@ -127,12 +127,15 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
   Tony behind Sal.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
-  anything else. The scene then moves to the convent.
+  anything else.
 - Before leaving, Micah pushes up from his hands and knees through a supported crouch to standing.
+- The player regains control in the alley and clicks the street exit to travel to the convent.
 
 #### Convent
 
-- Two new locations in neo-gothic style: the convent corridor, and Eleanor's cell, really dark, simple and tiny,
+- Micah arrives outside the neo-gothic convent, with Eleanor absent. He comments on its pointed arches, iron
+  spikes and saints in the windows. The player must click the convent door to enter the corridor.
+- Inside are the convent corridor and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
 - In the corridor, Sister Agatha interrogates Micah: what he's doing here and what he wants with Eleanor.
   She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "you would be better off finishing the
@@ -149,13 +152,24 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah keeps the revealed mirror; the comb stays in the drawer.
 - If the player tries to leave the cell before revealing the symbol, Micah says "There is still something to be
   found in this room."
+- Leaving the cell returns Micah to the corridor, near the cell door. Talking to Sister Agatha now starts
+  her farewell: "What do you hope to find in all this, Detective?" Micah answers, "I don't know, sister, but
+  I can't stop at this point." Afterward, the player can click the front door to leave.
+- If the player clicks the front door without first talking to her, she calls, "Detective, before you go..."
+  and starts the same exchange. That exit action continues outside once the conversation finishes.
+  The farewell plays only once.
 
 #### Road outside the convent
 
 - When Micah gets out, he finds Eleanor there, outside, dressed in black. No one is passing.
+- She opens on the road: "Not many people enter a convent this late, mister. Were you looking for someone?"
+  Micah asks about Eleanor Harrington, introduces himself, and the conversation joins the existing exchange.
 - She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
 - While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
-  same VGA style as the other close-ups. It fades when the conversation ends.
+  same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
+  speaker's dialogue is shown below their own portrait half.
+- The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
+  The compensation choices and the remaining conversation take place on the road with normal overhead speech.
 - The scene ends when Eleanor says "I can't go back there..."
 
 #### Motel room, night

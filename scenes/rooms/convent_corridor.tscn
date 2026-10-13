@@ -45,6 +45,10 @@ polygon = PackedVector2Array(0, 190, 480, 190, 480, 268, 0, 268)
 position = Vector2(60, 215)
 metadata/facing = 4
 
+[node name="cell" type="Marker2D" parent="Entries"]
+position = Vector2(410, 200)
+metadata/facing = 3
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]
@@ -57,6 +61,8 @@ DisplayName = "front door"
 LookText = "The way I came in. The way out, too, if I had any sense."
 WalkTo = Vector2(42, 205)
 Face = 2
+ExitTo = "convent_road"
+ExitEntry = "start"
 monitoring = false
 monitorable = false
 

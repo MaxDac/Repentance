@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Alley.cs" id="1_Alley"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/alley.png" id="2_alley"]
@@ -16,6 +16,9 @@ size = Vector2(40, 140)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(50, 36)
+
+[sub_resource type="RectangleShape2D" id="Rect_street"]
+size = Vector2(36, 72)
 
 [node name="Alley" type="Node2D"]
 script = ExtResource("1_Alley")
@@ -59,6 +62,24 @@ metadata/facing = 4
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Street" type="Area2D" parent="Hotspots"]
+script = ExtResource("4_Hotspot")
+Id = "street"
+DisplayName = "street"
+LookText = "Out of the alley. The convent's on the North Side."
+WalkTo = Vector2(24, 232)
+Face = 3
+ExitTo = "convent_road"
+ExitEntry = "street"
+ShowIfFlags = "alley_done"
+HideIfFlags = "alley3"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Street"]
+position = Vector2(18, 232)
+shape = SubResource("Rect_street")
 
 [node name="Door" type="Area2D" parent="Hotspots"]
 script = ExtResource("4_Hotspot")
