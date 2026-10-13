@@ -71,7 +71,7 @@ public partial class Lobby : Room
                 return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator") &&
                 !State.HasFlag("took_brass_box") && !State.HasFlag("club_lead"):
-                await Say("Not yet. I bought a look at room 507. I should collect its clues before chasing the Blue Lantern.");
+                await Say("Not yet. I bought a look at room 507. I should collect its clues before I go chasing anybody.");
                 return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("knows_lantern") &&
                 !State.HasFlag("staff_elevator") && !State.HasFlag("club_lead"):

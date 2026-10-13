@@ -44,7 +44,82 @@ def tracing(d, im):
     d.rectangle([19, 13, 25, 19], outline=hx("a43a32"))
 
 
+GOLD, GOLD_HI, GOLD_LO = hx("c9a25e"), hx("f0d79a"), hx("6e5630")
+INK, PANEL = hx("12131a"), hx("1c1d27")
+
+
+def _stepped(d, box, fill, outline, step=3):
+    """Rectangle with Art Deco stepped corners."""
+    x0, y0, x1, y1 = box
+    pts = [(x0 + step, y0), (x1 - step, y0), (x1 - step, y0 + 1), (x1 - 1, y0 + 1), (x1 - 1, y0 + step - 1),
+           (x1, y0 + step - 1), (x1, y1 - step), (x1 - 1, y1 - step), (x1 - 1, y1 - 1), (x1 - step, y1 - 1),
+           (x1 - step, y1), (x0 + step, y1), (x0 + step, y1 - 1), (x0 + 1, y1 - 1), (x0 + 1, y1 - step),
+           (x0, y1 - step), (x0, y0 + step - 1), (x0 + 1, y0 + step - 1), (x0 + 1, y0 + 1), (x0 + step, y0 + 1)]
+    d.polygon(pts, fill=fill, outline=outline)
+
+
+def deco_button(state):
+    """32x22 nine-patch (7px side, 6px top/bottom margins): stepped gold frame, inner keyline, corner studs."""
+    fill, rim, line = {"normal": (hx("1f3036"), GOLD, GOLD_LO),
+                       "hover": (hx("2d474e"), GOLD_HI, GOLD),
+                       "pressed": (hx("5b4524"), GOLD_HI, GOLD_HI)}[state]
+    im = Image.new("RGBA", (32, 22))
+    d = ImageDraw.Draw(im)
+    _stepped(d, (0, 0, 31, 21), fill, rim)
+    d.rectangle([3, 3, 28, 18], outline=line)
+    if state != "pressed":
+        d.line([(4, 4), (27, 4)], fill=hx("ffffff", 40))
+        d.line([(4, 17), (27, 17)], fill=hx("000000", 90))
+    for x, y in ((2, 2), (29, 2), (2, 19), (29, 19)):
+        im.putpixel((x, y), GOLD_HI if state != "normal" else GOLD)
+    return im
+
+
+def _fan(d, cx, cy, r, start, end, col):
+    import math
+    for i in range(6):
+        a = math.radians(start + (end - start) * i / 5)
+        d.line([(cx, cy), (cx + r * math.cos(a), cy + r * math.sin(a))], fill=col)
+    d.arc([cx - r, cy - r, cx + r, cy + r], start, end, fill=col)
+    d.arc([cx - r // 2, cy - r // 2, cx + r // 2, cy + r // 2], start, end, fill=col)
+
+
+def puzzle_frame():
+    """The shared puzzle screen: deco frame, title cartouche, work area, clue card, footer and feedback strip."""
+    im = Image.new("RGBA", (480, 270), INK)
+    d = ImageDraw.Draw(im)
+    for x in range(0, 480, 6):
+        d.line([(x, 0), (x, 269)], fill=hx("161720"))
+    _stepped(d, (3, 3, 476, 266), None, GOLD, step=8)
+    _stepped(d, (6, 6, 473, 263), None, GOLD_LO, step=6)
+    for cx, cy, a0 in ((7, 7, 0), (472, 7, 90), (472, 262, 180), (7, 262, 270)):
+        _fan(d, cx, cy, 16, a0, a0 + 90, GOLD_LO)
+    # title cartouche, stepped like a skyscraper crown
+    d.polygon([(130, 6), (350, 6), (342, 26), (138, 26)], fill=PANEL, outline=GOLD)
+    d.line([(144, 23), (336, 23)], fill=GOLD_LO)
+    for x in (120, 112, 104):
+        d.line([(x, 16), (x + 6, 16)], fill=GOLD)
+    for x in (354, 362, 370):
+        d.line([(x, 16), (x + 6, 16)], fill=GOLD)
+    # work area
+    _stepped(d, (14, 31, 272, 204), hx("171a22"), GOLD_LO, step=4)
+    # clue card
+    _stepped(d, (280, 31, 466, 204), hx("221f22"), GOLD, step=4)
+    d.rectangle([284, 35, 462, 200], outline=GOLD_LO)
+    d.polygon([(330, 31), (416, 31), (410, 41), (336, 41)], fill=GOLD_LO)
+    text(im, (373, 36), "CLUES", INK, size=8)
+    # footer rule with a central chevron
+    d.line([(16, 236), (226, 236)], fill=GOLD_LO)
+    d.line([(254, 236), (464, 236)], fill=GOLD_LO)
+    d.polygon([(232, 236), (240, 231), (248, 236), (240, 241)], outline=GOLD)
+    d.rectangle([14, 241, 466, 259], fill=hx("0e0f14"), outline=GOLD_LO)
+    return im
+
+
 def build():
+    for state in ("normal", "hover", "pressed"):
+        save(deco_button(state), "ui", "deco_button.png" if state == "normal" else f"deco_button_{state}.png")
+    save(puzzle_frame(), "ui", "puzzle_frame.png")
     for name, fn in (("mirror_waxed", waxed_mirror), ("cloth", cloth), ("wedge", wedge),
                      ("audit_folder", base), ("audit_tracing", tracing)):
         save(_icon(fn), "items", name + ".png")

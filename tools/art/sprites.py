@@ -9,6 +9,7 @@ side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 """
 from .common import save
 import json
+import math
 from pathlib import Path
 from . import common
 from .figure import figure as _figure, pose, walk_pose, sheet, action_figure
@@ -322,9 +323,17 @@ def desk_frame(spec, name, cut=0.5):
 
 def kneel_frame(spec, name):
     """Wide articulated hands-and-knees pose sharing the action strips' planted ankle."""
-    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), KNEEL)
+    img, head = kneeling_figure(dict(spec, h=spec["h"] * SCALE), KNEEL)
     action_strip(name, [(img, head)], [1])
     return img, head
+
+
+def kneeling_figure(spec, joints):
+    """Action figure whose shirt front and tie are tucked out of sight while the trunk is bent over the floor, so they
+    don't read as a red streak along the side of the coat."""
+    hip, shoulder = joints[0], joints[1]
+    dx, dy = shoulder[0] - hip[0], shoulder[1] - hip[1]
+    return action_figure(spec, joints, chest_down=-dy < 0.55 * math.hypot(dx, dy))
 
 
 def aim_frame(spec, name):
@@ -344,7 +353,9 @@ SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
 UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
-KNEEL = [(60, 81), (79, 79), (85, 68), (62, 90), (41, 91), (82, 85), (88, 91)]
+# Beaten down on hands and knees: hips over the knees, shins flat behind, the back sagging down to shoulders a little
+# lower than the hips, arms braced (elbows soft) under the shoulders and the head hanging towards the ground.
+KNEEL = [(60, 71), (82, 76), (91, 79), (61, 88), (41, 91), (81, 84), (86, 90)]
 FALL = [UPRIGHT,
         [(64, 59), (60, 35), (57, 20), (70, 74), (74, 91), (69, 44), (78, 39)],
         [(64, 67), (53, 45), (47, 30), (75, 78), (79, 91), (48, 59), (44, 72)],
@@ -377,11 +388,11 @@ def action_sequences(spec, name):
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
 
-    def sequence(keys, end, timing):
+    def sequence(keys, end, timing, paint=action_figure):
         frames, times = [], []
         for i, (a, b) in enumerate(zip(keys, keys[1:])):
-            frames.append(standing if i == 0 and keys is FALL else action_figure(scaled, a))
-            frames.append(action_figure(scaled, between(a, b)))
+            frames.append(standing if i == 0 and keys is FALL else paint(scaled, a))
+            frames.append(paint(scaled, between(a, b)))
             times += [timing[i] / 2] * 2
         return frames + [end], times + [timing[-1]]
 
@@ -394,7 +405,7 @@ def action_sequences(spec, name):
         # Retain the planted hands/feet while lifting the bowed spine, then bring one knee underneath the body.
         lifting = [(61, 73), (73, 54), (79, 44), (68, 87), (48, 91), (79, 71), (87, 88)]
         keys = [KNEEL, lifting, CROUCH, HALF_UP, UPRIGHT]
-        rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12])
+        rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12], kneeling_figure)
         action_strip("micah_kneel_rise", rise, times)
 
 

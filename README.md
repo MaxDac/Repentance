@@ -129,20 +129,22 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
 1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
    $22 in cash and a set of lockpicks. Micah won't leave without all three.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory; another buys the
-   staff elevator up to Eleanor's floor. Trace its routing diagram and set the three junctions
-   lower, upper, upper to reach the fifth-floor linen room.
+   staff elevator up to Eleanor's floor. Steer the cage through the maze of service shafts from the loading bay
+   to the fifth-floor linen room next to 507 (rooms count up west to east), then dispatch it.
    Micah collects the brass box in room 507 before departing for the Blue Lantern.
 3. **Linen room**: the corridor door to 507 is night-bolted from the far side and has no keyhole. Take a wire
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
    **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and enter R 12 / L 31 / R 7 on the safe's close-up controls, then take the brass box.
+   open the closet and decode the paper's references (apostles, December, the day of rest: 12, 31, 7). It gives
+   no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7.
+   Then take the brass box.
    Open it in the satchel with the hand: a
-   perfumed, blank calling card and a matchbook from the Blue Lantern.
+   calling card carrying her perfume and a matchbook from the Blue Lantern.
 4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
    for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
    combine them and show the blue carnation at the cold-room grille to be let in.
-   **Blue Lantern speakeasy**: Micah doesn't know the password and can bribe Sal with $10,
+   **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
    leaving $10 after all the bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
@@ -312,7 +314,7 @@ tools/               Python art generator
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
 | `PuzzleRules` / `PuzzleMigration` | Godot-free puzzle validators and one-time legacy-save normalization |
-| `PuzzlePanel` | Modal route, dial, catalogue, cipher, crest, alarm-plan and account-index controls |
+| `PuzzlePanel` / `PuzzleScreens` | Shared Art Deco puzzle frame and buttons; per-puzzle screens for the lift maze, dial, catalogue, cipher, crests, alarm plan and account index |
 
 ### Adding a room
 

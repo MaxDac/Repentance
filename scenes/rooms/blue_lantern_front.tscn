@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/BlueLanternFront.cs" id="1_BlueLanternFront"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front.png" id="2_blue_lantern_front"]
@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_bluing.png" id="5_bluing"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_grille_open.png" id="6_grille_open"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="7_Rain"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_regular.png" id="8_regular"]
+[ext_resource type="Script" path="res://scripts/Core/IdleStrip.cs" id="9_IdleStrip"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(52, 180)
@@ -81,6 +83,18 @@ texture = ExtResource("6_grille_open")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "grille_opened"
+
+[node name="Regular" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(422, 95)
+texture = ExtResource("8_regular")
+centered = false
+hframes = 6
+script = ExtResource("9_IdleStrip")
+Sequence = "1:0.18,2:0.22,3:1.1,2:0.25,4:0.3,5:0.9"
+MinRest = 4.0
+MaxRest = 7.0
+Seed = 12
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -222,7 +236,7 @@ shape = SubResource("Rect_8")
 script = ExtResource("3_Hotspot")
 Id = "regular"
 DisplayName = "regular"
-LookText = "A fellow in a good coat, waiting on nothing in the rain. Blue carnation in his buttonhole."
+LookText = "A fellow in a good coat, hat brim down, smoking at the pavement. Blue carnation in his buttonhole."
 WalkTo = Vector2(420, 200)
 Face = 4
 monitoring = false
