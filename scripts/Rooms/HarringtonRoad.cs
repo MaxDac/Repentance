@@ -57,11 +57,11 @@ public partial class HarringtonRoad : Room
             case ("watchman", Verb.UseItem) when item == "revolver":
                 await Say("Pull a gun on a watchman in the Loop, and I'll be explaining myself to the Chicago police by midnight.");
                 return true;
-            case ("watchman", Verb.UseItem) when item == "matchbook":
+            case ("watchman", Verb.UseItem) when item is MicahKit.LighterId or "matchbook":
                 await Say("He doesn't smoke. Or he doesn't smoke on duty. Either way, he isn't taking a light from me.");
                 return true;
 
-            case ("trash_can", Verb.UseItem) when item == "matchbook":
+            case ("trash_can", Verb.UseItem) when item is MicahKit.LighterId or "matchbook":
                 if (State.HasFlag("fire_lit"))
                 {
                     await Say("It's burning well enough already. Any more and I'll take the building down with it.");
@@ -72,7 +72,7 @@ public partial class HarringtonRoad : Room
             case ("trash_can", Verb.Hand):
                 await Say(State.HasFlag("fire_lit")
                     ? "It's on fire. I'm not touching it."
-                    : "Newspapers, straw, and somebody's lunch. One match and it would go up like a Fourth of July.");
+                    : "Newspapers, straw, and somebody's lunch. One flick of my lighter and it would go up like a Fourth of July.");
                 return true;
             case ("trash_can", Verb.Kick):
                 await Say(Watched ? "And have the watchman come over to see who's kicking his trash? Subtle." : "It's burning. Kicking it would just set my trousers on fire too.");

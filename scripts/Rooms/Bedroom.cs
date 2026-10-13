@@ -19,7 +19,7 @@ public partial class Bedroom : Room
         Game.Hud.ShowCaption("Chicago, 1927.");
         await Wait(2.8);
         Game.Hud.ShowCaption(null);
-        Attic.RestoreMicahItems();
+        Attic.RestoreMicahItems(3);
         State.SetFlag("masked");
         await Game.ChangeRoom("club_stage", "act3");
     });
