@@ -28,7 +28,8 @@ class ReconciliationArtTests(unittest.TestCase):
 
     def test_committed_assets_match_generators(self):
         for folder, names in (
-                ("rooms", ("office", "office_ring", "office_cup")),
+                ("rooms", ("office", "office_ring", "office_cup", "office_act3", "office_act3_door_ajar",
+                           "office_act3_door_open", "office_act3_drawer_open")),
                 ("sprites", ("micah_cup", "micah_drink")),
                 ("items", ("faith_ring", "cross"))):
             for name in names:
@@ -53,6 +54,14 @@ class ReconciliationArtTests(unittest.TestCase):
         self.assertGreater(held_y - raised_y, 12)
         self.assertGreaterEqual(raised_y, 20)
         self.assertLessEqual(raised_y, 30)
+
+    def test_act3_office_has_the_lamp_off(self):
+        def brightness(name, box):
+            with Image.open(self.generated / "rooms" / f"{name}.png") as image:
+                pixels = list(image.convert("L").crop(box).getdata())
+            return sum(pixels) / len(pixels)
+        lamp_pool = (166, 100 + common.TOP, 232, 134 + common.TOP)
+        self.assertLess(brightness("office_act3", lamp_pool), brightness("office", lamp_pool) * 0.6)
 
     def test_office_props_and_inventory_icons_have_transparency(self):
         for folder, name, size in (
