@@ -84,8 +84,8 @@ DisplayName = "door"
 LookText = "The door back to the corridor. And the street. And whatever's waiting on it."
 WalkTo = Vector2(90, 232)
 Face = 3
-ExitTo = "convent_road"
-ExitEntry = "start"
+ExitTo = "convent_corridor"
+ExitEntry = "cell"
 monitoring = false
 monitorable = false
 

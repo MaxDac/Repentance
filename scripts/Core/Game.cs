@@ -485,7 +485,7 @@ public partial class Game : Node
         _skipSpeech = new TaskCompletionSource();
         var skip = _skipSpeech;
         who.Talking = true;
-        Hud.ShowSpeech(text, who.HeadPosition, who.SpeechColor);
+        Hud.ShowSpeech(text, who);
         var seconds = Math.Clamp(0.9 + text.Length * 0.055, 1.5, 7.0);
         // ignore the click that triggered this line
         await Wait(0.15);
