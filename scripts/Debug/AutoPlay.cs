@@ -127,7 +127,7 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "dollar");
             await game.Perform(Verb.Hand, "lockpick");
             Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
-            Check(CashRules.Balance(gs.HasFlag) == 22, "case cash is twice the combined bribes");
+            Check(CashRules.Balance(gs.HasFlag) == 22, "case cash covers every bribe");
             await Shot("office_drawer_empty");
             await MouseTest(game);
             await game.Perform(Verb.Walk, "door");
@@ -141,11 +141,18 @@ public class AutoPlay
             Check(game.Room?.Name == "Lobby", "back in the lobby");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
-            Check(gs.HasItem("dollar") && CashRules.Balance(gs.HasFlag) == 21, "bellboy costs one dollar, not the whole cash supply");
+            Check(gs.HasItem("dollar") && CashRules.Balance(gs.HasFlag) == 21 && gs.HasFlag("knows_lantern") &&
+                !gs.HasFlag("staff_elevator"), "the first dollar buys the bellboy's memory, not the back way");
+            await game.Perform(Verb.Walk, "revolving_door");
+            Check(game.Room is Rooms.Lobby, "Eleanor's room comes before the Blue Lantern");
+            await game.Perform(Verb.Talk, "bellboy");
+            Check(CashRules.Balance(gs.HasFlag) == 21 && !gs.HasFlag("staff_elevator"), "talking doesn't buy the back way");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
-            Check(CashRules.Balance(gs.HasFlag) == 21, "repeat bellboy visit does not charge again");
+            Check(CashRules.Balance(gs.HasFlag) == 20 && gs.HasFlag("staff_elevator"), "another dollar buys the way to Eleanor's room");
+            await game.Perform(Verb.UseItem, "bellboy", "dollar");
+            Check(CashRules.Balance(gs.HasFlag) == 20, "repeat bellboy visit does not charge again");
             await ReloadCheckpoint("cash_after_bellboy");
-            Check(CashRules.Balance(gs.HasFlag) == 21 && gs.HasItem("dollar"), "save/load preserves remaining cash");
+            Check(CashRules.Balance(gs.HasFlag) == 20 && gs.HasItem("dollar"), "save/load preserves remaining cash");
             Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
             await game.Perform(Verb.Walk, "revolving_door");
             Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
@@ -232,7 +239,7 @@ public class AutoPlay
             Check(game.Room?.Name == "Speakeasy", "Sal blocks the bar");
             await game.Perform(Verb.Talk, "sal");
             Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out"), "no password, but Sal takes the bribe");
-            Check(CashRules.Balance(gs.HasFlag) == 11 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves eleven");
+            Check(CashRules.Balance(gs.HasFlag) == 10 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves ten");
             await Shot("speakeasy_inside");
             var bar = game.Perform(Verb.Talk, "bartender");
             await Until(() => game.Room?.Name == "Alley");
@@ -1308,7 +1315,17 @@ public class AutoPlay
         Check(game.Hud.InventoryOpen, "satchel opens the inventory");
         var slot = game.Hud.SlotCenter(IndexOf("crowbar"));
         Move(slot);
+        await game.Wait(0.1);
+        Check(game.Hud.HoverRect.HasArea() && game.Hud.HoverDrawsOverInventory, "item name draws above the inventory case");
         await Shot("attic_inventory");
+        PressKey(Key.I);
+        await game.Wait(0.1);
+        Check(!game.Hud.InventoryOpen, "I closes the inventory");
+        PressKey(Key.I);
+        await game.Wait(0.1);
+        Check(game.Hud.InventoryOpen, "I opens the inventory");
+        Move(slot);
+        await game.Wait(0.05);
         Click(slot, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
