@@ -515,6 +515,8 @@ def _head(c, col, P, body, H, cp, sp, nod):
         x, y, _ = P(center)
         return (x, y), H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2), H * ay
 
+    if col.get("chin_cut"):
+        before = (c.mat.copy(), c.part.copy(), c.n.copy(), c.bias.copy())
     if abs(sp) > 0.3:  # back of the skull: heads are deeper than they are wide
         oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
         c.put(c.ellipse(oc, orx, ory), skin, "head", dither=False)
@@ -535,6 +537,15 @@ def _head(c, col, P, body, H, cp, sp, nod):
               skin, "head", dither=False)
         c.put(c.capsule(P(body([0, ys + 0.066 * HEAD, 0.05 * HEAD])), P(body([0, ys + 0.078 * HEAD, 0.046 * HEAD])), 0.8, 0.8),
               skin, "head", dither=False)
+    if col.get("chin_cut"):  # lift the chin: drop the lowest rows of every head column, showing what lay behind
+        head = c.parts_mask("head")
+        cut = head.copy()
+        cut[:-1] &= ~head[1:]
+        cut &= c.Y > hy_
+        for _ in range(col["chin_cut"] - 1):
+            cut[:-1] |= cut[1:] & head[:-1]
+        for dst, src in zip((c.mat, c.part, c.n, c.bias), before):
+            dst[cut] = src[cut]
     if abs(cp) > 0.1 and abs(sp) > 0.15 and facing:
         ex, ey, _ = P(body([-fs * 0.05 * 1, 0.088 + nod, -0.006]))
         ear_side = -1 if sp > 0 else 1
