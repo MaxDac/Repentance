@@ -186,11 +186,16 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### End of Act 1 - Present day
 
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
-- Micah's 1927 inventory is put aside during the present-day scenes and given back when the story returns to 1927.
+- Micah's 1927 inventory is put aside during the present-day scenes. When the journal picks up again, each act
+  starts with a reset satchel: the notepad and lighter plus only what the rest of that act needs.
+  - Act 2: revolver, lockpick, the brass box's card, the mirror, and Faith's ring and cross if he has them. The
+    photo, the cash and the matchbook stay behind; the notepad holds what they said.
+  - Act 3: the revolver, and Faith's ring and cross if he has them (the endings weigh them).
 
 ### Micah's notepad
 
-- Micah always carries a notepad, the first item in his satchel (Daniel never has it). It can be read full
+- Micah always carries a notepad, the first item in his satchel, and his lighter, the second (Daniel has
+  neither). The lighter is the flame for every fire in the story. The notepad can be read full
   screen at any time with **N** or look/hand in the satchel, one page per note, paged back and forth.
 - Notes are written as the story advances, from Teddy's briefing to the Harrington audit, including the
   triquetra sketched from behind the mirror.
@@ -392,7 +397,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
   - While the watchman is there, touching the crates or the fire escape gets Micah spotted: the watchman
     shoos him back down the alley, and the back door is locked anyway. Threatening him with the revolver or kicking him is refused.
-  - Step 1: use the Blue Lantern matchbook on the trash can. It catches fire, the watchman shouts "Fire!" and
+  - Step 1: use the lighter on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
   - **Puzzle 7 - Ladder catch:** after the distraction, take the tapered packing wedge visible among the
@@ -425,8 +430,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   - The plaque reads: "Present your summons, sealed by the first of the procession."
   - Take the stick of sealing wax from the coat-check counter. Cold wax on the invitation is refused ("Hard as a
     church pew. Needs a flame.").
-  - Combine the matchbook with the sealing wax: soft wax (the matchbook is never consumed - it is needed again
-    in Act 3). Combine the soft wax with the invitation: the waxed invitation.
+  - Combine the lighter with the sealing wax: soft wax (the lighter is never consumed). Combine the soft wax
+    with the invitation: the waxed invitation.
   - Each cloak on the rack (lion, stag, raven) has a signet ring in its pocket; Micah only holds one at a time,
     taking another hangs the previous one back up. The invitation's procession is raven, lion, stag, so the
     raven is first: lion or stag on the wax is refused.
@@ -538,8 +543,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - **Puzzle 15 - The wine cellar:** the trapdoor leads down into the Harrington wine cellar, pitch black.
   Micah can make out a storm lantern on a hook and some delivery crates; the stair at the back can't be
   climbed blind. Take the lantern (empty) and look at/take from the crates: one sloshes, a can of
-  kerosene. Combine **lantern + kerosene** (filled lantern), then **filled lantern + matchbook** (lit
-  lantern; the matchbook is kept). Trying the matchbook on the empty lantern gets "Dry wick. Needs fuel
+  kerosene. Combine **lantern + kerosene** (filled lantern), then **filled lantern + lighter** (lit
+  lantern; the lighter is kept). Trying the lighter on the empty lantern gets "Dry wick. Needs fuel
   first." Use the lit lantern on the stair (or on the darkness): Micah hangs it on a nail, the cellar
   lights up, and behind the wine racks a bootleggers' service stair climbs to a panel behind the old
   man's study bar. It brings Micah into the study through the drinks cabinet. Going back through the
@@ -651,8 +656,9 @@ in the trunk.
 The fifteen added/expanded puzzles are distributed **6 in Act 1, 6 in Act 2, and 3 in Act 3**. Puzzles 11-15
 are collect-and-combine puzzles in five extra locations: the Aurelian linen room and Rizzo's Flowers (Act 1), the
 Tribune morgue and the Club vestibule (Act 2), and the Harrington wine cellar (Act 3). Each asks Micah to gather
-items in that location, join them in the satchel and use the result to continue. The matchbook is only ever a
-flame: no combination consumes it, so it is still in the satchel for the cellar lantern.
+items in that location, join them in the satchel and use the result to continue. Micah's lighter is the only
+flame: no combination consumes it, and it is pinned in the satchel, so it is still there for the cellar lantern.
+The matchbook is only the Blue Lantern clue.
 The final act also retains its existing three-step alley encounter. The alarm gives the pursuit route
 an interactive infiltration beat; the optional index provides investigation before the confrontation.
 Giving up or reconciling never requires completing a pursuit-route puzzle. The obsolete temporary

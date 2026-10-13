@@ -11,6 +11,8 @@ public static class Items
     {
         [Notes.ItemId] = new(Notes.ItemId, "notepad", "res://assets/art/items/notepad.png",
             "My notepad. Everything I've learned on the case, in pencil."),
+        [MicahKit.LighterId] = new(MicahKit.LighterId, "lighter", "res://assets/art/items/lighter.png",
+            "My brass lighter. It's lit more cigarettes than I should have smoked, and it never misses."),
         ["faith_ring"] = new("faith_ring", "wedding ring", "res://assets/art/items/faith_ring.png",
             "My wedding ring. Rose kept her promises. It's time I kept mine."),
         ["cross"] = new("cross", "cross pendant", "res://assets/art/items/cross.png",
@@ -20,7 +22,7 @@ public static class Items
         ["dollar"] = new("dollar", "cash", "res://assets/art/items/dollar.png",
             "My cash for the case. Two dollars for the bellboy; ten to get past Sal."),
         ["matchbook"] = new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
-            "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. Just matches."),
+            "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. A calling card for a speakeasy."),
         ["crowbar"] = new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
             "A rusty crowbar. Every attic has one. Nobody knows why."),
         ["journal"] = new("journal", "journal", "res://assets/art/items/journal.png",
