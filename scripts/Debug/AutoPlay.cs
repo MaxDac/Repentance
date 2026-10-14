@@ -616,6 +616,8 @@ public class AutoPlay
             // ---- Caleb points to the convent; the sister, and the revolver
             await game.Perform(Verb.Walk, "church");
             Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
+            Check(_offered.TryGetValue("caleb_club", out var calebLast) && calebLast.Length == 1 && calebLast[0].StartsWith("They have her, Caleb"),
+                "Micah presses Caleb with both reasons before asking him outright");
             await game.Perform(Verb.Walk, "church");
             Check(game.Room?.Name == "ChicagoMap" && !gs.HasFlag("church_before_office"), "repeat church visit doesn't anticipate the sister's threat");
             Check(!gs.HasItem("cross"), "taking the ring initially postpones the cross until Act 3");
