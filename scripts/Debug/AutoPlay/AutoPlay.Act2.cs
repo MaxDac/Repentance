@@ -1,0 +1,305 @@
+using Godot;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Repentance;
+
+/// <summary>Act 2 of the autoplay run.</summary>
+public partial class AutoPlay
+{
+    /// <summary>The end of Act 1 and Act 2: the cathedral, the library, the Club, the morgue and the Harrington office.</summary>
+    private async Task PlayActTwo(Game game, GameState gs)
+    {
+        // ---- end of Act 1, then Act 2 the next day
+        Check(gs.StoryAct == 2 && gs.HasItem("journal") && game.Player.Character == "daniel", "Act 2: Daniel is back with the journal");
+        await Shot("attic_act2");
+        var read = game.ItemVerb(Verb.Hand, "journal");
+
+        // ---- Act 2, 1927: whiskey and the ring, then the cathedral
+        await Until(() => game.Room?.Name == "Office" && gs.HasFlag("office_cup_held"));
+        await game.Wait(0.65);
+        await Shot("office_whiskey_drinking");
+        await Until(() => gs.HasFlag("act2_office_done"));
+        Check(gs.HasFlag("act2_whiskey_drunk") && gs.HasFlag("ring_taken_act2") && gs.HasItem("faith_ring"),
+            "Act 2 opens with whiskey and the recorded take-ring choice");
+        Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
+        await Until(() => game.Room?.Name == "ChurchExterior");
+        Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+        Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
+            gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
+            !gs.HasItem("matchbook") && !gs.HasItem("photo") && !gs.HasItem("dollar"),
+            "Act 2 starts with notepad, lighter and the case kit; Act 1 clues stay behind");
+        await game.Wait(1.5);
+        await Shot("church_exterior_act2");
+        await Until(() => game.Room?.Name == "ChurchInterior");
+        Check(gs.HasFlag("act2_church_thought"), "Micah thinks about Eleanor outside the cathedral, then goes in");
+        await game.Wait(2);
+        await Shot("church_act2");
+        await Until(() => game.Room?.Name == "ChicagoMap");
+        Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
+        Check(_crossOffers == 0, "no pendant offer on the initial confession");
+        Check(!game.Player.Visible, "the player isn't drawn on the map");
+        await read;
+        await WaitIdle(game);
+        await RingAndCrossTest(game);
+        await RoseAppealsTest(game);
+        await RoseWalkAwayTest(game);
+        await Shot("map");
+        Check(game.Room?.FindHotspot("club")?.Visible == false, "the club isn't on the map yet");
+        if (game.Room is Rooms.ChicagoMap map && map.FindHotspot("library") is { } libSpot)
+        {
+            map.UpdateCaption(libSpot.Bounds.GetCenter());
+            Check(map.CaptionText == libSpot.LookText && !map.CaptionText.Contains("Rose"),
+                "hovering a place reads its description in the map caption");
+            map.UpdateCaption(new Vector2(20, 250));
+            Check(map.CaptionText == "", "the map caption hides away from the places");
+            Check(game.LeftClickVerb(libSpot) == Verb.Walk, "a left click on the map travels instead of looking");
+        }
+        else Check(false, "map caption test reached the map");
+        await game.Perform(Verb.Walk, "church");
+        Check(game.Room?.Name == "ChicagoMap", "Micah won't go back to the church");
+
+        var libraryLines = await Listen(game, game.Perform(Verb.Walk, "library"));
+        Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+        Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
+            "Micah is relieved Rose isn't on duty, but she's back on his mind");
+        Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");
+        CheckActorWins(game, "librarian", "ladder", "the librarian wins over the ladder behind him");
+        await Shot("library_day");
+        await game.Perform(Verb.UseItem, "librarian", "revolver");
+        Check(!gs.HasFlag("library_banned"), "no gun before asking");
+        gs.TakeItem("mirror");
+        var ask = game.Perform(Verb.UseItem, "librarian", Notes.ItemId);
+        await Until(() => game.Hud.ImageVisible);
+        Check(game.Hud.ImageVisible, "the notepad sketch of the symbol stands in for the mirror");
+        await Shot("librarian_symbol");
+        game.Hud.CloseImage();
+        await ask;
+        gs.GiveItem("mirror");
+        var notes = game.ItemVerb(Verb.Hand, Notes.ItemId);
+        await game.Wait(0.1);
+        for (int i = 0; i < 40 && game.Hud.Notepad.PageId is not (null or "triquetra"); i++) game.Hud.Notepad.Turn(-1);
+        Check(game.Hud.Notepad.PageId == "triquetra" && game.Hud.Notepad.SketchVisible, "the notepad keeps the sketch from behind the mirror");
+        await Shot("notepad_triquetra");
+        game.Hud.Notepad.Close();
+        await notes;
+        Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
+        await game.Perform(Verb.UseItem, "librarian", "revolver");
+        Check(!gs.HasItem("book"), "cannot retrieve book before identifying title");
+        await game.Perform(Verb.Hand, "shelves_right");
+        Check(!gs.HasItem("book"), "locked restricted shelves prevent a catalogue bypass");
+        await CancelPuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue, "catalogue_identified", "catalogue");
+        await SolvePuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue,
+            new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
+        var threaten = game.Perform(Verb.UseItem, "librarian", "revolver");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Good Lord", StringComparison.Ordinal));
+        Check(game.Player.PoseName == "micah_aim", "Micah aims the revolver at the librarian");
+        await Shot("library_threat");
+        await threaten;
+        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&
+            game.Room?.Name == "Library" && game.Player.PoseName == null,
+            "threatened the librarian into giving up the book; Micah stays until he leaves");
+        await game.Perform(Verb.Talk, "librarian");
+        Check(game.Room?.Name == "Library", "the cowed librarian won't talk any more");
+        await game.Perform(Verb.Walk, "exit");
+        Check(gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "leaving after the hold-up bans the library");
+        await game.Perform(Verb.Walk, "library");
+        Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
+
+        await game.ItemVerb(Verb.Hand, "book");
+        Check(!gs.HasItem("address"), "the book is only read at the office");
+        await game.Perform(Verb.Walk, "office");
+        Check(game.Room?.Name == "Office", "back at the office");
+        await game.ItemVerb(Verb.Hand, "book");
+        Check(!gs.HasItem("address") && !gs.HasFlag("club_unlocked"), "book gives cipher instructions, not a free address");
+        await ReloadCheckpoint("cipher_book_only");
+        Check(gs.HasFlag("read_book") && !gs.HasItem("address") && !gs.HasFlag("club_unlocked"), "new save/load does not grandfather unfinished cipher");
+        await Combine("card", "mirror");
+        await WaitIdle(game);
+        Check(!gs.HasFlag("card_reflected"), "cold blank card does not yield an address");
+        var warming = game.Perform(Verb.UseItem, "radiator", "card");
+        await Until(() => game.Hud.ImageVisible);
+        await Shot("card_reversed");
+        game.Hud.CloseImage();
+        await warming;
+        await CancelPuzzle(() => CombineAndWait("card", "mirror"), PuzzleKind.Cipher, "card_decoded", "card_cipher");
+        await SolvePuzzle(() => CombineAndWait("mirror", "card"), PuzzleKind.Cipher,
+            new[] { ("s0", 1), ("s1", 2) }, "card_cipher");
+        Check(gs.HasItem("address") && gs.HasFlag("club_unlocked"), "heat, reflection and ornament order reveal Club address");
+        await Shot("office_book");
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "ChicagoMap" && game.Room?.FindHotspot("club")?.Visible == true, "the club is on the map now");
+        await Shot("map_club");
+        // ---- the Club, the first time: thrown out onto Hubbard Street
+        var club = game.Perform(Verb.Walk, "club");
+        await Until(() => game.Room?.Name == "ClubHall");
+        Check(!gs.HasFlag("on_map") && game.Room?.FindHotspot("guest")?.Visible == false, "entered the Club, no masks around yet");
+        await game.Wait(1);
+        await Shot("club_hall");
+        await Until(() => gs.HasFlag("brute_called"));
+        await game.Wait(1);
+        await Shot("club_hall_brute");
+        await Until(() => game.Room?.Name == "Street");
+        await game.Wait(1.5);
+        await Shot("street_thrown_out");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        await club;
+        await WaitIdle(game);
+        Check(gs.HasFlag("go_rose") && gs.HasFlag("club_out"), "chose to go to Rose's house");
+        await Shot("rose_house");
+        var bell = game.Perform(Verb.Hand, "bell");
+        await Until(() => gs.HasFlag("rose_door"));
+        await game.Wait(1.5);
+        await Shot("rose_house_door");
+        await Until(() => game.Player.Facing == Facing.Up && game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
+        Check(game.Room!.FindActor("rose")!.Texture!.ResourcePath.EndsWith("/rose_front.png"),
+            "Micah stands by the bell with his back to the screen, Rose faces the camera");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Wait!"));
+        Check(!game.Hud.InsetVisible, "no close-up yet while Rose calls \"Wait!\"");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Rose && game.Room?.Name == "RoseHouse", "Rose's close-up framed over the door after she calls Micah back");
+        Check(!game.Hud.SpeechVisible, "the close-up opens on a silent look");
+        Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "Rose's close-up fills most of the screen");
+        await Until(() => game.Hud.SpeechVisible);
+        Check(game.Hud.SpeechText.Contains("trouble"), "after the pause, Rose's last line over the close-up");
+        Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below Rose's face while the close-up is up");
+        await game.Wait(1);
+        await Shot("rose_house_wait");
+        await Until(() => !game.Hud.InsetVisible);
+        Check(game.Room?.Name == "RoseHouse", "Rose's close-up is gone before the door closes");
+        await bell;
+        Check(gs.HasFlag("rose_wait") && game.Room?.Name == "ChicagoMap", "Rose called Micah back, then the map");
+        Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("convent")?.Visible == false, "convent not on the map yet");
+        await game.Perform(Verb.Walk, "club");
+        Check(game.Room?.Name == "ChicagoMap", "no use going back to the Club");
+
+        // ---- Caleb points to the convent; the sister, and the revolver
+        await game.Perform(Verb.Walk, "church");
+        Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
+        Check(_offered.TryGetValue("caleb_club", out var calebLast) && calebLast.Length == 1 && calebLast[0].StartsWith("They have her, Caleb"),
+            "Micah presses Caleb with both reasons before asking him outright");
+        await game.Perform(Verb.Walk, "church");
+        Check(game.Room?.Name == "ChicagoMap" && !gs.HasFlag("church_before_office"), "repeat church visit doesn't anticipate the sister's threat");
+        Check(!gs.HasItem("cross"), "taking the ring initially postpones the cross until Act 3");
+        Check(game.Room?.FindHotspot("convent")?.Visible == true, "the convent is on the map");
+        await game.Perform(Verb.Walk, "convent");
+        Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
+        await Shot("convent_act2");
+        for (var i = 0; i < 3; i++)
+        {
+            var nunLines = await Listen(game, game.Perform(Verb.Talk, "nun"));
+            Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("nun_threatened") &&
+                nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
+        }
+        var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+        await game.Wait(1.5);
+        await Shot("convent_gun");
+        await threat;
+        Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
+        Check(game.Room?.FindHotspot("tribune")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false
+            && game.Room?.FindHotspot("club")?.Visible == false
+            && game.Room?.FindHotspot("library")?.Visible == false
+            && game.Room?.FindHotspot("office")?.Visible == true, "the Tribune before Harrington; office remains available for ring recovery");
+        await Shot("map_tribune");
+        await game.Perform(Verb.Walk, "church");
+        Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
+
+        // ---- the Tribune morgue: a clipping torn through the address, paste, and a pin in the Loop
+        await game.Perform(Verb.Walk, "tribune");
+        Check(game.Room?.Name == "NewspaperMorgue", "down in the Tribune morgue");
+        await WaitIdle(game);
+        await Shot("newspaper_morgue");
+        await game.Perform(Verb.Hand, "drawer_h");
+        Check(gs.HasItem("clipping_top") && gs.HasFlag("took_clipping_top"), "drawer H: the top half of the clipping");
+        await game.Perform(Verb.Hand, "spike");
+        Check(gs.HasItem("clipping_bottom") && gs.HasFlag("took_clipping_bottom"), "the copy spike: the bottom half");
+        await game.Perform(Verb.UseItem, "wall_map", "clipping_top");
+        Check(!gs.HasFlag("harrington_located"), "half a clipping is no address");
+        await CombineAndWait("clipping_top", "clipping_bottom");
+        Check(!gs.HasItem("clipping") && gs.HasItem("clipping_top") && gs.HasItem("clipping_bottom"), "the halves won't hold without paste");
+        await game.Perform(Verb.Hand, "paste_pot");
+        Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
+        await Shot("newspaper_morgue_taken");
+        await CombineAndWait("clipping_top", "clipping_bottom");
+        Check(gs.HasItem("clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
+            "pasted the halves together; the paste pot is kept");
+        await ReloadCheckpoint("morgue_clipping");
+        await game.Perform(Verb.UseItem, "wall_map", "clipping");
+        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the clipping pins the Harrington Building on LaSalle");
+        await Shot("newspaper_morgue_pin");
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "ChicagoMap" && !gs.HasItem("paste") && !gs.HasFlag("paste_out"), "the paste pot goes back on the way out");
+        Check(game.Room?.FindHotspot("harrington")?.Visible == true && game.Room?.FindHotspot("tribune")?.Visible == false,
+            "Harrington's office on the map, the Tribune off it");
+        await Shot("map_harrington");
+
+        // ---- the alley behind the Harrington Building
+        await game.Perform(Verb.Walk, "harrington");
+        Check(game.Room?.Name == "HarringtonRoad", "at the Harrington Building");
+        await Shot("harrington_road");
+        await game.Perform(Verb.Hand, "crates");
+        Check(!gs.HasFlag("crates_stacked"), "the watchman sees Micah going for the crates");
+        await game.Perform(Verb.Hand, "fire_escape");
+        Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
+        await game.Perform(Verb.UseItem, "trash_can", MicahKit.LighterId);
+        Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
+        var flames = game.Room?.GetNodeOrNull<LoopStrip>("Flames");
+        var flameFrame = flames?.Frame ?? -1;
+        await game.Wait(0.35);
+        Check(flames != null && flames.Visible && flames.Hframes > 1 && flames.Frame != flameFrame,
+            "the trash-can fire's flames and smoke loop while it burns");
+        await Shot("harrington_road_fire");
+        await game.Perform(Verb.Hand, "fire_escape");
+        Check(game.Room?.Name == "HarringtonRoad", "the ladder is too high without the crates");
+        await game.Perform(Verb.Hand, "packing_wedge");
+        await game.Perform(Verb.UseItem, "ladder_catch", "wedge");
+        Check(!gs.HasFlag("ladder_freed") && gs.HasItem("wedge"), "catch cannot be reached before stacking crates; wedge retained");
+        await game.Perform(Verb.Hand, "crates");
+        Check(gs.HasFlag("crates_stacked"), "stacked the crates");
+        await game.Perform(Verb.Hand, "fire_escape");
+        Check(game.Room?.Name == "HarringtonRoad", "stacked crates alone do not bypass the jammed catch");
+        await game.Perform(Verb.Hand, "packing_wedge");
+        Check(gs.HasItem("wedge"), "collected packing wedge from distinct hotspot");
+        await ReloadCheckpoint("ladder_wedge");
+        await game.Perform(Verb.UseItem, "ladder_catch", "wedge");
+        Check(gs.HasFlag("ladder_freed") && !gs.HasItem("wedge"), "wedge remains installed holding catch clear");
+        await Shot("harrington_road_crates");
+        await game.Perform(Verb.Hand, "fire_escape");
+        Check(game.Room?.Name == "HarringtonOffice", "climbed into Harrington's office");
+        await WaitIdle(game);
+        await Shot("harrington_office");
+        await game.Perform(Verb.Walk, "window");
+        Check(game.Room?.Name == "HarringtonOffice", "can't leave empty-handed");
+        await game.Perform(Verb.Hand, "drawer_left");
+        await game.Perform(Verb.Hand, "drawer_right");
+        Check(!gs.HasItem("invitation"), "the right drawer is locked");
+        await game.Perform(Verb.UseItem, "drawer_right", "lockpick");
+        Check(gs.HasItem("invitation"), "picked the drawer: the invitation");
+        await game.Perform(Verb.Hand, "closet");
+        Check(gs.HasFlag("harrington_closet_open"), "Harrington closet uses independent flag");
+        var lookPortrait = game.Perform(Verb.Look, "portrait");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Heraldry && game.Hud.InsetName == "heraldry_closeup",
+            "looking at the portrait frames the band of heraldry at its foot");
+        await Until(() => game.Hud.SpeechVisible);
+        await Shot("harrington_portrait_heraldry");
+        await lookPortrait;
+        await Until(() => !game.Hud.InsetVisible);
+        Check(gs.HasFlag("portrait_key_seen") && !game.Hud.InsetVisible, "the heraldry close-up closes after Micah's look");
+        Check(new CrestsScreen().Clue == "Three dials. Three symbols.",
+            "the false-back lock's clue box gives nothing away");
+        await CancelPuzzle(() => game.Perform(Verb.UseItem, "panel", "lockpick"), PuzzleKind.Crests, "secret_open", "crest_lock");
+        await SolvePuzzle(() => game.Perform(Verb.Hand, "panel"), PuzzleKind.Crests,
+            new[] { ("s0", 2), ("s2", 1) }, "crest_lock");
+        await Shot("harrington_office_niche");
+        await game.Perform(Verb.Hand, "niche");
+        Check(gs.HasItem("mask") && gs.HasItem("cloak"), "took the mask and the cloak");
+        await Shot("harrington_office_after");
+        await game.Perform(Verb.Walk, "window");
+        Check(gs.HasFlag("harrington_done") && game.Room?.Name == "ChicagoMap", "out the window, back to the map");
+        Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false, "the Club is back on the map");
+        await game.Perform(Verb.Walk, "church");
+        Check(gs.HasFlag("church_before_club"), "Caleb's last warning before the Club");
+    }
+}

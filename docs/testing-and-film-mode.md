@@ -138,7 +138,7 @@ Each one needs a reason next to every entry, and each fails when an entry is no 
 1. Update `Walkthrough.md` (the spec), then `scripts/Rooms` and `dialogue/repentance.ink`.
 2. Update the matching beat in `Playthrough.cs` so the canonical story still plays through; add a beat for a new
    room or step.
-3. Add a regression to `AutoPlay.cs` for anything that could break quietly (a wrong item, a cancelled puzzle).
+3. Add a regression to the matching act file in `scripts/Debug/AutoPlay/` for anything that could break quietly (a wrong item, a cancelled puzzle).
 4. Run `tools\run\test.ps1` and watch `tools\run\film.ps1 -Speed 4` once.
 5. If the save format changes, bump `SaveData.CurrentVersion` and the version stated in `README.md` and
    `Walkthrough.md` (a test checks they agree).

@@ -1,6 +1,7 @@
 # Credits
 
-- **Game design, code and generated art**: Repentance project.
+- **Game design, code and generated art**: Repentance project, by Massimiliano D'Acunzo. Code under
+  PolyForm Noncommercial 1.0.0 (`LICENSE`), content under CC BY-NC-SA 4.0 (`LICENSE-ASSETS.md`).
 - **Silkscreen** font by Jason Kottke, licensed under the SIL Open Font License 1.1 (`assets/fonts/OFL.txt`).
 - **GodotInk** by Paul Joannon, MIT License (`addons/GodotInk/LICENSE`).
 - **Ink** narrative scripting language by inkle Ltd, MIT License.

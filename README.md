@@ -339,11 +339,20 @@ dialogue/            repentance.ink - all conversations, one knot per character
 scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
+scripts/Core/Game/   Game's partial files, one per concern (startup, input, items, commands, scripting, rooms, saves, pause)
+scripts/Core/Items/  the item catalogue, one file per act
+scripts/Story/       story logic that holds in any room (inventory verbs, item combinations, shared puzzles)
 scripts/Rooms/       per-room puzzle scripts
 scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-ups, cursor), CloseUp (the close-up catalog), VerbWheel and GameMenu (title/pause/save slots)
-scripts/Debug/       Automated runs: Harness, Playthrough (story + film mode), AutoPlay, WalkTest
+scripts/UI/Hud/      Hud's partial files: inventory, dialogue, screens and images
+scripts/Debug/       Automated runs: Harness (shared base), Playthrough (story + film mode), AutoPlay (partials in
+                     scripts/Debug/AutoPlay/, one per act plus the focused checks), WalkTest
 tools/               Python art generator
 ```
+
+Large classes are split into `partial` files so that changes to different features land in different files
+and rarely conflict. The main file (for example `scripts/Core/Game.cs`) keeps the fields and the Godot
+callbacks; add new code to the partial file for its concern, or start a new one.
 
 ### Framework at a glance (`scripts/Core`)
 
@@ -362,7 +371,8 @@ tools/               Python art generator
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `SoundSynth` / `Sfx` | Godot-free procedural sound effects and `*cue*` parsing, and the node that plays them (footsteps, story cues, room ambience) on the Effects bus |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
-| `Items` | Inventory item catalogue (name, icon, description) |
+| `Items` | Inventory item catalogue (name, icon, description), listed per act in `scripts/Core/Items/`; an id defined twice throws |
+| `ItemScripts` / `CombineScripts` / `StoryPuzzles` (`scripts/Story`) | Story responses to inventory verbs and combinations that hold in any room, and the puzzles they share with room hotspots |
 | `MicahKit` | Godot-free: the pinned notepad and lighter, the items each act keeps when its journal starts, and debug-start kits |
 | `Notes` / `NotepadView` | Godot-free catalogue of Micah's notepad pages (unlocked by story flags, plus debug-start flags) and the full-screen reader |
 | `PuzzleRules` / `PuzzleMigration` | Godot-free puzzle validators and one-time legacy-save normalization |
@@ -468,3 +478,15 @@ flatten the lounge's velvet and brass.
 ## Credits
 
 See [CREDITS.md](CREDITS.md).
+
+## License
+
+Repentance is source-available and non-commercial. You may fork, modify and share it, but you
+may not sell it or use it commercially.
+
+- **Code** (`scripts/`, `scenes/`, `tests/`, `tools/`, project files): [PolyForm Noncommercial 1.0.0](LICENSE).
+- **Creative content** (`assets/` art and audio, `dialogue/`, `docs/`, `Walkthrough.md`):
+  [CC BY-NC-SA 4.0](LICENSE-ASSETS.md).
+- Third-party components (GodotInk, the Silkscreen font) keep their own licences; see [CREDITS.md](CREDITS.md).
+
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -50,9 +50,15 @@ py -3.14 -m unittest discover -s tests\art -v
 
 - Update the beat in `scripts/Debug/Playthrough.cs` (the canonical story, also what film mode plays), or add one.
   Act 3 routes branch on `_route`; every route must still reach "The End".
-- Add regressions for things that could break quietly to `scripts/Debug/AutoPlay.cs`.
+- Add regressions for things that could break quietly to the matching act file in `scripts/Debug/AutoPlay/`
+  (`AutoPlay.Act1.cs` ... `AutoPlay.Endings.cs`). Shared test helpers (input, puzzles, satchel, checks) live in
+  `scripts/Debug/Harness.cs`, not in `AutoPlay`.
 - `StoryIntegrityTests` (flags, knots, items, one-shot knots, save version in docs) and `InkWalkTests` (every
   conversation, every choice path, no Ink runtime error, every choice reachable) must stay green. Only add an
   allowlist entry (`OneShotKnots`, `UnreadFlags`, `UnsetFlags`, `IndirectItems`, `UnreachedChoices`,
   `UnheardSounds`) with a real reason; a knot with only `*` choices that the game can run twice is a dead end.
 - Bump `SaveData.CurrentVersion` if the save format changes, and the version stated in README and Walkthrough.
+- Inventory verbs and combinations that hold in any room go in `scripts/Story/` (not in `Game`).
+- New items go in the act file in `scripts/Core/Items/` that introduces them.
+- `Game`, `Hud` and `AutoPlay` are partial classes split by concern to keep merges conflict-free:
+  add code to the partial file for its concern rather than to the main file.
