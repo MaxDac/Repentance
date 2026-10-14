@@ -535,16 +535,18 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Behind Blue Lantern, previous location from Act 1
 
 - The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
-  Sal out, then use the revolver on him to knock him down. Only then knock on the back door to face Tony.
+  Sal out, then use the revolver on him to knock him down. Hit from behind, Sal drops to his knees and then falls
+  face-down. Only then knock on the back door to face Tony.
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
 - Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
   Eleanor.
 - The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
-- At this point, the player must choose between fire the revolver on the leg, or to walk away, because it's not worth it.
+- At this point, the player must choose between firing the revolver into his shoulder, or walking away, because it's not worth it.
   The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
   office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
 - If the player walks out, he's going to his wife's house (caption *End of Act Three*).
-- If he's firing at the leg, you have to create a new model for the bartender supine, with a drop of blood from the leg.
+- If he fires, Tony is hit in the shoulder: he clutches it, his legs fold straight down under him and he ends up on
+  his back, with the blood on his shoulder and pooling on the ground under it.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
   from the kitchen, because they provide them with booze.
 - Micah get out of the scene.

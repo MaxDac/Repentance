@@ -748,7 +748,7 @@ MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
 BARTENDER: Are you out of your mind? Beat it, Jones. You don't know who these people are.
 BARTENDER: They own judges. They own cops. They own the men who own the cops.
 BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, too.
-* [(Shoot him in the leg.)]
+* [(Shoot him in the shoulder.)]
     ~ set_flag("shot_bartender")
 * {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
     MICAH: ...You're right, Tony. It's not worth it. None of it is.
@@ -756,12 +756,12 @@ BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, to
 - -> END
 
 === bartender_shot ===
-BARTENDER: AAAAH! My leg! You shot me, you crazy son of a...
-MICAH: I've got five more. Where is she?
+BARTENDER: AAAAH! My shoulder! You shot me, you crazy son of a...
+MICAH: I've got five more, Tony. And you've got another shoulder. Where is she?
 BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
 BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday.
 BARTENDER: There's a key on the lintel over the kitchen door. Just walk in like the delivery boys do.
-MICAH: Get that leg looked at, Tony. Tell them you slipped.
+MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 -> END
 
 === harrington_eleanor ===

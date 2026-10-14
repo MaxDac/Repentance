@@ -234,7 +234,7 @@ From here the story follows Walkthrough.md:
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
 28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
-   the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the leg, or (only if Micah went
+   the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the shoulder, or (only if Micah went
    back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house.
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
