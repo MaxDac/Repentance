@@ -473,6 +473,13 @@ public partial class Hud : CanvasLayer
 
     public void HideChoices() => _choices.Visible = _choicesBg.Visible = false;
 
+    /// <summary>Film mode: draws the option about to be picked in the hover colour.</summary>
+    public void HighlightChoice(int index)
+    {
+        if (index < _choices.GetChildCount() && _choices.GetChild(index) is Button b)
+            b.AddThemeColorOverride("font_color", VerbHover);
+    }
+
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
     public void ShowSpeech(string text, ISpeaker speaker)
     {

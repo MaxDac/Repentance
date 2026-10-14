@@ -21,5 +21,11 @@
     <Compile Include="..\..\scripts\Core\Notes.cs" Link="Linked\Notes.cs" />
     <Compile Include="..\..\scripts\Core\MicahKit.cs" Link="Linked\MicahKit.cs" />
     <Compile Include="..\..\scripts\Core\SoundSynth.cs" Link="Linked\SoundSynth.cs" />
+    <Compile Include="..\..\scripts\Core\InkScan.cs" Link="Linked\InkScan.cs" />
   </ItemGroup>
+  <!-- The same ink compiler and runtime as the game (downloaded on first build), so StoryIntegrityTests can walk the real story. -->
+  <PropertyGroup>
+    <GodotProjectDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\'))</GodotProjectDir>
+  </PropertyGroup>
+  <Import Project="..\..\addons\GodotInk\GodotInk.props" />
 </Project>

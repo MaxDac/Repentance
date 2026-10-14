@@ -10,17 +10,11 @@ namespace Repentance;
 /// Smoke test: plays the whole demo by itself, saving screenshots to screenshots/ and printing
 /// AUTOPLAY OK / AUTOPLAY FAILED. Run with: godot -- --autoplay [--clock=fast|normal]
 /// </summary>
-public class AutoPlay
+public class AutoPlay : Harness
 {
-    /// <summary>Previous automated clock: 8× game time, display timing left alone.</summary>
-    private const double NormalTimeScale = 8;
-    /// <summary>Uncapped clock: dialogue and <see cref="Game.Wait"/> do not take wall-clock story time.</summary>
-    private const double FastTimeScale = 60;
-    private Game _game = null!;
+    private string _marker = "AUTOPLAY";
+    protected override string Marker => _marker;
     private readonly HashSet<string> _shotKnots = new();
-    private readonly List<string> _failures = new();
-    private string _dir = "";
-    private int _shot;
     private readonly Dictionary<string, int> _poseCounts = new();
     private readonly Dictionary<PosePlayback, int> _lastPoseFrame = new();
     private string[] _prefer = Array.Empty<string>();
@@ -34,21 +28,14 @@ public class AutoPlay
 
     public async Task Run(Game game)
     {
-        _game = game;
+        if (OS.GetCmdlineUserArgs().Contains("--settings-test")) _marker = "SETTINGS TEST";
         PosePlayback.FrameObserver = ObservePose;
-        _dir = ProjectSettings.GlobalizePath("res://screenshots");
-        DirAccess.MakeDirRecursiveAbsolute(_dir);
-        // keep Godot from importing the screenshots
-        using (FileAccess.Open($"{_dir}/.gdignore", FileAccess.ModeFlags.Write)) { }
-        if (!ApplyClock(out var clockError))
+        PrepareScreenshots();
+        if (!Begin(game, "autoplay"))
         {
-            GD.Print("AUTOPLAY FAILED:\n  " + clockError);
-            game.GetTree().Quit(1);
+            Finish();
             return;
         }
-        // never touch the player's own saves
-        SaveSystem.Directory = "user://autoplay_saves/ten_puzzles_act3";
-        foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
         DialogueManager.Instance.AutoChoose = async (knot, options) =>
         {
             GD.Print($"[autoplay] {knot}: {string.Join(" | ", options)}");
@@ -1153,10 +1140,8 @@ public class AutoPlay
         }
         finally
         {
-            GD.Print(_failures.Count == 0 ? "AUTOPLAY OK" : "AUTOPLAY FAILED:\n  " + string.Join("\n  ", _failures));
             PosePlayback.FrameObserver = null;
-            Engine.TimeScale = 1;
-            game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+            Finish();
         }
     }
 
@@ -1359,11 +1344,10 @@ public class AutoPlay
 
     public async Task RunPauseTests(Game game)
     {
-        _game = game;
-        if (!ApplyClock(out var clockError))
+        _marker = "PAUSE TEST";
+        if (!Begin(game, "pause_test"))
         {
-            GD.Print("PAUSE TEST FAILED:\n  " + clockError);
-            game.GetTree().Quit(1);
+            Finish();
             return;
         }
         game.AutosaveEnabled = false;
@@ -1380,8 +1364,7 @@ public class AutoPlay
         {
             if (game.IsPaused) game.TogglePause();
         }
-        GD.Print(_failures.Count == 0 ? "PAUSE TEST OK" : "PAUSE TEST FAILED:\n  " + string.Join("\n  ", _failures));
-        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        Finish();
     }
 
     private async Task PauseTest(Game game)
@@ -1552,55 +1535,6 @@ public class AutoPlay
         }
     }
 
-    /// <summary>
-    /// <c>--clock=fast</c> (default) uncapped 60×, or <c>--clock=normal</c> for the previous 8× clock.
-    /// Pause assertions still force 1×. Fast also disables vsync so an unfocused run is not stuck at the refresh rate.
-    /// </summary>
-    internal static bool ApplyClock(out string error)
-    {
-        error = "";
-        string? value = null;
-        foreach (var arg in OS.GetCmdlineUserArgs())
-        {
-            if (arg == "--clock")
-            {
-                error = "--clock requires =normal or =fast";
-                return false;
-            }
-            if (!arg.StartsWith("--clock=")) continue;
-            if (value != null)
-            {
-                error = "--clock given more than once";
-                return false;
-            }
-            value = arg["--clock=".Length..];
-        }
-        if (value is null or "fast")
-        {
-            Engine.TimeScale = FastTimeScale;
-            Engine.MaxPhysicsStepsPerFrame = 256;
-            Engine.MaxFps = 0;
-            OS.LowProcessorUsageMode = false;
-            DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
-            GD.Print("[autoplay] clock fast (60x, vsync off)");
-            return true;
-        }
-        if (value == "normal")
-        {
-            Engine.TimeScale = NormalTimeScale;
-            GD.Print("[autoplay] clock normal (8x)");
-            return true;
-        }
-        error = $"unknown --clock={value} (use normal or fast)";
-        return false;
-    }
-
-    private async Task Observe(double seconds)
-    {
-        var timer = _game.GetTree().CreateTimer(seconds, processAlways: true, ignoreTimeScale: true);
-        await _game.ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
-    }
-
     private async Task AwaitTest(Task task, string description)
     {
         for (int i = 0; i < 100 && !task.IsCompleted; i++) await Observe(0.05);
@@ -1719,14 +1653,6 @@ public class AutoPlay
         await WaitIdle(game);
     }
 
-    private static int IndexOf(string item)
-    {
-        var inv = GameState.Instance.Inventory;
-        for (int i = 0; i < inv.Count; i++)
-            if (inv[i] == item) return i;
-        throw new InvalidOperationException($"Inventory does not contain '{item}'.");
-    }
-
     /// <summary>
     /// Autosave on room change, Esc pause menu, saving to slot 1 through the menu, wiping progress and
     /// loading the slot back.
@@ -1825,13 +1751,6 @@ public class AutoPlay
         Check(gs.Inventory[0] == Notes.ItemId && gs.Inventory[1] == MicahKit.LighterId,
             "new items never push the notepad and lighter out of the first slots");
         gs.TakeItem("hanger");
-    }
-
-    private void PressKey(Key key, bool alt = false)
-    {
-        foreach (var pressed in new[] { true, false })
-            _game.GetViewport().PushInput(
-                new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
     /// <summary>Wherever a character is drawn over the scenery behind him, hovering or clicking there means him (#73, #97).</summary>
@@ -2036,68 +1955,6 @@ public class AutoPlay
         await action;
         await WaitIdle(_game);
         Check(!_game.Hud.Puzzle.IsOpen && !GameState.Instance.HasFlag(flag), $"{name} cancellation preserves unsolved state");
-    }
-
-    private async Task SolvePuzzle(Func<Task> start, PuzzleKind kind, (string Id, int Count)[] controls, string name, bool submit = true)
-    {
-        var action = start();
-        await Until(() => _game.Hud.Puzzle.IsOpen);
-        Check(_game.Hud.Puzzle.IsOpen && _game.Hud.Puzzle.Kind == kind, $"reopened {name}");
-        foreach (var (id, count) in controls)
-        {
-            for (int i = 0; i < count; i++) PuzzleClick(id);
-            await _game.Wait(0.1);
-        }
-        if (submit)
-        {
-            await Shot(name + "_solution");
-            PuzzleClick("submit");
-        }
-        await action;
-        await WaitIdle(_game);
-        Check(!_game.Hud.Puzzle.IsOpen, $"solved {name} through real controls");
-    }
-
-    /// <summary>The cage's shortest way through the service shafts, as arrow-button clicks.</summary>
-    private static (string Id, int Count)[] LiftRoute() =>
-        LiftMaze.Route(LiftMaze.Start, LiftMaze.Target)!.Select(step => (step, 1)).ToArray();
-
-    private void PuzzleClick(string id)
-    {
-        var point = _game.Hud.Puzzle.ButtonCenter(id);
-        Move(point);
-        Click(point, MouseButton.Left);
-    }
-
-    private async Task SelectInventoryItem(string item)
-    {
-        await WaitIdle(_game);
-        if (!_game.Hud.InventoryOpen) Click(_game.Hud.SatchelCenter, MouseButton.Left);
-        await _game.Wait(0.1);
-        Check(_game.Hud.InventoryOpen, $"satchel open to select {item}");
-        if (!_game.Hud.InventoryOpen) throw new InvalidOperationException($"Satchel did not open for {item}");
-        int index = IndexOf(item);
-        int page = index / 12;
-        while (_game.Hud.InventoryPage != page)
-        {
-            Click(_game.Hud.InventoryPageCenter(_game.Hud.InventoryPage < page), MouseButton.Left);
-            await _game.Wait(0.1);
-        }
-        Click(_game.Hud.SlotCenter(index), MouseButton.Left);
-        await _game.Wait(0.1);
-    }
-
-    private async Task Combine(string first, string second)
-    {
-        await SelectInventoryItem(first);
-        Check(_game.Carried == first, $"picked {first} from paged inventory");
-        await SelectInventoryItem(second);
-    }
-
-    private async Task CombineAndWait(string first, string second)
-    {
-        await Combine(first, second);
-        while (_game.Busy) await _game.Wait(0.1);
     }
 
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
@@ -2379,45 +2236,4 @@ public class AutoPlay
         _theEndShot = true;
     }
 
-    private async Task WaitIdle(Game game)
-    {
-        await game.Wait(0.2);
-        for (int i = 0; i < 300 && game.Busy; i++) await game.Wait(0.1);
-    }
-
-    private void Move(Vector2 pos)
-    {
-        _game.GetViewport().PushInput(new InputEventMouseMotion { Position = pos, GlobalPosition = pos }, true);
-        _game.GetViewport().WarpMouse(pos);
-    }
-
-    private void Click(Vector2 pos, MouseButton button)
-    {
-        foreach (var pressed in new[] { true, false })
-        {
-            _game.GetViewport().PushInput(new InputEventMouseButton
-            {
-                Position = pos, GlobalPosition = pos, ButtonIndex = button, Pressed = pressed,
-            }, true);
-        }
-    }
-
-    private async Task Until(Func<bool> done, double timeout = 90)
-    {
-        for (double t = 0; t < timeout && !done(); t += 0.1) await _game.Wait(0.1);
-    }
-
-    private void Check(bool ok, string what)
-    {
-        GD.Print($"[autoplay] {(ok ? "PASS" : "FAIL")} {what}");
-        if (!ok) _failures.Add(what);
-    }
-
-    private async Task Shot(string name)
-    {
-        await Observe(0.4 / Engine.TimeScale);
-        await _game.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
-        var img = _game.GetViewport().GetTexture().GetImage();
-        img.SavePng($"{_dir}/{++_shot:00}_{name}.png");
-    }
 }

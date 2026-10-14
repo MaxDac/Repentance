@@ -20,5 +20,8 @@ Thumbs.db
 /screenshots/
 /frames/
 
+# Logs from tools/run/*
+/logs/
+
 # Python
 __pycache__/

@@ -23,6 +23,8 @@ public partial class DialogueManager : Node
 
     /// <summary>Test hook: when set, picks dialogue choices instead of the player (knot, options) => index.</summary>
     public Func<string, IReadOnlyList<string>, Task<int>>? AutoChoose;
+    /// <summary>Raised with the talk knot and every option shown, before one is picked (choice coverage).</summary>
+    public event Action<string, IReadOnlyList<string>>? ChoicesOffered;
 
     public override void _EnterTree() => Instance = this;
 
@@ -84,6 +86,7 @@ public partial class DialogueManager : Node
             var choices = story.CurrentChoices;
             if (choices.Count == 0) break;
             var labels = choices.Select(c => c.Text.Trim()).ToList();
+            ChoicesOffered?.Invoke(knot, labels);
             int picked = AutoChoose != null ? await AutoChoose(knot, labels) : await game.Hud.ShowChoices(labels);
             var said = labels[picked];
             story.ChooseChoiceIndex(choices[picked].Index);

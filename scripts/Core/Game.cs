@@ -70,13 +70,16 @@ public partial class Game : Node
         bool settingsTest = Array.IndexOf(args, "--settings-test") >= 0;
         bool pauseTest = Array.IndexOf(args, "--pause-test") >= 0;
         bool walkTest = Array.IndexOf(args, "--walk-test") >= 0;
-        bool anyTest = settingsTest || pauseTest || walkTest || Array.IndexOf(args, "--autoplay") >= 0;
+        bool film = args.Any(a => a == "--film" || a.StartsWith("--film="));
+        bool playthrough = Array.IndexOf(args, "--playthrough") >= 0;
+        bool anyTest = settingsTest || pauseTest || walkTest || film || playthrough || Array.IndexOf(args, "--autoplay") >= 0;
         Settings = new GameSettings(anyTest ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
         Sfx = new Sfx { Name = "Sfx" };
         AddChild(Sfx);
         Sfx.Bind(Settings);
-        AddChild(new WindowModeController(Settings, !anyTest) { Name = "WindowMode" });
+        // film mode is watched, so it may go fullscreen with F11 (the setting is the autoplay copy, not the player's)
+        AddChild(new WindowModeController(Settings, !anyTest || film) { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
         Player = new Player { Name = "Player" };
@@ -91,6 +94,11 @@ public partial class Game : Node
             if (a.StartsWith("--room=")) StartRoom = a[7..];
             if (a.StartsWith("--entry=")) StartEntry = a[8..];
             if (a.StartsWith("--flag=")) _startFlags.AddRange(a[7..].Split(',', StringSplitOptions.RemoveEmptyEntries));
+        }
+        if (film || playthrough)
+        {
+            await new Playthrough(film).Run(this);
+            return;
         }
         if (walkTest)
         {
@@ -491,9 +499,31 @@ public partial class Game : Node
     {
         _busy++;
         try { await sequence(); }
-        catch (Exception ex) { GD.PushError(ex.ToString()); }
+        catch (Exception ex)
+        {
+            GD.PushError(ex.ToString());
+            SequenceFailed?.Invoke(ex);
+        }
         finally { _busy--; }
     }
+
+    private TaskCompletionSource? _theEnd;
+
+    /// <summary>Keeps the final caption up (and the game busy) until a load or a new game replaces the story.</summary>
+    public Task HoldTheEnd()
+    {
+        _theEnd = new TaskCompletionSource();
+        return _theEnd.Task;
+    }
+
+    private void ReleaseTheEnd()
+    {
+        _theEnd?.TrySetResult();
+        _theEnd = null;
+    }
+
+    /// <summary>Raised when <see cref="Run"/> swallows an exception, so automated runs can fail on it.</summary>
+    public static event Action<Exception>? SequenceFailed;
 
     public async Task<bool> WalkTo(Vector2 point)
     {
@@ -667,6 +697,7 @@ public partial class Game : Node
     public async Task LoadGame(SaveData data)
     {
         _busy++;
+        ReleaseTheEnd();
         try
         {
             await Hud.Fade(1, 0.35);
@@ -684,6 +715,7 @@ public partial class Game : Node
 
     public async Task NewGame()
     {
+        ReleaseTheEnd();
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
