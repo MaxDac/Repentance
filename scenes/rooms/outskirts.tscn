@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="93_FlagSprite"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(188, 26)
+size = Vector2(444, 54)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
 size = Vector2(98, 44)
@@ -69,7 +69,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Skyline"]
-position = Vector2(274.0, 118.0)
+position = Vector2(240.0, 92.0)
 shape = SubResource("Rect_1")
 
 [node name="HedgeGap" type="Area2D" parent="Hotspots"]

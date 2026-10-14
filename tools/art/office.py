@@ -101,7 +101,7 @@ def door(img, state="closed"):
     light(img, "rect", [x0, y1, x1, y1 + 10], hx("806830"), 0.35, 4)
 
 
-def cabinet(img):
+def cabinet(img, whiskey=True):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 108, 60, 146, 127
     hgrad(img, (x0, y0, x1, y1), hx("5a5e5a"), hx("3a3e3a"))
@@ -113,12 +113,8 @@ def cabinet(img):
         d.rectangle([x0 + 14, y + 4, x1 - 14, y + 6], fill=hx("b0a888"))
         d.rectangle([x0 + 16, y + 9, x1 - 16, y + 12], fill=hx("d8d0b0"))
     noise(img, (x0, y0, x1, y1), 4, 9)
-    # bottle and glass
-    d.rectangle([115, 44, 123, 59], fill=hx("6a3a14"))
-    d.rectangle([117, 38, 121, 44], fill=hx("6a3a14"))
-    d.rectangle([117, 36, 121, 38], fill=hx("1a1a1a"))
-    d.rectangle([116, 49, 122, 54], fill=hx("d8c890"))
-    d.line([(116, 45), (116, 58)], fill=hx("c08040"))
+    if whiskey:
+        bottle(d, 115, 36)
     # diploma
     d.rectangle([110, 20, 144, 42], fill=hx("6a4a24"))
     d.rectangle([113, 23, 141, 39], fill=hx("d8cca8"))
@@ -126,6 +122,28 @@ def cabinet(img):
         d.line([(117, y), (137, y)], fill=hx("6a6050"))
     d.ellipse([124, 34, 130, 39], fill=hx("a02020"))
     shadow(img, "rect", [146, 62, 154, 127], 0.5, 3)
+
+
+def bottle(d, x, y):
+    """The whiskey bottle, its cap's top-left corner at (x + 2, y): 9 px wide, 24 px tall."""
+    d.rectangle([x, y + 8, x + 8, y + 23], fill=hx("6a3a14"))
+    d.rectangle([x + 2, y + 2, x + 6, y + 8], fill=hx("6a3a14"))
+    d.rectangle([x + 2, y, x + 6, y + 2], fill=hx("1a1a1a"))
+    d.rectangle([x + 1, y + 13, x + 7, y + 18], fill=hx("d8c890"))
+    d.line([(x + 1, y + 9), (x + 1, y + 22)], fill=hx("c08040"))
+
+
+def cup(d, x, y):
+    """The tin cup of whiskey (the office_cup sprite) with its top-left corner at (x, y)."""
+    d.rectangle([x + 1, y + 2, x + 7, y + 10], fill=hx("b8b4a4"))
+    d.rectangle([x + 2, y + 3, x + 6, y + 5], fill=hx("a86024"))
+    d.rectangle([x + 7, y + 4, x + 9, y + 8], outline=hx("b8b4a4"))
+    d.line([(x + 2, y + 9), (x + 6, y + 9)], fill=hx("e0d8bc"))
+
+
+# Act 3: the bottle and the cup end up on the desk, between the lamp and the case files (art coordinates)
+DESK_BOTTLE = (214, 80)
+DESK_CUP = (224, 92)
 
 
 def coat_rack(img):
@@ -180,13 +198,13 @@ def desk(img):
     shadow(img, "rect", [176, 150, 344, 160], 0.55, 4)
 
 
-def desk_props(img):
+def desk_props(img, lamp_on=True):
     d = ImageDraw.Draw(img)
     # banker's lamp
     d.rectangle([194, 92, 198, 101], fill=hx("b8904a"))
     d.ellipse([188, 98, 204, 102], fill=hx("8a6a34"))
-    d.chord([184, 82, 210, 96], 180, 360, fill=hx("1e6a3a"))
-    d.line([(186, 89), (208, 89)], fill=hx("4aa060"))
+    d.chord([184, 82, 210, 96], 180, 360, fill=hx("1e6a3a" if lamp_on else "16402a"))
+    d.line([(186, 89), (208, 89)], fill=hx("4aa060" if lamp_on else "24583a"))
     # stack of case files, typewriter-ish papers
     d.polygon([(238, 96), (262, 95), (264, 101), (236, 102)], fill=hx("c8bc98"))
     d.polygon([(240, 93), (260, 92), (262, 97), (238, 98)], fill=hx("e0d8b8"))
@@ -203,9 +221,29 @@ def desk_props(img):
     d.ellipse([318, 90, 328, 98], fill=hx("16161a"))
     d.line([(314, 88), (332, 88)], fill=hx("16161a"), width=3)
     d.ellipse([320, 93, 326, 97], fill=hx("c8c0a8"))
+    if not lamp_on:
+        bottle(d, *DESK_BOTTLE)
+        cup(d, *DESK_CUP)
+        return
     # lamp pool of light
     light(img, "ellipse", [150, 70, 260, 130], hx("f0d890"), 0.55, 14)
     light(img, "polygon", [(186, 92), (210, 92), (232, 104), (166, 104)], hx("fff0c0"), 0.5, 3)
+
+
+WINDOW = (352, 16, 470, 98)
+
+
+def lights_out(img):
+    """Act 3: the lamp is off. The room sinks into blue shadow; only the window and its neon spill stay lit."""
+    x0, y0, x1, y1 = WINDOW
+    glass = img.crop((x0, y0, x1 + 1, y1 + 1))
+    shadow(img, "rect", [0, 0, W, H], 0.72, 0, hx("6a6a9a"))
+    img.paste(glass, (x0, y0))
+    light(img, "polygon", [(352, 16), (470, 16), (500, 200), (300, 200)], hx("4a6aa8"), 0.2, 10)
+    light(img, "ellipse", [380, 110, 480, 200], hx("ff3030"), 0.14, 20)
+    # a red rim of HOTEL light catching the bottle on the desk
+    bx, by = DESK_BOTTLE
+    light(img, "rect", [bx + 6, by + 8, bx + 8, by + 22], hx("ff4a4a"), 0.35, 1)
 
 
 def window(img):
@@ -240,20 +278,24 @@ def window(img):
     light(img, "ellipse", [380, 110, 480, 200], hx("ff3030"), 0.12, 20)
 
 
-def paint(drawer=None, door_state="closed"):
+def paint(drawer=None, door_state="closed", lamp_on=True):
     img = Image.new("RGB", (W, H))
     walls(img)
     floor(img)
     door(img, door_state)
-    cabinet(img)
+    cabinet(img, whiskey=lamp_on)
     coat_rack(img)
     clock(img)
     window(img)
     desk(img)
-    desk_props(img)
+    desk_props(img, lamp_on)
     if drawer is not None:
         open_drawer(img, drawer)
+    if not lamp_on:
+        lights_out(img)
     img = tall(img, ceiling)
+    if not lamp_on:
+        shadow(img, "rect", [0, 0, W, TOP], 0.72, 0, hx("6a6a9a"))
     vignette(img, 0.55)
     return img
 
@@ -346,6 +388,16 @@ def build():
     save(pixelize(paint(()), pal).crop(DRAWER_BOX), "rooms", "office_drawer_open.png")
     for item, box in ITEM_BOXES.items():
         save(pixelize(paint((item,)), pal).crop(box), "rooms", f"office_drawer_{item}.png")
+    # Act 3: the lamp off, the whiskey on the desk; the overlays that can still show get dark twins
+    dark = paint(lamp_on=False)
+    dark_pal = palette_of(dark, 128)
+    save(pixelize(dark, dark_pal), "rooms", "office_act3.png")
+    for state in ("ajar", "open"):
+        save(pixelize(paint(door_state=state, lamp_on=False), dark_pal).crop(DOOR_BOX), "rooms",
+             f"office_act3_door_{state}.png")
+    save(pixelize(paint((), lamp_on=False), dark_pal).crop(DRAWER_BOX), "rooms", "office_act3_drawer_open.png")
+    for item, box in ITEM_BOXES.items():
+        save(pixelize(paint((item,), lamp_on=False), dark_pal).crop(box), "rooms", f"office_act3_drawer_{item}.png")
     # the ring is only a glint of gold on the desk: two bright pixels and a shadowed band
     ring = Image.new("RGBA", (3, 2))
     d = ImageDraw.Draw(ring)
@@ -355,11 +407,7 @@ def build():
     d.point((1, 1), fill=hx("6a5020"))
     save(ring, "rooms", "office_ring.png")
     save(ring_glint(), "rooms", "office_ring_glint.png")
-    cup = Image.new("RGBA", (10, 12))
-    d = ImageDraw.Draw(cup)
-    d.rectangle([1, 2, 7, 10], fill=hx("b8b4a4"))
-    d.rectangle([2, 3, 6, 5], fill=hx("a86024"))
-    d.rectangle([7, 4, 9, 8], outline=hx("b8b4a4"))
-    d.line([(2, 9), (6, 9)], fill=hx("e0d8bc"))
-    save(cup, "rooms", "office_cup.png")
+    sprite = Image.new("RGBA", (10, 12))
+    cup(ImageDraw.Draw(sprite), 0, 0)
+    save(sprite, "rooms", "office_cup.png")
     return px

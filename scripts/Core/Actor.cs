@@ -219,9 +219,19 @@ public partial class Actor : Hotspot, ISpeaker
         return SpriteRect.Grow(-2).HasPoint(ToLocal(point));
     }
 
-    /// <summary>Whether a drawn (opaque) pixel of the character is under <paramref name="point"/>.</summary>
-    public bool DrawnAt(Vector2 point) =>
-        IsVisibleInTree() && _sprite is { Visible: true } s && s.IsPixelOpaque(s.ToLocal(point));
+    /// <summary>
+    /// Whether the character is drawn under <paramref name="point"/>: an opaque pixel there or right next to it, so the
+    /// soft edge of a dark silhouette (Sal in the unlit alley, #97) still counts as him rather than the scenery behind.
+    /// </summary>
+    public bool DrawnAt(Vector2 point)
+    {
+        if (!IsVisibleInTree() || _sprite is not { Visible: true } s) return false;
+        foreach (var o in Around)
+            if (s.IsPixelOpaque(s.ToLocal(point + o))) return true;
+        return false;
+    }
+
+    private static readonly Vector2[] Around = { Vector2.Zero, Vector2.Left, Vector2.Right, Vector2.Up, Vector2.Down };
 
     public override Rect2 Bounds
     {

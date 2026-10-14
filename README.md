@@ -48,7 +48,8 @@ Command-line options (after `--`):
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
-| `--clock=fast` | Default for the three checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time |
+| `--walk-test` | Movement checks in every room: entry markers stand on the floor, every hotspot and exit is reachable from every entry without crossing a wall, the player really walks there at the right scale, and every exit leads to an existing entry (room entry cutscenes are skipped). Then real mouse input: floor clicks, clicks off the floor, interrupting a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking. Prints `WALK TEST OK` and exits with code 0 on success |
+| `--clock=fast` | Default for the four checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
 | `--clock=normal` | Previous automated clock: 8× game time, display timing left alone. Use this when screenshots should be closer to the paced game |
 
 ```powershell
@@ -243,7 +244,7 @@ From here the story follows Walkthrough.md:
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
-27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+27. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
 28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
