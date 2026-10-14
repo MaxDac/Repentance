@@ -4,20 +4,36 @@ using System.Threading.Tasks;
 namespace Repentance.Rooms;
 
 /// <summary>
-/// Micah's office, 9 PM. Teddy Harrington is waiting when the game starts. In Act 3 Micah ends up back here, at his
-/// desk, working out who could know where Eleanor is.
+/// Micah's office, 9 PM. Teddy Harrington is waiting when the game starts. In Act 3 Micah ends up back here, the lamp
+/// off and the whiskey on the desk, staring out of the window and working out who could know where Eleanor is.
 /// </summary>
 public partial class Office : Room
 {
-    // Micah starts Act 3 seated behind the desk (a sprite), so the walking player is hidden until he stands up.
-    public override bool PlayerVisibleOnLoad => ShowPlayer && !State.HasFlag("micah_at_desk");
+    private const string Art = "res://assets/art/rooms/";
 
     public override void _Ready()
     {
         // Teddy only waits here in Act 1; later acts (also when reached by a debug room jump) never show him.
         if (State.StoryAct >= 2) State.SetFlag("teddy_gone");
+        // Act 3: the lamp stays off and the bottle and cup have moved to the desk
+        bool dark = State.StoryAct >= 3;
+        State.SetFlag("office_lamp_off", dark);
+        if (dark) UseDarkArt();
         base._Ready();
         _glint = GetNodeOrNull<Godot.Sprite2D>("WeddingRing/Glint");
+    }
+
+    private void UseDarkArt()
+    {
+        foreach (var (node, file) in new[]
+                 {
+                     ("Background", "office_act3"), ("DoorAjar", "office_act3_door_ajar"),
+                     ("DoorOpen", "office_act3_door_open"), ("DrawerOpen", "office_act3_drawer_open"),
+                     ("DrawerRevolver", "office_act3_drawer_revolver"), ("DrawerDollar", "office_act3_drawer_dollar"),
+                     ("DrawerLockpick", "office_act3_drawer_lockpick"),
+                 })
+            if (GetNodeOrNull<Godot.Sprite2D>(node) is { } sprite)
+                sprite.Texture = Godot.GD.Load<Godot.Texture2D>($"{Art}{file}.png");
     }
 
     private const double GlintEvery = 3.5, GlintFrameTime = 0.08;
@@ -43,7 +59,7 @@ public partial class Office : Room
         }
         if (entry == "act3" && State.HasFlag("micah_at_desk"))
         {
-            await Game.Run(AtTheDesk);
+            await Game.Run(AtTheWindow);
             return;
         }
         if (State.HasFlag("teddy_gone")) return;
@@ -120,22 +136,25 @@ public partial class Office : Room
         State.SetFlag("office_door_ajar", false);
     }
 
-    /// <summary>Act 3: thinking it over at the desk, then out the door to the Blue Lantern.</summary>
-    private async Task AtTheDesk()
+    /// <summary>
+    /// Act 3: in the dark, the whiskey poured on the desk behind him, Micah stands at the window with his back to the
+    /// room, thinking it over under the HOTEL sign; then he turns round and heads for the Blue Lantern.
+    /// </summary>
+    private async Task AtTheWindow()
     {
+        Player.Face(Facing.Up);
         await Wait(1.0);
-        await Say("Back behind my own desk. The whiskey's still there. Some things you can count on.");
+        await Say("Back in my own office. Lamp off. The whiskey's still there. Some things you can count on.");
         await Say("Thanks to my efforts, he said. How'd they find her through me? Somebody on my heels? Something I let slip?");
         await Say("Aw, what's the difference? They've got her just the same.");
         await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
         await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
         await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
         await Say("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
-        await Say("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
         State.SetFlag("micah_at_desk", false);
-        Player.Teleport(new Godot.Vector2(160, 172), Facing.Left);
-        Player.Visible = true;
+        Player.Face(Facing.Left);
         await Wait(0.4);
+        await Say("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
     }
 
     private async Task LeaveAct3()
@@ -231,6 +250,18 @@ public partial class Office : Room
                 await Say("My picks. A locked door is just a question nobody's asked politely yet.");
                 return true;
 
+            case ("bottle", Verb.Hand) when State.HasFlag("office_lamp_off"):
+                await Say("Not tonight. Tonight I need my hands steady.");
+                return true;
+            case ("cup", Verb.Hand) when State.HasFlag("office_lamp_off"):
+                await Say("I poured it. I don't have to drink it.");
+                return true;
+            case ("lamp", Verb.Hand) when State.HasFlag("office_lamp_off"):
+                await Say("Leave it off. I can think in the dark. I've had the practice.");
+                return true;
+            case ("lamp", Verb.Look) when State.HasFlag("office_lamp_off"):
+                await Say("The green banker's lamp, switched off. The HOTEL sign does the lighting tonight.");
+                return true;
             case ("bottle", Verb.Hand):
                 await Say("Whiskey. It never gave me a good answer.");
                 return true;

@@ -12,10 +12,15 @@ godot_console --path . --headless --import   # required on a fresh checkout and 
 godot_console --path . -- --autoplay         # pass = output contains "AUTOPLAY OK"
 godot_console --path . -- --settings-test    # pass = "AUTOPLAY OK"
 godot_console --path . -- --pause-test       # pass = "PAUSE TEST OK"
+godot_console --path . -- --walk-test        # pass = "WALK TEST OK" (movement in every room + mouse input)
 dotnet test tests/Repentance.Tests/Repentance.Tests.csproj
 py -3.14 -m unittest discover -s tests\art -v
 ```
 
+- CI also fails a Godot run that logs `ERROR:`/`SCRIPT ERROR:` lines, even if the pass marker printed.
+- `SceneGraphTests` (xunit) checks that every scene exit and every literal `ChangeRoom("room","entry")` call
+  targets an existing entry marker, that markers and walk targets stand on the floor, and that every room is
+  reachable from the attic. New rooms and entries must keep it green.
 - `.godot/` is gitignored. Without the import step, nothing loads and the game logs
   `Assets are not imported`, showing a grey screen.
 - To see what the game draws, record frames instead of taking a desktop screenshot:

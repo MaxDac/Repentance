@@ -354,14 +354,6 @@ def seated_frame(spec, name, flip=False):
     return img
 
 
-def desk_frame(spec, name, cut=0.5):
-    """Head and shoulders of a character facing the camera, cut off at a fraction of the frame height: sitting behind
-    a desk that hides the rest."""
-    img = figure(spec, pose(16, arms=_arms("fold")), FW, FH)
-    img = img.crop((0, 0, FW, int(FH * cut)))
-    save(img, "sprites", f"{name}.png")
-    return img
-
 def kneel_frame(spec, name):
     """Wide articulated hands-and-knees pose sharing the action strips' planted ankle."""
     img, head = kneeling_figure(dict(spec, h=spec["h"] * SCALE), KNEEL)
@@ -497,7 +489,6 @@ def build_act3():
     shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
     falling_frame(HARRINGTON_GOWN, "harrington_falling")
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
-    desk_frame(MICAH, "micah_desk")
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
