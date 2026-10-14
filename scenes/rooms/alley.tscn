@@ -18,7 +18,7 @@ size = Vector2(40, 140)
 size = Vector2(50, 36)
 
 [sub_resource type="RectangleShape2D" id="Rect_street"]
-size = Vector2(36, 72)
+size = Vector2(96, 172)
 
 [node name="Alley" type="Node2D"]
 script = ExtResource("1_Alley")
@@ -55,7 +55,7 @@ position = Vector2(331, 198)
 metadata/facing = 1
 
 [node name="act3" type="Marker2D" parent="Entries"]
-position = Vector2(24, 232)
+position = Vector2(50, 194)
 metadata/facing = 4
 
 [node name="Hotspots" type="Node2D" parent="."]
@@ -68,8 +68,8 @@ script = ExtResource("4_Hotspot")
 Id = "street"
 DisplayName = "street"
 LookText = "Out of the alley. The convent's on the North Side."
-WalkTo = Vector2(24, 232)
-Face = 3
+WalkTo = Vector2(50, 192)
+Face = 2
 ExitTo = "convent_road"
 ExitEntry = "street"
 ShowIfFlags = "alley_done"
@@ -78,7 +78,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Street"]
-position = Vector2(18, 232)
+position = Vector2(50, 104)
 shape = SubResource("Rect_street")
 
 [node name="Door" type="Area2D" parent="Hotspots"]

@@ -77,10 +77,17 @@ public partial class RoseHouse : Room
             rose.SetPose(null);
         }
         await Wait(0.3);
+        await Game.WalkTo(TalkSpot);
+        Player.Face(Facing.Up);
     }
+
+    /// <summary>The bell, just right of the doorway: Micah talks to Rose from here so he never stands in front of her.</summary>
+    public static readonly Vector2 TalkSpot = new(258, 220);
 
     private async Task RingTheBell()
     {
+        await Game.WalkTo(TalkSpot);
+        Player.Face(Facing.Up);
         await Say("*Ring*");
         await Wait(1.2);
         await RoseOpens();
@@ -123,7 +130,7 @@ public partial class RoseHouse : Room
     {
         await Wait(0.6);
         await Say("Same door. Same bell. A different man pressing it, I hoped.");
-        await Game.WalkTo(new Vector2(258, 220));
+        await Game.WalkTo(TalkSpot);
         Player.Face(Facing.Up);
         await Say("*Ring*");
         await Wait(1.2);

@@ -554,35 +554,6 @@ LIBRARIAN: Take it. Take it and go, and please don't come back.
 MICAH: Pleasure doing business. Late fees are on me.
 -> END
 
-=== rose ===
-{not has_flag("rose_met"):
-    ROSE: We're closing, sir, so unless you have a card-
-    ROSE: ...Micah.
-    MICAH: Hello, Rose.
-    ROSE: Eight months without a word, and you walk in here dripping on my floor.
-    ~ set_flag("rose_met")
-- else:
-    ROSE: You're still here. That's a first.
-}
-- (opts)
-* [I'm sorry.]
-    ROSE: You always are. It's the one thing you were ever reliable about.
-    -> rose.opts
-* [You look well.]
-    ROSE: I sleep now. Nobody calls at three in the morning to say you're in the hospital again.
-    -> rose.opts
-* {has_flag("library_lead")} [A woman hid something here. Dark hair, about this tall.]
-    ROSE: Last Tuesday. She asked for the county land records, then asked to be left alone.
-    ROSE: Right-hand stacks, top shelf. Nobody has touched those since the Taft administration.
-    ROSE: Is she in trouble?
-    MICAH: She's in the kind of trouble I'm good at.
-    ROSE: That's what worries me.
-    ~ set_flag("rose_tip")
-    -> END
-+ [(Leave)]
-    ROSE: Goodbye, Micah. Try the front door this time. You used to prefer the window.
-    -> END
-
 // ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
 
 === street_choice ===
@@ -777,7 +748,7 @@ MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
 BARTENDER: Are you out of your mind? Beat it, Jones. You don't know who these people are.
 BARTENDER: They own judges. They own cops. They own the men who own the cops.
 BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, too.
-* [(Shoot him in the leg.)]
+* [(Shoot him in the shoulder.)]
     ~ set_flag("shot_bartender")
 * {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
     MICAH: ...You're right, Tony. It's not worth it. None of it is.
@@ -785,12 +756,12 @@ BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, to
 - -> END
 
 === bartender_shot ===
-BARTENDER: AAAAH! My leg! You shot me, you crazy son of a...
-MICAH: I've got five more. Where is she?
+BARTENDER: AAAAH! My shoulder! You shot me, you crazy son of a...
+MICAH: I've got five more, Tony. And you've got another shoulder. Where is she?
 BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
 BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday.
 BARTENDER: There's a key on the lintel over the kitchen door. Just walk in like the delivery boys do.
-MICAH: Get that leg looked at, Tony. Tell them you slipped.
+MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 -> END
 
 === harrington_eleanor ===
