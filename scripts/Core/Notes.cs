@@ -92,7 +92,7 @@ public static class Notes
             L("The Master of Ceremonies, in his robes: \"She is with us... thanks to your efforts.\""),
             L("Then his brute threw me out on the pavement.")),
         N("caleb_convent", "Caleb", "caleb_club",
-            L("Caleb went white when I said Hubbard."),
+            L("Eleanor hid at the convent once. The convent answers to the Church. Caleb might know."),
             L("Performers, he called the women. When the Club is done with them, the sisters take some in."),
             L("Ask at the convent.")),
         N("harrington_senior", "The sister again", "nun_threatened",

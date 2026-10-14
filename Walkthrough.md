@@ -341,12 +341,18 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
   return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
-  Keep the choice "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
+  Micah does not suspect Caleb of being involved. He reasons his way to him: Eleanor already found refuge at the
+  convent, and maybe not for the first time; the convent belongs to the Church, even though Mother Superior runs it
+  and Caleb runs the parish; so Caleb might know something. Both reasons must be offered before the choice
+  "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
   in his sacristy; the established refuge is the convent.
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
   Micah will answer "There's little left for me to do, at this point."
-  The brother will say "You know that that's not the case.:
+  The brother will say "You know that that's not the case."
+  Caleb teaches that repentance is for anyone, at any time in their life, and that the Lord forgives whoever truly
+  repents. When Micah insists he is too far gone, Caleb rebukes him harshly: thinking himself beyond salvation is
+  pride, arrogant and self-serving. He closes with the prodigal son.
   Micah will say nothing and get out.
 
 #### Map of Chicago
