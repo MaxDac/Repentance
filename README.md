@@ -231,7 +231,7 @@ From here the story follows Walkthrough.md:
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
-27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+27. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
 28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
