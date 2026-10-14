@@ -49,6 +49,7 @@ size = Vector2(282, 22)
 [node name="BlueLanternFront" type="Node2D"]
 script = ExtResource("1_BlueLanternFront")
 RoomName = "Rizzo's Flowers, State Street"
+Floor = 1
 FarY = 182
 NearY = 244
 FarScale = 0.86

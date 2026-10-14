@@ -150,8 +150,48 @@ public partial class GameMenu : Control
                 _status.Text = settings.SetFullscreen(!settings.Fullscreen) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }),
+            ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
             ("Back", true, () => { _status.Text = ""; back(); }));
+        OnAltPress(EffectsLabel, () => StepEffects(up: false));
         _onSettings = true;
+    }
+
+    private const string EffectsLabel = "Effects volume";
+
+    /// <summary>Left click turns the effects up a step, right click down; both wrap around between 0% and 100%.</summary>
+    private void StepEffects(bool up)
+    {
+        var settings = Game.Instance.Settings;
+        _status.Text = settings.SetEffectsVolume(GameSettings.CycleVolume(settings.EffectsVolume, up))
+            ? "Left click: louder. Right click: quieter." : "Couldn't save settings.";
+        Game.Instance.Sfx.Preview();
+        SettingsPage();
+    }
+
+    private readonly Dictionary<Button, Action> _altPress = new();
+
+    /// <summary>Gives the row starting with <paramref name="label"/> a right-click action.</summary>
+    private void OnAltPress(string label, Action action)
+    {
+        var b = _list.GetChildren().OfType<Button>().First(x => x.Text.StartsWith(label) && !x.IsQueuedForDeletion());
+        _altPress[b] = action;
+        b.GuiInput += e =>
+        {
+            if (e is not InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Right } || b.Disabled) return;
+            b.AcceptEvent();
+            Callable.From(action).CallDeferred();
+        };
+        b.TreeExiting += () => _altPress.Remove(b);
+    }
+
+    /// <summary>Right-clicks a menu entry by its label (used by the autoplay test).</summary>
+    public bool PressAlt(string label)
+    {
+        var b = _list.GetChildren().OfType<Button>().FirstOrDefault(x => x.Text.StartsWith(label) && !x.Disabled &&
+            !x.IsQueuedForDeletion());
+        if (b == null || !_altPress.TryGetValue(b, out var action)) return false;
+        Callable.From(action).CallDeferred();
+        return true;
     }
 
     /// <summary>Keeps the settings page in sync when a setting changes elsewhere (e.g. the F11 shortcut).</summary>

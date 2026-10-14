@@ -92,8 +92,14 @@ public partial class Actor : Hotspot, ISpeaker
     private void ApplyDepthScale()
     {
         if (!DepthScale) return;
+        if (FindRoom() is { } r) Scale = Vector2.One * r.ScaleAt(Position.Y);
+    }
+
+    private Room? FindRoom()
+    {
         for (Node? n = GetParent(); n != null; n = n.GetParent())
-            if (n is Room r) { Scale = Vector2.One * r.ScaleAt(Position.Y); return; }
+            if (n is Room r) return r;
+        return null;
     }
 
     public override void _Process(double delta)
@@ -108,7 +114,11 @@ public partial class Actor : Hotspot, ISpeaker
         {
             var from = Position;
             Position = Position.MoveToward(target, _moveSpeed * (float)delta);
+            int stepsBefore = (int)(_walkDistance / (StridePerFrame * 4));
             _walkDistance += from.DistanceTo(Position) / Mathf.Max(Scale.Y, 0.01f);
+            // a foot lands every half walk cycle
+            if (CanWalk && IsVisibleInTree() && (int)(_walkDistance / (StridePerFrame * 4)) != stepsBefore)
+                Game.Instance?.Sfx?.Step(FindRoom()?.Floor ?? FloorSurface.Wood, Scale.Y);
             ApplyDepthScale();
             if (Position.DistanceTo(target) < 0.01f)
             {

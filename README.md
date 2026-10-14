@@ -46,7 +46,7 @@ Command-line options (after `--`):
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
+| `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
 | `--walk-test` | Movement checks in every room: entry markers stand on the floor, every hotspot and exit is reachable from every entry without crossing a wall, the player really walks there at the right scale, and every exit leads to an existing entry (room entry cutscenes are skipped). Then real mouse input: floor clicks, clicks off the floor, interrupting a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking. Prints `WALK TEST OK` and exits with code 0 on success |
 | `--clock=fast` | Default for the four checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
@@ -103,6 +103,19 @@ Automated checks use a separate `user://autoplay_settings.cfg` and never modify 
 anywhere, including on the title screen and while paused. Full screen is borderless and keeps whole-pixel
 scaling, so the 480x270 picture is letterboxed when the monitor isn't an exact multiple. The choice is stored
 in `user://settings.cfg` alongside the content settings. Automated checks never change the real window.
+
+### Sound
+
+All sound effects are synthesized at startup (no audio files) and play on an **Effects** bus:
+
+- **Footsteps** for Micah, Daniel and walking NPCs, voiced by each room's `Floor` export (`Wood`, `Stone` or `Carpet`).
+- **Story cues**: narration lines starting with `*` play a matching sound: `*BANG*` is a gunshot, and
+  `*Knock knock*... *knock*` keeps its rhythm. There are also cues for clangs, crashes, door slams, the doorbell and the explosion.
+- **Ambience**: rain loops in rooms with a `Rain` node. It sounds muffled when the rain is only seen through a window.
+
+**Settings > Effects volume** defaults to **80%**. Left click raises it and right click lowers it, in steps of 10%
+(it wraps at the ends), and each change plays a preview knock. 0% mutes the effects. The value is stored in
+`user://settings.cfg` under `[audio] effects_volume`.
 
 ### Saving
 
@@ -333,6 +346,7 @@ tools/               Python art generator
 | `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
 | `WalkArea` | Polygon visibility-graph pathfinder |
+| `SoundSynth` / `Sfx` | Godot-free procedural sound effects and `*cue*` parsing, and the node that plays them (footsteps, story cues, room ambience) on the Effects bus |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
 | `MicahKit` | Godot-free: the pinned notepad and lighter, the items each act keeps when its journal starts, and debug-start kits |

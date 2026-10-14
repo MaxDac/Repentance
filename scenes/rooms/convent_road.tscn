@@ -18,6 +18,7 @@ size = Vector2(62, 124)
 [node name="ConventRoad" type="Node2D"]
 script = ExtResource("1_ConventRoad")
 RoomName = "Outside the Convent"
+Floor = 1
 FarY = 194
 NearY = 266
 FarScale = 0.92

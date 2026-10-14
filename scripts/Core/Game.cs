@@ -23,6 +23,7 @@ public partial class Game : Node
     public Hud Hud { get; private set; } = null!;
     public Room? Room { get; private set; }
     public GameSettings Settings { get; private set; } = null!;
+    public Sfx Sfx { get; private set; } = null!;
 
     private Node2D _roomHost = null!;
     private string? _carried;
@@ -72,6 +73,9 @@ public partial class Game : Node
         bool anyTest = settingsTest || pauseTest || walkTest || Array.IndexOf(args, "--autoplay") >= 0;
         Settings = new GameSettings(anyTest ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
+        Sfx = new Sfx { Name = "Sfx" };
+        AddChild(Sfx);
+        Sfx.Bind(Settings);
         AddChild(new WindowModeController(Settings, !anyTest) { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
@@ -517,6 +521,7 @@ public partial class Game : Node
         var skip = _skipSpeech;
         who.Talking = true;
         Hud.ShowSpeech(text, who);
+        Sfx.PlayCues(text);
         var seconds = Math.Clamp(0.9 + text.Length * 0.055, 1.5, 7.0);
         // ignore the click that triggered this line
         await Wait(0.15);
@@ -569,6 +574,8 @@ public partial class Game : Node
         Player.SetCharacter(Room.ResolvePlayerCharacter());
         SyncPinned();
         Player.Visible = Room.PlayerVisibleOnLoad;
+        if (Room.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
+        else Sfx.SetAmbient(null);
     }
 
     /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>
@@ -672,6 +679,7 @@ public partial class Game : Node
                 try { await Hud.Fade(1, 0.5); }
                 finally { _busy--; }
                 UnloadRoom();
+                Sfx.SetAmbient(null);
                 await TitleScreen();
                 break;
         }
