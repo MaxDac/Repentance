@@ -48,7 +48,8 @@ Command-line options (after `--`):
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
 | `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
-| `--clock=fast` | Default for the three checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time |
+| `--walk-test` | Movement checks in every room: entry markers stand on the floor, every hotspot and exit is reachable from every entry without crossing a wall, the player really walks there at the right scale, and every exit leads to an existing entry (room entry cutscenes are skipped). Then real mouse input: floor clicks, clicks off the floor, interrupting a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking. Prints `WALK TEST OK` and exits with code 0 on success |
+| `--clock=fast` | Default for the four checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
 | `--clock=normal` | Previous automated clock: 8× game time, display timing left alone. Use this when screenshots should be closer to the paced game |
 
 ```powershell
