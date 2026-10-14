@@ -1230,7 +1230,7 @@ public class AutoPlay
             "a close-up's variant swaps in place when the setting changes");
         game.Hud.HideCloseUp(0);
         Check(!game.Hud.InsetVisible && game.Hud.CurrentCloseUp == null, "close-up hidden");
-        await game.ChangeRoom("attic", "settings_test");
+        await game.ChangeRoom("attic", "start");
         await WaitIdle(game);
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
@@ -1495,7 +1495,7 @@ public class AutoPlay
     /// <c>--clock=fast</c> (default) uncapped 60×, or <c>--clock=normal</c> for the previous 8× clock.
     /// Pause assertions still force 1×. Fast also disables vsync so an unfocused run is not stuck at the refresh rate.
     /// </summary>
-    private static bool ApplyClock(out string error)
+    internal static bool ApplyClock(out string error)
     {
         error = "";
         string? value = null;
