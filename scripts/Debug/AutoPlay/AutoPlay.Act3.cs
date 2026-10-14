@@ -1,0 +1,302 @@
+using Godot;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Repentance;
+
+/// <summary>Act 3 of the autoplay run, up to the main ending.</summary>
+public partial class AutoPlay
+{
+    /// <summary>The masked Club, Act 3 and the main ending.</summary>
+    private async Task PlayActThree(Game game, GameState gs)
+    {
+        // ---- the Club, masked: end of Act Two, the bedroom, and the stage in Act 3
+        await game.Perform(Verb.Walk, "club");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "ClubVestibule" && gs.HasFlag("masked") && game.Player.Character == "micah_masked",
+            "Micah goes in masked, by the vestibule");
+        await Shot("club_vestibule");
+        await game.Perform(Verb.Walk, "street_door");
+        Check(game.Room?.Name == "ClubVestibule", "no way back out to the street");
+        await game.Perform(Verb.UseItem, "slot", "invitation");
+        Check(game.Room?.Name == "ClubVestibule" && !gs.HasFlag("vestibule_passed") && gs.HasItem("invitation"),
+            "the slot refuses an unsealed invitation");
+        await game.Perform(Verb.Look, "plaque");
+        await game.Perform(Verb.Hand, "sealing_wax");
+        Check(gs.HasItem("sealing_wax") && gs.HasFlag("took_sealing_wax"), "took the sealing wax");
+        await CombineAndWait("sealing_wax", "invitation");
+        Check(gs.HasItem("sealing_wax") && gs.HasItem("invitation") && !gs.HasItem("invitation_waxed"), "cold wax won't take");
+        await CombineAndWait(MicahKit.LighterId, "sealing_wax");
+        Check(gs.HasItem("wax_soft") && !gs.HasItem("sealing_wax") && gs.HasItem(MicahKit.LighterId) && gs.HasFlag("wax_softened"),
+            "the lighter softens the wax and is kept");
+        await CombineAndWait("wax_soft", "invitation");
+        Check(gs.HasItem("invitation_waxed") && !gs.HasItem("invitation") && !gs.HasItem("wax_soft"), "wax dripped on the invitation");
+        await game.Perform(Verb.UseItem, "slot", "invitation_waxed");
+        Check(!gs.HasFlag("vestibule_passed") && gs.HasItem("invitation_waxed"), "the slot refuses wax with no seal in it");
+        await game.Perform(Verb.Hand, "cloak_lion");
+        Check(gs.HasItem("signet_lion"), "borrowed the lion signet");
+        await CombineAndWait("signet_lion", "invitation_waxed");
+        Check(gs.HasItem("invitation_waxed") && !gs.HasItem("sealed_invitation") && gs.HasItem("signet_lion"),
+            "the lion is second in the procession, not first");
+        await game.Perform(Verb.Hand, "cloak_raven");
+        Check(gs.HasItem("signet_raven") && !gs.HasItem("signet_lion"), "taking the raven hangs the lion back up");
+        await ReloadCheckpoint("vestibule_raven");
+        await CombineAndWait("signet_raven", "invitation_waxed");
+        Check(gs.HasItem("sealed_invitation") && !gs.HasItem("invitation_waxed") && !gs.HasItem("signet_raven")
+            && gs.HasFlag("invitation_sealed"), "sealed with the raven, first of the procession; ring hung back up");
+        await Shot("club_vestibule_sealed");
+        var rite = game.Perform(Verb.UseItem, "slot", "sealed_invitation");
+        await Until(() => gs.HasFlag("vestibule_passed"));
+        await Shot("club_vestibule_open");
+        await Until(() => game.Room?.Name == "ClubHall");
+        await WaitIdle(game);
+        Check(gs.HasFlag("masked") && game.Player.Character == "micah_masked", "Micah goes in masked");
+        Check(gs.HasItem(MicahKit.LighterId) && gs.HasItem("sealed_invitation"), "lighter still held; the sealed card came back out of the slot");
+        Check(game.Room?.FindHotspot("guest")?.Visible == true, "masked guests in the hall");
+        await rite;
+        await Shot("club_hall_masked");
+        await game.Perform(Verb.Walk, "exit");
+        Check(game.Room?.Name == "ClubLounge", "into the lounge");
+        await Shot("club_lounge");
+        var stage = game.Perform(Verb.Walk, "stage_exit");
+        await Until(() => game.Room?.Name == "ClubStage");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Stage && game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
+        Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
+        await Until(() => game.Hud.SpeechVisible);
+        Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
+        await game.Wait(4);
+        await Shot("club_stage");
+        await Until(() => game.Room?.Name == "Attic");
+        Check(!game.Hud.InsetVisible, "the close-up is gone in the attic");
+        await game.Wait(2);
+        await Shot("attic_night2");
+        await Until(() => game.Hud.CaptionVisible);
+        Check(game.Player.Character == "daniel" && !gs.HasItem("revolver") && gs.HasItem("journal") && !gs.HasItem(Notes.ItemId),
+            "back in the attic, Micah's things put away");
+        await Shot("end_of_act_two");
+        await Until(() => game.Room?.Name == "Bedroom");
+        Check(gs.StoryAct == 3, "Act Three");
+        await game.Wait(2);
+        await Shot("bedroom");
+        await Until(() => game.Room?.Name == "ClubStage");
+        Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned),
+            "back on the stage with Micah's things, notepad and lighter first");
+        Check(gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(3, i)) && !gs.HasItem("mirror") && !gs.HasItem("card") &&
+            !gs.HasItem("lockpick"), "Act 3 starts with only the revolver and Micah's commitments");
+        await game.Wait(3);
+        Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
+        await Shot("club_stage_act3");
+        await Until(() => gs.HasFlag("harrington_unmasked"));
+        var unmasked = game.Room?.FindActor("harrington");
+        Check(!game.Hud.InsetVisible && unmasked != null && game.Room?.FindActor("leader") == null
+              && unmasked.Texture?.ResourcePath == "res://assets/art/sprites/leader_unmasked.png",
+            "the stag takes off his mask in front of everyone: Harrington senior, close-up gone");
+        await game.Wait(1);
+        await Shot("club_stage_unmasked");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Power that never shows itself"));
+        Check(game.Hud.SpeechText.Contains("rumour"), "Harrington says the meeting is only the exercise of his power");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("I am where I belong", StringComparison.Ordinal));
+        Check(game.Hud.SpeechText == "I am where I belong, Mr. Jones.", "Eleanor answers flatly, like a recording");
+        await Until(() => gs.HasFlag("brute_stage"));
+        Check(_insetAtCaughtChoice == false, "the close-up is removed before the revolver choice");
+        await game.Wait(1);
+        await Shot("club_stage_brute");
+        await Until(() => game.Room?.Name == "ChurchExterior");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
+        await game.Wait(1.5);
+        Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
+            "his thoughts sit below his face while the close-up is up");
+        await Shot("church_exterior_beaten");
+        await Until(() => game.Room?.Name == "Office");
+        Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");
+        await game.Wait(1.5);
+        Check(game.Player.Visible && game.Player.Facing == Facing.Up && game.Player.Position.X > 380,
+            "Act 3 office: Micah talks at the window, his back to the room");
+        Check(gs.HasFlag("office_lamp_off") && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("office_act3.png") == true,
+            "Act 3 office is dim, the lamp off and the whiskey on the desk");
+        await Shot("office_act3_window");
+        await stage;
+        await WaitIdle(game);
+        Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+        Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
+        Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
+        _prefer = new[] { "Visit Caleb", "Refuse the cross" };
+        int offers = _crossOffers;
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "Office" && gs.HasFlag("church_act3_return") && !gs.HasItem("cross") && _crossOffers == offers + 1,
+            "Act 3 Caleb visit offers cross, refusal returns to office");
+        await game.Perform(Verb.Walk, "door");
+        Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Caleb offers again after refusal");
+        _prefer = new[] { "Visit Caleb", "Accept the cross" };
+        await game.Perform(Verb.Walk, "door");
+        Check(gs.HasItem("cross") && gs.HasFlag("took_cross") && gs.Inventory.Count(i => i == "cross") == 1,
+            "accepted pendant is recorded and given once");
+        await game.Perform(Verb.Walk, "door");
+        Check(_crossOffers == offers + 3 && game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"),
+            "accepted cross isn't offered again, desk scene isn't replayed");
+        var savedCommitments = game.CaptureSave();
+        Check(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(savedCommitments))?.Inventory.Contains("cross") == true,
+            "accepted pendant survives save serialization");
+        gs.TakeItem("cross");
+        await game.LoadGame(savedCommitments);
+        Check(gs.HasItem("cross") && gs.HasItem("faith_ring") && gs.HasFlag("ring_taken_act2") && game.Room is Rooms.Office,
+            "load restores ring, pendant and initial decision without replaying the desk");
+        _prefer = new[] { "Go to the Blue Lantern" };
+        await game.Perform(Verb.Walk, "door");
+        Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
+        var act3Flags = _act3Flags = gs.Flags.ToArray();
+        var act3Items = _act3Items = gs.Inventory.ToArray();
+        _act3Ink = DialogueManager.Instance.SaveInk();
+
+        // ---- the alley: break the lamp, lure Sal out, knock him down, and bring Tony out
+        await Shot("alley_act3");
+        int stoneSteps = game.Sfx.Count(Sound.StepStone), knocks = game.Sfx.Count(Sound.Knock);
+        int gunshots = game.Sfx.Count(Sound.Gunshot);
+        await game.Perform(Verb.Talk, "back_door");
+        Check(!gs.HasFlag("shot_bartender"), "not knocking with Sal inside");
+        await game.Perform(Verb.Kick, "trash");
+        Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
+        await game.Perform(Verb.Hand, "street_lamp");
+        Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+        Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
+        await Shot("alley_dark");
+        await game.Perform(Verb.Kick, "trash");
+        Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+        Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
+        await Shot("alley_sal_out");
+        CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
+        await game.Perform(Verb.UseItem, "sal", "revolver");
+        Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+        Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
+            !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
+        await Shot("alley_sal_down");
+        _prefer = new[] { "Shoot him", "You can't stay", "Every time" };
+        var tonyTalk = game.Perform(Verb.Talk, "back_door");
+        await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
+            t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
+        Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
+            "Tony falls, shot in the shoulder, and stays down on his back");
+        await Shot("alley_tony_shot");
+        Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
+        Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
+        await tonyTalk;
+        Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
+        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the shoulder, on to the Harrington mansion");
+
+        // ---- the mansion: the alarm bell, the key, the study, the bedroom
+        await Shot("mansion_exterior");
+        await game.Perform(Verb.Hand, "bell");
+        await game.Perform(Verb.Look, "door");
+        Check(gs.HasFlag("alarm_noticed"), "spotted the alarm wire");
+        await game.Perform(Verb.Hand, "lintel");
+        Check(gs.HasItem("kitchen_key"), "the key on the lintel");
+        await game.Perform(Verb.Hand, "door");
+        await game.Perform(Verb.Hand, "bell");
+        Check(game.Room?.Name == "MansionExterior" && !gs.HasFlag("bell_wedged"), "the bell is out of reach");
+        await game.Perform(Verb.Hand, "bin");
+        Check(gs.HasFlag("bin_moved"), "moved the coal bin under the bell");
+        await ReloadCheckpoint("alarm_unrestrained");
+        Check(!gs.HasFlag("bell_wedged"), "save/load does not restrain a new alarm");
+        await CancelPuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell, "bell_wedged", "alarm_restraint");
+        await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
+            new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
+        Check(gs.HasFlag("bell_wedged"), "gagged the bell with the tie");
+        await Shot("mansion_exterior_wedged");
+        await game.Perform(Verb.Hand, "door");
+        Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("kitchen_key"), "in through the kitchen, quietly");
+        await Shot("mansion_kitchen");
+        await game.Perform(Verb.Hand, "range");
+        await game.Perform(Verb.Hand, "back_door");
+        Check(!gs.HasFlag("gas_on") && game.Room?.Name == "MansionKitchen", "no gas, no leaving yet");
+        await game.Perform(Verb.Walk, "baize_door");
+        Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag("baize_unbolted"), "the baize door is bolted from the house side");
+        // ---- the wine cellar: a lantern, kerosene and the lighter light the bootleggers' stair up to the study
+        await game.Perform(Verb.Walk, "cellar_door");
+        Check(game.Room?.Name == "MansionCellar" && !gs.HasFlag("cellar_lit"), "down the trapdoor into the dark cellar");
+        await Shot("mansion_cellar_dark");
+        await game.Perform(Verb.Walk, "stair");
+        Check(game.Room?.Name == "MansionCellar", "no climbing the cellar stair blind");
+        await game.Perform(Verb.Hand, "lantern");
+        await game.Perform(Verb.Hand, "crates");
+        Check(gs.HasItem("lantern") && gs.HasItem("kerosene") && gs.HasItem(MicahKit.LighterId), "lantern off the hook, kerosene off the crates, lighter in pocket");
+        await Shot("mansion_cellar_taken");
+        await CombineAndWait("lantern", MicahKit.LighterId);
+        Check(gs.HasItem("lantern") && !gs.HasItem("lantern_filled") && !gs.HasItem("lantern_lit") && gs.HasItem(MicahKit.LighterId),
+            "a dry wick won't light");
+        await CombineAndWait("lantern", "kerosene");
+        Check(gs.HasItem("lantern_filled") && !gs.HasItem("lantern") && !gs.HasItem("kerosene"), "filled the lantern");
+        await CombineAndWait("lantern_filled", MicahKit.LighterId);
+        Check(gs.HasItem("lantern_lit") && gs.HasFlag("lantern_lit") && gs.HasItem(MicahKit.LighterId), "lit the lantern; the lighter is kept");
+        await game.Perform(Verb.UseItem, "stair", "lantern_lit");
+        Check(gs.HasFlag("cellar_lit") && !gs.HasItem("lantern_lit"), "the lantern hung at the stair foot lights the cellar");
+        await Shot("mansion_cellar_lit");
+        await game.Perform(Verb.Walk, "stair");
+        Check(game.Room?.Name == "MansionStudy", "up the bootleggers' stair into the study");
+        await Shot("mansion_study_hatch");
+        await game.Perform(Verb.Walk, "door_left");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("baize_unbolted"), "unbolted the baize door from the study side");
+        await game.Perform(Verb.Walk, "baize_door");
+        Check(game.Room?.Name == "MansionStudy", "into the study");
+        await Shot("mansion_study");
+        await game.Perform(Verb.Hand, "drawer_right");
+        await Shot("mansion_study_drawer");
+        await game.Perform(Verb.Hand, "documents");
+        Check(gs.HasItem("audit_folder") && !gs.HasItem("documents") && !gs.HasFlag(Endings.TookDocuments),
+            "account register alone is not incriminating evidence");
+        await game.Perform(Verb.Hand, "drawer_left");
+        Check(gs.HasItem("audit_tracing"), "matching index found under the cigars");
+        await ReloadCheckpoint("audit_unsolved");
+        Check(!gs.HasFlag(Endings.TookDocuments) && gs.HasItem("audit_folder") && gs.HasItem("audit_tracing"),
+            "both audit clues survive save/load without granting evidence");
+        await CancelPuzzle(() => CombineAndWait("audit_tracing", "audit_folder"), PuzzleKind.Alignment, "audit_identified", "audit_alignment");
+        await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
+            new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+        Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "index identifies signed payoff sheets");
+        var confront = game.Perform(Verb.Walk, "door_right");
+        await Until(() => game.Room?.Name == "MansionBedroom");
+        await game.Wait(1.5);
+        await Until(() => game.Hud.SpeechVisible && game.Room?.Name == "MansionBedroom");
+        var mansionLine = game.Hud.SpeechText;
+        Check(game.Hud.SpeechVisible && !confront.IsCompleted, "Act Three confrontation is speaking before pause");
+        PressKey(Key.Space);
+        // Longer than the longest unpaused line (7s) at the current scale, so a failed pause would have finished.
+        await Observe(7.0 / Engine.TimeScale + 0.2);
+        Check(game.IsPaused && game.Hud.SpeechVisible && game.Hud.SpeechText == mansionLine
+            && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
+            "Space freezes the Act Three confrontation mid-sentence");
+        PressKey(Key.Space);
+        Check(game.Player.Visible && game.Player.Position.Y < 218 && game.Player.Position.X is > 68 and < 148,
+            "Micah listens in view behind the lowered folding screen (#104)");
+        await Shot("mansion_bedroom");
+        await Until(() => gs.HasFlag("eleanor_up"));
+        Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
+            "Micah walks out from behind the screen to take aim (#104)");
+        await game.Wait(0.5);
+        await Shot("mansion_bedroom_gun");
+        await confront;
+        await WaitIdle(game);
+        Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
+        Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
+        await Shot("mansion_kitchen_escape");
+        await game.Perform(Verb.Walk, "baize_door");
+        await game.Perform(Verb.Walk, "cellar_door");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door or the cellar during the escape");
+        await game.Perform(Verb.Hand, "range");
+        await game.Perform(Verb.Hand, "candle");
+        Check(gs.HasFlag("gas_on") && gs.HasFlag("candle_lit"), "gas on, candle lit");
+        await Shot("mansion_kitchen_gas");
+        _ = game.Perform(Verb.Walk, "back_door");
+        await Until(() => gs.HasFlag(Endings.MansionExploded));
+        await game.Wait(1.5);
+        await Shot("mansion_explosion");
+        await Until(() => game.Room?.Name == "Outskirts");
+        Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
+        await game.Wait(3);
+        await Shot("ending_together");
+        await TheEnd("ending_2");
+    }
+}
