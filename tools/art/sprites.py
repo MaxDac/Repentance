@@ -136,9 +136,10 @@ BRUTE = dict(h=71, sw=0.168, hw=0.06, waist=0.112, hipw=0.112, leg_r=1.14, skin=
 WATCHMAN = dict(h=69, sw=0.16, hw=0.058, skin="c89a7c", hair="4a3a2c", hat="cap", hat_col="1e2638",
                 torso="26304a", coat=dict(col="26304a", top=0.40, hem=0.66, flare=0.02), pants="1e2638", shoes="141210",
                 decals=[("strip", 0.215, 0.62, 0.0, 0.008, "a88c46")])
-# The club's members on the night of the rite: a white full-face mask in the shadow of a deep black cowl, the cowl
+# The club's members on the night of the rite: a white Venetian Bauta half-mask (heavy brow, eye holes and a long
+# nose; the mouth and chin bare and overshadowed) in the shadow of a deep black cowl, the cowl
 # falling into a long cloak closed over the arms down to the ankles.
-MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_col="16141a", mask=("full", "ece8e0"),
+MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_col="16141a", mask=("bauta", "ece6d4"),
                   torso="16141a", collar="16141a", sleeves="16141a", cloak=dict(col="16141a", hem=0.96),
                   pants="16141a", shoes="0e0c10", decals=[])
 MICAH_MASKED = dict(MASKED_MAN, decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
