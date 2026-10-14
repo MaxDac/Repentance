@@ -633,21 +633,34 @@ ROSE: ...Why not.
 === caleb_club ===
 CALEB: Micah. Twice in one week. People will start to talk.
 MICAH: There's a club on Hubbard. No sign on the door, a man in a robe at the bell. They have Eleanor.
-CALEB: ...I don't know anything about clubs.
+CALEB: A club? Micah, what would a priest know about clubs?
 - (opts)
-* [You went as white as the altar cloth, Caleb.]
-    CALEB: It's late, Micah. Go home.
+* (hid) [Before they took her, Eleanor was hiding at the convent.]
+    MICAH: Tony at the Blue Lantern sent her to the sisters, and they didn't ask a single question.
+    MICAH: Doors don't open that easily the first time. Maybe she'd been there before.
+    CALEB: The sisters open their door to anybody who knocks. That's what the door is for.
     -> opts
-* [They have her, Caleb. If you know anything, tell me.]
+* (roof) [The convent answers to the Church. And you're the Church on this side of town.]
+    CALEB: The convent is Mother Superior's house, not mine. I say Mass for the sisters. I don't keep their books.
+    MICAH: But it's all one roof, in the end. Somebody under it might have heard something. Maybe you.
+    -> opts
+* {hid and roof} [They have her, Caleb. If you know anything, tell me.]
     CALEB: ...
-    CALEB: There are women who go there. Performers, they call them. When the Club is done with them, the sisters at the convent take some of them in.
+    CALEB: I don't know anything about her. But I hear things. A priest always does.
+    CALEB: There are women who go to that place. Performers, they call them. When the Club is done with them, the sisters take some of them in.
     CALEB: If anybody knows anything, it's the sisters. The convent is the best place to ask.
     -> rest
 - (rest)
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
 MICAH: There isn't much left for me to do.
 CALEB: You know that isn't true.
-CALEB: The prodigal thought so too. Then he turned for home, and his father ran to meet him.
+CALEB: Repentance isn't for saints at the end of their lives, Micah. It's for anyone, any day they still draw breath.
+CALEB: If a man truly repents, the Lord forgives him. Every time.
+MICAH: Not a man like me, Caleb. I'm too far gone.
+CALEB: Listen to yourself. You think your sins are too big for God to forgive? That's not humility, brother. That's pride.
+CALEB: You've always been arrogant, Micah. Always the one who had to carry everything, so nobody could ever ask anything of you.
+CALEB: Despair is just another way of putting yourself first. If you're past saving, you never have to change.
+CALEB: The prodigal thought he was past it too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
 -> END
 
