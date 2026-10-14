@@ -61,6 +61,7 @@ build_and_import() {
 
 # godot_run <godot> <name> <markers, |-separated> [engine args...] -- <user args...>
 # Tees the output to logs/<name>.log; succeeds when the run exited cleanly, printed a marker and logged no errors.
+# With ERRORS_ARE_WARNINGS=1 (film mode), logged errors are reported but don't fail the run.
 godot_run() {
   local godot="$1" name="$2" markers="$3"; shift 3
   local engine=() user=()
@@ -78,7 +79,10 @@ godot_run() {
   IFS='|' read -r -a ms <<< "$markers"
   for m in "${ms[@]}"; do grep -qF "$m" "$log" && found=1; done
   if [ "$found" -eq 0 ]; then echo "None of '$markers' found in $log" >&2; ok=1; fi
-  if grep -nE "$ERROR_PATTERN" "$log" >&2; then echo "Godot logged errors (see above)" >&2; ok=1; fi
+  if grep -nE "$ERROR_PATTERN" "$log" >&2; then
+    echo "Godot logged errors (see above)" >&2
+    [ "${ERRORS_ARE_WARNINGS:-0}" = 1 ] || ok=1
+  fi
   return $ok
 }
 

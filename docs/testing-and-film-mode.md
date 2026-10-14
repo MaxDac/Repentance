@@ -59,7 +59,9 @@ watching: your mouse and keyboard can't skip lines or change anything. Only thes
 
 When Micah has a decision to make, the choices stay on screen for a moment and the one picked is highlighted before
 the story continues. The film uses the test-only save and settings files and plays with real sound.
-The log goes to `logs/film_<speed>x.log`.
+The log goes to `logs/film_<speed>x.log`. Unlike the tests, `ERROR:` lines in the log are shown as warnings rather
+failing the film (without an audio device, for instance, Godot logs WASAPI errors and plays silently); the test
+suites run with `--audio-driver Dummy`.
 
 Without the scripts: `godot_console --path . -- --film=2 --ending=3` (after a build and import).
 

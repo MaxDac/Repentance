@@ -71,7 +71,9 @@ function Build-And-Import([string]$Godot) {
 function Invoke-GodotRun {
     param(
         [string]$Godot, [string]$Name, [string[]]$UserArgs, [string[]]$Markers,
-        [string[]]$EngineArgs = @()
+        [string[]]$EngineArgs = @(),
+        # Film mode: report logged errors without failing (e.g. no audio device makes the engine log WASAPI errors).
+        [switch]$ErrorsAreWarnings
     )
     New-Item -ItemType Directory -Force $LogDir | Out-Null
     $log = Join-Path $LogDir "$Name.log"
@@ -90,9 +92,10 @@ function Invoke-GodotRun {
     if ($found.Count -eq 0) { Write-Host "None of '$($Markers -join "', '")' found in $log" -ForegroundColor Red; $ok = $false }
     $errors = $text | Select-String -CaseSensitive -Pattern $ErrorPattern
     if ($errors) {
-        Write-Host 'Godot logged errors:' -ForegroundColor Red
-        $errors | ForEach-Object { Write-Host "  $log`:$($_.LineNumber): $($_.Line)" -ForegroundColor Red }
-        $ok = $false
+        $color = if ($ErrorsAreWarnings) { 'Yellow' } else { 'Red' }
+        Write-Host 'Godot logged errors:' -ForegroundColor $color
+        $errors | ForEach-Object { Write-Host "  $log`:$($_.LineNumber): $($_.Line)" -ForegroundColor $color }
+        if (-not $ErrorsAreWarnings) { $ok = $false }
     }
     return $ok
 }

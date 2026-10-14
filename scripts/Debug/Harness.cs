@@ -155,10 +155,7 @@ public abstract class Harness
 
     protected void Move(Vector2 pos)
     {
-        _game.GetViewport().PushInput(new InputEventMouseMotion
-        {
-            Position = pos, GlobalPosition = pos,
-        }, true);
+        Push(new InputEventMouseMotion { Position = pos, GlobalPosition = pos });
         _game.GetViewport().WarpMouse(pos);
     }
 
@@ -166,20 +163,28 @@ public abstract class Harness
     {
         foreach (var pressed in new[] { true, false })
         {
-            _game.GetViewport().PushInput(new InputEventMouseButton
+            Push(new InputEventMouseButton
             {
                 Position = pos, GlobalPosition = pos, ButtonIndex = button, Pressed = pressed,
-            }, true);
+            });
         }
     }
 
     protected void PressKey(Key key, bool alt = false)
     {
         foreach (var pressed in new[] { true, false })
-            _game.GetViewport().PushInput(new InputEventKey
+            Push(new InputEventKey
             {
                 Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed,
-            }, true);
+            });
+    }
+
+    /// <summary>Pushes a synthetic event past film mode's <see cref="SpectatorFilter"/>.</summary>
+    private void Push(InputEvent e)
+    {
+        SpectatorFilter.Injecting = true;
+        try { _game.GetViewport().PushInput(e, true); }
+        finally { SpectatorFilter.Injecting = false; }
     }
 
     // ------------------------------------------------------------------ story helpers

@@ -22,7 +22,7 @@ Write-Host "Godot: $godotExe"
 if (-not $NoClean) { Reset-Generated }
 Build-And-Import $godotExe
 $ok = Invoke-GodotRun -Godot $godotExe -Name "film_${Speed}x" -UserArgs @("--film=$Speed", "--ending=$Ending") `
-    -Markers @('FILM OK', 'FILM STOPPED')
+    -Markers @('FILM OK', 'FILM STOPPED') -ErrorsAreWarnings
 if ($ok) { Write-Host 'Film finished.' -ForegroundColor Green; exit 0 }
 Write-Host 'Film failed; see the log above.' -ForegroundColor Red
 exit 1

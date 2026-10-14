@@ -27,7 +27,8 @@ godot="$(find_godot "$godot_arg")"
 echo "Godot: $godot"
 [ "$clean" -eq 1 ] && reset_generated
 build_and_import "$godot"
-if godot_run "$godot" "film_${speed}x" "FILM OK|FILM STOPPED" -- "--film=$speed" "--ending=$ending"; then
+# Logged errors are reported but don't stop the show (no audio device, for one, makes the engine log some).
+if ERRORS_ARE_WARNINGS=1 godot_run "$godot" "film_${speed}x" "FILM OK|FILM STOPPED" -- "--film=$speed" "--ending=$ending"; then
   echo "Film finished."
 else
   echo "Film failed; see the log above." >&2
