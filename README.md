@@ -126,8 +126,9 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The current save format is version 7; earlier saves are incompatible because the Act One convent visit now
-includes a playable exterior arrival and a return to the corridor for Sister Agatha's farewell.
+The current save format is version 8; earlier saves are incompatible because the laundry bluing now comes
+from Eleanor's brass box instead of the florist's shelf, and the prototype State Street hub is gone. Version 7
+added the Act One convent's playable exterior arrival and the return to the corridor for Sister Agatha's farewell.
 The preceding five collect-and-combine locations reroute the staff lift, the Blue Lantern entrance,
 the Harrington lead, the masked Club entrance and the
 mansion entrance. The puzzle expansion's separate original-puzzle
@@ -170,10 +171,10 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
    no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7.
    Then take the brass box.
    Open it in the satchel with the hand: a
-   calling card carrying her perfume and a matchbook from the Blue Lantern.
+   calling card carrying her perfume, a matchbook from the Blue Lantern and a vial of laundry bluing.
 4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
-   for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
-   combine them and show the blue carnation at the cold-room grille to be let in.
+   for blue carnations only. Take a white carnation from the bucket, combine it with Eleanor's
+   bluing and show the blue carnation at the cold-room grille to be let in.
    **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
    leaving $10 after all the bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't

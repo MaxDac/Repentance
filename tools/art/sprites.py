@@ -330,18 +330,6 @@ def shoulder_shot_strip(spec, name, final_name, arms):
     return frames
 
 
-def falling_frame(spec, name):
-    """Single frame of a character facing right, hit and toppling backwards, arms flung up."""
-    from PIL import Image
-    ps = pose(90, arms={1: ("swing", -70, 30, 20), -1: ("swing", -40, 20, 30)}, legs={1: (14, 10, 0), -1: (-6, 18, 0)},
-              lean=-6.0)
-    fig = figure(spec, ps, FW + 16, FH)
-    fig.putalpha(fig.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
-    tilted = fig.rotate(24, resample=Image.NEAREST, center=(fig.width // 2, FH - 4))
-    save(tilted, "sprites", f"{name}.png")
-    return tilted
-
-
 def seated_frame(spec, name, flip=False):
     """Single 64x96 frame of a character sitting on a chair in profile (facing right; flipped to face left), forearms
     forward as if resting on a table. The seat itself is painted into the room."""
@@ -443,8 +431,9 @@ def action_sequences(spec, name):
             times += [timing[i] / 2] * 2
         return frames + [end], times + [timing[-1]]
 
-    falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
-    action_strip(f"{name}_collapse", falling, times)
+    if name == "micah_masked":
+        falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
+        action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
         recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
                                    [0.28, 0.3, 0.28, 0.22, 0.12])
@@ -487,7 +476,6 @@ def build():
 def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
     shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
-    falling_frame(HARRINGTON_GOWN, "harrington_falling")
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)

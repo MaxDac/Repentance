@@ -54,6 +54,7 @@ public static class Notes
         {
             L("A perfumed card, blank but for two letters. Her perfume."),
             L("A matchbook: The Blue Lantern, State Street."),
+            L("A vial of laundry bluing. She meant to wear a blue flower."),
         }),
         N("blue_lantern", "The Blue Lantern", "seen_blue_lantern_front",
             L("Rizzo's Flowers on State Street is the front."),
@@ -161,7 +162,7 @@ public static class Notes
         (new[] { "convent_cell" }, new[] { "nun_talked" }),
         (new[] { "motel_night", "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "got_mirror", "eleanor_found" }),
         (new[] { "club_hall" }, new[] { "librarian_refused", "catalogue_identified", "read_book", "card_decoded" }),
-        (new[] { "street", "rose_house", "aurelian_room" }, new[] { "club_out" }),
+        (new[] { "street", "rose_house" }, new[] { "club_out" }),
         (new[] { "newspaper_morgue" }, new[] { "caleb_club", "nun_threatened" }),
         (new[] { "harrington_road" }, new[] { "mended_clipping", "harrington_located" }),
         (new[] { "harrington_office" }, new[] { "seen_harrington_road" }),
@@ -170,7 +171,7 @@ public static class Notes
         (new[] { "mansion_exterior" }, new[] { "beaten", "shot_bartender" }),
         (new[] { "mansion_kitchen" }, new[] { "alarm_noticed" }),
         (new[] { "mansion_cellar" }, new[] { "seen_mansion_kitchen" }),
-        (new[] { "mansion_study", "mansion_bedroom", "outskirts", "prison", "motel_room" }, new[] { "cellar_lit" }),
+        (new[] { "mansion_study", "mansion_bedroom", "outskirts", "prison" }, new[] { "cellar_lit" }),
     };
 
     /// <summary>Rooms with a debug-start entry, in story order.</summary>

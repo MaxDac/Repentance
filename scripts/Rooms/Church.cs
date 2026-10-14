@@ -126,9 +126,6 @@ public partial class Church : Room
             case ("caleb", Verb.Talk):
                 await Talk("caleb");
                 return true;
-            case ("caleb", Verb.UseItem) when item == "diary":
-                await Talk("caleb");
-                return true;
             case ("caleb", Verb.UseItem) when Shows(item, "photo", "eleanor"):
                 await Say("caleb", "Eleanor. She sat in that pew for two nights before she said a word. Is she safe?");
                 return true;

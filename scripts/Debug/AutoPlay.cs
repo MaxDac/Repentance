@@ -148,9 +148,7 @@ public class AutoPlay
             await Shot("lobby");
             await game.Perform(Verb.Talk, "concierge");
             await game.Perform(Verb.Walk, "revolving_door");
-            Check(game.Room?.Name == "Street", "revolving door leads to the street before the tip");
-            await game.Perform(Verb.Walk, "lobby_door");
-            Check(game.Room?.Name == "Lobby", "back in the lobby");
+            Check(game.Room is Rooms.Lobby, "the revolving door holds Micah in the lobby before the bellboy's tip");
             await game.Perform(Verb.Talk, "bellboy");
             await game.Perform(Verb.UseItem, "bellboy", "dollar");
             Check(gs.HasItem("dollar") && CashRules.Balance(gs.HasFlag) == 21 && gs.HasFlag("knows_lantern") &&
@@ -212,8 +210,6 @@ public class AutoPlay
             await game.Perform(Verb.Hand, "brass_box");
             Check(gs.HasItem("brass_box"), "took the brass box");
             await Shot("eleanor_safe_empty");
-            await game.ItemVerb(Verb.Hand, "brass_box");
-            Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
             await game.Perform(Verb.Walk, "exit");
             Check(game.Room?.Name == "HotelLinen", "back across the corridor to the linen room");
             await game.Perform(Verb.Walk, "lift");
@@ -236,11 +232,15 @@ public class AutoPlay
             Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened") && gs.HasItem("carnation"),
                 "a white carnation gets a shut slot");
             await game.Perform(Verb.Hand, "shelf");
-            Check(gs.HasItem("bluing") && gs.HasFlag("took_bluing"), "took the bottle of bluing");
+            Check(!gs.HasItem("bluing") && gs.HasItem("brass_box") && !gs.HasFlag("opened_brass_box"),
+                "the florist's shelf has no bluing: the carnation can't be dyed until the brass box is opened");
+            await game.ItemVerb(Verb.Hand, "brass_box");
+            Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook") && gs.HasItem("bluing") &&
+                gs.HasFlag("opened_brass_box"), "the brass box holds a card, the matchbook and Eleanor's bluing");
             await Shot("blue_lantern_front_taken");
             await CombineAndWait("carnation", "bluing");
             Check(gs.HasItem("blue_carnation") && !gs.HasItem("carnation") && !gs.HasItem("bluing") && gs.HasFlag("made_blue_carnation"),
-                "dyed the carnation blue; the bluing goes back on the shelf");
+                "dyed the carnation blue with Eleanor's bluing");
             await game.Perform(Verb.UseItem, "grille", "blue_carnation");
             Check(game.Room?.Name == "Speakeasy", "the grille opens for a blue carnation");
             Check(gs.HasFlag("grille_opened") && !gs.HasItem("blue_carnation") && !gs.HasFlag("sal_passed"),
@@ -625,6 +625,12 @@ public class AutoPlay
             await game.Perform(Verb.Walk, "convent");
             Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
             await Shot("convent_act2");
+            for (var i = 0; i < 3; i++)
+            {
+                var nunLines = await Listen(game, game.Perform(Verb.Talk, "nun"));
+                Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("nun_threatened") &&
+                    nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
+            }
             var threat = game.Perform(Verb.UseItem, "nun", "revolver");
             await game.Wait(1.5);
             await Shot("convent_gun");
@@ -1743,7 +1749,7 @@ public class AutoPlay
         Check(game.Hud.Menu.Press("Slot 1"), "save menu lists slot 1");
         await Observe(0.1);
         var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
-        Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("matchbook"), "saved to slot 1 from the menu");
+        Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("brass_box"), "saved to slot 1 from the menu");
         PressKey(Key.Escape);
         await game.Wait(0.1);
         Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc resumes the game");
@@ -1752,13 +1758,13 @@ public class AutoPlay
         var ink = DialogueManager.Instance.SaveInk();
         gs.Reset();
         DialogueManager.Instance.ResetInk();
-        await game.ChangeRoom("street", "lobby");
+        await game.ChangeRoom("office", "start");
         await WaitIdle(game);
-        Check(!gs.HasItem("matchbook") && game.Room?.Name == "Street", "progress wiped before loading");
+        Check(!gs.HasItem("brass_box") && game.Room?.Name == "Office", "progress wiped before loading");
 
         await game.LoadGame(saved);
         Check(game.Room?.Name == "Lobby", "load returns to the saved room");
-        Check(gs.HasItem("matchbook") && gs.HasItem("photo") && gs.HasFlag("knows_lantern") && gs.HasFlag("seen_lobby"),
+        Check(gs.HasItem("brass_box") && gs.HasItem("photo") && gs.HasFlag("knows_lantern") && gs.HasFlag("seen_lobby"),
             "load restores items and flags");
         Check(game.Player.Position.DistanceTo(new Vector2(saved.X, saved.Y)) < 0.5f, "load restores the player's position");
         Check(ink.Length > 0 && DialogueManager.Instance.SaveInk() == ink, "load restores the Ink state");

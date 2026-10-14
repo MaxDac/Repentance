@@ -41,7 +41,7 @@ public partial class BlueLanternFront : Room
                 await Game.ChangeRoom("speakeasy", "door");
                 return true;
             case ("grille" or "cold_door", Verb.UseItem) when item == "carnation":
-                await Say("A white one gets a long look and a shut slot. The chalkboard said blue. There's a bottle of bluing on the shelf.");
+                await Say("A white one gets a long look and a shut slot. The chalkboard said blue.");
                 return true;
             case ("grille" or "cold_door", Verb.UseItem) when item == "lockpick":
                 await Say("No keyhole. Whoever's behind that grille is the lock.");
@@ -64,14 +64,6 @@ public partial class BlueLanternFront : Room
                 await Say("I leave a nickel in the tin and take a white carnation. Honest money for an honest flower.");
                 return true;
 
-            case ("shelf", Verb.Hand) when !State.HasFlag("took_bluing") && !State.HasFlag("made_blue_carnation"):
-                State.SetFlag("took_bluing");
-                State.GiveItem("bluing");
-                await Say("Mrs. Stewart's Bluing. Every laundress in Chicago has a bottle. So does every florist with a blue flower to sell.");
-                return true;
-            case ("shelf", Verb.Hand) when State.HasFlag("made_blue_carnation"):
-                await Say("The bluing's back on the shelf, a few drops lighter.");
-                return true;
             case ("shelf", Verb.Hand):
                 await Say("Pots and a watering can. Nothing else worth borrowing.");
                 return true;

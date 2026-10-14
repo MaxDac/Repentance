@@ -109,7 +109,7 @@ class CharacterArtTests(unittest.TestCase):
                     self.assertEqual(frame.tobytes(), sprites.figure(spec, ps, 64, 96).tobytes())
 
     def test_collapse_starts_from_the_actual_player_idle(self):
-        for name in ("micah", "micah_masked"):
+        for name in ("micah_masked",):
             normal = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA").crop((0, 0, 64, 96))
             collapse = Image.open(ART / "sprites" / f"{name}_collapse.png").convert("RGBA")
             self.assertEqual(collapse.crop((64, 0, 128, 96)).tobytes(), normal.tobytes())
@@ -128,11 +128,8 @@ class CharacterArtTests(unittest.TestCase):
         self.assertEqual(hand[1], elbow[1])
         self.assertEqual(hand[1], 91)
         held = Image.open(ART / "sprites" / "micah_supine.png")
-        for name in ("micah_collapse", "micah_recover"):
-            image = Image.open(ART / "sprites" / f"{name}.png")
-            frame = image.crop((image.width - held.width, 0, image.width, held.height)) \
-                if name.endswith("collapse") else image.crop((0, 0, *held.size))
-            self.assertEqual(frame.tobytes(), held.tobytes(), name)
+        image = Image.open(ART / "sprites" / "micah_recover.png")
+        self.assertEqual(image.crop((0, 0, *held.size)).tobytes(), held.tobytes())
 
     def test_strapless_club_dresses_have_no_ribbon_spikes(self):
         for spec in (sprites.MASKED_WOMAN, sprites.MASKED_WOMAN_B, sprites.ELEANOR_STAGE_CLOTHED):
@@ -265,7 +262,7 @@ class CharacterArtTests(unittest.TestCase):
                     self.assertEqual(data["bounds"], bounds)
 
     def test_distinct_intermediate_frames(self):
-        for name in ("micah_collapse", "micah_recover", "micah_kneel_rise",
+        for name in ("micah_recover", "micah_kneel_rise",
                      "micah_masked_collapse", "eleanor_sheet_rise"):
             clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
             image = Image.open(ART / "sprites" / f"{name}.png")

@@ -112,86 +112,6 @@ def curtains(img, night=False):
         d.line([(x0, 26), (x0, 96)], fill=shade)
 
 
-def window(img):
-    d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 302, 26, 396, 92
-    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 7], fill=WOOD_D)
-    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1 + 4], fill=WOOD)
-    vgrad(img, (x0, y0, x1, y1), hx("dcd8b8"), hx("aeb89e"))
-    d.rectangle([x0, 70, x1, y1], fill=hx("7b7554"))
-    d.rectangle([x0, 62, x1, 70], fill=hx("938a63"))
-    d.rectangle([320, 50, 332, 92], fill=hx("5f5a46"))
-    d.rectangle([346, 44, 356, 92], fill=hx("655f49"))
-    d.rectangle([372, 54, 382, 92], fill=hx("595542"))
-    light(img, "rect", [x0, y0, x1, y1], hx("f5efc6"), 0.18, 2)
-    d.rectangle([x0, y0, x1, y1], outline=hx("20140e"))
-    d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=hx("2a1a12"), width=2)
-    d.line([(x0, 58), (x1, 58)], fill=hx("2a1a12"), width=2)
-    d.rectangle([x0 - 8, y1 + 4, x1 + 8, y1 + 8], fill=hx("4e3a2a"))
-
-    curtains(img)
-    shadow(img, "rect", [296, 26, 402, 90], 0.08, 2, hx("d8d0b0"))
-
-    # Sickly daylight spill
-    light(img, "polygon", [(322, 92), (376, 92), (454, 224), (254, 224)], hx("e8dfaa"), 0.22, 10)
-    light(img, "ellipse", [286, 90, 438, 190], hx("d8d28e"), 0.14, 18)
-
-
-def bed(img, unmade=False):
-    """A narrow iron bed pushed lengthways against the back wall: knee-high mattress, head end on the right."""
-    X0, X1, Z0, Z1 = 52, 140, 4, 42
-    a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z0)
-    shadow(img, "rect", [a[0] - 2, b[1] - 2, b[0] + 6, a[1] + 3], 0.45, 3)
-    # back posts and end panels (behind the mattress)
-    for x, top in ((X0, 30), (X1, 46)):
-        R.line(img, (x, 0, Z0), (x, top, Z0), IRON, 2)
-    # mattress on a sagging spring frame
-    R.box(img, X0 + 2, X1 - 2, 12, 15, Z0 + 2, Z1 - 2, IRON_L)
-    sheet, sheet_d = hx("cfc6ad"), hx("a59c84")
-    R.box(img, X0 + 2, X1 - 2, 15, 24, Z0 + 2, Z1 - 2, sheet, top=hx("ddd4bc"), side=sheet_d)
-    blanket, blanket_l = hx("6f7558"), hx("8c9270")
-    if not unmade:
-        R.box(img, X0 + 1, X1 - 22, 12, 24.6, Z0 + 1, Z1 - 1, blanket, top=blanket_l, side=hx("565b44"))
-        R.line(img, (X1 - 22, 24.6, Z0 + 1), (X1 - 22, 24.6, Z1 - 1), hx("e6dfca"))  # turned-down sheet
-        R.box(img, X1 - 18, X1 - 5, 24, 28, Z0 + 7, Z1 - 7, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
-        for x in range(X0 + 12, X1 - 24, 14):
-            R.line(img, (x, 24.6, Z1 - 1), (x - 1, 12, Z1 - 1), hx("5f644b"))
-    else:
-        R.box(img, X0 + 1, X0 + 26, 12, 29, Z0 + 3, Z1 - 1, blanket, top=blanket_l, side=hx("565b44"))
-        R.quad(img, [(X0 + 26, 24.2, Z0 + 8), (X0 + 46, 24.2, Z0 + 14), (X0 + 40, 24.2, Z1 - 4), (X0 + 26, 24.2, Z1 - 2)],
-               blanket_l)
-        R.box(img, X1 - 26, X1 - 12, 24, 28, Z0 + 14, Z1 - 3, hx("e2dac4"), top=hx("eee7d4"), side=hx("b8af98"))
-        for (p, q) in (((X0 + 50, 24.1, Z0 + 10), (X0 + 70, 24.1, Z1 - 8)), ((X0 + 62, 24.1, Z0 + 6), (X1 - 30, 24.1, Z0 + 20))):
-            R.line(img, p, q, hx("aaa088"))
-    # side rail, front posts and end panels (in front of the mattress)
-    R.line(img, (X0, 12, Z1), (X1, 12, Z1), IRON, 2)
-    for x, top, mid in ((X0, 30, 20), (X1, 46, 32)):
-        R.line(img, (x, 0, Z1), (x, top, Z1), IRON, 2)
-        R.line(img, (x, top, Z0), (x, top, Z1), IRON, 2)
-        R.line(img, (x, mid, Z0), (x, mid, Z1), IRON)
-        for z in range(Z0 + 6, Z1 - 3, 6):
-            R.line(img, (x, mid, z), (x, top, z), IRON_L)
-        for z in (Z0, Z1):
-            px, py = R.P(x, top + 1.5, z)
-            ImageDraw.Draw(img).ellipse([px - 1.5, py - 1.5, px + 1.5, py + 1.5], fill=BRASS)
-    if unmade:  # the top sheet dragged half off, hanging over the rail
-        R.quad(img, [(X0 + 30, 24, Z1 - 1), (X0 + 52, 24, Z1 - 1), (X0 + 56, 6, Z1 + 1), (X0 + 27, 8, Z1 + 1)], sheet)
-        R.line(img, (X0 + 40, 22, Z1), (X0 + 42, 8, Z1 + 1), sheet_d)
-
-
-def nightstand(img):
-    X0, X1, Z0, Z1 = 148, 172, 3, 22
-    R.box(img, X0, X1, 0, 30, Z0, Z1, hx("5a4130"), top=hx("74563e"), side=hx("3c2a1d"))
-    R.quad(img, [(X0 + 2, 18, Z1), (X1 - 2, 18, Z1), (X1 - 2, 27, Z1), (X0 + 2, 27, Z1)], None, hx("2a1c12"))
-    R.quad(img, [(X0 + 2, 3, Z1), (X1 - 2, 3, Z1), (X1 - 2, 15, Z1), (X0 + 2, 15, Z1)], None, hx("2a1c12"))
-    for y in (22, 9):
-        px, py = R.P((X0 + X1) / 2, y, Z1)
-        ImageDraw.Draw(img).rectangle([px - 2, py, px + 2, py + 1], fill=hx("ac8a4a"))
-    # ashtray and a water glass
-    R.box(img, 152, 160, 30, 31.5, 9, 16, hx("5e5a52"), top=hx("8a857a"))
-    R.box(img, 164, 167, 30, 36, 10, 13, hx("a9b2a6"), top=hx("d8e0d4"))
-
-
 def chair(img):
     X0, X1, Z0, Z1 = 236, 258, 6, 24
     sh = R.P(X0, 0, Z1), R.P(X1, 0, Z0)
@@ -272,24 +192,6 @@ def details(img):
         d.line([(x, FLOOR - 8), (x + 8, FLOOR - 4)], fill=hx("271b13"))
     for (x, y) in ((304, 168), (318, 176), (380, 190), (196, 200)):
         d.ellipse([x, y, x + 10, y + 4], fill=hx("4a392b"))
-
-
-def paint(unmade=False):
-    img = Image.new("RGB", (W, H))
-    shell(img)
-    floor(img)
-    window(img)
-    details(img)
-    door(img)
-    bed(img, unmade)
-    nightstand(img)
-    chair(img)
-    dresser(img)
-    bottle(img)
-    bulb(img)
-    img = tall(img, ceiling)
-    vignette(img, 0.62, tint=(34, 32, 20), blur=46)
-    return img
 
 
 def ceiling(img):
@@ -716,11 +618,6 @@ def ceiling_night(img):
 
 
 def build():
-    made = paint(False)
-    unmade = paint(True)
-    pal = palette_of(Image.blend(made, unmade, 0.5), 128)
-    save(pixelize(made, pal), "rooms", "motel_room_made.png")
-    save(pixelize(unmade, pal), "rooms", "motel_room_unmade.png")
     night = paint_night()
     from .mansion import LINEN_PALETTE
     palette = palette_of(night, 102) + NIGHT_EXTRA + LINEN_PALETTE
@@ -733,7 +630,7 @@ def build():
     foreground.putalpha(alpha)
     save(foreground, "rooms", "motel_night_rails.png")
     eleanor_rise(palette)
-    return made
+    return night
 
 
 def eleanor_rise(palette):

@@ -66,8 +66,7 @@ public class WalkTest
 
     private async Task TestRoom(string name)
     {
-        // an unknown entry name falls back to the first marker
-        await _game.ChangeRoom(name, "__first__");
+        await _game.ChangeRoom(name, Game.FirstEntry);
         var room = _game.Room!;
         if (!room.ShowPlayer)
         {
@@ -231,10 +230,11 @@ public class WalkTest
             await busy;
             Engine.TimeScale = timeScale;
 
-            // exits by clicking: the street's motel door, and back out of the motel room
-            await ClickExit("motel_door", "motel_room", "start");
-            await ClickExit("exit", "street", "motel");
-            await ClickExit("library_door", "library", "start");
+            // exits by clicking: out of the library onto the city map (their first-visit thoughts already had)
+            GameState.Instance.SetFlag("seen_library_night");
+            GameState.Instance.SetFlag("map_seen");
+            await _game.ChangeRoom("library", "start");
+            await ClickExit("exit", "chicago_map", "start");
         }
         finally
         {

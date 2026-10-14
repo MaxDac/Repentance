@@ -331,11 +331,13 @@ public partial class Game : Node
             state.TakeItem("brass_box");
             state.GiveItem("card");
             state.GiveItem("matchbook");
+            state.GiveItem("bluing");
             state.SetFlag("opened_brass_box");
-            await Say("The clasp gave with a click. Inside: a calling card, and a matchbook.");
+            await Say("The clasp gave with a click. Inside: a calling card, a matchbook, and a little vial of Mrs. Stewart's Bluing.");
             await Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
             await Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
             await Say("The matchbook: a blue lantern on the cover. The Blue Lantern, State Street.");
+            await Say("Laundry bluing in a lady's jewellery box. Somebody meant to dye a white flower blue. She was going there herself.");
             await Say("Two big fellas walked her out the back door without a soul seeing. Fellas like that drink somewhere. That's where her trail goes next.");
             return;
         }
@@ -561,8 +563,29 @@ public partial class Game : Node
     /// <summary>File name (in scenes/rooms) of the loaded room.</summary>
     public string RoomScene => _roomScene;
 
+    /// <summary>Entry name that places the player on a room's first marker, for tools that visit every room.</summary>
+    public const string FirstEntry = "__first__";
+
+    /// <summary>Why <paramref name="room"/>/<paramref name="entry"/> is not a valid destination, or null if it is.</summary>
+    public static string? RoomTargetError(string room, string entry)
+    {
+        var path = RoomScenePath(room);
+        if (!ResourceLoader.Exists(path)) return $"no room scene {path}";
+        if (entry == FirstEntry) return null;
+        var state = GD.Load<PackedScene>(path).GetState();
+        for (var i = 0; i < state.GetNodeCount(); i++)
+            if (state.GetNodePath(i).ToString() == $"./Entries/{entry}") return null;
+        return $"room '{room}' has no entry marker '{entry}'";
+    }
+
     public async Task ChangeRoom(string name, string entry)
     {
+        // a typo would otherwise leave the player on a grey screen; stay put and fail loudly instead
+        if (RoomTargetError(name, entry) is { } error)
+        {
+            GD.PushError($"ChangeRoom({name}, {entry}): {error}");
+            return;
+        }
         _busy++;
         try
         {
@@ -673,7 +696,7 @@ public partial class Game : Node
             if (MicahKit.DebugAct(StartRoom) > 1) gs.SetStoryAct(MicahKit.DebugAct(StartRoom));
         }
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
-        await ChangeRoom(StartRoom, StartEntry);
+        await ChangeRoom(StartRoom, StartEntry == "start" && RoomTargetError(StartRoom, StartEntry) != null ? FirstEntry : StartEntry);
     }
 
     private async Task PauseMenu()

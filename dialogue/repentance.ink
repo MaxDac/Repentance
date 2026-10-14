@@ -135,7 +135,6 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
 * {has_item("photo") or knows_note("eleanor")} [Have you seen this woman?]
     CONCIERGE: The Aurelian prides itself on discretion, sir.
     CONCIERGE: I make a point of seeing nothing. And of remembering less. That is why they pay me.
-    ~ set_flag("concierge_stonewall")
     -> concierge.opts
 * [Nice place.]
     CONCIERGE: Thank you, sir. The marble is Italian. The guests, I'm afraid, are not what they used to be.
@@ -448,7 +447,6 @@ HARRINGTON: And next Thursday they will come back, and bow again.
 HARRINGTON: You brought Eleanor back to us. For that, the intrusion is forgiven. This is as far as you go.
 INSET: none
 * [(Draw the revolver.)]
-    ~ set_flag("drew_revolver")
     MICAH: Nobody move. Eleanor, come down off that stage. We're leaving.
     HARRINGTON: Go on, my dear. Answer him.
     ELEANOR: I am where I belong, Mr. Jones.
@@ -487,7 +485,6 @@ CALEB: Micah, wait-
 -> END
 
 === caleb ===
-{has_flag("library_lead"): -> caleb.after}
 {not has_flag("caleb_met"):
     CALEB: Can I help you, my son?
     CALEB: ...Micah?
@@ -507,21 +504,9 @@ CALEB: Micah, wait-
     CALEB: She keeps your picture in her desk drawer. Face down. But she keeps it.
     MICAH: That's something.
     -> caleb.opts
-* {has_item("diary")} [Eleanor sent me with this.]
-    ~ take_item("diary")
-    CALEB: Her diary. She trusted you with it. That's more than she trusted me.
-    CALEB: ...Here. "Teddy's ledger is safe. Among a hundred thousand books, where nobody reads."
-    CALEB: The public library, Micah. Rose's library.
-    MICAH: Of all the bookshelves in Chicago.
-    CALEB: God has a sense of humor. Mostly at our family's expense.
-    ~ set_flag("library_lead")
-    -> END
 + [(Leave)]
     CALEB: Go with God, Micah. He's been waiting for you longer than I have.
     -> END
-= after
-CALEB: The library. And Micah... be kind to her.
--> END
 
 // ---------------------------------------------------------------- LIBRARY
 
@@ -717,7 +702,6 @@ CALEB: There's a way back for everybody. Even you.
     MICAH: I'll keep it with me, Caleb.
     CALEB: Then remember what it means.
 + [(Refuse the cross pendant.)]
-    ~ set_flag("cross_refused")
     MICAH: Keep it. I can't take it tonight.
     CALEB: I'll ask again when you come back.
 - -> END

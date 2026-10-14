@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>The public library, where Rose Jones works and Eleanor hid Teddy's ledger.</summary>
+/// <summary>The public library, where Rose Jones works.</summary>
 public partial class Library : Room
 {
     public override async Task OnEnter(string entry)

@@ -43,7 +43,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The bellboy's memory: on Tuesday night, having a smoke out back, he saw two big fellas (broken nose, cheap suit,
   expensive cigar) escort Eleanor out of the service door and away down the alley in a car with no lights,
   without anybody seeing. He doesn't mention the Blue Lantern; the matchbook in the brass box makes that connection.
-- Before the bribe, the revolving door leads out to the street.
+- Before the bellboy's memory, Micah won't leave through the revolving door either: somebody in the lobby saw
+  her go.
 - **Puzzle 2 - Service lift maze:** after the bribe, the bellboy explains that the staff cage runs a maze of
   shafts and laundry chutes behind the walls, that every floor has an identical linen room, that he wants the
   fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (13, by the fire escape).
@@ -90,7 +91,9 @@ described here (other verbs, flavour lines) is left to the implementation.
     perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
     permeates the whole room, only stronger... hypnotic, even." The line conveys an early attraction;
   - a matchbook with the name of the club, the Blue Lantern (next location). Micah connects it to the men the
-    bellboy saw: fellas like that drink somewhere, and that's where her trail goes next.
+    bellboy saw: fellas like that drink somewhere, and that's where her trail goes next;
+  - a little vial of Mrs. Stewart's Bluing: Eleanor meant to dye a white flower blue and go to the Blue Lantern
+    herself. The florist's puzzle needs it, so the box has to be opened before the club's front can be passed.
 - Leaving the room goes back across the corridor to the linen room and the staff lift; in the lobby the
   revolving door now leads to the club's front.
 
@@ -101,12 +104,12 @@ described here (other verbs, flavour lines) is left to the implementation.
   chalkboard in the window reads "Members' buttonholes - blue carnations only".
 - The cold-room door has a speaking grille: "A slot at eye height. Somebody inside checks lapels before they
   check faces." Knocking, or offering anything else, gets "No blue in my buttonhole, no hatch."; a white
-  carnation gets a hint toward the bluing.
-- **Puzzle 12 - Blue carnation:** take a white carnation from the bucket (a nickel in the tin) and the bottle of
-  Mrs. Stewart's Bluing from the sidewalk shelf. Combine them in the inventory to dye the carnation blue (the
-  bluing goes back on the shelf). Use the blue carnation on the grille: the hatch opens and Micah is let
+  carnation gets a hint that the chalkboard said blue.
+- **Puzzle 12 - Blue carnation:** take a white carnation from the bucket (a nickel in the tin) and combine it in
+  the inventory with Eleanor's vial of Mrs. Stewart's Bluing from the brass box to dye the carnation blue (the
+  vial is used up). The sidewalk shelf only holds pots and a watering can. Use the blue carnation on the grille: the hatch opens and Micah is let
   through the cold room into the speakeasy. Afterwards the door opens for him directly.
-- The street exit on the left leads back to State Street; the speakeasy's steel door leads back out here.
+- The street exit on the left leads back to the Aurelian's lobby; the speakeasy's steel door leads back out here.
 
 #### Club (the Blue Lantern speakeasy)
 
@@ -707,7 +710,8 @@ motel map and burial survey are not part of the completed Act 3.
 All fifteen puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 6; earlier versions are incompatible with the five added locations and the rerouted lift,
+is version 8 (`SaveData.CurrentVersion`); earlier versions are incompatible with the bluing moving into the
+brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in
 compatible saves remain completed, using independent markers
 for the original and Act 3 puzzles. Saving/loading never completes an unfinished new puzzle.
