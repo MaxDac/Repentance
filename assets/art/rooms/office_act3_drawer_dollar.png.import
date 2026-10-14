@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://icbjiddqqban"
-path="res://.godot/imported/micah_desk.png-9de6ea2f89a4e1c91ba1b80e04a46bc3.ctex"
+uid="uid://c0x6bljsuakqg"
+path="res://.godot/imported/office_act3_drawer_dollar.png-34e73e369e5341c88c06dbcc64c6ec35.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/sprites/micah_desk.png"
-dest_files=["res://.godot/imported/micah_desk.png-9de6ea2f89a4e1c91ba1b80e04a46bc3.ctex"]
+source_file="res://assets/art/rooms/office_act3_drawer_dollar.png"
+dest_files=["res://.godot/imported/office_act3_drawer_dollar.png-34e73e369e5341c88c06dbcc64c6ec35.ctex"]
 
 [params]
 

@@ -830,7 +830,11 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "Office");
             Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");
             await game.Wait(1.5);
-            await Shot("office_act3_desk");
+            Check(game.Player.Visible && game.Player.Facing == Facing.Up && game.Player.Position.X > 380,
+                "Act 3 office: Micah talks at the window, his back to the room");
+            Check(gs.HasFlag("office_lamp_off") && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("office_act3.png") == true,
+                "Act 3 office is dim, the lamp off and the whiskey on the desk");
+            await Shot("office_act3_window");
             await stage;
             await WaitIdle(game);
             Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
