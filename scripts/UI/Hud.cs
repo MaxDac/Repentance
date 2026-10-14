@@ -116,120 +116,19 @@ public partial class Hud : CanvasLayer
         _interface.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         root.AddChild(_interface);
 
-        _hover = MakeOutlinedLabel(VerbHover);
-
-        _satchel = new TextureButton
-        {
-            TextureNormal = GD.Load<Texture2D>("res://assets/art/ui/satchel.png"),
-            Position = SatchelPos,
-            FocusMode = Control.FocusModeEnum.None,
-            TooltipText = "",
-        };
-        _satchel.Pressed += () => ShowInventory(!_inventory.Visible);
-        _satchel.MouseEntered += () => _satchel.Modulate = new Color(1.3f, 1.2f, 1f);
-        _satchel.MouseExited += () => _satchel.Modulate = Colors.White;
-        _interface.AddChild(_satchel);
-
+        // children draw in the order they are added: keep this sequence when adding new layers
+        BuildSatchel();
         BuildInventory(root);
-
-        // above the inventory case, so item names over the top row aren't hidden behind its frame
-        _hoverLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
-        _hoverLayer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        _hoverLayer.AddChild(_hover);
-        root.AddChild(_hoverLayer);
-
-        _choicesBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.06f, 0.88f), Visible = false };
-        root.AddChild(_choicesBg);
-        _choices = new VBoxContainer { Visible = false };
-        _choices.AddThemeConstantOverride("separation", 1);
-        root.AddChild(_choices);
-
-        _speech = new Label
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            AutowrapMode = TextServer.AutowrapMode.WordSmart,
-            LabelSettings = new LabelSettings
-            {
-                Font = Font, FontSize = 8, OutlineSize = 4, OutlineColor = new Color(0, 0, 0), LineSpacing = 1,
-            },
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-            Visible = false,
-        };
-        root.AddChild(_speech);
-
-        // Micah's journal narration: faded ink along the top, over a faint strip so it reads on any background
-        _thoughtBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.02f, 0.55f), Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
-        root.AddChild(_thoughtBg);
-        _thought = new Label
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            AutowrapMode = TextServer.AutowrapMode.WordSmart,
-            LabelSettings = new LabelSettings
-            {
-                Font = Font, FontSize = 8, FontColor = ThoughtColor, OutlineSize = 4,
-                OutlineColor = new Color(0.08f, 0.05f, 0.02f), LineSpacing = 1,
-            },
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-            Visible = false,
-        };
-        root.AddChild(_thought);
+        BuildHoverLayer(root);
+        BuildChoices(root);
+        BuildSpeech(root);
 
         Wheel = new VerbWheel { Name = "VerbWheel" };
         root.AddChild(Wheel);
 
-        _title = new TextureRect
-        {
-            Texture = GD.Load<Texture2D>("res://assets/art/ui/title.png"),
-            Visible = false,
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-        };
-        root.AddChild(_title);
-        // rain falls over the skyline and the river, behind the gold plate
-        _title.AddChild(new Rain
-        {
-            Name = "TitleRain",
-            Areas = new() { new Rect2(0, 0, ScreenW, ScreenH) },
-            Density = 2.6f,
-            Speed = 300f,
-            Slant = -0.22f,
-            Length = 6,
-            Layers = 3,
-            Tint = new Color(0.58f, 0.66f, 0.86f, 0.5f),
-            SplashAreas = new() { new Rect2(0, 210, ScreenW, ScreenH - 210) },
-            SplashRate = 4f,
-            Seed = 1927,
-        });
-        _title.AddChild(new TextureRect
-        {
-            Texture = GD.Load<Texture2D>("res://assets/art/ui/title_logo.png"),
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-        });
-
-        _fade = new ColorRect { Color = new Color(0, 0, 0, 1), MouseFilter = Control.MouseFilterEnum.Ignore };
-        _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(_fade);
-
-        _caption = new Label
-        {
-            Position = new Vector2(0, 126),
-            Size = new Vector2(ScreenW, 16),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = 16, FontColor = VerbHover },
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-            Visible = false,
-        };
-        root.AddChild(_caption);
-
-        _image = new TextureRect { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
-        _image.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        _image.GuiInput += e =>
-        {
-            if (e is not InputEventMouseButton { Pressed: true }) return;
-            // while a held picture is being described, a click only skips the line
-            if (_imageHeld) Game.Instance.SkipSpeech();
-            else CloseImage();
-        };
-        root.AddChild(_image);
+        BuildTitle(root);
+        BuildFadeAndCaption(root);
+        BuildImage(root);
 
         Notepad = new NotepadView { Name = "Notepad" };
         root.AddChild(Notepad);
@@ -240,21 +139,26 @@ public partial class Hud : CanvasLayer
         Puzzle = new PuzzlePanel { Name = "PuzzlePanel" };
         root.AddChild(Puzzle);
 
-        _pause = new Control
-        {
-            Visible = false,
-            MouseFilter = Control.MouseFilterEnum.Stop,
-            ProcessMode = ProcessModeEnum.Always,
-        };
-        _pause.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        var pauseLabel = MakeOutlinedLabel(VerbHover);
-        pauseLabel.Text = "Paused - Space to resume";
-        pauseLabel.HorizontalAlignment = HorizontalAlignment.Center;
-        pauseLabel.Position = new Vector2(0, 4);
-        pauseLabel.Size = new Vector2(ScreenW, 12);
-        _pause.AddChild(pauseLabel);
-        root.AddChild(_pause);
+        BuildPause(root);
+        BuildCursor(root);
+        Input.MouseMode = Input.MouseModeEnum.Hidden;
 
+        GameState.Instance.Changed += RefreshInventory;
+        RefreshInventory();
+    }
+
+    private void BuildHoverLayer(Control root)
+    {
+        _hover = MakeOutlinedLabel(VerbHover);
+        // above the inventory case, so item names over the top row aren't hidden behind its frame
+        _hoverLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
+        _hoverLayer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _hoverLayer.AddChild(_hover);
+        root.AddChild(_hoverLayer);
+    }
+
+    private void BuildCursor(Control root)
+    {
         _cursorTex = GD.Load<Texture2D>("res://assets/art/ui/cursor.png");
         _cursor = new TextureRect { Texture = _cursorTex, MouseFilter = Control.MouseFilterEnum.Ignore };
         root.AddChild(_cursor);
@@ -270,10 +174,6 @@ public partial class Hud : CanvasLayer
             Visible = false,
         };
         root.AddChild(_cursorItem);
-        Input.MouseMode = Input.MouseModeEnum.Hidden;
-
-        GameState.Instance.Changed += RefreshInventory;
-        RefreshInventory();
     }
 
     /// <summary>Last mouse position in game pixels (tracked from motion events, so synthetic input works too).</summary>
@@ -292,111 +192,11 @@ public partial class Hud : CanvasLayer
         if (Game.Instance.IsPaused) GetViewport().SetInputAsHandled();
     }
 
-    public void ShowPause(bool show) => _pause.Visible = show;
-
     public override void _Process(double delta)
     {
         _cursor.Position = MousePos.Floor() - (_cursor.Texture.GetSize() / 2).Floor();
         _cursorItem.Position = MousePos.Floor() + new Vector2(4, 4);
         _hoverLayer.Visible = _interface.Visible;
-    }
-
-    private void BuildInventory(Control root)
-    {
-        // full-screen catcher: clicking outside the case closes it
-        _inventory = new Control { Visible = false, MouseFilter = Control.MouseFilterEnum.Stop };
-        _inventory.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        _inventory.GuiInput += e =>
-        {
-            if (e is InputEventMouseButton { Pressed: true }) ShowInventory(false);
-        };
-        root.AddChild(_inventory);
-        _inventory.AddChild(new TextureRect
-        {
-            Texture = GD.Load<Texture2D>("res://assets/art/ui/inventory.png"),
-            Position = InvPos,
-            MouseFilter = Control.MouseFilterEnum.Stop,
-        });
-
-        var normal = new StyleBoxFlat { BgColor = new Color("140c08"), BorderColor = new Color("3a2814") };
-        normal.SetBorderWidthAll(1);
-        var hover = new StyleBoxFlat { BgColor = new Color("2a1c10"), BorderColor = new Color("d8b050") };
-        hover.SetBorderWidthAll(1);
-        for (int r = 0; r < InvRows; r++)
-        for (int c = 0; c < InvCols; c++)
-        {
-            var b = new Button
-            {
-                Position = InvPos + new Vector2(10 + c * SlotW, 7 + r * SlotH),
-                Size = new Vector2(SlotW - 2, SlotH - 2),
-                FocusMode = Control.FocusModeEnum.None,
-                IconAlignment = HorizontalAlignment.Center,
-                ButtonMask = MouseButtonMask.Left | MouseButtonMask.Right,
-            };
-            b.AddThemeStyleboxOverride("normal", normal);
-            b.AddThemeStyleboxOverride("hover", hover);
-            b.AddThemeStyleboxOverride("pressed", hover);
-            b.AddThemeStyleboxOverride("disabled", normal);
-            b.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
-            var slot = _slots.Count;
-            b.GuiInput += e => OnSlotInput(slot, e);
-            b.MouseEntered += () => ItemHovered?.Invoke(ItemInSlot(slot));
-            b.MouseExited += () => ItemHovered?.Invoke(null);
-            _inventory.AddChild(b);
-            _slots.Add(b);
-        }
-        _previousPage = new Button { Text = "<", Position = new Vector2(110, 249), Size = new Vector2(30, 18), FocusMode = Control.FocusModeEnum.None };
-        _nextPage = new Button { Text = ">", Position = new Vector2(340, 249), Size = new Vector2(30, 18), FocusMode = Control.FocusModeEnum.None };
-        _pageLabel = MakeOutlinedLabel(VerbHover);
-        _pageLabel.Position = new Vector2(197, 253);
-        _previousPage.Pressed += () => { _inventoryPage--; ItemHovered?.Invoke(null); RefreshInventory(); };
-        _nextPage.Pressed += () => { _inventoryPage++; ItemHovered?.Invoke(null); RefreshInventory(); };
-        _inventory.AddChild(_previousPage);
-        _inventory.AddChild(_nextPage);
-        _inventory.AddChild(_pageLabel);
-    }
-
-    private string? ItemInSlot(int slot)
-    {
-        var inv = GameState.Instance.Inventory;
-        slot += _inventoryPage * InvCols * InvRows;
-        return slot < inv.Count ? inv[slot] : null;
-    }
-
-    /// <summary>Screen position of an inventory slot (used by the autoplay test).</summary>
-    public Vector2 SlotCenter(int slot) => _slots[slot % _slots.Count].Position + _slots[slot % _slots.Count].Size / 2;
-    public Vector2 InventoryPageCenter(bool next) => (next ? _nextPage : _previousPage).GetGlobalRect().GetCenter();
-
-    public Vector2 SatchelCenter => SatchelPos + _satchel.Size / 2;
-
-    private void OnSlotInput(int slot, InputEvent e)
-    {
-        if (e is not InputEventMouseButton { Pressed: true } mb) return;
-        _slots[slot].AcceptEvent();
-        if (ItemInSlot(slot) is not { } item || mb.ButtonIndex is not (MouseButton.Left or MouseButton.Right)) return;
-        ItemClicked?.Invoke(item, mb.ButtonIndex == MouseButton.Right, mb.GlobalPosition);
-    }
-
-    public void RefreshInventory()
-    {
-        int pages = Math.Max(1, (GameState.Instance.Inventory.Count + _slots.Count - 1) / _slots.Count);
-        _inventoryPage = Math.Clamp(_inventoryPage, 0, pages - 1);
-        _previousPage.Disabled = _inventoryPage == 0;
-        _nextPage.Disabled = _inventoryPage == pages - 1;
-        _pageLabel.Text = $"Page {_inventoryPage + 1}/{pages}";
-        for (int s = 0; s < _slots.Count; s++)
-        {
-            var id = ItemInSlot(s);
-            _slots[s].Icon = id == null ? null : GD.Load<Texture2D>(Items.Get(id).IconPath);
-        }
-        _satchel.Disabled = false;
-    }
-
-    public void ShowInventory(bool show)
-    {
-        if (show && Game.Instance.Busy) return;
-        _inventory.Visible = show;
-        if (!show) ItemHovered?.Invoke(null);
     }
 
     /// <summary>Label shown just above the cursor ("Trunk", "Use crowbar on trunk").</summary>
@@ -428,258 +228,5 @@ public partial class Hud : CanvasLayer
     {
         _interface.Visible = visible && !_choices.Visible;
         if (!visible && _inventory.Visible) ShowInventory(false);
-    }
-
-    public Task<int> ShowChoices(IReadOnlyList<string> options)
-    {
-        foreach (var c in _choices.GetChildren()) c.QueueFree();
-        for (int i = 0; i < options.Count; i++)
-        {
-            int idx = i;
-            var b = new Button
-            {
-                Text = options[i],
-                Flat = true,
-                Alignment = HorizontalAlignment.Left,
-                FocusMode = Control.FocusModeEnum.None,
-                CustomMinimumSize = new Vector2(ScreenW - 16, 12),
-                ClipText = true,
-            };
-            b.AddThemeColorOverride("font_color", ChoiceColor);
-            b.AddThemeColorOverride("font_hover_color", VerbHover);
-            b.AddThemeColorOverride("font_pressed_color", Colors.White);
-            b.AddThemeColorOverride("font_hover_pressed_color", Colors.White);
-            var empty = new StyleBoxEmpty();
-            foreach (var s in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
-                b.AddThemeStyleboxOverride(s, empty);
-            b.Pressed += async () =>
-            {
-                await Game.Instance.WaitUntilResumed();
-                HideChoices();
-                _choiceTcs?.TrySetResult(idx);
-            };
-            _choices.AddChild(b);
-        }
-        float h = options.Count * 13 + 8;
-        _choicesBg.Position = new Vector2(0, ScreenH - h);
-        _choicesBg.Size = new Vector2(ScreenW, h);
-        _choices.Position = new Vector2(8, ScreenH - h + 4);
-        _choices.Size = new Vector2(ScreenW - 16, h - 8);
-        _choices.Visible = _choicesBg.Visible = true;
-        _interface.Visible = false;
-        _choiceTcs = new TaskCompletionSource<int>();
-        return _choiceTcs.Task;
-    }
-
-    public void HideChoices() => _choices.Visible = _choicesBg.Visible = false;
-
-    /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
-    public void ShowSpeech(string text, ISpeaker speaker)
-    {
-        var head = speaker.HeadPosition;
-        var color = speaker.SpeechColor;
-        if (_insetShown)
-        {
-            ShowSpeechOverInset(text, speaker);
-            return;
-        }
-        const int width = 220;
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
-        _speech.Text = text;
-        _speech.LabelSettings.FontColor = color;
-        _speech.Size = new Vector2(width, size.Y);
-        var pos = new Vector2(head.X - width / 2f, head.Y - size.Y - 2);
-        // clamp horizontally by moving the box but keeping it centred over the text
-        float textHalf = Mathf.Min(width, size.X) / 2f + 3;
-        float shift = 0;
-        if (head.X - textHalf < 2) shift = 2 - (head.X - textHalf);
-        if (head.X + textHalf > ScreenW - 2) shift = ScreenW - 2 - (head.X + textHalf);
-        pos.X += shift;
-        pos.Y = Mathf.Clamp(pos.Y, 2, ScreenH - size.Y - 2);
-        _speech.Position = pos.Round();
-        _speech.Visible = true;
-    }
-
-    public void HideSpeech() => _speech.Visible = false;
-
-    /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
-    public void ShowThought(string text)
-    {
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, ThoughtWidth, 8);
-        _thought.Text = text;
-        _thought.Size = new Vector2(ThoughtWidth, size.Y);
-        _thought.Position = new Vector2((ScreenW - ThoughtWidth) / 2f, ThoughtTop).Round();
-        float stripW = Mathf.Min(ThoughtWidth, size.X) + 12;
-        _thoughtBg.Position = new Vector2((ScreenW - stripW) / 2f, ThoughtTop - 3).Round();
-        _thoughtBg.Size = new Vector2(stripW, size.Y + 6).Round();
-        _thought.Visible = _thoughtBg.Visible = true;
-    }
-
-    public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
-
-    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
-    private void ShowSpeechOverInset(string text, ISpeaker speaker)
-    {
-        float width = 380;
-        float x = (ScreenW - width) / 2f;
-        if (_closeUp == CloseUps.Convent)
-        {
-            const int padding = 12;
-            float half = _inset.Size.X / 2f;
-            width = half - padding * 2;
-            x = _inset.Position.X + padding;
-            if (speaker is Actor { Id: "eleanor" }) x += half;
-        }
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
-        _speech.Text = text;
-        _speech.LabelSettings.FontColor = speaker.SpeechColor;
-        _speech.Size = new Vector2(width, size.Y);
-        float bottom = _inset.Position.Y + _inset.Size.Y - 8;
-        _speech.Position = new Vector2(x, bottom - size.Y).Round();
-        _speech.Visible = true;
-    }
-
-    public async Task Fade(float alpha, double seconds)
-    {
-        var tw = CreateTween();
-        tw.SetPauseMode(Tween.TweenPauseMode.Stop);
-        tw.TweenProperty(_fade, "color:a", alpha, seconds);
-        await ToSignal(tw, Tween.SignalName.Finished);
-    }
-
-    public void ShowTitle(bool show)
-    {
-        _title.Visible = show;
-        _title.MouseFilter = show ? Control.MouseFilterEnum.Stop : Control.MouseFilterEnum.Ignore;
-    }
-
-    /// <summary>Large centred text drawn above the fade layer (chapter cards, "To be continued...").</summary>
-    public void ShowCaption(string? text)
-    {
-        _caption.Text = text ?? "";
-        _caption.Visible = text != null;
-    }
-
-    /// <summary>True from <see cref="ShowCloseUp"/> until <see cref="HideCloseUp"/>, even while it fades.</summary>
-    public bool InsetVisible => _insetShown;
-    /// <summary>The picture currently framed (its file name), e.g. "stage_closeup_clothed".</summary>
-    public string InsetName => _inset.Texture?.ResourcePath.GetFile().GetBaseName() ?? "";
-    /// <summary>The close-up shown, or null.</summary>
-    public CloseUp? CurrentCloseUp => _insetShown ? _closeUp : null;
-
-    /// <summary>Lets close-ups follow the player's settings: a variant swaps in place when they change.</summary>
-    public void BindSettings(GameSettings settings)
-    {
-        if (_settings != null) _settings.Changed -= RefreshCloseUp;
-        _settings = settings;
-        _settings.Changed += RefreshCloseUp;
-        Menu.BindSettings(settings);
-    }
-
-    public override void _ExitTree()
-    {
-        if (_settings != null) _settings.Changed -= RefreshCloseUp;
-    }
-
-    private void RefreshCloseUp()
-    {
-        if (_insetShown && _closeUp != null) ShowInset(LoadCloseUp(_closeUp), 0);
-    }
-
-    private Texture2D LoadCloseUp(CloseUp closeUp) => GD.Load<Texture2D>(closeUp.TexturePath(_settings));
-
-    /// <summary>
-    /// Frames a close-up centred over the scene without blocking it: the room, speech and choices stay live around
-    /// and above it, and speech moves to the panel's bottom edge. Stays until <see cref="HideCloseUp"/> or the next
-    /// room change. Showing the one already up does nothing.
-    /// </summary>
-    public void ShowCloseUp(CloseUp closeUp, double? fadeIn = null)
-    {
-        if (_insetShown && _closeUp == closeUp) return;
-        _closeUp = closeUp;
-        ShowInset(LoadCloseUp(closeUp), fadeIn ?? closeUp.FadeIn);
-    }
-
-    public void HideCloseUp(double? fadeOut = null)
-    {
-        double seconds = fadeOut ?? _closeUp?.FadeOut ?? 0.3;
-        _closeUp = null;
-        HideInset(seconds);
-    }
-
-    private void ShowInset(Texture2D texture, double seconds)
-    {
-        _insetTween?.Kill();
-        _inset.Texture = texture;
-        var size = texture.GetSize();
-        _inset.Size = size;
-        _inset.Position = ((new Vector2(ScreenW, ScreenH) - size) / 2).Floor();
-        _inset.Visible = true;
-        _insetShown = true;
-        _inset.Modulate = new Color(1, 1, 1, seconds > 0 ? 0 : 1);
-        if (seconds <= 0) return;
-        _insetTween = CreateTween();
-        _insetTween.TweenProperty(_inset, "modulate:a", 1f, seconds);
-    }
-
-    private void HideInset(double seconds)
-    {
-        _insetTween?.Kill();
-        _insetTween = null;
-        _insetShown = false;
-        if (!_inset.Visible) return;
-        if (seconds <= 0)
-        {
-            _inset.Visible = false;
-            return;
-        }
-        _insetTween = CreateTween();
-        _insetTween.TweenProperty(_inset, "modulate:a", 0f, seconds);
-        _insetTween.TweenCallback(Callable.From(() => _inset.Visible = false));
-    }
-
-    public bool ImageVisible => _image.Visible;
-    private bool _imageHeld;
-
-    /// <summary>Shows a full-screen picture (a close-up) until the player clicks.</summary>
-    public Task ShowImage(Texture2D texture)
-    {
-        _imageTcs?.TrySetResult();
-        _image.Texture = texture;
-        _image.Visible = true;
-        _image.MouseFilter = Control.MouseFilterEnum.Stop;
-        _interface.Visible = false;
-        _imageTcs = new TaskCompletionSource();
-        return _imageTcs.Task;
-    }
-
-    /// <summary>
-    /// Shows a full-screen picture while the given lines are spoken over it: clicks skip the lines, and only once
-    /// they are done does the next click close the picture.
-    /// </summary>
-    public async Task ShowImageWithLines(Texture2D texture, Func<Task> lines)
-    {
-        var closed = ShowImage(texture);
-        _imageHeld = true;
-        _speech.ZIndex = 1;
-        try { await lines(); }
-        finally
-        {
-            _imageHeld = false;
-            _speech.ZIndex = 0;
-        }
-        await closed;
-    }
-
-    public bool ImageHeld => _imageHeld;
-
-    public void CloseImage()
-    {
-        if (Game.Instance.IsPaused || _imageHeld) return;
-        _image.Visible = false;
-        _image.MouseFilter = Control.MouseFilterEnum.Ignore;
-        _interface.Visible = true;
-        _imageTcs?.TrySetResult();
-        _imageTcs = null;
     }
 }

@@ -1,0 +1,45 @@
+namespace Repentance;
+
+public static partial class Items
+{
+    /// <summary>Act 2: the library, the Tribune morgue, the Harrington office and the Club vestibule.</summary>
+    private static ItemDef[] Act2Items() => new ItemDef[]
+    {
+        new("wedge", "packing wedge", "res://assets/art/items/wedge.png",
+            "A tapered wooden packing wedge. It could hold the fire-escape spring catch out of the way."),
+        new("book", "book of Celtic rituals", "res://assets/art/items/book.png",
+            "\"Rites of the Old Isles,\" by A. R. Bell. Green leather gone soft as a glove. The same knot is stamped on the cover."),
+        new("address", "address", "res://assets/art/items/address.png",
+            "The deciphered calling-card address, copied onto a slip: \"The Club, 18 W. Hubbard.\""),
+        new("invitation", "invitation", "res://assets/art/items/invitation.png",
+            "Black card, gold edges. \"The Club. Saturday, at the turning of the night.\" Procession crests, left to right: raven, lion, stag."),
+        new("mask", "white Bauta mask", "res://assets/art/items/mask.png",
+            "A white Venetian Bauta: heavy brow, empty eyes, a long nose, and nothing below it but shadow. It looks like everybody and nobody."),
+        new("cloak", "black cloak", "res://assets/art/items/cloak.png",
+            "A long black cloak with a deep hood. It smells of cedar and somebody else's cigars."),
+        // Puzzle 13 - Tribune morgue.
+        new("clipping_top", "top half of a clipping", "res://assets/art/items/clipping_top.png",
+            "\"HARRINGTON BUILDS...\" The headline and half a column, torn straight through the address."),
+        new("clipping_bottom", "bottom half of a clipping", "res://assets/art/items/clipping_bottom.png",
+            "The bottom of a Tribune column, torn across: \"...Building, LaS\" and a photo caption. It needs its other half."),
+        new("paste", "paste pot", "res://assets/art/items/paste.png",
+            "A pot of library paste with a brush in the lid. Every newspaper runs on it."),
+        new("clipping", "mended clipping", "res://assets/art/items/clipping.png",
+            "\"Harrington senior keeps his offices at the Harrington Building, LaSalle Street.\" Somebody ought to put a pin in that."),
+        // Puzzle 14 - Club vestibule.
+        new("sealing_wax", "stick of sealing wax", "res://assets/art/items/sealing_wax.png",
+            "Red sealing wax from the coat-check counter. Hard as a church pew until it meets a flame."),
+        new("wax_soft", "softened wax", "res://assets/art/items/wax_soft.png",
+            "The end of the wax stick, warm and glossy. It wants something to drip on."),
+        new("invitation_waxed", "waxed invitation", "res://assets/art/items/invitation_waxed.png",
+            "The invitation with a fat drop of red wax on the fold, waiting for a seal. Procession crests: raven, lion, stag."),
+        new("sealed_invitation", "sealed invitation", "res://assets/art/items/sealed_invitation.png",
+            "Black card, gold edges, sealed with the raven - first of the procession. My summons."),
+        new("signet_raven", "raven signet", "res://assets/art/items/signet_raven.png",
+            "A heavy signet ring with a raven cut into the face. Borrowed from a cloak on the rack."),
+        new("signet_lion", "lion signet", "res://assets/art/items/signet_lion.png",
+            "A signet ring cut with a lion. Borrowed from a cloak on the rack."),
+        new("signet_stag", "stag signet", "res://assets/art/items/signet_stag.png",
+            "A signet ring cut with a stag. Borrowed from a cloak on the rack."),
+    };
+}

@@ -78,7 +78,7 @@ public partial class MansionStudy : Room
             case ("documents", Verb.UseItem) when item == "audit_tracing":
                 State.SetFlag("audit_folder_taken");
                 State.GiveItem("audit_folder");
-                await Game.TryReadAccounts();
+                await Story.StoryPuzzles.TryReadAccounts(Game);
                 return true;
 
             case ("closet", Verb.Hand):

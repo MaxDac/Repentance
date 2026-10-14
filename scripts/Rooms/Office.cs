@@ -293,7 +293,7 @@ public partial class Office : Room
                 State.SetFlag("card_warmed");
                 await Say("In the radiator's warmth, ink rises between the curlicues. Backward writing. I'll need a reflection.");
                 await Game.Hud.ShowImage(Godot.GD.Load<Godot.Texture2D>("res://assets/art/ui/card_reversed.png"));
-                await Game.TryDecodeCard();
+                await Story.StoryPuzzles.TryDecodeCard(Game);
                 return true;
         }
         return false;
@@ -305,7 +305,7 @@ public partial class Office : Room
         if (State.HasFlag("read_book"))
         {
             await Say("Concealed messages: gentle warmth, then a reflection. Ornament order: lily, leaf, feather.");
-            await Game.TryDecodeCard();
+            await Story.StoryPuzzles.TryDecodeCard(Game);
             return true;
         }
         State.SetFlag("read_book");
@@ -313,7 +313,7 @@ public partial class Office : Room
         await Say("Druids and dew and the turning of the seasons. Pretty, if you're a farmer. I'm not.");
         await Say("A page about concealed messages. Gentle warmth brings up the ink; a mirror turns the writing back.");
         await Say("The ornaments give the order: lily first, leaf second, feather last. Those curlicues on the hotel card weren't just decoration.");
-        await Game.TryDecodeCard();
+        await Story.StoryPuzzles.TryDecodeCard(Game);
         return true;
     }
 }

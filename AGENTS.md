@@ -32,4 +32,9 @@ py -3.14 -m unittest discover -s tests\art -v
 ## Story work
 
 `Walkthrough.md` is the story spec. Implement changes in `scripts/Rooms` and `dialogue/repentance.ink`,
-and cover them in `scripts/Debug/AutoPlay.cs`.
+and cover them in the matching act file in `scripts/Debug/AutoPlay/` (`AutoPlay.Act1.cs` ... `AutoPlay.Endings.cs`).
+
+- Inventory verbs and combinations that hold in any room go in `scripts/Story/` (not in `Game`).
+- New items go in the act file in `scripts/Core/Items/` that introduces them.
+- `Game`, `Hud` and `AutoPlay` are partial classes split by concern to keep merges conflict-free:
+  add code to the partial file for its concern rather than to the main file.
