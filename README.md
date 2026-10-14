@@ -463,3 +463,15 @@ flatten the lounge's velvet and brass.
 ## Credits
 
 See [CREDITS.md](CREDITS.md).
+
+## License
+
+Repentance is source-available and non-commercial. You may fork, modify and share it, but you
+may not sell it or use it commercially.
+
+- **Code** (`scripts/`, `scenes/`, `tests/`, `tools/`, project files): [PolyForm Noncommercial 1.0.0](LICENSE).
+- **Creative content** (`assets/` art and audio, `dialogue/`, `docs/`, `Walkthrough.md`):
+  [CC BY-NC-SA 4.0](LICENSE-ASSETS.md).
+- Third-party components (GodotInk, the Silkscreen font) keep their own licences; see [CREDITS.md](CREDITS.md).
+
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
