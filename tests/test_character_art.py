@@ -71,6 +71,29 @@ class CharacterArtTests(unittest.TestCase):
             plain_top = np.nonzero(np.array(plain.crop((0, 0, 56, 96)).getchannel("A")) > 0)[0].min()
             self.assertLess(top, plain_top, f"the {kind}'s crest must rise above the cowl")
 
+    def test_white_mask_is_a_bauta_half_mask_with_a_long_nose(self):
+        self.assertEqual(sprites.MASKED_MAN["mask"][0], "bauta")
+        self.assertEqual(sprites.MICAH_MASKED["mask"], sprites.MASKED_MAN["mask"])
+        oval = dict(sprites.MASKED_MAN, mask=("full", sprites.MASKED_MAN["mask"][1]))
+
+        def ivory(spec, yaw):
+            a = np.array(sprites.figure(spec, sprites.pose(yaw), 64, 96).convert("RGBA"))[:34].astype(int)
+            ys, xs = np.nonzero((a[..., 3] > 0) & (a[..., :3].sum(-1) > 450))
+            return a, ys, xs
+
+        _, bys, bxs = ivory(sprites.MASKED_MAN, 90)
+        _, oys, oxs = ivory(oval, 90)
+        self.assertGreater(bxs.max(), oxs.max(), "in profile the nose must stand proud of the plain plate")
+        for yaw in (16, sprites.PLAYER_IDLE_YAW, 90):
+            with self.subTest(yaw=yaw):
+                a, ys, xs = ivory(sprites.MASKED_MAN, yaw)
+                _, oys, _ = ivory(oval, yaw)
+                self.assertLess(ys.max(), oys.max(), "the Bauta stops under the nose, leaving the chin bare")
+                below = a[ys.max() + 1:ys.max() + 4, xs.min():xs.max() + 1]
+                skin = (below[..., 3] > 0) & (below[..., 0] - below[..., 2] > 15)
+                self.assertTrue(skin.any(), "the bare mouth and chin show under the mask")
+                self.assertLess(below[..., :3][skin].sum(-1).max(), 400, "the bare chin sits in shadow")
+
     def test_player_walk_and_vertical_views_keep_existing_poses(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
                            ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):

@@ -97,11 +97,14 @@ public class AutoPlay
             await PauseTest(game);
             Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId) && !gs.HasItem(MicahKit.LighterId), "prologue plays as Daniel, without Micah's notepad or lighter");
             await Shot("attic");
+            Check(game.Sfx.Ambient == null, "no rain sounds in the dry attic");
+            int woodSteps = game.Sfx.Count(Sound.StepWood);
             await WheelTest(game);
             await PosePlaybackTest(game);
             await game.Perform(Verb.Talk, "hatch");
             await game.Perform(Verb.Hand, "sheet");
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
+            Check(game.Sfx.Count(Sound.StepWood) > woodSteps, "Daniel's shoes sound on the attic boards");
             await game.Perform(Verb.Hand, "boxes");
             Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
             await game.Perform(Verb.Hand, "suitcase");
@@ -126,6 +129,7 @@ public class AutoPlay
             Check(gs.HasFlag("teddy_gone"), "Teddy left the office");
             Check(gs.HasItem("photo"), "got the photo");
             await Shot("office");
+            Check(game.Sfx.Ambient == Sound.Rain, "rain patters on the office window");
             await game.Perform(Verb.Hand, "drawer");
             await Shot("office_drawer");
             await game.Perform(Verb.Walk, "door");
@@ -220,6 +224,7 @@ public class AutoPlay
 
             // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
             await Shot("blue_lantern_front");
+            Check(game.Sfx.Ambient == Sound.Rain, "rain falls on State Street");
             await game.Perform(Verb.Look, "chalkboard");
             await game.Perform(Verb.Hand, "grille");
             Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened"), "the grille won't open for a bare lapel");
@@ -872,15 +877,19 @@ public class AutoPlay
 
             // ---- the alley: break the lamp, lure Sal out, knock him down, and bring Tony out
             await Shot("alley_act3");
+            int stoneSteps = game.Sfx.Count(Sound.StepStone), knocks = game.Sfx.Count(Sound.Knock);
+            int gunshots = game.Sfx.Count(Sound.Gunshot);
             await game.Perform(Verb.Talk, "back_door");
             Check(!gs.HasFlag("shot_bartender"), "not knocking with Sal inside");
             await game.Perform(Verb.Kick, "trash");
             Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
             await game.Perform(Verb.Hand, "street_lamp");
             Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+            Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
             await Shot("alley_dark");
             await game.Perform(Verb.Kick, "trash");
             Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+            Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
             await Shot("alley_sal_out");
             CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
             await game.Perform(Verb.UseItem, "sal", "revolver");
@@ -895,6 +904,8 @@ public class AutoPlay
             Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
                 "Tony falls, shot in the shoulder, and stays down on his back");
             await Shot("alley_tony_shot");
+            Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
+            Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
             await tonyTalk;
             Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
             Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the shoulder, on to the Harrington mansion");
@@ -1177,6 +1188,27 @@ public class AutoPlay
         Check(!game.Settings.Fullscreen && reloaded.Load() && !reloaded.Fullscreen && reloaded.NudityEnabled,
             "full screen turned back off and persisted");
         Check(DisplayServer.WindowGetMode() == windowMode, "automated runs never change the real window mode");
+
+        Check(game.Settings.EffectsVolume == GameSettings.DefaultEffectsVolume && game.Hud.Menu.HasEntry("Effects volume: 80%"),
+            "effects volume defaults to 80%");
+        Check(game.Hud.Menu.Press("Effects volume"), "settings offers an effects volume");
+        await Observe(0.1);
+        Check(game.Settings.EffectsVolume == 90 && game.Hud.Menu.HasEntry("Effects volume: 90%") &&
+            reloaded.Load() && reloaded.EffectsVolume == 90 && reloaded.NudityEnabled,
+            "left click raises the effects volume and persists it alongside the other settings");
+        Check(Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(Sfx.BusIndex), SoundSynth.PercentToDb(90)),
+            "the Effects bus follows the setting");
+        Check(game.Hud.Menu.PressAlt("Effects volume"), "right click lowers the effects volume");
+        await Observe(0.1);
+        Check(game.Settings.EffectsVolume == 80 && game.Hud.Menu.HasEntry("Effects volume: 80%"), "back down to 80%");
+        Check(game.Settings.SetEffectsVolume(0) && AudioServer.IsBusMute(Sfx.BusIndex), "0% mutes the effects");
+        await Observe(0.1);
+        Check(game.Hud.Menu.HasEntry("Effects volume: 0%"), "the settings page shows 0%");
+        Check(GameSettings.CycleVolume(100, up: true) == 0 && GameSettings.CycleVolume(0, up: false) == 100,
+            "the volume wraps around");
+        Check(game.Settings.SetEffectsVolume(GameSettings.DefaultEffectsVolume) && !AudioServer.IsBusMute(Sfx.BusIndex),
+            "effects volume restored");
+        await Observe(0.1);
 
         PressKey(Key.Escape);
         await Observe(0.1);

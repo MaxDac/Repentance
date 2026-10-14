@@ -916,8 +916,8 @@ def _coat(d, cx, top, bottom, col, seed):
 
 
 def _cloak_and_mask(d, x0, y0, x1, y1):
-    """The niche's floor: the black hooded cloak folded into a thick bundle, the white mask laid on top of it face
-    up. The bundle's front roll hides all of the mask but the ridge of its nose and the sliver of its rim."""
+    """The niche's floor: the black hooded cloak folded into a thick bundle, the white Bauta half-mask laid on top of it
+    face up and seen side-on: the brow and the long nose rising over the bundle's roll."""
     mx = (x0 + x1) // 2
     black, fold, shine = hx("1a1820"), hx("060508"), hx("4a4458")
     # the bundle, a hood flopped over its left end, the crimson lining showing at the folds
@@ -934,16 +934,14 @@ def _cloak_and_mask(d, x0, y0, x1, y1):
     d.line([(x1 - 9, y1 - 13), (x1 - 5, y1 - 2)], fill=hx("4a1420"))
     d.rectangle([x1 - 14, y1 - 9, x1 - 11, y1 - 7], fill=hx("a8a8b0"))  # the clasp
     d.line([(x1 - 11, y1 - 8), (x1 - 7, y1 - 6)], fill=hx("6a6a74"))
-    # the mask, face up: the curve of its brow and the ridge of its nose rising over the bundle's roll
+    # the Bauta, face up: the brow at the left, the long nose peaking towards the right where the plate stops short
     top = y1 - 17
-    d.chord([mx - 8, top - 2, mx + 9, top + 2], 180, 360, fill=hx("d8d4cc"))
-    d.line([(mx - 6, top - 2), (mx + 6, top - 2)], fill=hx("ece8e0"))
-    d.polygon([(mx - 2, top - 2), (mx, top - 7), (mx + 1, top - 7), (mx + 3, top - 2)], fill=hx("f4f0e8"))
-    d.line([(mx + 1, top - 7), (mx + 3, top - 2)], fill=hx("a8a49c"))
-    d.line([(mx, top - 7), (mx - 2, top - 2)], fill=hx("ffffff"))
-    d.point((mx - 2, top - 1), fill=hx("8a867e"))  # a nostril's shadow
-    d.point((mx + 3, top - 1), fill=hx("8a867e"))
-    d.line([(mx - 13, top + 1), (mx + 13, top + 1)], fill=fold)  # the roll's shadow under the rim
+    d.polygon([(mx - 9, top + 1), (mx - 8, top - 2), (mx - 4, top - 3), (mx + 1, top - 7), (mx + 3, top - 4),
+               (mx + 6, top - 2), (mx + 7, top + 1)], fill=hx("d8d4cc"))
+    d.line([(mx - 8, top - 2), (mx - 4, top - 3)], fill=hx("ece8e0"))  # the brow catching the light
+    d.line([(mx - 3, top - 4), (mx + 1, top - 7)], fill=hx("ffffff"))  # the nose ridge
+    d.line([(mx + 2, top - 5), (mx + 6, top - 1)], fill=hx("a8a49c"))
+    d.point((mx - 5, top - 1), fill=hx("8a867e"))  # an eye hole    d.line([(mx - 13, top + 1), (mx + 13, top + 1)], fill=fold)  # the roll's shadow under the rim
 
 
 LAMP_GREENS = ("0e3216", "22622e", "56a066")
