@@ -22,9 +22,10 @@ def inner(panel):
 class StageCloseupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        src = Image.open(closeup.SRC)
-        cls.nude = closeup.stage_closeup(src, clothed=False)
-        cls.clothed = closeup.stage_closeup(src, clothed=True)
+        nude, clothed = Image.open(closeup.SRC), Image.open(closeup.CLOTHED_SRC)
+        pal = closeup.shared_palette(nude, clothed)
+        cls.nude = closeup.stage_closeup(nude, pal)
+        cls.clothed = closeup.stage_closeup(clothed, pal)
 
     def test_committed_panels_match_the_build_and_fit_the_screen(self):
         # nearly the whole 480x270 screen, with the room still showing around it
@@ -64,8 +65,17 @@ class StageCloseupTests(unittest.TestCase):
         self.assertGreater(len(ys), 400)
         self.assertGreater(ys.min(), 78)  # below the collarbones
         self.assertTrue(64 < xs.min() and xs.max() < 160)  # not on the men
-        chest = c[101:, 92:128]
-        self.assertGreater(chest[..., 0].mean(), chest[..., 1].mean() * 2, "dark red velvet")
+        for x0, x1 in ((70, 80), (143, 153)):  # her sides, either side of the locks of hair
+            side = c[101:, x0:x1]
+            self.assertGreater(side[..., 0].mean(), side[..., 1].mean() * 2, "dark red velvet")
+
+    def test_her_hair_covers_her_breasts(self):
+        a = np.asarray(inner(self.nude), dtype=float)
+        c = np.asarray(inner(self.clothed), dtype=float)
+        for x0, x1 in ((84, 103), (117, 139)):  # one long lock over each breast, in both variants
+            with self.subTest(x=x0):
+                self.assertLess(a[95:, x0:x1].mean(), 40)
+                self.assertLess(c[95:, x0:x1].mean(), 40)
 
 
 class BeatenCloseupTests(unittest.TestCase):

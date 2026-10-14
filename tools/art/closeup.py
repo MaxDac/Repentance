@@ -3,8 +3,8 @@
 Each is built from an original generated picture committed under tools/art/src/ and reduced to a VGA close-up:
 chunky pixels, a tight palette and ordered dithering, inside a dark bevelled frame.
 
-- stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her. The clothed variant paints a
-  dark velvet dress over her shoulders and chest; the picture is otherwise the same.
+- stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
+  her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
 - rose_closeup: Rose calling Micah back from her door.
 - beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw
 from .common import ROOT, hx, palette_of, pixelize, save
 
 SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
+CLOTHED_SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup_clothed.png")
 ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
 BEATEN_SRC = os.path.join(ROOT, "tools", "art", "src", "beaten_closeup.png")
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
@@ -33,56 +34,18 @@ MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
 ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 
-# the neckline, in source pixels: a scoop between the shoulders, sleeves over the shoulder tops
-NECK_X, NECK_HALF = 1010, 290
-NECK_TOP, NECK_DIP = 805, 75
-DRESS = np.array(hx("4a0e16"), float)  # oxblood velvet
-DRESS_LIGHT = np.array(hx("a8323a"), float)
-TRIM = np.array(hx("c89a48"), float)  # a thin gold edge along the neckline
 
-
-def neckline(x):
-    """Top edge of the dress at source column x."""
-    u = np.clip((x - NECK_X) / NECK_HALF, -1, 1)
-    return NECK_TOP + NECK_DIP * (1 - u * u)
-
-
-def skin_mask(a):
-    r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    return (r > 110) & (r > g) & (g > b) & (r - b > 35)
-
-
-def dress(img):
-    """Covers the skin below the neckline in velvet, shaded by the light that fell on her."""
-    a = np.array(img, float)
-    h, w = a.shape[:2]
-    yy, xx = np.mgrid[0:h, 0:w]
-    below = yy > neckline(xx)
-    m = skin_mask(a) & below
-    lum = a.mean(-1)
-    lit = np.clip((lum - 150) / 90, 0, 1)[..., None]
-    a[m] = (DRESS + (DRESS_LIGHT - DRESS) * lit ** 1.5)[m]
-    edge = m & ~(yy - 14 > neckline(xx))
-    a[edge] = TRIM * (0.75 + 0.35 * lit[edge])
-    return Image.fromarray(np.clip(a, 0, 255).astype("uint8"), "RGB")
-
-
-def shared_palette(src):
+def shared_palette(nude, clothed):
     """One palette for both variants, so they differ only where the dress is."""
-    nude = src.convert("RGB").resize((AW, AH), Image.BOX)
-    clothed = dress(src.convert("RGB")).resize((AW, AH), Image.BOX)
     both = Image.new("RGB", (AW, AH * 2))
-    both.paste(nude, (0, 0))
-    both.paste(clothed, (0, AH))
+    both.paste(nude.convert("RGB").resize((AW, AH), Image.BOX), (0, 0))
+    both.paste(clothed.convert("RGB").resize((AW, AH), Image.BOX), (0, AH))
     return palette_of(both, COLOURS)
 
 
-def stage_closeup(src, clothed, pal=None):
-    """Eleanor on the stage, framed."""
-    img = src.convert("RGB")
-    if clothed:
-        img = dress(img)
-    return framed(img, pal or shared_palette(src))
+def stage_closeup(src, pal):
+    """Eleanor on the stage, framed; src is the nude or the clothed picture, pal their shared palette."""
+    return framed(src.convert("RGB"), pal)
 
 
 def rose_crop(src):
@@ -191,10 +154,10 @@ def heraldry_closeup():
 
 
 def build():
-    src = Image.open(SRC)
-    pal = shared_palette(src)
-    save(stage_closeup(src, clothed=False, pal=pal), "ui", "stage_closeup.png")
-    save(stage_closeup(src, clothed=True, pal=pal), "ui", "stage_closeup_clothed.png")
+    nude, clothed = Image.open(SRC), Image.open(CLOTHED_SRC)
+    pal = shared_palette(nude, clothed)
+    save(stage_closeup(nude, pal), "ui", "stage_closeup.png")
+    save(stage_closeup(clothed, pal), "ui", "stage_closeup_clothed.png")
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")
