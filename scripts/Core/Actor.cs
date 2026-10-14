@@ -92,8 +92,14 @@ public partial class Actor : Hotspot, ISpeaker
     private void ApplyDepthScale()
     {
         if (!DepthScale) return;
+        if (FindRoom() is { } r) Scale = Vector2.One * r.ScaleAt(Position.Y);
+    }
+
+    private Room? FindRoom()
+    {
         for (Node? n = GetParent(); n != null; n = n.GetParent())
-            if (n is Room r) { Scale = Vector2.One * r.ScaleAt(Position.Y); return; }
+            if (n is Room r) return r;
+        return null;
     }
 
     public override void _Process(double delta)
@@ -108,7 +114,11 @@ public partial class Actor : Hotspot, ISpeaker
         {
             var from = Position;
             Position = Position.MoveToward(target, _moveSpeed * (float)delta);
+            int stepsBefore = (int)(_walkDistance / (StridePerFrame * 4));
             _walkDistance += from.DistanceTo(Position) / Mathf.Max(Scale.Y, 0.01f);
+            // a foot lands every half walk cycle
+            if (CanWalk && IsVisibleInTree() && (int)(_walkDistance / (StridePerFrame * 4)) != stepsBefore)
+                Game.Instance?.Sfx?.Step(FindRoom()?.Floor ?? FloorSurface.Wood, Scale.Y);
             ApplyDepthScale();
             if (Position.DistanceTo(target) < 0.01f)
             {
@@ -209,9 +219,19 @@ public partial class Actor : Hotspot, ISpeaker
         return SpriteRect.Grow(-2).HasPoint(ToLocal(point));
     }
 
-    /// <summary>Whether a drawn (opaque) pixel of the character is under <paramref name="point"/>.</summary>
-    public bool DrawnAt(Vector2 point) =>
-        IsVisibleInTree() && _sprite is { Visible: true } s && s.IsPixelOpaque(s.ToLocal(point));
+    /// <summary>
+    /// Whether the character is drawn under <paramref name="point"/>: an opaque pixel there or right next to it, so the
+    /// soft edge of a dark silhouette (Sal in the unlit alley, #97) still counts as him rather than the scenery behind.
+    /// </summary>
+    public bool DrawnAt(Vector2 point)
+    {
+        if (!IsVisibleInTree() || _sprite is not { Visible: true } s) return false;
+        foreach (var o in Around)
+            if (s.IsPixelOpaque(s.ToLocal(point + o))) return true;
+        return false;
+    }
+
+    private static readonly Vector2[] Around = { Vector2.Zero, Vector2.Left, Vector2.Right, Vector2.Up, Vector2.Down };
 
     public override Rect2 Bounds
     {

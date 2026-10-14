@@ -431,7 +431,14 @@ def lamppost(img, on):
     d.ellipse([sx - 4, sy + 1, sx + 4, sy + 9], fill=bulb)
     if on:
         d.ellipse([sx - 2, sy + 3, sx + 2, sy + 7], fill=hx("ffffff"))
+    shade(d, on)
+
+
+def shade(d, on):
+    """The enamel dish: opaque from above, so the bulb's glow only spills out under its rim."""
+    sx, sy = SHADE
     d.polygon([(sx - 13, sy + 4), (sx - 4, sy - 2), (sx + 4, sy - 2), (sx + 13, sy + 4)], fill=hx("2e4036"))
+    d.line([(sx - 9, sy + 1), (sx - 3, sy - 1)], fill=hx("3e5246"))
     d.line([(sx - 13, sy + 4), (sx + 13, sy + 4)], fill=hx("e8e4d8") if on else hx("8a8880"))
     d.line([(sx - 4, sy - 2), (sx + 4, sy - 2)], fill=hx("4a5a50"))
 
@@ -479,10 +486,13 @@ def lighting(img, on, far_box):
     light(img, "ellipse", [52, 2, 64, 14], hx("dfe4f4"), 0.75, 2)          # moon over the passage
     light(img, "ellipse", [20, -40, 100, 50], hx("8090c0"), 0.25, 18)
     if on:
-        light(img, "ellipse", [sx - 30, sy - 16, sx + 30, sy + 30], hx("ffc870"), 0.3, 12)
-        light(img, "ellipse", [sx - 7, sy + 1, sx + 7, sy + 11], hx("fff4d0"), 0.8, 2)
+        # the glow starts under the rim and fans downward; nothing shines up through the dish
+        light(img, "polygon", [(sx - 13, sy + 5), (sx + 13, sy + 5), (sx + 34, sy + 40), (sx - 34, sy + 40)],
+              hx("ffc870"), 0.28, 8)
+        light(img, "ellipse", [sx - 6, sy + 3, sx + 6, sy + 11], hx("fff4d0"), 0.7, 1)
         light(img, "polygon", [(sx - 12, sy + 6), (sx + 12, sy + 6), (310, 250), (80, 250)], hx("f0a860"), 0.13, 8)
         light(img, "rect", [sx - 4, 200, sx + 4, 262], hx("ffe0a0"), 0.3, 3)  # streak on the wet stones
+    shade(ImageDraw.Draw(img), on)
     return img
 
 

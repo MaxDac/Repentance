@@ -23,6 +23,7 @@ size = Vector2(96, 172)
 [node name="Alley" type="Node2D"]
 script = ExtResource("1_Alley")
 RoomName = "Alley behind the Blue Lantern"
+Floor = 1
 FarY = 188
 NearY = 264
 FarScale = 0.9
@@ -36,7 +37,7 @@ centered = false
 
 [node name="Lamp" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(47, 20)
+position = Vector2(47, 36)
 texture = ExtResource("3_alley_lamp")
 centered = false
 

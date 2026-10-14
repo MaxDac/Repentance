@@ -30,6 +30,23 @@ public partial class Room : Node2D
     [Export] public string PlayerCharacter = "micah";
     /// <summary>False for screens like the city map, where the player character isn't drawn.</summary>
     [Export] public bool ShowPlayer = true;
+    /// <summary>What footsteps sound like here.</summary>
+    [Export] public FloorSurface Floor = FloorSurface.Wood;
+
+    /// <summary>
+    /// The looping ambience and its level in dB: rain wherever it is drawn, loud when the room is out in it, muffled
+    /// when it only runs down a window.
+    /// </summary>
+    public virtual (Sound Sound, float VolumeDb)? Ambience
+    {
+        get
+        {
+            var rain = FindAll<Rain>(this).ToList();
+            if (rain.Count == 0) return null;
+            bool outside = rain.Any(r => r.Areas.Count == 0 || r.Areas.Sum(a => a.Area) > 480 * 270 * 0.3f);
+            return (Sound.Rain, outside ? 0f : -9f);
+        }
+    }
 
     /// <summary>Whether the player is drawn when the room loads; rooms can hide him for an entry cutscene.</summary>
     public virtual bool PlayerVisibleOnLoad => ShowPlayer;

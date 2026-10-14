@@ -72,7 +72,7 @@ public partial class HarringtonOffice : Room
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Crests)) return true;
                 State.SetFlag("secret_open");
                 await Say("Star, sun, moon. The back of the closet swings open like a pair of little doors.");
-                await Say("A white mask, and a black cloak. Folded like vestments.");
+                await Say("A white Bauta mask, and a black cloak. Folded like vestments.");
                 return true;
             case ("panel", Verb.Kick):
                 await Say("Kick the wall in a dead quiet building. Brilliant.");

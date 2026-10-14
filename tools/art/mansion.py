@@ -198,12 +198,20 @@ def sash(d, x0, y0, x1, y1, glass="dark", bars=False, seed=0, em=None):
         if em is not None:
             em.rectangle([x0, y0, x1, y1], fill=235)
     else:
+        # the room ablaze behind the glass (the flames themselves are drawn over everything by _blaze): a white-hot
+        # ceiling, the burning curtains hanging in charred rags at either side, and soot fanned up the stonework
         for y in range(y0, y1 + 1):
-            d.line([(x0, y), (x1, y)], fill=mix(hx("fff0a0"), hx("f06818"), (y - y0) / (y1 - y0)))
-        for i in range(4):
-            fx = x0 + 2 + i * (w - 4) // 3
-            d.polygon([(fx - 4, y1), (fx + rnd.randint(-2, 2), y0 + 4 + rnd.randint(0, 12)), (fx + 4, y1)], fill=hx("fffce0"))
-        d.polygon([(x0 - 6, y0 - 12), (x1 + 6, y0 - 12), (cx + 10, y0 - 34), (cx - 8, y0 - 30)], fill=hx("201814"))
+            d.line([(x0, y), (x1, y)], fill=mix(hx("fff0a0"), hx("c84818"), ((y - y0) / (y1 - y0)) ** 0.8))
+        for side, xa in ((1, x0), (-1, x1)):
+            for k in range(4):
+                xx = xa + side * k
+                d.line([(xx, y0), (xx, y0 + rnd.randint(6, y1 - y0 - 4))], fill=hx("3a1a10") if k % 2 else hx("5a2410"))
+        for i in range(26):
+            f = i / 25
+            sx = cx + rnd.gauss(0, 4 + 10 * f)
+            sy = y0 - 10 - f * 28 + rnd.randint(-2, 2)
+            r = 2 + 4 * (1 - abs(sx - cx) / (w + 10)) + rnd.random() * 2
+            d.ellipse([sx - r, sy - r * 0.7, sx + r, sy + r * 0.7], fill=mix(hx("120c0a"), hx("2a1c16"), rnd.random()))
         if em is not None:
             em.rectangle([x0, y0, x1, y1], fill=255)
     # sashes: frame, glazing bars and the meeting rail
@@ -280,7 +288,8 @@ def ivy(d, img, seed, x0, x1, y_top, y_bot, density=1.0):
                     d.point((lx - 1, ly - 1), fill=hx("5a8a4a"))
 
 
-def paint_exterior(moved=False, wedged=False, opened=False, fire=False):
+def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0.0):
+    """The back of the house; fire_t in [0, 1) is the phase of the blaze's flame and smoke loop."""
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
     em = Image.new("L", img.size, 0)
@@ -526,11 +535,7 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False):
     img = grade(img, (0.42, 0.46, 0.7), pools, em)
     if fire:
         light(img, "ellipse", [-80, -60, W + 80, 220], hx("f07028"), 0.45, 30)
-        d = ImageDraw.Draw(img)
-        rf = random.Random(7)
-        for _ in range(40):  # sparks
-            x, y = rf.randint(40, W - 1), rf.randint(0, 120)
-            d.point((x, y), fill=hx("ffd070"))
+        _blaze(img, fire_t, (DOOR[0] + 11, DOOR[1], DOOR[2], DOOR[3]) if opened else None)
     else:
         light(img, "ellipse", [lx - 30, ly - 24, lx + 30, ly + 30], hx("f0b060"), 0.25, 10)
         light(img, "ellipse", [430, 30, 484, 100], hx("e0a050"), 0.2, 12)
@@ -552,8 +557,128 @@ def build_exterior():
             "mansion_exterior_bin")
     overlay(v["wedged"], px, pal, (BELL[0] - 2, BELL[1] - 2, BELL[2] + 10, BELL[3] + 16), "mansion_exterior_tie")
     overlay(v["open"], px, pal, (DOOR[0] - 2, DOOR[1] - 2, DOOR[2] + 2, DOOR[3] + 1), "mansion_exterior_door")
-    save(pixelize(v["fire"], palette_of(v["fire"], 124)), "rooms", "mansion_exterior_fire.png")
+    fire = [v["fire"]] + [paint_exterior(moved=True, wedged=True, opened=True, fire=True, fire_t=i / EXT_FIRE_FRAMES)
+                          for i in range(1, EXT_FIRE_FRAMES)]
+    fpal = palette_of(Image.blend(fire[0], fire[EXT_FIRE_FRAMES // 2], 0.5), 160)
+    strip = Image.new("RGB", (W * EXT_FIRE_FRAMES, H))
+    for i, frame in enumerate(fire):
+        strip.paste(pixelize(frame, fpal), (i * W, 0))
+    save(strip, "rooms", "mansion_exterior_fire.png")
+    print("mansion_exterior_fire:", EXT_FIRE_FRAMES, "frames")
     return px, v
+
+
+EXT_FIRE_FRAMES = 8
+FLAME_LAYERS = ((hx("a82a12"), 1.0, 1.0), (hx("e0601e"), 0.84, 0.78), (hx("f8a032"), 0.64, 0.56),
+                (hx("ffd870"), 0.42, 0.36), (hx("fff6d8"), 0.2, 0.18))
+LOWER_SASHES = ((70, 116, 104, 166), (156, 116, 190, 166), (384, 116, 416, 150))
+
+
+def _flame(d, cx, base, h, w, t, ph, lean=0.0):
+    """One tongue of flame, nested from a dark red skin to a white core: it narrows as it rises, ripples with a wave
+    running up it, leans downwind at the tip and swells and sinks with phase t (looping on 1); a torn-off wisp
+    drifts up from the tip and burns out."""
+    tau = 2 * math.pi
+    h *= 0.8 + 0.16 * math.sin(tau * (t + ph)) + 0.07 * math.sin(tau * (3 * t + 2 * ph))
+    for col, hs, ws in FLAME_LAYERS:
+        hh, ww = h * hs, w * ws + 0.6
+        left, right = [], []
+        n = 12
+        for i in range(n + 1):
+            f = i / n
+            mid = cx + lean * f * f * h * 0.3 + (1 + w * 0.3) * f * math.sin(tau * (1.3 * f - 2 * t + ph))
+            half = ww * (1 - f) ** 0.7 * (1 + 0.22 * math.sin(tau * (2 * f + t + ph)))
+            left.append((mid - half, base - hh * f))
+            right.append((mid + half, base - hh * f))
+        d.polygon(left + right[::-1], fill=col)
+    q = (2 * t + ph) % 1.0
+    r = w * 0.45 * (1 - q)
+    if r >= 0.6:
+        wx = cx + lean * h * 0.3 + 2 * math.sin(tau * (q + ph)) + q * lean * 6
+        wy = base - h * (0.95 + 0.45 * q)
+        d.ellipse([wx - r, wy - r * 1.4, wx + r, wy + r * 1.4], fill=mix(hx("ffb040"), hx("b8381a"), q))
+
+
+def _smoke(layer, sx, sy, rise, drift, size, t, n, seed):
+    """A plume of smoke billowing up from (sx, sy): n puffs ride up it in turn, swelling, drifting downwind and
+    thinning out, each a dark mass lit hot orange from below by the fire."""
+    tau = 2 * math.pi
+    rs = random.Random(seed)
+    d = ImageDraw.Draw(layer)
+    puffs = []
+    for k in range(n):
+        q = (t + k / n) % 1.0
+        wob = rs.uniform(-1, 1)
+        x = sx + drift * q + size * 0.8 * wob + 3 * math.sin(tau * (q * 1.5 + k * 0.37))
+        y = sy - rise * q
+        r = size * (0.45 + 1.1 * q) * rs.uniform(0.8, 1.15)
+        a = int(235 * min(1.0, q * 6) * (1 - q) ** 0.6)
+        puffs.append((y, x, r, a, q))
+    for y, x, r, a, q in sorted(puffs, reverse=True):
+        body = mix(hx("362824"), hx("282426"), min(1.0, q * 1.6))
+        d.ellipse([x - r, y - r * 0.8, x + r, y + r * 0.8], fill=body + (a,))
+        d.ellipse([x - r * 0.8, y - r * 0.05, x + r * 0.6, y + r * 0.75],
+                  fill=mix(hx("c8662c"), hx("5a4a46"), min(1.0, q * 1.3)) + (int(a * 0.7),))  # underlit
+        d.ellipse([x - r * 0.3, y - r * 0.8, x + r * 0.8, y - r * 0.2], fill=hx("6a6264") + (int(a * 0.35),))  # moonlit
+
+
+def _blaze(img, t, doorway=None):
+    """The house going up, drawn last at phase t (looping on 1): smoke pouring out over the cornice and rolling
+    off the roof in a bank, flames bursting out of every window (and the open kitchen door) and licking up the
+    brick, and sparks spiralling up into the night."""
+    tau = 2 * math.pi
+    rgba = img.convert("RGBA")
+    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    for i, x in enumerate(UPPER_X):  # a plume out of the top of each upper window
+        _smoke(layer, x + 13, UPPER_Y[0] - 8, 90, 40, 8, (t + i * 0.29) % 1.0, 11, 300 + i)
+    for i, (x0, y0, x1, y1) in enumerate(LOWER_SASHES):
+        _smoke(layer, (x0 + x1) / 2, y0 - 10, 70, 30, 6, (t + i * 0.41) % 1.0, 9, 320 + i)
+    if doorway is not None:
+        _smoke(layer, (doorway[0] + doorway[2]) / 2, doorway[1] - 14, 90, 34, 8, t, 10, 330)
+    dl = ImageDraw.Draw(layer)
+    for k in range(20):  # the bank rolling along the roof, downwind
+        x = (k * 28 + t * 28) % (20 * 28) - 40
+        y = 2 + 5 * math.sin(tau * x / 140) + 2 * math.sin(tau * x / 61)
+        r = 18 + 6 * math.sin(tau * x / 97)
+        dl.ellipse([x - r, y - r * 0.7, x + r, y + r * 0.7], fill=hx("2e2a2c") + (200,))
+        dl.ellipse([x - r * 0.8, y + r * 0.05, x + r * 0.6, y + r * 0.65], fill=hx("8a4426") + (130,))
+    layer = layer.filter(ImageFilter.GaussianBlur(2.2))
+    rgba.alpha_composite(layer)
+    img.paste(rgba.convert("RGB"))
+    for i, x in enumerate(UPPER_X):  # a glow on the brick around each window, breathing with the fire
+        g = 0.32 + 0.08 * math.sin(tau * (t + i * 0.23))
+        light(img, "ellipse", [x - 22, UPPER_Y[0] - 40, x + 48, UPPER_Y[1] + 14], hx("ff8a30"), g, 8)
+    for x0, y0, x1, y1 in LOWER_SASHES:
+        light(img, "ellipse", [x0 - 18, y0 - 26, x1 + 18, y1 + 12], hx("ff8a30"), 0.3, 8)
+    d = ImageDraw.Draw(img)
+    rf = random.Random(7)
+    for i, x in enumerate(UPPER_X):
+        x0, y0, x1, y1 = x, UPPER_Y[0], x + 26, UPPER_Y[1]
+        for j in range(5):
+            cx = x0 + 3 + j * (x1 - x0 - 6) / 4 + rf.uniform(-1, 1)
+            hj = (y1 - y0) * rf.uniform(0.9, 1.35) + (10 if j in (1, 2, 3) else 0)
+            _flame(d, cx, y1 - 1, hj, rf.uniform(3.8, 5.2), t, rf.random(), lean=rf.uniform(0.2, 0.9))
+    for x0, y0, x1, y1 in LOWER_SASHES:
+        for j in range(5):
+            cx = x0 + 3 + j * (x1 - x0 - 6) / 4 + rf.uniform(-1, 1)
+            _flame(d, cx, y1 - 1, (y1 - y0) * rf.uniform(0.75, 1.15), rf.uniform(3.6, 5), t, rf.random(),
+                   lean=rf.uniform(0.1, 0.6))
+        for bx in range(x0 + 3, x1, 5):  # the bars stand black against the flames
+            d.line([(bx, y0 - 1), (bx, y1 + 1)], fill=hx("161414"))
+        d.line([(x0, y0 + 4), (x1, y0 + 4)], fill=hx("161414"))
+        d.line([(x0, y1 - 4), (x1, y1 - 4)], fill=hx("161414"))
+    if doorway is not None:
+        dx0, dy0, dx1, dy1 = doorway
+        for j in range(7):
+            cx = dx0 + 2 + j * (dx1 - dx0 - 4) / 6
+            _flame(d, cx, dy1 - 1, (dy1 - dy0) * rf.uniform(0.3, 0.62), rf.uniform(3.4, 4.6), t, rf.random(),
+                   lean=rf.uniform(0.0, 0.4))
+    for k in range(48):  # sparks, spiralling up off the windows
+        q = (t * 2 + k / 48) % 1.0
+        sx0 = UPPER_X[k % len(UPPER_X)] + 13
+        x = sx0 + rf.uniform(-12, 12) + q * 40 + 5 * math.sin(tau * (q * 2 + k * 0.17))
+        y = UPPER_Y[0] - 10 - q * 60 - rf.uniform(0, 20)
+        d.point((x, y), fill=hx("fff0a0") if q < 0.3 else hx("ffb040") if q < 0.7 else hx("a8401a"))
 
 
 # ------------------------------------------------------------------------------------------------ KITCHEN
@@ -561,6 +686,136 @@ def build_exterior():
 KFL = 204  # where the back wall meets the floor
 CANDLE = (322, 150)  # the flame, roughly; recomputed from the table in paint_kitchen
 TILE, TILE_D, PLASTER = hx("d8d4c4"), hx("9a978a"), hx("c8bc9a")
+
+
+def _regulator_clock(d, cx, top):
+    """A walnut wall regulator: carved crest, a brass-bezelled dial with hour and minute marks, and a glazed trunk
+    showing the brass pendulum."""
+    wal, wal_l, wal_d = hx("5a3a20"), hx("8a6038"), hx("24140a")
+    # the crest: a broken pediment with a turned finial
+    d.polygon([(cx - 15, top + 8), (cx - 3, top + 2), (cx - 3, top + 5), (cx - 12, top + 9)], fill=wal, outline=wal_d)
+    d.polygon([(cx + 15, top + 8), (cx + 3, top + 2), (cx + 3, top + 5), (cx + 12, top + 9)], fill=wal, outline=wal_d)
+    d.rectangle([cx - 1, top - 2, cx + 1, top + 6], fill=wal_l)
+    d.ellipse([cx - 2, top - 4, cx + 2, top], fill=hx("c8a048"))
+    d.rectangle([cx - 16, top + 9, cx + 16, top + 11], fill=wal_l, outline=wal_d)
+    # the head, with the dial behind a round glazed door
+    d.rectangle([cx - 14, top + 12, cx + 14, top + 40], fill=wal, outline=wal_d)
+    d.line([(cx - 13, top + 13), (cx + 13, top + 13)], fill=wal_l)
+    d.line([(cx - 13, top + 13), (cx - 13, top + 39)], fill=wal_l)
+    for sx in (-1, 1):  # little carved corner spandrels
+        d.point((cx + sx * 12, top + 15), fill=hx("c8a048"))
+        d.point((cx + sx * 12, top + 37), fill=hx("c8a048"))
+    dy = top + 26
+    d.ellipse([cx - 12, dy - 12, cx + 12, dy + 12], fill=hx("b08a3a"), outline=wal_d)  # the brass bezel
+    d.arc([cx - 11, dy - 11, cx + 11, dy + 11], 180, 300, fill=hx("f0d890"))
+    d.ellipse([cx - 10, dy - 10, cx + 10, dy + 10], fill=hx("efe8d2"))
+    d.ellipse([cx - 9, dy - 9, cx + 9, dy + 9], outline=hx("c8bfa4"))  # the chapter ring
+    for k in range(60):
+        t = k * math.pi / 30
+        if k % 5 == 0:
+            d.line([(cx + 8 * math.cos(t), dy + 8 * math.sin(t)), (cx + 6 * math.cos(t), dy + 6 * math.sin(t))],
+                   fill=hx("1e1a14"))
+        elif k % 2 == 0:
+            d.point((cx + 8.6 * math.cos(t), dy + 8.6 * math.sin(t)), fill=hx("8a8270"))
+    for t in (-math.pi / 2, 0, math.pi / 2, math.pi):  # bolder quarter marks
+        d.point((cx + 7 * math.cos(t), dy + 7 * math.sin(t)), fill=hx("1e1a14"))
+    d.point((cx - 3, dy + 4), fill=hx("4a4a50"))  # winding holes
+    d.point((cx + 3, dy + 4), fill=hx("4a4a50"))
+    d.line([(cx, dy), (cx + 4, dy - 2)], fill=hx("141414"), width=2)  # ten past ten, nearly
+    d.line([(cx, dy), (cx - 3, dy - 7)], fill=hx("141414"))
+    d.point((cx, dy), fill=hx("c8a048"))
+    d.line([(cx - 8, dy - 6), (cx - 5, dy - 8)], fill=hx("ffffff"))  # glint on the glass
+    # the glazed trunk and the pendulum swinging inside
+    d.rectangle([cx - 10, top + 40, cx + 10, top + 58], fill=wal, outline=wal_d)
+    d.rectangle([cx - 7, top + 43, cx + 7, top + 55], fill=hx("2a2016"))
+    d.line([(cx - 7, top + 43), (cx + 7, top + 43)], fill=hx("1a120a"))
+    d.line([(cx, top + 43), (cx + 1, top + 49)], fill=hx("b08a3a"))
+    d.ellipse([cx - 3, top + 48, cx + 5, top + 54], fill=hx("c8a048"), outline=hx("6a5020"))
+    d.point((cx - 1, top + 50), fill=hx("f8e8a8"))
+    d.line([(cx - 6, top + 45), (cx - 6, top + 50)], fill=hx("5a5040"))  # reflection on the trunk glass
+    d.polygon([(cx - 10, top + 58), (cx + 10, top + 58), (cx + 4, top + 63), (cx - 4, top + 63)], fill=wal,
+              outline=wal_d)  # the drop finial
+    d.ellipse([cx - 2, top + 62, cx + 2, top + 66], fill=wal_l, outline=wal_d)
+
+
+def _apron(img, hx0, hy0):
+    """The cook's striped ticking apron hung by its neck strap from a brass peg: a narrow square bib, a step out at
+    the waist into a wide skirt with blue stripes falling in folds, ties hanging from the waist corners, a pocket with
+    a red tea towel tucked in, the off-side in shadow, and old stains."""
+    d = ImageDraw.Draw(img)
+    cloth, cloth_l, cloth_d, cloth_dd = hx("bcb6a2"), hx("d6d0bc"), hx("8e8878"), hx("5e5a4e")
+    stripe, stripe_d = hx("3e5684"), hx("2e3e60")
+    by, wy, hy = hy0 + 8, hy0 + 22, hy0 + 52  # bib top, waist, hem
+    shadow(img, "polygon", [(hx0 - 4, by + 1), (hx0 + 7, by + 1), (hx0 + 11, hy + 2), (hx0 - 8, hy + 2)], 0.45, 2)
+    d = ImageDraw.Draw(img)
+    # the brass peg and the neck strap over it
+    d.rectangle([hx0 - 2, hy0 - 1, hx0 + 2, hy0 + 1], fill=hx("6a5028"))
+    d.point((hx0 - 1, hy0 - 1), fill=hx("c8a050"))
+    d.line([(hx0 - 1, hy0 + 1), (hx0 - 4, by)], fill=cloth_d, width=2)
+    d.line([(hx0 + 1, hy0 + 1), (hx0 + 4, by)], fill=cloth_dd, width=2)
+    # the bib: a square of ticking, narrower than the skirt
+    d.rectangle([hx0 - 5, by, hx0 + 5, wy], fill=cloth)
+    for sx in (-3, 0, 3):
+        d.line([(hx0 + sx, by + 1), (hx0 + sx, wy - 1)], fill=stripe)
+    d.line([(hx0 - 5, by), (hx0 - 5, wy)], fill=cloth_l)
+    d.line([(hx0 + 5, by), (hx0 + 5, wy)], fill=cloth_dd)
+    d.line([(hx0 - 5, by), (hx0 + 5, by)], fill=cloth_dd)
+    # the skirt: steps out wide at the waist, hangs a touch wider at the hem
+    d.polygon([(hx0 - 9, wy + 1), (hx0 + 9, wy + 1), (hx0 + 11, hy), (hx0 - 10, hy)], fill=cloth)
+    for i, sx in enumerate((-7, -4, -1, 2, 5, 8)):
+        d.line([(hx0 + sx, wy + 3), (hx0 + sx * 1.15, hy - 1)], fill=stripe if i % 2 else stripe_d)
+    for sx in (-7.5, -1.5, 4.5):  # fold shadows
+        d.line([(hx0 + sx, wy + 8), (hx0 + sx * 1.15, hy - 1)], fill=cloth_d)
+    d.polygon([(hx0 + 6, wy + 1), (hx0 + 9, wy + 1), (hx0 + 11, hy), (hx0 + 8, hy)], fill=mul(cloth, 0.7))
+    d.line([(hx0 + 8, wy + 1), (hx0 + 9, hy)], fill=mul(stripe, 0.7))
+    d.line([(hx0 - 9, wy + 1), (hx0 - 10, hy)], fill=cloth_l)
+    d.line([(hx0 + 9, wy + 1), (hx0 + 11, hy)], fill=cloth_dd)
+    # the waistband, then the ties dropping from its corners
+    d.rectangle([hx0 - 9, wy, hx0 + 9, wy + 2], fill=cloth_d)
+    d.line([(hx0 - 10, wy + 1), (hx0 + 10, wy + 1)], fill=cloth_l)
+    d.line([(hx0 - 10, wy + 1), (hx0 - 11, wy + 4), (hx0 - 11, wy + 18)], fill=cloth_d)
+    d.line([(hx0 - 10, wy + 3), (hx0 - 12, wy + 16)], fill=cloth)
+    d.line([(hx0 + 12, wy + 1), (hx0 + 11, wy + 4), (hx0 + 12, wy + 15)], fill=cloth_dd)
+    # a frilled hem
+    d.line([(hx0 - 10, hy), (hx0 + 11, hy)], fill=cloth_dd)
+    for fx in range(-10, 12, 2):
+        d.point((hx0 + fx, hy + 1), fill=cloth_l)
+        d.point((hx0 + fx + 1, hy + 1), fill=cloth_d)
+    # the pocket with a red-checked tea towel stuffed into it
+    d.rectangle([hx0 - 7, wy + 8, hx0 + 1, wy + 16], fill=cloth_l, outline=cloth_dd)
+    d.line([(hx0 - 6, wy + 9), (hx0, wy + 9)], fill=cloth_d)
+    d.polygon([(hx0 - 5, wy + 8), (hx0 - 1, wy + 8), (hx0, wy + 3), (hx0 - 4, wy + 4)], fill=hx("9a2a26"))
+    d.point((hx0 - 3, wy + 5), fill=hx("e0d0b8"))
+    d.point((hx0 - 1, wy + 7), fill=hx("e0d0b8"))
+    for sx, sy in ((5, 22), (-8, 26), (2, -6), (-2, 24)):  # gravy and old tea
+        d.point((hx0 + sx, wy + sy), fill=hx("6a5a3a"))
+        d.point((hx0 + sx + 1, wy + sy), fill=hx("7a6a4a"))
+
+def _broom(img, x0, y0, xh, floor):
+    """A corn broom leaning in a corner: turned handle, the stitched shoulder, and a flared head of straw."""
+    d = ImageDraw.Draw(img)
+    hy = floor - 26  # where the handle enters the head
+    d.line([(x0, y0), (xh, hy)], fill=hx("6a4a26"), width=2)
+    d.line([(x0, y0), (xh - 1, hy)], fill=hx("b08a5a"))
+    d.ellipse([x0 - 1, y0 - 3, x0 + 2, y0], fill=hx("4a3018"))  # the hanging hole's knob
+    d.point((x0 + 1, y0 + 4), fill=hx("2a1a0c"))
+    shadow(img, "ellipse", [xh - 12, floor - 3, xh + 16, floor + 3], 0.5, 2)
+    d = ImageDraw.Draw(img)
+    straws = [hx("c8a860"), hx("a8884a"), hx("d8bc78"), hx("8a6e38"), hx("b89a58")]
+    rnd = random.Random(91)
+    for k in range(26):  # the head flares from the stitching to the floor
+        u = k / 25
+        top_x = xh - 4 + u * 8
+        bot_x = xh - 9 + u * 20 + rnd.uniform(-1, 1)
+        d.line([(top_x, hy + 8), (bot_x, floor - rnd.randint(0, 1))], fill=straws[rnd.randrange(len(straws))])
+    d.line([(xh - 9, floor), (xh + 11, floor)], fill=hx("6a5228"))  # the worn, splayed tips
+    d.polygon([(xh - 4, hy), (xh + 4, hy), (xh + 5, hy + 9), (xh - 5, hy + 9)], fill=hx("b89a58"),
+              outline=hx("6a5228"))  # the bound shoulder
+    for k, c in enumerate((hx("a83a2a"), hx("2a5a3a"), hx("a83a2a"))):  # the stitching bands
+        y = hy + 2 + k * 3
+        d.line([(xh - 4, y), (xh + 4, y)], fill=c)
+        for sx in range(int(xh) - 3, int(xh) + 4, 2):
+            d.point((sx, y), fill=mul(c, 1.4))
 
 
 def paint_kitchen(lit=False, gas=False):
@@ -584,16 +839,8 @@ def paint_kitchen(lit=False, gas=False):
         shadow(img, "ellipse", [x - 8, y - 4, x + 8, y + 6], 0.12, 3, (60, 50, 20))
     d = ImageDraw.Draw(img)
     d.line([(96, 22), (100, 34), (98, 46), (103, 58)], fill=hx("8a8068"))
-    # a kitchen clock over the back door and a calendar by the dresser
-    d.ellipse([36, 44, 60, 68], fill=hx("4a3220"), outline=hx("1a120a"))
-    d.ellipse([39, 47, 57, 65], fill=hx("ece4cc"))
-    for k in range(12):
-        t = k * math.pi / 6
-        d.point((48 + 7 * math.cos(t), 56 + 7 * math.sin(t)), fill=hx("2a2a2a"))
-    d.line([(48, 56), (48, 50)], fill=hx("1a1a1a"))
-    d.line([(48, 56), (52, 58)], fill=hx("1a1a1a"))
-    d.rectangle([47, 68, 49, 82], fill=hx("4a3220"))
-    d.ellipse([44, 80, 52, 88], fill=hx("c8a048"))
+    # a walnut regulator clock over the back door, and a calendar by the dresser
+    _regulator_clock(d, 48, 22)
     d.rectangle([243, 112, 257, 132], fill=hx("ece4cc"), outline=hx("8a8068"))
     d.rectangle([244, 113, 256, 120], fill=hx("a83a2a"))
     for y in range(123, 131, 2):
@@ -615,32 +862,46 @@ def paint_kitchen(lit=False, gas=False):
             d.line([(x, y + 1), (x, y + 4)], fill=TILE_D)
     d.rectangle([0, KFL - 6, W - 1, KFL], fill=hx("2a3a30"))
     d.line([(0, KFL - 6), (W - 1, KFL - 6)], fill=hx("5a7a68"))
-    # ---- the back door to the yard, four panes of moonlit glass, a bolt, the cook's apron on a hook ----
+    # ---- the back door to the yard: solid oak, six raised panels, a bolt, the cook's apron on a hook ----
     bx0, bx1, by0 = 24, 72, 98
     d.rectangle([bx0 - 4, by0 - 4, bx1 + 4, KFL], fill=hx("5a4a36"))
+    d.line([(bx0 - 4, by0 - 4), (bx1 + 4, by0 - 4)], fill=hx("8a7656"))
+    d.line([(bx1 + 4, by0 - 4), (bx1 + 4, KFL)], fill=hx("3a2e20"))
+    d.rectangle([bx0 - 6, by0 - 8, bx1 + 6, by0 - 5], fill=hx("6a5840"))  # the lintel's cornice
+    d.line([(bx0 - 6, by0 - 8), (bx1 + 6, by0 - 8)], fill=hx("9a8662"))
     d.rectangle([bx0, by0, bx1, KFL], fill=hx("4a3a28"))
+    grain = random.Random(811)
+    for k in range(9):  # the oak's grain running down the stiles and rails
+        gx = bx0 + 3 + k * 5 + grain.randint(-1, 1)
+        d.line([(gx, by0 + 1), (gx + grain.randint(-1, 1), KFL - 1)], fill=hx("42331f"))
     d.line([(bx0, by0), (bx0, KFL)], fill=hx("2a2014"))
-    vgrad(img, (bx0 + 5, by0 + 5, bx1 - 5, by0 + 44), hx("3a4a7a"), hx("6a7aa8"))
-    ed.rectangle([bx0 + 5, by0 + 5, bx1 - 5, by0 + 44], fill=150)
-    d.ellipse([bx0 + 28, by0 + 9, bx0 + 36, by0 + 17], fill=hx("eeeed8"))
-    ed.ellipse([bx0 + 28, by0 + 9, bx0 + 36, by0 + 17], fill=255)
-    d.polygon([(bx0 + 5, by0 + 44), (bx0 + 5, by0 + 32), (bx0 + 16, by0 + 26), (bx0 + 30, by0 + 34), (bx1 - 5, by0 + 28),
-               (bx1 - 5, by0 + 44)], fill=hx("1a2a24"))  # the garden's trees through the glass
-    d.line([(48, by0 + 5), (48, by0 + 44)], fill=hx("4a3a28"), width=2)
-    d.line([(bx0 + 5, by0 + 24), (bx1 - 5, by0 + 24)], fill=hx("4a3a28"), width=2)
-    for a, b in ((by0 + 52, by0 + 76), (by0 + 82, KFL - 8)):
-        for px0, px1 in ((bx0 + 5, 46), (50, bx1 - 5)):
-            d.rectangle([px0, a, px1, b], fill=hx("40321f"), outline=hx("2a2014"))
+    d.line([(bx0 + 1, by0), (bx1, by0)], fill=hx("5e4a32"))
+    mid = (bx0 + bx1) // 2
+    for a, b in ((by0 + 6, by0 + 30), (by0 + 36, by0 + 70), (by0 + 76, KFL - 8)):
+        for px0, px1 in ((bx0 + 5, mid - 2), (mid + 2, bx1 - 5)):
+            d.rectangle([px0, a, px1, b], fill=hx("3a2c1c"))  # the sunk moulding round the panel
+            d.rectangle([px0 + 2, a + 2, px1 - 2, b - 2], fill=hx("4e3c28"))  # the raised field
+            d.line([(px0 + 2, a + 2), (px1 - 2, a + 2)], fill=hx("6e5638"))
+            d.line([(px0 + 2, a + 2), (px0 + 2, b - 2)], fill=hx("644e32"))
+            d.line([(px1 - 2, a + 3), (px1 - 2, b - 2)], fill=hx("33261a"))
+            d.line([(px0 + 3, b - 2), (px1 - 2, b - 2)], fill=hx("2e2216"))
             d.line([(px0, b), (px1, b)], fill=hx("6a5638"))
-    d.rectangle([bx1 - 7, by0 + 54, bx1 - 4, by0 + 58], fill=hx("c8a048"))
-    d.rectangle([bx0 + 2, by0 + 48, bx0 + 12, by0 + 50], fill=hx("6a6a70"))  # bolt
-    d.rectangle([80, 116, 82, 118], fill=hx("6a6a70"))
-    d.polygon([(76, 118), (88, 118), (92, 170), (72, 170)], fill=hx("dcd8c8"))  # apron
-    d.line([(78, 140), (88, 140)], fill=hx("a8a494"))
-    d.line([(76, 118), (72, 170)], fill=hx("a8a494"))
-    # a broom propped in the corner of the frame
-    d.line([(90, 120), (96, KFL - 12)], fill=hx("8a6a40"), width=2)
-    d.polygon([(90, KFL - 14), (102, KFL - 14), (106, KFL), (88, KFL)], fill=hx("a88a50"))
+    d.rectangle([bx1 - 8, by0 + 70, bx1 - 4, by0 + 76], fill=hx("8a6a2a"))  # brass escutcheon and knob
+    d.ellipse([bx1 - 9, by0 + 64, bx1 - 3, by0 + 70], fill=hx("c8a048"), outline=hx("5a4418"))
+    d.point((bx1 - 7, by0 + 65), fill=hx("f0d890"))
+    d.point((bx1 - 6, by0 + 74), fill=hx("1a1208"))
+    for hy in (by0 + 10, KFL - 16):  # strap hinges
+        d.rectangle([bx0 + 1, hy, bx0 + 9, hy + 2], fill=hx("2a2a2e"))
+        d.point((bx0 + 7, hy + 1), fill=hx("6a6a70"))
+    d.rectangle([bx0 + 2, by0 + 34, bx0 + 12, by0 + 36], fill=hx("6a6a70"))  # bolt
+    d.rectangle([bx0 + 10, by0 + 33, bx0 + 12, by0 + 37], fill=hx("4a4a50"))
+    d.line([(bx0 + 1, KFL - 1), (bx1 - 1, KFL - 1)], fill=hx("6a7aa8"))  # moonlight under the door
+    ed.line([(bx0 + 1, KFL - 1), (bx1 - 1, KFL - 1)], fill=150)
+    _apron(img, 87, 116)
+    d = ImageDraw.Draw(img)
+    # a corn broom propped in the corner of the frame
+    _broom(img, 97, 112, 102, KFL)
+    d = ImageDraw.Draw(img)
     # ---- the range in its chimney recess: a brick arch, a mantel shelf with tins, the black iron range ----
     rx0, rx1 = 112, 236
     bricks(img, (rx0, 40, rx1, KFL), hx("6a3a2a"), hx("3a2620"), 83, h=4, w=9)
@@ -813,10 +1074,10 @@ def paint_kitchen(lit=False, gas=False):
         R.line(img, (352, y, 56), (366, y, 56), hx("6a4a2a"))
     R.line(img, (352, 16, 56), (352, 40, 56), hx("4a321c"))
     R.line(img, (366, 16, 56), (366, 40, 56), hx("4a321c"))
-    # ---- light: moonlight through the back door's glass, the candle if it's lit ----
-    light(img, "polygon", [(bx0 + 5, by0 + 5), (bx1 - 5, by0 + 5), (150, H), (40, H)], hx("5a6aa8"), 0.35, 8)
+    # ---- light: a sliver of moonlight under the back door, the candle if it's lit ----
+    light(img, "polygon", [(bx0, KFL - 2), (bx1, KFL - 2), (bx1 + 30, H), (bx0 - 20, H)], hx("5a6aa8"), 0.18, 8)
     fxx, fyy = flame
-    pools = [(48, 200, 70, 70, (0.62, 0.7, 1.0), 0.6)]
+    pools = [(48, 214, 56, 40, (0.62, 0.7, 1.0), 0.45)]
     if lit:
         pools.append((fxx, fyy + 20, 120, 90, (1.3, 0.98, 0.64), 1.0))
     img = grade(img, (0.36, 0.4, 0.62), pools, em)
@@ -936,6 +1197,138 @@ def steelworks_painting(img, box):
     d.line([(x0 + 15, y1 + 7), (x1 - 15, y1 + 7)], fill=hx("624a24"))
 
 
+def _coat(d, cx, top, bot, w, base, collar=None, buttons=hx("1a1410")):
+    """A greatcoat on a wooden hanger: shoulders, a turned-down collar and lapels, sleeves hanging at the sides,
+    a button stand and a hem, shaded down its left edge."""
+    hi, lo = mul(base, 1.35), mul(base, 0.6)
+    d.line([(cx, top - 3), (cx, top)], fill=hx("8a8a80"))  # the hook
+    d.arc([cx - 2, top - 6, cx + 2, top - 2], 180, 360, fill=hx("8a8a80"))
+    d.line([(cx - w + 1, top + 3), (cx, top), (cx + w - 1, top + 3)], fill=hx("8a6440"), width=2)  # the hanger
+    d.polygon([(cx - w, top + 3), (cx + w, top + 3), (cx + w + 1, bot), (cx - w - 1, bot)], fill=base)
+    d.polygon([(cx - w, top + 3), (cx - w + 4, top + 3), (cx - w + 3, bot - 8), (cx - w - 1, bot - 6)], fill=mul(base, 0.85))
+    d.line([(cx - w + 4, top + 4), (cx - w + 3, bot - 8)], fill=lo)  # the sleeves
+    d.line([(cx + w - 4, top + 4), (cx + w - 3, bot - 8)], fill=lo)
+    d.line([(cx - w - 1, bot - 7), (cx - w + 3, bot - 8)], fill=lo)  # cuffs
+    d.line([(cx + w + 1, bot - 7), (cx + w - 3, bot - 8)], fill=lo)
+    c = collar or mul(base, 0.8)
+    d.polygon([(cx - 4, top + 1), (cx + 4, top + 1), (cx + 5, top + 5), (cx, top + 14), (cx - 5, top + 5)], fill=c)
+    d.line([(cx - 5, top + 5), (cx, top + 14), (cx + 5, top + 5)], fill=lo)  # lapels
+    d.line([(cx - 3, top + 2), (cx + 3, top + 2)], fill=hi)
+    d.line([(cx, top + 14), (cx, bot)], fill=lo)  # the front edge
+    for k in range(3):
+        d.point((cx - 2, top + 18 + k * 8), fill=buttons)
+        d.point((cx + 2, top + 18 + k * 8), fill=buttons)
+    d.line([(cx - w + 5, top + 34), (cx - 2, top + 34)], fill=lo)  # pocket flaps
+    d.line([(cx + 2, top + 34), (cx + w - 5, top + 34)], fill=lo)
+    d.line([(cx - w - 1, bot), (cx + w + 1, bot)], fill=lo)
+    d.line([(cx + w, top + 4), (cx + w + 1, bot)], fill=hi)
+
+
+def _closet_contents(img, x0, y0, x1, y1):
+    """Inside the open closet: a dark planked interior, a hat shelf with a homburg and a hatbox, a brass rail of
+    three coats on wooden hangers, a scarf hung over one, and a pair of brogues beside a strapped valise."""
+    d = ImageDraw.Draw(img)
+    vgrad(img, (x0, y0, x1, y1), hx("1c120a"), hx("0c0804"))
+    for x in range(x0 + 7, x1, 9):  # back planks
+        d.line([(x, y0 + 14), (x, y1)], fill=hx("080402"))
+        d.line([(x + 1, y0 + 14), (x + 1, y1)], fill=hx("221810"))
+    shadow(img, "rect", [x0, y0, x1, y1], 0.35, 4)
+    d = ImageDraw.Draw(img)
+    # the hat shelf
+    d.rectangle([x0, y0 + 11, x1, y0 + 13], fill=hx("4a3220"))
+    d.line([(x0, y0 + 11), (x1, y0 + 11)], fill=hx("6a4a2c"))
+    d.line([(x0, y0 + 14), (x1, y0 + 14)], fill=hx("040200"))
+    hx0 = x0 + 6  # a homburg: brim, pinched crown, ribbon
+    d.ellipse([hx0, y0 + 7, hx0 + 16, y0 + 11], fill=hx("2e2e30"))
+    d.polygon([(hx0 + 3, y0 + 9), (hx0 + 4, y0 + 2), (hx0 + 8, y0 + 4), (hx0 + 12, y0 + 2), (hx0 + 13, y0 + 9)],
+              fill=hx("3a3a3e"))
+    d.line([(hx0 + 3, y0 + 7), (hx0 + 13, y0 + 7)], fill=hx("141416"), width=2)
+    d.line([(hx0 + 1, y0 + 9), (hx0 + 15, y0 + 9)], fill=hx("4e4e54"))
+    bx0 = x1 - 22  # a round striped hatbox
+    d.rectangle([bx0, y0 + 2, bx0 + 16, y0 + 10], fill=hx("a88a5a"))
+    for k in range(bx0 + 2, bx0 + 16, 4):
+        d.line([(k, y0 + 3), (k, y0 + 10)], fill=hx("7a2a26"))
+    d.rectangle([bx0 - 1, y0 + 1, bx0 + 17, y0 + 3], fill=hx("c8a870"))
+    # the brass rail and the coats
+    ry = y0 + 22
+    d.line([(x0 + 1, ry), (x1 - 1, ry)], fill=hx("a8842e"), width=2)
+    d.line([(x0 + 1, ry - 1), (x1 - 1, ry - 1)], fill=hx("e0c070"))
+    _coat(d, x0 + 13, ry + 2, y1 - 40, 10, hx("2e2e38"), collar=hx("1e1e26"))  # charcoal chesterfield, velvet collar
+    _coat(d, x0 + 29, ry + 2, y1 - 30, 9, hx("6a5236"), buttons=hx("2a1a0e"))  # a camel overcoat
+    _coat(d, x0 + 43, ry + 2, y1 - 46, 8, hx("4a1e24"), collar=hx("3a3a3a"))  # a smoking jacket
+    d.line([(x0 + 26, ry + 6), (x0 + 24, ry + 40), (x0 + 22, ry + 44)], fill=hx("9a8a6a"), width=2)  # a silk scarf
+    d.line([(x0 + 32, ry + 6), (x0 + 33, ry + 34)], fill=hx("b8a880"), width=2)
+    for k in range(ry + 12, ry + 42, 5):
+        d.point((x0 + 24, k), fill=hx("5a3a2a"))
+    # the floor: brogues and a strapped valise
+    for sx in (x0 + 4, x0 + 12):
+        d.polygon([(sx, y1 - 3), (sx + 2, y1 - 6), (sx + 6, y1 - 6), (sx + 8, y1 - 3), (sx + 8, y1 - 1), (sx, y1 - 1)],
+                  fill=hx("4a2a14"))
+        d.line([(sx + 1, y1 - 4), (sx + 7, y1 - 4)], fill=hx("7a4a24"))
+        d.point((sx + 4, y1 - 5), fill=hx("a8742e"))
+    vx0, vx1, vy0 = x0 + 22, x1 - 4, y1 - 20
+    d.rectangle([vx0, vy0, vx1, y1 - 1], fill=hx("6a4a2a"), outline=hx("2a1a0c"))
+    d.line([(vx0 + 1, vy0 + 1), (vx1 - 1, vy0 + 1)], fill=hx("8a6a40"))
+    d.line([(vx0, vy0 + 4), (vx1, vy0 + 4)], fill=hx("3a2614"))  # the lid seam
+    for sx in (vx0 + 6, vx1 - 6):  # straps and buckles
+        d.line([(sx, vy0), (sx, y1 - 1)], fill=hx("3a2614"), width=2)
+        d.rectangle([sx - 1, vy0 + 5, sx + 1, vy0 + 7], outline=hx("c8a048"))
+    hm = (vx0 + vx1) // 2
+    d.line([(hm - 4, vy0), (hm - 4, vy0 - 4), (hm + 4, vy0 - 4), (hm + 4, vy0)], fill=hx("2a1a0c"))  # handle
+    d.point((hm - 1, vy0 + 3), fill=hx("e0c070"))  # the lock
+    d.point((hm + 1, vy0 + 3), fill=hx("e0c070"))
+    d.rectangle([vx0 + 10, vy0 + 9, vx0 + 16, vy0 + 13], fill=hx("c8b890"))  # a steamship label
+    d.line([(vx0 + 11, vy0 + 11), (vx0 + 15, vy0 + 11)], fill=hx("7a2a26"))
+
+
+def _decanters(img, R):
+    """The drinks tray on the cabinet: a silver tray, a cut-glass whisky decanter and a port decanter with ball
+    stoppers, a square gin bottle with a label, a soda siphon and two tumblers, each with a glint."""
+    d = ImageDraw.Draw(img)
+    P = lambda *a: tuple(int(round(v)) for v in R.P(*a))
+    ta, tb = P(350, 40, 6), P(406, 40, 14)
+    ty0, ty1 = sorted((ta[1], tb[1]))
+    d.rectangle([ta[0], ty0, tb[0], ty1 + 1], fill=hx("6a6a70"))  # the tray
+    d.line([(ta[0], ty1 + 1), (tb[0], ty1 + 1)], fill=hx("b8b8c0"))
+    d.line([(ta[0], ty0), (tb[0], ty0)], fill=hx("4a4a50"))
+
+    def decanter(x, liquor, h):
+        bx, by = P(x, 40, 10)
+        d.polygon([(bx - 4, by), (bx + 4, by), (bx + 5, by - 6), (bx + 3, by - h + 4), (bx - 3, by - h + 4),
+                   (bx - 5, by - 6)], fill=mix(hx("8a9aa8"), liquor, 0.7), outline=hx("2a2a30"))
+        d.rectangle([bx - 4, by - 7, bx + 4, by - 1], fill=liquor)  # the liquor line
+        d.line([(bx - 4, by - 7), (bx + 4, by - 7)], fill=mul(liquor, 1.4))
+        for k in range(by - 6, by, 2):  # the cut facets
+            d.point((bx - 2, k), fill=mul(liquor, 1.3))
+            d.point((bx + 2, k), fill=mul(liquor, 0.7))
+        d.rectangle([bx - 1, by - h + 1, bx + 1, by - h + 4], fill=hx("9aa8b4"))  # neck
+        d.ellipse([bx - 2, by - h - 3, bx + 2, by - h + 1], fill=hx("b8c4d0"), outline=hx("4a5058"))  # stopper
+        d.point((bx - 3, by - h + 6), fill=hx("f0f0f0"))
+        d.point((bx - 3, by - h + 7), fill=hx("c8d0d8"))
+
+    decanter(354, hx("a8641e"), 16)  # whisky
+    decanter(368, hx("6a1a22"), 14)  # port
+    gx, gy = P(381, 40, 10)  # gin: a square bottle with a paper label
+    d.rectangle([gx - 3, gy - 13, gx + 3, gy], fill=hx("7a8a8c"), outline=hx("2a3032"))
+    d.rectangle([gx - 1, gy - 17, gx + 1, gy - 13], fill=hx("7a8a8c"))
+    d.rectangle([gx - 1, gy - 18, gx + 1, gy - 17], fill=hx("a8842e"))
+    d.rectangle([gx - 2, gy - 9, gx + 2, gy - 4], fill=hx("e8dcc0"))
+    d.line([(gx - 1, gy - 7), (gx + 1, gy - 7)], fill=hx("7a2a26"))
+    d.point((gx - 2, gy - 12), fill=hx("f0f0f0"))
+    sx, sy = P(396, 40, 10)  # the soda siphon: blue glass, chrome head and spout
+    d.rectangle([sx - 3, sy - 12, sx + 3, sy], fill=hx("3e5a86"), outline=hx("1a2840"))
+    for k in range(sy - 11, sy, 3):
+        d.line([(sx - 2, k), (sx + 2, k)], fill=hx("2e4a72"))
+    d.rectangle([sx - 2, sy - 17, sx + 2, sy - 12], fill=hx("b8b8c0"))
+    d.line([(sx + 2, sy - 16), (sx + 6, sy - 15)], fill=hx("d8d8e0"))
+    d.line([(sx - 2, sy - 18), (sx + 1, sy - 19)], fill=hx("8a8a90"))  # the lever
+    d.point((sx - 2, sy - 10), fill=hx("a8c0e0"))
+    for x in (360, 388):  # tumblers on the tray front
+        tx, ty = P(x, 40, 16)
+        d.rectangle([tx - 2, ty - 5, tx + 2, ty], fill=hx("5a6870"), outline=hx("a8b4bc"))
+        d.line([(tx - 1, ty - 2), (tx + 1, ty - 2)], fill=hx("c88a3a"))
+
+
 def paint_study(left=False, right=False, docs=True, closet=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -981,20 +1374,8 @@ def paint_study(left=False, right=False, docs=True, closet=False):
     d.rectangle([wx0 - 6, wy0 - 11, wx1 + 6, wy0 - 6], fill=hx("8a6440"))
     d.line([(wx0 - 6, wy0 - 6), (wx1 + 6, wy0 - 6)], fill=OAK_D)
     if closet:
-        d.rectangle([wx0, wy0, wx1, wy1], fill=hx("0e0804"))
-        shadow(img, "rect", [wx0, wy0, wx1, wy1], 0.4, 4)
+        _closet_contents(img, wx0, wy0, wx1, wy1)
         d = ImageDraw.Draw(img)
-        d.line([(wx0 + 2, wy0 + 10), (wx1 - 2, wy0 + 10)], fill=hx("8a8a80"))
-        for i, (c, w2) in enumerate((("2a2a32", 9), ("4a3a2a", 8), ("5a1e26", 7))):
-            cx = wx0 + 12 + i * 15
-            d.polygon([(cx - 3, wy0 + 10), (cx + 3, wy0 + 10), (cx + w2, wy0 + 18), (cx + w2 + 1, wy0 + 84),
-                       (cx - w2 - 1, wy0 + 84), (cx - w2, wy0 + 18)], fill=hx(c))
-            d.line([(cx, wy0 + 12), (cx, wy0 + 84)], fill=mul(hx(c), 0.6))
-            d.line([(cx - w2, wy0 + 18), (cx - w2 - 1, wy0 + 84)], fill=mul(hx(c), 1.4))
-        d.rectangle([wx0 + 4, wy0 + 2, wx1 - 4, wy0 + 6], fill=hx("2a1e14"))
-        d.ellipse([wx0 + 8, wy0 - 2, wx0 + 24, wy0 + 4], fill=hx("3a3a3a"))  # a homburg on the shelf
-        d.rectangle([wx0 + 6, wy1 - 18, wx1 - 6, wy1 - 2], fill=hx("4a3a28"), outline=hx("1a120a"))  # a valise
-        d.line([(wx0 + 20, wy1 - 18), (wx0 + 20, wy1 - 22), (wx0 + 32, wy1 - 22), (wx0 + 32, wy1 - 18)], fill=hx("2a1e14"))
         d.polygon([(wx1, wy0), (wx1 + 14, wy0 + 6), (wx1 + 14, wy1 + 4), (wx1, wy1)], fill=hx("5a3a1e"), outline=OAK_D)
         d.polygon([(wx1 + 3, wy0 + 12), (wx1 + 11, wy0 + 16), (wx1 + 11, wy0 + 62), (wx1 + 3, wy0 + 60)], outline=OAK_D)
         d.polygon([(wx1 + 3, wy0 + 70), (wx1 + 11, wy0 + 73), (wx1 + 11, wy1 - 8), (wx1 + 3, wy1 - 10)], outline=OAK_D)
@@ -1053,14 +1434,8 @@ def paint_study(left=False, right=False, docs=True, closet=False):
         cx1 = cx0 + (b[0] - a[0] - 8) / 2 - 2
         d.rectangle([cx0, a[1] + 4, cx1, b[1] - 4], fill=hx("3a2010"), outline=hx("1e0e06"))
         d.rectangle([cx0 + 3, a[1] + 7, cx1 - 3, b[1] - 7], outline=hx("6a4426"))
-    for i, (x, c, hgt) in enumerate(((354, "8a4a1a", 14), (366, "c8a060", 12), (380, "6a2a2a", 16))):
-        p = R.P(x, 40, 10)
-        d.rectangle([p[0] - 3, p[1] - hgt + 4, p[0] + 3, p[1]], fill=hx(c))
-        d.rectangle([p[0] - 1, p[1] - hgt, p[0] + 1, p[1] - hgt + 4], fill=hx(c))
-        d.point((p[0] - 2, p[1] - hgt + 6), fill=hx("f0e0c0"))
-    p = R.P(398, 40, 10)  # soda siphon and a tray of glasses
-    d.rectangle([p[0] - 3, p[1] - 14, p[0] + 3, p[1]], fill=hx("4a6a8a"))
-    d.rectangle([p[0] - 2, p[1] - 18, p[0] + 2, p[1] - 14], fill=hx("b8b8c0"))
+    _decanters(img, R)
+    d = ImageDraw.Draw(img)
     # ---- floor: herringbone parquet, a Persian rug under the desk ----
     floor_boards(img, SFL, H - 1, (240, 100), 14, hx("7a5430"), hx("6a4626"), hx("3a2410"), 94)
     shadow(img, "rect", [0, SFL, W, SFL + 6], 0.5, 3)
@@ -1137,15 +1512,6 @@ def paint_study(left=False, right=False, docs=True, closet=False):
     d.line([(p[0], p[1]), (p[0], p[1] - 12)], fill=hx("1a1a1a"), width=2)
     d.ellipse([p[0] - 2, p[1] - 15, p[0] + 2, p[1] - 11], fill=hx("1a1a1a"))
     d.line([(p[0] + 2, p[1] - 9), (p[0] + 5, p[1] - 6)], fill=hx("1a1a1a"), width=2)
-    # ---- a globe on its stand, front right ----
-    gp = R.P(430, 0, 70)
-    gx, gy = gp
-    d.line([(gx - 8, gy), (gx, gy - 14), (gx + 8, gy)], fill=OAK_D, width=2)
-    d.line([(gx, gy - 14), (gx, gy - 22)], fill=OAK_D, width=2)
-    d.ellipse([gx - 13, gy - 48, gx + 13, gy - 22], fill=hx("8a7a4a"), outline=hx("3a2a10"))
-    d.polygon([(gx - 8, gy - 42), (gx - 2, gy - 44), (gx + 2, gy - 36), (gx - 4, gy - 30), (gx - 9, gy - 34)], fill=hx("5a6a3a"))
-    d.polygon([(gx + 4, gy - 30), (gx + 10, gy - 34), (gx + 9, gy - 26)], fill=hx("5a6a3a"))
-    d.arc([gx - 16, gy - 51, gx + 16, gy - 19], 200, 340, fill=hx("a8842e"), width=2)
     # ---- light: the moon through the window across the desk and rug ----
     light(img, "polygon", [(gx0, gy0), (gx1, gy0), (400, H), (200, H)], hx("5a6ab0"), 0.3, 12)
     pools = [(280, 70, 70, 60, (0.7, 0.78, 1.1), 0.7), (290, 220, 110, 50, (0.6, 0.66, 0.95), 0.6)]
@@ -1344,8 +1710,11 @@ def _restamp_white_sheet(img, R):
     img.paste(before, (0, 0), frame.getchannel("A"))
 
 
-def bedroom_palette(base, occupied, empty):
-    pal = palette_of(Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3), 124)
+def bedroom_palette(base, occupied, empty, screen=None):
+    mixed = Image.blend(Image.blend(base, occupied, 0.4), empty, 0.3)
+    if screen is not None:
+        mixed = Image.blend(mixed, screen, 0.3)
+    pal = palette_of(mixed, 124)
     for color in MANSION_LINEN_PALETTE:
         if color not in pal:
             pal.append(color)
@@ -1385,6 +1754,204 @@ def _bed(img, R, who):
     _bed_front(img, R)
 
 
+SCREEN_X0, SCREEN_FEET = 68, 218  # the folding screen's left edge and the floor line it stands on (its y-sort point)
+BED_FIRE_BOX = (164, 126, 209, 205)  # the hearth's opening, animated by mansion_bedroom_fire
+BED_FIRE_FRAMES = 8
+
+
+def _hearth_fire(img, xa, xb, base, t):
+    """The low fire on the grate: tongues of flame that swell, lean and flicker with phase t (looping on 1), and
+    wisps of smoke curling up into the chimney throat."""
+    d = ImageDraw.Draw(img)
+    tau = 2 * math.pi
+    soot, smoke = hx("1e1410"), hx("6a6058")
+    for k in range(3):  # smoke first, so the flames sit in front of it
+        p = (t + k / 3) % 1.0
+        for j in range(4):
+            q = p + j * 0.06
+            if q >= 1:
+                continue
+            sy = base - 14 - q * 58
+            sx = (xa + xb) / 2 + (k - 1) * 6 + 4 * math.sin(tau * (q * 1.5 + k * 0.3))
+            r = 2 + q * 4
+            c = mix(soot, smoke, 0.55 * (1 - q) * (1 - j * 0.2))
+            d.ellipse([sx - r, sy - r * 0.7, sx + r, sy + r * 0.7], fill=c)
+    tongues = ((2, 9, 0.0), (7, 15, 0.35), (12, 11, 0.7), (17, 19, 0.15), (22, 10, 0.55), (27, 14, 0.85))
+    layers = ((hx("c8401a"), 1.0, 1.0), (hx("f08a2a"), 0.72, 0.7), (hx("ffd070"), 0.45, 0.42), (hx("fff4d0"), 0.2, 0.2))
+    for dx, h0, ph in tongues:
+        cx = xa + dx
+        h = h0 * (0.78 + 0.22 * math.sin(tau * (t + ph)) + 0.08 * math.sin(tau * (3 * t + ph * 2)))
+        sway = 1.6 * math.sin(tau * (2 * t + ph))
+        for col, hs, ws in layers:
+            hh, w = h * hs, 3.2 * ws + 0.6
+            pts = []
+            n = 6
+            for i in range(n + 1):  # up the left edge, bending with the draught
+                f = i / n
+                pts.append((cx - w * (1 - f) ** 0.8 + sway * f * f + 0.6 * math.sin(tau * (t * 2 + f + ph)), base - hh * f))
+            for i in range(n, -1, -1):  # and back down the right
+                f = i / n
+                pts.append((cx + w * (1 - f) ** 0.8 + sway * f * f + 0.6 * math.sin(tau * (t * 2 + f + ph + 0.3)), base - hh * f))
+            d.polygon(pts, fill=col)
+    for k in range(4):  # sparks rising off the logs
+        q = (t * 2 + k / 4) % 1.0
+        sx = xa + 6 + k * 7 + 2 * math.sin(tau * (q + k * 0.2))
+        d.point((sx, base - 6 - q * 30), fill=hx("ffc060") if q < 0.6 else hx("a85a2a"))
+
+
+def _mantel_clock(d, cx, shelf):
+    """A gilt French mantel clock: a stepped plinth on bun feet, a waisted drum case with an enamel dial, Roman
+    hour ticks, blued hands and a bezel, a glimpse of the pendulum through a lunette, and an urn finial."""
+    gilt, gilt_l, gilt_d = hx("c8a040"), hx("f0d070"), hx("6a5018")
+    for fx in (cx - 8, cx + 7):  # bun feet
+        d.ellipse([fx - 1, shelf - 2, fx + 2, shelf], fill=gilt_d)
+    d.rectangle([cx - 9, shelf - 5, cx + 9, shelf - 2], fill=gilt, outline=gilt_d)  # plinth
+    d.line([(cx - 8, shelf - 5), (cx + 8, shelf - 5)], fill=gilt_l)
+    d.rectangle([cx - 4, shelf - 4, cx + 4, shelf - 3], fill=hx("2a1a0a"))  # the pendulum lunette
+    d.point((cx + (1 if shelf % 2 else -1), shelf - 4), fill=gilt_l)
+    d.polygon([(cx - 7, shelf - 5), (cx + 7, shelf - 5), (cx + 6, shelf - 8), (cx - 6, shelf - 8)], fill=gilt_d)
+    d.ellipse([cx - 7, shelf - 21, cx + 7, shelf - 7], fill=gilt, outline=gilt_d)  # the drum
+    d.arc([cx - 7, shelf - 21, cx + 7, shelf - 7], 200, 290, fill=gilt_l)
+    d.ellipse([cx - 5, shelf - 19, cx + 5, shelf - 9], fill=hx("f4eedc"), outline=hx("8a7030"))  # enamel dial
+    oy = shelf - 14
+    for k in range(12):
+        a = k * math.pi / 6
+        d.point((round(cx + 4 * math.sin(a)), round(oy - 4 * math.cos(a))), fill=hx("2a2a2a"))
+    d.line([(cx, oy), (cx - 2, oy - 2)], fill=hx("1a2a4a"))  # ten past ten, blued steel
+    d.line([(cx, oy), (cx + 3, oy - 3)], fill=hx("1a2a4a"))
+    d.point((cx, oy), fill=gilt_d)
+    d.point((cx - 3, oy - 3), fill=hx("ffffff"))  # glint on the glass
+    d.rectangle([cx - 1, shelf - 24, cx + 1, shelf - 21], fill=gilt)  # urn finial
+    d.ellipse([cx - 2, shelf - 27, cx + 2, shelf - 23], fill=gilt, outline=gilt_d)
+    d.point((cx, shelf - 28), fill=gilt_l)
+    for sx in (-1, 1):  # scrolls either side
+        d.arc([cx + sx * 9 - 3, shelf - 14, cx + sx * 9 + 3, shelf - 7], 90 if sx > 0 else 270, 270 if sx > 0 else 90,
+              fill=gilt)
+
+
+def _candlestick(d, ed, x, shelf):
+    """A brass baluster candlestick: a domed foot, a knopped stem, a drip pan, a tall ivory candle with a lit wick."""
+    br, br_l, br_d = hx("c8a040"), hx("f0d070"), hx("6a5018")
+    d.ellipse([x - 4, shelf - 3, x + 4, shelf], fill=br, outline=br_d)  # foot
+    d.line([(x - 3, shelf - 2), (x - 1, shelf - 3)], fill=br_l)
+    d.rectangle([x - 1, shelf - 12, x + 1, shelf - 3], fill=br)  # stem
+    for ky in (shelf - 5, shelf - 9):  # knops
+        d.ellipse([x - 2, ky - 1, x + 2, ky + 1], fill=br, outline=br_d)
+    d.line([(x - 1, shelf - 12), (x - 1, shelf - 3)], fill=br_l)
+    d.rectangle([x - 3, shelf - 14, x + 3, shelf - 12], fill=br, outline=br_d)  # drip pan
+    d.rectangle([x - 1, shelf - 24, x + 1, shelf - 14], fill=hx("f0e8d0"))  # candle
+    d.line([(x + 1, shelf - 24), (x + 1, shelf - 14)], fill=hx("c8bea4"))
+    d.point((x - 1, shelf - 20), fill=hx("fff8e8"))  # a wax drip
+    d.point((x - 1, shelf - 19), fill=hx("fff8e8"))
+    d.point((x, shelf - 25), fill=hx("2a1a0a"))  # wick
+    d.polygon([(x - 1, shelf - 26), (x, shelf - 30), (x + 1, shelf - 26), (x, shelf - 25)], fill=hx("ffc860"))
+    d.point((x, shelf - 27), fill=hx("fff4d0"))
+    ed.ellipse([x - 2, shelf - 31, x + 2, shelf - 24], fill=255)
+
+
+def _bedroom_window(img, ed, x0, y0, x1, y1):
+    """The tall sash window: a moulded architrave and sill, glazing bars, a deep reveal; outside, a starry sky with
+    thin cloud, a cratered moon with a halo, the lake's faint shine and the black line of the grounds' trees."""
+    d = ImageDraw.Draw(img)
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 6], fill=IVORY)
+    d.rectangle([x0 - 3, y0 - 3, x1 + 3, y1 + 3], outline=IVORY_D)
+    d.rectangle([x0 - 8, y1 + 4, x1 + 8, y1 + 8], fill=hx("ece4cc"))  # sill
+    d.line([(x0 - 8, y1 + 8), (x1 + 8, y1 + 8)], fill=IVORY_D)
+    vgrad(img, (x0, y0, x1, y1), hx("0e1430"), hx("2a3460"))
+    rs = random.Random(1061)
+    for _ in range(22):  # stars, thicker high up
+        sx, sy = rs.randint(x0, x1), rs.randint(y0, y0 + 40)
+        d.point((sx, sy), fill=hx("c8d0e8") if rs.random() < 0.3 else hx("7a84a8"))
+    for cy, cx0, cx1 in ((66, x0, x0 + 30), (72, x0 + 14, x1), (38, x0 + 4, x0 + 22)):  # thin cloud, moonlit edges
+        d.line([(cx0, cy), (cx1, cy)], fill=hx("3a4470"))
+        d.line([(cx0 + 4, cy - 1), (cx1 - 6, cy - 1)], fill=hx("5a6490"))
+    light(img, "ellipse", [262, 37, 291, 66], hx("7a88b0"), 0.18, 6)
+    d = ImageDraw.Draw(img)
+    d.ellipse([270, 45, 283, 58], fill=hx("f4f0d8"))  # the moon
+    d.arc([270, 45, 283, 58], 300, 120, fill=hx("fffcec"))
+    d.arc([270, 45, 283, 58], 140, 260, fill=hx("d8d2b8"))
+    for (mx, my, r) in ((274, 49, 1.5), (279, 54, 1), (276, 54, 1), (280, 49, 0.8)):  # the seas and craters
+        d.ellipse([mx - r, my - r, mx + r, my + r], fill=hx("d6d2bc"))
+    d.point((273, 52), fill=hx("e0dcc6"))
+    d.point((278, 47), fill=hx("fffcf0"))
+    vgrad(img, (x0, 96, x1, 104), hx("1a2244"), hx("141a36"))  # the lake, far off
+    for k in range(7):  # the moon's broken path on the water
+        d.point((276 + (k % 3) - 1, 97 + k), fill=hx("4a5480"))
+    d.line([(x0, 96), (x1, 96)], fill=hx("2e3866"))
+    rt = random.Random(1062)  # the treeline of the grounds, black against the lake
+    top = 104
+    for x in range(x0, x1 + 1):
+        top = max(98, min(108, top + rt.choice((-1, 0, 0, 1))))
+        d.line([(x, top), (x, y1)], fill=hx("0a0c18"))
+    ed.rectangle([x0, y0, x1, y1], fill=170)
+    # glazing: the meeting rail, the bars and a reveal shadow down the left
+    d.rectangle([264, y0, 266, y1], fill=IVORY)
+    for y in (y0 + 34, y0 + 70):
+        d.rectangle([x0, y, x1, y + 2], fill=IVORY)
+        d.line([(x0, y + 3), (x1, y + 3)], fill=hx("4a4656"))  # the bar's shadow on the night glass
+    d.line([(265, y0), (265, y1)], fill=hx("fffaf0"))
+    d.rectangle([x0, y0, x0 + 1, y1], fill=IVORY_D)
+    d.rectangle([x0, y0, x1, y0 + 1], fill=IVORY_D)
+    for y in (y0 + 30, y0 + 66):  # sash lifts
+        d.point((262, y), fill=GILT)
+        d.point((268, y), fill=GILT)
+
+
+def _folding_screen(img):
+    """A four-leaf lacquered screen, low enough that a man behind it shows from the shoulders up: gold-leaf panels
+    painted with reeds, herons and a red sun, brass hinges, little feet, and a silk robe thrown over the top."""
+    d = ImageDraw.Draw(img)
+    feet, x0, leaf, top0 = SCREEN_FEET, SCREEN_X0, 20, 162
+    shadow(img, "polygon", [(x0 - 2, feet - 1), (x0 + 4 * leaf + 2, feet - 1), (x0 + 4 * leaf + 8, feet + 3),
+                            (x0 + 4, feet + 3)], 0.55, 2)
+    d = ImageDraw.Draw(img)
+    lac, lac_l, lac_d = hx("2a1a12"), hx("4a2e1e"), hx("0e0806")
+    for i in range(4):
+        a = x0 + i * leaf
+        b = a + leaf
+        ta = top0 + (i % 2) * 3
+        tb = top0 + ((i + 1) % 2) * 3
+        fold = 0.82 if i % 2 else 1.0  # the leaves angled away from the fire are darker
+        d.polygon([(a, ta), (b, tb), (b, feet - 3), (a, feet - 3)], fill=mul(lac, fold), outline=lac_d)
+        d.line([(a + 1, ta + 1), (b - 1, tb + 1)], fill=lac_l)
+        gold = mul(hx("c8a868") if i % 2 else hx("d0b070"), fold)
+        d.polygon([(a + 2, ta + 3), (b - 2, tb + 3), (b - 2, feet - 7), (a + 2, feet - 7)], fill=gold)
+        # the picture runs across all four leaves: distant hills, water, reeds, herons
+        hy = top0 + 22 + (i % 2)
+        d.line([(a + 2, hy + (i * 2) % 5), (b - 2, hy + ((i + 1) * 2) % 5)], fill=mul(hx("8a7a5a"), fold))
+        d.line([(a + 2, feet - 16), (b - 2, feet - 16)], fill=mul(hx("8a9a8a"), fold))
+        for rx in range(a + 3, b - 2, 3):
+            d.line([(rx, feet - 8), (rx + (rx % 2), feet - 14 - (rx * 7) % 6)], fill=mul(hx("5a6a3a"), fold))
+        if i in (0, 2):
+            hxc, hyc = a + 10, ta + 18
+            d.ellipse([hxc - 4, hyc, hxc + 3, hyc + 6], fill=hx("f0ece0"))  # the heron's body
+            d.line([(hxc - 2, hyc + 1), (hxc - 3, hyc - 6), (hxc - 1, hyc - 8)], fill=hx("f0ece0"))  # its neck
+            d.line([(hxc - 1, hyc - 8), (hxc + 3, hyc - 7)], fill=hx("c89a3a"))  # the bill
+            d.point((hxc - 2, hyc - 8), fill=hx("1a1a1a"))
+            d.line([(hxc - 4, hyc + 2), (hxc + 3, hyc + 4)], fill=hx("6a6a70"))  # a grey wing
+            d.line([(hxc - 1, hyc + 6), (hxc - 2, hyc + 14)], fill=hx("2a2a2a"))
+            d.line([(hxc + 1, hyc + 6), (hxc + 2, hyc + 14)], fill=hx("2a2a2a"))
+        if i == 1:
+            d.ellipse([a + 6, ta + 6, a + 13, ta + 13], fill=hx("c84a30"))  # a red sun
+        if i == 3:  # a heron in flight
+            d.line([(a + 4, ta + 10), (a + 9, ta + 12), (a + 14, ta + 9)], fill=hx("f0ece0"))
+            d.point((a + 9, ta + 12), fill=hx("2a2a2a"))
+        d.rectangle([a + 2, feet - 3, a + 4, feet], fill=lac_d)  # feet
+        d.rectangle([b - 4, feet - 3, b - 2, feet], fill=lac_d)
+        if i:
+            for hy2 in (ta + 8, feet - 12):  # brass hinges
+                d.rectangle([a - 1, hy2, a + 1, hy2 + 2], fill=hx("c8a040"))
+    # a silk robe thrown over the top, hanging down the far side and the front
+    rx = x0 + 3 * leaf + 8
+    robe, robe_l, robe_d = hx("3a5a7a"), hx("6a8aaa"), hx("22384e")
+    d.polygon([(rx - 10, top0 - 1), (rx + 8, top0 + 1), (rx + 9, top0 + 20), (rx + 5, top0 + 17), (rx + 1, top0 + 23),
+               (rx - 4, top0 + 16), (rx - 8, top0 + 19)], fill=robe)
+    d.line([(rx - 9, top0), (rx + 7, top0 + 1)], fill=robe_l)
+    d.line([(rx - 2, top0 + 2), (rx - 3, top0 + 15)], fill=robe_d)
+    d.line([(rx + 4, top0 + 3), (rx + 5, top0 + 16)], fill=robe_d)
+    d.line([(rx - 8, top0 + 6), (rx - 13, top0 + 20)], fill=hx("c8a040"))  # its sash hanging loose
+
+
 def _bed_front(img, R):
     """The carved frame in front of the cotton; also supplies its exact occlusion mask."""
     x0, x1, z0, z1 = BED["x0"], BED["x1"], BED["z0"], BED["z1"]
@@ -1405,8 +1972,9 @@ def _bed_front(img, R):
         d.ellipse([p[0] - 3, p[1] - 6, p[0] + 3, p[1]], fill=WAL_L, outline=WAL_D)
     R.line(img, (x0 - 2, 4, z1 + 3), (x1 + 2, 4, z1 + 3), WAL)
 
-def paint_bedroom(bed=None):
-    """The room; bed is None (the room alone), "eleanor" or "empty"."""
+def paint_bedroom(bed=None, screen=False, fire_t=0.0):
+    """The room; bed is None (the room alone), "eleanor" or "empty"; screen adds the folding screen (cut as its own
+    sprite); fire_t in [0, 1) is the phase of the hearth fire's flame and smoke loop."""
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
     em = Image.new("L", img.size, 0)
@@ -1460,37 +2028,28 @@ def paint_bedroom(bed=None):
     for y in range(130, BFL, 6):
         d.line([(fx0 + 16, y), (fx1 - 16, y)], fill=hx("2a1c16"))
     d.rectangle([fx0 + 20, BFL - 12, fx1 - 20, BFL - 4], fill=hx("1a1a1a"))  # grate
+    for gx in range(fx0 + 21, fx1 - 20, 4):
+        d.line([(gx, BFL - 16), (gx, BFL - 4)], fill=hx("2a2a2a"))
     d.polygon([(fx0 + 22, BFL - 12), (fx1 - 24, BFL - 16), (fx1 - 22, BFL - 12), (fx0 + 24, BFL - 9)], fill=hx("3a2014"))  # logs
+    d.polygon([(fx0 + 24, BFL - 15), (fx1 - 22, BFL - 11), (fx1 - 24, BFL - 9), (fx0 + 22, BFL - 13)], fill=hx("2e180e"))
     d.ellipse([fx1 - 26, BFL - 17, fx1 - 21, BFL - 11], fill=hx("c86a3a"))
-    for k, (dx, hgt) in enumerate(((2, 9), (7, 15), (12, 11), (17, 19), (22, 8), (27, 13))):
-        cx = fx0 + 20 + dx
-        d.polygon([(cx - 3, BFL - 12), (cx - 1, BFL - 12 - hgt * 0.6), (cx + 1, BFL - 12 - hgt), (cx + 3, BFL - 12)], fill=hx("e86a24"))
-        d.polygon([(cx - 1, BFL - 12), (cx + 1, BFL - 12 - hgt * 0.55), (cx + 2, BFL - 12)], fill=hx("ffd070"))
+    d.ellipse([fx0 + 21, BFL - 15, fx0 + 25, BFL - 11], fill=hx("a85a2a"))
+    _hearth_fire(img, fx0 + 20, fx1 - 20, BFL - 12, fire_t)
+    d = ImageDraw.Draw(img)
     d.rectangle([fx0 + 20, BFL - 8, fx1 - 20, BFL - 5], fill=hx("c84a18"))
+    for k in range(fx0 + 21, fx1 - 20, 3):  # glowing coals in the ash pan
+        d.point((k, BFL - 7 + (k % 2)), fill=hx("ffb040"))
     ed.rectangle([fx0 + 18, BFL - 24, fx1 - 18, BFL - 4], fill=230)
     R.box(img, fx0 - 2, fx1 + 2, 0, 4, 10, 16, hx("b8903a"), top=hx("e0c060"))  # brass fender
     d = ImageDraw.Draw(img)
     cx = (fx0 + fx1) / 2  # clock and candlesticks on the mantel shelf
-    d.rectangle([cx - 7, 90, cx + 7, 102], fill=hx("b8903a"))
-    d.ellipse([cx - 5, 88, cx + 5, 98], fill=hx("f0ead8"), outline=hx("6a5018"))
-    d.line([(cx, 93), (cx, 90)], fill=hx("1a1a1a"))
-    d.line([(cx, 93), (cx + 2, 94)], fill=hx("1a1a1a"))
-    for x in (fx0 + 4, fx1 - 4):
-        d.rectangle([x - 1, 88, x + 1, 102], fill=hx("c8a040"))
-        d.rectangle([x - 3, 100, x + 3, 102], fill=hx("c8a040"))
-        d.rectangle([x - 1, 82, x + 1, 88], fill=hx("f0ead8"))
-    # ---- the tall window, an unobstructed moon and swagged drapes ----
+    _mantel_clock(d, int(cx), 102)
+    for x in (fx0 + 6, fx1 - 6):
+        _candlestick(d, ed, x, 102)
+    # ---- the tall window: the moon over the lake, the grounds black below ----
     gx0, gy0, gx1, gy1 = 240, 34, 290, 140
-    d.rectangle([gx0 - 5, gy0 - 5, gx1 + 5, gy1 + 6], fill=IVORY)
-    vgrad(img, (gx0, gy0, gx1, gy1), hx("121834"), hx("2a3460"))
-    light(img, "ellipse", [266, 40, 289, 63], hx("7a88b0"), 0.12, 5)
-    d.ellipse([270, 45, 283, 58], fill=hx("f4f0d8"))
-    d.ellipse([273, 48, 276, 51], fill=hx("c8c6b4"))
-    d.ellipse([278, 53, 280, 55], fill=hx("dcdbc8"))
-    ed.rectangle([gx0, gy0, gx1, gy1], fill=170)
-    d.rectangle([264, gy0, 266, gy1], fill=IVORY)
-    for y in (gy0 + 34, gy0 + 70):
-        d.rectangle([gx0, y, gx1, y + 2], fill=IVORY)
+    _bedroom_window(img, ed, gx0, gy0, gx1, gy1)
+    d = ImageDraw.Draw(img)
     for (a, b, c2, dd) in (((228, 26), (248, 26), (244, 150), (226, 154)), ((282, 26), (302, 26), (304, 154), (286, 150))):
         d.polygon([a, b, c2, dd], fill=hx("6a2a3a"))
         for k in range(1, 4):
@@ -1522,30 +2081,14 @@ def paint_bedroom(bed=None):
     ed.polygon([(lx - 9, ly - 14), (lx + 9, ly - 14), (lx + 5, ly - 25), (lx - 5, ly - 25)], fill=220)
     p = R.P(408, 30, 14)  # a book and a glass of water
     d.rectangle([p[0] - 4, p[1] - 2, p[0] + 2, p[1]], fill=hx("2a3a5a"))
-    # ---- the folding screen, painted with herons on gold ----
-    for i in range(4):
-        x0 = 72 + i * 18
-        top = 104 + (i % 2) * 3
-        dy = 3 if i % 2 == 0 else -3
-        d.polygon([(x0, top), (x0 + 18, top + dy), (x0 + 18, 210), (x0, 210)], fill=hx("2a1a12"), outline=hx("0e0806"))
-        d.polygon([(x0 + 2, top + 4), (x0 + 16, top + dy + 4), (x0 + 16, 200), (x0 + 2, 200)], fill=hx("c8a868") if i % 2 else hx("b89a5a"))
-        d.line([(x0 + 3, 170), (x0 + 15, 166 + (i % 3) * 3)], fill=hx("6a7a4a"))
-        d.line([(x0 + 8, top + 50), (x0 + 10, top + 34), (x0 + 13, top + 38)], fill=hx("2a2a2a"))
-        d.ellipse([x0 + 6, top + 40, x0 + 14, top + 52], fill=hx("ece8dc"))
-        d.line([(x0 + 9, top + 52), (x0 + 8, top + 64)], fill=hx("2a2a2a"))
-        d.line([(x0 + 11, top + 52), (x0 + 12, top + 64)], fill=hx("2a2a2a"))
-        if i == 1:
-            d.ellipse([x0 + 4, top + 12, x0 + 12, top + 20], fill=hx("c84a30"))  # a red sun
-    d.rectangle([72, 206, 144, 210], fill=hx("1a100a"))
-    # a silk robe thrown over the top of the screen
-    d.polygon([(96, 100), (116, 102), (114, 132), (110, 128), (104, 134), (98, 126)], fill=hx("3a5a7a"))
-    d.line([(98, 104), (112, 104)], fill=hx("6a8aaa"))
     # ---- floor: parquet, a pale Aubusson rug ----
     floor_boards(img, BFL, H - 1, (240, 100), 14, hx("6a4428"), hx("5a3820"), hx("2e1c0e"), 104)
     shadow(img, "rect", [0, BFL, W, BFL + 6], 0.5, 3)
     rug(R, img, 60, 430, 30, 230, hx("6a4a5a"), hx("3a2a44"), hx("d8b878"), seed=105)
     if bed:
         _bed(img, R, bed)
+    if screen:  # the folding screen: its own y-sorted sprite, so Micah can stand behind it
+        _folding_screen(img)
     # ---- light: firelight low on the left, the lamp's pink pool by the bed, moonlight from the window ----
     light(img, "polygon", [(gx0, gy0), (gx1, gy0), (330, H), (200, H)], hx("5a6ab0"), 0.22, 12)
     pools = [((fx0 + fx1) / 2, BFL - 10, 110, 70, (1.3, 0.85, 0.55), 1.0), (lx, ly - 10, 80, 60, (1.2, 0.95, 0.8), 0.9),
@@ -1575,9 +2118,23 @@ def _cut_sprite(variant_px, base_px, name):
 def build_bedroom():
     base = paint_bedroom()
     v = {"eleanor": paint_bedroom("eleanor"), "empty": paint_bedroom("empty")}
-    pal = bedroom_palette(base, v["eleanor"], v["empty"])
+    screen = paint_bedroom(screen=True)
+    pal = bedroom_palette(base, v["eleanor"], v["empty"], screen)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_bedroom.png")
     _cut_sprite(pixelize(v["eleanor"], pal), px, "mansion_bed")
     _cut_sprite(pixelize(v["empty"], pal), px, "mansion_bed_empty")
+    _cut_sprite(pixelize(screen, pal), px, "mansion_bedroom_screen")
+    bed_fire_strip(pal)
     return px, v
+
+
+def bed_fire_strip(pal):
+    """The hearth's flames and smoke as a strip of BED_FIRE_FRAMES crops of BED_FIRE_BOX, frame 0 matching the
+    background, played by a LoopStrip."""
+    x0, y0, x1, y1 = BED_FIRE_BOX
+    strip = Image.new("RGB", ((x1 - x0) * BED_FIRE_FRAMES, y1 - y0))
+    for i in range(BED_FIRE_FRAMES):
+        strip.paste(pixelize(paint_bedroom(fire_t=i / BED_FIRE_FRAMES), pal).crop(BED_FIRE_BOX), (i * (x1 - x0), 0))
+    save(strip, "rooms", "mansion_bedroom_fire.png")
+    print("mansion_bedroom_fire at", BED_FIRE_BOX[:2], BED_FIRE_FRAMES, "frames")

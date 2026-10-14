@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://icbjiddqqban"
-path="res://.godot/imported/micah_desk.png-9de6ea2f89a4e1c91ba1b80e04a46bc3.ctex"
+uid="uid://dfl4q8gp2i2p8"
+path="res://.godot/imported/mansion_bedroom_screen.png-a5c2d7fedece335e8be3fbefd0e245b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/sprites/micah_desk.png"
-dest_files=["res://.godot/imported/micah_desk.png-9de6ea2f89a4e1c91ba1b80e04a46bc3.ctex"]
+source_file="res://assets/art/rooms/mansion_bedroom_screen.png"
+dest_files=["res://.godot/imported/mansion_bedroom_screen.png-a5c2d7fedece335e8be3fbefd0e245b7.ctex"]
 
 [params]
 

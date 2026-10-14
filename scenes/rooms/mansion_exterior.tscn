@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionExterior.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior.png" id="2_bg"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_tie.png" id="11_mansion_exterior_tie"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_door.png" id="12_mansion_exterior_door"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_exterior_fire.png" id="13_mansion_exterior_fire"]
+[ext_resource type="Script" path="res://scripts/Core/LoopStrip.cs" id="21_LoopStrip"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="14_eleanor_sheet"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
@@ -41,6 +42,7 @@ size = Vector2(30, 84)
 [node name="MansionExterior" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Harrington Mansion"
+Floor = 1
 FarY = 212
 NearY = 262
 FarScale = 0.92
@@ -231,8 +233,10 @@ z_index = -8
 position = Vector2(0, 0)
 texture = ExtResource("13_mansion_exterior_fire")
 centered = false
-script = ExtResource("4_FlagSprite")
+hframes = 8
+script = ExtResource("21_LoopStrip")
 ShowIfFlags = "mansion_exploded"
+FrameSeconds = 0.11
 
 [node name="Eleanor" type="Area2D" parent="World"]
 position = Vector2(262, 224)

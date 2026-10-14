@@ -13,7 +13,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageStat
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from art import act2_rooms, attic, common, library, mansion, motel
+from art import act2_rooms, attic, common, library, mansion, motel, outskirts
 
 
 def luminance(image):
@@ -28,7 +28,7 @@ class SceneImprovementsTests(unittest.TestCase):
         cls.generated = Path(cls.directory.name)
         with patch.object(common, "ART", cls.directory.name), contextlib.redirect_stdout(io.StringIO()):
             for build in (motel.build, attic.build, library.build, act2_rooms.build_rose,
-                          mansion.build_study, mansion.build_bedroom):
+                          mansion.build_study, mansion.build_bedroom, mansion.build_exterior, outskirts.build):
                 build()
 
     def assert_image_equal(self, a, b):
@@ -319,7 +319,7 @@ class SceneImprovementsTests(unittest.TestCase):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
         base = mansion.paint_bedroom()
         occupied, empty = mansion.paint_bedroom("eleanor"), mansion.paint_bedroom("empty")
-        pal = mansion.bedroom_palette(base, occupied, empty)
+        pal = mansion.bedroom_palette(base, occupied, empty, mansion.paint_bedroom(screen=True))
         for name, variant, node in (("mansion_bed", occupied, "Bed"),
                                     ("mansion_bed_empty", empty, "BedEmpty")):
             block = re.search(rf'\[node name="{node}" type="Sprite2D"[^\]]*\]([^\[]*)', scene)[1]
@@ -328,6 +328,57 @@ class SceneImprovementsTests(unittest.TestCase):
                 composed = common.pixelize(base, pal).convert("RGBA")
                 composed.alpha_composite(sprite, tuple(map(int, position.groups())))
                 self.assert_image_equal(composed, common.pixelize(variant, pal))
+
+    def test_bedroom_screen_is_a_low_y_sorted_sprite_micah_shows_over(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
+        block = re.search(r'\[node name="Screen" type="Sprite2D" parent="World"\]([^\[]*)', scene)[1]
+        x, feet = map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", block).groups())
+        offset = int(re.search(r"offset = Vector2\(0, (-?\d+)\)", block)[1])
+        self.assertEqual(feet, mansion.SCREEN_FEET)
+        self.assertGreater(feet, 214, "Micah's spot behind the screen must sort behind it")
+        with Image.open(self.generated / "rooms" / "mansion_bedroom_screen.png") as sprite:
+            top = feet + offset
+            self.assertGreaterEqual(top, 150, "the screen must be low enough to show his hat and shoulders")
+            self.assertLessEqual(x, 107 - 13)
+            self.assertGreaterEqual(x + sprite.width, 107 + 13)
+
+    def test_bedroom_fire_strip_loops_and_starts_on_the_background(self):
+        x0, y0, x1, y1 = mansion.BED_FIRE_BOX
+        with Image.open(self.generated / "rooms" / "mansion_bedroom_fire.png") as strip, \
+                Image.open(self.generated / "rooms" / "mansion_bedroom.png") as room:
+            w = x1 - x0
+            self.assertEqual(strip.size, (w * mansion.BED_FIRE_FRAMES, y1 - y0))
+            self.assert_image_equal(strip.crop((0, 0, w, y1 - y0)), room.crop(mansion.BED_FIRE_BOX))
+            frames = {strip.crop((i * w, 0, (i + 1) * w, y1 - y0)).tobytes() for i in range(mansion.BED_FIRE_FRAMES)}
+            self.assertEqual(len(frames), mansion.BED_FIRE_FRAMES, "every frame of the flames must move")
+
+    def test_outskirts_skyline_fills_the_horizon_over_a_textured_hedgerow(self):
+        with Image.open(self.generated / "rooms" / "outskirts.png") as room:
+            px = np.asarray(room.convert("RGB")).astype(int)
+        sky = px[30:40].mean(axis=2).mean(axis=0)
+        towers = px[96:114].mean(axis=2).min(axis=0) < sky - 30
+        self.assertGreater(towers.mean(), 0.75, "the skyline spans most of the horizon")
+        self.assertGreater((px[60:96].mean(axis=2) < 90).sum(), 150, "towers rise well above the horizon")
+        hedge = Image.fromarray(px[150:200, 0:200].astype("uint8"))
+        self.assertGreater(len(hedge.getcolors(4000)), 20, "the hedge is modelled leaf by leaf, not flat blobs")
+
+    def test_burning_mansion_is_a_looping_strip_of_flames_and_smoke(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
+        block = re.search(r'\[node name="Fire" type="Sprite2D" parent="\."\]([^\[]*)', scene)[1]
+        self.assertIn(f"hframes = {mansion.EXT_FIRE_FRAMES}", block)
+        self.assertIn('ShowIfFlags = "mansion_exploded"', block)
+        self.assertIn("LoopStrip", re.search(r'script = ExtResource\("([^"]+)"\)', block)[1])
+        with Image.open(self.generated / "rooms" / "mansion_exterior_fire.png") as strip:
+            self.assertEqual(strip.size, (common.W * mansion.EXT_FIRE_FRAMES, 270))
+            frames = [np.asarray(strip.crop((i * common.W, 0, (i + 1) * common.W, 270)).convert("RGB")).astype(int)
+                      for i in range(mansion.EXT_FIRE_FRAMES)]
+        self.assertEqual(len({f.tobytes() for f in frames}), mansion.EXT_FIRE_FRAMES, "the flames and smoke must move")
+        for f in frames:
+            roof = f[0:30, 60:460]
+            self.assertLess(roof.mean(), 120, "a bank of smoke rolls off the roof")
+            above_window = f[20:40, 64:90]
+            self.assertGreater(((above_window[..., 0] > 220) & (above_window[..., 2] < 140)).sum(), 6,
+                               "flames lick out above the upper windows")
 
 
 if __name__ == "__main__":

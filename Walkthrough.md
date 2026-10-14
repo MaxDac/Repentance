@@ -432,7 +432,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   hints; its clue box only reads "Three dials. Three symbols."
   Open the closet and inspect its false-back panel. Set the three graphical wheels to
   **STAR / SUN / MOON** and submit. Neither a hand nor lockpicks bypasses the lock.
-  The double doors reveal the original white mask and cloak.
+  The double doors reveal the original white mask (a Venetian Bauta) and cloak.
 
 #### Map of Chicago
 
@@ -462,7 +462,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club
 
-- When Micah's enters the Club, he will be dressed with a white mask and a cloak. You will have to generate this 
+- When Micah's enters the Club, he will be dressed with a white mask and a cloak. The mask is a Venetian Bauta half-mask: ivory, heavy brow, eye holes and a long nose; the mouth and chin are bare, overshadowed by the mask and the cowl. You will have to generate this 
   new dress and sprite.
 - The club will be filled with a number of masked men, all in the same black cloak and cowl: some with the same white mask
   as Micah, others with carved animal masks inspired by Celtic folklore (bear, raven, hare),
@@ -525,8 +525,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Office
 
-- The player returns to the office, and is seated behind his desk; narrating voice which describes his thoughts.
-- After the opening desk line, he reflects: "Thanks to my efforts, he said. How'd they find her through me?
+- The player returns to the office. The banker's lamp is off for the whole of Act 3 and the whiskey bottle and cup have
+  moved to the desk; Micah stands at the window, his back to the room, under the HOTEL sign; narrating voice which
+  describes his thoughts.
+- After the opening line, he reflects: "Thanks to my efforts, he said. How'd they find her through me?
   Somebody on my heels? Something I let slip?" Then: "Aw, what's the difference? They've got her just the same."
   Neither a tail nor a betrayal is established as fact.
 - He's thinking what could do next, where could Eleanor be; he concludes that the only person who could help are at the

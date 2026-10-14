@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionBedroom.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom.png" id="2_bg"]
@@ -9,6 +9,9 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bed_empty.png" id="13_mansion_bed_empty"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/harrington_gown.png" id="11_harrington_gown"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="12_eleanor_sheet"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom_screen.png" id="14_screen"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom_fire.png" id="15_fire"]
+[ext_resource type="Script" path="res://scripts/Core/LoopStrip.cs" id="16_LoopStrip"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(96, 72)
@@ -16,6 +19,7 @@ size = Vector2(96, 72)
 [node name="MansionBedroom" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Harrington's Bedroom"
+Floor = 2
 FarY = 206
 NearY = 262
 FarScale = 0.94
@@ -56,9 +60,24 @@ shape = SubResource("Rect_1")
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
 
+[node name="Screen" type="Sprite2D" parent="World"]
+position = Vector2(64, 218)
+texture = ExtResource("14_screen")
+centered = false
+offset = Vector2(0, -57)
+
+[node name="Fire" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(164, 126)
+texture = ExtResource("15_fire")
+centered = false
+hframes = 8
+script = ExtResource("16_LoopStrip")
+FrameSeconds = 0.11
+
 [node name="Bed" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(296, 136)
+position = Vector2(295, 136)
 texture = ExtResource("10_mansion_bed")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -66,7 +85,7 @@ HideIfFlags = "eleanor_up"
 
 [node name="BedEmpty" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(296, 136)
+position = Vector2(295, 136)
 texture = ExtResource("13_mansion_bed_empty")
 centered = false
 script = ExtResource("4_FlagSprite")

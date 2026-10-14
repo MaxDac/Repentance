@@ -38,6 +38,7 @@ size = Vector2(24, 70)
 [node name="Street" type="Node2D"]
 script = ExtResource("1_Street")
 RoomName = "State Street"
+Floor = 1
 FarY = 172
 NearY = 240
 FarScale = 0.82

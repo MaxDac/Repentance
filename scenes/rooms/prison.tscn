@@ -13,6 +13,7 @@
 [node name="Prison" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Prison"
+Floor = 1
 FarY = 200
 NearY = 262
 FarScale = 1.0

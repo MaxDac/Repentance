@@ -97,11 +97,14 @@ public class AutoPlay
             await PauseTest(game);
             Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId) && !gs.HasItem(MicahKit.LighterId), "prologue plays as Daniel, without Micah's notepad or lighter");
             await Shot("attic");
+            Check(game.Sfx.Ambient == null, "no rain sounds in the dry attic");
+            int woodSteps = game.Sfx.Count(Sound.StepWood);
             await WheelTest(game);
             await PosePlaybackTest(game);
             await game.Perform(Verb.Talk, "hatch");
             await game.Perform(Verb.Hand, "sheet");
             Check(gs.HasFlag("sheet_lifted"), "lifted the dust sheet");
+            Check(game.Sfx.Count(Sound.StepWood) > woodSteps, "Daniel's shoes sound on the attic boards");
             await game.Perform(Verb.Hand, "boxes");
             Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
             await game.Perform(Verb.Hand, "suitcase");
@@ -126,6 +129,7 @@ public class AutoPlay
             Check(gs.HasFlag("teddy_gone"), "Teddy left the office");
             Check(gs.HasItem("photo"), "got the photo");
             await Shot("office");
+            Check(game.Sfx.Ambient == Sound.Rain, "rain patters on the office window");
             await game.Perform(Verb.Hand, "drawer");
             await Shot("office_drawer");
             await game.Perform(Verb.Walk, "door");
@@ -220,6 +224,7 @@ public class AutoPlay
 
             // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
             await Shot("blue_lantern_front");
+            Check(game.Sfx.Ambient == Sound.Rain, "rain falls on State Street");
             await game.Perform(Verb.Look, "chalkboard");
             await game.Perform(Verb.Hand, "grille");
             Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened"), "the grille won't open for a bare lapel");
@@ -499,7 +504,7 @@ public class AutoPlay
             Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
                 "Micah is relieved Rose isn't on duty, but she's back on his mind");
             Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");
-            CheckLibrarianOverLadder(game);
+            CheckActorWins(game, "librarian", "ladder", "the librarian wins over the ladder behind him");
             await Shot("library_day");
             await game.Perform(Verb.UseItem, "librarian", "revolver");
             Check(!gs.HasFlag("library_banned"), "no gun before asking");
@@ -834,7 +839,11 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "Office");
             Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");
             await game.Wait(1.5);
-            await Shot("office_act3_desk");
+            Check(game.Player.Visible && game.Player.Facing == Facing.Up && game.Player.Position.X > 380,
+                "Act 3 office: Micah talks at the window, his back to the room");
+            Check(gs.HasFlag("office_lamp_off") && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("office_act3.png") == true,
+                "Act 3 office is dim, the lamp off and the whiskey on the desk");
+            await Shot("office_act3_window");
             await stage;
             await WaitIdle(game);
             Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
@@ -870,16 +879,21 @@ public class AutoPlay
 
             // ---- the alley: break the lamp, lure Sal out, knock him down, and bring Tony out
             await Shot("alley_act3");
+            int stoneSteps = game.Sfx.Count(Sound.StepStone), knocks = game.Sfx.Count(Sound.Knock);
+            int gunshots = game.Sfx.Count(Sound.Gunshot);
             await game.Perform(Verb.Talk, "back_door");
             Check(!gs.HasFlag("shot_bartender"), "not knocking with Sal inside");
             await game.Perform(Verb.Kick, "trash");
             Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
             await game.Perform(Verb.Hand, "street_lamp");
             Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+            Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
             await Shot("alley_dark");
             await game.Perform(Verb.Kick, "trash");
             Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+            Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
             await Shot("alley_sal_out");
+            CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
             await game.Perform(Verb.UseItem, "sal", "revolver");
             Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
             Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
@@ -892,6 +906,8 @@ public class AutoPlay
             Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
                 "Tony falls, shot in the shoulder, and stays down on his back");
             await Shot("alley_tony_shot");
+            Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
+            Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
             await tonyTalk;
             Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
             Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the shoulder, on to the Harrington mansion");
@@ -978,8 +994,12 @@ public class AutoPlay
                 && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
                 "Space freezes the Act Three confrontation mid-sentence");
             PressKey(Key.Space);
+            Check(game.Player.Visible && game.Player.Position.Y < 218 && game.Player.Position.X is > 68 and < 148,
+                "Micah listens in view behind the lowered folding screen (#104)");
             await Shot("mansion_bedroom");
             await Until(() => gs.HasFlag("eleanor_up"));
+            Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
+                "Micah walks out from behind the screen to take aim (#104)");
             await game.Wait(0.5);
             await Shot("mansion_bedroom_gun");
             await confront;
@@ -1171,6 +1191,27 @@ public class AutoPlay
             "full screen turned back off and persisted");
         Check(DisplayServer.WindowGetMode() == windowMode, "automated runs never change the real window mode");
 
+        Check(game.Settings.EffectsVolume == GameSettings.DefaultEffectsVolume && game.Hud.Menu.HasEntry("Effects volume: 80%"),
+            "effects volume defaults to 80%");
+        Check(game.Hud.Menu.Press("Effects volume"), "settings offers an effects volume");
+        await Observe(0.1);
+        Check(game.Settings.EffectsVolume == 90 && game.Hud.Menu.HasEntry("Effects volume: 90%") &&
+            reloaded.Load() && reloaded.EffectsVolume == 90 && reloaded.NudityEnabled,
+            "left click raises the effects volume and persists it alongside the other settings");
+        Check(Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(Sfx.BusIndex), SoundSynth.PercentToDb(90)),
+            "the Effects bus follows the setting");
+        Check(game.Hud.Menu.PressAlt("Effects volume"), "right click lowers the effects volume");
+        await Observe(0.1);
+        Check(game.Settings.EffectsVolume == 80 && game.Hud.Menu.HasEntry("Effects volume: 80%"), "back down to 80%");
+        Check(game.Settings.SetEffectsVolume(0) && AudioServer.IsBusMute(Sfx.BusIndex), "0% mutes the effects");
+        await Observe(0.1);
+        Check(game.Hud.Menu.HasEntry("Effects volume: 0%"), "the settings page shows 0%");
+        Check(GameSettings.CycleVolume(100, up: true) == 0 && GameSettings.CycleVolume(0, up: false) == 100,
+            "the volume wraps around");
+        Check(game.Settings.SetEffectsVolume(GameSettings.DefaultEffectsVolume) && !AudioServer.IsBusMute(Sfx.BusIndex),
+            "effects volume restored");
+        await Observe(0.1);
+
         PressKey(Key.Escape);
         await Observe(0.1);
         Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
@@ -1223,7 +1264,7 @@ public class AutoPlay
             "a close-up's variant swaps in place when the setting changes");
         game.Hud.HideCloseUp(0);
         Check(!game.Hud.InsetVisible && game.Hud.CurrentCloseUp == null, "close-up hidden");
-        await game.ChangeRoom("attic", "settings_test");
+        await game.ChangeRoom("attic", "start");
         await WaitIdle(game);
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
@@ -1507,7 +1548,7 @@ public class AutoPlay
     /// <c>--clock=fast</c> (default) uncapped 60×, or <c>--clock=normal</c> for the previous 8× clock.
     /// Pause assertions still force 1×. Fast also disables vsync so an unfocused run is not stuck at the refresh rate.
     /// </summary>
-    private static bool ApplyClock(out string error)
+    internal static bool ApplyClock(out string error)
     {
         error = "";
         string? value = null;
@@ -1785,26 +1826,26 @@ public class AutoPlay
                 new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
-    /// <summary>Wherever the librarian is drawn over the ladder, hovering or clicking there means him (#73).</summary>
-    private void CheckLibrarianOverLadder(Game game)
+    /// <summary>Wherever a character is drawn over the scenery behind him, hovering or clicking there means him (#73, #97).</summary>
+    private void CheckActorWins(Game game, string actorId, string sceneryId, string what)
     {
-        if (game.Room?.FindHotspot("librarian") is not Actor librarian || game.Room.FindHotspot("ladder") is not { } ladder)
+        if (game.Room?.FindHotspot(actorId) is not Actor actor || game.Room.FindHotspot(sceneryId) is not { } scenery)
         {
-            Check(false, "library has the librarian and the ladder");
+            Check(false, $"{what}: the room has {actorId} and {sceneryId}");
             return;
         }
-        var b = librarian.Bounds;
+        var b = actor.Bounds;
         int overlap = 0, wrong = 0;
         var winners = new HashSet<string>();
         for (float y = b.Position.Y; y < b.End.Y; y++)
             for (float x = b.Position.X; x < b.End.X; x++)
             {
                 var p = new Vector2(x, y);
-                if (!librarian.DrawnAt(p)) continue;
-                if (ladder.Bounds.HasPoint(p)) overlap++;
-                if (game.Room.HotspotAt(p) is var h && h != librarian) { wrong++; winners.Add($"{h?.Id ?? "none"}@{p}"); }
+                if (!actor.DrawnAt(p)) continue;
+                if (scenery.Bounds.HasPoint(p)) overlap++;
+                if (game.Room.HotspotAt(p) is var h && h != actor) { wrong++; winners.Add($"{h?.Id ?? "none"}@{p}"); }
             }
-        Check(overlap > 0 && wrong == 0, $"the librarian wins over the ladder behind him ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
+        Check(overlap > 0 && wrong == 0, $"{what} ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
     }
 
     private void CheckPortraitSpeech(Game game, bool right)

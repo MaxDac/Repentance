@@ -10,7 +10,6 @@
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="6_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/teddy.png" id="8_teddy"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/micah_desk.png" id="11_micah_desk"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring.png" id="12_ring"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_ring_glint.png" id="12_ring_glint"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/office_cup.png" id="13_cup"]
@@ -23,6 +22,9 @@ size = Vector2(9, 7)
 
 [sub_resource type="RectangleShape2D" id="Rect_cup"]
 size = Vector2(10, 12)
+
+[sub_resource type="RectangleShape2D" id="Rect_desk_bottle"]
+size = Vector2(11, 25)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(72, 109)
@@ -132,8 +134,8 @@ position = Vector2(58, 172)
 metadata/facing = 1
 
 [node name="act3" type="Marker2D" parent="Entries"]
-position = Vector2(249, 170)
-metadata/facing = 1
+position = Vector2(405, 168)
+metadata/facing = 2
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -160,14 +162,7 @@ position = Vector2(126, 81)
 texture = ExtResource("13_cup")
 centered = false
 script = ExtResource("4_FlagSprite")
-HideIfFlags = "office_cup_held"
-
-[node name="MicahDesk" type="Sprite2D" parent="."]
-z_index = -9
-position = Vector2(249, 106)
-texture = ExtResource("11_micah_desk")
-script = ExtResource("4_FlagSprite")
-ShowIfFlags = "micah_at_desk"
+HideIfFlags = "office_cup_held, office_lamp_off"
 
 [node name="DrawerOpen" type="Sprite2D" parent="."]
 position = Vector2(276, 139)
@@ -258,12 +253,29 @@ DisplayName = "whiskey bottle"
 LookText = "Whiskey. Another bottle, another night. It never fills the empty places."
 WalkTo = Vector2(124, 170)
 Face = 2
+HideIfFlags = "office_lamp_off"
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bottle"]
 position = Vector2(123.0, 77.5)
 shape = SubResource("Rect_3")
+
+[node name="DeskBottle" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "bottle"
+DisplayName = "whiskey bottle"
+LookText = "I brought the bottle over to the desk. Saves walking. Saves thinking, too."
+WalkTo = Vector2(218, 190)
+Face = 2
+ClickPriority = 10
+ShowIfFlags = "office_lamp_off"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/DeskBottle"]
+position = Vector2(218.5, 121.5)
+shape = SubResource("Rect_desk_bottle")
 
 [node name="WeddingRing" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")
@@ -290,12 +302,28 @@ LookText = "A cup of whiskey. No ice. No excuses."
 WalkTo = Vector2(124, 172)
 Face = 2
 ClickPriority = 10
-HideIfFlags = "office_cup_held"
+HideIfFlags = "office_cup_held, office_lamp_off"
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Cup"]
 position = Vector2(131, 87)
+shape = SubResource("Rect_cup")
+
+[node name="DeskCup" type="Area2D" parent="Hotspots"]
+script = ExtResource("6_Hotspot")
+Id = "cup"
+DisplayName = "cup of whiskey"
+LookText = "The cup, poured and waiting on the desk. In the dark it looks like it's been waiting for me."
+WalkTo = Vector2(229, 190)
+Face = 2
+ClickPriority = 10
+ShowIfFlags = "office_lamp_off"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/DeskCup"]
+position = Vector2(229, 127)
 shape = SubResource("Rect_cup")
 
 [node name="Diploma" type="Area2D" parent="Hotspots"]

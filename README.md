@@ -46,9 +46,10 @@ Command-line options (after `--`):
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--settings-test` | Checks content settings, persistence, menus and both Eleanor variants without playing through the story |
+| `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
-| `--clock=fast` | Default for the three checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time |
+| `--walk-test` | Movement checks in every room: entry markers stand on the floor, every hotspot and exit is reachable from every entry without crossing a wall, the player really walks there at the right scale, and every exit leads to an existing entry (room entry cutscenes are skipped). Then real mouse input: floor clicks, clicks off the floor, interrupting a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking. Prints `WALK TEST OK` and exits with code 0 on success |
+| `--clock=fast` | Default for the four checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
 | `--clock=normal` | Previous automated clock: 8× game time, display timing left alone. Use this when screenshots should be closer to the paced game |
 
 ```powershell
@@ -102,6 +103,19 @@ Automated checks use a separate `user://autoplay_settings.cfg` and never modify 
 anywhere, including on the title screen and while paused. Full screen is borderless and keeps whole-pixel
 scaling, so the 480x270 picture is letterboxed when the monitor isn't an exact multiple. The choice is stored
 in `user://settings.cfg` alongside the content settings. Automated checks never change the real window.
+
+### Sound
+
+All sound effects are synthesized at startup (no audio files) and play on an **Effects** bus:
+
+- **Footsteps** for Micah, Daniel and walking NPCs, voiced by each room's `Floor` export (`Wood`, `Stone` or `Carpet`).
+- **Story cues**: narration lines starting with `*` play a matching sound: `*BANG*` is a gunshot, and
+  `*Knock knock*... *knock*` keeps its rhythm. There are also cues for clangs, crashes, door slams, the doorbell and the explosion.
+- **Ambience**: rain loops in rooms with a `Rain` node. It sounds muffled when the rain is only seen through a window.
+
+**Settings > Effects volume** defaults to **80%**. Left click raises it and right click lowers it, in steps of 10%
+(it wraps at the ends), and each change plays a preview knock. 0% mutes the effects. The value is stored in
+`user://settings.cfg` under `[audio] effects_volume`.
 
 ### Saving
 
@@ -215,14 +229,14 @@ From here the story follows Walkthrough.md:
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
-   back are a white mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
+   back are a white Bauta mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
    (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
 23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
    wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
    matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
    Post the sealed invitation in the door slot.
-   **Club, masked**: through the hall and the lounge, full of masked men and women (white masks and carved
+   **Club, masked**: through the hall and the lounge, full of masked men and women (white Bauta masks and carved
    bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
    of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
@@ -230,7 +244,7 @@ From here the story follows Walkthrough.md:
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
-27. **The office**: at his desk, Micah works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+27. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
 28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
@@ -332,6 +346,7 @@ tools/               Python art generator
 | `Verbs` | `Verb` enum (`Walk`, `Look`, `Hand`, `Talk`, `Kick`, `UseItem`) and the wheel's labels and icons |
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
 | `WalkArea` | Polygon visibility-graph pathfinder |
+| `SoundSynth` / `Sfx` | Godot-free procedural sound effects and `*cue*` parsing, and the node that plays them (footsteps, story cues, room ambience) on the Effects bus |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description) |
 | `MicahKit` | Godot-free: the pinned notepad and lighter, the items each act keeps when its journal starts, and debug-start kits |

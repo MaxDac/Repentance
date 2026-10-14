@@ -189,16 +189,25 @@ def invitation(d, im):
 
 
 def mask(d, im):
-    """A white full-face mask: plain porcelain, two almond eye holes and a closed, painted mouth."""
-    d.ellipse([9, 1, 23, 22], fill=hx("ece8e0"))
-    d.chord([9, 1, 23, 22], 300, 60, fill=hx("d4cec4"))
-    d.polygon([(11, 9), (14, 8), (15, 10), (12, 11)], fill=hx("141016"))
-    d.polygon([(21, 9), (18, 8), (17, 10), (20, 11)], fill=hx("141016"))
-    d.line([(16, 11), (16, 14)], fill=hx("c4beb4"))
-    d.line([(14, 17), (18, 17)], fill=hx("8a3a3a"))
-    d.line([(9, 9), (5, 8)], fill=hx("2a2028"))
-    d.line([(23, 9), (27, 8)], fill=hx("2a2028"))
-
+    """A white Venetian Bauta half-mask, face on: a flat brow, a heavy carved brow ridge over almond eye holes and a
+    long nose jutting down past the plate's square lower edge. The mouth and chin are left bare. Black ribbon ties
+    trail off the sides."""
+    ivory, shade, deep, hi, hole = hx("ece4cc"), hx("cfc4a6"), hx("a89c80"), hx("fbf7ec"), hx("141016")
+    d.line([(8, 7), (2, 6)], fill=hx("16141a"), width=2)
+    d.line([(24, 7), (30, 6)], fill=hx("16141a"), width=2)
+    d.polygon([(11, 1), (21, 1), (24, 4), (25, 9), (24, 14), (21, 16), (11, 16), (8, 14), (7, 9), (8, 4)],
+              fill=ivory)
+    d.polygon([(21, 1), (24, 4), (25, 9), (24, 14), (21, 16), (20, 10)], fill=shade)  # the cheek turning away
+    d.line([(11, 2), (20, 2)], fill=hi)
+    d.line([(9, 5), (14, 6)], fill=deep)  # the heavy brow ridge, dipping to the bridge of the nose
+    d.line([(18, 6), (23, 5)], fill=deep)
+    d.polygon([(10, 8), (12, 7), (14, 8), (13, 9), (11, 9)], fill=hole)
+    d.polygon([(18, 8), (20, 7), (22, 8), (21, 9), (19, 9)], fill=hole)
+    d.line([(9, 15), (23, 15)], fill=shade)  # the square lower edge
+    d.polygon([(15, 6), (17, 6), (18, 14), (19, 19), (13, 19), (14, 14)], fill=ivory)  # the long nose
+    d.polygon([(17, 6), (18, 14), (19, 19), (17, 19)], fill=shade)
+    d.line([(15, 6), (14, 14)], fill=hi)
+    d.line([(14, 19), (18, 19)], fill=deep)  # the nose's underside
 
 def cloak(d, im):
     """A long black hooded cloak, folded over on itself."""
