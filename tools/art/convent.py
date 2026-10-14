@@ -717,20 +717,91 @@ def l_door(img):
     d.ellipse([a[0] - 2, a[1] - 2, a[0] + 2, a[1] + 2], fill=hx("8a7a5a"))
 
 
-def l_crucifix(img):
-    d = ImageDraw.Draw(img)
+def l_crucifix_geom():
+    """Screen centre line, top and foot of the upright, and the crossbar row of the cell crucifix over the bed."""
     xc = (BED_X0 + BED_X1) / 2
-    top, bot = LR.P(xc, 84, 0), LR.P(xc, 48, 0)
-    arm = LR.P(xc, 74, 0)[1]
-    x = top[0]
-    d.rectangle([x - 1, top[1], x + 1, bot[1]], fill=hx("3a2416"))
-    d.rectangle([x - 8, arm - 1, x + 8, arm + 1], fill=hx("3a2416"))
-    d.line([(x - 7, arm), (x, arm + 2), (x + 7, arm)], fill=hx("c8bca4"))
-    d.line([(x, arm), (x, arm + 13)], fill=hx("c8bca4"), width=2)
-    d.point((x, arm - 2), fill=hx("c8bca4"))
+    top, foot = LR.P(xc, 94, 0), LR.P(xc, 50, 0)
+    return round(top[0]), round(top[1]), round(foot[1]), round(LR.P(xc, 84, 0)[1])
+
+
+def l_crucifix(img):
+    """Only the dried palm and the shadow cast away from the lamp go under the lamplight; the cross is laid on after."""
+    d = ImageDraw.Draw(img)
+    x, top, foot, arm = l_crucifix_geom()
+    shadow(img, "rect", [x - 10, top + 2, x + 17, foot + 3], 0.3, 2)
+    shadow(img, "rect", [x - 1, top + 1, x + 6, foot + 2], 0.25, 1)
     # a sprig of dried palm tucked behind it
-    d.line([(x + 1, arm - 1), (x + 9, arm - 12)], fill=hx("8a7a4a"))
-    shadow(img, "rect", [x - 8, top[1] + 2, x + 11, bot[1] + 3], 0.25, 2)
+    for k, (dx, dy) in enumerate(((13, -14), (16, -10), (10, -16))):
+        d.line([(x + 2, arm - 1), (x + dx, arm + dy)], fill=mul(hx("8a7a4a"), 1 - 0.1 * k))
+    for t in range(3, 12, 2):
+        px, py = x + 2 + t, arm - 1 - round(t * 1.15)
+        d.point((px - 1, py - 1), fill=hx("9a8a54"))
+        d.point((px + 1, py + 1), fill=hx("6a5a34"))
+
+
+def l_crucifix_layer(size):
+    """A dark oak cross with trefoil ends, its INRI titulus and the hand-pixelled ivory corpus, on a transparent layer."""
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    x, top, foot, arm = l_crucifix_geom()
+    WOOD, WOOD_L, WOOD_D, GRAIN = hx("5a361e"), hx("94643c"), hx("2a180c"), hx("462814")
+    GILT, CLEAR = hx("c8a050"), (0, 0, 0, 0)
+    half = 13
+    # upright and crossbar, lit from the lamp on the left; grain runs along each beam
+    d.rectangle([x - 2, top, x + 2, foot], fill=WOOD)
+    d.rectangle([x - half, arm - 2, x + half, arm + 2], fill=WOOD)
+    for y in range(top + 1, foot, 3):
+        d.point((x + (y // 3) % 3 - 1, y), fill=GRAIN)
+    for xx in range(x - half + 1, x + half, 4):
+        d.point((xx, arm + (xx // 4) % 3 - 1), fill=GRAIN)
+    d.line([(x - 2, top), (x - 2, foot)], fill=WOOD_L)
+    d.line([(x + 2, top), (x + 2, foot)], fill=WOOD_D)
+    d.line([(x - half, arm - 2), (x + half, arm - 2)], fill=WOOD_L)
+    d.line([(x - half, arm + 2), (x + half, arm + 2)], fill=WOOD_D)
+    # rounded ends with a gilt boss on the three arms
+    for ex, ey in ((x - half - 1, arm), (x + half + 1, arm), (x, top - 1)):
+        d.rectangle([ex - 2, ey - 2, ex + 2, ey + 2], fill=WOOD)
+        for cx, cy in ((-2, -2), (2, -2), (-2, 2), (2, 2)):
+            d.point((ex + cx, ey + cy), fill=CLEAR)
+        d.point((ex - 1, ey - 1), fill=WOOD_L)
+        d.point((ex + 1, ey + 1), fill=WOOD_D)
+        d.point((ex, ey), fill=GILT)
+    # stepped foot block
+    d.rectangle([x - 4, foot - 3, x + 4, foot], fill=WOOD)
+    d.line([(x - 4, foot - 3), (x + 4, foot - 3)], fill=WOOD_L)
+    d.line([(x - 4, foot), (x + 4, foot)], fill=WOOD_D)
+    # gilt rays behind the crossing
+    for dx, dy in ((-4, -4), (4, -4), (-5, 0), (5, 0)):
+        d.point((x + dx, arm + dy), fill=GILT)
+    # INRI titulus above his head
+    d.rectangle([x - 4, top + 3, x + 4, top + 7], fill=hx("e8dcb8"))
+    d.line([(x - 4, top + 7), (x + 4, top + 7)], fill=hx("a89670"))
+    d.line([(x + 4, top + 3), (x + 4, top + 7)], fill=hx("a89670"))
+    for i, dy in ((-3, 4), (-3, 6), (-1, 4), (-1, 5), (-1, 6), (1, 4), (1, 6), (3, 4), (3, 6), (2, 5)):
+        d.point((x + i, top + dy), fill=hx("6a3a24"))
+    # the corpus, hands nailed to the crossbar
+    ink = {"s": hx("ecdcbe"), "S": hx("a88e6c"), "H": hx("6a4428"), "t": hx("a8955a"), "T": hx("5a4a28"),
+           "w": hx("fbf8f0"), "W": hx("b8b0a0"), "n": hx("2a2622"), "b": hx("8a1a18")}
+    ox, oy = x - len(CORPUS[0]) // 2, arm - 1
+    for r, row in enumerate(CORPUS):
+        for c, ch in enumerate(row):
+            if ch in ink:
+                d.point((ox + c, oy + r), fill=ink[ch])
+    # blood from the nailed hands and the wound in his side
+    for p in ((ox + 1, oy + 2), (ox + len(CORPUS[0]) - 2, oy + 2), (ox + 13, oy + 9)):
+        d.point(p, fill=hx("8a1a18"))
+    return layer
+
+
+def l_crucifix_lit(img):
+    """The lamp is to the left of the cross: its left side is warmer and brighter."""
+    layer = l_crucifix_layer(img.size)
+    x, top, foot, _ = l_crucifix_geom()
+    tint = Image.new("RGB", img.size, hx("b49478"))
+    td = ImageDraw.Draw(tint)
+    for xx in range(x - 17, x + 18):
+        td.line([(xx, top - 4), (xx, foot + 2)], fill=mix(hx("e8ccaa"), hx("987a66"), (xx - x + 17) / 34))
+    img.paste(ImageChops.multiply(layer.convert("RGB"), tint), (0, 0), layer.getchannel("A"))
 
 
 def l_lamp(img):
@@ -880,37 +951,56 @@ def paint_cell(drawer=False, comb=False, mirror=False):
     l_bed(img)
     l_nightstand(img, drawer, comb, mirror)
     fx, fy = l_lamp(img)
-    patch, beam, moon = moon_patch(img.size)
+    patch, beam, core, moon = moon_patch(img.size)
     lights = [
         ("ellipse", [fx - 110, fy - 70, fx + 110, fy + 110], hx("8a5428"), 0.9, 34),
         ("ellipse", [fx - 55, fy - 34, fx + 60, fy + 70], hx("b06a34"), 0.6, 18),
         ("ellipse", [fx - 22, fy - 18, fx + 22, fy + 20], hx("ffd090"), 0.45, 8),
         ("ellipse", [fx - 190, fy - 150, fx + 150, fy + 60], hx("4a3020"), 0.6, 40),
         ("mask", moon, hx("6878b0"), 0.75, 1),
-        ("polygon", beam, hx("303a60"), 0.4, 6),
+        ("polygon", beam, hx("303a60"), 0.35, 3),
         ("polygon", g, hx("6070a0"), 0.8, 2),
     ]
     img = lightmap(img, (46, 46, 72), lights)
     light(img, "ellipse", [fx - 7, fy - 9, fx + 7, fy + 7], hx("ffe0a0"), 0.5, 4)
-    light(img, "polygon", beam, hx("8898c8"), 0.06, 5)
+    light(img, "polygon", beam, hx("8898c8"), 0.09, 3)
+    light(img, "polygon", core, hx("a8b4e0"), 0.06, 2)
+    l_crucifix_lit(img)
     vignette(img, 0.6, tint=(16, 14, 26), blur=40)
     return img
 
 
-# Moonlight falls steeply through the lancet: a window point at height y lands MOON_DEPTH * y in front of the
-# wall, leaning MOON_LEAN * y to the left. The arch's point therefore lands nearest the camera.
-MOON_DEPTH, MOON_LEAN = 0.55, 0.08
+# Moonlight falls steeply and straight through the lancet: a window point at height y lands MOON_DEPTH * y in front
+# of the wall directly below itself, so the arch's point lands nearest the camera and the shaft stays upright.
+MOON_DEPTH = 0.55
 
 
 def moon_on_floor(x, y):
-    return LR.P(x - MOON_LEAN * (y - WIN_Y0), 0, MOON_DEPTH * y)
+    return LR.P(x, 0, MOON_DEPTH * y)
+
+
+def _hull(pts):
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in pts))
+
+    def half(seq):
+        out = []
+        for p in seq:
+            while len(out) >= 2 and ((out[-1][0] - out[-2][0]) * (p[1] - out[-2][1])
+                                     - (out[-1][1] - out[-2][1]) * (p[0] - out[-2][0])) <= 0:
+                out.pop()
+            out.append(p)
+        return out[:-1]
+    return half(pts) + half(list(reversed(pts)))
 
 
 def moon_patch(size):
-    """The lancet's moonlit shape on the flagstones, with the shadows of its bars and transom cut out of it."""
+    """The lancet's moonlit shape on the flagstones with the shadows of its bars and transom cut out of it, the shaft
+    joining the glass to it, and a brighter core down the middle of the shaft."""
     inner = lancet(WIN_X - 7, WIN_X + 7, WIN_Y0, 112, 14)
     patch = [moon_on_floor(x, y) for x, y in inner]
-    beam = [LR.P(WIN_X - 7, WIN_Y0, -12), LR.P(WIN_X + 7, WIN_Y0, -12), patch[-1], patch[0]]
+    beam = _hull(on_wall(LR, inner, -12) + patch)
+    narrow = lancet(WIN_X - 4, WIN_X + 4, WIN_Y0 + 4, 112, 10)
+    core = _hull(on_wall(LR, narrow, -12) + [moon_on_floor(x, y) for x, y in narrow])
     m = Image.new("L", size, 0)
     d = ImageDraw.Draw(m)
     d.polygon(patch, fill=255)
@@ -919,7 +1009,7 @@ def moon_patch(size):
     d.line([moon_on_floor(WIN_X - 7, 100), moon_on_floor(WIN_X + 7, 100)], fill=0)
     clip = Image.new("L", size, 0)
     ImageDraw.Draw(clip).polygon(patch, fill=255)
-    return patch, beam, ImageChops.darker(m, clip)
+    return patch, beam, core, ImageChops.darker(m, clip)
 
 
 def build():
@@ -934,9 +1024,12 @@ def build():
     full = paint_cell(drawer=True, comb=True, mirror=True)
     only_comb = paint_cell(drawer=True, comb=True)
     pal = palette_of(Image.blend(base, full, 0.5), 128)
-    px = pixelize(base, pal)
+    # the crucifix is too small for dithering: it keeps its exact colours, as in the corridor
+    cross = l_crucifix_layer(base.size).getchannel("A")
+    px, drawer, comb = (pixelize(im, pal) for im in (base, full, only_comb))
+    for out, src in ((px, base), (drawer, full), (comb, only_comb)):
+        out.paste(src, (0, 0), cross)
     save(px, "rooms", "convent_cell.png")
-    drawer, comb = pixelize(full, pal), pixelize(only_comb, pal)
     a, b = _bbox(px, drawer), _bbox(px, comb)
     box = (min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3]))
     save(drawer.crop(box), "rooms", "convent_cell_drawer.png")

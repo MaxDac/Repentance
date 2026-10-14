@@ -172,17 +172,29 @@ def entrance_bay(img, rnd, glows):
     d.line([(111, 16), (129, 16)], fill=STONE_D)
     d.line([(120, 7), (120, 25)], fill=STONE_D)
     glows.append([(111, 7), (129, 7), (129, 25), (111, 25)])
-    # niche with the Virgin
-    d.polygon(arch_poly(110, 130, 48, 75, 0.7), fill=hx("2a2a3a"))
-    d.line(arch_curve(109, 131, 48, 0.7), fill=STONE_L, width=2)
-    d.rectangle([107, 75, 133, 78], fill=STONE_L)
-    fig = hx("c8c8cc")
-    ox, oy = 9, -22
-    d.ellipse([107 + ox, 60 + oy, 113 + ox, 67 + oy], fill=fig)
-    d.polygon([(105 + ox, 66 + oy), (115 + ox, 66 + oy), (117 + ox, 97 + oy), (103 + ox, 97 + oy)], fill=hx("8a9ab8"))
-    d.polygon([(107 + ox, 68 + oy), (113 + ox, 68 + oy), (114 + ox, 96 + oy), (106 + ox, 96 + oy)], fill=fig)
-    d.line([(108 + ox, 74 + oy), (112 + ox, 78 + oy)], fill=mul(fig, 0.75))
-    d.arc([105 + ox, 56 + oy, 115 + ox, 66 + oy], 200, 340, fill=hx("e0c070"))
+    # niche for the Virgin (she is painted after the lighting, see niche_virgin): shafts, cusped head, hood mould
+    d.polygon(arch_poly(106, 134, 50, 76, 0.7), fill=STONE_D)
+    d.polygon(arch_poly(108, 132, 50, 75, 0.7), fill=hx("2a2a3a"))
+    d.polygon(arch_poly(110, 130, 52, 75, 0.7), fill=hx("222232"))
+    d.line(arch_curve(105, 135, 50, 0.7), fill=STONE_L, width=2)
+    for x in (106, 133):
+        d.line([(x, 50), (x, 75)], fill=STONE_L)
+        d.rectangle([x - 1, 49, x + 1, 51], fill=STONE_L)
+    for x, y in ((103, 51), (137, 51)):    # carved label stops
+        d.ellipse([x - 2, y - 1, x + 2, y + 3], fill=STONE_L)
+        d.point((x, y + 1), fill=STONE_D)
+    for x0 in (110, 124):                   # trefoil cusps in the niche head
+        d.arc([x0, 40, x0 + 6, 46], 180, 360, fill=STONE)
+    d.point((120, 37), fill=STONE)
+    d.rectangle([105, 75, 135, 78], fill=STONE_L)
+    d.line([(105, 79), (135, 79)], fill=STONE_D)
+    # leafy corbel under the ledge
+    d.polygon([(110, 80), (130, 80), (124, 88), (116, 88)], fill=mul(STONE, 1.08))
+    for x in (114, 120, 126):
+        d.ellipse([x - 3, 80, x + 3, 85], fill=STONE_L)
+        d.line([(x, 81), (x, 85)], fill=STONE_D)
+    d.line([(116, 88), (124, 88)], fill=STONE_D)
+    d.point((120, 89), fill=STONE_L)
     # moulded arch around the door, on clustered colonnettes with carved capitals
     a, b = DOOR
     for i, (pa, pb) in enumerate(((a - 12, b + 12), (a - 8, b + 8), (a - 4, b + 4))):
@@ -274,15 +286,10 @@ def chapel(img, rnd, glows):
     for y in range(40, 162, 6):
         for x in range(ga, gb, 5):
             cd.rectangle([x, y, x + 4, y + 5], fill=rnd.choice(GLASS), outline=hx("201828"))
-    # a saint in red and gold in the central light
-    cd.ellipse([apex - 5, 66, apex + 5, 76], fill=hx("e0c070"))
-    cd.ellipse([apex - 3, 68, apex + 3, 74], fill=hx("e8d8b0"))
-    cd.polygon([(apex - 6, 76), (apex + 6, 76), (apex + 8, 120), (apex - 8, 120)], fill=hx("b0283a"))
+    st_michael(cells, ga, gb)
     img.paste(cells, (0, 0), mask_of(img.size, [p]))
-    for x in (ga + 18, gb - 18):
-        d.line([(x, 62), (x, 162)], fill=STONE_D, width=2)
-    for y in (100, 130):
-        d.line([(ga, y), (gb, y)], fill=STONE_D)
+    for y in (100, 130):    # iron saturation bars
+        d.line([(ga, y), (gb, y)], fill=IRON)
     d.line(arch_curve(ga - 5, gb + 5, 80, 0.62, 18), fill=STONE_L, width=2)
     d.rectangle([ga - 8, 164, gb + 8, 168], fill=STONE_L)
     CHAPEL_GLASS.append(p)
@@ -294,6 +301,197 @@ def chapel(img, rnd, glows):
     for (bx, btop) in ((x0 - 4, 50), (x1 - 6, 50)):
         buttress(img, bx, bx + 10, btop)
         d.polygon([(bx + 2, btop - 10), (bx + 5, btop - 24), (bx + 8, btop - 10)], fill=STONE_L)
+
+
+LEAD = hx("201828")
+SKIN_G = hx("e8c8a0")
+SILVER_G, SILVER_GD = hx("c8d0e0"), hx("8890a8")
+WHITE_G = hx("e8e0c0")
+RED_G, RED_GD = hx("b0283a"), hx("701828")
+GOLD_G, GOLD_GD = hx("d9a640"), hx("9a6a28")
+BLUE_G, BLUE_GD = hx("2a4fa8"), hx("1c3478")
+GREEN_G, GREEN_GD = hx("5cb070"), hx("2e6a44")
+PURPLE_G = hx("9a50c0")
+
+
+def _leaded(d, poly, fill):
+    d.polygon(poly, fill=fill, outline=LEAD)
+
+
+def _bar(d, pts, fill, w=3):
+    d.line(pts, fill=LEAD, width=w + 2, joint="curve")
+    d.line(pts, fill=fill, width=w, joint="curve")
+
+
+def st_michael(cells, ga, gb):
+    """St Michael the Archangel in the great lancet: winged, in armour, sword raised, the dragon under his feet.
+    Painted as glass cut along lead lines, with trace lines for the features, inside a border of coloured quarries."""
+    d = ImageDraw.Draw(cells)
+    cx = (ga + gb) // 2
+    # deep blue field with diamond quarries, inside the border
+    field = Image.new("RGB", cells.size, BLUE_G)
+    fd = ImageDraw.Draw(field)
+    for k in range(-80, 140, 7):
+        fd.line([(ga + k, 40), (ga + k + 130, 170)], fill=BLUE_GD)
+        fd.line([(gb - k, 40), (gb - k - 130, 170)], fill=BLUE_GD)
+    fpoly = arch_poly(ga + 5, gb - 5, 80, 156, 0.62, 18)
+    cells.paste(field, (0, 0), mask_of(cells.size, [fpoly]))
+    d.line(fpoly + [fpoly[0]], fill=LEAD)
+    # rocky ground and the dragon
+    _leaded(d, [(ga + 5, 150), (cx - 12, 146), (cx + 8, 149), (gb - 5, 145), (gb - 5, 157), (ga + 5, 157)], hx("7a5a30"))
+    d.line([(ga + 10, 153), (cx - 4, 151), (gb - 10, 152)], fill=LEAD)
+    _leaded(d, [(cx + 14, 142), (cx + 24, 122), (cx + 20, 132), (cx + 16, 126), (cx + 14, 134), (cx + 8, 130), (cx + 8, 142)],
+            PURPLE_G)   # bat wing
+    d.line([(cx + 12, 142), (cx + 24, 122)], fill=LEAD)
+    d.line([(cx + 10, 142), (cx + 16, 126)], fill=LEAD)
+    spine = [(gb - 6, 132), (gb - 4, 138), (gb - 9, 146), (cx + 6, 150), (cx - 8, 148), (cx - 16, 142), (cx - 20, 136)]
+    _bar(d, spine, GREEN_G, 6)
+    d.line(spine, fill=GREEN_GD)
+    for x, y in spine[2:-1]:    # belly scales
+        d.point((x, y + 2), fill=GOLD_G)
+        d.point((x - 2, y + 2), fill=LEAD)
+    d.arc([gb - 12, 124, gb - 4, 132], 300, 150, fill=GREEN_G, width=2)    # curled tail
+    head = [(cx - 26, 128), (cx - 18, 130), (cx - 16, 136), (cx - 22, 140), (cx - 28, 134)]
+    _leaded(d, head, GREEN_G)
+    _leaded(d, [(cx - 28, 134), (cx - 22, 136), (cx - 27, 139)], RED_G)    # open jaws
+    d.point((cx - 21, 132), fill=GOLD_G)
+    d.line([(cx - 20, 129), (cx - 17, 125)], fill=LEAD)    # horn
+    d.line([(cx - 30, 137), (cx - 33, 135)], fill=RED_G)   # forked tongue
+    # wings behind him: gold coverts, white primaries, red tips, leaded feather by feather
+    for side in (-1, 1):
+        root = (cx + side * 4, 76)
+        tip = (cx + side * 22, 54 if side < 0 else 60)
+        outer = [(cx + side * 25, 72), (cx + side * 25, 88), (cx + side * 23, 102), (cx + side * 19, 112)]
+        wing = [root, (cx + side * 12, 62), tip] + outer + [(cx + side * 12, 96)]
+        _leaded(d, wing, WHITE_G)
+        _leaded(d, [root, (cx + side * 12, 62), tip, (cx + side * 24, 70), (cx + side * 12, 80)], GOLD_G)
+        for (ex, ey) in outer:
+            d.line([(cx + side * 12, 84), (ex, ey)], fill=LEAD)
+        _leaded(d, [outer[2], outer[3], (cx + side * 17, 104)], RED_G)
+        d.line([(cx + side * 9, 68), (cx + side * 16, 64)], fill=GOLD_GD)
+        d.line([(cx + side * 10, 74), (cx + side * 20, 70)], fill=GOLD_GD)
+    # red cloak swinging behind the body
+    _leaded(d, [(cx - 8, 74), (cx + 8, 74), (cx + 14, 92), (cx + 16, 124), (cx + 10, 130), (cx + 6, 116),
+                (cx - 10, 126), (cx - 16, 120), (cx - 12, 92)], RED_G)
+    for x0, x1 in ((cx - 11, cx - 14), (cx + 12, cx + 13)):
+        d.line([(x0, 96), (x1, 118)], fill=RED_GD)
+    # legs in greaves, the right foot planted on the dragon's back
+    for leg in ([(cx - 8, 104), (cx - 3, 104), (cx - 5, 132), (cx - 10, 132)],
+                [(cx + 2, 104), (cx + 7, 104), (cx + 8, 122), (cx + 6, 144), (cx + 1, 144), (cx + 2, 122)]):
+        _leaded(d, leg, SILVER_G)
+    d.line([(cx - 9, 118), (cx - 4, 118)], fill=LEAD)
+    d.line([(cx + 2, 122), (cx + 8, 122)], fill=LEAD)
+    _leaded(d, [(cx - 12, 132), (cx - 4, 132), (cx - 4, 135), (cx - 13, 135)], hx("8a5a30"))
+    _leaded(d, [(cx, 144), (cx + 8, 144), (cx + 9, 147), (cx - 1, 147)], hx("8a5a30"))
+    # cuirass, belt and the skirt of leather straps
+    _leaded(d, [(cx - 8, 74), (cx + 7, 74), (cx + 8, 90), (cx + 6, 97), (cx - 7, 97), (cx - 9, 90)], SILVER_G)
+    d.line([(cx, 76), (cx, 96)], fill=SILVER_GD)
+    d.arc([cx - 7, 76, cx, 86], 0, 180, fill=SILVER_GD)
+    d.arc([cx, 76, cx + 7, 86], 0, 180, fill=SILVER_GD)
+    d.line([(cx - 7, 76), (cx - 7, 90)], fill=hx("f0f4ff"))
+    for y in (90, 93):
+        d.line([(cx - 7, y), (cx + 6, y)], fill=SILVER_GD)
+    _leaded(d, [(cx - 8, 97), (cx + 7, 97), (cx + 7, 99), (cx - 8, 99)], GOLD_G)
+    for i, x in enumerate(range(cx - 9, cx + 8, 3)):
+        _leaded(d, [(x, 99), (x + 3, 99), (x + 3, 106), (x, 106)], (GOLD_G, RED_G)[i % 2])
+    for x in (cx - 8, cx + 6):    # pauldrons
+        _leaded(d, [(x - 3, 73), (x + 3, 73), (x + 3, 79), (x - 3, 79)], SILVER_G)
+        d.line([(x - 2, 76), (x + 2, 76)], fill=SILVER_GD)
+    # head, golden curls, the halo
+    d.ellipse([cx - 9, 55, cx + 8, 72], fill=GOLD_G, outline=LEAD)
+    d.ellipse([cx - 7, 57, cx + 6, 70], outline=GOLD_GD)
+    _leaded(d, [(cx - 2, 69), (cx + 1, 69), (cx + 1, 74), (cx - 2, 74)], SKIN_G)
+    d.ellipse([cx - 5, 59, cx + 4, 70], fill=SKIN_G, outline=LEAD)
+    _leaded(d, [(cx - 6, 64), (cx - 5, 59), (cx - 2, 57), (cx + 2, 57), (cx + 5, 60), (cx + 5, 64), (cx + 3, 61),
+                (cx - 3, 61)], hx("c08030"))
+    for x in (cx - 5, cx - 2, cx + 1, cx + 4):
+        d.point((x, 59), fill=GOLD_G)
+    d.point((cx - 2, 64), fill=LEAD)
+    d.point((cx + 2, 64), fill=LEAD)
+    d.line([(cx - 3, 63), (cx - 1, 63)], fill=hx("8a5a30"))
+    d.line([(cx + 1, 63), (cx + 3, 63)], fill=hx("8a5a30"))
+    d.point((cx, 66), fill=hx("b08060"))
+    d.line([(cx - 1, 68), (cx + 1, 68)], fill=RED_GD)
+    # shield on his left arm: a red cross on white in a gold rim
+    d.ellipse([cx - 22, 80, cx - 7, 96], fill=GOLD_G, outline=LEAD)
+    d.ellipse([cx - 20, 82, cx - 9, 94], fill=WHITE_G, outline=LEAD)
+    d.rectangle([cx - 16, 83, cx - 13, 93], fill=RED_G)
+    d.rectangle([cx - 19, 86, cx - 10, 89], fill=RED_G)
+    d.point((cx - 15, 80), fill=hx("fff0b0"))
+    # right arm raised, the sword lifted over the dragon
+    _bar(d, [(cx + 7, 77), (cx + 13, 72), (cx + 13, 64)], SILVER_G, 3)
+    d.line([(cx + 9, 75), (cx + 12, 72)], fill=RED_G)
+    d.line([(cx + 12, 48), (cx + 9, 40)], fill=LEAD, width=3)
+    d.line([(cx + 13, 60), (cx + 8, 41)], fill=LEAD, width=4)
+    d.line([(cx + 13, 59), (cx + 9, 43)], fill=hx("f0f4ff"))
+    d.line([(cx + 12, 59), (cx + 8, 43)], fill=SILVER_G)
+    _bar(d, [(cx + 9, 60), (cx + 17, 58)], GOLD_G, 1)
+    d.ellipse([cx + 11, 61, cx + 15, 65], fill=SKIN_G, outline=LEAD)
+    d.point((cx + 14, 67), fill=GOLD_G)
+
+
+VIRGIN = [hx("1e1c34"), hx("3c3862"), hx("625e8e"), hx("8c88b4"), hx("b4b0d2"), hx("d8d4ec")]
+RIM = hx("d0a07c")
+GILT_N = hx("e8c070")
+
+
+def niche_virgin(img):
+    """The Virgin in the niche over the door, painted after the lighting: cool sky light from above and the left,
+    the door lanterns warming her lower edges."""
+    d = ImageDraw.Draw(img)
+    R = VIRGIN
+    cx = 120
+    # shadow she casts on the back of the niche
+    d.polygon([(cx - 4, 42), (cx + 9, 46), (cx + 11, 74), (cx - 2, 74)], fill=hx("161424"))
+    # twelve stars about her head
+    for k in range(12):
+        t = math.pi * (1.0 + k / 11)
+        x, y = cx + 7.5 * math.cos(t), 45 + 7 * math.sin(t)
+        d.point((round(x), round(y)), fill=GILT_N if k % 2 == 0 else hx("a08048"))
+    # mantle: a long cloak falling from the veil, open over the gown
+    mantle = [(cx - 3, 39), (cx + 3, 39), (cx + 6, 46), (cx + 7, 56), (cx + 8, 66), (cx + 9, 72), (cx + 4, 73),
+              (cx - 4, 73), (cx - 9, 72), (cx - 8, 66), (cx - 7, 56), (cx - 6, 46)]
+    d.polygon(mantle, fill=R[2])
+    d.polygon([(cx - 3, 39), (cx - 6, 46), (cx - 7, 56), (cx - 8, 66), (cx - 9, 72), (cx - 6, 72), (cx - 5, 58),
+               (cx - 4, 46)], fill=R[4])
+    d.polygon([(cx + 3, 39), (cx + 6, 46), (cx + 7, 56), (cx + 8, 66), (cx + 9, 72), (cx + 6, 72), (cx + 5, 58),
+               (cx + 4, 46)], fill=R[1])
+    # gown and its folds, between the open edges of the mantle
+    d.polygon([(cx - 3, 50), (cx + 3, 50), (cx + 4, 72), (cx - 4, 72)], fill=R[4])
+    d.line([(cx - 1, 57), (cx - 2, 72)], fill=R[3])
+    d.line([(cx + 2, 57), (cx + 3, 72)], fill=R[2])
+    d.line([(cx, 60), (cx, 72)], fill=R[5])
+    # girdle with its knot and falling cord
+    d.line([(cx - 3, 56), (cx + 3, 56)], fill=R[1])
+    d.line([(cx + 1, 57), (cx + 1, 63)], fill=R[1])
+    # mantle folds and gilt hem
+    for x0, x1, c in ((cx - 5, cx - 7, R[3]), (cx + 5, cx + 6, R[0]), (cx - 3, cx - 5, R[2])):
+        d.line([(x0, 58), (x1, 71)], fill=c)
+    d.line([(cx - 4, 47), (cx - 3, 50), (cx - 4, 72)], fill=GILT_N)
+    d.line([(cx + 4, 47), (cx + 3, 50), (cx + 4, 72)], fill=hx("a08048"))
+    d.line([(cx - 8, 73), (cx + 8, 73)], fill=R[0])
+    # veil and face
+    d.polygon([(cx - 3, 39), (cx + 3, 39), (cx + 4, 42), (cx + 4, 48), (cx - 4, 48), (cx - 4, 42)], fill=R[3])
+    d.line([(cx - 3, 39), (cx - 4, 47)], fill=R[5])
+    d.ellipse([cx - 2, 41, cx + 2, 46], fill=R[4])
+    d.point((cx - 1, 43), fill=R[1])
+    d.point((cx + 1, 43), fill=R[1])
+    d.line([(cx + 1, 41), (cx + 2, 45)], fill=R[2])
+    d.point((cx, 45), fill=R[2])
+    # hands joined in prayer, sleeves falling from the wrists
+    d.polygon([(cx - 4, 51), (cx - 1, 49), (cx - 1, 54), (cx - 3, 54)], fill=R[3])
+    d.polygon([(cx + 4, 51), (cx + 1, 49), (cx + 1, 54), (cx + 3, 54)], fill=R[2])
+    d.line([(cx, 47), (cx, 50)], fill=R[5])
+    d.point((cx - 1, 47), fill=R[4])
+    # crescent moon and the serpent under her feet
+    d.line([(cx - 7, 73), (cx - 4, 75), (cx + 4, 75), (cx + 7, 73)], fill=R[3])
+    d.line([(cx - 6, 74), (cx + 6, 74)], fill=R[4])
+    d.line([(cx - 9, 74), (cx - 6, 75)], fill=R[1])
+    d.point((cx + 2, 73), fill=R[4])
+    # warm lantern light catching her edges from below
+    for x, y in ((cx - 9, 71), (cx - 8, 68), (cx + 9, 71), (cx + 8, 68), (cx - 6, 74), (cx + 6, 74), (cx - 3, 72),
+                 (cx + 4, 72)):
+        d.point((x, y), fill=RIM)
 
 
 def yard_and_fence(img):
@@ -440,6 +638,7 @@ def paint():
     out = sky()
     out.paste(lit, (0, 0), scene)
     d = ImageDraw.Draw(out)
+    niche_virgin(out)
     # emissive things on top: window glass, the lamps, the door lantern
     for p in glows:
         m = mask_of(out.size, [p])
@@ -477,7 +676,7 @@ def lantern(d, x, y):
 
 def build():
     img = paint()
-    pal = palette_of(img, 128)
+    pal = palette_of(img, 128) + palette_of(img.crop((102, 34, 138, 80)), 10) + palette_of(img.crop((GREAT[0], 44, GREAT[1], 160)), 16)
     px = pixelize(img, pal)
     save(px, "rooms", "convent_road.png")
     return px
