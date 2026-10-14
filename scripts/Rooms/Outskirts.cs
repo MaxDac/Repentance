@@ -18,7 +18,7 @@ public partial class Outskirts : Room
         }
         if (State.HasFlag("seen_outskirts")) return;
         State.SetFlag("seen_outskirts");
-        await Game.Run(() => Say("The last fence post, the last streetlight, the last place a man would go to bury something."));
+        await Game.Run(() => Think("The last fence post, the last streetlight, the last place a man would go to bury something."));
     }
 
     private async Task Ending()
@@ -38,6 +38,9 @@ public partial class Outskirts : Room
             _ = eleanor.MoveTo(new Vector2(272, 250), 40);
         await Game.WalkTo(new Vector2(232, 252));
         Player.Face(Facing.Right);
+        await Think(together ? "Prairie dark and a cold wind off the stubble. Chicago is a dirty glow behind us, and she's still here."
+            : nextMorning ? "Grey light over the stubble fields. A morning paper on the passenger seat. I haven't had the nerve to open it."
+            : "Prairie dark and a cold wind off the stubble. The passenger seat is empty. Maybe it always was.");
         await Talk(together ? "ending_together" : "ending_alone");
         await Act3.Finish();
     }

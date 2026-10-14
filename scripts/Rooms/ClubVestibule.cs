@@ -22,7 +22,8 @@ public partial class ClubVestibule : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("A vestibule in wine and gold, a cloakroom nobody minds, and an inner door with a slot in it instead of a doorman.");
+            await Think("A vestibule in wine and gold, a cloakroom nobody minds, and an inner door with a slot in it instead of a doorman.");
+            await Think("Their mask on my face, their cloak on my back. Somewhere past that door, Eleanor.");
         });
     }
 
@@ -111,7 +112,7 @@ public partial class ClubVestibule : Room
         await Say("The card goes into the slot. Something behind the door reads the raven, and approves.");
         State.SetFlag("vestibule_passed");
         await Wait(0.6);
-        await Say("(The card slides back out of the slot, like change. The door swings in.)");
+        await Think("The card slides back out of the slot, like change. The door swings in.");
         if (FindHotspot("inner_door") is { } door) await Game.WalkTo(door.WalkTo + new Vector2(0, -4));
         await Game.ChangeRoom("club_hall", "from_street");
     }

@@ -67,7 +67,11 @@ public partial class ChicagoMap : Room
         State.SetFlag("on_map");
         if (State.HasFlag("map_seen")) return;
         State.SetFlag("map_seen");
-        await Game.Run(() => Say("I have to find her again."));
+        await Game.Run(async () =>
+        {
+            await Think("An old map of the city, soft at the folds. Somewhere on it she's breathing, and I let her walk away.");
+            await Say("I have to find her again.");
+        });
     }
 
     // nobody walks on a map

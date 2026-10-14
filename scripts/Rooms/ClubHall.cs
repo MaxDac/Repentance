@@ -20,10 +20,10 @@ public partial class ClubHall : Room
             await Game.Run(async () =>
             {
                 await Wait(0.5);
-                await Say("The mask breathes back at me. It smells of cedar, and of whoever wore it before.");
+                await Think("The mask breathes back at me. It smells of cedar, and of whoever wore it before.");
                 await Game.WalkTo(new Vector2(84, 222));
                 Player.Face(Facing.Right);
-                await Say("(I hold out the invitation. I don't say a word. Nobody here does, it seems.)");
+                await Think("I hold out the invitation. I don't say a word. Nobody here does, it seems.");
                 await Talk("moc_masked");
             });
             return;
@@ -35,7 +35,7 @@ public partial class ClubHall : Room
     private async Task ThrownOut()
     {
         await Wait(0.5);
-        await Say("No sign, no doorman outside. Inside, a man dressed for a lodge meeting in the year of our Lord 1727.");
+        await Think("No sign, no doorman outside. Inside, a man dressed for a lodge meeting in the year of our Lord 1727.");
         await Game.WalkTo(new Vector2(78, 224));
         Player.Face(Facing.Right);
         await Talk("moc");

@@ -192,6 +192,17 @@ described here (other verbs, flavour lines) is left to the implementation.
     photo, the cash and the matchbook stay behind; the notepad holds what they said.
   - Act 3: the revolver, and Faith's ring and cross if he has them (the endings weigh them).
 
+### Micah's journal narration
+
+- In every 1927 scene (all acts), Micah's inner thoughts are a narrating voice taken from his journal: lines in
+  faded sepia ink along the top of the screen, while Micah himself stays silent. They advance like speech (or on a
+  click).
+- They are written in the first person and present tense, as journal prose about the scene as it happens:
+  "Another night, another bottle. And a client in my chair, too well dressed for this floor."
+- Each scene opens with a short thought on Micah's first arrival, and key moments (after major conversations,
+  discoveries, departures) add one. Wherever this walkthrough says Micah *thinks* something, it is narration.
+- Replies to looking at or handling things, and anything said to another character, remain spoken.
+
 ### Micah's notepad
 
 - Micah always carries a notepad, the first item in his satchel, and his lighter, the second (Daniel has

@@ -9,8 +9,12 @@ public partial class EleanorRoom : Room
     {
         if (State.HasFlag("seen_eleanor_room")) return;
         State.SetFlag("seen_eleanor_room");
-        await Say("Room 507. Silk on the floor, feathers in the air. Somebody had been here before me, and they hadn't knocked either.");
-        await Say("Whatever they were looking for, I'd bet they didn't find it.");
+        await Game.Run(async () =>
+        {
+            await Wait(0.4);
+            await Think("Room 507. Silk on the floor, feathers in the air. Somebody's been here before me, and they didn't knock either.");
+            await Think("Her perfume still hangs in the air, under the cigar smoke. Whatever they were looking for, I'd bet they didn't find it.");
+        });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -68,6 +72,7 @@ public partial class EleanorRoom : Room
                 State.GiveItem("brass_box");
                 State.SetFlag("recover_hotel", false);
                 await Say("A little brass box, engraved with lilies. The only thing in this room she bothered to lock away twice.");
+                await Think("Her things trampled, her secrets locked away twice. Whoever Eleanor Harrington is, she was expecting company.");
                 return true;
 
             case ("bed", Verb.Hand):

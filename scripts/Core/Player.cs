@@ -40,6 +40,7 @@ public partial class Player : Node2D, ISpeaker
 
     public bool Talking
     {
+        get => _talking;
         set { _talking = value; _animTime = 0; }
     }
 

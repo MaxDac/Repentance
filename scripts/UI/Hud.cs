@@ -20,6 +20,9 @@ public partial class Hud : CanvasLayer
     public static readonly Color VerbColor = new("b89a58");
     public static readonly Color VerbHover = new("f8e8b0");
     public static readonly Color ChoiceColor = new("8ab0d8");
+    /// <summary>Faded journal ink for Micah's narration.</summary>
+    public static readonly Color ThoughtColor = new("d8b878");
+    private const int ThoughtWidth = 440, ThoughtTop = 4;
 
     public event Action<string, bool, Vector2>? ItemClicked;
     public event Action<string?>? ItemHovered;
@@ -38,6 +41,8 @@ public partial class Hud : CanvasLayer
     private ColorRect _choicesBg = null!;
     private VBoxContainer _choices = null!;
     private Label _speech = null!;
+    private Label _thought = null!;
+    private ColorRect _thoughtBg = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
     private TextureRect _image = null!;
@@ -70,6 +75,10 @@ public partial class Hud : CanvasLayer
     public bool SpeechVisible => _speech.Visible;
     public string SpeechText => _speech.Text;
     public Rect2 SpeechRect => _speech.GetRect();
+    public bool ThoughtVisible => _thought.Visible;
+    public string ThoughtText => _thought.Text;
+    public Rect2 ThoughtRect => _thought.GetRect();
+    public Color ThoughtFontColor => _thought.LabelSettings.FontColor;
     public Rect2 InsetRect => _inset.GetRect();
     public bool InsetDrawn => _inset.Visible && _inset.Modulate.A > 0;
     public float FadeAlpha => _fade.Color.A;
@@ -147,6 +156,23 @@ public partial class Hud : CanvasLayer
             Visible = false,
         };
         root.AddChild(_speech);
+
+        // Micah's journal narration: faded ink along the top, over a faint strip so it reads on any background
+        _thoughtBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.02f, 0.55f), Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        root.AddChild(_thoughtBg);
+        _thought = new Label
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            LabelSettings = new LabelSettings
+            {
+                Font = Font, FontSize = 8, FontColor = ThoughtColor, OutlineSize = 4,
+                OutlineColor = new Color(0.08f, 0.05f, 0.02f), LineSpacing = 1,
+            },
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Visible = false,
+        };
+        root.AddChild(_thought);
 
         Wheel = new VerbWheel { Name = "VerbWheel" };
         root.AddChild(Wheel);
@@ -475,6 +501,21 @@ public partial class Hud : CanvasLayer
     }
 
     public void HideSpeech() => _speech.Visible = false;
+
+    /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
+    public void ShowThought(string text)
+    {
+        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, ThoughtWidth, 8);
+        _thought.Text = text;
+        _thought.Size = new Vector2(ThoughtWidth, size.Y);
+        _thought.Position = new Vector2((ScreenW - ThoughtWidth) / 2f, ThoughtTop).Round();
+        float stripW = Mathf.Min(ThoughtWidth, size.X) + 12;
+        _thoughtBg.Position = new Vector2((ScreenW - stripW) / 2f, ThoughtTop - 3).Round();
+        _thoughtBg.Size = new Vector2(stripW, size.Y + 6).Round();
+        _thought.Visible = _thoughtBg.Visible = true;
+    }
+
+    public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
 
     /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
     private void ShowSpeechOverInset(string text, ISpeaker speaker)

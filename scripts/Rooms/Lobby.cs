@@ -13,7 +13,8 @@ public partial class Lobby : Room
         {
             // the first arrival comes in off State Street, through the revolving door
             if (entry == "street") await Game.WalkTo(new Godot.Vector2(372, 204));
-            await Say("The Aurelian. Where the rich come to forget, and the help is paid to forget harder.");
+            await Think("The Aurelian. Where the rich come to forget, and the help is paid to forget harder.");
+            await Think("Marble, brass, lilies taller than me. I used to walk Rose past places like this and promise her one day.");
         });
     }
 

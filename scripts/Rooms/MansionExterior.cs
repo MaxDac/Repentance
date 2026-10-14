@@ -26,8 +26,9 @@ public partial class MansionExterior : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("The Harrington place. From the front it's a bank. From the back, it's still a bank, with a kitchen.");
-            await Say("The kitchen door, the lintel, the key. Walk in like the delivery boys. Easy.");
+            await Think("Gold Coast, past midnight. Wind off the lake, and hedges clipped as neat as a banker's moustache.");
+            await Think("The Harrington place. From the front it's a bank. From the back, it's still a bank, with a kitchen.");
+            await Think("Tony's directions: the kitchen door, the lintel, the key. Walk in like the delivery boys. Easy.");
         });
     }
 
@@ -138,7 +139,7 @@ public partial class MansionExterior : Room
     {
         if (!await Game.Hud.Puzzle.Open(PuzzleKind.Bell)) return;
         await Say("Hold the hammer back, tie it clear of the gong, then let go. The wire stays intact.");
-        await Say("My tie. Rose gave it to me, a lifetime ago. Knotted around the hammer and its bracket, holding it clear of the gong.");
+        await Think("My tie. Rose gave it to me, a lifetime ago. Now it's all that keeps this house asleep.");
         State.SetFlag("bell_wedged");
         await Say("Let it ring now. Nobody will hear a thing.");
     }
@@ -160,13 +161,17 @@ public partial class MansionExterior : Room
             await Wait(0.25);
             await Game.Hud.Fade(0, 1.4);
             await Say("*BOOOOOM*");
-            await Say("The kitchen goes first. Then the study. Then everything Harrington ever wrote down in it.");
-            if (eleanor != null && eleanor.Visible) await Say("eleanor", "Oh my God. Oh my God, Micah.");
-            await Say("Time to go. Before the whole Gold Coast comes out in its pajamas.");
+            await Think("The kitchen goes first. Then the study. Then everything Harrington ever wrote down in it.");
+            if (eleanor != null && eleanor.Visible)
+            {
+                await Say("eleanor", "Oh my God. Oh my God, Micah.");
+                await Say("Time to go. Before the whole Gold Coast comes out in its pajamas.");
+            }
+            else await Think("Time to go. Before the whole Gold Coast comes out in its pajamas.");
         }
         else
         {
-            await Say("The house sleeps on, with the old man on the carpet. Somebody will find him by breakfast.");
+            await Think("The house sleeps on, with the old man on the carpet. Somebody will find him by breakfast.");
         }
         await Game.WalkTo(new Vector2(30, 236));
         await Act3.End();

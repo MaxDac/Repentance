@@ -16,7 +16,8 @@ public partial class ConventCell : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("A bed, a lamp and a book. A woman who wore pearls to dinner slept here.");
+            await Think("A bed, a lamp and a book. A woman who wore pearls to dinner slept here.");
+            await Think("Narrow enough to touch both walls. I feel like I ought to knock, and I'm already inside.");
         });
     }
 

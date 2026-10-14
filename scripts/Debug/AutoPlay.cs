@@ -781,8 +781,10 @@ public class AutoPlay
             await Until(() => game.Hud.InsetVisible);
             Check(game.Hud.CurrentCloseUp == CloseUps.Stage && game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
             Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
-            await Until(() => game.Hud.SpeechVisible);
-            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
+            await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("And in the light", StringComparison.Ordinal));
+            Check(game.Hud.InsetVisible && !game.Hud.SpeechVisible && game.Hud.ThoughtRect.Position.Y < 20 &&
+                game.Hud.ThoughtRect.End.Y < game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.3f,
+                "Micah's thoughts on Eleanor sit along the top while the close-up is up");
             await game.Wait(4);
             await Shot("club_stage");
             await Until(() => game.Room?.Name == "Attic");
@@ -823,9 +825,11 @@ public class AutoPlay
             await Until(() => game.Room?.Name == "ChurchExterior");
             await Until(() => game.Hud.InsetVisible);
             Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
+            await Until(() => game.Hud.ThoughtVisible);
+            Check(game.Hud.InsetVisible && !game.Hud.SpeechVisible && game.Hud.ThoughtRect.Position.Y < 20 &&
+                game.Hud.ThoughtRect.End.Y < game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.3f,
+                "his thoughts sit along the top, clear of his face, while the close-up is up");
             await game.Wait(1.5);
-            Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
-                "his thoughts sit below his face while the close-up is up");
             await Shot("church_exterior_beaten");
             await Until(() => game.Room?.Name == "Office");
             Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");
@@ -1366,6 +1370,25 @@ public class AutoPlay
             await Observe(0.3);
             Check(nextSpeech.IsCompleted && !game.Hud.SpeechVisible, "click-to-skip still works after resuming");
 
+            var thought = game.Run(() => game.Think("Pause thought."));
+            await Observe(0.35);
+            PressKey(Key.Space);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(3);
+            Check(game.IsPaused && !thought.IsCompleted && game.Hud.ThoughtVisible && game.Hud.ThoughtText == "Pause thought." &&
+                !game.Hud.SpeechVisible && !game.Player.Talking, "a paused thought outlasts its duration and cannot be skipped");
+            PressKey(Key.Space);
+            await Observe(0.3);
+            Check(!game.IsPaused && !thought.IsCompleted && game.Hud.ThoughtVisible, "the thought is still up after resuming");
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(0.3);
+            Check(thought.IsCompleted && !game.Hud.ThoughtVisible, "click skips the thought after resuming");
+            var skipped = game.Run(() => game.Think("Skip this thought."));
+            await Observe(0.3);
+            game.SkipSpeech();
+            await Observe(0.3);
+            Check(skipped.IsCompleted && !game.Hud.ThoughtVisible, "SkipSpeech ends a thought");
+
             var timer = game.Wait(0.8);
             await Observe(0.2);
             PressKey(Key.Space);
@@ -1614,8 +1637,22 @@ public class AutoPlay
         Click(game.Hud.Wheel.SlotCenter(Verb.Hand), MouseButton.Left);
         for (int i = 0; i < 400 && !game.Hud.CaptionVisible; i++) await game.Wait(0.05);
         await Shot("chicago_1927");
+        bool thoughtChecked = false;
         for (int i = 0; i < 1200 && (game.Room?.Name != "Office" || !GameState.Instance.HasFlag("teddy_gone") || game.Busy); i++)
+        {
+            if (!thoughtChecked && game.Room?.Name == "Office" && game.Hud.ThoughtVisible)
+            {
+                thoughtChecked = true;
+                Check(game.Hud.ThoughtText.StartsWith("Rain ticks on the window", StringComparison.Ordinal),
+                    "the office opens on Micah's thought");
+                Check(game.Hud.ThoughtFontColor == Hud.ThoughtColor && game.Hud.ThoughtRect.Position.Y < 20,
+                    "the thought is in faded ink along the top of the screen");
+                Check(!game.Hud.SpeechVisible && !game.Player.Talking, "a thought is not spoken: no speech, no moving mouth");
+                await Shot("office_thought");
+            }
             await game.Wait(0.1);
+        }
+        Check(thoughtChecked, "saw Micah's opening thought in the office");
     }
 
     /// <summary>Drives the real input path in 1927: left click the floor walks, left click the window looks at it.</summary>
@@ -2141,14 +2178,17 @@ public class AutoPlay
         }
     }
 
-    /// <summary>Awaits <paramref name="task"/>, collecting every speech line shown meanwhile.</summary>
+    /// <summary>Awaits <paramref name="task"/>, collecting every speech and thought line shown meanwhile.</summary>
     private static async Task<System.Collections.Generic.List<string>> Listen(Game game, Task task)
     {
         var heard = new System.Collections.Generic.List<string>();
+        string? lastSpeech = null, lastThought = null;
         while (!task.IsCompleted)
         {
-            if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
-                heard.Add(game.Hud.SpeechText);
+            if (game.Hud.SpeechVisible && lastSpeech != game.Hud.SpeechText)
+                heard.Add(lastSpeech = game.Hud.SpeechText);
+            if (game.Hud.ThoughtVisible && lastThought != game.Hud.ThoughtText)
+                heard.Add(lastThought = game.Hud.ThoughtText);
             await game.Wait(0.05);
         }
         await task;
@@ -2215,15 +2255,7 @@ public class AutoPlay
                     ? Task.FromResult(dialogue.Get("pushes").AsInt32() < appeals ? 0 : options.Count - 1)
                     : choose(knot, options);
                 await game.ChangeRoom("rose_house", "start");
-                var heard = new System.Collections.Generic.List<string>();
-                var visit = game.Perform(Verb.Hand, "bell");
-                while (!visit.IsCompleted)
-                {
-                    if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
-                        heard.Add(game.Hud.SpeechText);
-                    await game.Wait(0.05);
-                }
-                await visit;
+                var heard = await Listen(game, game.Perform(Verb.Hand, "bell"));
                 bool dismissed = heard.Any(l => l.Contains("Don't bother ringing this bell again, Micah Jones."));
                 bool shutForGood = heard.Any(l => l.Contains("Just once, and for good."));
                 Check(dismissed == (appeals < 3) && shutForGood == (appeals < 3),

@@ -321,7 +321,7 @@ tools/               Python art generator
 
 | Type | Role |
 |---|---|
-| `Game` | Main controller. Handles input (left click, right-click wheel, held item), executes verbs and changes rooms. Exposes the script helpers `Say`, `WalkTo`, `Wait`, `Run` and `ChangeRoom` |
+| `Game` | Main controller. Handles input (left click, right-click wheel, held item), executes verbs and changes rooms. Exposes the script helpers `Say`, `Think` (Micah's journal narration), `WalkTo`, `Wait`, `Run` and `ChangeRoom` |
 | `GameState` (autoload) | Story flags and inventory; emits `Changed`. `CaptureInto`/`Restore` copy it to and from a save |
 | `SaveData` / `SaveSystem` | The save file model and its JSON serializer (Godot-free and unit tested), and the autosave plus slot files in `user://saves` |
 | `DialogueManager` (autoload) | Runs Ink knots; binds `has_item`, `has_flag`, `give_item`, `take_item` and `set_flag` |
@@ -358,6 +358,10 @@ Foreground props that characters can walk behind go inside `World` as Sprite2Ds 
 
 Edit `dialogue/repentance.ink`. Lines use the format `SPEAKER: text`, where the speaker is an actor `Id` in upper case and `MICAH` is the player.
 Micah speaks the choice text aloud, unless it starts with `(`.
+In the 1927 scenes, Micah's inner monologue is journal narration: `THOUGHT: text` in ink, or `await Think("...")`
+in a room script. It is shown in faded sepia (`Hud.ThoughtColor`) along the top of the screen, blocks and skips like
+speech, and nobody's mouth moves. Write it first person, present tense; keep replies to objects and lines said to
+others as speech.
 Start a conversation from a room script with `await Talk("knot")`.
 Ink compiles on import in the editor; `repentance.ink.import` must keep `is_main_file=true`.
 

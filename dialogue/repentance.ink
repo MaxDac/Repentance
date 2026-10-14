@@ -1,6 +1,8 @@
 // REPENTANCE - all game dialogue.
 // Lines are "SPEAKER: text" where SPEAKER is an actor/voice id in upper case. MICAH and DANIEL are the
 // player character (DANIEL in the present-day prologue). Unprefixed lines are spoken by the player.
+// "THOUGHT: text" is Micah's journal narration in the 1927 scenes: first person, present tense, shown in faded
+// ink at the top of the screen. Use it for his inner monologue; anything said aloud stays MICAH.
 // Choice text is spoken by the player unless it starts with "(".
 // Room scripts start conversations with DialogueManager.Instance.Talk("knot").
 
@@ -104,10 +106,12 @@ TEDDY: My wife, Eleanor, has... misplaced herself. Three days ago.
 = photo
 TEDDY: Naturally.
 ~ give_item("photo")
+THOUGHT: Dark hair, pale eyes, a mouth that's keeping a secret. The camera loved her. I'd bet Teddy never did.
 TEDDY: Don't crease it. The sitting alone cost more than your furniture.
 -> teddy.opts
 = photo_then_case
 ~ give_item("photo")
+THOUGHT: Dark hair, pale eyes, a mouth that's keeping a secret. The camera loved her. I'd bet Teddy never did.
 -> teddy.take_case
 = take_case
 TEDDY: Splendid. Your usual fee, plus a bonus when she's home.
@@ -185,6 +189,7 @@ BELLBOY: Service door opens, and out she comes. Big fella either side of her. Br
 BELLBOY: Not dragging her, mister. Escorting her. Like she was the guest of honour and the party didn't want her to leave.
 MICAH: Who were they?
 BELLBOY: The kind of fellas who make sure nobody saw 'em. Nobody did. Car with no lights, gone down the alley. That's all my memory's got.
+THOUGHT: Escorted, not dragged. Either she went quietly, or she knew exactly where she was going.
 ~ set_flag("knows_lantern")
 MICAH: Her room. The one she had Tuesday. I want a look.
 BELLBOY: That's another dollar, mister. The first one bought my memory. The back way costs extra.
@@ -266,6 +271,7 @@ BARTENDER: What'll it be?
 = photo
 BARTENDER: ...
 BARTENDER: Never heard of her. And I got a real bad memory for faces, pal. Especially faces that ask questions.
+THOUGHT: He went still a second too long at her name. Never heard of her, my eye.
 - (photo_opts)
 * [She left the Aurelian with one of your regulars. People saw.]
     BARTENDER: Lots of people get seen. Then one day they stop getting seen. Funny how that works.
@@ -321,6 +327,7 @@ NUN: ...
 NUN: I have said too much already. It is not my place to judge. Only to pray.
 NUN: The last door, at the end of the corridor. Look, if you must.
 NUN: Then go. And God be with you, Micah Jones. You will need Him.
+THOUGHT: Jezebel. Painted, thrown from a window, left for the dogs. Mother made sure we boys knew how that one ended.
 ~ set_flag("nun_talked")
 -> END
 = again
@@ -352,6 +359,7 @@ INSET: none_now
 * [Right now, I'm not so sure.]
     ELEANOR: That's the first honest thing a man has said to me in a month.
 - ELEANOR: You're bleeding. Hold still.
+THOUGHT: Her fingers on my split lip, cool as rain. Rose used to do that, a long time ago.
 MICAH: You do this for every man who comes looking for you?
 ELEANOR: Only the ones who get beaten on my account. It's a short list. You're at the top of it.
 MICAH: The sister called you a Jezebel.
@@ -409,6 +417,7 @@ MOC: You are here because of Eleanor.
 MICAH: Do you know where she is?
 MOC: Of course! Thanks to your efforts, she is already with us, safe, and where she belongs!
 MICAH: My efforts...?
+THOUGHT: Thanks to me. He says it like a compliment, and it goes in like a knife.
 MOC: Bruno. The gentleman is leaving.
 BRUTE: This way, pal. Nice and easy. Or the other way.
 -> END
@@ -443,6 +452,7 @@ INSET: none
     MICAH: Nobody move. Eleanor, come down off that stage. We're leaving.
     HARRINGTON: Go on, my dear. Answer him.
     ELEANOR: I am where I belong, Mr. Jones.
+    THOUGHT: Mr. Jones. Not Micah. Like a girl reciting lines somebody else taught her.
     MICAH: Eleanor. Look at me.
     ELEANOR: I am where I belong.
 * [(Do nothing.)]
@@ -457,6 +467,7 @@ INSET: none
 === caleb_act2 ===
 CALEB: Can I help you, my son?
 CALEB: ...Micah?
+THOUGHT: My kid brother in a Roman collar. He still looks at me like I'm the one who ought to know the way.
 MICAH: Hello, Caleb. Or is it "Father" now?
 CALEB: Six years. You look like a man who hasn't slept for most of them.
 ~ set_flag("caleb_met")
@@ -564,6 +575,7 @@ MICAH: Pleasure doing business. Late fees are on me.
 
 === rose_house ===
 ROSE: Micah.
+THOUGHT: Rose, one hand on the door, not opening it an inch wider. Older. So am I. She wears it better.
 ROSE: It's past eleven. What are you doing here?
 MICAH: I was passing by.
 ROSE: Nobody passes by this street, Micah. You have no business being here. Not anymore.
@@ -652,16 +664,16 @@ CALEB: The prodigal thought so too. Then he turned for home, and his father ran 
 -> END
 
 === office_ring ===
-MICAH: My wedding ring. On the desk, where I left it.
-MICAH: Rose kept hers on long after I stopped coming home.
+THOUGHT: My wedding ring, on the desk where I left it.
+THOUGHT: Rose kept hers on long after I stopped coming home.
 * [(Take the wedding ring.)]
     ~ set_flag("ring_taken_act2")
     ~ set_flag("took_faith_ring")
     ~ give_item("faith_ring")
-    MICAH: A promise doesn't stop being a promise because I broke it.
+    THOUGHT: A promise doesn't stop being a promise because I broke it.
 * [(Leave the wedding ring in the office.)]
     ~ set_flag("ring_left_act2")
-    MICAH: Not yet. I don't know how to carry it.
+    THOUGHT: Not yet. I don't know how to carry it.
 - -> END
 
 === office_act3_destination ===
@@ -748,6 +760,7 @@ MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
 BARTENDER: Are you out of your mind? Beat it, Jones. You don't know who these people are.
 BARTENDER: They own judges. They own cops. They own the men who own the cops.
 BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, too.
+THOUGHT: The revolver weighs more than it did this morning. Tony's sweating. So am I.
 * [(Shoot him in the shoulder.)]
     ~ set_flag("shot_bartender")
 * {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
@@ -771,6 +784,7 @@ HARRINGTON: You ran to the nuns, and then to a drunk who calls himself a detecti
 HARRINGTON: Theodore will have you back. He always does. The Club will have you on Thursdays. And I will have you whenever I please.
 ELEANOR: Yes, Mr. Harrington.
 HARRINGTON: Good girl.
+THOUGHT: Good girl. Like he's talking to a spaniel. My hand finds the revolver before the rest of me decides.
 -> END
 
 === oldman_taunt ===
@@ -779,6 +793,7 @@ MICAH: Get away from her.
 HARRINGTON: Or what? You'll shoot an old man in his dressing gown? You haven't got the guts. You'd have done it by now.
 HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one, I grant you. But her place is here.
 ELEANOR: Micah...
+THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice somewhere far behind it.
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")
 * {has_flag("can_spare")} [(Lower the gun.)]
@@ -812,6 +827,7 @@ ELEANOR: Please, Micah. Just go. Before they come.
 
 === eleanor_comes ===
 ELEANOR: All right. All right. Don't let go of my hand.
+THOUGHT: Her hand is cold and small in mine. For the first time in years I know exactly where I'm going.
 -> END
 
 // ---------------------------------------------------------------- ACT 3: ENDINGS
@@ -831,23 +847,25 @@ MICAH: West. Until the money runs out, or the road does.
 ELEANOR: Say goodbye, then.
 MICAH: Goodbye, Chicago. You were never any good to me.
 ELEANOR: Goodbye, Chicago.
+THOUGHT: She says it like a prayer. I say it like a man settling a tab. Then we get back in the car.
 -> END
 
 === ending_alone ===
-MICAH: The last fence post. The last streetlight. The last place a man goes to bury something.
+THOUGHT: The last fence post. The last streetlight. The last place a man goes to bury something.
 MICAH: She wouldn't come with me. Even with him on the carpet and the whole Club on its way.
 {has_flag("took_documents"):
-    MICAH: I've got the old man's papers in my coat. Enough to keep the cops off me for the rest of my life.
+    THOUGHT: I've got the old man's papers in my coat. Enough to keep the cops off me for the rest of my life.
 }
 {has_flag("mansion_exploded"):
     MICAH: The morning paper lists the dead. Eleanor Harrington. There it is, in black and white.
     MICAH: I told myself I was saving her. I left her there and lit the fuse.
     MICAH: They know who died. They don't know what I did.
 }
-MICAH: Free. That's the word for it. Free as a dog nobody wants.
+THOUGHT: Free. That's the word for it. Free as a dog nobody wants.
 -> END
 
 === prison_eleanor ===
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. The guard says she wore her best hat.
 ELEANOR: Hello, Micah.
 MICAH: You came. The guard bet me a cigarette you wouldn't.
 ELEANOR: They said a lot of things about you. In court, mostly.
@@ -857,9 +875,11 @@ ELEANOR: But I have to go on from here. I'm going back to Theodore.
 MICAH: To Teddy. After all of it.
 ELEANOR: He's the only door that was ever open to me. You knew that, the first night.
 ELEANOR: Goodbye, Micah.
+THOUGHT: She doesn't look back at the door. I can't blame her. I never once looked back at mine.
 -> END
 
 === prison_caleb ===
+THOUGHT: Six months of grey walls and grey soup. Today, my brother, in his collar, turning his hat in his hands.
 CALEB: Micah.
 MICAH: Father.
 CALEB: How are you holding up?
@@ -872,6 +892,7 @@ CALEB: She asked me not to bring Tommy. Not yet. Maybe not ever.
 MICAH: And Eleanor's living with Harrington's son. In the big house with the view of the lake. I read the papers.
 CALEB: I'll pray for you, brother.
 MICAH: You always say that. One of these days I'd like to know what you ask for.
+THOUGHT: He goes out into the daylight. I go back to my cell and think about Rose, and Tommy, and what Caleb asks for.
 -> END
 
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
