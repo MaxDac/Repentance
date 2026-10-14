@@ -53,6 +53,9 @@ jobs:
           - name: pause
             args: --pause-test
             marker: PAUSE TEST OK
+          - name: walk
+            args: --walk-test
+            marker: WALK TEST OK
     name: godot-tests (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +111,11 @@ jobs:
           fi
           if ! grep -qF "${{ matrix.marker }}" godot.log; then
             echo "::error::'${{ matrix.marker }}' not found in output"
+            exit 1
+          fi
+          # Game.Run catches script exceptions with GD.PushError, so a run can reach its marker after one.
+          if grep -nE '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception' godot.log; then
+            echo "::error::Godot logged errors (see above)"
             exit 1
           fi
 
