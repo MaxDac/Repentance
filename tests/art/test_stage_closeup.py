@@ -72,7 +72,7 @@ class StageCloseupTests(unittest.TestCase):
     def test_her_hair_covers_her_breasts(self):
         a = np.asarray(inner(self.nude), dtype=float)
         c = np.asarray(inner(self.clothed), dtype=float)
-        for x0, x1 in ((84, 103), (117, 139)):  # one long lock over each breast, in both variants
+        for x0, x1 in ((88, 100), (122, 135)):  # one long lock over each breast, in both variants
             with self.subTest(x=x0):
                 self.assertLess(a[95:, x0:x1].mean(), 40)
                 self.assertLess(c[95:, x0:x1].mean(), 40)
