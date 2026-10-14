@@ -162,6 +162,29 @@ public partial class Player : Node2D, ISpeaker
             UpdateScale();
         }
         UpdateFrame();
+        Footstep(delta);
+    }
+
+    private int _lastStep = -1;
+    private double _sinceStep;
+
+    /// <summary>
+    /// A footstep each time a foot lands: twice per walk cycle, so every 4 side frames or 3 front/back frames.
+    /// </summary>
+    private void Footstep(double delta)
+    {
+        _sinceStep += delta;
+        if (_path.Count == 0 || _poses.Active || !IsVisibleInTree()) { _lastStep = -1; return; }
+        bool side = _facing is not (Facing.Up or Facing.Down);
+        int step = side ? (int)(_animTime * Speed / SideStridePerFrame) / 4 : (int)(_animTime * FrontWalkFps) / 3;
+        if (step == _lastStep) return;
+        bool first = _lastStep < 0;
+        _lastStep = step;
+        if (first || _sinceStep < 0.18) return;
+        _sinceStep = 0;
+        Room? room = null;
+        for (var n = GetParent(); n != null && room == null; n = n.GetParent()) room = n as Room;
+        Game.Instance?.Sfx?.Step(room?.Floor ?? FloorSurface.Wood, Scale.Y);
     }
 
     private void UpdateScale()

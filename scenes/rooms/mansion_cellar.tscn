@@ -29,6 +29,7 @@ size = Vector2(150, 136)
 [node name="MansionCellar" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Harrington Wine Cellar"
+Floor = 1
 FarY = 206
 NearY = 262
 FarScale = 0.94
