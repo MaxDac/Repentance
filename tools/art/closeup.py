@@ -33,18 +33,16 @@ HALF = (AW - BAR) // 2
 MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
 ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
+# One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
+# before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
+STAGE_PALETTE = [hx(c) for c in """
+f6d3a3 f6d1a2 f6cf9d e6af84 c07c5c 865338 4d3124 26282b 252729 242628 781f27 4f1b1b 242223 1e2022 18181a 141518
+111316 101114 0d0e11 0a0c0f 0a090b 060608 030405 030204 010202 010102 010101 010100 010001 000101 000001 000000
+""".split()]
 
 
-def shared_palette(nude, clothed):
-    """One palette for both variants, so they differ only where the dress is."""
-    both = Image.new("RGB", (AW, AH * 2))
-    both.paste(nude.convert("RGB").resize((AW, AH), Image.BOX), (0, 0))
-    both.paste(clothed.convert("RGB").resize((AW, AH), Image.BOX), (0, AH))
-    return palette_of(both, COLOURS)
-
-
-def stage_closeup(src, pal):
-    """Eleanor on the stage, framed; src is the nude or the clothed picture, pal their shared palette."""
+def stage_closeup(src, pal=STAGE_PALETTE):
+    """Eleanor on the stage, framed; src is the nude or the clothed picture."""
     return framed(src.convert("RGB"), pal)
 
 
@@ -155,9 +153,8 @@ def heraldry_closeup():
 
 def build():
     nude, clothed = Image.open(SRC), Image.open(CLOTHED_SRC)
-    pal = shared_palette(nude, clothed)
-    save(stage_closeup(nude, pal), "ui", "stage_closeup.png")
-    save(stage_closeup(clothed, pal), "ui", "stage_closeup_clothed.png")
+    save(stage_closeup(nude), "ui", "stage_closeup.png")
+    save(stage_closeup(clothed), "ui", "stage_closeup_clothed.png")
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")

@@ -22,10 +22,8 @@ def inner(panel):
 class StageCloseupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        nude, clothed = Image.open(closeup.SRC), Image.open(closeup.CLOTHED_SRC)
-        pal = closeup.shared_palette(nude, clothed)
-        cls.nude = closeup.stage_closeup(nude, pal)
-        cls.clothed = closeup.stage_closeup(clothed, pal)
+        cls.nude = closeup.stage_closeup(Image.open(closeup.SRC))
+        cls.clothed = closeup.stage_closeup(Image.open(closeup.CLOTHED_SRC))
 
     def test_committed_panels_match_the_build_and_fit_the_screen(self):
         # nearly the whole 480x270 screen, with the room still showing around it
