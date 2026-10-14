@@ -1042,7 +1042,7 @@ public class AutoPlay
             Check(!Offered("oldman_taunt", "Lower the gun") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
             Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
             // Seeded endings follow the permanent epilogue lock; exercise the recipe without reopening its blocked HUD.
-            await game.Run(game.TryReadAccounts);
+            await game.Run(() => Story.StoryPuzzles.TryReadAccounts(game));
             Check(!game.Hud.Puzzle.IsOpen && !gs.HasFlag(Endings.TookDocuments), "escape kitchen cannot decode skipped evidence after confrontation");
             await game.Perform(Verb.Walk, "baize_door");
             Check(game.Room?.Name == "MansionKitchen", "skipped study cannot be revisited during escape");
