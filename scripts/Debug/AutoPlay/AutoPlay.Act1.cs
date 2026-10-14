@@ -51,6 +51,7 @@ public partial class AutoPlay
     {
         // ---- 1927
         Check(game.Room?.Name == "Office", "journal leads to the office");
+        Check(game.Music.Current == Track.OfficeJazz, "soft jazz plays in the office");
         Check(game.Player.Character == "micah", "story continues as Micah");
         Check(gs.HasFlag("teddy_gone"), "Teddy left the office");
         Check(gs.HasItem("photo"), "got the photo");
@@ -212,6 +213,7 @@ public partial class AutoPlay
         await Until(() => !game.Busy && gs.HasFlag("seen_convent_exterior"));
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
             "arrival waits outside for the player to open the convent door");
+        Check(game.Music.Current == null, "no piano outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");
         Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor")?.Visible == false &&
@@ -220,12 +222,16 @@ public partial class AutoPlay
         Click(game.Room!.FindHotspot("door")!.Bounds.GetCenter(), MouseButton.Left);
         await Until(() => game.Room is Rooms.ConventCorridor && gs.HasFlag("nun_talked") && !game.Busy);
         Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_talked"), "the nun questions Micah in the corridor");
+        Check(game.Music.Current == Track.ConventPiano, "the piano plays in the convent corridor");
+        int pianoStarts = game.Music.Count(Track.ConventPiano);
         await game.Perform(Verb.Walk, "entrance");
         Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("convent_departed"),
             "Micah must search the cell before leaving the convent");
         await Shot("convent_corridor");
         await game.Perform(Verb.Walk, "cell_door");
         Check(game.Room?.Name == "ConventCell", "entered Eleanor's cell");
+        Check(game.Music.Current == Track.ConventPiano && game.Music.Count(Track.ConventPiano) == pianoStarts,
+            "the piano carries on into the cell without restarting");
         await Shot("convent_cell");
         await game.Perform(Verb.Walk, "exit");
         Check(game.Room?.Name == "ConventCell", "can't leave the cell without the mirror");

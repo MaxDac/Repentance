@@ -22,6 +22,6 @@
     <Compile Include="..\..\scripts\Core\Notes.cs" Link="Linked\Notes.cs" />
     <Compile Include="..\..\scripts\Core\MicahKit.cs" Link="Linked\MicahKit.cs" />
     <Compile Include="..\..\scripts\Core\SoundSynth.cs" Link="Linked\SoundSynth.cs" />
-    <Compile Include="..\..\scripts\Core\MusicSynth.cs" Link="Linked\MusicSynth.cs" />
+    <Compile Include="..\..\scripts\Core\MusicSynth*.cs" LinkBase="Linked" />
   </ItemGroup>
 </Project>
