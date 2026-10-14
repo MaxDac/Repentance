@@ -884,9 +884,12 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
 
 def _mask(c, col, P, body, H, cp, sp, nod):
     """A ritual mask over the face: ("full", colour) covers the whole face, ("half", colour) is a domino over the eyes,
-    ("animal", kind, colour, accent) is a carved beast's face (see _animal_mask)."""
+    ("animal", kind, colour, accent) is a carved beast's face (see _animal_mask), ("bauta", colour) is the Venetian
+    Bauta (see _bauta_mask)."""
     if col["mask"][0] == "animal":
         return _animal_mask(c, col, P, body, H, cp, sp, nod)
+    if col["mask"][0] == "bauta":
+        return _bauta_mask(c, col, P, body, H, cp, sp, nod)
     style, mc = col["mask"]
     fx, fy, _ = P(body([0, 0.08 + nod, 0.05]))
     hrx = H * HEAD * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
@@ -913,6 +916,45 @@ def _mask(c, col, P, body, H, cp, sp, nod):
         ex = math.floor(ex) - (fs if abs(sp) > 0.85 else 0)
         c.dot(ex, math.floor(ey2), "141016")
 
+
+def _bauta_mask(c, col, P, body, H, cp, sp, nod):
+    """The Venetian Bauta worn as a half-mask: an ivory papier-mache plate over the brow, eyes and nose, cut square
+    just under a long ridged nose. The mouth and chin stay bare, lost in the cowl's shadow. In profile the nose
+    stands proud of the plate."""
+    _, mc = col["mask"]
+    K = HEAD
+
+    def S(x, y, z):  # head-relative point (head units: y from the eye line, z forward)
+        return P(body([x * K, 0.074 + nod + y * K, z * K]))[:2]
+
+    fx, fy, _ = P(body([0, 0.08 + nod, 0.05]))
+    hrx = H * K * math.sqrt((0.048 * cp) ** 2 + (0.056 * sp) ** 2)
+    frx, fry = max(hrx * (0.62 + 0.25 * abs(cp)), 2.6), H * 0.077 * K * 0.86
+    region = c.parts_mask("head")
+    hem = S(0, 0.036, 0.06)[1]  # the plate's square lower edge, just under the nose
+    ys, xs = np.nonzero(region | c.ellipse((fx, fy), frx, fry)[0])
+    x0, x1, y0, y1 = xs.min() - 2, xs.max() + 2, ys.min() - 1, ys.max() + 2
+    c.ink = [(x, y, ic) for x, y, ic in c.ink if not (x0 <= x <= x1 and y0 <= y <= y1)]
+    plate = c.put(c.ellipse((fx, fy), frx, fry), mc, "mask", dither=False, cast=False, clip=region & (c.Y < hem))
+    if plate is None or not plate.any():
+        return
+    # the bare skin round the plate, the mouth and chin below it, overshadowed by the plate and the cowl
+    c.recolor(c.parts_mask("head", "ear", "neck"), col.get("mask_shadow", "9a7058"), dither=False)
+    # the long nose, standing proud of the face down to the plate's edge
+    c.put(c.capsule(S(0, -0.014, 0.062), S(0, 0.03, 0.084), 0.8, 1.1), mc, "nose", dither=False, cast=False,
+          clip=c.Y < hem + 0.5)
+    m = c.parts_mask("mask", "nose")
+    ey = S(0, 0, 0.056)[1]
+    c.bias[m & (c.Y > ey - 2.2) & (c.Y < ey - 0.6)] -= 1  # the carved brow over the eyes
+    c.bias[c.parts_mask("head", "ear", "neck") & ~m & (c.Y >= hem - 1) & (c.Y < hem + 1)] -= 1  # the plate's shadow
+
+    fs = 0 if abs(sp) < 0.12 else (1 if sp > 0 else -1)
+    for s in (1, -1):
+        if s * 0.4 * sp + 0.92 * cp < 0.1:
+            continue
+        ex, ey2 = S(s * 0.022, 0.0, 0.056)
+        ex = math.floor(ex) - (fs if abs(sp) > 0.85 else 0)
+        c.dot(ex, math.floor(ey2), "141016")
 
 def _animal_mask(c, col, P, body, H, cp, sp, nod):
     """A carved wood or bone beast's face after the animals of Celtic folklore: the plate covers the face like the

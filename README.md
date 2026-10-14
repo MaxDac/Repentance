@@ -229,14 +229,14 @@ From here the story follows Walkthrough.md:
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
-   back are a white mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
+   back are a white Bauta mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
    (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
 23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
    wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
    matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
    Post the sealed invitation in the door slot.
-   **Club, masked**: through the hall and the lounge, full of masked men and women (white masks and carved
+   **Club, masked**: through the hall and the lounge, full of masked men and women (white Bauta masks and carved
    bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
    of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
