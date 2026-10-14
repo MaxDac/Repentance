@@ -73,7 +73,7 @@ FrameSeconds = 0.11
 
 [node name="Crates" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(320, 148)
+position = Vector2(320, 152)
 texture = ExtResource("7_harrington_road_crates")
 centered = false
 script = ExtResource("5_FlagSprite")
@@ -105,7 +105,7 @@ script = ExtResource("5_FlagSprite")
 ShowIfFlags = "ladder_freed"
 
 [node name="LoweredLadder" type="Sprite2D" parent="."]
-position = Vector2(328, 111)
+position = Vector2(332, 111)
 z_index = -9
 texture = ExtResource("12_Ladder")
 centered = false
@@ -218,8 +218,8 @@ shape = SubResource("Rect_4")
 [node name="Window" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "window"
-DisplayName = "lit window"
-LookText = "One floor up, one light still on. Theodore Harrington's office, if the brass plate out front is honest."
+DisplayName = "office window"
+LookText = "One floor up, dark like all the rest. Theodore Harrington's office, if the brass plate out front is honest."
 WalkTo = Vector2(334, 218)
 Face = 2
 ClickPriority = -1
@@ -227,7 +227,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
-position = Vector2(354, 63)
+position = Vector2(361, 62)
 shape = SubResource("Rect_5")
 
 [node name="Exit" type="Area2D" parent="Hotspots"]
