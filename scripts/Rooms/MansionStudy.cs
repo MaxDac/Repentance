@@ -12,7 +12,11 @@ public partial class MansionStudy : Room
     {
         if (State.HasFlag("seen_mansion_study")) return;
         State.SetFlag("seen_mansion_study");
-        await Game.Run(() => Say("His study. Leather, cigars and old money. Voices behind the far door."));
+        await Game.Run(async () =>
+        {
+            await Think("His study. Leather, cigars and old money. Voices behind the far door.");
+            await Think("The whole room smells of a man who has never once had to say he was sorry.");
+        });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -38,7 +42,7 @@ public partial class MansionStudy : Room
                 await Say("The bootleggers' hatch, standing open. The lantern's still burning at the bottom of the stair.");
                 return true;
             case ("door_right", Verb.Hand or Verb.Walk):
-                await Say("Voices. A man's. And hers.");
+                await Think("Voices. A man's. And hers.");
                 await Game.ChangeRoom("mansion_bedroom", "start");
                 return true;
             case ("door_right", Verb.Kick):

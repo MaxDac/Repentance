@@ -10,6 +10,7 @@ namespace Repentance;
 /// <summary>
 /// Runs Ink conversations. All dialogue lives in res://dialogue/repentance.ink, one knot per
 /// conversation. Lines are written "SPEAKER: text" (speaker = actor/voice Id; MICAH or DANIEL for the player).
+/// "THOUGHT: text" is Micah's journal narration (top of the screen, nobody speaks it).
 /// Choice text is spoken by the player; wrap it in parentheses, e.g. "(Leave)", to keep them quiet.
 /// Ink can call give_item/take_item/has_item/set_flag/has_flag to touch the game state.
 /// </summary>
@@ -70,6 +71,12 @@ public partial class DialogueManager : Node
                 if (speaker == "IMAGE")
                 {
                     await game.Hud.ShowImage(GD.Load<Texture2D>($"res://assets/art/ui/{text}.png"));
+                    continue;
+                }
+                // "THOUGHT: text" is Micah's journal narration, shown at the top of the screen
+                if (speaker == "THOUGHT")
+                {
+                    await game.Think(text);
                     continue;
                 }
                 await game.Say(speaker, text);

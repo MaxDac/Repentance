@@ -86,8 +86,22 @@ public partial class AutoPlay
         Click(game.Hud.Wheel.SlotCenter(Verb.Hand), MouseButton.Left);
         for (int i = 0; i < 400 && !game.Hud.CaptionVisible; i++) await game.Wait(0.05);
         await Shot("chicago_1927");
+        bool thoughtChecked = false;
         for (int i = 0; i < 1200 && (game.Room?.Name != "Office" || !GameState.Instance.HasFlag("teddy_gone") || game.Busy); i++)
+        {
+            if (!thoughtChecked && game.Room?.Name == "Office" && game.Hud.ThoughtVisible)
+            {
+                thoughtChecked = true;
+                Check(game.Hud.ThoughtText.StartsWith("Rain ticks on the window", StringComparison.Ordinal),
+                    "the office opens on Micah's thought");
+                Check(game.Hud.ThoughtFontColor == Hud.ThoughtColor && game.Hud.ThoughtRect.Position.Y < 20,
+                    "the thought is in faded ink along the top of the screen");
+                Check(!game.Hud.SpeechVisible && !game.Player.Talking, "a thought is not spoken: no speech, no moving mouth");
+                await Shot("office_thought");
+            }
             await game.Wait(0.1);
+        }
+        Check(thoughtChecked, "saw Micah's opening thought in the office");
     }
 
     /// <summary>Drives the real input path in 1927: left click the floor walks, left click the window looks at it.</summary>

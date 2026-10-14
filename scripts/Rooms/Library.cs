@@ -11,9 +11,9 @@ public partial class Library : Room
         State.SetFlag("seen_library_night");
         await Game.Run(async () =>
         {
-            await Say("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
-            await Say("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
-            await Say("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
+            await Think("The public library, in broad daylight. Leather, dust, and a room full of people pretending not to whisper.");
+            await Think("A man I don't know behind Rose's desk. Not her shift. Thank God. I couldn't have stood that look today.");
+            await Think("...Still. Her empty chair, her pencils lined up like soldiers. She's back in my head, and she isn't leaving.");
         });
     }
 
@@ -47,7 +47,7 @@ public partial class Library : Room
                 await Talk("librarian_threat");
                 State.SetFlag("librarian_threatened");
                 Player.SetPose(null);
-                await Say("I'd just held up a library. Mother would have been so proud.");
+                await Think("I've just held up a library. Mother would be so proud.");
                 return true;
             case ("librarian", Verb.Hand):
                 await Say("He looks like he'd break. I'm not that desperate. Not yet.");

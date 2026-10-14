@@ -44,15 +44,16 @@ public partial class ClubStage : Room
     private async Task EndOfActTwo()
     {
         await Wait(0.5);
-        await Say("The seats were full, and nobody was sitting. Everybody stood, facing the light.");
+        await Think("The seats were full, and nobody was sitting. Everybody stood, facing the light.");
         Game.Hud.ShowCloseUp(CloseUps.Stage);
         await Game.WalkTo(new Vector2(212, 208));
         Player.Face(Facing.Up);
         await Wait(0.8);
-        await Say(Game.Settings.NudityEnabled
-            ? "And in the light, Eleanor. No mask. Not a stitch on her, and nothing in her face. Not fear, not shame. Nothing. Three of them around her, like pall-bearers: a stag, a boar and a wolf."
-            : "And in the light, Eleanor. No mask, and nothing in her face. Not fear, not shame. Nothing. Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
-        await Say("She looked like a doll somebody had wound up and set down. Whoever lived behind those eyes had gone out and left the lights on.");
+        await Think(Game.Settings.NudityEnabled
+            ? "And in the light, Eleanor. No mask. Not a stitch on her, and nothing in her face. Not fear, not shame. Nothing."
+            : "And in the light, Eleanor. No mask, and nothing in her face. Not fear, not shame. Nothing.");
+        await Think("Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
+        await Think("She looked like a doll somebody had wound up and set down. Whoever lived behind those eyes had gone out and left the lights on.");
         await Wait(1.0);
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.HideCloseUp(0);
@@ -75,7 +76,7 @@ public partial class ClubStage : Room
             if (child is Actor a && a.Id != "brute" && a.Visible)
                 a.FaceLeft(a.Position.X > Player.Position.X);
         await Wait(1.6);
-        await Say("Every mask in the room, turned my way. White porcelain and carved bone, antlers, tusks and beaks, and all of them smiling.");
+        await Think("Every mask in the room turns my way. White porcelain and carved bone, antlers, tusks and beaks, and all of them smiling.");
         Game.Hud.HideCloseUp();
         await Wait(0.8);
         await Unmask();
@@ -98,14 +99,14 @@ public partial class ClubStage : Room
     private async Task Unmask()
     {
         if (FindActor("leader") is not { } leader) return;
-        await Say("All but one. The stag put a hand to his jaw and lifted the face away, and pushed the cowl back off his head.");
+        await Think("All but one. The stag puts a hand to his jaw, lifts the face away, and pushes the cowl back off his head.");
         leader.SetTexture(GD.Load<Texture2D>("res://assets/art/sprites/leader_unmasked.png"), leader.Frames);
         leader.Id = "harrington";
         leader.DisplayName = "Mr. Harrington";
         leader.LookText = "Harrington senior. Bald as an egg, white at the temples, the stag's face held against his chest like a hat at a funeral.";
         await Wait(1.2);
-        await Say("I knew the face. I'd seen it in oils, over a desk on LaSalle Street. The old man himself.");
-        await Say("Nobody else in the room even blinked. They'd always known. That was the point.");
+        await Think("I know the face. I've seen it in oils, over a desk on LaSalle Street. The old man himself.");
+        await Think("Nobody else in the room even blinks. They've always known. That's the point.");
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)

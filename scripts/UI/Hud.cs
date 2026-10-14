@@ -20,6 +20,9 @@ public partial class Hud : CanvasLayer
     public static readonly Color VerbColor = new("b89a58");
     public static readonly Color VerbHover = new("f8e8b0");
     public static readonly Color ChoiceColor = new("8ab0d8");
+    /// <summary>Faded journal ink for Micah's narration.</summary>
+    public static readonly Color ThoughtColor = new("d8b878");
+    private const int ThoughtWidth = 440, ThoughtTop = 4;
 
     public event Action<string, bool, Vector2>? ItemClicked;
     public event Action<string?>? ItemHovered;
@@ -38,6 +41,8 @@ public partial class Hud : CanvasLayer
     private ColorRect _choicesBg = null!;
     private VBoxContainer _choices = null!;
     private Label _speech = null!;
+    private Label _thought = null!;
+    private ColorRect _thoughtBg = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
     private TextureRect _image = null!;
@@ -70,6 +75,10 @@ public partial class Hud : CanvasLayer
     public bool SpeechVisible => _speech.Visible;
     public string SpeechText => _speech.Text;
     public Rect2 SpeechRect => _speech.GetRect();
+    public bool ThoughtVisible => _thought.Visible;
+    public string ThoughtText => _thought.Text;
+    public Rect2 ThoughtRect => _thought.GetRect();
+    public Color ThoughtFontColor => _thought.LabelSettings.FontColor;
     public Rect2 InsetRect => _inset.GetRect();
     public bool InsetDrawn => _inset.Visible && _inset.Modulate.A > 0;
     public float FadeAlpha => _fade.Color.A;

@@ -17,8 +17,8 @@ public partial class HarringtonRoad : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("The back of the Harrington Building. The front has a doorman, a brass plate and a bank's worth of marble.");
-            await Say("The back has a trash can and a watchman. Back doors are more my class.");
+            await Think("The back of the Harrington Building. The front has a doorman, a brass plate and a bank's worth of marble.");
+            await Think("The back has a trash can and a watchman. Back doors are more my class.");
         });
     }
 
@@ -166,7 +166,7 @@ public partial class HarringtonRoad : Room
             await w.MoveTo(new Vector2(176, 196));
         }
         State.SetFlag("watchman_distracted");
-        await Say("He'll stay inside explaining a trash can to the fire department. Time to sort out that ladder.");
+        await Think("He'll be inside a while, explaining a trash can to the fire department. Time to sort out that ladder.");
     }
 
     private async Task StackCrates()
@@ -186,7 +186,7 @@ public partial class HarringtonRoad : Room
     {
         await Game.WalkTo(new Vector2(334, 218));
         Player.Face(Facing.Up);
-        await Say("Up the crates, down comes the ladder. One floor up to the office window, and trying not to look down.");
+        await Think("Up the crates, down comes the ladder. One floor up to the office window, trying not to look down.");
         await Game.ChangeRoom("harrington_office", "window");
     }
 }

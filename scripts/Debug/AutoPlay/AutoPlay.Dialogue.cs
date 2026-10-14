@@ -118,14 +118,17 @@ public partial class AutoPlay
         }
     }
 
-    /// <summary>Awaits <paramref name="task"/>, collecting every speech line shown meanwhile.</summary>
+    /// <summary>Awaits <paramref name="task"/>, collecting every speech and thought line shown meanwhile.</summary>
     private static async Task<System.Collections.Generic.List<string>> Listen(Game game, Task task)
     {
         var heard = new System.Collections.Generic.List<string>();
+        string? lastSpeech = null, lastThought = null;
         while (!task.IsCompleted)
         {
-            if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
-                heard.Add(game.Hud.SpeechText);
+            if (game.Hud.SpeechVisible && lastSpeech != game.Hud.SpeechText)
+                heard.Add(lastSpeech = game.Hud.SpeechText);
+            if (game.Hud.ThoughtVisible && lastThought != game.Hud.ThoughtText)
+                heard.Add(lastThought = game.Hud.ThoughtText);
             await game.Wait(0.05);
         }
         await task;

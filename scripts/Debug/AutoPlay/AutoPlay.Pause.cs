@@ -70,6 +70,25 @@ public partial class AutoPlay
             await Observe(0.3);
             Check(nextSpeech.IsCompleted && !game.Hud.SpeechVisible, "click-to-skip still works after resuming");
 
+            var thought = game.Run(() => game.Think("Pause thought."));
+            await Observe(0.35);
+            PressKey(Key.Space);
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(3);
+            Check(game.IsPaused && !thought.IsCompleted && game.Hud.ThoughtVisible && game.Hud.ThoughtText == "Pause thought." &&
+                !game.Hud.SpeechVisible && !game.Player.Talking, "a paused thought outlasts its duration and cannot be skipped");
+            PressKey(Key.Space);
+            await Observe(0.3);
+            Check(!game.IsPaused && !thought.IsCompleted && game.Hud.ThoughtVisible, "the thought is still up after resuming");
+            Click(new Vector2(240, 140), MouseButton.Left);
+            await Observe(0.3);
+            Check(thought.IsCompleted && !game.Hud.ThoughtVisible, "click skips the thought after resuming");
+            var skipped = game.Run(() => game.Think("Skip this thought."));
+            await Observe(0.3);
+            game.SkipSpeech();
+            await Observe(0.3);
+            Check(skipped.IsCompleted && !game.Hud.ThoughtVisible, "SkipSpeech ends a thought");
+
             var timer = game.Wait(0.8);
             await Observe(0.2);
             PressKey(Key.Space);

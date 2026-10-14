@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Repentance;
 
-/// <summary>Scripting helpers rooms use: Run, WalkTo, Say and Wait.</summary>
+/// <summary>Scripting helpers rooms use: Run, WalkTo, Say, Think and Wait.</summary>
 public partial class Game
 {
     /// <summary>Runs a scripted sequence, blocking player input and hiding the verbs while it runs.</summary>
@@ -52,6 +52,23 @@ public partial class Game
         await Task.WhenAny(Wait(seconds), skip.Task);
         who.Talking = false;
         Hud.HideSpeech();
+        if (_skipSpeech == skip) _skipSpeech = null;
+        await Wait(0.12);
+    }
+
+    /// <summary>
+    /// Micah's journal narration: a thought shown along the top of the screen in faded ink. Blocks like speech
+    /// (timed by length, a click skips it) but nobody's mouth moves.
+    /// </summary>
+    public async Task Think(string text)
+    {
+        _skipSpeech = new TaskCompletionSource();
+        var skip = _skipSpeech;
+        Hud.ShowThought(text);
+        var seconds = Math.Clamp(1.2 + text.Length * 0.06, 2.0, 8.0);
+        await Wait(0.15);
+        await Task.WhenAny(Wait(seconds), skip.Task);
+        Hud.HideThought();
         if (_skipSpeech == skip) _skipSpeech = null;
         await Wait(0.12);
     }

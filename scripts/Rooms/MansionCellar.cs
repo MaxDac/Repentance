@@ -21,7 +21,8 @@ public partial class MansionCellar : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Black as a coal hole. I can make out a lantern on a hook and some crates.");
+            await Think("Down the steps into the cold. The dark here has weight, like a confessional with the priest gone home.");
+            await Think("Black as a coal hole. I can make out a lantern on a hook and some crates.");
         });
     }
 
@@ -100,5 +101,6 @@ public partial class MansionCellar : Room
         State.SetFlag("cellar_lit");
         await Say("I hang the lantern on a nail at the back. Racks of wine, the kind nobody's allowed to drink.");
         await Say("And behind them, stone steps going up to a panel. A bootleggers' stair, straight to the old man's bar.");
+        await Think("A rich man's back stair for his bottles. Every vice in this city has a service entrance.");
     }
 }

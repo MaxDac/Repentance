@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Repentance;
 
-/// <summary>Dialogue choices and speech text.</summary>
+/// <summary>Dialogue choices, speech text and Micah's journal thoughts.</summary>
 public partial class Hud
 {
     private void BuildChoices(Control root)
@@ -30,6 +30,23 @@ public partial class Hud
             Visible = false,
         };
         root.AddChild(_speech);
+
+        // Micah's journal narration: faded ink along the top, over a faint strip so it reads on any background
+        _thoughtBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.02f, 0.55f), Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        root.AddChild(_thoughtBg);
+        _thought = new Label
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            LabelSettings = new LabelSettings
+            {
+                Font = Font, FontSize = 8, FontColor = ThoughtColor, OutlineSize = 4,
+                OutlineColor = new Color(0.08f, 0.05f, 0.02f), LineSpacing = 1,
+            },
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Visible = false,
+        };
+        root.AddChild(_thought);
     }
 
     public Task<int> ShowChoices(IReadOnlyList<string> options)
@@ -103,6 +120,21 @@ public partial class Hud
     }
 
     public void HideSpeech() => _speech.Visible = false;
+
+    /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
+    public void ShowThought(string text)
+    {
+        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, ThoughtWidth, 8);
+        _thought.Text = text;
+        _thought.Size = new Vector2(ThoughtWidth, size.Y);
+        _thought.Position = new Vector2((ScreenW - ThoughtWidth) / 2f, ThoughtTop).Round();
+        float stripW = Mathf.Min(ThoughtWidth, size.X) + 12;
+        _thoughtBg.Position = new Vector2((ScreenW - stripW) / 2f, ThoughtTop - 3).Round();
+        _thoughtBg.Size = new Vector2(stripW, size.Y + 6).Round();
+        _thought.Visible = _thoughtBg.Visible = true;
+    }
+
+    public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
 
     /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
     private void ShowSpeechOverInset(string text, ISpeaker speaker)

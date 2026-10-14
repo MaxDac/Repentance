@@ -16,7 +16,7 @@ public partial class ConventCorridor : Room
             await Game.Run(async () =>
             {
                 await Wait(0.6);
-                await Say("Same corridor, same wax, same sister. She saw me coming from the other end of it.");
+                await Think("Same corridor, same wax, same sister. She saw me coming from the other end of it.");
                 if (FindActor("nun") is { } nun) await Game.WalkTo(nun.WalkTo);
                 await Talk("nun_club");
             });
@@ -26,7 +26,7 @@ public partial class ConventCorridor : Room
         await Game.Run(async () =>
         {
             await Wait(0.6);
-            await Say("Incense, floor wax and cold stone. Every convent smells like my mother's disappointment.");
+            await Think("Incense, floor wax and cold stone. Every convent smells like my mother's disappointment.");
             await Talk("nun");
         });
     }
@@ -109,8 +109,8 @@ public partial class ConventCorridor : Room
                 await Wait(1.0);
                 Player.SetPose(null);
                 await Say("...");
-                await Say("(I put the revolver away. My hand was shaking. It never used to.)");
-                await Say("Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's name - I'd start there.");
+                await Think("I put the revolver away. My hand is shaking. It never used to.");
+                await Think("Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's name - I'd start there.");
                 await LeaveToMap();
                 return true;
             case ("cell_door", Verb.Walk or Verb.Hand):

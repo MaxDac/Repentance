@@ -21,6 +21,17 @@ public partial class AurelianRoom : Room
         background.Texture = State.HasFlag(BedDisturbedFlag) ? UnmadeBackground : MadeBackground;
     }
 
+    public override async Task OnEnter(string entry)
+    {
+        if (State.HasFlag("thought_aurelian_room")) return;
+        State.SetFlag("thought_aurelian_room");
+        await Game.Run(async () =>
+        {
+            await Wait(0.4);
+            await Think("A suite at the Aurelian. Clean towels, fresh lilies, and nobody's life left in it.");
+        });
+    }
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)

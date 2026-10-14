@@ -65,8 +65,10 @@ public partial class AutoPlay
         await Until(() => game.Hud.InsetVisible);
         Check(game.Hud.CurrentCloseUp == CloseUps.Stage && game.Hud.InsetName.StartsWith("stage_closeup"), "Eleanor's close-up framed over the stage after Micah's first line");
         Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the close-up fills most of the screen");
-        await Until(() => game.Hud.SpeechVisible);
-        Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below her face while the close-up is up");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("And in the light", StringComparison.Ordinal));
+        Check(game.Hud.InsetVisible && !game.Hud.SpeechVisible && game.Hud.ThoughtRect.Position.Y < 20 &&
+            game.Hud.ThoughtRect.End.Y < game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.3f,
+            "Micah's thoughts on Eleanor sit along the top while the close-up is up");
         await game.Wait(4);
         await Shot("club_stage");
         await Until(() => game.Room?.Name == "Attic");
@@ -107,9 +109,11 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "ChurchExterior");
         await Until(() => game.Hud.InsetVisible);
         Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
+        await Until(() => game.Hud.ThoughtVisible);
+        Check(game.Hud.InsetVisible && !game.Hud.SpeechVisible && game.Hud.ThoughtRect.Position.Y < 20 &&
+            game.Hud.ThoughtRect.End.Y < game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.3f,
+            "his thoughts sit along the top, clear of his face, while the close-up is up");
         await game.Wait(1.5);
-        Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f,
-            "his thoughts sit below his face while the close-up is up");
         await Shot("church_exterior_beaten");
         await Until(() => game.Room?.Name == "Office");
         Check(_insetAtBeatenChoice == false, "Micah's close-up is removed before he gets up and chooses");

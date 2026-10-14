@@ -256,15 +256,7 @@ public partial class AutoPlay
                     ? Task.FromResult(dialogue.Get("pushes").AsInt32() < appeals ? 0 : options.Count - 1)
                     : choose(knot, options);
                 await game.ChangeRoom("rose_house", "start");
-                var heard = new System.Collections.Generic.List<string>();
-                var visit = game.Perform(Verb.Hand, "bell");
-                while (!visit.IsCompleted)
-                {
-                    if (game.Hud.SpeechVisible && (heard.Count == 0 || heard[^1] != game.Hud.SpeechText))
-                        heard.Add(game.Hud.SpeechText);
-                    await game.Wait(0.05);
-                }
-                await visit;
+                var heard = await Listen(game, game.Perform(Verb.Hand, "bell"));
                 bool dismissed = heard.Any(l => l.Contains("Don't bother ringing this bell again, Micah Jones."));
                 bool shutForGood = heard.Any(l => l.Contains("Just once, and for good."));
                 Check(dismissed == (appeals < 3) && shutForGood == (appeals < 3),

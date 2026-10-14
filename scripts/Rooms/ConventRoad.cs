@@ -12,6 +12,7 @@ public partial class ConventRoad : Room
             if (State.HasFlag("seen_convent_exterior")) return;
             await Game.Run(async () =>
             {
+                await Think("The end of a dark road on the North Side. My ribs remember every one of Sal's knuckles.");
                 await Say("Gothic arches, iron spikes and a saint in every window. They built the place to point toward heaven. From down here, it looks like a warning.");
                 State.SetFlag("seen_convent_exterior");
             });
@@ -21,6 +22,7 @@ public partial class ConventRoad : Room
         await Game.Run(async () =>
         {
             await Wait(0.8);
+            await Think("A woman in black by the gate, alone on an empty road. I know the face. I've carried it in my pocket all night.");
             if (FindActor("eleanor") is { } eleanor)
                 await Game.WalkTo(eleanor.Position + new Godot.Vector2(-44, 4));
             Player.Face(Facing.Right);
