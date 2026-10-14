@@ -66,7 +66,8 @@ public partial class Office : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Another night, another bottle of whiskey. And a client. A well-dressed one.");
+            await Think("Rain ticks on the window. The radiator knocks. Nine o'clock, and the bottle's already lower than the day.");
+            await Think("Another night, another bottle. And a client in my chair, too well dressed for this floor.");
             await Talk("teddy");
             await TeddyLeaves();
         });
@@ -74,6 +75,7 @@ public partial class Office : Room
 
     private async Task Act2Opening()
     {
+        await Think("The office again. Teddy's twenty a day is gone, and the bottle's still here. Loyal, the bottle.");
         await Game.WalkTo(new Godot.Vector2(124, 172));
         Player.Face(Facing.Right);
         State.SetFlag("office_cup_held");
@@ -86,7 +88,7 @@ public partial class Office : Room
         Player.SetPose(null);
         State.SetFlag("office_cup_held", false);
         State.SetFlag("act2_whiskey_drunk");
-        await Say("Whiskey. It burns going down. Doesn't burn away a thing.");
+        await Think("Whiskey. It burns going down. It doesn't burn away a thing.");
         await Talk("office_ring");
         State.SetFlag("act2_office_done");
         await Game.WalkTo(new Godot.Vector2(58, 172));
@@ -102,7 +104,8 @@ public partial class Office : Room
         await OpenTheDoor(player: false);
         State.SetFlag("teddy_gone");
         await CloseTheDoor();
-        await Say("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
+        await Think("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
+        await Think("A wife who walked out. I know a thing or two about that. Just never from his side of the door.");
     }
 
     /// <summary>
@@ -144,17 +147,17 @@ public partial class Office : Room
     {
         Player.Face(Facing.Up);
         await Wait(1.0);
-        await Say("Back in my own office. Lamp off. The whiskey's still there. Some things you can count on.");
-        await Say("Thanks to my efforts, he said. How'd they find her through me? Somebody on my heels? Something I let slip?");
-        await Say("Aw, what's the difference? They've got her just the same.");
-        await Say("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
-        await Say("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
-        await Say("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
-        await Say("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
+        await Think("Back in my own office. Lamp off. The whiskey's still there. Some things you can count on.");
+        await Think("Thanks to my efforts, he said. How'd they find her through me? Somebody on my heels? Something I let slip?");
+        await Think("Aw, what's the difference? They've got her just the same.");
+        await Think("Where would they take her? Not the Club, not tonight. Not the hotel. Not Teddy's, he'd have to explain her.");
+        await Think("The convent's done with me. Caleb would sooner pray than talk. The cops are on somebody's payroll.");
+        await Think("Who knows where the Club keeps its girls? Who delivers to people like that, and keeps his mouth shut?");
+        await Think("The Blue Lantern. Tony and his gorilla. The mob knows every back door in this town. They deliver to most of them.");
         State.SetFlag("micah_at_desk", false);
         Player.Face(Facing.Left);
         await Wait(0.4);
-        await Say("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
+        await Think("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
     }
 
     private async Task LeaveAct3()

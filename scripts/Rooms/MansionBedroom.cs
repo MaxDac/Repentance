@@ -45,6 +45,7 @@ public partial class MansionBedroom : Room
         await Game.WalkTo(BehindScreen);
         Player.Face(Facing.Right);
         await Wait(0.8);
+        await Think("Behind a folding screen, breathing through my mouth. A walnut bed the size of my office. She's in it.");
         await Talk("harrington_eleanor");
 
         // He steps out round the other end, then forward into the room with the revolver up.
@@ -67,6 +68,7 @@ public partial class MansionBedroom : Room
         if (State.HasFlag(Endings.SparedOldMan))
         {
             Player.SetPose(null);
+            await Think("I put the gun away. He's still talking when I reach the door. Let him. I know where I'm going.");
             await Wait(0.5);
             await Game.WalkTo(new Vector2(30, 236));
             await Act3.End();
@@ -81,6 +83,7 @@ public partial class MansionBedroom : Room
         }
         await Wait(1.0);
         Player.SetPose(null);
+        await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
         await Talk("eleanor_persuade");
 
         if (State.HasFlag(Endings.EleanorConvinced))

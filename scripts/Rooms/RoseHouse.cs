@@ -21,8 +21,8 @@ public partial class RoseHouse : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("Number 14. I used to come home to this door. Mostly at three in the morning, mostly drunk.");
-            await Say("Rose kept the house. Rose kept Tommy. I kept the bottle. Seemed fair at the time.");
+            await Think("Number 14. I used to come home to this door. Mostly at three in the morning, mostly drunk.");
+            await Think("Rose kept the house. Rose kept Tommy. I kept the bottle. It seemed fair at the time.");
         });
     }
 
@@ -62,7 +62,7 @@ public partial class RoseHouse : Room
     {
         await Talk("rose_leave");
         if (!State.HasFlag("rose_avoided")) return;
-        await Say("Not tonight. I left the bell alone, the way I left everything else in that house.");
+        await Think("Not tonight. I left the bell alone, the way I left everything else in that house.");
         await Game.WalkTo(new Vector2(8, 236));
         await Game.ChangeRoom("chicago_map", "start");
     }
@@ -105,7 +105,7 @@ public partial class RoseHouse : Room
         if (!State.HasFlag("rose_wait"))
         {
             State.SetFlag("rose_door", false);
-            await Say("The door shut. Not hard. Just once, and for good.");
+            await Think("The door shut. Not hard. Just once, and for good.");
             await Game.WalkTo(new Vector2(8, 236));
             await Game.ChangeRoom("chicago_map", "start");
             return;
@@ -120,7 +120,7 @@ public partial class RoseHouse : Room
         Game.Hud.HideCloseUp();
         await Wait(0.8);
         State.SetFlag("rose_door", false);
-        await Say("The door closed. Softly. She always closed doors softly. It was worse than slamming.");
+        await Think("The door closes. Softly. She always closed doors softly. It was worse than slamming.");
         await Game.WalkTo(new Vector2(8, 236));
         await Game.ChangeRoom("chicago_map", "start");
     }
@@ -129,13 +129,14 @@ public partial class RoseHouse : Room
     private Task Coffee() => Game.Run(async () =>
     {
         await Wait(0.6);
-        await Say("Same door. Same bell. A different man pressing it, I hoped.");
+        await Think("Same door. Same bell. A different man pressing it, I hope.");
         await Game.WalkTo(TalkSpot);
         Player.Face(Facing.Up);
         await Say("*Ring*");
         await Wait(1.2);
         await RoseOpens();
         await Talk("rose_coffee");
+        await Think("Why not. Two small words. I'll walk home on them like they're solid ground.");
         await Act3.Finish();
     });
 }

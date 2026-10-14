@@ -46,11 +46,13 @@ public partial class Speakeasy : Room
     /// <summary>The door talk, whether Micah opens it or Sal stops him. If nobody gets anywhere, Sal walks him back.</summary>
     private async Task TalkToSal()
     {
+        bool wasPassed = State.HasFlag("sal_passed");
         await Talk("sal");
         var sal = FindActor("sal");
         if (State.HasFlag("sal_passed"))
         {
             if (sal != null) await sal.MoveTo(SalAside, 45);
+            if (!wasPassed) await Think("Ten dollars into a fist the size of a ham. Half of what I had left, and I haven't even had a drink.");
         }
         else if (State.HasFlag("thrown_out"))
             await ThrownOut();
@@ -72,8 +74,9 @@ public partial class Speakeasy : Room
         State.SetFlag("seen_lantern");
         await Game.Run(async () =>
         {
+            await Think("Past the iced roses, a steel door, then smoke and a muted trumpet. The Blue Lantern.");
             await Say("sal", "Members only, pal.");
-            await Say("The Blue Lantern. Gin, jazz, and a bouncer built like a bank vault.");
+            await Think("Gin, jazz, and a bouncer built like a bank vault.");
         });
     }
 
@@ -153,7 +156,7 @@ public partial class Speakeasy : Room
     {
         if (State.HasFlag("photo_shown")) return;
         await Talk("bartender_dislike");
-        await Say("He nods at the bouncer by the door. That's never a good nod.");
+        await Think("He nods at the bouncer by the door. That's never a good nod.");
         if (FindActor("sal") is { } sal)
             await sal.MoveTo(Game.Player.Position + new Vector2(-18, 0), 70);
         await Say("sal", "Out back, pal. Tony wants a word. Several, actually.");

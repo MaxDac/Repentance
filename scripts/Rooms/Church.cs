@@ -24,7 +24,7 @@ public partial class Church : Room
         }
         if (State.HasFlag("seen_church_interior")) return;
         State.SetFlag("seen_church_interior");
-        await Game.Run(() => Say("The nave swallowed the street noise whole. Even my footsteps sounded guilty in here."));
+        await Game.Run(() => Think("The nave swallows the street noise whole. Even my footsteps sound guilty in here."));
     }
 
     /// <summary>Act 2: Micah talks to his brother, then walks out on him and onto the streets of Chicago.</summary>
@@ -32,6 +32,7 @@ public partial class Church : Room
     {
         State.SetFlag("seen_church_interior");
         await Wait(0.4);
+        await Think("Candle smoke and cold stone. My brother is up by the altar rail, and I still don't know what I came to say.");
         if (FindActor("caleb") is { } caleb)
         {
             await Game.WalkTo(caleb.WalkTo);
@@ -40,6 +41,7 @@ public partial class Church : Room
         await Talk("caleb_act2");
         State.SetFlag("act2_church", false);
         if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
+        await Think("He calls after me. I keep walking. Walking out is the one thing I've always been good at.");
         await Game.ChangeRoom("chicago_map", "start");
     });
 
@@ -60,6 +62,7 @@ public partial class Church : Room
             await Talk("caleb_club");
             // Micah doesn't answer that one. He just leaves.
             await Wait(1.2);
+            await Think("No answer for that. None I could say out loud, not in his church.");
         }
         else if (State.HasFlag("harrington_done"))
         {
@@ -94,6 +97,11 @@ public partial class Church : Room
         }
         State.SetFlag("church_act3_return");
         await Talk("caleb_act3_return");
+        if (!State.HasFlag("thought_church_act3"))
+        {
+            State.SetFlag("thought_church_act3");
+            await Think("Rose and Tommy. He says their names like a door I could still knock on. Then I think of her, and I'm gone again.");
+        }
         await OfferCross();
         if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
         await Game.ChangeRoom("office", "from_caleb");

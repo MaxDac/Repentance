@@ -20,7 +20,18 @@ public partial class Street : Room
 
     public override async Task OnEnter(string entry)
     {
-        if (entry == "thrown_out") await Game.Run(ThrownOut);
+        if (entry == "thrown_out")
+        {
+            await Game.Run(ThrownOut);
+            return;
+        }
+        if (State.HasFlag("thought_street")) return;
+        State.SetFlag("thought_street");
+        await Game.Run(async () =>
+        {
+            await Wait(0.4);
+            await Think("State Street. Wet pavement, headlamps hissing past, a newsboy selling tomorrow's trouble. Nobody out here has seen her either.");
+        });
     }
 
     /// <summary>Act 2: Bruno dumps Micah on the pavement outside the Club. He thinks about Rose and Tommy, then chooses.</summary>
@@ -28,12 +39,12 @@ public partial class Street : Room
     {
         Player.SetPose("micah_supine");
         await Wait(1.2);
-        await Say("The pavement on Hubbard Street is cold, and it doesn't ask questions. I like that in a pavement.");
-        await Say("What am I doing, lying in the gutter for a woman I met four days ago?");
-        await Say("I had a wife once. Still do, on paper. A boy who's eleven now, if I've counted right. Tommy.");
-        await Say("I walked out on them because the bottle was easier to talk to. And now I'm walking into the night for a stranger.");
-        await Say("At the library I thanked God Rose wasn't at her desk. She's been in my head every minute since.");
-        await Say("Maybe that's the joke. Maybe it's easier to save somebody you don't owe anything to.");
+        await Think("The pavement on Hubbard Street is cold under my back, and it doesn't ask questions. I like that in a pavement.");
+        await Think("What am I doing, lying in the gutter for a woman I met four days ago?");
+        await Think("I have a wife. On paper, anyway. And a boy who's eleven now, if I've counted right. Tommy.");
+        await Think("I walked out on them because the bottle was easier to talk to. Now I walk into the night for a stranger.");
+        await Think("At the library I thanked God Rose wasn't at her desk. She's been in my head every minute since.");
+        await Think("Maybe that's the joke. Maybe it's easier to save somebody you don't owe anything to.");
         if (!await Player.PlayPose("micah_recover")) return;
         Player.SetPose(null);
         Player.Face(Facing.Down);

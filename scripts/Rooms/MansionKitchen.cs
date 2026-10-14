@@ -21,14 +21,18 @@ public partial class MansionKitchen : Room
                 if (State.HasFlag(Endings.EleanorConvinced))
                     await Say("eleanor", "The back door, Micah. Please. Let's go.");
                 else
-                    await Say("Alone. She chose that house. Or the house chose her.");
-                await Say("Gas range. A candle on the table. Matches. This house runs on the Club's gas, like everything else on the Gold Coast.");
+                    await Think("Alone. She chose that house. Or the house chose her.");
+                await Think("Gas range. A candle on the table. Matches. This house runs on the Club's gas, like everything else on the Gold Coast.");
             });
             return;
         }
         if (entry != "start" || State.HasFlag("seen_mansion_kitchen")) return;
         State.SetFlag("seen_mansion_kitchen");
-        await Game.Run(() => Say("A kitchen bigger than my office, my flat and my marriage put together. Quiet as a church."));
+        await Game.Run(async () =>
+        {
+            await Think("Copper pans glint in the dark. Somewhere upstairs a clock is counting the old man's money.");
+            await Think("A kitchen bigger than my office, my flat and my marriage put together. Quiet as a church.");
+        });
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)

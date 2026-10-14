@@ -76,8 +76,8 @@ public partial class Alley : Room
             await Game.Run(async () =>
             {
                 await Wait(0.6);
-                await Say("The Blue Lantern's back door. Last time I was here, I was on my knees.");
-                await Say("Sal's inside, and Tony behind him. I need Tony out here. Alone. Without his gorilla.");
+                await Think("The Blue Lantern's back door. Last time I was here, I was on my knees.");
+                await Think("Sal's inside, and Tony behind him. I need Tony out here. Alone. Without his gorilla.");
             });
             return;
         }
@@ -86,6 +86,7 @@ public partial class Alley : Room
         {
             Player.SetPose("micah_kneel");
             await Wait(1.2);
+            await Think("Gravel in my palms, copper in my mouth. Sal's fists did the talking. Now Tony wants his turn.");
             await Talk("alley");
             // back inside through the club's back door
             if (FindActor("sal") is { } sal) _ = sal.MoveTo(new Vector2(322, 198), 50);
@@ -94,7 +95,7 @@ public partial class Alley : Room
             if (!await Player.PlayPose("micah_kneel_rise")) return;
             Player.SetPose(null);
             Player.Face(Facing.Right);
-            await Say("A convent. Of all the places to hide a woman like that.");
+            await Think("A convent. Of all the places to hide a woman like that.");
             State.SetFlag("alley_done");
         });
     }
@@ -181,7 +182,7 @@ public partial class Alley : Room
         sal.WalkTo = BehindSal;
         await Say("sal", "Damn cats. And who turned off the light? Tony! The light's out again!");
         await Say("sal", "...Tony? Ah, forget it.");
-        await Say("His back's to me. Big back. It would be a shame to waste it.");
+        await Think("His back's to me. Big back. It would be a shame to waste it.");
     }
 
     private async Task KnockOutSal()
@@ -217,7 +218,7 @@ public partial class Alley : Room
         {
             Player.SetPose(null);
             await Wait(0.6);
-            await Say("I walked away. Down the alley, past the dead lamp, out into the street. Nobody followed.");
+            await Think("I walk away. Down the alley, past the dead lamp, out into the street. Nobody follows.");
             await Game.WalkTo(StreetMouth);
             await Act3.End();
             return;
@@ -230,7 +231,8 @@ public partial class Alley : Room
         await Talk("bartender_shot");
         Player.SetPose(null);
         State.SetFlag("alley3_done");
-        await Say("The Gold Coast. The kitchen door. The delivery boys' key.");
+        await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
+        await Think("I shot a man tonight. My hand doesn't shake. That's what scares me.");
         await Game.WalkTo(StreetMouth);
         await Game.ChangeRoom("mansion_exterior", "start");
     }

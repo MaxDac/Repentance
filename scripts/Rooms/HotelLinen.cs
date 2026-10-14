@@ -18,7 +18,7 @@ public partial class HotelLinen : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Fifth floor, linen room. 507's on the other side of that door. So is a night bolt.");
+            await Think("Fifth floor, linen room. Starch and hot pipes. 507's on the other side of that door. So is a night bolt.");
         });
     }
 

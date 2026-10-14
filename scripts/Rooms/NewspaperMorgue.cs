@@ -19,8 +19,8 @@ public partial class NewspaperMorgue : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("The Tribune morgue. Where yesterday's news comes to lie in steel drawers and smell of glue.");
-            await Say("The night man upstairs owes me for a story I never told. He gave me ten minutes and the lights.");
+            await Think("The Tribune morgue. Yesterday's news lies down here in steel drawers and smells of glue.");
+            await Think("The night man upstairs owes me for a story I never told. He gives me ten minutes and the lights.");
         });
     }
 
@@ -92,6 +92,7 @@ public partial class NewspaperMorgue : Room
                 State.SetFlag("harrington_located");
                 await Say("\"Harrington senior keeps his offices at the Harrington Building, LaSalle Street.\"");
                 await Say("I pin it where it belongs. The Harrington Building, LaSalle Street - right in the middle of the Loop, where the money sleeps.");
+                await Think("One pin in a city of pins. Somewhere under it, an old man who knows where Eleanor is.");
                 if (PasteOut) await Say("I'll put the paste back on my way out.");
                 return true;
             case ("wall_map", Verb.UseItem) when item is "clipping_top" or "clipping_bottom":
@@ -118,7 +119,7 @@ public partial class NewspaperMorgue : Room
             if (FindHotspot("paste_pot") is { } pot) await Game.WalkTo(pot.WalkTo);
             State.TakeItem("paste");
             State.SetFlag("paste_out", false);
-            await Say("(I put the paste pot back on the layout desk. Borrowed is borrowed.)");
+            await Think("I put the paste pot back on the layout desk. Borrowed is borrowed.");
         }
         if (FindHotspot("door") is { } door) await Game.WalkTo(door.WalkTo);
         await Game.ChangeRoom("chicago_map", "start");

@@ -16,6 +16,17 @@ public partial class MotelRoom : Room
         background.Texture = State.HasFlag(BedSearchedFlag) ? UnmadeBackground : MadeBackground;
     }
 
+    public override async Task OnEnter(string entry)
+    {
+        if (State.HasFlag("thought_motel_room")) return;
+        State.SetFlag("thought_motel_room");
+        await Game.Run(async () =>
+        {
+            await Wait(0.4);
+            await Think("A motel room by the hour. Damp walls, a sagging bed, a bottle somebody didn't finish. I know the type. I am the type.");
+        });
+    }
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)

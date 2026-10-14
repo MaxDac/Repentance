@@ -16,7 +16,8 @@ public partial class BlueLanternFront : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Say("Rizzo's Flowers. Closed at this hour, but somebody's still taking deliveries round the cold room.");
+            await Think("State Street again, and the rain hasn't let up. The matchbook says Blue Lantern. The sign says Rizzo's Flowers.");
+            await Think("Closed at this hour, but somebody's still taking deliveries round the cold room.");
         });
     }
 

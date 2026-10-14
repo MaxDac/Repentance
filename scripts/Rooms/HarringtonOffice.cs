@@ -17,8 +17,8 @@ public partial class HarringtonOffice : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Say("Theodore Harrington's office. The light's on and the chair's empty. Old money keeps its lamps burning even when it goes home.");
-            await Say("The sister said Harrington senior. Let's see what senior keeps in his desk.");
+            await Think("Theodore Harrington's office. The light's on and the chair's empty. Old money keeps its lamps burning even when it goes home.");
+            await Think("The sister said Harrington senior. Let's see what senior keeps in his desk.");
         });
     }
 
@@ -108,7 +108,7 @@ public partial class HarringtonOffice : Room
                 return true;
             case ("window", Verb.Walk or Verb.Hand):
                 State.SetFlag("harrington_done");
-                await Say("Back out the window, down the fire escape, and away before the fire trucks come.");
+                await Think("Back out the window, down the fire escape, and away before the fire trucks come. Saturday is tonight.");
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
         }
