@@ -94,7 +94,7 @@ items, solve the puzzles and pick the choices.
 - **Every ending, for real.** Acts 1 and 2 are played once. At the Club vestibule the run saves to a manual slot,
   then reloads that save and plays each Act 3 route through to "The End": endings 2, 3, 4, 5 and the three ways to
   ending 1 (Tony, the old man, the steps). No state is seeded.
-- **Decisions.** Every Ink choice the beats pick is logged; the run fails if a choice it wants isn't offered.
+- **Decisions.** Every Ink choice the beats pick is logged; the run fails if a choice its route wants is never offered by the time the route reaches "The End".
 - **Save/load at every beat.** After each beat the game saves, loads that save and compares the flags, items, act,
   room, position and Ink state. A save that doesn't restore exactly what was there fails the run.
 - **No dead ends.** A beat that can't reach what it needs (an exit, an item, a choice) times out and fails, naming

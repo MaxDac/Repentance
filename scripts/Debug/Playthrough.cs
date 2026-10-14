@@ -35,6 +35,7 @@ public sealed class Playthrough : Harness
     private string _route = "2";
     private string[] _routes = { "2" };
     private readonly List<string> _decisions = new();
+    private readonly HashSet<string> _matchedWants = new();
     private readonly HashSet<string> _shownLabels = new();
     private int _roundTrips;
     private const string RoundTripSlot = "manual_3";
@@ -126,6 +127,7 @@ public sealed class Playthrough : Harness
         string checkpoint = SaveSystem.ManualSlot(1);
         Check(_game.SaveToSlot(checkpoint), "saved the Club vestibule checkpoint");
         var save = SaveSystem.Read(checkpoint) ?? throw new InvalidOperationException("Missing the vestibule checkpoint");
+        var wantsBeforeActThree = _matchedWants.ToList();
         for (int i = 0; i < _routes.Length; i++)
         {
             _route = _routes[i];
@@ -134,6 +136,8 @@ public sealed class Playthrough : Harness
             {
                 await _game.LoadGame(save);
                 await WaitIdle();
+                _matchedWants.Clear();
+                _matchedWants.UnionWith(wantsBeforeActThree);
                 Check(_game.Room is Rooms.ClubVestibule && Gs.HasItem("sealed_invitation"), $"route {_route}: reloaded the vestibule checkpoint");
             }
             await ActThree();
@@ -540,6 +544,12 @@ public sealed class Playthrough : Harness
         for (int n = 1; n <= 5; n++)
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         Check(Gs.HasItem("journal") == (ending == 1), $"route {_route}: Daniel {(ending == 1 ? "keeps the journal for Leo" : "puts the journal back")}");
+        // Choose() falls back to the first option, so a renamed or wrongly gated choice would otherwise pass silently.
+        // By now the cross is taken, so Wants() names the Blue Lantern; Caleb was asked for on the first visit. Giving up
+        // on the steps ends the story before Act 3's office, so that route only answers the stage.
+        var required = _route == "1-steps" ? new[] { "Give up" } : Wants().Append("Visit Caleb").Distinct();
+        foreach (var want in required)
+            Check(_matchedWants.Contains(want), $"route {_route}: the choice \"{want}\" was offered and taken");
     }
 
     // ------------------------------------------------------------------ decisions
@@ -589,6 +599,7 @@ public sealed class Playthrough : Harness
             int i = options.ToList().FindIndex(o => o.Contains(want, StringComparison.Ordinal));
             if (i < 0) continue;
             pick = i;
+            _matchedWants.Add(want);
             break;
         }
         _decisions.Add($"{knot}: {options[pick]}");

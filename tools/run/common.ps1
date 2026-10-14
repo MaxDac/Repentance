@@ -61,7 +61,10 @@ function Build-And-Import([string]$Godot) {
     Push-Location $Root
     try {
         Invoke-Checked 'dotnet build' { dotnet build Repentance.csproj --nologo -v quiet }
-        Invoke-Checked 'Godot import' { & $Godot --headless --path . --import 2>&1 | ForEach-Object { "$_" } | Out-Host }
+        # Windows PowerShell 5.1 turns redirected native stderr into terminating errors under 'Stop'.
+        $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+        try { Invoke-Checked 'Godot import' { & $Godot --headless --path . --import 2>&1 | ForEach-Object { "$_" } | Out-Host } }
+        finally { $ErrorActionPreference = $eap }
     }
     finally { Pop-Location }
 }
@@ -79,12 +82,15 @@ function Invoke-GodotRun {
     $log = Join-Path $LogDir "$Name.log"
     Write-Host "== $Name ($($UserArgs -join ' '))" -ForegroundColor Cyan
     Push-Location $Root
+    # Windows PowerShell 5.1 turns redirected native stderr into terminating errors under 'Stop'; success is judged
+    # from the exit code, markers and log below instead.
+    $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
     try {
         $all = @('--path', '.') + $EngineArgs + @('--') + $UserArgs
         & $Godot @all 2>&1 | ForEach-Object { "$_" } | Tee-Object -FilePath $log | Out-Host
         $code = $LASTEXITCODE
     }
-    finally { Pop-Location }
+    finally { $ErrorActionPreference = $eap; Pop-Location }
     $text = @(Get-Content $log)
     $ok = $true
     if ($code -ne 0) { Write-Host "Godot exited with status $code" -ForegroundColor Red; $ok = $false }
