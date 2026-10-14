@@ -135,12 +135,14 @@ public partial class AutoPlay
         var club = game.Perform(Verb.Walk, "club");
         await Until(() => game.Room?.Name == "ClubHall");
         Check(!gs.HasFlag("on_map") && game.Room?.FindHotspot("guest")?.Visible == false, "entered the Club, no masks around yet");
+        Check(game.Music.Current == Track.ClubStrings, "the Club's strings start in the hall");
         await game.Wait(1);
         await Shot("club_hall");
         await Until(() => gs.HasFlag("brute_called"));
         await game.Wait(1);
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
+        Check(game.Music.Current == null, "the strings stop out on the street");
         await game.Wait(1.5);
         await Shot("street_thrown_out");
         await Until(() => game.Room?.Name == "RoseHouse");

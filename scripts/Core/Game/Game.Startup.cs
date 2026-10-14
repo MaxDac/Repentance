@@ -20,6 +20,9 @@ public partial class Game
         Sfx = new Sfx { Name = "Sfx" };
         AddChild(Sfx);
         Sfx.Bind(Settings);
+        Music = new Music { Name = "Music" };
+        AddChild(Music);
+        Music.Bind(Settings);
         AddChild(new WindowModeController(Settings, !anyTest) { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);

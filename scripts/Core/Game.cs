@@ -24,6 +24,7 @@ public partial class Game : Node
     public Room? Room { get; private set; }
     public GameSettings Settings { get; private set; } = null!;
     public Sfx Sfx { get; private set; } = null!;
+    public Music Music { get; private set; } = null!;
 
     private Node2D _roomHost = null!;
     private string? _carried;

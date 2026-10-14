@@ -19,6 +19,7 @@ public partial class AutoPlay
         Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId) && !gs.HasItem(MicahKit.LighterId), "prologue plays as Daniel, without Micah's notepad or lighter");
         await Shot("attic");
         Check(game.Sfx.Ambient == null, "no rain sounds in the dry attic");
+        Check(game.Music.Current == null, "no music in the attic");
         int woodSteps = game.Sfx.Count(Sound.StepWood);
         await WheelTest(game);
         await PosePlaybackTest(game);

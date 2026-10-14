@@ -5,6 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>The Club's lounge: masked members waiting for the rite on the stage beyond the curtain.</summary>
 public partial class ClubLounge : Room
 {
+    public override Track? Music => Track.ClubStrings;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_club_lounge")) return;
