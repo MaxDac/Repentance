@@ -36,6 +36,8 @@ public class WalkTest
         game.SkipRoomEnter = true;
         SaveSystem.Directory = "user://autoplay_saves/walk_test";
         GameState.Instance.Reset();
+        // Sal stops Micah at the speakeasy curtain and starts a conversation; the test walks past him
+        GameState.Instance.SetFlag("sal_passed");
         try
         {
             var rooms = RoomNames();
@@ -107,10 +109,14 @@ public class WalkTest
         {
             var target = Destination(room, h);
             if (!await WalkAndArrive(target, $"{name}: walk to {h.Id}")) continue;
+            // the walk resolves inside Player._Process, just before it rescales for the final step
+            await _game.ToSignal(_game.GetTree(), SceneTree.SignalName.ProcessFrame);
             float scale = room.ScaleAt(_game.Player.Position.Y);
             Check(Mathf.IsEqualApprox(_game.Player.Scale.Y, scale, 0.001f),
                 $"{name}: scale at {h.Id} is {_game.Player.Scale.Y:0.###}, expected {scale:0.###}");
         }
+        // a room script that grabs control (an intercept, a cutscene) would block every later click
+        Check(!_game.Busy, $"{name}: walking around leaves the game idle");
 
         // every exit: walk up to it from the first entry, then take it (the room is reloaded each time)
         var exits = Enumerable.Range(0, hotspots.Count).Where(i => hotspots[i].IsExit).ToList();
