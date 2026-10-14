@@ -30,10 +30,10 @@ size = Vector2(30, 78)
 size = Vector2(30, 78)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
-size = Vector2(38, 30)
+size = Vector2(40, 40)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(38, 30)
+size = Vector2(40, 40)
 
 [sub_resource type="RectangleShape2D" id="Rect_10"]
 size = Vector2(24, 46)
@@ -190,7 +190,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Chandelier1"]
-position = Vector2(173.0, 45.0)
+position = Vector2(173.0, 66.0)
 shape = SubResource("Rect_8")
 
 [node name="Chandelier2" type="Area2D" parent="Hotspots"]
@@ -203,7 +203,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Chandelier2"]
-position = Vector2(341.0, 45.0)
+position = Vector2(341.0, 66.0)
 shape = SubResource("Rect_9")
 
 [node name="Urn" type="Area2D" parent="Hotspots"]

@@ -2,8 +2,9 @@
 from PIL import Image, ImageDraw
 import math
 import random
+import numpy as np
 from .common import (W, H, TOP, hx, mul, vgrad, noise, light, shadow, vignette,
-                     pixelize, palette_of, tall, save, floor_boards)
+                     pixelize, palette_of, tall, save, floor_boards, cut)
 
 FLOOR = 154
 MAHOGANY = hx("4c2416")
@@ -197,48 +198,114 @@ def shelves(img):
         d.rectangle([x0, 20, x1, 108], outline=hx("160906"))
 
 
+# The writing desk is a real prop: build() cuts it out of the painting into library_desk.png, drawn by a
+# Y-sorted Sprite2D in library.tscn so Micah passes behind it (north) or in front of it (south).
+DESK_BOX = (176, 160, 304, 238)  # crop of the desk sprite in screen coordinates (x0, y0, x1, y1), exclusive
+DESK_SORT = (240, 236)  # Sprite2D position in library.tscn: where the front feet meet the floor
+
+
+def desk_shadow(img):
+    shadow(img, "polygon", [(184, 198), (296, 198), (306, 210), (174, 210)], 0.34, 4)
+
+
 def desk(img):
-    # roughly waist height for the ~85px characters, kept below the fireplace opening
+    """A walnut pedestal desk, roughly waist height for the ~85px characters, below the fireplace opening."""
     d = ImageDraw.Draw(img)
-    shadow(img, "polygon", [(186, 200), (294, 200), (304, 212), (176, 212)], 0.3, 5)
-    d.polygon([(188, 167), (292, 167), (287, 161), (193, 161)], fill=hx("6f3d26"))
-    d.line([(194, 161), (286, 161)], fill=hx("8d593b"))
-    d.rectangle([190, 167, 290, 194], fill=hx("5a2c1b"), outline=hx("2a120b"))
-    d.line([(190, 168), (290, 168)], fill=hx("2a120b"))
-    for px0 in (194, 260):
-        d.rectangle([px0, 170, px0 + 26, 192], outline=hx("26110b"))
-        for yy in (172, 182):
-            d.rectangle([px0 + 2, yy, px0 + 24, yy + 8], outline=hx("30170f"))
-            d.rectangle([px0 + 11, yy + 4, px0 + 15, yy + 4], fill=GOLD)
-    d.rectangle([222, 170, 258, 194], fill=hx("2e150d"))
-    for lx, dx in ((194, -3), (286, 3)):
-        d.line([(lx, 194), (lx + dx, 206)], fill=hx("30140c"), width=3)
-        d.line([(lx, 194), (lx + dx, 206)], fill=hx("5a2b1a"), width=1)
+    top, lip, body, plinth, feet = 160, 167, 170, 198, 206
+    # top: a moulded walnut edge around a tooled green leather writing surface
+    d.polygon([(186, lip), (294, lip), (288, top), (192, top)], fill=hx("6f3d26"))
+    d.line([(192, top), (288, top)], fill=hx("8d593b"))
+    d.polygon([(196, lip - 1), (284, lip - 1), (280, top + 2), (200, top + 2)], fill=hx("2e4a32"))
+    d.polygon([(198, lip - 2), (282, lip - 2), (279, top + 3), (201, top + 3)], outline=hx("a8884a"))
+    d.rectangle([185, lip, 295, lip + 2], fill=hx("7a4430"))
+    d.line([(185, lip), (295, lip)], fill=hx("b07850"))
+    d.line([(185, lip + 3), (295, lip + 3)], fill=hx("2a120b"))
+    # carcass: two pedestals of three drawers either side of a recessed kneehole
+    vgrad(img, (188, body, 292, plinth), hx("62301e"), hx("47200f"))
+    d.rectangle([188, body, 292, plinth], outline=hx("2a120b"))
+    d.rectangle([222, body + 1, 258, plinth], fill=hx("2a130b"))
+    d.rectangle([224, body + 9, 256, plinth], fill=hx("3a1a10"), outline=hx("1e0c07"))
+    for yy in range(body + 12, plinth, 4):
+        d.line([(226, yy), (254, yy)], fill=hx("43200f"))
+    d.rectangle([222, body + 1, 258, body + 7], fill=hx("55291a"), outline=hx("26110b"))
+    d.rectangle([238, body + 3, 242, body + 4], fill=GOLD)
+    d.line([(223, body + 8), (257, body + 8)], fill=hx("140805"))
+    for px0 in (191, 260):
+        for k, (y0, y1) in enumerate(((body + 2, body + 9), (body + 11, body + 18), (body + 20, plinth - 2))):
+            d.rectangle([px0, y0, px0 + 28, y1], fill=hx("5e2e1c"), outline=hx("26110b"))
+            d.line([(px0 + 1, y0 + 1), (px0 + 27, y0 + 1)], fill=hx("7e4630"))
+            d.line([(px0 + 1, y1 - 1), (px0 + 27, y1 - 1)], fill=hx("3e1c10"))
+            cy = (y0 + y1) // 2
+            d.rectangle([px0 + 11, cy - 1, px0 + 17, cy], fill=hx("8a6a30"))
+            d.line([(px0 + 12, cy - 1), (px0 + 16, cy - 1)], fill=hx("e8c870"))
+            d.point((px0 + 14, cy + 1), fill=hx("2a1a0c"))
+            if k == 0:
+                d.rectangle([px0 + 3, cy - 1, px0 + 6, cy + 1], fill=hx("a88a4a"))
+        d.line([(px0 - 1, body + 1), (px0 - 1, plinth)], fill=hx("7a4430"))
+    # plinth and bun feet
+    for x0, x1 in ((188, 222), (258, 292)):
+        d.rectangle([x0 - 1, plinth, x1 + 1, plinth + 3], fill=hx("3a1a10"))
+        d.line([(x0 - 1, plinth), (x1 + 1, plinth)], fill=hx("8a5238"))
+        for fx in (x0 + 3, x1 - 3):
+            d.ellipse([fx - 3, plinth + 3, fx + 3, feet], fill=hx("3e1c10"), outline=hx("1e0c07"))
+            d.point((fx - 1, plinth + 5), fill=hx("8a5238"))
+    d.line([(222, plinth), (258, plinth)], fill=hx("1e0c07"))
 
 
 def desk_props(img):
     d = ImageDraw.Draw(img)
-    # oil lamp, unlit in the daytime: cold glass chimney, a dark wick
-    d.ellipse([199, 158, 211, 162], fill=hx("8a622a"))
-    d.rectangle([204, 151, 206, 158], fill=hx("a67838"))
-    d.ellipse([201, 147, 209, 152], fill=hx("a8a490"))
-    d.ellipse([202, 148, 208, 151], fill=hx("c8c4b0"))
-    d.line([(205, 144), (205, 146)], fill=hx("3a2c20"))
-    # papers, quill, magnifier
-    d.polygon([(222, 160), (242, 159), (243, 165), (220, 166)], fill=hx("d7c5a0"))
-    d.line([(225, 161), (239, 161)], fill=hx("7a6a54"))
-    d.line([(225, 163), (238, 163)], fill=hx("7a6a54"))
-    d.line([(234, 157), (248, 163)], fill=hx("e8e0d0"))
-    d.ellipse([249, 159, 256, 165], outline=hx("b88a4c"))
-    d.line([(255, 164), (259, 167)], fill=hx("b88a4c"))
-    # globe
-    d.line([(276, 151), (276, 162)], fill=hx("7b572e"))
-    d.ellipse([272, 160, 281, 163], fill=hx("7b572e"))
-    d.arc([269, 143, 283, 157], 190, 350, fill=hx("9d7440"))
-    d.ellipse([270, 143, 282, 155], fill=hx("56745c"))
+    # oil lamp, unlit in the daytime: brass font, cold glass chimney, a dark wick
+    d.ellipse([197, 158, 211, 163], fill=hx("6a4a1e"))
+    d.ellipse([198, 157, 210, 161], fill=hx("a67838"))
+    d.ellipse([200, 150, 208, 157], fill=hx("b88a40"))
+    d.point((202, 152), fill=hx("f0d890"))
+    d.rectangle([203, 146, 205, 150], fill=hx("8a622a"))
+    d.polygon([(202, 146), (206, 146), (207, 141), (206, 136), (202, 136), (201, 141)], fill=hx("b8b4a0"))
+    d.line([(202, 137), (202, 145)], fill=hx("e8e4d4"))
+    d.line([(204, 136), (204, 133)], fill=hx("3a2c20"))
+    # a small oak card-catalogue box, one drawer pulled out with index cards
+    d.rectangle([212, 152, 226, 163], fill=hx("8a5a30"), outline=hx("3a1e10"))
+    d.line([(213, 153), (225, 153)], fill=hx("b07c46"))
+    for yy in (155, 159):
+        d.rectangle([214, yy, 224, yy + 2], fill=hx("6e4424"), outline=hx("3a1e10"))
+        d.point((219, yy + 1), fill=GOLD)
+    d.polygon([(214, 160), (224, 160), (226, 164), (212, 164)], fill=hx("7a4c28"))
+    for x in (215, 217, 219, 221, 223):
+        d.line([(x, 158), (x, 161)], fill=hx("ece2c8"))
+    # open ledger, quill in an inkwell, magnifier
+    d.polygon([(230, 160), (246, 159), (247, 165), (229, 166)], fill=hx("d7c5a0"))
+    d.line([(238, 159), (238, 166)], fill=hx("9a8a6a"))
+    for yy in (161, 163):
+        d.line([(231, yy), (236, yy)], fill=hx("7a6a54"))
+        d.line([(240, yy), (245, yy)], fill=hx("7a6a54"))
+    d.rectangle([249, 160, 253, 164], fill=hx("1c1c24"), outline=hx("8a7a5a"))
+    d.line([(251, 160), (257, 151)], fill=hx("e8e0d0"))
+    d.line([(255, 153), (257, 151)], fill=hx("ffffff"))
+    d.ellipse([256, 160, 263, 165], outline=hx("c89a54"))
+    d.point((258, 161), fill=hx("e8f0f0"))
+    d.line([(262, 164), (266, 166)], fill=hx("5a2a18"))
+    # globe on a brass meridian stand
+    d.ellipse([271, 161, 281, 164], fill=hx("5a3a1a"))
+    d.line([(276, 155), (276, 162)], fill=hx("7b572e"))
+    d.arc([268, 142, 284, 158], 120, 420, fill=hx("c8a25a"))
+    d.ellipse([270, 143, 282, 155], fill=hx("4a6a7a"))
+    d.polygon([(272, 146), (276, 145), (277, 149), (274, 151), (272, 149)], fill=hx("7a9a5a"))
+    d.polygon([(278, 148), (281, 149), (280, 153), (278, 152)], fill=hx("8aa860"))
     d.line([(276, 143), (276, 155)], fill=hx("a0c29a"))
     d.line([(270, 149), (282, 149)], fill=hx("a0c29a"))
-    light(img, "ellipse", [268, 141, 284, 157], hx("d8c890"), 0.2, 3)
+    d.point((273, 145), fill=hx("e8f4f0"))
+
+
+def desk_mask():
+    """Opaque pixels of the desk and its props (paint coordinates): painted over two grounds, they agree."""
+    grounds = []
+    for col in ((255, 0, 255), (0, 255, 0)):
+        g = Image.new("RGB", (W, H), col)
+        desk(g)
+        desk_props(g)
+        grounds.append(np.asarray(g).astype(int))
+    same = np.all(grounds[0] == grounds[1], axis=2)
+    return Image.fromarray((same * 255).astype("uint8"), "L")
 
 
 def chairs(img):
@@ -290,7 +357,7 @@ def ladder(img):
     shadow(img, "ellipse", [380, 183, 425, 189], 0.18, 3)
 
 
-def paint():
+def paint(include_desk=True):
     img = Image.new("RGB", (W, H))
     shell(img)
     arched_window(img)
@@ -299,8 +366,10 @@ def paint():
     mantle_items(img)
     parquet_floor(img)
     chairs(img)
-    desk(img)
-    desk_props(img)
+    desk_shadow(img)
+    if include_desk:
+        desk(img)
+        desk_props(img)
     ladder(img)
     shadow(img, "ellipse", [0, 0, W - 1, 40], 0.22, 12, hx("2a130d"))
     sunlight(img)
@@ -346,6 +415,14 @@ def build():
     base = paint()
     vignette(base, 0.32, tint=(120, 96, 70), blur=42)
     pal = palette_of(base, 128)
-    px = pixelize(base, pal)
+    room = paint(include_desk=False)
+    vignette(room, 0.32, tint=(120, 96, 70), blur=42)
+    px = pixelize(room, pal)
     save(px, "rooms", "library.png")
+    mask = Image.new("L", base.size, 0)
+    mask.paste(desk_mask(), (0, TOP))
+    x0, y0, x1, y1 = DESK_BOX
+    bx0, by0, bx1, by1 = mask.getbbox()
+    assert x0 <= bx0 and y0 <= by0 and bx1 <= x1 and by1 <= y1, f"desk {mask.getbbox()} outside {DESK_BOX}"
+    save(cut(pixelize(base, pal), mask).crop(DESK_BOX), "rooms", "library_desk.png")
     return px
