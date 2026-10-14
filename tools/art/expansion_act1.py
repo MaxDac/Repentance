@@ -101,26 +101,98 @@ def lift(img):
     d.ellipse([x1 + 7, 115, x1 + 11, 119], fill=hx("e8c070"))
 
 
+def _stack(d, rnd, x, base, w, h):
+    """One pile on a shelf: folded sheets, striped towels, a wool blanket or banded pillowcases."""
+    kind = rnd.choice(("sheets", "sheets", "towels", "blanket", "cases"))
+    if kind == "towels":
+        col, band = hx("e8e4d8"), rnd.choice((hx("4a6a8a"), hx("8a2a2a"), hx("b08a3a")))
+        step = 4
+    elif kind == "blanket":
+        col, band = rnd.choice((hx("8a8478"), hx("6a7480"), hx("9a7a5a"))), None
+        step = 5
+    elif kind == "cases":
+        col, band = hx("dcd8ca"), None
+        step = 2
+    else:
+        col, band = mix(LINEN, LINEN_D, rnd.random() * 0.4), None
+        step = 3
+    hi, lo, fold = mul(col, 1.1), mul(col, 0.72), mul(col, 0.86)
+    top = base - (h // step) * step
+    d.rectangle([x, top, x + w, base], fill=col)
+    for k, yy in enumerate(range(base, top, -step)):
+        d.line([(x, yy - step + 1), (x + w, yy - step + 1)], fill=hi)          # top of each fold
+        d.line([(x, yy), (x + w, yy)], fill=lo)                              # crease below it
+        # the rounded fold edge facing the room bulges a pixel past the pile
+        d.point((x + w + 1, yy - step // 2), fill=fold)
+        if band is not None and step > 2:
+            d.line([(x + 2, yy - 2), (x + w - 2, yy - 2)], fill=band)
+            d.point((x + 2 + (k * 3) % max(1, w - 4), yy - 1), fill=mul(band, 1.3))
+        if kind == "blanket":
+            for sx in range(x + 1, x + w, 2):                                # blanket stitch on the edge
+                d.point((sx, yy - 1), fill=mul(col, 0.6))
+    d.line([(x + w, top), (x + w, base)], fill=lo)
+    d.line([(x, top), (x, base)], fill=hi)
+    if kind == "cases":                                                      # a paper band round the bundle
+        bx = x + w // 2 - 2
+        d.rectangle([bx, top, bx + 4, base], fill=hx("c8a868"))
+        d.line([(bx + 4, top), (bx + 4, base)], fill=hx("8a6a38"))
+        d.point((bx + 2, (top + base) // 2), fill=hx("8a2a2a"))
+    if kind == "sheets" and rnd.random() < 0.5:                              # laundry mark tag
+        d.rectangle([x + w - 4, top + 2, x + w - 1, top + 4], fill=hx("c84a3a"))
+    return top
+
+
 def shelves(img):
     d = ImageDraw.Draw(img)
     x0, x1, y0 = 100, 196, 58
+    # carcass: crown, plank back, panelled sides
     d.rectangle([x0, y0, x1, FLOOR - 2], fill=WOOD_D)
+    d.rectangle([x0 - 2, y0 - 3, x1 + 2, y0], fill=WOOD)
+    d.line([(x0 - 2, y0 - 3), (x1 + 2, y0 - 3)], fill=hx("8a6040"))
+    d.line([(x0 - 1, y0 + 1), (x1 + 1, y0 + 1)], fill=hx("1a100a"))
     rnd = random.Random(511)
-    for i, y in enumerate(range(y0 + 4, FLOOR - 8, 24)):
-        d.rectangle([x0 + 3, y, x1 - 3, y + 20], fill=hx("1a120a"))
+    rows = list(range(y0 + 4, FLOOR - 8, 24))
+    labels = ("SHEETS", "TOWELS", "CASES", "WOOL", "SPARE")
+    for i, y in enumerate(rows):
+        vgrad(img, (x0 + 3, y, x1 - 3, y + 20), hx("120c06"), hx("2a1c10"))
+        for px in range(x0 + 14, x1 - 3, 15):                                 # back planks
+            d.line([(px, y), (px, y + 20)], fill=hx("0c0804"))
+        shadow(img, "rect", [x0 + 3, y, x1 - 3, y + 3], 0.5, 1)
         x = x0 + 5
         while x < x1 - 14:
-            w = rnd.randint(12, 18)
+            w = rnd.randint(12, 17)
             h = rnd.randint(9, 17)
-            col = mix(LINEN, LINEN_D, rnd.random() * 0.5) if rnd.random() < 0.8 else hx("a8b8c8")
-            for k in range(0, h, 3):
-                d.rectangle([x, y + 20 - k - 3, x + w, y + 20 - k], fill=mul(col, 0.92 + 0.08 * (k % 2)))
-                d.line([(x, y + 20 - k - 3), (x + w, y + 20 - k - 3)], fill=mul(col, 1.08))
-            x += w + rnd.randint(1, 3)
+            if i == 3 and x > x1 - 40 and x < x1 - 20:
+                # a cardboard carton of soap on the bottom shelf
+                w = 18
+                d.rectangle([x, y + 7, x + w, y + 20], fill=hx("9a7a4a"))
+                d.rectangle([x, y + 7, x + w, y + 9], fill=hx("b8965e"))
+                d.line([(x + w, y + 7), (x + w, y + 20)], fill=hx("5e4426"))
+                d.line([(x + w // 2, y + 7), (x + w // 2, y + 9)], fill=hx("5e4426"))
+                d.rectangle([x + 3, y + 12, x + w - 3, y + 16], fill=hx("d8ccaa"))
+                for k in range(x + 4, x + w - 3, 2):
+                    d.point((k, y + 14), fill=hx("4a2a1a"))
+            else:
+                _stack(d, rnd, x, y + 19, w, h)
+            x += w + rnd.randint(2, 3)
+        # shelf board with a lipped front edge and a brass label holder
         d.rectangle([x0, y + 20, x1, y + 23], fill=WOOD)
         d.line([(x0, y + 20), (x1, y + 20)], fill=hx("8a6040"))
-    d.rectangle([x0, y0, x0 + 3, FLOOR - 2], fill=WOOD)
-    d.rectangle([x1 - 3, y0, x1, FLOOR - 2], fill=WOOD)
+        d.line([(x0, y + 23), (x1, y + 23)], fill=hx("1a100a"))
+        lx = x0 + 38 + (i % 2) * 14
+        d.rectangle([lx, y + 20, lx + 14, y + 23], fill=BRASS_D)
+        d.rectangle([lx + 1, y + 21, lx + 13, y + 22], fill=hx("e8dcb8"))
+        for k in range(len(labels[i % len(labels)])):
+            d.point((lx + 2 + k * 2, y + 21 + (k % 2)), fill=hx("3a2a18"))
+    for xs in (x0, x1 - 3):                                                   # side posts
+        d.rectangle([xs, y0, xs + 3, FLOOR - 2], fill=WOOD)
+        d.line([(xs, y0), (xs, FLOOR - 2)], fill=hx("8a6040"))
+        d.line([(xs + 3, y0), (xs + 3, FLOOR - 2)], fill=WOOD_D)
+    # an inventory card pinned to the right post
+    d.rectangle([x1 - 9, y0 + 30, x1 - 2, y0 + 40], fill=hx("e8e0c8"))
+    for k in range(3):
+        d.line([(x1 - 8, y0 + 33 + k * 2), (x1 - 4, y0 + 33 + k * 2)], fill=hx("6a6a7a"))
+    d.point((x1 - 6, y0 + 31), fill=hx("c83a30"))
     shadow(img, "rect", [x1 + 1, y0 + 4, x1 + 6, FLOOR], 0.3, 3)
 
 
@@ -139,32 +211,75 @@ def hanger_shape(d, cx, y, col):
 def maid_uniform(d, cx, y):
     """Black dress with puffed sleeves, white collar and cuffs, a bibbed white apron tied at the waist."""
     black, black_hi, black_d = hx("26262e"), hx("40404c"), hx("101014")
-    white, white_d = hx("e4dece"), hx("aaa490")
+    white, white_hi, white_d = hx("e4dece"), hx("f4f0e4"), hx("aaa490")
     waist = y + 30
-    # puffed sleeves behind the shoulders, white cuffs
+    # puffed sleeves behind the shoulders: gathers at the crown, a band and a turned-back white cuff
     for s in (-1, 1):
-        d.polygon([(cx + s * 7, y + 8), (cx + s * 12, y + 11), (cx + s * 12, y + 19), (cx + s * 8, y + 20)], fill=black)
+        d.polygon([(cx + s * 7, y + 8), (cx + s * 12, y + 10), (cx + s * 13, y + 15), (cx + s * 11, y + 19),
+                   (cx + s * 8, y + 20)], fill=black)
+        d.line([(cx + s * 9, y + 9), (cx + s * 10, y + 15)], fill=black_hi if s < 0 else black_d)
+        d.line([(cx + s * 11, y + 11), (cx + s * 12, y + 15)], fill=black_d)
+        d.line([(cx + s * 12, y + 17), (cx + s * 8, y + 19)], fill=black_d)
         d.line([(cx + s * 12, y + 18), (cx + s * 9, y + 20)], fill=white)
+        d.line([(cx + s * 12, y + 19), (cx + s * 9, y + 21)], fill=white_d)
+        d.point((cx + s * 10, y + 20), fill=white_hi)
     # bodice narrowing to the waist, then a full skirt
     d.polygon([(cx - 8, y + 8), (cx + 8, y + 8), (cx + 6, waist), (cx - 6, waist)], fill=black)
     d.polygon([(cx - 6, waist), (cx + 6, waist), (cx + 11, y + 80), (cx - 11, y + 80)], fill=black)
     d.line([(cx - 8, y + 9), (cx - 6, waist), (cx - 11, y + 79)], fill=black_hi)
     d.line([(cx + 8, y + 9), (cx + 6, waist), (cx + 11, y + 79)], fill=black_d)
     d.line([(cx - 11, y + 80), (cx + 11, y + 80)], fill=black_d)
-    for fx in (-5, 0, 5):  # skirt folds
-        d.line([(cx + fx * 0.6, waist + 6), (cx + fx, y + 79)], fill=black_d)
-    # collar
-    d.polygon([(cx - 4, y + 8), (cx, y + 12), (cx + 4, y + 8)], fill=white)
-    # apron: straps over the shoulders, bib, waistband, skirt with a hem
-    d.line([(cx - 5, y + 9), (cx - 4, y + 16)], fill=white)
-    d.line([(cx + 5, y + 9), (cx + 4, y + 16)], fill=white)
+    d.line([(cx - 10, y + 78), (cx + 10, y + 78)], fill=black_hi)              # turned-up hem
+    for fx in (-8, -5, 0, 5, 8):  # skirt folds, lit on their left
+        d.line([(cx + fx * 0.6, waist + 6), (cx + fx, y + 77)], fill=black_d)
+        d.line([(cx + fx * 0.6 - 1, waist + 8), (cx + fx - 1, y + 77)], fill=black_hi)
+    # princess seams on the bodice beside the bib
+    d.line([(cx - 6, y + 12), (cx - 5, waist - 1)], fill=black_d)
+    d.line([(cx + 6, y + 12), (cx + 5, waist - 1)], fill=black_d)
+    # starched round collar, picked out, with a little jet stud
+    d.polygon([(cx - 5, y + 7), (cx - 1, y + 12), (cx, y + 10), (cx + 1, y + 12), (cx + 5, y + 7)], fill=white)
+    d.line([(cx - 5, y + 8), (cx - 1, y + 12)], fill=white_d)
+    d.line([(cx + 1, y + 12), (cx + 5, y + 8)], fill=white_d)
+    d.point((cx, y + 11), fill=black_d)
+    # apron: frilled straps over the shoulders, bib with tucks, waistband, skirt with a pocket and lace hem
+    for s in (-1, 1):
+        d.line([(cx + s * 5, y + 9), (cx + s * 4, y + 16)], fill=white)
+        for k in range(y + 10, y + 16, 2):
+            d.point((cx + s * 6, k), fill=white_hi)
+            d.point((cx + s * 6, k + 1), fill=white_d)
     d.rectangle([cx - 4, y + 16, cx + 4, waist - 1], fill=white)
+    d.line([(cx - 4, y + 16), (cx + 4, y + 16)], fill=white_hi)
+    for tx in (-2, 0, 2):
+        d.line([(cx + tx, y + 18), (cx + tx, waist - 2)], fill=white_d if tx else white_hi)
     d.line([(cx + 4, y + 16), (cx + 4, waist - 1)], fill=white_d)
     d.rectangle([cx - 7, waist, cx + 7, waist + 1], fill=white)
+    d.line([(cx - 7, waist + 1), (cx + 7, waist + 1)], fill=white_d)
+    # apron strings tied in a bow peeping out at the side
+    d.polygon([(cx + 7, waist - 1), (cx + 10, waist - 2), (cx + 10, waist + 2), (cx + 7, waist + 1)], fill=white)
+    d.line([(cx + 8, waist + 2), (cx + 9, waist + 9)], fill=white_d)
+    d.line([(cx + 9, waist + 2), (cx + 11, waist + 8)], fill=white)
     d.polygon([(cx - 6, waist + 2), (cx + 6, waist + 2), (cx + 8, y + 70), (cx - 8, y + 70)], fill=white)
+    d.line([(cx - 6, waist + 2), (cx - 8, y + 70)], fill=white_hi)
     d.line([(cx + 6, waist + 2), (cx + 8, y + 70)], fill=white_d)
-    d.line([(cx - 7, y + 67), (cx + 7, y + 67)], fill=white_d)
     d.line([(cx - 2, waist + 4), (cx - 3, y + 66)], fill=white_d)
+    d.line([(cx + 3, waist + 4), (cx + 4, y + 66)], fill=white_d)
+    # patch pocket with a hankie corner
+    d.rectangle([cx - 5, waist + 12, cx, waist + 18], outline=white_d)
+    d.line([(cx - 5, waist + 13), (cx, waist + 13)], fill=white_d)
+    d.point((cx - 1, waist + 11), fill=hx("c8a8b0"))
+    d.point((cx - 2, waist + 12), fill=hx("c8a8b0"))
+    # lace hem: an insertion line above a scalloped edge
+    d.line([(cx - 7, y + 65), (cx + 7, y + 65)], fill=white_d)
+    for k in range(-7, 8):
+        d.point((cx + k, y + 66), fill=white_hi if k % 2 else white_d)
+    for k in range(-8, 8, 2):
+        d.point((cx + k, y + 71), fill=white)
+        d.point((cx + k + 1, y + 71), fill=white_d)
+    # frilled cap pinned to the hanger hook
+    d.ellipse([cx - 4, y - 1, cx + 2, y + 3], fill=white)
+    for k in range(-4, 3, 2):
+        d.point((cx + k, y + 3), fill=white_d)
+    d.line([(cx - 2, y + 1), (cx, y + 1)], fill=black)
 
 
 def porter_jacket(d, cx, y):
@@ -492,34 +607,141 @@ def display_window(img):
     text(img, (142, 170), "5c", hx("e8e4d0"), size=8)
 
 
+_MINI = {   # 3x5 pixel capitals for lettering too small for the font
+    "C": ("111", "100", "100", "100", "111"), "L": ("100", "100", "100", "100", "111"),
+    "O": ("111", "101", "101", "101", "111"), "S": ("111", "100", "111", "001", "111"),
+    "E": ("111", "100", "110", "100", "111"), "D": ("110", "101", "101", "101", "110"),
+    "B": ("110", "101", "110", "101", "110"), "U": ("101", "101", "101", "101", "111"),
+    "N": ("101", "111", "111", "111", "101"),
+}
+
+
+def mini_text(d, x, y, s, col):
+    for i, ch in enumerate(s):
+        for r, row in enumerate(_MINI[ch]):
+            for c, bit in enumerate(row):
+                if bit == "1":
+                    d.point((x + i * 4 + c, y + r), fill=col)
+
+
 def shop_door(img):
     d = ImageDraw.Draw(img)
     x0, x1, top = 222, 258, 74
-    d.rectangle([x0 - 3, top - 3, x1 + 3, BASE], fill=mul(GREEN, 0.7))
+    frame = mul(GREEN, 0.7)
+    d.rectangle([x0 - 3, top - 3, x1 + 3, BASE], fill=frame)
+    d.line([(x0 - 3, top - 3), (x1 + 3, top - 3)], fill=GREEN_L)
     vgrad(img, (x0, top, x1, BASE - 1), GREEN_L, GREEN)
-    vgrad(img, (x0 + 5, top + 5, x1 - 5, top + 50), hx("2a3440"), hx("141a22"))
-    text(img, ((x0 + x1) // 2, top + 30), "CLOSED", hx("c8c0a0"), size=8)
-    d.rectangle([x0 + 5, top + 58, x1 - 5, BASE - 8], outline=mul(GREEN, 0.6))
-    d.ellipse([x1 - 8, top + 54, x1 - 4, top + 58], fill=GOLD)
+    d.line([(x0, top), (x0, BASE - 1)], fill=mix(GREEN_L, hx("ffffff"), 0.15))
+    d.line([(x1, top), (x1, BASE - 1)], fill=mul(GREEN, 0.6))
+    # glazed upper half: a dark shop beyond, a roller blind half down, a bead moulding round the pane
+    gx0, gy0, gx1, gy1 = x0 + 4, top + 5, x1 - 4, top + 50
+    d.rectangle([gx0 - 1, gy0 - 1, gx1 + 1, gy1 + 1], fill=GOLD)
+    d.rectangle([gx0, gy0, gx1, gy1], fill=mul(GREEN, 0.5))
+    vgrad(img, (gx0, gy0, gx1, gy1), hx("2a3440"), hx("141a22"))
+    vgrad(img, (gx0, gy0, gx1, gy0 + 9), hx("c8b888"), hx("9a8a62"))
+    for y in range(gy0 + 2, gy0 + 9, 2):
+        d.line([(gx0, y), (gx1, y)], fill=hx("8a7a56"))
+    d.line([(gx0, gy0 + 9), (gx1, gy0 + 9)], fill=hx("5a4a30"))
+    d.ellipse([(gx0 + gx1) // 2 - 1, gy0 + 10, (gx0 + gx1) // 2 + 1, gy0 + 12], fill=hx("d8c8a0"))
+    # shelves and buckets dimly seen inside
+    d.line([(gx0, gy1 - 10), (gx1, gy1 - 10)], fill=hx("2e2a26"))
+    for k, x in enumerate(range(gx0 + 2, gx1 - 2, 6)):
+        d.point((x, gy1 - 12), fill=hx("5a2a30") if k % 2 else hx("4a5a40"))
+        d.point((x + 1, gy1 - 13), fill=hx("6a3038") if k % 2 else hx("5a6a48"))
+    # the CLOSED card hangs inside the glass on a cord from a little suction hook
+    hx_, hy = (gx0 + gx1) // 2, gy0 + 14
+    d.ellipse([hx_ - 1, hy - 1, hx_ + 1, hy + 1], fill=hx("a8a898"))
+    cx0, cy0, cx1, cy1 = gx0 + 1, hy + 7, gx1 - 1, hy + 16
+    d.line([(hx_, hy + 1), (cx0 + 3, cy0)], fill=hx("b8a878"))
+    d.line([(hx_, hy + 1), (cx1 - 3, cy0)], fill=hx("b8a878"))
+    d.rectangle([cx0 + 1, cy0 + 1, cx1 + 1, cy1 + 1], fill=hx("0a0e12"))
+    d.rectangle([cx0, cy0, cx1, cy1], fill=hx("d8ccaa"))
+    d.rectangle([cx0, cy0, cx1, cy1], outline=hx("8a2a24"))
+    d.point((cx0 + 3, cy0), fill=hx("e8e0c0"))
+    d.point((cx1 - 3, cy0), fill=hx("e8e0c0"))
+    tw = 6 * 4 - 1
+    mini_text(d, (cx0 + cx1 + 1) // 2 - tw // 2, cy0 + 2, "CLOSED", hx("2a1a14"))
+    # a streak of street light across the pane
+    d.line([(gx0 + 2, gy1), (gx0 + 12, gy0 + 22)], fill=hx("3a4654"))
+    d.line([(gx1 - 4, gy0 + 34), (gx1, gy0 + 26)], fill=hx("4a5664"))
+    # lock rail, door number, raised lower panel, letter slot, brass knob and kick plate
+    d.rectangle([x0 + 1, gy1 + 3, x1 - 1, gy1 + 5], fill=mul(GREEN_L, 1.1))
+    d.line([(x0 + 1, gy1 + 6), (x1 - 1, gy1 + 6)], fill=mul(GREEN, 0.6))
+    d.rectangle([x0 + 5, top + 58, x1 - 5, BASE - 12], outline=mul(GREEN, 0.6))
+    d.rectangle([x0 + 7, top + 60, x1 - 7, BASE - 14], outline=mix(GREEN_L, hx("ffffff"), 0.12))
+    d.line([(x0 + 7, BASE - 14), (x1 - 7, BASE - 14)], fill=mul(GREEN, 0.55))
+    d.line([(x1 - 7, top + 60), (x1 - 7, BASE - 14)], fill=mul(GREEN, 0.55))
+    d.rectangle([x0 + 11, top + 66, x1 - 11, top + 69], fill=BRASS_D)
+    d.rectangle([x0 + 12, top + 67, x1 - 12, top + 67], fill=GOLD)
+    d.line([(x0 + 12, top + 68), (x1 - 12, top + 68)], fill=hx("1a1408"))
+    d.rectangle([x1 - 9, top + 51, x1 - 5, top + 61], fill=BRASS_D)
+    d.ellipse([x1 - 9, top + 54, x1 - 4, top + 59], fill=GOLD)
+    d.point((x1 - 7, top + 55), fill=hx("fff0b0"))
+    d.point((x1 - 7, top + 60), fill=hx("1a1408"))
+    d.rectangle([x0 + 1, BASE - 9, x1 - 1, BASE - 2], fill=BRASS_D)
+    d.rectangle([x0 + 1, BASE - 9, x1 - 1, BASE - 8], fill=GOLD)
+    for x in (x0 + 3, x1 - 3):
+        d.point((x, BASE - 5), fill=hx("fff0b0"))
+    # hinges on the left stile
+    for y in (top + 8, BASE - 22):
+        d.rectangle([x0, y, x0 + 1, y + 4], fill=BRASS_D)
 
 
 def bluing_shelf(img):
     d = ImageDraw.Draw(img)
     x0, x1 = SHELF
-    d.rectangle([x0, 100, x0 + 2, BASE], fill=hx("4a3020"))
-    d.rectangle([x1 - 2, 100, x1, BASE], fill=hx("4a3020"))
+    wood, wood_d, wood_l, wood_hi = hx("4a3020"), hx("2a1a10"), hx("6a4a2a"), hx("9a7a4a")
+    rnd = random.Random(621)
+    # back boards between the uprights, and a crest with a painted sign on top
+    vgrad(img, (x0 + 3, 88, x1 - 3, BASE - 1), hx("2e2016"), hx("1a120c"))
+    for x in range(x0 + 9, x1 - 3, 7):
+        d.line([(x, 88), (x, BASE - 1)], fill=hx("140c06"))
+        d.line([(x + 1, 88), (x + 1, BASE - 1)], fill=hx("3a2a1c"))
+    d.polygon([(x0 - 1, 88), (x0 + 6, 82), (x1 - 6, 82), (x1 + 1, 88)], fill=wood_l)
+    d.line([(x0 + 6, 82), (x1 - 6, 82)], fill=wood_hi)
+    d.rectangle([x0 - 1, 88, x1 + 1, 92], fill=wood_l)
+    d.line([(x0 - 1, 88), (x1 + 1, 88)], fill=wood_hi)
+    d.line([(x0 - 1, 92), (x1 + 1, 92)], fill=wood_d)
+    d.rectangle([x0 + 9, 83, x1 - 9, 91], fill=GREEN)
+    d.rectangle([x0 + 9, 83, x1 - 9, 91], outline=GOLD)
+    mini_text(d, (x0 + x1) // 2 - 9, 85, "BULBS", GOLD)
+    for fx in (x0 + 1, x1 - 1):
+        d.ellipse([fx - 2, 78, fx + 2, 82], fill=wood_hi)
+        d.rectangle([fx - 1, 82, fx + 1, 87], fill=wood_l)
+    for x in range(x0 + 2, x1 - 1, 4):     # scalloped valance under the crest
+        d.pieslice([x - 2, 91, x + 2, 95], 0, 180, fill=wood_l)
+    # uprights with chamfered edges and turned feet
+    for ux in (x0, x1 - 2):
+        d.rectangle([ux, 88, ux + 2, BASE], fill=wood)
+        d.line([(ux, 88), (ux, BASE)], fill=wood_l)
+        d.line([(ux + 2, 88), (ux + 2, BASE)], fill=wood_d)
+        d.rectangle([ux - 1, BASE - 3, ux + 3, BASE], fill=wood_l)
+    # shelves with a lipped edge and brackets underneath
     for y in (110, 134, 158):
-        d.rectangle([x0, y, x1, y + 3], fill=hx("6a4a2a"))
-        d.line([(x0, y), (x1, y)], fill=hx("9a7a4a"))
-    # potted geraniums on top, tins of plant food and the bottles in the middle
+        shadow(img, "rect", [x0 + 3, y - 4, x1 - 3, y], 0.35, 2)
+        d.rectangle([x0, y, x1, y + 3], fill=wood_l)
+        d.line([(x0, y), (x1, y)], fill=wood_hi)
+        d.line([(x0, y + 3), (x1, y + 3)], fill=wood_d)
+        for bx_ in (x0 + 3, x1 - 5):
+            d.polygon([(bx_, y + 4), (bx_ + 2, y + 4), (bx_, y + 7)], fill=wood)
+    # potted geraniums on top: leaves, clustered red heads, saucers
     for px_ in (272, 288, 300):
-        d.polygon([(px_ - 5, 101), (px_ + 5, 101), (px_ + 4, 109), (px_ - 4, 109)], fill=hx("a8583a"))
+        for k in range(4):
+            lx = px_ - 6 + k * 4
+            d.ellipse([lx, 97 + (k % 2), lx + 3, 100 + (k % 2)], fill=hx("3a6a3a"))
+            d.point((lx + 1, 98 + (k % 2)), fill=hx("5a8a4a"))
+        d.line([(px_, 101), (px_ - 2, 95)], fill=hx("3a6a3a"))
+        d.line([(px_, 101), (px_ + 2, 96)], fill=hx("3a6a3a"))
+        d.polygon([(px_ - 5, 101), (px_ + 5, 101), (px_ + 4, 108), (px_ - 4, 108)], fill=hx("a8583a"))
+        d.rectangle([px_ - 6, 101, px_ + 6, 102], fill=hx("c87a50"))
+        d.line([(px_ + 3, 103), (px_ + 3, 107)], fill=hx("7a3a24"))
+        d.rectangle([px_ - 5, 109, px_ + 5, 109], fill=hx("7a3a24"))
         for k in range(5):
-            d.ellipse([px_ - 5 + k * 2, 94 - (k % 2) * 3, px_ - 2 + k * 2, 97 - (k % 2) * 3], fill=hx("c83040"))
-        d.line([(px_, 101), (px_ - 2, 96)], fill=hx("3a6a3a"))
-    for tx in (270, 279):
-        d.rectangle([tx, 150, tx + 6, 157], fill=hx("8a8a70"))
-        d.rectangle([tx, 152, tx + 6, 154], fill=hx("c8a040"))
+            ex, ey = px_ - 5 + k * 2, 94 - (k % 2) * 3
+            d.ellipse([ex, ey, ex + 3, ey + 3], fill=hx("c83040"))
+            d.point((ex + 1, ey), fill=hx("f06070"))
+            d.point((ex + 2, ey + 3), fill=hx("7a1a24"))
+    # middle shelf: corked jars with paper labels and a twine spool
     for bx, col in ((271, hx("6a4a2a")), (279, hx("3a5a3a"))):
         d.rectangle([bx, 122, bx + 5, 133], fill=col)
         d.rectangle([bx + 1, 119, bx + 4, 122], fill=mul(col, 0.8))
@@ -527,6 +749,67 @@ def bluing_shelf(img):
     d.ellipse([284, 146, 300, 158], fill=hx("6a7a6a"))
     d.line([(299, 150), (305, 144)], fill=hx("6a7a6a"), width=2)
     shadow(img, "rect", [x1 + 1, 104, x1 + 6, BASE], 0.3, 3)
+=======
+        d.rectangle([bx + 1, 117, bx + 4, 118], fill=hx("b89060"))
+        d.rectangle([bx, 125, bx + 5, 130], fill=hx("e0d4b0"))
+        d.line([(bx + 1, 127), (bx + 4, 127)], fill=hx("4a3a2a"))
+        d.point((bx + 2, 129), fill=hx("8a2a24"))
+        d.line([(bx, 123), (bx, 132)], fill=mix(col, hx("ffffff"), 0.3))
+        d.line([(bx + 5, 123), (bx + 5, 132)], fill=mul(col, 0.6))
+    d.rectangle([301, 127, 306, 133], fill=hx("6a4a2a"))
+    d.rectangle([302, 126, 305, 133], fill=hx("c8b080"))
+    for y in range(127, 133, 2):
+        d.line([(302, y), (305, y)], fill=hx("9a8058"))
+    d.line([(303, 126), (306, 121)], fill=hx("c8b080"))
+    # a pair of shears and a ribbon reel hanging from hooks under the top shelf
+    d.point((288, 114), fill=GOLD)
+    d.line([(288, 115), (286, 122)], fill=hx("a8acb0"))
+    d.line([(288, 115), (290, 121)], fill=hx("80848a"))
+    d.ellipse([285, 113, 287, 115], outline=hx("1a1a1a"))
+    d.ellipse([268, 113, 270, 115], fill=GOLD)
+    d.ellipse([302, 113, 307, 118], fill=hx("b82838"))
+    d.ellipse([304, 115, 305, 116], fill=hx("3a1a14"))
+    d.line([(305, 118), (306, 124)], fill=hx("d84858"))
+    # price tickets tacked to the shelf lips
+    for tx, y in ((276, 134), (299, 110), (272, 158)):
+        d.rectangle([tx, y + 1, tx + 4, y + 4], fill=hx("e8e0c8"))
+        d.point((tx + 1, y + 2), fill=hx("8a2a24"))
+        d.point((tx + 3, y + 3), fill=hx("2a1a14"))
+    # lower shelf: labelled plant-food tins, a fan of seed packets, the watering can
+    for tx, band in ((270, hx("c8a040")), (278, hx("a83a2a"))):
+        d.rectangle([tx, 150, tx + 6, 157], fill=hx("8a8a70"))
+        d.rectangle([tx, 149, tx + 6, 150], fill=hx("b8b8a0"))
+        d.rectangle([tx, 152, tx + 6, 155], fill=band)
+        d.point((tx + 3, 153), fill=hx("f0e8c8"))
+        d.line([(tx + 6, 150), (tx + 6, 157)], fill=hx("5a5a48"))
+    for k, col in enumerate((hx("d8a040"), hx("c84a5a"), hx("6a9a4a"), hx("8a6ac8"))):
+        x = 285 + k * 2
+        d.polygon([(x, 145 + k), (x + 4, 144 + k), (x + 5, 151), (x + 1, 151)], fill=col)
+        d.line([(x + 1, 146 + k), (x + 3, 146 + k)], fill=hx("f0e8d0"))
+    d.ellipse([290, 146, 304, 157], fill=hx("6a7a6a"))
+    d.arc([292, 142, 302, 152], 180, 360, fill=hx("4a5a4a"))
+    d.line([(303, 151), (307, 145)], fill=hx("6a7a6a"), width=2)
+    d.rectangle([306, 143, 308, 145], fill=hx("8a9a8a"))
+    d.line([(292, 149), (294, 155)], fill=hx("9aaa9a"))
+    d.line([(290, 157), (304, 157)], fill=hx("3a4a3a"))
+    # bottom: nested clay pots, a sack of potting soil and a crate of bulbs
+    for k in range(3):
+        y = 175 - k * 3
+        d.polygon([(270, y - 4), (281, y - 4), (280, y), (271, y)], fill=hx("a8583a"))
+        d.line([(269, y - 4), (282, y - 4)], fill=hx("c87a50"))
+        d.line([(280, y - 3), (279, y)], fill=hx("7a3a24"))
+    d.polygon([(284, 175), (285, 164), (288, 162), (292, 164), (294, 175)], fill=hx("8a7a5a"))
+    d.line([(285, 164), (292, 164)], fill=hx("6a5a3a"))
+    d.rectangle([286, 167, 292, 171], fill=hx("c8b890"))
+    d.point((289, 169), fill=hx("3a5a3a"))
+    d.line([(293, 166), (293, 174)], fill=hx("5a4a30"))
+    d.rectangle([296, 166, 306, 175], fill=hx("8a6a40"))
+    for y in (166, 170, 174):
+        d.line([(296, y), (306, y)], fill=hx("5a4428"))
+    for x in range(297, 306, 3):
+        d.ellipse([x, 163, x + 2, 165], fill=hx("c8a878"))
+    shadow(img, "rect", [x1 + 1, 92, x1 + 6, BASE], 0.3, 3)
+>>>>>>> 90f906e (Art: more detail in linen room, Rizzo's Flowers, room 507)
 
 
 def cold_door(img, open_):
@@ -858,10 +1141,11 @@ def build_florist():
         b = mask.getbbox()
         box = (min(box[0], b[0]), min(box[1], b[1]), max(box[2], b[2]), max(box[3], b[3]))
     # the palette sees the regular at full contrast; the carnation, the cigarette's ember and the stall's roses are a
-    # handful of pixels each, so their colours are pinned so quantising cannot grey them out or turn the roses orange
+    # handful of pixels each, so their colours are pinned so quantising cannot grey them out or turn the roses orange;
+    # the white carnations' cream is pinned too, or they snap to the pale carnation blue
     src = Image.blend(variants["base"], variants["grille"], 0.5)
     src.paste(frames[0][0].crop(box), box[:2])
-    pal = palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45)]
+    pal = palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45), hx("ccc3a0")]
     px = {k: pixelize(v, pal) for k, v in variants.items()}
     save(px["base"], "rooms", "blue_lantern_front.png")
     _overlay(px["base"], px["grille"], "blue_lantern_front_grille_open")
