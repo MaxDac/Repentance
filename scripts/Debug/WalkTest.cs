@@ -15,8 +15,8 @@ namespace Repentance;
 /// </summary>
 public class WalkTest
 {
-    /// <summary>Entries that are intentionally off the floor: Micah sits hidden at the desk, then is moved.</summary>
-    private static readonly HashSet<string> OffFloorEntries = new() { "office/act3" };
+    /// <summary>Entries deliberately off the floor (the player is hidden there and teleported before he can move).</summary>
+    private static readonly HashSet<string> OffFloorEntries = new();
     private const float Tolerance = 1.5f;
 
     private Game _game = null!;

@@ -11,10 +11,7 @@ namespace Repentance.Tests;
 public class SceneGraphTests
 {
     /// <summary>Entries deliberately off the floor: the player is hidden there and teleported before he can move.</summary>
-    private static readonly HashSet<string> OffFloorEntries = new()
-    {
-        "office/act3", // Micah sits hidden behind the desk (micah_at_desk) and is teleported onto the floor afterwards
-    };
+    private static readonly HashSet<string> OffFloorEntries = new();
 
     private sealed record HotspotDef(string Node, string Id, (float X, float Y)? WalkTo, string ExitTo, string ExitEntry);
 
