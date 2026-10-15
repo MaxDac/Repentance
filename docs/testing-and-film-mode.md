@@ -82,6 +82,25 @@ A Godot suite passes only if Godot exits with status 0, the marker is printed, *
 `GD.PushError`, so a run can reach its marker after one. Godot logs are in `logs/<suite>.log`; AutoPlay screenshots
 are in `screenshots/`. CI runs the very same scripts (`.github/workflows/ci.yml`), so a local pass means a CI pass.
 
+### CI: what gates a merge
+
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`:
+
+| Job | What it does |
+|---|---|
+| `unit-tests` | `tools/run/test.sh unit` |
+| `art-tests` | `tools/run/test.sh art` |
+| `godot-tests (<suite>)` | `tools/run/test.sh <suite>` for `autoplay`, `settings`, `pause`, `walk` and `playthrough`, under xvfb |
+| `export (linux / windows)` | Exports the `Linux` and `Windows Desktop` presets exactly as `release.yml` does; the Linux build then runs `--walk-test` itself, so the shipped build is proven to boot and load every room |
+| `ci-ok` | Passes only if every job above passed |
+
+Make `ci-ok` the required status check on `main` (Settings → Branches or Rulesets) so that a pull request can't be
+merged until the whole suite passes. Godot (and its export templates) are installed by the shared
+`.github/actions/setup-godot` action, which `release.yml` uses too.
+
+Because CI runs everything, local runs before a pull request can be limited to the suites that match the change;
+`AGENTS.md` has the table.
+
 All the Godot suites share one harness (`scripts/Debug/Harness.cs`): the `--clock` option, the checks and the
 marker, waits, mouse input, screenshots, and a separate save folder per suite (`user://autoplay_saves/<suite>`).
 
@@ -140,6 +159,8 @@ Each one needs a reason next to every entry, and each fails when an entry is no 
 2. Update the matching beat in `Playthrough.cs` so the canonical story still plays through; add a beat for a new
    room or step.
 3. Add a regression to the matching act file in `scripts/Debug/AutoPlay/` for anything that could break quietly (a wrong item, a cancelled puzzle).
-4. Run `tools\run\test.ps1` and watch `tools\run\film.ps1 -Speed 4` once.
+4. Run the suites that match the change (`tools\run\test.ps1 -Suite unit, playthrough`, plus `autoplay` if you added a
+   regression) and open a pull request; CI runs every suite and the exports. Watch `tools\run\film.ps1 -Speed 4` when
+   you want to see the new story play.
 5. If the save format changes, bump `SaveData.CurrentVersion` and the version stated in `README.md` and
    `Walkthrough.md` (a test checks they agree).

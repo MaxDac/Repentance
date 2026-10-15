@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# A new push to a PR cancels its older run; main keeps every run.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   GODOT_VERSION: 4.7.2
   DOTNET_VERSION: 10.0.x
@@ -49,33 +54,14 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Cache Godot
-        id: godot-cache
-        uses: actions/cache@v4
+      - uses: ./.github/actions/setup-godot
         with:
-          path: ~/godot
-          key: godot-mono-editor-${{ env.GODOT_VERSION }}
-
-      - name: Install Godot
-        if: steps.godot-cache.outputs.cache-hit != 'true'
-        run: |
-          set -euo pipefail
-          mkdir -p ~/godot
-          curl -fsSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64.zip"
-          unzip -q /tmp/godot.zip -d ~/godot
+          version: ${{ env.GODOT_VERSION }}
 
       - name: Install virtual display and software OpenGL
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
-
-      - name: Locate Godot
-        run: |
-          godot="$(find ~/godot -type f -name 'Godot_v*_mono_linux.x86_64' | head -n1)"
-          chmod +x "$godot"
-          echo "GODOT=$godot" >> "$GITHUB_ENV"
-          "$godot" --headless --version
 
       # tools/run/test.sh resets, builds, imports and runs the suite with the same pass rule as a local run: the
       # marker printed, exit status 0, and no ERROR / SCRIPT ERROR / USER ERROR / Unhandled exception lines.
@@ -94,3 +80,91 @@ jobs:
             logs/
             screenshots/
           if-no-files-found: ignore
+
+  # Exports the game the way release.yml ships it, so a broken export fails the PR rather than the release.
+  # The Linux build is then run through the walk test (every room, every hotspot), proving the exported
+  # build boots, loads its C# assembly and every scene.
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            preset: Linux
+            binary: Repentance.x86_64
+          - platform: windows
+            preset: Windows Desktop
+            binary: Repentance.exe
+    name: export (${{ matrix.platform }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          export-templates: 'true'
+
+      - name: Build C# and import assets
+        run: |
+          set -euo pipefail
+          dotnet build Repentance.csproj
+          "$GODOT" --headless --path . --import
+
+      - name: Export ${{ matrix.preset }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/${{ matrix.platform }}
+          "$GODOT" --headless --path . --export-release "${{ matrix.preset }}" "build/${{ matrix.platform }}/${{ matrix.binary }}"
+          ls -la build/${{ matrix.platform }}
+          test -f "build/${{ matrix.platform }}/${{ matrix.binary }}"
+          # Godot exits 0 even when the C# export step fails; the .NET data folder proves it ran.
+          ls -d build/${{ matrix.platform }}/data_Repentance_* >/dev/null
+
+      - name: Install virtual display and software OpenGL
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
+
+      - name: Walk test on the exported build
+        if: matrix.platform == 'linux'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -uo pipefail
+          mkdir -p logs
+          log=logs/export-walk.log
+          timeout 15m xvfb-run -a -s "-screen 0 1280x720x24" build/linux/Repentance.x86_64 \
+            --rendering-driver opengl3 --audio-driver Dummy -- --walk-test 2>&1 | tee "$log"
+          status=${PIPESTATUS[0]}
+          ok=0
+          [ "$status" -eq 0 ] || { echo "::error::exported build exited with status $status"; ok=1; }
+          grep -qF "WALK TEST OK" "$log" || { echo "::error::WALK TEST OK not printed by the exported build"; ok=1; }
+          if grep -nE '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception' "$log"; then
+            echo "::error::the exported build logged errors"; ok=1
+          fi
+          exit $ok
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: export-${{ matrix.platform }}
+          path: logs/
+          if-no-files-found: ignore
+
+  # The single check to require on main (branch protection / ruleset): green only when every job above passed.
+  ci-ok:
+    if: always()
+    needs: [unit-tests, art-tests, godot-tests, export]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All CI jobs passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for r in $RESULTS; do [ "$r" = success ] || { echo "::error::a required CI job did not succeed ($r)"; exit 1; }; done
