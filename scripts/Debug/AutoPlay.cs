@@ -67,6 +67,11 @@ public partial class AutoPlay : Harness
 
         try
         {
+#if TOOLS
+            InheritanceContractTest();
+            InkResetTest();
+            if (_failures.Count != 0) return;
+#endif
             var gs = GameState.Instance;
             await ContentSettingsTest(game);
             if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
