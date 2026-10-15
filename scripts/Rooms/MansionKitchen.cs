@@ -96,11 +96,11 @@ public partial class MansionKitchen : Room
             case ("candle", Verb.UseItem) when !Escaping && item == MicahKit.LighterId:
                 await Say("Not why I'm here. Eleanor's somewhere upstairs.");
                 return true;
-            case ("range", Verb.Hand):
-                await Say("Turn on the gas and somebody upstairs smells it long before it does any good.");
-                return true;
-            case ("candle", Verb.Hand or Verb.UseItem) when item is null or MicahKit.LighterId:
-                await Say("A candle on a deal table, in a stone kitchen. It'd burn itself out and nothing else.");
+            case ("range" or "candle", Verb.Hand or Verb.UseItem) when item is null or MicahKit.LighterId:
+                if (State.HasFlag("cellar_fire"))
+                    await Say("No need. The cellar's doing the job for me.");
+                else
+                    await Say("Gas and a candle? It would explode before we'd be far enough. But maybe if I use all that alcohol in the cellar...");
                 return true;
         }
         return false;

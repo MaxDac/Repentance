@@ -624,7 +624,9 @@ described here (other verbs, flavour lines) is left to the implementation.
       the lighter is too close to throw. He climbs back up to the kitchen ("Closed the Club's account. Out. Now."),
       and the trapdoor is then refused. Outside, the house burns: "The cellar goes first. Then the kitchen, then
       the study, and everything Harrington ever wrote down in it." There is no explosion. The kitchen's gas range
-      and candle are only scenery.
+      and candle stay selectable, but Micah talks himself out of them: "Gas and a candle? It would explode before
+      we'd be far enough. But maybe if I use all that alcohol in the cellar..." (after the fire: "No need. The
+      cellar's doing the job for me.").
     - During the escape the way back is shut: the baize door gets "Not back in there. Somebody's on the stairs by
       now." and so does the bootleggers' stair in the cellar, so the bedroom confrontation can't be replayed.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,

@@ -297,9 +297,11 @@ public partial class AutoPlay
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");
         Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door during the escape");
-        await game.Perform(Verb.Hand, "range");
-        await game.Perform(Verb.Hand, "candle");
-        Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag(Endings.MansionExploded), "the range and the candle are only scenery now");
+        var rangeLines = await Listen(game, game.Perform(Verb.Hand, "range"));
+        var candleLines = await Listen(game, game.Perform(Verb.Hand, "candle"));
+        Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag(Endings.MansionExploded) &&
+              rangeLines.Concat(candleLines).Count(l => l.Contains("all that alcohol in the cellar")) == 2,
+            "the range and the candle stay selectable, and Micah steers himself to the cellar whiskey");
         // ---- the fire: down to the cellar while Eleanor waits, open the whiskey, the hung lantern onto it
         await game.Perform(Verb.Walk, "cellar_door");
         Check(game.Room?.Name == "MansionCellar", "back down to the cellar during the escape");
