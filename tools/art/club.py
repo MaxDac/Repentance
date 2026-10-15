@@ -771,11 +771,14 @@ def pendant(full, x, y, pool):
     light(full, "ellipse", pool, LAMPLIGHT, 0.06, 12)
 
 
+STAGE_X0, STAGE_X1 = 100, 380  # the proscenium, widened now the stalls are gone
+
+
 def proscenium(img):
     """The gilt proscenium arch framing the stage, its wall darker than the house."""
     d = ImageDraw.Draw(img)
-    d.polygon([(108, 0), (W - 109, 0), (324, 136), (156, 136)], fill=hx("1c0a0e"))
-    x0, x1, y0 = 132, 348, 10
+    x0, x1, y0 = STAGE_X0, STAGE_X1, 10
+    d.polygon([(x0 - 28, 0), (x1 + 28, 0), (x1 - 8, 136), (x0 + 8, 136)], fill=hx("1c0a0e"))
     d.rectangle([x0, y0, x1, 136], fill=hx("2a1014"))
     for x in range(x0 + 4, x1 - 2, 8):
         for y in range(y0 + 4 + (x // 8) % 2 * 4, 40, 8):
@@ -799,7 +802,7 @@ def proscenium(img):
     d.arc([x0 + 20, y0 + 8, x1 - 20, 60], 180, 360, fill=hx("e0c070"))
     for k in range(10):
         a = math.pi * (k + 0.5) / 10
-        px_, py_ = 240 - math.cos(a) * 100, 37 - math.sin(a) * 22
+        px_, py_ = 240 - math.cos(a) * ((x1 - x0) / 2 - 8), 37 - math.sin(a) * 22
         d.ellipse([px_ - 1, py_ - 1, px_ + 1, py_ + 1], fill=hx("f0d088"))
     d.ellipse([228, y0, 252, y0 + 16], fill=BRASS, outline=WOOD_DEEP)
     d.ellipse([232, y0 + 3, 248, y0 + 13], fill=hx("5a1018"), outline=hx("e0c070"))
@@ -813,18 +816,18 @@ def proscenium(img):
 def stage_backdrop(img):
     """The house curtain: a fringed valance, two velvet panels meeting at a seam, tied-back legs either side."""
     d = ImageDraw.Draw(img)
-    d.rectangle([148, 40, 332, 110], fill=hx("0a0406"))
+    d.rectangle([STAGE_X0 + 12, 40, STAGE_X1 - 12, 110], fill=hx("0a0406"))
     px = img.load()
-    x0, x1, y0, y1 = 168, 312, 46, 110
-    curtain_panel(px, y0, y1, lambda y: (x0, 239 - max(0, (y - 100)) * 0.3), 6, 0.3, 3011)
-    curtain_panel(px, y0, y1, lambda y: (241 + max(0, (y - 100)) * 0.3, x1), 6, 2.1, 3012)
+    x0, x1, y0, y1 = STAGE_X0 + 32, STAGE_X1 - 32, 46, 110
+    curtain_panel(px, y0, y1, lambda y: (x0, 239 - max(0, (y - 100)) * 0.3), 8, 0.3, 3011)
+    curtain_panel(px, y0, y1, lambda y: (241 + max(0, (y - 100)) * 0.3, x1), 8, 2.1, 3012)
     d.line([(240, y0), (240, y1)], fill=hx("16030a"))
     for x in range(x0, x1 + 1):
         if (x // 2) % 2:
             d.point((x, y1 - 1), fill=hx("c8a050"))
         d.point((x, y1 - 2), fill=hx("7a5a24"))
     # side legs caught back with gilt cords
-    for a, b, tie, s in ((150, 170, 86, 1), (310, 330, 86, -1)):
+    for a, b, tie, s in ((x0 - 18, x0 + 2, 86, 1), (x1 - 2, x1 + 18, 86, -1)):
         def leg(y, a=a, b=b, tie=tie, s=s):
             if y < tie:
                 t = max(0, (y - y0) / (tie - y0))
@@ -840,41 +843,43 @@ def stage_backdrop(img):
         for tx in range(cx - 2, cx + 3, 2):
             d.line([(tx, tie + 6), (tx, tie + 12)], fill=hx("7a5a24"))
     # the valance: swags, bullion fringe, tassels between
-    d.rectangle([146, 36, 334, 46], fill=hx("5a1018"))
-    d.line([(146, 36), (334, 36)], fill=hx("f0d088"))
-    d.line([(146, 37), (334, 37)], fill=BRASS)
-    for sx in range(146, 334, 23):
-        d.chord([sx, 34, sx + 23, 56], 0, 180, fill=hx("7a1a26"))
-        d.arc([sx, 34, sx + 23, 56], 0, 180, fill=hx("2a060c"))
-        d.arc([sx + 3, 34, sx + 20, 50], 15, 165, fill=hx("a03040"))
-        d.arc([sx + 6, 36, sx + 17, 46], 20, 160, fill=hx("8a2232"))
-        for fx in range(sx + 1, sx + 23, 2):
-            fy = 45 + round(10 * math.sin(math.pi * (fx - sx) / 23))
+    vl, vr, sw = STAGE_X0 + 10, STAGE_X1 - 10, 26
+    d.rectangle([vl, 36, vr, 46], fill=hx("5a1018"))
+    d.line([(vl, 36), (vr, 36)], fill=hx("f0d088"))
+    d.line([(vl, 37), (vr, 37)], fill=BRASS)
+    for sx in range(vl, vr, sw):
+        d.chord([sx, 34, sx + sw, 56], 0, 180, fill=hx("7a1a26"))
+        d.arc([sx, 34, sx + sw, 56], 0, 180, fill=hx("2a060c"))
+        d.arc([sx + 3, 34, sx + sw - 3, 50], 15, 165, fill=hx("a03040"))
+        d.arc([sx + 7, 36, sx + sw - 7, 46], 20, 160, fill=hx("8a2232"))
+        for fx in range(sx + 1, sx + sw, 2):
+            fy = 45 + round(10 * math.sin(math.pi * (fx - sx) / sw))
             d.line([(fx, fy), (fx, fy + 2)], fill=BRASS if fx % 4 else hx("e0c070"))
         d.ellipse([sx - 2, 42, sx + 2, 46], fill=hx("e0c070"))
         d.polygon([(sx - 1, 46), (sx + 1, 46), (sx + 3, 56), (sx - 3, 56)], fill=BRASS)
         d.line([(sx, 48), (sx, 56)], fill=hx("7a5a24"))
-    shadow(img, "rect", [168, 46, 312, 60], 0.3, 4)
+    shadow(img, "rect", [x0, 46, x1, 60], 0.3, 4)
     # the stage boards, an apron with footlights
-    d.polygon([(184, 110), (296, 110), (314, 146), (166, 146)], fill=WOOD_DARK)
-    d.line([(184, 110), (296, 110)], fill=mul(WOOD, 1.1))
-    for x in range(188, 296, 12):
-        d.line([(x, 111), (240 + (x - 240) * 1.3, 146)], fill=hx("3a2216"))
+    bl, br, al, ar = x0 + 18, x1 - 18, x0 - 6, x1 + 6
+    d.polygon([(bl, 110), (br, 110), (ar, 146), (al, 146)], fill=WOOD_DARK)
+    d.line([(bl, 110), (br, 110)], fill=mul(WOOD, 1.1))
+    for x in range(bl + 4, br, 12):
+        d.line([(x, 111), (240 + (x - 240) * (ar - 240) / (br - 240), 146)], fill=hx("3a2216"))
     for y in (118, 129, 140):
         k = (y - 110) / 36
-        d.line([(184 - 18 * k + 2, y), (296 + 18 * k - 2, y)], fill=hx("2e1a10"))
-    for x, y in ((214, 124), (262, 120), (230, 136), (282, 132)):
+        d.line([(bl - 24 * k + 2, y), (br + 24 * k - 2, y)], fill=hx("2e1a10"))
+    for x, y in ((174, 124), (214, 124), (262, 120), (230, 136), (282, 132), (318, 126)):
         d.point((x, y), fill=hx("5a3a24"))
-    d.polygon([(166, 146), (314, 146), (314, 152), (166, 152)], fill=WOOD_DEEP)
-    d.line([(166, 146), (314, 146)], fill=mul(WOOD, 1.15))
-    d.line([(166, 152), (314, 152)], fill=hx("6a4a24"))
-    for x in range(172, 312, 6):
+    d.polygon([(al, 146), (ar, 146), (ar, 152), (al, 152)], fill=WOOD_DEEP)
+    d.line([(al, 146), (ar, 146)], fill=mul(WOOD, 1.15))
+    d.line([(al, 152), (ar, 152)], fill=hx("6a4a24"))
+    for x in range(al + 6, ar - 2, 6):
         d.line([(x, 148), (x, 151)], fill=hx("2a160c"))
-    for x in range(178, 306, 16):
+    for x in range(al + 12, ar - 6, 16):
         d.chord([x - 5, 142, x + 5, 150], 180, 360, fill=hx("6a4a24"), outline=hx("2a1a0a"))
         d.point((x, 144), fill=hx("fff0c0"))
         light(img, "ellipse", [x - 7, 132, x + 7, 148], hx("f8d28a"), 0.18, 4)
-    light(img, "rect", [176, 96, 304, 146], hx("f8d28a"), 0.06, 10)
+    light(img, "rect", [al + 10, 96, ar - 10, 146], hx("f8d28a"), 0.06, 10)
 
 
 def theatre_seat(d, x, y, shade):
@@ -898,22 +903,35 @@ def theatre_seat(d, x, y, shade):
 
 
 def seating(img):
+    """A single front row of stalls along the right wall, on a low riser with brass-capped aisle ends."""
     d = ImageDraw.Draw(img)
-    for i, y in enumerate((78, 94, 110)):
-        shade = i / 3
-        for side in (-1, 1):
-            xs = [240 + side * (90 + j * 26 + i * 3) for j in range(4)]
-            lo, hi = min(xs) - 14, max(xs) + 14
-            # the stepped riser each row stands on, with a brass nosing
-            d.rectangle([lo, y + 12, hi, y + 18], fill=mix(hx("2a1014"), hx("140608"), shade))
-            d.line([(lo, y + 12), (hi, y + 12)], fill=mix(BRASS, hx("1a0a08"), 0.4 + shade * 0.4))
-            d.line([(lo, y + 18), (hi, y + 18)], fill=hx("0e0406"))
-            for x in xs:
-                theatre_seat(d, x, y, shade)
-            end = hi - 1 if side > 0 else lo + 1
-            d.rectangle([end - 2, y - 4, end + 2, y + 14], fill=mix(hx("5a3424"), hx("1a0c08"), shade))
-            d.ellipse([end - 2, y - 6, end + 2, y - 2], fill=mix(BRASS, hx("2a1a0a"), shade))
-            d.point((end, y + 4), fill=hx("e0c070"))
+    y, shade = 120, 0.3
+    xs = [404 + j * 26 for j in range(3)]
+    lo, hi = min(xs) - 14, max(xs) + 14
+    shadow(img, "rect", [lo - 2, y + 14, hi + 2, y + 22], 0.5, 4)
+    d.rectangle([lo, y + 12, hi, y + 18], fill=mix(hx("2a1014"), hx("140608"), shade))
+    d.line([(lo, y + 12), (hi, y + 12)], fill=mix(BRASS, hx("1a0a08"), 0.4 + shade * 0.4))
+    d.line([(lo, y + 18), (hi, y + 18)], fill=hx("0e0406"))
+    for x in xs:
+        theatre_seat(d, x, y, shade)
+    for end in (lo + 1, hi - 1):
+        d.rectangle([end - 2, y - 4, end + 2, y + 14], fill=mix(hx("5a3424"), hx("1a0c08"), shade))
+        d.ellipse([end - 2, y - 6, end + 2, y - 2], fill=mix(BRASS, hx("2a1a0a"), shade))
+        d.point((end, y + 4), fill=hx("e0c070"))
+
+
+def side_walls(img):
+    """Dado panelling and sconces on the house walls either side of the proscenium."""
+    d = ImageDraw.Draw(img)
+    for a, b in ((0, STAGE_X0 - 24), (STAGE_X1 + 24, W - 1)):
+        d.rectangle([a, 92, b, 136], fill=hx("1e0c0e"))
+        d.line([(a, 91), (b, 91)], fill=mul(WOOD, 0.8))
+        d.line([(a, 92), (b, 92)], fill=WOOD_DEEP)
+        for x in range(a + 4, b - 12, 22):
+            d.rectangle([x, 98, x + 16, 130], outline=hx("2e1812"))
+            d.line([(x + 1, 99), (x + 15, 99)], fill=hx("3a2016"))
+    sconce(img, 82, 70)
+    sconce(img, 432, 70)
 
 
 def aisle_rug(img):
@@ -1008,10 +1026,11 @@ def stage_scene():
     img = Image.new("RGB", (W, H))
     room_shell(img, 136, (240, -180), 320)
     proscenium(img)
+    side_walls(img)
     d = ImageDraw.Draw(img)
     d.polygon([(0, 136), (W - 1, 136), (W - 1, H - 1), (0, H - 1)], fill=hx("12070a"))
-    d.polygon([(168, 132), (312, 132), (362, H - 1), (118, H - 1)], fill=hx("1c0b0f"))
-    for x in range(120, 360, 12):
+    d.polygon([(140, 132), (340, 132), (392, H - 1), (88, H - 1)], fill=hx("1c0b0f"))
+    for x in range(92, 392, 12):
         d.line([(x, 160), (x - 12, 230)], fill=hx("18080c"))
     aisle_rug(img)
     stage_backdrop(img)
