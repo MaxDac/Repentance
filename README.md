@@ -59,7 +59,7 @@ Command-line options (after `--`):
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself with targeted regression checks, and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`7`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
+| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs` and its act files in `scripts/Debug/Playthrough/`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`7`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
 | `--film[=1\|2\|4]` | Film mode: the same story to watch at 1x, 2x or 4x speed, from the title to "The End"; input is ignored except Space, F11 and Esc. `--ending=N` picks the route (default 2). Prints `FILM OK` |
 | `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story. Prints `SETTINGS TEST OK` |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
@@ -374,7 +374,8 @@ scripts/Story/       story logic that holds in any room (inventory verbs, item c
 scripts/Rooms/       per-room puzzle scripts
 scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-ups, cursor), CloseUp (the close-up catalog), VerbWheel and GameMenu (title/pause/save slots)
 scripts/UI/Hud/      Hud's partial files: inventory, dialogue, screens and images
-scripts/Debug/       Automated runs: Harness (shared base), Playthrough (story + film mode), AutoPlay (partials in
+scripts/Debug/       Automated runs: Harness (shared base), Playthrough (story + film mode; beats in
+                     scripts/Debug/Playthrough/, one per act plus the endings), AutoPlay (partials in
                      scripts/Debug/AutoPlay/, one per act plus the focused checks), WalkTest
 tools/               Python art generator
 ```

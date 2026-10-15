@@ -106,9 +106,11 @@ marker, waits, mouse input, screenshots, and a separate save folder per suite (`
 
 ### `--playthrough`: the story, end to end
 
-`scripts/Debug/Playthrough.cs` is the single description of how the story should go. It's a list of named beats
+`Playthrough` is the single description of how the story should go. It's a list of named beats
 (`attic`, `office`, `lobby`, … `club_stage`, then the Act 3 beats), each doing what a player does: walk, look, use
-items, solve the puzzles and pick the choices.
+items, solve the puzzles and pick the choices. The beats live in one file per act in `scripts/Debug/Playthrough/`
+(`Playthrough.Act1.cs`, `Act2`, `Act3`, and `Endings` for the choices each route takes and the checks on "The End");
+`scripts/Debug/Playthrough.cs` keeps the modes, the save/load round trip and the coverage gates.
 
 - **Every ending, for real.** Acts 1 and 2 are played once. At the Club vestibule the run saves to a manual slot,
   then reloads that save and plays each Act 3 route through to "The End": endings 2, 3, 4, 5, 6, 7 and the three ways to
@@ -156,7 +158,7 @@ Each one needs a reason next to every entry, and each fails when an entry is no 
 ## Changing the story
 
 1. Update `Walkthrough.md` (the spec), then `scripts/Rooms` and `dialogue/repentance.ink`.
-2. Update the matching beat in `Playthrough.cs` so the canonical story still plays through; add a beat for a new
+2. Update the matching beat in the act file in `scripts/Debug/Playthrough/` so the canonical story still plays through; add a beat for a new
    room or step.
 3. Add a regression to the matching act file in `scripts/Debug/AutoPlay/` for anything that could break quietly (a wrong item, a cancelled puzzle).
 4. Run the suites that match the change (`tools\run\test.ps1 -Suite unit, playthrough`, plus `autoplay` if you added a
