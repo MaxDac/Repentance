@@ -6,7 +6,7 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
   her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
 - rose_closeup: Rose calling Micah back from her door.
-- beaten_closeup: Micah flat on his back on the cathedral steps in Act 3, looking up from under his hat.
+- beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours.
 """

@@ -147,9 +147,13 @@ public partial class AutoPlay
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
         Check(game.Music.Current == null, "the strings stop out on the street");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup",
+            "Micah's close-up framed over the pavement while he lies there");
         await game.Wait(1.5);
         await Shot("street_thrown_out");
         await Until(() => game.Room?.Name == "RoseHouse");
+        Check(_insetAtStreetChoice == false, "Micah's close-up is removed before he gets up and chooses");
         await club;
         await WaitIdle(game);
         Check(gs.HasFlag("go_rose") && gs.HasFlag("club_out"), "chose to go to Rose's house");
