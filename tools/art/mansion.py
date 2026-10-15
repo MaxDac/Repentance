@@ -2308,9 +2308,9 @@ def _bed(img, R, who):
     _bed_front(img, R)
 
 
-# The folding screen's hinge feet, from the back of the room to the front: it runs into the room nearly edge-on to us.
-# Its y-sort point is its nearest foot.
-SCREEN_HINGES = ((146, 210), (141, 217), (131, 224), (127, 231), (116, 238))
+# The folding screen's hinge feet, from the back of the room to the front: it runs into the room nearly edge-on to us,
+# its leaves folded tight in a sharp zig-zag so it stands on a small patch of floor. Its y-sort point is its nearest foot.
+SCREEN_HINGES = ((139, 213), (130, 217), (134, 221), (125, 225), (128, 229))
 SCREEN_FEET = SCREEN_HINGES[-1][1]
 BED_FIRE_BOX = (164, 126, 209, 205)  # the hearth's opening, animated by mansion_bedroom_fire
 BED_FIRE_FRAMES = 8
@@ -2465,9 +2465,10 @@ def _bedroom_window(img, ed, x0, y0, x1, y1):
 
 def _folding_screen(img):
     """A four-leaf lacquered screen standing nearly edge-on to us, running back into the room between the door and
-    the hearth: the leaves zig-zag, the two facing us wide and painted with reeds, a heron and a red sun on gold leaf,
-    the two turned away narrow and black; brass hinges, little feet and a silk robe thrown over the near end. Tall
-    enough to hide a standing man from the bed, and set so the man beside it stays in full view of the room's door."""
+    the hearth: the leaves folded tight in a sharp zig-zag, the two facing us painted with reeds, a heron and a red sun
+    on gold leaf, the two turned away narrow and black; brass hinges, little feet and a silk robe thrown over the near
+    end. Tall enough to hide a man from the bed, and set so the man crouched beside it stays in full view of the room's
+    door."""
     d = ImageDraw.Draw(img)
     lac, lac_l, lac_d = hx("2a1a12"), hx("5a3a24"), hx("0e0806")
 
@@ -2495,16 +2496,16 @@ def _folding_screen(img):
         if not facing:
             d.line([pt(i, 0.5, 0.06), pt(i, 0.5, 0.94)], fill=hx("6a5030"))  # a gilt edge line down the narrow leaf
             continue
-        quad(i, 0.14, 0.86, 0.06, 0.94, hx("c8a868"))  # gold leaf
-        quad(i, 0.14, 0.86, 0.06, 0.12, hx("8a9a8a"))  # water along the bottom
-        quad(i, 0.14, 0.86, 0.94, 0.9, hx("e0c888"))  # a lighter band of sky at the top
+        # black lacquer painted in gold: dark against the fire-lit dado, so the folded leaves read as solid
+        quad(i, 0.14, 0.86, 0.06, 0.94, hx("1a100c"))
+        quad(i, 0.14, 0.86, 0.06, 0.12, hx("3a3a40"))  # water along the bottom
         hill = 0.62 + 0.05 * (i % 3)
-        d.line([pt(i, 0.14, hill), pt(i, 0.5, hill + 0.04), pt(i, 0.86, hill - 0.02)], fill=hx("8a7a5a"))
-        for k, u in enumerate((0.2, 0.32, 0.45, 0.58, 0.7, 0.8)):  # reeds rising out of the water
+        d.line([pt(i, 0.14, hill), pt(i, 0.5, hill + 0.04), pt(i, 0.86, hill - 0.02)], fill=hx("a8823a"))
+        for k, u in enumerate((0.2, 0.32, 0.45, 0.58, 0.7, 0.8)):  # gold reeds rising out of the water
             top = 0.24 + 0.09 * ((k * 5 + i) % 4)
-            d.line([pt(i, u, 0.08), pt(i, u + 0.03, top)], fill=hx("5a6a3a") if k % 2 else hx("3e4e2a"))
-            d.point(pt(i, u + 0.03, top + 0.02), fill=hx("7a5a2a"))  # a bulrush head
-        if i == 1:  # a heron standing in the reeds, foreshortened like the leaf
+            d.line([pt(i, u, 0.08), pt(i, u + 0.03, top)], fill=hx("c8a040") if k % 2 else hx("8a6a2a"))
+            d.point(pt(i, u + 0.03, top + 0.02), fill=hx("e0c060"))  # a bulrush head
+        if i == 0:  # a heron standing in the reeds, foreshortened like the leaf
             bx, by = pt(i, 0.5, 0.42)
             d.ellipse([bx - 3, by - 2, bx + 2, by + 2], fill=hx("f0ece0"))
             d.line([(bx - 1, by - 2), (bx - 2, by - 8), (bx, by - 10)], fill=hx("f0ece0"))
@@ -2512,7 +2513,7 @@ def _folding_screen(img):
             d.point((bx - 1, by - 10), fill=hx("1a1a1a"))
             d.line([(bx - 3, by), (bx + 2, by + 1)], fill=hx("6a6a70"))  # its grey wing
             d.line([(bx, by + 2), (bx, by + 8)], fill=hx("2a2a2a"))
-        if i == 3:  # the red sun over the hills, and a heron in flight under it
+        if i == 2:  # the red sun over the hills, and a heron in flight under it
             sx, sy = pt(i, 0.5, 0.8)
             d.ellipse([sx - 3, sy - 3, sx + 2, sy + 3], fill=hx("c84a30"))
             d.point((sx - 2, sy - 2), fill=hx("e87a50"))

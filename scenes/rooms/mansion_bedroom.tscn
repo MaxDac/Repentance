@@ -33,7 +33,7 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(0, 210, 140, 210, 111, 239, 114, 243, 122, 243, 154, 210, 479, 210, 479, 269, 0, 269)
+polygon = PackedVector2Array(0, 210, 134, 210, 119, 230, 121, 234, 132, 234, 147, 210, 479, 210, 479, 269, 0, 269)
 
 [node name="Entries" type="Node2D" parent="."]
 
@@ -61,10 +61,10 @@ shape = SubResource("Rect_1")
 y_sort_enabled = true
 
 [node name="Screen" type="Sprite2D" parent="World"]
-position = Vector2(113, 238)
+position = Vector2(124, 229)
 texture = ExtResource("14_screen")
 centered = false
-offset = Vector2(0, -99)
+offset = Vector2(0, -87)
 
 [node name="Fire" type="Sprite2D" parent="."]
 z_index = -9

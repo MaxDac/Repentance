@@ -5,8 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// The old man's bedroom: Eleanor under the sheet in the walnut bed, Harrington in his dressing gown. Micah listens from
-/// beside the folding screen (it stands edge-on to us, between him and the bed), steps out with the revolver, and the
-/// act's last choice is his.
+/// crouched beside the folding screen (folded tight and edge-on to us, between him and the bed), rises, steps out with
+/// the revolver, and the act's last choice is his.
 /// </summary>
 public partial class MansionBedroom : Room
 {
@@ -16,8 +16,8 @@ public partial class MansionBedroom : Room
     private const int PrayerSteps = 6;
     private int _prayerStep;
 
-    private static readonly Vector2 BesideScreen = new(94, 222);
-    private static readonly Vector2 PastScreenFront = new(116, 250);
+    private static readonly Vector2 BesideScreen = new(106, 222);
+    private static readonly Vector2 PastScreenFront = new(118, 241);
     private static readonly Vector2 MicahAims = new(160, 236);
     private static readonly Vector2 PrayerStop = new(52, 236);
     private static readonly Vector2 Door = new(30, 236);
@@ -46,14 +46,18 @@ public partial class MansionBedroom : Room
         State.SetFlag("entered_bedroom");
         var harrington = FindActor("harrington");
         var eleanor = FindActor("eleanor");
-        // In beside the screen: hidden from the bed by it, in full view from the door.
+        // In beside the screen, crouched low: hidden from the bed by it, in full view from the door.
         await Game.WalkTo(BesideScreen);
         Player.Face(Facing.Right);
+        if (!await Player.PlayPose("micah_crouch")) return;
+        Player.SetPose("micah_crouched");
         await Wait(0.8);
         await Think("Behind a folding screen, breathing through my mouth. A walnut bed the size of my office. She's in it.");
         await Talk("harrington_eleanor");
 
-        // He steps out round its near end, then forward into the room with the revolver up.
+        if (!await Player.PlayPose("micah_crouch_rise")) return;
+        Player.SetPose(null);
+        // He rises, steps out round its near end, then forward into the room with the revolver up.
         await Game.WalkTo(PastScreenFront);
         await Game.WalkTo(MicahAims);
         Player.Face(Facing.Right);

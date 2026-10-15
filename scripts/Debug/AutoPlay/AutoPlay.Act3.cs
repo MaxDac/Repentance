@@ -282,12 +282,16 @@ public partial class AutoPlay
             && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
             "Space freezes the Act Three confrontation mid-sentence");
         PressKey(Key.Space);
-        Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(94, 222)) < 2,
-            "Micah listens beside the edge-on folding screen, in full view, the screen between him and the bed (#104)");
+        Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(106, 222)) < 2,
+            "Micah listens beside the folded, edge-on screen, in full view, the screen between him and the bed (#104)");
+        Check(game.Player.PoseName == "micah_crouched" && _poseCounts.GetValueOrDefault("micah_crouch") == 1,
+            "Micah crouches down behind the screen and holds the crouch while he listens");
         await Shot("mansion_bedroom");
         await Until(() => gs.HasFlag("eleanor_up"));
         Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
             "Micah walks out from behind the screen to take aim (#104)");
+        Check(_poseCounts.GetValueOrDefault("micah_crouch_rise") == 1 && game.Player.PoseName == "micah_aim",
+            "Micah stands back up before stepping out, so the crouch is released");
         await game.Wait(0.5);
         await Shot("mansion_bedroom_gun");
         await confront;

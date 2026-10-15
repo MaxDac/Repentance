@@ -448,6 +448,10 @@ UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
 # Beaten down on hands and knees: hips over the knees, shins flat behind, the back sagging down to shoulders a little
 # lower than the hips, arms braced (elbows soft) under the shoulders and the head hanging towards the ground.
 KNEEL = [(60, 71), (82, 76), (91, 79), (61, 88), (41, 91), (81, 84), (86, 90)]
+# Hiding behind something, facing right: knees bent, then sitting low on the heels with the back straight and leaning
+# forward, the head up to listen and the near hand resting on the knee.
+HALF_CROUCH = [(62, 64), (66, 41), (68, 26), (76, 75), (66, 91), (70, 54), (75, 65)]
+HIDE_CROUCH = [(62, 76), (69, 54), (73, 40), (79, 78), (66, 91), (77, 64), (85, 74)]
 FALL = [UPRIGHT,
         [(64, 59), (60, 35), (57, 20), (70, 74), (74, 91), (69, 44), (78, 39)],
         [(64, 67), (53, 45), (47, 30), (75, 78), (79, 91), (48, 59), (44, 72)],
@@ -500,6 +504,19 @@ def action_sequences(spec, name):
         keys = [KNEEL, lifting, CROUCH, HALF_UP, UPRIGHT]
         rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12], kneeling_figure)
         action_strip("micah_kneel_rise", rise, times)
+        crouch_strips(scaled, standing)
+
+
+def crouch_strips(scaled, standing):
+    """Micah ducking down out of sight behind something (micah_crouch), the low pose he holds there (micah_crouched),
+    and standing back up (micah_crouch_rise: the same frames reversed). All face right."""
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+    keys = [UPRIGHT, between(UPRIGHT, HALF_CROUCH), HALF_CROUCH, between(HALF_CROUCH, HIDE_CROUCH), HIDE_CROUCH]
+    frames = [standing] + [action_figure(scaled, k) for k in keys]
+    action_strip("micah_crouch", frames, [0.08, 0.07, 0.07, 0.08, 0.09, 0.14])
+    action_strip("micah_crouched", frames[-1:], [1])
+    action_strip("micah_crouch_rise", frames[::-1], [0.12, 0.09, 0.08, 0.07, 0.07, 0.1])
 
 
 def build_drinking():
