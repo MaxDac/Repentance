@@ -1029,17 +1029,57 @@ def sanctuary(img):
         pa = P(x, 6.8, z)
         d.polygon([(pa[0] - 2, pa[1]), (pa[0], pa[1] - 8), (pa[0] + 2, pa[1])], fill=hx("c8a050"))
     d.line([P(-rx, 1.6, z), P(rx, 1.6, z)], fill=hx("e8c870"))
+    light(img, "polygon", [P(-rx, 0.45, z), P(-rx, 7.6, z), P(rx, 7.6, z), P(rx, 0.45, z)], hx("ffc060"), 0.28, 6)
+    # the crucifix is painted over the screen's glow so the candlelight does not wash it out
     cx, cy0 = P(0, 2.3, z)
     _, cy1 = P(0, 6.4, z)
     _, ca = P(0, 5.5, z)
-    hw = 0.8 * F / z
-    d.rectangle([cx - 1, cy1, cx + 1, cy0], fill=hx("3a2014"))
-    d.rectangle([cx - hw, ca - 1, cx + hw, ca + 1], fill=hx("3a2014"))
-    d.line([(cx, ca + 1), (cx, ca + 10)], fill=hx("e8d8c0"))
-    d.line([(cx - hw + 2, ca), (cx + hw - 2, ca)], fill=hx("e8d8c0"))
-    d.point((cx, ca - 2), fill=hx("f0e0c8"))
-    light(img, "polygon", [P(-rx, 0.45, z), P(-rx, 7.6, z), P(rx, 7.6, z), P(rx, 0.45, z)], hx("ffc060"), 0.28, 6)
-    # the high altar: white linen over marble, six tall candles
+    cx, cy0, cy1, ca = round(cx), round(cy0), round(cy1), round(ca)
+    hw = round(0.8 * F / z) + 1
+    # the great crucifix: a dark wooden cross, gilt-edged where the candles catch its left and top faces,
+    # its four ends flared into gilt terminals, with an ivory corpus
+    wood, edge, wood_d = hx("4a2614"), hx("b88a38"), hx("100804")
+    gilt, gilt_l, gilt_d = hx("d8b050"), hx("fff4c0"), hx("6a4818")
+    d.rectangle([cx + 1, cy1 + 2, cx + 4, cy0 + 2], fill=hx("1e100a"))
+    d.rectangle([cx - hw + 2, ca + 2, cx + hw + 2, ca + 4], fill=hx("1e100a"))
+    d.rectangle([cx - 2, cy1, cx + 2, cy0], fill=wood)
+    d.rectangle([cx - hw, ca - 1, cx + hw, ca + 2], fill=wood)
+    d.line([(cx - 2, cy1), (cx - 2, cy0)], fill=edge)
+    d.line([(cx + 2, cy1), (cx + 2, ca - 2)], fill=wood_d)
+    d.line([(cx + 2, ca + 3), (cx + 2, cy0)], fill=wood_d)
+    d.line([(cx - hw, ca - 1), (cx - 3, ca - 1)], fill=edge)
+    d.line([(cx + 3, ca - 1), (cx + hw, ca - 1)], fill=edge)
+    d.line([(cx - hw, ca + 2), (cx - 3, ca + 2)], fill=wood_d)
+    d.line([(cx + 3, ca + 2), (cx + hw, ca + 2)], fill=wood_d)
+    for (tx, ty, vertical) in ((cx, cy1, True), (cx, cy0, True), (cx - hw, ca, False), (cx + hw, ca, False)):
+        if vertical:
+            d.rectangle([tx - 3, ty - 1, tx + 3, ty + 1], fill=gilt)
+            d.line([(tx - 3, ty - 1), (tx + 2, ty - 1)], fill=gilt_l)
+            d.line([(tx - 2, ty + 1), (tx + 3, ty + 1)], fill=gilt_d)
+        else:
+            d.rectangle([tx - 1, ty - 2, tx + 1, ty + 3], fill=gilt)
+            d.line([(tx - 1, ty - 2), (tx - 1, ty + 2)], fill=gilt_l)
+            d.line([(tx + 1, ty - 1), (tx + 1, ty + 3)], fill=gilt_d)
+    for ox, oy in ((-4, -3), (4, -3), (-4, 4), (4, 4)):
+        d.point((cx + ox, ca + oy), fill=gilt_l)
+    # the corpus: title board, bowed head with a gilt halo, arms along the beam, loincloth and crossed feet
+    ivory, ivory_d = hx("f4e6cc"), hx("9a7e62")
+    d.line([(cx - 1, ca - 6), (cx + 1, ca - 6)], fill=hx("fff8e8"))
+    d.point((cx - 1, ca - 4), fill=gilt)
+    d.point((cx + 1, ca - 4), fill=gilt_l)
+    d.point((cx, ca - 4), fill=gilt)
+    d.rectangle([cx - 1, ca - 3, cx, ca - 2], fill=ivory)
+    d.point((cx, ca - 2), fill=ivory_d)
+    d.line([(cx - hw + 2, ca), (cx + hw - 2, ca)], fill=ivory)
+    d.line([(cx + 2, ca + 1), (cx + hw - 2, ca + 1)], fill=ivory_d)
+    d.line([(cx - hw + 2, ca + 1), (cx - 2, ca + 1)], fill=ivory_d)
+    d.rectangle([cx - 1, ca - 1, cx, ca + 8], fill=ivory)
+    d.line([(cx, ca + 1), (cx, ca + 8)], fill=ivory_d)
+    d.line([(cx - 1, ca + 7), (cx + 1, ca + 7)], fill=hx("fffaf0"))
+    d.line([(cx - 1, ca + 9), (cx - 1, ca + 13)], fill=ivory)
+    d.line([(cx, ca + 9), (cx, ca + 12)], fill=ivory_d)
+    d.point((cx, ca + 14), fill=ivory_d)
+    d.point((cx - 1, ca + 15), fill=gilt)    # the high altar: white linen over marble, six tall candles
     za = ALTAR_Z
     ax = 1.7
     d.polygon([P(-ax, 0.45, za), P(-ax, 1.45, za), P(ax, 1.45, za), P(ax, 0.45, za)], fill=hx("d8d0bc"))
@@ -1132,7 +1172,7 @@ def confessional(img):
 
 
 def pedestal(img, p0, p1, s):
-    """A moulded stone pedestal with a gilt Marian monogram on its front panel."""
+    """A moulded stone pedestal with a gilt IHS monogram on its front panel."""
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = round(p0[0]), round(p0[1]), round(p1[0]), round(p1[1])
     d.rectangle([x0, y0, x1, y1], fill=hx("8a8274"))
@@ -1144,114 +1184,123 @@ def pedestal(img, p0, p1, s):
     d.line([(x0 - 1, y0 + 2), (x1 + 1, y0 + 2)], fill=hx("6a6256"))
     for x in range(x0, x1 + 1, 2):
         d.point((x, y0 + 3), fill=hx("a49a88"))
-    # recessed front panel with the AM monogram and a small crown
+    # recessed front panel with the IHS monogram under a small cross
     px0, py0, px1, py1 = x0 + 3, y0 + 6, x1 - 3, y0 + 19
     d.rectangle([px0, py0, px1, py1], fill=hx("766e62"), outline=hx("5a5248"))
     d.line([(px0 + 1, py1), (px1, py1)], fill=hx("a49a88"))
     d.line([(px1, py0 + 1), (px1, py1)], fill=hx("a49a88"))
     mx, my = (px0 + px1) // 2, py0 + 4
     gold, gold_l = hx("c8a050"), hx("f0d488")
-    d.line([(mx - 4, my + 8), (mx - 4, my + 2), (mx - 2, my + 6), (mx, my + 2), (mx, my + 8)], fill=gold)  # M
-    d.line([(mx + 1, my + 8), (mx + 3, my + 1), (mx + 5, my + 8)], fill=gold)  # A woven through it
-    d.line([(mx + 2, my + 5), (mx + 4, my + 5)], fill=gold)
-    d.point((mx + 3, my + 1), fill=gold_l)
-    d.line([(mx - 2, my - 1), (mx + 2, my - 1)], fill=gold)
-    for k in (-2, 0, 2):
-        d.point((mx + k, my - 2), fill=gold_l)
+    d.line([(mx - 5, my + 2), (mx - 5, my + 8)], fill=gold)  # I
+    d.line([(mx - 3, my + 2), (mx - 3, my + 8)], fill=gold)  # H
+    d.line([(mx - 1, my + 2), (mx - 1, my + 8)], fill=gold)
+    d.line([(mx - 3, my + 5), (mx - 1, my + 5)], fill=gold)
+    d.line([(mx + 3, my + 2), (mx + 1, my + 2), (mx + 1, my + 5), (mx + 3, my + 5), (mx + 3, my + 8), (mx + 1, my + 8)],
+           fill=gold)  # S
+    d.line([(mx - 2, my - 3), (mx - 2, my + 1)], fill=gold)
+    d.line([(mx - 3, my - 2), (mx - 1, my - 2)], fill=gold)
+    d.point((mx - 2, my - 3), fill=gold_l)
     # the plinth flares out at the floor
     d.rectangle([x0 - 2, y1 - 4, x1 + 2, y1], fill=hx("9a9282"))
     d.line([(x0 - 2, y1 - 4), (x1 + 2, y1 - 4)], fill=hx("c0b6a2"))
 
 
-def our_lady(img, cx, top, foot):
-    """Our Lady of Grace: crowned with stars, white veil and gown, a gold-hemmed blue mantle, hands joined,
-    standing on a cloud and the crescent moon with the serpent crushed underfoot."""
+def sacred_heart(img, cx, top, foot):
+    """The Sacred Heart: Christ in a white tunic and a gold-hemmed red mantle, a cruciform halo behind his head,
+    his right hand raised in blessing and his left drawing the eye to the flaming heart on his breast."""
     d = ImageDraw.Draw(img)
-    WHITE, WHITE_M, WHITE_D = hx("e4d6be"), hx("bcac94"), hx("8a7c6a")
-    BLUE, BLUE_L, BLUE_D, BLUE_DD = hx("3a5aa8"), hx("6a8cd0"), hx("283e80"), hx("182452")
-    GOLD, GOLD_L = hx("d8a848"), hx("ffe090")
-    SKIN, SKIN_D, ROSE = hx("e8b898"), hx("b07c64"), hx("b85a5a")
+    WHITE, WHITE_M, WHITE_D, WHITE_L = hx("e8dcc4"), hx("bcac94"), hx("8a7c6a"), hx("fff8ec")
+    RED, RED_L, RED_D, RED_DD = hx("a8282c"), hx("d85448"), hx("741820"), hx("461014")
+    GOLD, GOLD_L, GOLD_D = hx("d8a848"), hx("ffe090"), hx("a07830")
+    SKIN, SKIN_D = hx("e8b898"), hx("b07c64")
+    HAIR, HAIR_D, HAIR_L = hx("6a4024"), hx("3e2414"), hx("9a6a40")
     y = lambda k: top + k
-    # a ring of twelve stars behind the head
-    for i in range(12):
-        a = math.radians(180 + i * 180 / 11)
-        sx, sy = cx + 9 * math.cos(a), y(6) + 8 * math.sin(a)
-        if sy > y(7):
-            continue
-        d.point((round(sx), round(sy)), fill=GOLD_L)
-    d.arc([cx - 8, y(-2), cx + 8, y(14)], 190, 350, fill=GOLD)
-    for i in range(0, 12, 3):
-        a = math.radians(180 + i * 180 / 11)
-        sx, sy = round(cx + 9 * math.cos(a)), round(y(6) + 8 * math.sin(a))
-        for ox, oy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-            d.point((sx + ox, sy + oy), fill=GOLD)
-    # the blue mantle: over the head, off the shoulders and down to the cloud, open in front
-    d.polygon([(cx - 3, y(0)), (cx + 3, y(0)), (cx + 6, y(5)), (cx + 7, y(10)), (cx + 9, y(18)), (cx + 10, y(30)),
-               (cx + 9, y(37)), (cx + 4, y(36)), (cx - 4, y(36)), (cx - 9, y(37)), (cx - 10, y(30)), (cx - 9, y(18)),
-               (cx - 7, y(10)), (cx - 6, y(5))], fill=BLUE)
-    # light falls from the votives on the left: lit left flank, shaded right flank
-    d.line([(cx - 6, y(5)), (cx - 7, y(10)), (cx - 9, y(18)), (cx - 10, y(30))], fill=BLUE_L)
-    d.line([(cx + 6, y(5)), (cx + 7, y(10)), (cx + 9, y(18)), (cx + 10, y(30)), (cx + 9, y(37))], fill=BLUE_DD)
-    for k, (a, b) in enumerate((((cx - 7, y(14)), (cx - 8, y(34))), ((cx + 6, y(13)), (cx + 7, y(35))),
-                                ((cx + 8, y(20)), (cx + 8, y(34))))):
-        d.line([a, b], fill=BLUE_D)
-    d.line([(cx - 6, y(16)), (cx - 6, y(33))], fill=BLUE_L)
-    # the white gown, between the open edges of the mantle
-    d.polygon([(cx - 2, y(10)), (cx + 2, y(10)), (cx + 4, y(36)), (cx - 4, y(36))], fill=WHITE)
-    for fx in (-3, 0, 3):
-        d.line([(cx + fx, y(23)), (cx + fx + (fx > 0) - (fx < 0), y(35))], fill=WHITE_M)
-    d.line([(cx + 1, y(24)), (cx + 2, y(35))], fill=WHITE_D)
-    d.line([(cx - 2, y(24)), (cx - 3, y(35))], fill=hx("fff8ec"))
-    # the mantle's gold hem along both front edges, and its lining turned back at the hem
-    d.line([(cx - 3, y(10)), (cx - 4, y(20)), (cx - 5, y(36))], fill=GOLD)
-    d.line([(cx + 3, y(10)), (cx + 4, y(20)), (cx + 5, y(36))], fill=hx("a08038"))
-    d.line([(cx - 9, y(37)), (cx - 4, y(36))], fill=GOLD)
-    d.line([(cx + 4, y(36)), (cx + 9, y(37))], fill=hx("a08038"))
-    d.polygon([(cx + 6, y(33)), (cx + 9, y(36)), (cx + 6, y(36))], fill=hx("c0d0e8"))
-    # the blue sash knotted at the waist, its ends falling down the gown
-    d.line([(cx - 3, y(19)), (cx + 3, y(19))], fill=BLUE)
-    d.point((cx, y(19)), fill=BLUE_L)
-    d.line([(cx, y(20)), (cx - 1, y(26))], fill=BLUE)
-    d.line([(cx + 1, y(20)), (cx + 2, y(25))], fill=BLUE_D)
-    # white veil framing the face and falling to the shoulders
-    d.ellipse([cx - 4, y(0), cx + 4, y(10)], fill=WHITE)
-    d.polygon([(cx - 4, y(5)), (cx - 5, y(10)), (cx + 5, y(10)), (cx + 4, y(5))], fill=WHITE)
-    d.line([(cx + 4, y(3)), (cx + 5, y(10))], fill=WHITE_D)
-    d.line([(cx - 4, y(4)), (cx - 4, y(9))], fill=hx("fff8ec"))
-    # the face, tilted down, with a strand of brown hair under the veil
+    # a gilt halo with the arms of the cross showing round the head
+    d.ellipse([cx - 7, y(-2), cx + 7, y(12)], fill=GOLD_D)
+    d.ellipse([cx - 6, y(-1), cx + 6, y(11)], fill=GOLD)
+    d.arc([cx - 7, y(-2), cx + 7, y(12)], 140, 260, fill=GOLD_L)
+    for (ax, ay, bx, by) in ((cx - 6, y(4), cx - 4, y(4)), (cx + 4, y(4), cx + 6, y(4)), (cx, y(-1), cx, y(0))):
+        d.line([(ax, ay), (bx, by)], fill=hx("b02a2a"))
+    # the white tunic, from the shoulders to the hem
+    d.polygon([(cx - 5, y(11)), (cx + 5, y(11)), (cx + 7, y(16)), (cx + 8, y(36)), (cx - 8, y(36)), (cx - 7, y(16))],
+              fill=WHITE)
+    d.line([(cx - 7, y(16)), (cx - 8, y(36))], fill=WHITE_L)
+    for fx in (-4, -1, 2):
+        d.line([(cx + fx, y(30)), (cx + fx + (1 if fx > 0 else -1), y(36))], fill=WHITE_M)
+    d.line([(cx - 3, y(31)), (cx - 4, y(36))], fill=WHITE_L)
+    # the red mantle: over his left shoulder, down his side and wrapped across the hips
+    d.polygon([(cx + 2, y(10)), (cx + 6, y(11)), (cx + 9, y(17)), (cx + 10, y(29)), (cx + 9, y(35)), (cx + 2, y(34)),
+               (cx - 6, y(32)), (cx - 9, y(28)), (cx - 7, y(24)), (cx + 1, y(21)), (cx + 3, y(16))], fill=RED)
+    # candlelight from the left: the folds across the hips lit, the far side in shadow
+    d.line([(cx - 8, y(28)), (cx - 6, y(25)), (cx + 1, y(22))], fill=RED_L)
+    d.line([(cx - 5, y(27)), (cx + 3, y(24))], fill=RED_L)
+    d.line([(cx - 4, y(30)), (cx + 5, y(27))], fill=RED_D)
+    d.line([(cx + 9, y(17)), (cx + 10, y(29)), (cx + 9, y(35))], fill=RED_DD)
+    d.line([(cx + 6, y(14)), (cx + 7, y(32))], fill=RED_D)
+    d.line([(cx + 4, y(18)), (cx + 4, y(22))], fill=RED_D)
+    d.line([(cx - 2, y(32)), (cx + 6, y(30))], fill=RED_D)
+    # the gold hem along the mantle's edges
+    d.line([(cx - 9, y(28)), (cx - 7, y(24)), (cx + 1, y(21)), (cx + 3, y(16)), (cx + 2, y(10))], fill=GOLD)
+    d.line([(cx - 6, y(32)), (cx + 2, y(34)), (cx + 9, y(35))], fill=GOLD_D)
+    # the tunic's hem below the mantle, and his bare feet on the little gilt base
+    d.line([(cx - 7, y(36)), (cx + 7, y(36))], fill=WHITE_D)
+    d.ellipse([cx - 9, y(37), cx + 9, y(41)], fill=hx("6a5a3a"))
+    d.arc([cx - 9, y(37), cx + 9, y(41)], 0, 180, fill=GOLD_D)
+    d.arc([cx - 9, y(37), cx + 9, y(41)], 120, 190, fill=GOLD_L)
+    d.line([(cx - 8, y(39)), (cx + 8, y(39))], fill=GOLD)
+    for fx in (-3, 2):
+        d.line([(cx + fx, y(37)), (cx + fx + 1, y(37))], fill=SKIN)
+        d.point((cx + fx + 1, y(38)), fill=SKIN_D)
+    # his right hand raised in blessing, the wide sleeve falling back from the wrist
+    d.polygon([(cx - 5, y(11)), (cx - 8, y(10)), (cx - 10, y(12)), (cx - 10, y(16)), (cx - 7, y(19)), (cx - 6, y(15))],
+              fill=WHITE)
+    d.line([(cx - 10, y(12)), (cx - 10, y(16))], fill=WHITE_L)
+    d.line([(cx - 7, y(17)), (cx - 6, y(14))], fill=WHITE_M)
+    d.rectangle([cx - 11, y(7), cx - 9, y(10)], fill=SKIN)
+    d.line([(cx - 11, y(5)), (cx - 11, y(6))], fill=hx("f4ccb0"))
+    d.line([(cx - 10, y(4)), (cx - 10, y(6))], fill=SKIN)
+    d.line([(cx - 9, y(8)), (cx - 9, y(10))], fill=SKIN_D)
+    d.point((cx - 8, y(8)), fill=SKIN)
+    d.line([(cx - 11, y(11)), (cx - 8, y(11))], fill=WHITE_L)
+    # his left hand at his side, turned to point at the heart
+    d.line([(cx + 4, y(18)), (cx + 2, y(17))], fill=SKIN)
+    d.point((cx + 5, y(18)), fill=WHITE_M)
+    # the Sacred Heart: crowned with thorns, a flame and a small cross rising from it, rays around it
+    hx0, hy0 = cx - 2, y(14)
+    for (ox, oy) in ((-2, -1), (2, -1), (-3, 1), (3, 1), (0, -3), (-2, 4), (2, 4)):
+        d.point((hx0 + ox, hy0 + oy), fill=GOLD_L)
+    d.point((hx0 - 1, hy0), fill=hx("e03030"))
+    d.point((hx0 + 1, hy0), fill=hx("c02028"))
+    d.line([(hx0 - 1, hy0 + 1), (hx0 + 1, hy0 + 1)], fill=hx("c02028"))
+    d.point((hx0, hy0 + 2), fill=hx("901820"))
+    d.point((hx0 - 1, hy0), fill=hx("ff6050"))
+    d.point((hx0 - 2, hy0 + 1), fill=hx("2e4a22"))
+    d.point((hx0 + 2, hy0 + 1), fill=hx("2e4a22"))
+    d.point((hx0, hy0 - 1), fill=hx("ffb040"))
+    d.point((hx0, hy0 - 2), fill=GOLD)
+    # long hair parted in the middle and falling to the shoulders
+    d.ellipse([cx - 4, y(0), cx + 4, y(9)], fill=HAIR)
+    d.polygon([(cx - 4, y(4)), (cx - 5, y(11)), (cx - 2, y(11)), (cx - 2, y(6))], fill=HAIR)
+    d.polygon([(cx + 4, y(4)), (cx + 5, y(11)), (cx + 2, y(11)), (cx + 2, y(6))], fill=HAIR_D)
+    d.line([(cx - 4, y(4)), (cx - 4, y(10))], fill=HAIR_L)
+    d.point((cx, y(0)), fill=HAIR_D)
+    # the face, a short forked beard, and the eyes looking down to whoever kneels at the rack
     d.ellipse([cx - 2, y(2), cx + 2, y(8)], fill=SKIN)
-    d.line([(cx + 2, y(4)), (cx + 2, y(7))], fill=SKIN_D)
-    d.point((cx - 2, y(3)), fill=hx("6a4028"))
-    d.point((cx + 2, y(3)), fill=hx("6a4028"))
-    d.line([(cx - 1, y(2)), (cx + 1, y(2))], fill=hx("6a4028"))
-    d.point((cx - 1, y(4)), fill=hx("5a3a30"))
-    d.point((cx + 1, y(4)), fill=hx("5a3a30"))
-    d.point((cx, y(5)), fill=hx("fff0e0"))
-    d.point((cx, y(6)), fill=ROSE)
-    d.point((cx - 1, y(5)), fill=hx("f4c0b0"))
-    # hands joined in prayer before the breast, the white sleeves falling from the wrists
-    d.polygon([(cx - 3, y(15)), (cx - 1, y(12)), (cx + 1, y(12)), (cx + 3, y(15)), (cx + 2, y(17)), (cx - 2, y(17))],
-              fill=WHITE_M)
-    d.polygon([(cx, y(10)), (cx + 1, y(12)), (cx + 1, y(15)), (cx - 1, y(15)), (cx - 1, y(12))], fill=SKIN)
-    d.line([(cx, y(11)), (cx, y(15))], fill=SKIN_D)
-    d.point((cx - 1, y(12)), fill=hx("fff0e0"))
-    # a bank of cloud, the crescent moon and the serpent with its apple beneath her bare foot
-    for (ox, oy, r) in ((-7, 38, 3), (-3, 39, 3), (2, 39, 3), (6, 38, 3), (0, 37, 2)):
-        d.ellipse([cx + ox - r, y(oy) - r + 1, cx + ox + r, y(oy) + r - 1], fill=hx("d8d4cc"))
-        d.arc([cx + ox - r, y(oy) - r + 1, cx + ox + r, y(oy) + r - 1], 200, 300, fill=hx("fffaf0"))
-    d.arc([cx - 7, y(33), cx + 7, y(41)], 20, 160, fill=GOLD)
-    d.line([(cx - 8, y(39)), (cx - 3, y(37)), (cx + 2, y(38)), (cx + 6, y(37))], fill=hx("3a7a3a"))
-    d.point((cx - 8, y(38)), fill=hx("2a5a2a"))
-    d.point((cx - 9, y(38)), fill=hx("e04030"))
-    d.point((cx - 8, y(37)), fill=hx("3a7a3a"))
-    d.ellipse([cx + 4, y(36), cx + 6, y(38)], fill=hx("b02020"))
-    d.ellipse([cx - 2, y(35), cx + 1, y(37)], fill=SKIN)
-    d.point((cx - 2, y(36)), fill=SKIN_D)
+    d.line([(cx + 2, y(4)), (cx + 2, y(6))], fill=SKIN_D)
+    d.point((cx - 1, y(4)), fill=hx("5a3626"))
+    d.point((cx + 1, y(4)), fill=hx("5a3626"))
+    d.point((cx, y(5)), fill=SKIN_D)
+    d.point((cx - 2, y(4)), fill=hx("fff0e0"))
+    d.line([(cx - 1, y(6)), (cx + 1, y(6))], fill=HAIR)
+    d.polygon([(cx - 2, y(7)), (cx + 2, y(7)), (cx + 1, y(9)), (cx, y(10)), (cx - 1, y(9))], fill=HAIR)
+    d.point((cx, y(7)), fill=hx("a85a50"))
+    d.point((cx - 1, y(8)), fill=HAIR_L)
+    d.point((cx + 1, y(8)), fill=HAIR_D)
 
 
 def votives(img):
     d = ImageDraw.Draw(img)
-    # Our Lady on a pedestal, the votive rack burning at her feet
+    # the Sacred Heart on a pedestal, the votive rack burning at his feet
     sx, sz = -6.1, 10.0
     s = F / sz
     p0 = P(sx - 0.45, 1.25, sz)
@@ -1282,8 +1331,8 @@ def votives(img):
     g0, g1 = P(xa, 1.0, rz), P(xb, 0.5, rz)
     light(img, "ellipse", [g0[0] - 18, g0[1] - 30, g1[0] + 18, g1[1] + 14], hx("ffa040"), 0.45, 10)
     light(img, "ellipse", [head[0] - 22, head[1] - 10, head[0] + 22, feet[1] + 30], hx("ffb060"), 0.22, 10)
-    # painted after the glow, in colours already warmed by it, so the candlelight does not bleach her
-    our_lady(img, round(head[0]), round(head[1]), round(feet[1]))
+    # painted after the glow, in colours already warmed by it, so the candlelight does not bleach him
+    sacred_heart(img, round(head[0]), round(head[1]), round(feet[1]))
     stand = P(-4.3, 0, 9.2)
     top = P(-4.3, 1.1, 9.2)
     d.line([stand, top], fill=hx("2a2220"))
@@ -1344,8 +1393,8 @@ def paint_interior():
 def build():
     interior = paint_interior()
     exterior = paint_exterior()
-    lady = interior.crop((80, 116, 108, 200))
-    save(pixelize(interior, palette_of(interior, 128) + palette_of(lady, 12)), "rooms", "church_interior.png")
+    statue = interior.crop((80, 116, 108, 200))
+    save(pixelize(interior, palette_of(interior, 128) + palette_of(statue, 12)), "rooms", "church_interior.png")
     statues = Image.new("RGB", (60, 56))
     statues.paste(exterior.crop((158, 124, 188, 180)), (0, 0))
     statues.paste(exterior.crop((298, 124, 328, 180)), (30, 0))
