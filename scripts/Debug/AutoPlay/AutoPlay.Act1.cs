@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -184,8 +185,31 @@ public partial class AutoPlay
         Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
         Check(CashRules.Balance(gs.HasFlag) == 10 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves ten");
         await Shot("speakeasy_inside");
+        int barOffers = _offerLog.Count;
         var bar = game.Perform(Verb.Talk, "bartender");
+        await Until(() => gs.HasFlag("lantern_gin_held"));
+        Check(gs.HasFlag("lantern_gin_paid") && gs.HasFlag("lantern_gin_poured") && !gs.HasFlag("lantern_gin") &&
+            CashRules.Balance(gs.HasFlag) == 9, "Tony pours the bathtub gin for a buck, leaving nine");
+        Check(game.Room?.FindChild("Gin", true, false) is CanvasItem { Visible: false } &&
+            game.Room?.FindChild("GinEmpty", true, false) is CanvasItem { Visible: false },
+            "the glass leaves the counter while Micah holds it");
+        await Until(() => game.Player.PoseName == "micah_gin");
+        await game.Wait(0.7);
+        await Shot("speakeasy_gin");
+        await Until(() => gs.HasFlag("lantern_gin"));
+        Check(_poseCounts.GetValueOrDefault("micah_gin") == 1 && game.Player.PoseName == null &&
+            !gs.HasFlag("lantern_gin_held"), "Micah knocks the gin back and stands normally again");
+        Check(game.Room?.FindChild("GinEmpty", true, false) is CanvasItem { Visible: true } &&
+            game.Room?.FindChild("Gin", true, false) is CanvasItem { Visible: false },
+            "the empty glass goes back on the counter");
+        var barLog = _offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").ToList();
+        int ginAt = barLog.FindIndex(o => o.Options.Any(l => l.StartsWith("Bathtub?")));
+        Check(barLog.Count > 0 && ginAt > 0 && barLog[ginAt - 1].Options[0] == "What've you got?" &&
+            !barLog[0].Options.Any(l => l.StartsWith("Bathtub?")),
+            "the gin is offered only after Tony names the bathtub gin");
         await Until(() => game.Room?.Name == "Alley");
+        Check(_offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").Count(o => o.Options.Any(l => l.StartsWith("Bathtub?"))) == 1 &&
+            CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
         await game.Wait(2.5);
         await Shot("alley");

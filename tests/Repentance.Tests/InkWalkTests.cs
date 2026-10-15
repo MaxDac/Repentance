@@ -74,6 +74,7 @@ public class InkWalkTests
     private static IEnumerable<World> Worlds()
     {
         yield return new World { Name = "learned", Flag = _ => false, Item = i => MicahKit.IsPinned(i) };
+        yield return new World { Name = "cash in hand", Flag = _ => false, Item = i => MicahKit.IsPinned(i) || i == "dollar" };
         yield return new World { Name = "all-true", Flag = _ => true, Item = _ => true };
         for (int seed = 1; seed <= RandomWorlds; seed++)
         {

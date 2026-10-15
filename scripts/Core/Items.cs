@@ -32,11 +32,14 @@ public static class CashRules
     public const int BellboyBribe = 1;
     public const int BellboyRoomBribe = 1;
     public const int SalBribe = 10;
+    /// <summary>Tony's bathtub gin at the Blue Lantern.</summary>
+    public const int GinPrice = 1;
     public const int StartingCash = 22;
 
     public static int Balance(System.Func<string, bool> hasFlag) =>
         !hasFlag("took_dollar") ? 0 : StartingCash
             - (hasFlag("knows_lantern") ? BellboyBribe : 0)
             - (hasFlag("bellboy_room_paid") ? BellboyRoomBribe : 0)
-            - (hasFlag("sal_passed") ? SalBribe : 0);
+            - (hasFlag("sal_passed") ? SalBribe : 0)
+            - (hasFlag("lantern_gin_paid") ? GinPrice : 0);
 }

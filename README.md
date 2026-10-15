@@ -273,7 +273,8 @@ installs and uninstalls it.
    bluing and show the blue carnation at the cold-room grille to be let in.
    **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
    leaving $10 after all the bribes (mock him or refuse and
-   you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
+   you're thrown straight out back). Ask Tony the bartender what he's got and Micah can order his bathtub gin for $1
+   (leaving $9) and knock it back at the bar. Tony won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
    him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit.
@@ -399,6 +400,7 @@ holding, not a documented average PI income. Historical purchasing-power context
 October 1927 weekly earnings were $24.37. The $22 reserve is about 90% of that benchmark, making the $10 door
 bribe a substantial payment (about 41% of the weekly benchmark),
 not an ordinary tip. Bribes deduct only their respective amounts; inventory inspection shows the remaining cash.
+Tony's bathtub gin costs $1, leaving $9 if Micah drinks it.
 
 Exact Scripture excerpts use **Douay-Rheims (Challoner)**, appropriate to the Catholic characters:
 

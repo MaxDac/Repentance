@@ -121,7 +121,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Until Sal lets him in, Micah can still try to walk past him to the bar: when he crosses the curtain line Sal
   steps in front of him and the password conversation starts. Talking to Sal directly starts it as well. If
   Micah leaves the conversation without paying, Sal walks him back to the door.
-- If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
+- If Micah bribes Sal, he can speak with Tony the bartender. Once Tony says the gin was made in a bathtub, Micah
+  can order one: "Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal." It costs $1
+  (leaving $9), is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking
+  sprite); the empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
   the entrance), and on to the next scene.
 

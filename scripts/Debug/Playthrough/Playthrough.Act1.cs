@@ -86,6 +86,8 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("sal_passed"), "Sal takes the bribe");
             await Do(Verb.Talk, "bartender");
             await WaitIdle();
+            Check(Gs.HasFlag("lantern_gin") && CashRules.Balance(Gs.HasFlag) == 9,
+                "Micah knocks back a buck's worth of bathtub gin");
             Expect("Alley", "thrown out into the alley");
         });
         await Beat("convent_road", async () =>

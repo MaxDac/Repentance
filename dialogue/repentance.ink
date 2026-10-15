@@ -257,9 +257,11 @@ SAL: You're in, ain't you? Don't make me regret it.
 {has_flag("photo_shown"): -> bartender.after}
 BARTENDER: What'll it be?
 - (opts)
-* [What've you got?]
+* (menu) [What've you got?]
     BARTENDER: Gin. Gin with ice. Gin that tastes like it was made in a bathtub. Because it was.
     -> bartender.opts
+* {menu && cash_amount() >= 1 && !has_flag("lantern_gin")} [Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal.]
+    -> bartender.gin
 * [Nice place.]
     BARTENDER: It's a dump. But it's a dump with a band on Fridays.
     -> bartender.opts
@@ -267,6 +269,17 @@ BARTENDER: What'll it be?
     -> bartender.photo
 + [(Leave)]
     -> END
+= gin
+BARTENDER: A man of refined tastes. That'll be a buck.
+~ set_flag("lantern_gin_paid")
+BARTENDER: Bathtub's finest. Don't ask which bathtub.
+~ set_flag("lantern_gin_poured")
+CUE: gin
+~ set_flag("lantern_gin")
+MICAH: Smooth as a cement mixer. Just how I like it.
+BARTENDER: Glad you approve. Ain't many do.
+THOUGHT: It goes down like a lit match. For half a minute, the room is warm and nobody's missing.
+-> bartender.opts
 = photo
 BARTENDER: ...
 BARTENDER: Never heard of her. And I got a real bad memory for faces, pal. Especially faces that ask questions.

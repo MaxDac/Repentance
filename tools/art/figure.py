@@ -378,6 +378,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.02), 0.40, 0.15])
             hand = body([s * 0.02, 0.2025 if kind == "drink" else 0.39, 0.10])
             wr = hand + np.array([s * 0.015, 0.035, 0.018])
+        elif kind == "hold":  # a glass in the hand: f = hand height, o = reach forward, e = how far it's tipped (0..1)
+            el = body([s * (sw + 0.02), 0.40, min(0.15, 0.04 + o * 0.55)])
+            hand = body([s * 0.02, f, o])
+            wr = hand + np.array([s * 0.015, 0.035, 0.018])
         elif kind == "temple":  # hand raised beside the head, a held gun pointing back into the temple
             el = body([s * (sw + 0.11), 0.12, -0.03])
             hand = body([s * 0.08, 0.09, 0.0])
@@ -412,6 +416,14 @@ def figure(spec, ps, fw=56, fh=80):
     if ps.get("cup"):
         def cup(s=ps["cup"]):
             hand = arm_pts[s][3]
+            if ps.get("glass") == "gin":  # a small tumbler of bathtub gin; ps["full"] says whether any is left
+                tip = ps["arms"][s][3]
+                rim = hand + np.array([0, -0.038 + 0.01 * tip, -0.04 * tip])
+                bottom = hand + np.array([0, 0.01, 0.01 * tip])
+                c.put(c.capsule(P(bottom), P(rim), H * 0.028, H * 0.033), "aac4cc", "cup", dither=False)
+                if ps.get("full"):
+                    c.put(c.capsule(P(rim), P(rim), H * 0.022, H * 0.022), "e4ecd2", "gin", dither=False)
+                return
             tipped = ps["arms"][s][0] == "drink"
             rim = hand + np.array([0, -0.07, -0.028 if tipped else 0])
             bottom = hand + np.array([0, 0.015, 0.015])
