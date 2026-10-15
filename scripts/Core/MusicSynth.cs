@@ -13,7 +13,7 @@ public enum Track
     ChurchOrgan,
     /// <summary>The convent: a quiet piano prelude, hymn-like over pedalled arpeggios.</summary>
     ConventPiano,
-    /// <summary>Micah's office: a soft 1920s Chicago jazz quartet heard off an old record.</summary>
+    /// <summary>Micah's office: a slow, depressed minor-key ballad for muted trumpet, piano, upright bass and brushes.</summary>
     OfficeJazz,
 }
 
@@ -30,7 +30,8 @@ public enum Instrument
     /// <summary>Organ pedal, 16' and 8'.</summary>
     OrganPedal,
     Piano,
-    Clarinet,
+    /// <summary>A trumpet played soft through a Harmon mute.</summary>
+    Trumpet,
     /// <summary>A plucked upright bass.</summary>
     UprightBass,
     /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, D2 brush tap, E2 brush sweep,
@@ -43,7 +44,7 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
-/// strings, pipe organ, piano, clarinet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
+/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -80,7 +81,7 @@ public static partial class MusicSynth
     {
         Track.ChurchOrgan => -7.5f,
         Track.ConventPiano => -7.5f,
-        Track.OfficeJazz => -8.5f,
+        Track.OfficeJazz => -15f,
         _ => -6f,
     };
 
