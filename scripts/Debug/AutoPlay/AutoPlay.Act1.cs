@@ -120,6 +120,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "EleanorRoom", "across the corridor into Eleanor's room");
 
         await Shot("eleanor_room");
+        Check(game.Sfx.Ambient == Sound.Rain, "rain patters on Eleanor's window");
         await game.Perform(Verb.Hand, "desk_drawer");
         Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
@@ -131,7 +132,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("closet_open"), "opened the closet");
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+            new[] { ("n0", 4), ("d1", 1), ("t1", 3), ("n1", 1), ("t2", 1), ("n2", 7) }, "safe_dial");
         Check(gs.HasFlag("safe_open"), "opened the safe");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");
@@ -163,7 +164,10 @@ public partial class AutoPlay
             "the florist's shelf has no bluing: the carnation can't be dyed until the brass box is opened");
         await game.ItemVerb(Verb.Hand, "brass_box");
         Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook") && gs.HasItem("bluing") &&
-            gs.HasFlag("opened_brass_box"), "the brass box holds a card, the matchbook and Eleanor's bluing");
+            gs.HasItem("water_flower") && gs.HasFlag("opened_brass_box"),
+            "the brass box holds a card, the matchbook, Eleanor's bluing and her water flower");
+        await game.Perform(Verb.UseItem, "chalkboard", "water_flower");
+        Check(gs.HasItem("water_flower") && !gs.HasFlag("knows_password"), "the water flower only talks in water");
         await Shot("blue_lantern_front_taken");
         await CombineAndWait("carnation", "bluing");
         Check(gs.HasItem("blue_carnation") && !gs.HasItem("carnation") && !gs.HasItem("bluing") && gs.HasFlag("made_blue_carnation"),
@@ -174,11 +178,22 @@ public partial class AutoPlay
             "past the florist's grille, but Sal is still to come");
 
         await Shot("speakeasy");
+        Vector2? salWhenPassed = null;
+        void OnSalPassed()
+        {
+            if (salWhenPassed == null && gs.HasFlag("sal_passed")) salWhenPassed = game.Room?.FindActor("sal")?.Position;
+        }
+        gs.Changed += OnSalPassed;
         await game.Perform(Verb.Talk, "bartender");
         await Until(() => !game.Busy);
+        gs.Changed -= OnSalPassed;
+        Check(salWhenPassed is { } p && p.DistanceTo(Rooms.Speakeasy.SalAside) > 4 &&
+            game.Room?.FindActor("sal")?.Position.DistanceTo(Rooms.Speakeasy.SalAside) < 0.5f,
+            $"Sal walks aside after the bribe instead of jumping there (at {salWhenPassed} when paid)");
         Check(game.Room?.Name == "Speakeasy" && _offered.Keys.Any(k => k.StartsWith("sal")),
             "walking past Sal makes him step in and start the talk");
-        Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out") && !gs.HasFlag("photo_shown"),
+        Check(gs.HasFlag("sal_passed") && gs.HasFlag("sal_bribed") && !gs.HasFlag("sal_password") &&
+              !gs.HasFlag("thrown_out") && !gs.HasFlag("photo_shown"),
             "no password, but Sal takes the bribe before Micah reaches the bar");
         await game.Perform(Verb.Talk, "sal");
         Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
@@ -312,13 +327,13 @@ public partial class AutoPlay
         }
         await WaitIdle(game);
         await game.Perform(Verb.Hand, "comb");
-        Check(gs.HasItem("mirror") && !gs.HasItem("comb") && !gs.HasItem("cloth"), "revealed mirror retained; comb and cloth left in cell");
+        Check(gs.HasItem("mirror") && !gs.HasItem("comb") && gs.HasItem("cloth"), "revealed mirror retained; comb left in cell; Micah keeps her cloth");
         var searchBedAfterCleaning = game.Perform(Verb.Hand, "bed");
         await Until(() => game.Hud.SpeechVisible);
-        Check(game.Hud.SpeechText == "Thin mattress, and the borrowed cloth back where it belongs.",
-            "bed search after cleaning keeps the returned-cloth response");
+        Check(game.Hud.SpeechText == "Thin mattress. Her rag oughta be lying here. It's in my pocket instead.",
+            "bed search after cleaning admits the cloth wasn't returned");
         await searchBedAfterCleaning;
-        Check(!gs.HasItem("cloth"), "bed search after cleaning does not borrow the cloth again");
+        Check(gs.Inventory.Count(i => i == "cloth") == 1, "bed search after cleaning does not borrow another cloth");
         await Shot("convent_cell_after");
 
         await game.Perform(Verb.Walk, "exit");

@@ -26,7 +26,7 @@ public partial class AutoPlay
         Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
         await Until(() => game.Room?.Name == "ChurchExterior");
         Check(game.Music.Current == null, "no organ out on the cathedral steps");
-        Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+        Check(gs.HasItem("mirror") && gs.HasItem("cloth"), "reading again leads back to 1927 with Micah's things, Eleanor's cloth too");
         Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
             gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
             !gs.HasItem("matchbook") && !gs.HasItem("photo") && !gs.HasItem("dollar"),
