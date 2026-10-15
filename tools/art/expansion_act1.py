@@ -322,6 +322,69 @@ def rack(img, with_hanger):
     shadow(img, "rect", [x0 - 4, FLOOR + 4, x1 + 10, FLOOR + 12], 0.4, 3)
 
 
+def cart_lamp(img, p):
+    """A brass desk lamp riding on the maid's cart: a weighted, stepped foot, a stem with a wing-nut knuckle and an
+    elbow arm, and a pleated silk shade with brass rims and a beaded fringe, lit, the bulb peeping under it."""
+    d = ImageDraw.Draw(img)
+    x, y = int(p[0]), int(p[1])
+    brass, brass_d, brass_l, brass_dd = hx("b08a3a"), hx("7a5a22"), hx("f0d488"), hx("3e2c12")
+    # weighted foot: a felt pad, a stepped brass plinth and a domed boss with its collar
+    d.ellipse([x - 7, y - 2, x + 7, y + 2], fill=brass_dd)
+    d.ellipse([x - 6, y - 4, x + 6, y + 1], fill=brass_d)
+    d.ellipse([x - 6, y - 5, x + 6, y - 1], fill=brass)
+    d.arc([x - 6, y - 5, x + 6, y - 1], 150, 260, fill=brass_l)
+    d.arc([x - 6, y - 5, x + 6, y - 1], 20, 90, fill=brass_d)
+    d.ellipse([x - 3, y - 7, x + 3, y - 3], fill=brass_d)
+    d.ellipse([x - 3, y - 8, x + 2, y - 4], fill=brass)
+    d.point((x - 2, y - 7), fill=brass_l)
+    d.point((x - 1, y - 7), fill=brass_l)
+    d.rectangle([x - 1, y - 10, x + 1, y - 8], fill=brass_d)
+    d.point((x - 1, y - 9), fill=brass_l)
+    # stem, round in section: lit on the left
+    d.rectangle([x, y - 16, x + 1, y - 10], fill=brass_d)
+    d.line([(x, y - 16), (x, y - 10)], fill=brass_l)
+    # knuckle joint with a wing nut, then the elbow arm leaning out to the shade
+    d.ellipse([x - 1, y - 19, x + 2, y - 16], fill=brass)
+    d.point((x, y - 18), fill=brass_l)
+    d.point((x + 1, y - 17), fill=brass_dd)
+    d.line([(x + 3, y - 18), (x + 4, y - 19)], fill=brass_d)
+    d.line([(x + 1, y - 19), (x + 4, y - 22)], fill=brass_d, width=2)
+    d.line([(x + 1, y - 20), (x + 3, y - 22)], fill=brass_l)
+    sx, ty, by = x + 5, y - 29, y - 22
+    d.ellipse([sx - 2, by - 2, sx + 1, by + 1], fill=brass)
+    # the bulb hanging under the shade, white-hot with a glint
+    d.ellipse([sx - 2, by - 1, sx + 2, by + 3], fill=hx("fff0c0"))
+    d.point((sx - 1, by + 1), fill=hx("ffffff"))
+    d.point((sx + 1, by + 2), fill=hx("e8c880"))
+    # pleated silk shade, a flared drum lit through from inside: pleats fan from the top rim to the bottom one
+    silk, silk_l, silk_d = hx("e8b868"), hx("fbe0a0"), hx("b07a38")
+    for yy in range(ty, by + 1):
+        t = (yy - ty) / (by - ty)
+        hw = 3 + 4 * t
+        for xx in range(int(sx - hw), int(sx + hw) + 1):
+            u = (xx - sx) / hw
+            pleat = int((u + 1) * 4.5) % 2
+            col = silk_l if pleat else silk
+            if abs(u) > 0.8:
+                col = mix(col, silk_d, 0.6)
+            elif u > 0.35:
+                col = mix(col, silk_d, 0.3)
+            d.point((xx, yy), fill=mix(col, silk_l, 0.25 * t))
+    d.line([(sx - 3, ty), (sx + 3, ty)], fill=brass_d)
+    d.line([(sx - 7, by), (sx + 7, by)], fill=brass)
+    d.line([(sx - 7, by), (sx - 4, by)], fill=brass_l)
+    for xx in range(sx - 7, sx + 8, 2):
+        d.point((xx, by + 1), fill=hx("c8963a"))
+    # finial: a little brass acorn on top of the harp
+    d.point((sx, ty - 1), fill=brass_d)
+    d.ellipse([sx - 1, ty - 3, sx + 1, ty - 1], fill=brass)
+    d.point((sx, ty - 3), fill=brass_l)
+    # soft warm glow: round the shade, under it onto the tray, and a hot spot at the bulb
+    light(img, "ellipse", [sx - 18, ty - 12, sx + 18, by + 12], hx("ffcc80"), 0.22, 7)
+    light(img, "ellipse", [x - 18, y - 6, x + 22, y + 5], hx("ffd890"), 0.2, 4)
+    light(img, "ellipse", [sx - 3, by - 1, sx + 3, by + 4], hx("fff4d0"), 0.5, 2)
+
+
 def cart(img, with_pliers):
     X0, X1, Z0, Z1 = 300, 364, 2, 24
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
@@ -339,9 +402,8 @@ def cart(img, with_pliers):
     R.box(img, X0 + 6, X0 + 18, 43, 48, Z0 + 6, Z0 + 14, hx("d8c070"), top=hx("e8d488"))
     R.box(img, X0 + 22, X0 + 34, 43, 46, Z0 + 4, Z0 + 10, hx("6a4a2a"), top=hx("8a6a3a"))
     d = ImageDraw.Draw(img)
-    p = R.P(X1 - 6, 44, Z0 + 4)
-    d.line([(p[0], p[1]), (p[0] + 2, p[1] - 22)], fill=hx("5a3a20"), width=2)
-    d.ellipse([p[0] - 3, p[1] - 30, p[0] + 7, p[1] - 20], fill=hx("c8c0b0"))
+    cart_lamp(img, R.P(X1 - 6, 44, Z0 + 4))
+    d = ImageDraw.Draw(img)
     for x in (X0, X1):
         for z in (Z0 + 2, Z1 - 2):
             q = R.P(x, 0, z)
@@ -844,6 +906,7 @@ def cold_door(img, open_):
 
 CARNATION = (hx("2e5ad8"), hx("5a8af0"), hx("a8c8ff"))
 EMBER = (hx("c84a20"), hx("ff8a3a"), hx("ffd890"))
+SKIN = (hx("c08a6a"), hx("8e5c46"), hx("e4b08a"), hx("5e3a2e"))  # face, shade, lit, deep shade
 REGULAR_X = 442
 # the smoker's strip: idle, arm rising, hand at the mouth, drawing on it, arm falling with a puff, idle with the
 # puff drifting off. Each pose is the cigarette hand's elbow and hand offsets from the regular's centre line.
@@ -870,9 +933,9 @@ def _puff(d, cx, cy, r):
 
 
 def regular(img, pose=0):
-    """A member waiting by the wall in a dark overcoat, head bowed so the fedora hides his face, a blue carnation
-    bright in his buttonhole and a cigarette in his hand. Painted on its own layer (the game animates the smoking);
-    returns the figure's mask."""
+    """A member waiting by the wall in a dark overcoat, fedora tipped low so his eyes look out of the brim's shadow,
+    a blue carnation bright in his buttonhole and a cigarette in his hand. Painted on its own layer (the game animates
+    the smoking); returns the figure's mask."""
     p = SMOKE_POSES[pose]
     fig = Image.new("RGBA", img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(fig)
@@ -888,17 +951,33 @@ def regular(img, pose=0):
     d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0c0b0e"))
     d.line([(cx - 8, BASE - 3), (cx - 3, BASE - 3)], fill=hx("4a4650"))
     outline = hx("0e0d12")
-    # head and neck under the brim, kept in the hat's shadow so the face stays hidden: jaw, chin and ear, lit a
-    # touch on the lamp side
-    face, face_d, face_l = hx("4e3a30"), hx("362820"), hx("664c3e")
-    d.rectangle([cx - 2, 112, cx + 2, 117], fill=face_d)
-    d.ellipse([cx - 5, 101, cx + 5, 115], fill=face)
-    d.line([(cx - 5, 106), (cx - 5, 110)], fill=face_l)
-    d.line([(cx - 4, 111), (cx - 2, 114)], fill=face_l)
-    d.line([(cx + 4, 110), (cx + 1, 114)], fill=face_d)
-    d.point((cx - 6, 107), fill=face)
-    d.point((cx - 6, 108), fill=face_d)
-    d.line([(cx - 1, 112), (cx + 1, 112)], fill=face_d)
+    # head and neck under the brim: the street lamp on the left lights the cheek, nose and chin, the far side of
+    # the face falls into shadow, and the brim throws a band of shade over the brow and eyes
+    face, face_d, face_l, face_dd = SKIN
+    d.rectangle([cx - 2, 113, cx + 2, 118], fill=face_dd)
+    d.ellipse([cx - 5, 101, cx + 5, 116], fill=face)
+    d.chord([cx - 5, 101, cx + 5, 116], 270, 90, fill=face_d)
+    d.line([(cx - 4, 109), (cx - 4, 112)], fill=face_l)
+    d.line([(cx - 3, 113), (cx - 1, 115)], fill=face_l)
+    d.line([(cx + 4, 110), (cx + 1, 115)], fill=face_dd)
+    # ear on the lit side
+    d.point((cx - 6, 109), fill=face)
+    d.point((cx - 6, 110), fill=face_d)
+    # brim shadow, then brow ridge and eyes glinting out of it
+    d.rectangle([cx - 5, 106, cx + 5, 108], fill=face_dd)
+    d.line([(cx - 4, 108), (cx - 1, 108)], fill=hx("2a1a14"))
+    d.line([(cx + 1, 108), (cx + 3, 108)], fill=hx("2a1a14"))
+    d.point((cx - 3, 109), fill=hx("1a1210"))
+    d.point((cx - 2, 109), fill=hx("c8bcae"))
+    d.point((cx + 2, 109), fill=hx("1a1210"))
+    # nose: a lit ridge, a shadowed side and the nostril
+    d.line([(cx - 1, 109), (cx - 1, 111)], fill=face_l)
+    d.line([(cx, 110), (cx, 111)], fill=face_d)
+    d.point((cx, 112), fill=face_dd)
+    # mouth and the underside of the lower lip, then a lit chin
+    d.line([(cx - 2, 113), (cx + 1, 113)], fill=hx("5a3028"))
+    d.point((cx - 1, 114), fill=face_l)
+    d.point((cx - 1, 115), fill=face)
     # overcoat: hunched shoulders, a modest flare, belt, the lamp catching its left edge
     d.polygon([(cx - 10, 116), (cx + 10, 116), (cx + 10, 123), (cx + 11, 164), (cx - 11, 164), (cx - 10, 123)],
               fill=coat)
@@ -960,22 +1039,22 @@ def regular(img, pose=0):
     else:
         d.point((hx_ - 2, hy + 1), fill=hx("e8e4dc"))
         d.point((hx_ - 3, hy + 1), fill=ember)
-    # fedora, tipped forward over the face and seen from above: a wide brim, the pinched crown sitting at its back,
-    # and the front lip dipping over where the eyes would be
-    hy0 = -3
-    d.ellipse([cx - 12, 101 + hy0, cx + 12, 112 + hy0], fill=hat_d)
-    d.arc([cx - 12, 101 + hy0, cx + 12, 112 + hy0], 160, 300, fill=hat_l)
-    d.polygon([(cx - 6, 105 + hy0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx + 4, 95 + hy0), (cx + 6, 98 + hy0),
-               (cx + 6, 105 + hy0)], fill=hat)
-    d.polygon([(cx - 6, 105 + hy0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx - 2, 95 + hy0), (cx - 3, 98 + hy0),
-               (cx - 3, 105 + hy0)], fill=mix(hat, hat_l, 0.45))
+    # fedora, tipped forward and seen from above: a wide brim, the pinched crown sitting at its back, and the front
+    # lip dipping low over the brow so the eyes look out of its shadow
+    hy0, by0 = -3, -6
+    d.ellipse([cx - 12, 101 + by0, cx + 12, 112 + by0], fill=hat_d)
+    d.arc([cx - 12, 101 + by0, cx + 12, 112 + by0], 160, 300, fill=hat_l)
+    d.polygon([(cx - 6, 102 + by0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx + 4, 95 + hy0), (cx + 6, 98 + hy0),
+               (cx + 6, 102 + by0)], fill=hat)
+    d.polygon([(cx - 6, 102 + by0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx - 2, 95 + hy0), (cx - 3, 98 + hy0),
+               (cx - 3, 102 + by0)], fill=mix(hat, hat_l, 0.45))
     d.ellipse([cx - 4, 95 + hy0, cx + 4, 100 + hy0], fill=mix(hat, hat_l, 0.3))
-    d.line([(cx, 95 + hy0), (cx, 100 + hy0)], fill=hat_d)
+    d.line([(cx, 95 + hy0), (cx, 99 + hy0)], fill=hat_d)
     d.point((cx - 1, 96 + hy0), fill=hat_l)
-    d.rectangle([cx - 6, 103 + hy0, cx + 6, 105 + hy0], fill=band)
-    d.chord([cx - 12, 101 + hy0, cx + 12, 113 + hy0], 0, 180, fill=hat_d)
-    d.arc([cx - 12, 101 + hy0, cx + 12, 113 + hy0], 25, 155, fill=hx("34302c"))
-    d.line([(cx - 11, 107 + hy0), (cx - 5, 110 + hy0)], fill=mix(hat_d, hat_l, 0.5))
+    d.rectangle([cx - 6, 102 + by0 - 2, cx + 6, 102 + by0], fill=band)
+    d.chord([cx - 12, 101 + by0, cx + 12, 113 + by0], 0, 180, fill=hat_d)
+    d.arc([cx - 12, 101 + by0, cx + 12, 113 + by0], 25, 155, fill=hx("34302c"))
+    d.line([(cx - 11, 107 + by0), (cx - 5, 110 + by0)], fill=mix(hat_d, hat_l, 0.5))
     if p["puff"]:
         for px_, py_, r in p["puff"]:
             _puff(d, cx + px_, py_, r)
@@ -1136,10 +1215,15 @@ def build_florist():
         box = (min(box[0], b[0]), min(box[1], b[1]), max(box[2], b[2]), max(box[3], b[3]))
     # the palette sees the regular at full contrast; the carnation, the cigarette's ember and the stall's roses are a
     # handful of pixels each, so their colours are pinned so quantising cannot grey them out or turn the roses orange;
-    # the white carnations' cream is pinned too, or they snap to the pale carnation blue
+    # the white carnations' cream is pinned too, or they snap to the pale carnation blue; and the regular's face, a
+    # few dozen pixels in the rain-tinted corner, keeps its skin tones as they come out of the night grade
     src = Image.blend(variants["base"], variants["grille"], 0.5)
     src.paste(frames[0][0].crop(box), box[:2])
-    pal = palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45), hx("ccc3a0")]
+    cx = REGULAR_X
+    face = frames[0][0].crop((cx - 6, 106, cx + 6, 117)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    skin = [tuple(face.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
+    pal = (palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45),
+                                                                    hx("ccc3a0")] + skin)
     px = {k: pixelize(v, pal) for k, v in variants.items()}
     save(px["base"], "rooms", "blue_lantern_front.png")
     _overlay(px["base"], px["grille"], "blue_lantern_front_grille_open")

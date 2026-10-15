@@ -139,11 +139,13 @@ def bed(img, unmade=False):
     light(img, "polygon", [R.P(X0, 27, Z0), R.P(X1 - 30, 27, Z0), R.P(X1 - 30, 27, Z1), R.P(X0, 27, Z1)], hx("fff4df"), 0.08, 6)
 
 
-def nightstand(img):
+def nightstand(img, lamp=True):
     X0, X1, Z0, Z1 = 388, 410, 3, 24
     R.box(img, X0, X1, 0, 28, Z0, Z1, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
     R.quad(img, [(X0 + 2, 16, Z1), (X1 - 2, 16, Z1), (X1 - 2, 25, Z1), (X0 + 2, 25, Z1)], None, WOOD_D)
     R.line(img, (X0 + 9, 21, Z1), (X0 + 13, 21, Z1), GOLD)
+    if not lamp:
+        return
     R.box(img, X0 + 8, X0 + 14, 28, 30, 10, 16, GOLD_D, top=GOLD)
     R.line(img, (X0 + 11, 30, 13), (X0 + 11, 40, 13), GOLD_D)
     R.quad(img, [(X0 + 5, 40, 16), (X0 + 17, 40, 16), (X0 + 14, 48, 16), (X0 + 8, 48, 16)], hx("efe2c4"), GOLD_D)

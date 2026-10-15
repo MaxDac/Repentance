@@ -87,16 +87,18 @@ class FloristArtTests(unittest.TestCase):
         self.assertGreater(ember_y(idle), 40)
         self.assertLess(ember_y(mouth), 24)
 
-    def test_the_brim_hides_his_face(self):
-        # head bowed: hardly any skin shows between the hat and the collar
+    def test_his_face_shows_under_the_brim(self):
+        # the brim's shadow falls over his brow, but a lit, skin-toned face with dark eyes shows below it
         idle = self.frames[0]
         cx = expansion_act1.REGULAR_X - self.origin[0]
-        skin = 0
-        for y in range(0, 20):
+        skin = dark = 0
+        for y in range(0, 24):
             for x in range(cx - 6, cx + 7):
                 r, g, b, a = idle.getpixel((x, y))
-                skin += a and r > 110 and r - b > 30 and g > 70
-        self.assertLessEqual(skin, 4)
+                skin += bool(a and r > 110 and r - b > 30 and g > 70)
+                dark += bool(a and r < 50 and g < 45 and b < 45)
+        self.assertGreaterEqual(skin, 12)
+        self.assertGreater(dark, 0)
 
     def test_painting_has_no_baked_regular_or_figure_behind_the_glass(self):
         bg = self.background
