@@ -1431,7 +1431,8 @@ def _draped_skirt(c, col, waist, hip, knee, across, length, floor=92.5):
         c.bias[m & c.capsule(np.array(a, float), np.array(b, float), 0.5, 0.6)[0]] -= 1
 
 
-def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None):
+def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None,
+                  toes_tucked=False):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
     hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
@@ -1439,7 +1440,9 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     coat_drape: the coat skirt hangs with gravity, over the thigh and down to the floor, instead of following the thigh.
     plain_chest: no shirt or tie along the trunk and the collar in the coat's colour, for a profile seen low down.
     head_sprite: (image, neck point) of ready-made head art pasted upright on the neck instead of painting the head;
-    the shoulder and collar are then one rounded mass of coat."""
+    the shoulder and collar are then one rounded mass of coat.
+    toes_tucked: kneeling with the shins raised off the floor behind, so the feet stand upright on their tucked toes
+    (heel up, sole facing back) instead of lying along the shin."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
@@ -1472,7 +1475,10 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         else:
             limb(hip + off, knee + off, 4.3, 3.1, pants, part)
             limb(knee + off, ankle + off, 3.1, 2.4, pants, part)
-            limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
+            if toes_tucked:
+                limb(ankle + off + (-2, -2), np.array([ankle[0] + off[0] - 1, 91.0]), 2, 1.5, spec["shoes"], part)
+            else:
+                limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
         if far:
             limb(shoulder + off, elbow + off, 3, 2.5, spec.get("sleeves", torso), "fararm")
             limb(elbow + off, hand + off, 2.5, 2, spec.get("sleeves", torso), "fararm")
@@ -1526,7 +1532,8 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         limb(shoulder + head_axis * 0.3, neck, 1.8, 1.6, skin, "neck")
     elif coat and abs(head_axis[0]) > abs(head_axis[1]):
         neck = shoulder + head_axis * 0.55
-        limb(shoulder, neck, 2.3, 2, spec.get("collar", torso), "collar")
+        # bent over the floor the shirt collar faces the ground, so only the coat's shows
+        limb(shoulder, neck, 2.3, 2, torso if chest_down else spec.get("collar", torso), "collar")
         limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")
     else:
         neck = shoulder + head_axis * 0.25

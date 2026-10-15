@@ -292,6 +292,12 @@ class CharacterArtTests(unittest.TestCase):
             if joints == sprites.REST:
                 self.assertEqual(ankle[1], 83)
                 self.assertEqual(grounded_joints(joints)[6][1], 91)
+            elif joints == sprites.KNEEL:
+                # the shin rises behind to a foot standing on its tucked toes, which touch the floor under the ankle
+                self.assertLess(ankle[1], 91)
+                img, _ = sprites.kneeling_figure(dict(sprites.MICAH, h=sprites.MICAH["h"] * sprites.SCALE), joints)
+                alpha = img.getchannel("A")
+                self.assertTrue(any(alpha.getpixel((x, 91)) == 255 for x in range(94, 99)))
             else:
                 self.assertEqual(ankle[1], 91)
 
