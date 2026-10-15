@@ -2,6 +2,39 @@
 
 Godot 4.7 .NET (C#) point-and-click game. See `README.md` for the full guide.
 
+## Workflow: local tests, then a PR, then CI
+
+CI (`.github/workflows/ci.yml`) is what proves the game works: every suite, a Linux and Windows export, and the walk
+test on the exported Linux build. Its `ci-ok` job is green only when all of them pass. So locally, run only the
+minimum needed to be confident the change is right, and let CI run the rest.
+
+Local minimum (Windows; first run clean, then add `-NoClean`). Pick the rows that match what you changed:
+
+| Change | Run |
+|---|---|
+| Docs only (`*.md`, comments) | nothing |
+| Any C# (`scripts/`, `tests/`) | `dotnet build`, then `tools\run\test.ps1 -Suite unit` |
+| Story: `dialogue/repentance.ink`, `scripts/Rooms`, `scripts/Story`, items, endings, `Playthrough.cs` | `-Suite unit, playthrough` |
+| An AutoPlay act file or `Harness.cs` | add `autoplay` |
+| Scenes: walk areas, hotspots, entries, exits | `-Suite unit, walk` |
+| Art generators (`tools/art`) or `assets/art` | `-Suite art` (it compares the committed PNGs to the generators) |
+| Settings menus / pause | `-Suite settings` / `-Suite pause` |
+| CI, launchers (`tools/run`), export presets | nothing local beyond what you touched; CI checks it |
+
+Don't run the full clean `tools\run\test.ps1` (about 10 minutes) or film mode before a PR unless the user asks.
+
+Every planning session that implements its plan ends with a PR, without being asked:
+
+1. Commit on the session branch and push it.
+2. Open the PR (the app's create-PR tool, or `gh pr create`). In the description, list what changed and which
+   local suites you ran.
+3. Watch the PR's checks (`gh pr checks --watch`). If any job fails, read its log (`gh run view <id> --log-failed`,
+   plus the uploaded `logs/` artifact), fix it, push, and repeat until `ci-ok` is green.
+4. Never merge, or call the work done, while a check is red, pending or missing.
+
+`ci-ok` is the required status check on `main` (the "main protection" ruleset), so nothing merges without the
+whole suite passing. When adding a CI job, add it to `ci-ok`'s `needs`, not to the ruleset.
+
 ## Running the game autonomously (Windows)
 
 Prefer the scripts in `tools/run/` (PowerShell `.ps1`, bash `.sh`). See `docs/testing-and-film-mode.md`.

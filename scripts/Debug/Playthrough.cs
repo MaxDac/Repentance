@@ -530,20 +530,27 @@ public sealed class Playthrough : Harness
             Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
             Check(Gs.HasFlag(Endings.EleanorConvinced) == (_route is "2" or "4"), "Eleanor's answer follows the route");
             Expect("MansionKitchen", "the escape through the kitchen");
-        }, roundTrip: false);
+        }, roundTrip: _route is "2" or "3" or "4" or "5");
         if (over) return;
-        await Beat("mansion_escape", async () =>
+        if (free)
         {
-            if (free)
+            await Beat("mansion_escape_cellar", async () =>
             {
                 await Do(Verb.Walk, "cellar_door");
                 Expect("MansionCellar", "back down to the cellar, Eleanor waiting in the kitchen");
                 await Do(Verb.Hand, "barrel");
                 await Do(Verb.Hand, "hung_lantern");
+                Check(Gs.HasFlag("barrel_open") && Gs.HasItem("lantern_lit"), "the whiskey running, the lantern off its nail");
+            });
+            await Beat("mansion_escape_fire", async () =>
+            {
                 await Do(Verb.UseItem, "barrel", "lantern_lit");
                 Expect("MansionKitchen", "up out of the burning cellar");
                 Check(Gs.HasFlag("cellar_fire"), "the whiskey is alight");
-            }
+            });
+        }
+        await Beat("mansion_escape", async () =>
+        {
             _ = Do(Verb.Walk, "back_door");
             string room = free ? "Outskirts" : "Prison";
             await Until(() => _game.Room?.Name == "Outskirts" || _game.Room?.Name == "Prison", 300);

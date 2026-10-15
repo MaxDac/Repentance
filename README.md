@@ -24,6 +24,8 @@ tools\run\test.ps1                 # every test suite (bash: tools/run/test.sh)
 tools\run\film.ps1 -Speed 2        # watch the story (bash: tools/run/film.sh 2)
 ```
 
+Pull requests are gated by CI: every suite, plus Linux and Windows exports, must pass (the `ci-ok` check).
+
 ### Common commands
 
 ```powershell
