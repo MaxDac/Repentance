@@ -7,7 +7,7 @@ namespace Repentance;
 public enum Sound
 {
     StepWood, StepStone, StepCarpet,
-    Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Explosion, Hiss, DoorSlam, Bell,
+    Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, Bell,
     Rain,
 }
 
@@ -41,9 +41,9 @@ public static class SoundSynth
     {
         Sound.StepWood or Sound.StepStone => -13f,
         Sound.StepCarpet => -11f,
-        Sound.Rustle or Sound.Click or Sound.Hiss => -6f,
+        Sound.Rustle or Sound.Click => -6f,
         Sound.Rain => -14f,
-        Sound.Gunshot or Sound.Explosion => 0f,
+        Sound.Gunshot or Sound.Whoosh => 0f,
         _ => -3f,
     };
 
@@ -68,8 +68,7 @@ public static class SoundSynth
             Sound.Rustle => Rustle(rng),
             Sound.Click => Click(rng),
             Sound.Scrape => Scrape(rng),
-            Sound.Explosion => Explosion(rng),
-            Sound.Hiss => Hiss(rng),
+            Sound.Whoosh => Whoosh(rng),
             Sound.DoorSlam => DoorSlam(rng),
             Sound.Bell => Bell(rng),
             Sound.Rain => Rain(rng),
@@ -91,8 +90,7 @@ public static class SoundSynth
         (new(@"\brustle\b"), Sound.Rustle),
         (new(@"\bclick\b"), Sound.Click),
         (new(@"\bscra+pe\b"), Sound.Scrape),
-        (new(@"\bbo{2,}m\b"), Sound.Explosion),
-        (new(@"\bhs{3,}\b"), Sound.Hiss),
+        (new(@"\b(?:fw|wh|fwh)o{2,}sh\b"), Sound.Whoosh),
         (new(@"\bring\b"), Sound.Bell),
     };
 
@@ -356,32 +354,26 @@ public static class SoundSynth
         return buf;
     }
 
-    private static float[] Explosion(Random rng)
+    /// <summary>Spirits catching all at once: a soft thump of air, a roar that swells and settles, crackling.</summary>
+    private static float[] Whoosh(Random rng)
     {
-        var buf = Buffer(3.2);
-        Tone(buf, 0, 70, 28, 0.45, 1.0, attack: 0.004);
-        Burst(buf, rng, 0, 0.75, 1.3, Biquad.LowPass(320), attack: 0.01);
-        Burst(buf, rng, 0, 0.12, 0.8, Biquad.LowPass(2500), attack: 0.002);
-        for (int i = 0; i < 70; i++)
-        {
-            double start = 0.05 + Math.Pow(rng.NextDouble(), 1.6) * 2.4;
-            Burst(buf, rng, start, 0.003 + rng.NextDouble() * 0.006, 0.15 + 0.3 * rng.NextDouble() * (1 - start / 2.6),
-                Biquad.BandPass(800 + rng.NextDouble() * 2500, 1.2));
-        }
-        return buf;
-    }
-
-    /// <summary>Gas escaping a cock.</summary>
-    private static float[] Hiss(Random rng)
-    {
-        var buf = Buffer(1.7);
-        var hp = Biquad.HighPass(3000);
-        var lp = Biquad.LowPass(9000);
+        var buf = Buffer(2.6);
+        Tone(buf, 0, 55, 35, 0.3, 0.5, attack: 0.03);
+        var lp = Biquad.LowPass(900);
+        var bp = Biquad.BandPass(1600, 0.8);
         for (int i = 0; i < buf.Length; i++)
         {
             double t = (double)i / SampleRate;
-            double env = Math.Min(1, t / 0.12) * Math.Min(1, (1.7 - t) / 0.45);
-            buf[i] = (float)(env * (0.9 + 0.1 * Math.Sin(t * 23)) * lp.Next(hp.Next(Noise(rng))));
+            double swell = Math.Min(1, t / 0.22);
+            double env = swell * swell * (0.35 + 0.65 * Math.Exp(-Math.Max(0, t - 0.22) * 1.6)) * Math.Clamp((2.6 - t) / 0.8, 0, 1);
+            double n = Noise(rng);
+            buf[i] += (float)(env * (lp.Next(n) + 0.35 * swell * bp.Next(n)));
+        }
+        for (int i = 0; i < 40; i++)
+        {
+            double start = 0.15 + rng.NextDouble() * 2.0;
+            Burst(buf, rng, start, 0.002 + rng.NextDouble() * 0.004, 0.1 + 0.2 * rng.NextDouble() * (1 - start / 2.4),
+                Biquad.BandPass(1500 + rng.NextDouble() * 2500, 1.5));
         }
         return buf;
     }

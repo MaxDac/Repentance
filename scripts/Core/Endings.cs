@@ -5,8 +5,8 @@ namespace Repentance;
 /// <summary>
 /// The rules that decide how Act 3 ends. Godot-free so they can be unit tested; callers pass GameState.HasFlag.
 ///   1  Rose        - Micah gives up: on the church steps, in front of the bartender or the old man.
-///   2  Outskirts   - Eleanor convinced, and the mansion blew up or Micah took the documents.
-///   3  Outskirts   - Eleanor not convinced, and the mansion blew up or Micah took the documents.
+///   2  Outskirts   - Eleanor convinced, and the mansion burned or Micah took the documents.
+///   3  Outskirts   - Eleanor not convinced, and the mansion burned or Micah took the documents.
 ///   4  Prison      - Eleanor convinced, but nothing to bargain with: Eleanor visits.
 ///   5  Prison      - Eleanor not convinced, nothing to bargain with: Caleb visits.
 /// </summary>
@@ -16,6 +16,7 @@ public static class Endings
     public const string WalkedAway = "walked_away";
     public const string SparedOldMan = "spared_oldman";
     public const string EleanorConvinced = "eleanor_convinced";
+    /// <summary>Set when the house burns after the cellar fire; the name predates the fire and is kept for saves.</summary>
     public const string MansionExploded = "mansion_exploded";
     public const string TookDocuments = "took_documents";
 
@@ -36,7 +37,7 @@ public static class Endings
         has("caleb_met") && !has("took_cross") &&
         (act >= 3 || (act == 2 && has("ring_left_act2")));
 
-    /// <summary>Documents or the explosion give Micah something to bargain with, which keeps him out of jail.</summary>
+    /// <summary>Documents or the fire give Micah something to bargain with, which keeps him out of jail.</summary>
     public static bool StaysFree(Func<string, bool> has) => has(MansionExploded) || has(TookDocuments);
 
     public static int Resolve(Func<string, bool> has)

@@ -604,7 +604,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   sheets, which Micah takes as the existing documents item. Cancellation keeps both clues.
   Taking the register alone does not count as evidence. This opportunity ends on entering the bedroom,
   as before: neither inventory combination during escape nor returning through the kitchen bypasses it.
-  Skipping the puzzle must retain the prison endings when the mansion does not explode.
+  Skipping the puzzle must retain the prison endings when the mansion does not burn.
 - Next area is Harrington father's bedroom: huge bedroom with king size bed, Elearon under the sheet naked, Harrington
   father in his dressing gown. He's talking with Eleanor, telling her that it's not too bad to have returned where she
   belongs.
@@ -616,11 +616,17 @@ described here (other verbs, flavour lines) is left to the implementation.
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
     - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
-    - If Micah manages to convince her, they both are in the kitchen: here, Micah ahs the possibility to run the gas
-      and make the mansion explode.
-    - If he doesn't manage, he's alone in the kitchen, and can make the mansion explode either way.
-    - During the escape the way back is shut: the baize door and the cellar trapdoor both get "Not back in
-      there. Somebody's on the stairs by now.", so the bedroom confrontation can't be replayed.
+    - If Micah manages to convince her, they both are in the kitchen: here, Micah has the possibility to set the
+      mansion on fire. Eleanor waits for him in the kitchen while he goes back down to the bootleggers' wine cellar.
+    - If he doesn't manage, he's alone in the kitchen, and can set the mansion on fire either way.
+    - The fire: in the cellar Micah opens the whiskey barrel (the spigot runs whiskey onto the floor), takes the
+      lit lantern back off its nail and uses it on the whiskey ("*FWOOOSH*"). The barrel has to be open first;
+      the lighter is too close to throw. He climbs back up to the kitchen ("Closed the Club's account. Out. Now."),
+      and the trapdoor is then refused. Outside, the house burns: "The cellar goes first. Then the kitchen, then
+      the study, and everything Harrington ever wrote down in it." There is no explosion. The kitchen's gas range
+      and candle are only scenery.
+    - During the escape the way back is shut: the baize door gets "Not back in there. Somebody's on the stairs by
+      now." and so does the bootleggers' stair in the cellar, so the bedroom confrontation can't be replayed.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
     at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this. All of it."
@@ -646,7 +652,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 2 - Outskirts, with Eleanor
 
 - Previously generated location
-- This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to make it explode
+- This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to set it on fire
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
 - In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
@@ -655,12 +661,12 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Previously generated location
 - This ending is accessible if Micah didn't manage to convince Eleanor, and Micah either finds the documents in the mansion
-  or make it explode.
+  or sets it on fire.
 - Her fate remains unknown during escape; there is no evacuation narration.
-- Only if the mansion exploded and Eleanor refused to follow, the outskirts scene begins with "The next morning"
+- Only if the mansion burned and Eleanor refused to follow, the outskirts scene begins with "The next morning"
   and does not describe the car door slamming in the dark. Micah reads: "The morning paper lists the dead.
   Eleanor Harrington. There it is, in black and white." He admits: "I told myself I was saving her.
-  I left her there and lit the fuse." The fuse is figurative; the mechanism remains gas and a candle.
+  I left her there and lit the fuse." The fuse is figurative; the mechanism is the cellar's whiskey and the lantern.
   "They know who died. They don't know what I did." replaces the same-night orange-sky/secrecy line.
 - Documents-only escape has no newspaper death report. With Eleanor following, the outskirts scene stays
   that night and she survives. Keep "She wouldn't come with me. Even with him on the carpet and the whole Club
@@ -671,7 +677,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 4 - Prison - With Eleanor
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah managed to convince Eleanor, but neither made the mansion explode nor found the
+- This ending is accessible if Micah managed to convince Eleanor, but neither set the mansion on fire nor found the
   signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
@@ -681,7 +687,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Option 5 - Prison - With brother
 
 - You have to generate prison parlatory, where the prisoners speaks with whoever came to talk to them.
-- This ending is accessible if Micah did not manage to convince Eleanor, and neither made the mansion explode nor
+- This ending is accessible if Micah did not manage to convince Eleanor, and neither set the mansion on fire nor
   found the signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
 - Micah and his brother seat at a table, one in front of the other, the brother asks how's he doing, he reluctantly

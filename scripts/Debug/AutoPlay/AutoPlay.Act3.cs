@@ -220,7 +220,7 @@ public partial class AutoPlay
         await Shot("mansion_kitchen");
         await game.Perform(Verb.Hand, "range");
         await game.Perform(Verb.Hand, "back_door");
-        Check(!gs.HasFlag("gas_on") && game.Room?.Name == "MansionKitchen", "no gas, no leaving yet");
+        Check(game.Room?.Name == "MansionKitchen", "no leaving without Eleanor");
         await game.Perform(Verb.Walk, "baize_door");
         Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag("baize_unbolted"), "the baize door is bolted from the house side");
         // ---- the wine cellar: a lantern, kerosene and the lighter light the bootleggers' stair up to the study
@@ -243,6 +243,10 @@ public partial class AutoPlay
         await game.Perform(Verb.UseItem, "stair", "lantern_lit");
         Check(gs.HasFlag("cellar_lit") && !gs.HasItem("lantern_lit"), "the lantern hung at the stair foot lights the cellar");
         await Shot("mansion_cellar_lit");
+        await game.Perform(Verb.Hand, "barrel");
+        await game.Perform(Verb.Hand, "hung_lantern");
+        Check(!gs.HasFlag("barrel_open") && !gs.HasFlag("took_hung_lantern") && !gs.HasItem("lantern_lit"),
+            "the whiskey and the hung lantern wait for the escape");
         await game.Perform(Verb.Walk, "stair");
         Check(game.Room?.Name == "MansionStudy", "up the bootleggers' stair into the study");
         await Shot("mansion_study_hatch");
@@ -292,16 +296,36 @@ public partial class AutoPlay
         Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");
-        await game.Perform(Verb.Walk, "cellar_door");
-        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door or the cellar during the escape");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door during the escape");
         await game.Perform(Verb.Hand, "range");
         await game.Perform(Verb.Hand, "candle");
-        Check(gs.HasFlag("gas_on") && gs.HasFlag("candle_lit"), "gas on, candle lit");
-        await Shot("mansion_kitchen_gas");
+        Check(game.Room?.Name == "MansionKitchen" && !gs.HasFlag(Endings.MansionExploded), "the range and the candle are only scenery now");
+        // ---- the fire: down to the cellar while Eleanor waits, open the whiskey, the hung lantern onto it
+        await game.Perform(Verb.Walk, "cellar_door");
+        Check(game.Room?.Name == "MansionCellar", "back down to the cellar during the escape");
+        await game.Perform(Verb.Walk, "stair");
+        Check(game.Room?.Name == "MansionCellar", "the bootleggers' stair stays shut during the escape");
+        await game.Perform(Verb.Hand, "hung_lantern");
+        Check(gs.HasFlag("took_hung_lantern") && gs.HasItem("lantern_lit"), "the lit lantern off its nail");
+        await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
+        Check(!gs.HasFlag("cellar_fire") && gs.HasItem("lantern_lit"), "a closed barrel won't burn");
+        await game.Perform(Verb.UseItem, "barrel", MicahKit.LighterId);
+        await game.Perform(Verb.Hand, "barrel");
+        Check(gs.HasFlag("barrel_open") && !gs.HasFlag("cellar_fire"), "the whiskey runs out over the floor");
+        await Shot("mansion_cellar_whiskey");
+        var fire = game.Perform(Verb.UseItem, "barrel", "lantern_lit");
+        await Until(() => gs.HasFlag("cellar_fire"));
+        await game.Wait(1.0);
+        await Shot("mansion_cellar_fire");
+        await fire;
+        await WaitIdle(game);
+        Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("lantern_lit"), "up out of the burning cellar, the lantern left in the fire");
+        await game.Perform(Verb.Walk, "cellar_door");
+        Check(game.Room?.Name == "MansionKitchen", "no going back down into the fire");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => gs.HasFlag(Endings.MansionExploded));
         await game.Wait(1.5);
-        await Shot("mansion_explosion");
+        await Shot("mansion_fire");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
         await game.Wait(3);

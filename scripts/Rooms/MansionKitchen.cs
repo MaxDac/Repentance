@@ -5,7 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// The Harrington kitchen, in the dark. On the way in it's just a corridor with copper pans. On the way out, with the old
-/// man on his bedroom carpet, there's a gas range and a candle on the table: everything a house needs to burn.
+/// man on his bedroom carpet, the back door is open and the cellar trapdoor leads down to the Club's whiskey: everything
+/// a house needs to burn. Eleanor, if she came, waits here by the door.
 /// </summary>
 public partial class MansionKitchen : Room
 {
@@ -22,7 +23,21 @@ public partial class MansionKitchen : Room
                     await Say("eleanor", "The back door, Micah. Please. Let's go.");
                 else
                     await Think("Alone. She chose that house. Or the house chose her.");
-                await Think("Gas range. A candle on the table. Matches. This house runs on the Club's gas, like everything else on the Gold Coast.");
+                await Think("There's a barrel of the Club's whiskey down in that cellar. This house runs on bootleg liquor, like everything else on the Gold Coast.");
+            });
+            return;
+        }
+        if (entry == "cellar" && State.HasFlag("cellar_fire"))
+        {
+            await Game.Run(async () =>
+            {
+                await Wait(0.3);
+                if (State.HasFlag(Endings.EleanorConvinced))
+                {
+                    await Say("eleanor", "Micah... there's smoke coming up through the floor. What did you do?");
+                    await Say("Closed the Club's account. Out. Now.");
+                }
+                else await Think("Smoke at my heels, and the floor getting warm. Time to leave. Right now.");
             });
             return;
         }
@@ -47,8 +62,18 @@ public partial class MansionKitchen : Room
                 return true;
 
             case ("baize_door", Verb.Hand or Verb.Walk) when Escaping:
-            case ("cellar_door", Verb.Hand or Verb.Walk) when Escaping:
                 await Say("Not back in there. Somebody's on the stairs by now.");
+                return true;
+            case ("cellar_door", Verb.Hand or Verb.Walk) when State.HasFlag("cellar_fire"):
+                await Say("Not back down there. It's all fire under that trapdoor.");
+                return true;
+            case ("cellar_door", Verb.Hand or Verb.Walk) when Escaping:
+                if (State.HasFlag(Endings.EleanorConvinced))
+                {
+                    await Say("eleanor", "Micah? The door's that way.");
+                    await Say("Wait for me by the door. One minute.");
+                }
+                await Game.ChangeRoom("mansion_cellar", "kitchen");
                 return true;
             case ("baize_door", Verb.Hand or Verb.Walk) when !State.HasFlag("baize_unbolted"):
                 await Say("Bolted from the house side. There'll be another way up - houses like this always kept one for the deliveries.");
@@ -71,41 +96,13 @@ public partial class MansionKitchen : Room
             case ("candle", Verb.UseItem) when !Escaping && item == MicahKit.LighterId:
                 await Say("Not why I'm here. Eleanor's somewhere upstairs.");
                 return true;
-
-            case ("range", Verb.Hand) when State.HasFlag("gas_on"):
-                await Say("Every tap's open. The kitchen smells like a hospital waiting room.");
-                return true;
             case ("range", Verb.Hand):
-                await Say("One tap. Two. Three. All of them.");
-                State.SetFlag("gas_on");
-                await Say("*Hssssssss*");
-                if (State.HasFlag(Endings.EleanorConvinced))
-                {
-                    await Say("eleanor", "Micah... what are you doing?");
-                    await Say("Closing the Club's account.");
-                }
-                await LeaveHint();
+                await Say("Turn on the gas and somebody upstairs smells it long before it does any good.");
                 return true;
-
-            case ("candle", Verb.Hand or Verb.UseItem) when State.HasFlag("candle_lit"):
-                await Say("It burns, nice and steady. For now.");
-                return true;
-            case ("candle", Verb.Hand):
-                await Say("A kitchen match off the box, and the candle catches.");
-                State.SetFlag("candle_lit");
-                await LeaveHint();
-                return true;
-            case ("candle", Verb.UseItem) when item == MicahKit.LighterId:
-                await Say("A flick of my lighter, and the candle catches.");
-                State.SetFlag("candle_lit");
-                await LeaveHint();
+            case ("candle", Verb.Hand or Verb.UseItem) when item is null or MicahKit.LighterId:
+                await Say("A candle on a deal table, in a stone kitchen. It'd burn itself out and nothing else.");
                 return true;
         }
         return false;
     }
-
-    private Task LeaveHint() =>
-        State.HasFlag("gas_on") && State.HasFlag("candle_lit")
-            ? Say("Gas, rising. A flame, waiting. Time to leave. Right now.")
-            : Task.CompletedTask;
 }

@@ -54,8 +54,8 @@ public class SoundSynthTests
     [InlineData("*click*", Sound.Click)]
     [InlineData("*scrape*", Sound.Scrape)]
     [InlineData("*SCRAAAPE*", Sound.Scrape)]
-    [InlineData("*BOOOOOM*", Sound.Explosion)]
-    [InlineData("*Hssssssss*", Sound.Hiss)]
+    [InlineData("*FWOOOSH*", Sound.Whoosh)]
+    [InlineData("*Whoosh*", Sound.Whoosh)]
     [InlineData("*Ring*", Sound.Bell)]
     [InlineData("*A car door slams.*", Sound.DoorSlam)]
     public void SoundEffectLinesPlayTheirSound(string line, Sound expected) =>

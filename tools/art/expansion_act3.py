@@ -4,13 +4,14 @@ study bar-panel hatch (patched onto the committed mansion rooms, so mansion.py a
 the lantern / kerosene icons.
 
 The cellar is painted once per state and the state overlays are cut against the dark base (see act2_rooms.overlay)."""
+import math
 import os
 import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import ART, W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text
 from .act2_rooms import bricks, overlay
-from .mansion import grade, flagstones
+from .mansion import grade, flagstones, _flame, _smoke
 from .furniture import Room3D
 from .items import _icon
 
@@ -20,6 +21,9 @@ CFL = 200  # where the cellar's back wall meets the floor
 LANTERN_HOOK = (179, 108)
 STAIR_NAIL = (388, 140)
 CAN = (305, 26, 46)  # world position of the kerosene can on the crates
+BARREL = (324, 372, 224, 13)  # left, right, centre y and radius of the whiskey barrel under the stair foot
+POOL = (372, 246)  # centre of the whiskey pool in front of its spigot
+CELLAR_FIRE_FRAMES = 8
 
 
 # ------------------------------------------------------------------------------------------------ CELLAR
@@ -56,9 +60,13 @@ def _kerosene_can(d, x, y):
     d.point((x + 2, y - 4), fill=hx("6a1a14"))  # the dent
 
 
-def _lying_barrel(img, xl, xr, cy, r):
+WHISKEY_D, WHISKEY, WHISKEY_L = hx("6a3410"), hx("b06a1c"), hx("f0c060")
+
+
+def _lying_barrel(img, xl, xr, cy, r, open=False):
     """An oak barrel on its side, axis running left-right: bulging staves shaded round the belly, iron hoops, and the
-    head (with its planks, chime and a brass spigot) showing as an ellipse at the right end."""
+    head (with its planks, chime and a brass spigot) showing as an ellipse at the right end. Opened, the spigot is
+    turned along the pipe and the old man's whiskey runs out of it in a thin amber rope."""
     shadow(img, "ellipse", [xl - 2, cy + r - 4, xr + 6, cy + r + 5], 0.6, 3)
     d = ImageDraw.Draw(img)
     for cx in (xl + 8, xr - 10):  # wooden chocks
@@ -99,12 +107,67 @@ def _lying_barrel(img, xl, xr, cy, r):
         d.line([(body_r - hw + 1, yy), (body_r + hw - 1, yy)], fill=hx("5a3a20"))
     d.arc([body_r - hw + 1, cy - hr + 2, body_r + hw - 1, cy + hr - 2], 260, 100, fill=hx("b08a5a"))
     d.rectangle([body_r + hw - 1, cy + 2, body_r + hw + 3, cy + 4], fill=hx("b08a3a"))  # brass spigot
-    d.line([(body_r + hw + 3, cy + 4), (body_r + hw + 3, cy + 7)], fill=hx("806020"))
-    d.point((body_r + hw + 3, cy + 9), fill=hx("6a1a2a"))  # a drip of the old man's port
+    tx = body_r + hw + 3
+    d.line([(tx, cy + 4), (tx, cy + 7)], fill=hx("806020"))
+    if open:
+        d.line([(tx - 1, cy + 1), (tx + 1, cy + 1)], fill=hx("d8b060"))  # the handle, turned along the pipe
+        for y in range(cy + 8, cy + r + 9):  # the whiskey, falling and fanning out as it nears the flags
+            f = (y - cy - 8) / (r + 1)
+            x = tx + 2.5 * f * f
+            d.line([(x - 0.5 * f, y), (x + 0.5 + 0.8 * f, y)], fill=WHISKEY)
+            if y % 3 == 0:
+                d.point((int(x), y), fill=WHISKEY_L)
+    else:
+        d.point((tx, cy + 9), fill=WHISKEY)  # a drip of the old man's whiskey
     d.ellipse([xc - 2, cy - r + 2, xc + 2, cy - r + 5], fill=hx("4a2c16"))  # the bung on top
 
 
-def paint_cellar(lantern=True, can=True, lit=False):
+def _whiskey_pool(img, cx, cy):
+    """The whiskey spreading over the flags in front of the barrel: a pool with a dark rim, runnels finding the
+    joints between the stones, and the lantern caught in it as streaks of gold."""
+    d = ImageDraw.Draw(img)
+    d.ellipse([cx - 30, cy - 5, cx + 18, cy + 6], fill=WHISKEY_D)
+    d.ellipse([cx - 28, cy - 4, cx + 16, cy + 4], fill=WHISKEY)
+    d.polygon([(cx - 28, cy), (cx - 54, cy + 3), (cx - 56, cy + 5), (cx - 30, cy + 3)], fill=WHISKEY_D)  # runnels
+    d.polygon([(cx + 10, cy + 3), (cx + 24, cy + 12), (cx + 22, cy + 13), (cx + 6, cy + 5)], fill=WHISKEY_D)
+    d.line([(cx - 52, cy + 4), (cx - 30, cy + 2)], fill=WHISKEY)
+    for x0, y0, n in ((cx - 18, cy - 2, 10), (cx - 4, cy + 1, 8), (cx + 4, cy - 2, 6)):  # reflections
+        d.line([(x0, y0), (x0 + n, y0)], fill=WHISKEY_L)
+
+
+def _cellar_fire(img, em, cx, cy, t):
+    """The whiskey alight at phase t (looping on 1): a blue skin of flame over the pool, orange tongues over it
+    and up the barrel, smoke rolling up into the vault. The flames are marked emissive in em."""
+    tau = 2 * math.pi
+    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    for i, (sx, sy) in enumerate(((cx - 14, cy - 50), (cx - 36, cy - 44))):
+        _smoke(layer, sx, sy, 130, -40 + 30 * i, 12, (t + i * 0.5) % 1.0, 7, 1520 + i)
+    layer.putalpha(layer.getchannel("A").point(lambda a: a * 3 // 5))
+    fl = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(fl)
+    d.ellipse([cx - 31, cy - 5, cx + 19, cy + 6], fill=hx("3a5ac8"))
+    d.ellipse([cx - 26, cy - 3, cx + 14, cy + 3], fill=hx("7a9af0"))
+    d.line([(cx - 55, cy + 4), (cx - 30, cy + 2)], fill=hx("4a6ad8"), width=2)
+    tongues = ((-38, -12, 40, 5, 0.71), (-26, -16, 52, 6, 0.05), (-14, -15, 30, 4, 0.53),  # along the barrel
+               (-48, 4, 12, 3, 0.45), (-24, 2, 30, 5, 0.0), (-12, 3, 48, 6, 0.31), (0, 2, 56, 7, 0.62),
+               (10, 3, 36, 5, 0.17), (17, 1, 18, 3, 0.83))  # (dx, dy, height, half-width, phase), back to front
+    for dx, dy, h, w, ph in tongues:
+        _flame(d, cx + dx, cy + dy, h, w, t, ph, lean=0.4 * math.sin(tau * (t + ph)))
+    for k in range(6):  # sparks spiralling up off the barrel
+        q = (t * 2 + k / 6) % 1.0
+        x = cx - 30 + k * 9 + 4 * math.sin(tau * (q + k * 0.21))
+        d.point((x, cy - 20 - q * 80), fill=hx("ffc060") if q < 0.6 else hx("a85a2a"))
+    em.paste(255, mask=fl.getchannel("A"))
+    out = Image.alpha_composite(Image.alpha_composite(img.convert("RGBA"), layer), fl).convert("RGB")
+    img.paste(out)
+
+
+def paint_cellar(lantern=True, can=True, lit=False, barrel_open=False, lantern_down=False, fire_t=None):
+    """lit hangs the lantern on the stair nail; lantern_down takes it back off (Micah carries it, so the light stays);
+    barrel_open runs the whiskey out over the flags; fire_t sets it alight at that phase."""
+    fire = fire_t is not None
+    barrel_open = barrel_open or fire
+    lantern_down = lantern_down or fire
     img = Image.new("RGB", (W, H))
     em = Image.new("L", img.size, 0)
     ed = ImageDraw.Draw(em)
@@ -209,16 +272,27 @@ def paint_cellar(lantern=True, can=True, lit=False):
     if can:
         p = R.P(*CAN)
         _kerosene_can(d, int(p[0]), int(p[1]))
-    # a barrel lying on its side under the stair foot, on chocks, its head and tap turned to the room
-    _lying_barrel(img, 324, 372, 224, 13)
+    # a barrel of whiskey lying on its side under the stair foot, on chocks, its head and tap turned to the room
+    _lying_barrel(img, *BARREL, open=barrel_open)
+    if barrel_open:
+        _whiskey_pool(img, *POOL)
+    if fire:
+        _cellar_fire(img, em, *POOL, fire_t)
     d = ImageDraw.Draw(img)
     # ---- the lantern hung at the stair foot, once it is lit ----
-    if lit:
+    if lit and not lantern_down:
         _storm_lantern(d, nx, ny, lit=True)
         ed.ellipse([nx - 7, ny + 9, nx + 7, ny + 25], fill=255)
     # ---- light ----
     hatch = (60, 30, 80, 90, (0.55, 0.62, 0.95), 0.9)
-    if lit:
+    if fire:
+        px_, py_ = POOL
+        k = 0.9 + 0.1 * math.sin(2 * math.pi * fire_t) + 0.05 * math.sin(6 * math.pi * fire_t)
+        pools = [hatch, (px_, py_ - 30, 240, 170, (1.75, 1.05, 0.55), k), (px_ - 10, py_ - 20, 90, 70, (2.0, 1.3, 0.7), 0.7 * k)]
+        img = grade(img, (0.2, 0.18, 0.24), pools, em)
+        light(img, "ellipse", [px_ - 60, py_ - 50, px_ + 40, py_ + 12], hx("f08030"), 0.35 * k, 14)
+        vignette(img, 0.45, (10, 4, 4), 40)
+    elif lit:
         pools = [hatch, (nx, ny + 20, 190, 150, (1.25, 0.95, 0.62), 1.0), (nx, ny + 20, 70, 60, (1.5, 1.15, 0.8), 0.6)]
         img = grade(img, (0.2, 0.2, 0.28), pools, em)
         light(img, "ellipse", [nx - 26, ny - 6, nx + 26, ny + 46], hx("f0b060"), 0.4, 10)
@@ -234,11 +308,13 @@ def paint_cellar(lantern=True, can=True, lit=False):
 
 def build_cellar():
     base = paint_cellar()
-    v = {"no_lantern": paint_cellar(lantern=False), "no_can": paint_cellar(can=False),
-         "lit": paint_cellar(lantern=False, can=False, lit=True)}
-    both = Image.new("RGB", (W * 2, H))
+    lit = dict(lantern=False, can=False, lit=True)
+    v = {"no_lantern": paint_cellar(lantern=False), "no_can": paint_cellar(can=False), "lit": paint_cellar(**lit),
+         "whiskey": paint_cellar(**lit, barrel_open=True), "lantern_down": paint_cellar(**lit, lantern_down=True)}
+    both = Image.new("RGB", (W * 3, H))
     both.paste(base, (0, 0))
     both.paste(v["lit"], (W, 0))
+    both.paste(v["whiskey"], (W * 2, 0))
     pal = palette_of(both, 124)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_cellar.png")
@@ -248,6 +324,20 @@ def build_cellar():
     overlay(v["no_can"], px, pal, (int(p[0]) - 12, int(p[1]) - 26, int(p[0]) + 12, int(p[1]) + 4),
             "mansion_cellar_can_taken")
     overlay(v["lit"], px, pal, (0, 0, W, H), "mansion_cellar_lit")
+    # the escape: cut against the lit cellar, since they sit on top of it
+    lit_px = pixelize(v["lit"], pal)
+    nx, ny = STAIR_NAIL
+    overlay(v["lantern_down"], lit_px, pal, (nx - 12, ny - 2, nx + 12, ny + 36), "mansion_cellar_lantern_down")
+    bx0, bx1, by, br = BARREL
+    cx, cy = POOL
+    overlay(v["whiskey"], lit_px, pal, (bx0 - 40, by - br - 2, cx + 30, cy + 16), "mansion_cellar_whiskey")
+    fire = [paint_cellar(**lit, fire_t=i / CELLAR_FIRE_FRAMES) for i in range(CELLAR_FIRE_FRAMES)]
+    fpal = palette_of(Image.blend(fire[0], fire[CELLAR_FIRE_FRAMES // 2], 0.5), 160)
+    strip = Image.new("RGB", (W * CELLAR_FIRE_FRAMES, H))
+    for i, frame in enumerate(fire):
+        strip.paste(pixelize(frame, fpal), (i * W, 0))
+    save(strip, "rooms", "mansion_cellar_fire.png")
+    print("mansion_cellar_fire:", CELLAR_FIRE_FRAMES, "frames")
     return px, v
 
 
@@ -399,7 +489,5 @@ def build_icons():
 def build():
     build_cellar()
     _patch("mansion_kitchen", _kitchen_box(), _kitchen_trapdoor, "mansion_kitchen_trapdoor")
-    _patch("mansion_kitchen", _kitchen_box(), _kitchen_trapdoor, "mansion_kitchen_trapdoor_candle",
-           relight="mansion_kitchen_candle")
     _patch("mansion_study", (330, 160, 432, 214), _study_hatch, "mansion_study_hatch")
     build_icons()

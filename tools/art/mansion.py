@@ -1095,14 +1095,13 @@ def paint_kitchen(lit=False, gas=False):
 
 def build_kitchen():
     base = paint_kitchen()
+    # the candle-lit and gas-on variants are no longer used in the game; they only seed the committed palette
     v = {"lit": paint_kitchen(lit=True), "gas": paint_kitchen(gas=True)}
     pal = palette_of(Image.blend(Image.blend(base, v["lit"], 0.4), v["gas"], 0.3), 124)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_kitchen.png")
     fx, fy = paint_kitchen.flame
     print("kitchen flame", paint_kitchen.flame, "taps", paint_kitchen.taps)
-    overlay(v["gas"], px, pal, paint_kitchen.taps, "mansion_kitchen_gas")
-    overlay(v["lit"], px, pal, (0, 0, W, H), "mansion_kitchen_candle")
     return px, v
 
 
