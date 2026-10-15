@@ -424,7 +424,7 @@ and includes seeded regressions; its wall-clock duration must not be advertised 
 
 ```
 assets/art/          generated pixel art (rooms, sprites, items, ui; ui/icon.png and icon.ico are the game icon)
-assets/fonts/        Silkscreen pixel font (OFL)
+assets/fonts/        Silkscreen (UI) and Departure Mono (dialogue) pixel fonts (OFL)
 dialogue/            repentance.ink - all conversations, one knot per character
 dist/linux/          shipped next to the Linux binary: Repentance.desktop, hicolor icons, install-desktop.sh
                      (dist/.gdignore keeps Godot from importing it)

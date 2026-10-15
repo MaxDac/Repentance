@@ -7,12 +7,17 @@ namespace Repentance;
 /// <summary>Dialogue choices, speech text and Micah's journal thoughts.</summary>
 public partial class Hud
 {
+    private const int ChoiceRowH = 14, ChoiceGap = 1;
+
+    private static Vector2 MeasureDialogue(string text, float width) =>
+        DialogueFont.GetMultilineStringSize(text, HorizontalAlignment.Center, width, DialogueFontSize);
+
     private void BuildChoices(Control root)
     {
         _choicesBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.06f, 0.88f), Visible = false };
         root.AddChild(_choicesBg);
         _choices = new VBoxContainer { Visible = false };
-        _choices.AddThemeConstantOverride("separation", 1);
+        _choices.AddThemeConstantOverride("separation", ChoiceGap);
         root.AddChild(_choices);
     }
 
@@ -24,7 +29,7 @@ public partial class Hud
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
             LabelSettings = new LabelSettings
             {
-                Font = Font, FontSize = 8, OutlineSize = 4, OutlineColor = new Color(0, 0, 0), LineSpacing = 1,
+                Font = DialogueFont, FontSize = DialogueFontSize, OutlineSize = 4, OutlineColor = new Color(0, 0, 0), LineSpacing = 0,
             },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
@@ -40,8 +45,8 @@ public partial class Hud
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
             LabelSettings = new LabelSettings
             {
-                Font = Font, FontSize = 8, FontColor = ThoughtColor, OutlineSize = 4,
-                OutlineColor = new Color(0.08f, 0.05f, 0.02f), LineSpacing = 1,
+                Font = DialogueFont, FontSize = DialogueFontSize, FontColor = ThoughtColor, OutlineSize = 4,
+                OutlineColor = new Color(0.08f, 0.05f, 0.02f), LineSpacing = 0,
             },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
@@ -61,9 +66,11 @@ public partial class Hud
                 Flat = true,
                 Alignment = HorizontalAlignment.Left,
                 FocusMode = Control.FocusModeEnum.None,
-                CustomMinimumSize = new Vector2(ScreenW - 16, 12),
+                CustomMinimumSize = new Vector2(ScreenW - 16, ChoiceRowH),
                 ClipText = true,
             };
+            b.AddThemeFontOverride("font", DialogueFont);
+            b.AddThemeFontSizeOverride("font_size", DialogueFontSize);
             b.AddThemeColorOverride("font_color", ChoiceColor);
             b.AddThemeColorOverride("font_hover_color", VerbHover);
             b.AddThemeColorOverride("font_pressed_color", Colors.White);
@@ -79,7 +86,7 @@ public partial class Hud
             };
             _choices.AddChild(b);
         }
-        float h = options.Count * 13 + 8;
+        float h = options.Count * (ChoiceRowH + ChoiceGap) + 8;
         _choicesBg.Position = new Vector2(0, ScreenH - h);
         _choicesBg.Size = new Vector2(ScreenW, h);
         _choices.Position = new Vector2(8, ScreenH - h + 4);
@@ -109,8 +116,8 @@ public partial class Hud
             ShowSpeechOverInset(text, speaker);
             return;
         }
-        const int width = 220;
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
+        const int width = 280;
+        var size = MeasureDialogue(text, width);
         _speech.Text = text;
         _speech.LabelSettings.FontColor = color;
         _speech.Size = new Vector2(width, size.Y);
@@ -131,7 +138,7 @@ public partial class Hud
     /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
     public void ShowThought(string text)
     {
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, ThoughtWidth, 8);
+        var size = MeasureDialogue(text, ThoughtWidth);
         _thought.Text = text;
         _thought.Size = new Vector2(ThoughtWidth, size.Y);
         _thought.Position = new Vector2((ScreenW - ThoughtWidth) / 2f, ThoughtTop).Round();
@@ -156,7 +163,7 @@ public partial class Hud
             x = _inset.Position.X + padding;
             if (speaker is Actor { Id: "eleanor" }) x += half;
         }
-        var size = Font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, 8);
+        var size = MeasureDialogue(text, width);
         _speech.Text = text;
         _speech.LabelSettings.FontColor = speaker.SpeechColor;
         _speech.Size = new Vector2(width, size.Y);
