@@ -1749,7 +1749,7 @@ def _bedroom_nightstand(img, d, R, WX, z0, z1, cols, seed):
 def _bedroom_lamp(img, d, base, k, lit):
     """A table lamp: brass foot, a glazed urn, brass stem with a knuckle and switch, and a pleated drum shade."""
     x, y = base
-    top = y + 22 * k  # the stem is short: everything above the urn's collar is lowered by this much
+    top = y + 27 * k  # a squat bedside lamp: the switch and shade sit almost straight on the urn's collar
     brass, brass_d, brass_l = hx("a88a44"), hx("5e4a24"), hx("ecd48e")
     d.ellipse([x - 6 * k, y - 2 * k, x + 6 * k, y + 2 * k], fill=brass_d)
     d.ellipse([x - 5 * k, y - 3 * k, x + 5 * k, y + 1 * k], fill=brass)
@@ -1764,8 +1764,6 @@ def _bedroom_lamp(img, d, base, k, lit):
     d.rectangle([x - 1, top - 48 * k, x + 1, y - 20 * k], fill=brass)
     d.line([(x - 1, top - 48 * k), (x - 1, y - 20 * k)], fill=brass_l)
     d.line([(x + 1, top - 48 * k), (x + 1, y - 20 * k)], fill=brass_d)
-    d.ellipse([x - 2 * k, y - 25 * k, x + 2 * k, y - 21 * k], fill=brass)
-    d.point((x - 1, y - 24 * k), fill=brass_l)
     d.rectangle([x - 2.5 * k, top - 52 * k, x + 2.5 * k, top - 47 * k], fill=brass_d)
     d.line([(x + 2.5 * k, top - 49 * k), (x + 4.5 * k, top - 49 * k)], fill=brass)
     if lit:  # painted bright so the night grade leaves it glowing warm
