@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ConventCell : Room
 {
+    public override Track? Music => Track.ConventPiano;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("cell_seen")) return;

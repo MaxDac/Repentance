@@ -137,8 +137,8 @@ public static class SoundSynth
 
     private static int At(double seconds) => (int)(seconds * SampleRate);
 
-    /// <summary>RBJ biquad: band-pass (constant peak gain) or low/high-pass.</summary>
-    private struct Biquad
+    /// <summary>RBJ biquad: band-pass (constant peak gain), low/high-pass or peaking EQ.</summary>
+    internal struct Biquad
     {
         private double _b0, _b1, _b2, _a1, _a2, _x1, _x2, _y1, _y2;
 
@@ -158,6 +158,13 @@ public static class SoundSynth
         {
             double w = 2 * Math.PI * hz / SampleRate, alpha = Math.Sin(w) / (2 * q), c = Math.Cos(w), a0 = 1 + alpha;
             return new Biquad { _b0 = (1 + c) / 2 / a0, _b1 = -(1 + c) / a0, _b2 = (1 + c) / 2 / a0, _a1 = -2 * c / a0, _a2 = (1 - alpha) / a0 };
+        }
+
+        public static Biquad Peaking(double hz, double gainDb, double q)
+        {
+            double w = 2 * Math.PI * hz / SampleRate, alpha = Math.Sin(w) / (2 * q), c = Math.Cos(w), a = Math.Pow(10, gainDb / 40);
+            double a0 = 1 + alpha / a;
+            return new Biquad { _b0 = (1 + alpha * a) / a0, _b1 = -2 * c / a0, _b2 = (1 - alpha * a) / a0, _a1 = -2 * c / a0, _a2 = (1 - alpha / a) / a0 };
         }
 
         public double Next(double x)

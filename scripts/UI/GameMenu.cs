@@ -151,12 +151,24 @@ public partial class GameMenu : Control
                 SettingsPage();
             }),
             ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
+            ($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)),
             ("Back", true, () => { _status.Text = ""; back(); }));
         OnAltPress(EffectsLabel, () => StepEffects(up: false));
+        OnAltPress(MusicLabel, () => StepMusic(up: false));
         _onSettings = true;
     }
 
     private const string EffectsLabel = "Effects volume";
+    private const string MusicLabel = "Music volume";
+
+    /// <summary>Like <see cref="StepEffects"/>; the music, if any is playing, keeps going under the menu as a preview.</summary>
+    private void StepMusic(bool up)
+    {
+        var settings = Game.Instance.Settings;
+        _status.Text = settings.SetMusicVolume(GameSettings.CycleVolume(settings.MusicVolume, up))
+            ? "Left click: louder. Right click: quieter." : "Couldn't save settings.";
+        SettingsPage();
+    }
 
     /// <summary>Left click turns the effects up a step, right click down; both wrap around between 0% and 100%.</summary>
     private void StepEffects(bool up)

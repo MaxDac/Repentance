@@ -100,7 +100,8 @@ items, solve the puzzles and pick the choices.
 - **No dead ends.** A beat that can't reach what it needs (an exit, an item, a choice) times out and fails, naming
   the beat. A story that stops early never prints the marker.
 - **Sound.** Every `Sound` effect must be played at least once over the whole run. A sound that's never heard
-  must be listed in `UnheardSounds` with a reason (the list is empty).
+  must be listed in `UnheardSounds` with a reason (the list is empty). Every music `Track` must also play at least
+  once.
 
 `--ending=N` (or `all`, the default) limits the run to one route.
 

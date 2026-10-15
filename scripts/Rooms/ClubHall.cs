@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ClubHall : Room
 {
+    public override Track? Music => Track.ClubStrings;
+
     private bool Masked => State.HasFlag("masked");
 
     public override async Task OnEnter(string entry)

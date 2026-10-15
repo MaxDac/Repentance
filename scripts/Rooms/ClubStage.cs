@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ClubStage : Room
 {
+    public override Track? Music => Track.ClubStrings;
+
     public override void _Ready()
     {
         base._Ready();

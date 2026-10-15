@@ -48,6 +48,9 @@ public partial class Room : Node2D
         }
     }
 
+    /// <summary>The background music that loops here; the same track carries on uninterrupted between rooms that share it.</summary>
+    public virtual Track? Music => null;
+
     /// <summary>Whether the player is drawn when the room loads; rooms can hide him for an entry cutscene.</summary>
     public virtual bool PlayerVisibleOnLoad => ShowPlayer;
 

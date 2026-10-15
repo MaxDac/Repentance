@@ -631,6 +631,10 @@ public sealed class Playthrough : Harness
         foreach (var s in UnheardSounds.Keys.Where(s => !unheard.Contains(s)))
             Fail($"sound {s} is played now: remove it from UnheardSounds");
         Check(unheard.All(UnheardSounds.ContainsKey), $"every sound is heard ({all.Length - unheard.Count}/{all.Length})");
+        var tracks = Enum.GetValues<Track>();
+        var silent = tracks.Where(t => _game.Music.Count(t) == 0).ToList();
+        foreach (var t in silent) Fail($"music track {t} never plays in the story");
+        Check(silent.Count == 0, $"every music track plays ({tracks.Length - silent.Count}/{tracks.Length})");
 
         using var file = FileAccess.Open(DialogueManager.StoryPath, FileAccess.ModeFlags.Read);
         var scan = InkScan.Parse(file.GetAsText());

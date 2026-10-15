@@ -22,6 +22,9 @@ public partial class Game
         Sfx = new Sfx { Name = "Sfx" };
         AddChild(Sfx);
         Sfx.Bind(Settings);
+        Music = new Music { Name = "Music" };
+        AddChild(Music);
+        Music.Bind(Settings);
         // film mode is watched, so it may go fullscreen with F11 (the setting is the autoplay copy, not the player's)
         AddChild(new WindowModeController(Settings, !anyTest || film) { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };

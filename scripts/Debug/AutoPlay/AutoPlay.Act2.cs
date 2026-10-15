@@ -25,6 +25,7 @@ public partial class AutoPlay
             "Act 2 opens with whiskey and the recorded take-ring choice");
         Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
         await Until(() => game.Room?.Name == "ChurchExterior");
+        Check(game.Music.Current == null, "no organ out on the cathedral steps");
         Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
         Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
             gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
@@ -33,10 +34,12 @@ public partial class AutoPlay
         await game.Wait(1.5);
         await Shot("church_exterior_act2");
         await Until(() => game.Room?.Name == "ChurchInterior");
+        Check(game.Music.Current == Track.ChurchOrgan, "the organ plays inside the cathedral");
         Check(gs.HasFlag("act2_church_thought"), "Micah thinks about Eleanor outside the cathedral, then goes in");
         await game.Wait(2);
         await Shot("church_act2");
         await Until(() => game.Room?.Name == "ChicagoMap");
+        Check(game.Music.Current == null, "the organ stops on the map");
         Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
         Check(_crossOffers == 0, "no pendant offer on the initial confession");
         Check(!game.Player.Visible, "the player isn't drawn on the map");
@@ -135,12 +138,14 @@ public partial class AutoPlay
         var club = game.Perform(Verb.Walk, "club");
         await Until(() => game.Room?.Name == "ClubHall");
         Check(!gs.HasFlag("on_map") && game.Room?.FindHotspot("guest")?.Visible == false, "entered the Club, no masks around yet");
+        Check(game.Music.Current == Track.ClubStrings, "the Club's strings start in the hall");
         await game.Wait(1);
         await Shot("club_hall");
         await Until(() => gs.HasFlag("brute_called"));
         await game.Wait(1);
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
+        Check(game.Music.Current == null, "the strings stop out on the street");
         await game.Wait(1.5);
         await Shot("street_thrown_out");
         await Until(() => game.Room?.Name == "RoseHouse");

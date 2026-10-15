@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Office : Room
 {
+    public override Track? Music => Track.OfficeJazz;
+
     private const string Art = "res://assets/art/rooms/";
 
     public override void _Ready()
