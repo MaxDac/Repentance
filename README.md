@@ -12,6 +12,39 @@ Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (vi
 ## Running it
 
 Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
+The standard Godot editor cannot load this game's C# scripts, even with the SDK installed.
+See [Testing and film mode](docs/testing-and-film-mode.md) to select the .NET executable.
+
+### Linux setup
+
+On Arch Linux / Omarchy, install **`godot-mono`**, not `godot`. The latter is the standard editor without C# support:
+
+```bash
+sudo pacman -Syu godot-mono dotnet-sdk
+godot-mono --version
+dotnet --list-sdks                 # must include a 10.x SDK
+```
+
+The launchers find `godot-mono` automatically, even if `godot` is also installed:
+
+```bash
+tools/run/film.sh 2                # build, import, then watch the story
+tools/run/test.sh unit             # run just the unit suite
+```
+
+For manual runs, use `godot-mono` rather than `godot`:
+
+```bash
+dotnet build                      # build C# before importing the Ink story
+godot-mono --path . --headless --import
+godot-mono --path .                # play
+godot-mono --path . --editor       # open the editor
+```
+
+On other Linux distributions, use the **.NET** download from
+[Godot's Linux download page](https://godotengine.org/download/linux/) and install the .NET 10 SDK separately.
+Keep the entire extracted editor folder, including `GodotSharp`, and select its executable with
+`--godot /path/to/executable` or the `GODOT` environment variable.
 
 ### Tests and film mode
 
@@ -27,6 +60,9 @@ tools\run\film.ps1 -Speed 2        # watch the story (bash: tools/run/film.sh 2)
 Pull requests are gated by CI: every suite, plus Linux and Windows exports, must pass (the `ci-ok` check).
 
 ### Common commands
+
+These examples assume `godot` resolves to the **.NET** edition. On Arch Linux / Omarchy, use
+`godot-mono` instead; on Windows, use the .NET console executable for automated runs.
 
 ```powershell
 # 1. after C# changes, and before the first import: the Ink importer is a C# plugin
