@@ -99,9 +99,42 @@ public partial class PuzzlePanel : Control
         return button;
     }
 
-    private static StyleBoxTexture? _normal, _hover, _pressed;
+    /// <summary>A small square direction button: the 16x16 deco pad plate with a drawn arrow instead of a glyph.</summary>
+    public Button AddPadButton(string id, Vector2 direction, Rect2 rect, Action action)
+    {
+        var button = new Button { Position = rect.Position, Size = rect.Size, FocusMode = FocusModeEnum.None };
+        _padNormal ??= Box("deco_pad", 4, 1);
+        _padHover ??= Box("deco_pad_hover", 4, 1);
+        _padPressed ??= Box("deco_pad_pressed", 4, 1);
+        button.AddThemeStyleboxOverride("normal", _padNormal);
+        button.AddThemeStyleboxOverride("hover", _padHover);
+        button.AddThemeStyleboxOverride("pressed", _padPressed);
+        button.AddThemeStyleboxOverride("hover_pressed", _padPressed);
+        button.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+        var arrow = new Control { MouseFilter = MouseFilterEnum.Ignore };
+        arrow.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        arrow.Draw += () =>
+        {
+            var c = rect.Size / 2;
+            var side = new Vector2(-direction.Y, direction.X);
+            var color = button.IsPressed() ? new Color("fff6d8")
+                : button.IsHovered() ? Hud.VerbHover : Hud.VerbColor.Lightened(0.25f);
+            arrow.DrawColoredPolygon(new[] { c + direction * 3, c - direction * 3 + side * 4, c - direction * 3 - side * 4 }, color);
+        };
+        button.MouseEntered += arrow.QueueRedraw;
+        button.MouseExited += arrow.QueueRedraw;
+        button.ButtonDown += arrow.QueueRedraw;
+        button.ButtonUp += arrow.QueueRedraw;
+        button.AddChild(arrow);
+        button.Pressed += action;
+        AddChild(button);
+        _buttons.Add(id, button);
+        return button;
+    }
 
-    private static StyleBoxTexture Box(string file)
+    private static StyleBoxTexture? _normal, _hover, _pressed, _padNormal, _padHover, _padPressed;
+
+    private static StyleBoxTexture Box(string file, int margin = 0, int content = 0)
     {
         var box = new StyleBoxTexture
         {
@@ -109,6 +142,11 @@ public partial class PuzzlePanel : Control
             TextureMarginLeft = 7, TextureMarginRight = 7, TextureMarginTop = 6, TextureMarginBottom = 6,
             ContentMarginLeft = 6, ContentMarginRight = 6, ContentMarginTop = 2, ContentMarginBottom = 2,
         };
+        if (margin > 0)
+        {
+            box.TextureMarginLeft = box.TextureMarginRight = box.TextureMarginTop = box.TextureMarginBottom = margin;
+            box.ContentMarginLeft = box.ContentMarginRight = box.ContentMarginTop = box.ContentMarginBottom = content;
+        }
         return box;
     }
 

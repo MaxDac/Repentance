@@ -75,6 +75,21 @@ def deco_button(state):
     return im
 
 
+def deco_pad(state):
+    """16x16 nine-patch (4px margins) for direction pads: the deco button's frame, keyline and studs, smaller."""
+    fill, rim, line = {"normal": (hx("1f3036"), GOLD, GOLD_LO),
+                       "hover": (hx("2d474e"), GOLD_HI, GOLD),
+                       "pressed": (hx("5b4524"), GOLD_HI, GOLD_HI)}[state]
+    im = Image.new("RGBA", (16, 16))
+    d = ImageDraw.Draw(im)
+    _stepped(d, (0, 0, 15, 15), fill, rim, step=2)
+    d.rectangle([2, 2, 13, 13], outline=line)
+    if state != "pressed":
+        d.line([(3, 3), (12, 3)], fill=hx("ffffff", 40))
+        d.line([(3, 12), (12, 12)], fill=hx("000000", 90))
+    return im
+
+
 def _fan(d, cx, cy, r, start, end, col):
     import math
     for i in range(6):
@@ -119,6 +134,7 @@ def puzzle_frame():
 def build():
     for state in ("normal", "hover", "pressed"):
         save(deco_button(state), "ui", "deco_button.png" if state == "normal" else f"deco_button_{state}.png")
+        save(deco_pad(state), "ui", "deco_pad.png" if state == "normal" else f"deco_pad_{state}.png")
     save(puzzle_frame(), "ui", "puzzle_frame.png")
     for name, fn in (("mirror_waxed", waxed_mirror), ("cloth", cloth), ("wedge", wedge),
                      ("audit_folder", base), ("audit_tracing", tracing)):

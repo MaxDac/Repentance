@@ -64,6 +64,20 @@ public abstract class PuzzleScreen
 
     protected Label Label(string text, float x, float y, float width) => Panel.AddLabel(text, new Rect2(x, y, width, 14));
 
+    /// <summary>Up/left/right/down pad: 16px buttons on a 3x3 grid (2px gaps, empty middle) centred on (cx, cy).</summary>
+    protected void DirectionPad(float cx, float cy, Action<int, int> move)
+    {
+        const float size = 16, step = size + 2;
+        foreach (var (id, dx, dy) in new[] { ("up", 0, -1), ("left", -1, 0), ("right", 1, 0), ("down", 0, 1) })
+            Panel.AddPadButton(id, new Vector2(dx, dy),
+                new Rect2(cx - size / 2 + dx * step, cy - size / 2 + dy * step, size, size), () =>
+                {
+                    move(dx, dy);
+                    Refresh();
+                    Panel.QueueRedraw();
+                });
+    }
+
     protected void Say(string feedback) => Panel.SetFeedback(feedback);
 
     protected static void Text(CanvasItem canvas, Vector2 at, string text, Color? color = null) =>
@@ -107,17 +121,10 @@ public sealed class LiftMazeScreen : PuzzleScreen
         "The bellboy:\n\"Fifth floor. The linen room right next to 507.\"\n\"Rooms count up west to east.\"\n\n" +
         "Steer the cage from the loading bay (B) through the shafts, then dispatch it. Every floor has a linen room (L).";
 
-    protected override void Build()
-    {
-        Button("up", "^", 240, 84, 28, () => Drive("up"));
-        Button("left", "<", 222, 108, 28, () => Drive("left"));
-        Button("right", ">", 256, 108, 28, () => Drive("right"));
-        Button("down", "v", 240, 132, 28, () => Drive("down"));
-    }
+    protected override void Build() => DirectionPad(242, 108, (dx, dy) => Drive(dx, dy));
 
-    private void Drive(string direction)
+    private void Drive(int dx, int dy)
     {
-        var (dx, dy) = LiftMaze.Step(direction);
         if (!LiftMaze.CanMove(_car, dx, dy))
         {
             Say("The cage bumps brick. No shaft that way.");
@@ -177,7 +184,7 @@ public sealed class LiftMazeScreen : PuzzleScreen
         canvas.DrawRect(new Rect2(car - new Vector2(4, 4), new Vector2(8, 8)), new Color("171821"), false, 1);
         Text(canvas, new Vector2(28, 184), "B loading bay   L linen room");
         Text(canvas, new Vector2(28, 196), "west: stairs   east: fire escape");
-        Text(canvas, new Vector2(232, 74), "CAGE");
+        Text(canvas, new Vector2(231, 74), "CAGE");
     }
 }
 
@@ -355,11 +362,8 @@ public sealed class AlignmentScreen : PuzzleScreen
 
     protected override void Build()
     {
-        Button("up", "^", 216, 80, 34, () => Move(0, -1));
-        Button("left", "<", 196, 104, 34, () => Move(-1, 0));
-        Button("right", ">", 236, 104, 34, () => Move(1, 0));
-        Button("down", "v", 216, 128, 34, () => Move(0, 1));
-        Button("rotate", "Quarter turn", 196, 158, 74, () => _rotation = (_rotation + 1) % 4);
+        DirectionPad(233, 106, Move);
+        Button("rotate", "Rotate", 205, 140, 56, () => _rotation = (_rotation + 1) % 4);
     }
 
     private void Move(int x, int y)
@@ -397,6 +401,7 @@ public sealed class AlignmentScreen : PuzzleScreen
                 Text(canvas, position + new Vector2(-10, 12), Marks[i], Blue);
             }
         }
-        Text(canvas, new Vector2(196, 196), $"Offset {_x},{_y}  Turn {_rotation * 90}");
+        Text(canvas, new Vector2(203, 180), $"Offset {_x},{_y}");
+        Text(canvas, new Vector2(203, 192), $"Turn {_rotation * 90}");
     }
 }
