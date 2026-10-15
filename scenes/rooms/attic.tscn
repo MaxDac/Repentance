@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Attic.cs" id="1_Attic"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic.png" id="2_attic"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="8_Hotspot"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic_box_open.png" id="9_attic_box_open"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_suitcase_open.png" id="10_attic_suitcase_open"]
 
 [sub_resource type="RectangleShape2D" id="TinShape"]
 size = Vector2(24, 16)
@@ -32,16 +33,16 @@ size = Vector2(100, 82)
 size = Vector2(119, 31)
 
 [sub_resource type="RectangleShape2D" id="Rect_7"]
-size = Vector2(72, 50)
+size = Vector2(72, 54)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
-size = Vector2(58, 36)
+size = Vector2(58, 44)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(48, 70)
+size = Vector2(46, 63)
 
 [sub_resource type="RectangleShape2D" id="Rect_10"]
-size = Vector2(32, 22)
+size = Vector2(48, 34)
 
 [sub_resource type="RectangleShape2D" id="Rect_11"]
 size = Vector2(22, 26)
@@ -71,7 +72,7 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(104, 194, 392, 194, 392, 232, 470, 236, 470, 264, 100, 264)
+polygon = PackedVector2Array(104, 194, 392, 194, 392, 232, 470, 236, 470, 264, 100, 264, 100, 240, 130, 237, 130, 210, 104, 207)
 
 [node name="Entries" type="Node2D" parent="."]
 
@@ -105,12 +106,20 @@ script = ExtResource("4_FlagSprite")
 ShowIfFlags = "boxes_spilled"
 
 [node name="Chair" type="Sprite2D" parent="."]
-position = Vector2(108, 118)
+position = Vector2(104, 112)
 z_index = -5
 texture = ExtResource("5_attic_chair")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "sheet_lifted"
+
+[node name="SuitcaseOpen" type="Sprite2D" parent="."]
+position = Vector2(70, 186)
+z_index = -5
+texture = ExtResource("10_attic_suitcase_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "got_suitcase_key"
 
 [node name="BoxOpen" type="Sprite2D" parent="."]
 position = Vector2(276, 104)
@@ -254,7 +263,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Trunk"]
-position = Vector2(432.0, 205.0)
+position = Vector2(432.0, 203.0)
 shape = SubResource("Rect_7")
 
 [node name="Painting" type="Area2D" parent="Hotspots"]
@@ -269,7 +278,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Painting"]
-position = Vector2(447.0, 164.0)
+position = Vector2(447.0, 152.0)
 shape = SubResource("Rect_8")
 
 [node name="Radio" type="Area2D" parent="Hotspots"]
@@ -277,13 +286,13 @@ script = ExtResource("8_Hotspot")
 Id = "radio"
 DisplayName = "old radio"
 LookText = "A cathedral radio. Older than my parents. Probably older than their parents."
-WalkTo = Vector2(106, 232)
+WalkTo = Vector2(112, 202)
 Face = 3
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Radio"]
-position = Vector2(64.0, 191.0)
+position = Vector2(67.0, 181.5)
 shape = SubResource("Rect_9")
 
 [node name="Suitcase" type="Area2D" parent="Hotspots"]
@@ -291,13 +300,14 @@ script = ExtResource("8_Hotspot")
 Id = "suitcase"
 DisplayName = "suitcase"
 LookText = "A battered suitcase. Empty. Somebody unpacked a long time ago."
-WalkTo = Vector2(106, 232)
+WalkTo = Vector2(134, 224)
 Face = 3
+ClickPriority = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Suitcase"]
-position = Vector2(20.0, 195.0)
+position = Vector2(102.0, 217.0)
 shape = SubResource("Rect_10")
 
 [node name="HatBox" type="Area2D" parent="Hotspots"]

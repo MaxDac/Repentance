@@ -48,6 +48,14 @@ public partial class Attic : Room
         GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_act3.png"),
     };
 
+    // the suitcase lying open on the floor once Daniel has cut the key out of its lining
+    private static readonly Texture2D[] SuitcaseOpenTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_suitcase_open.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_suitcase_open_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_suitcase_open_act3.png"),
+    };
+
     private Task Hint(string text) => Say("hint", text);
 
     private const string StashPrefix = "stash_";
@@ -87,6 +95,7 @@ public partial class Attic : Room
     private static readonly Texture2D NightBoxOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_night.png");
     private static readonly Texture2D NightChair = GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_night.png");
     private static readonly Texture2D NightTrunkOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_night.png");
+    private static readonly Texture2D NightSuitcaseOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_suitcase_open_night.png");
 
     private Task SatchelHint()
     {
@@ -105,6 +114,7 @@ public partial class Attic : Room
             SetTexture("BoxOpen", NightBoxOpen);
             SetTexture("Chair", NightChair);
             SetTexture("TrunkOpen", NightTrunkOpen);
+            SetTexture("SuitcaseOpen", NightSuitcaseOpen);
             return;
         }
         int actIndex = Mathf.Clamp(State.StoryAct, 1, ActBackgrounds.Length) - 1;
@@ -114,6 +124,7 @@ public partial class Attic : Room
         SetTexture("BoxOpen", BoxOpenTextures[actIndex]);
         SetTexture("Chair", ChairTextures[actIndex]);
         SetTexture("TrunkOpen", TrunkOpenTextures[actIndex]);
+        SetTexture("SuitcaseOpen", SuitcaseOpenTextures[actIndex]);
     }
 
     private void SetTexture(string nodePath, Texture2D texture)
