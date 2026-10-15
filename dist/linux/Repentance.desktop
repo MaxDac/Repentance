@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Repentance
+GenericName=Point-and-click adventure
+Comment=A 1920s Chicago noir point-and-click adventure.
+Exec=Repentance.x86_64
+Icon=repentance
+Terminal=false
+Categories=Game;AdventureGame;
+StartupWMClass=Repentance

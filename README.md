@@ -1,5 +1,6 @@
-# Repentance
+<img src="assets/art/ui/icon.png" alt="Repentance icon: a white pixel-art cross on black" width="96" align="right">
 
+# Repentance
 *Chicago, 1927. The neon says HOTEL. The rain says nothing at all.*
 
 A point-and-click noir adventure in the spirit of *Monkey Island 2*: a 480×270 pixel-art
@@ -212,7 +213,8 @@ The cash revision changes save compatibility, not the ending requirements or rin
 
 Linux and Windows builds are published by the manual **Release** workflow (`.github/workflows/release.yml`). It runs
 the unit tests, exports both presets from `export_presets.cfg` with Godot 4.7.2 .NET, and attaches
-`Repentance-vX.Y.Z-<linux|windows>-x86_64.zip` to a new GitHub Release.
+`Repentance-vX.Y.Z-<linux|windows>-x86_64.zip` to a new GitHub Release. The Linux zip also holds the desktop
+entry, its icons and `install-desktop.sh` (see "The game icon" below).
 
 ```powershell
 # blank version = bump the patch of the latest v* tag (first release: v0.1.0); prerelease defaults to true
@@ -221,6 +223,29 @@ gh workflow run release.yml -f version=0.2.0 -f prerelease=false
 
 Exporting needs `Repentance.sln`: without it Godot exits 0 but silently leaves out the C# assemblies. AI agents can
 use the `release` skill in `.github/skills/release/SKILL.md`.
+
+#### The game icon
+
+The icon (a white pixel-art cross on black, from `tools/art/icon.py`) appears in these places:
+
+- **Window title bar, taskbar and Alt-Tab, on every platform.** `config/icon` in `project.godot` sets it at
+  runtime, and `config/windows_native_icon` does the same on Windows.
+- **`Repentance.exe` in Explorer, in shortcuts and pinned to the taskbar.** The Windows preset embeds
+  `assets/art/ui/icon.ico` (`application/icon`, with `application/modify_resources=true`).
+- **Linux desktops (GNOME, KDE, Xfce...).** The dock, the app grid and Alt-Tab take the icon from a desktop entry.
+  The Linux zip ships `Repentance.desktop`, the `icons/hicolor` PNGs and `install-desktop.sh` from `dist/linux/`.
+  Godot's Wayland app_id and X11 `WM_CLASS` are both `config/name` ("Repentance"), so the entry is named
+  `Repentance.desktop` and sets `StartupWMClass=Repentance`. Players unpack the zip and run:
+
+  ```sh
+  ./install-desktop.sh              # adds Repentance to the menu for this user (~/.local/share)
+  ./install-desktop.sh --uninstall  # removes it again
+  ```
+
+  Run it again after moving the folder: the entry points at the binary's absolute path.
+
+CI's export job checks that every icon frame is embedded in the `.exe`. It also validates the desktop entry, then
+installs and uninstalls it.
 
 ## The demo
 
@@ -398,9 +423,11 @@ and includes seeded regressions; its wall-clock duration must not be advertised 
 ## Project layout
 
 ```
-assets/art/          generated pixel art (rooms, sprites, items, ui)
+assets/art/          generated pixel art (rooms, sprites, items, ui; ui/icon.png and icon.ico are the game icon)
 assets/fonts/        Silkscreen pixel font (OFL)
 dialogue/            repentance.ink - all conversations, one knot per character
+dist/linux/          shipped next to the Linux binary: Repentance.desktop, hicolor icons, install-desktop.sh
+                     (dist/.gdignore keeps Godot from importing it)
 scenes/Main.tscn     entry scene (Game.cs)
 scenes/rooms/        one .tscn per room
 scripts/Core/        the adventure framework
@@ -531,6 +558,7 @@ py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doors
                                      and Micah and Eleanor outside the convent, two portraits in one panel, from
                                      tools\art\src\convent_micah.png and convent_eleanor.png; and the heraldry band at the foot
                                      of Harrington's portrait, painted by act2_rooms.heraldry
+py -3.14 tools\gen_art.py icon       # the game icon: assets\art\ui\icon.png and icon.ico, and dist\linux\icons\hicolor
 py -3.14 -m unittest discover -s tests\art -v  # image contracts and location rendering regressions
 ```
 
