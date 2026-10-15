@@ -13,8 +13,11 @@ DUST = hx("f0d8a0")
 
 # crops for the flag-driven overlays (x0, y0, x1, y1)
 SPILL_BOX = (262, 184, 390, 222)
-SHEET_BOX = (108, 118, 204, 196)
+SHEET_BOX = (104, 112, 210, 199)
 TRUNK_BOX = (388, 150, 476, 236)
+# the suitcase lying on the floor between the radio and the hatch: front face corners, depth and lid height
+SUITCASE = dict(x0=80, x1=114, top=222, bottom=232, depth=0.93, lid=15)
+SUITCASE_BOX = (70, 199, 134, 240)
 
 ACTS = {
     1: dict(
@@ -211,14 +214,115 @@ def hatch(img):
     d.polygon([(22, 239), (88, 239), (93, 264), (15, 264)], fill=hx("c89a60"))
     light(img, "polygon", [(22, 239), (88, 239), (93, 264), (15, 264)], hx("fff0c0"), 0.4, 3)
     vgrad(img, (24, 240, 86, 252), hx("806040"), hx("e0b878"))
-    for x in (34, 74):
-        d.line([(x, 212), (x - 2, 266)], fill=WOOD_D, width=4)
-        d.line([(x, 212), (x - 2, 266)], fill=WOOD_L, width=2)
-    for y in (220, 232, 246, 258):
-        d.line([(34, y), (74, y)], fill=WOOD, width=3)
+    # the folding ladder: its rails rise a little above the hole and curl over into hand grips
+    top = 224
+    for y in (232, 244, 256):
+        d.line([(34, y + 1), (74, y + 1)], fill=WOOD_D, width=3)
+        d.line([(34, y), (74, y)], fill=WOOD)
         d.line([(34, y - 1), (74, y - 1)], fill=WOOD_L)
+    for x in (34, 74):
+        d.line([(x, top + 3), (x - 2, 266)], fill=WOOD_D, width=4)
+        d.line([(x, top + 3), (x - 2, 266)], fill=WOOD_L, width=2)
+        d.line([(x + 1, top + 4), (x - 1, 266)], fill=WOOD)
+        d.arc([x - 1, top - 1, x + 7, top + 7], 180, 300, fill=WOOD_D, width=3)
+        d.arc([x, top, x + 6, top + 6], 190, 290, fill=WOOD_L)
+    for x in (34, 74):  # brass hinges where the ladder folds
+        d.rectangle([x - 2, 247, x, 249], fill=hx("b8964a"))
     d.rectangle([8, 232, 18, 266], fill=hx("4a3828"))  # open trapdoor lid against the wall
     light(img, "ellipse", [0, 200, 120, 270], hx("ffd8a0"), 0.25, 12)
+
+
+def _rocker_curve(p0, p1, p2, n=24):
+    return [((1 - s) ** 2 * p0[0] + 2 * (1 - s) * s * p1[0] + s * s * p2[0],
+             (1 - s) ** 2 * p0[1] + 2 * (1 - s) * s * p1[1] + s * s * p2[1]) for s in (i / n for i in range(n + 1))]
+
+
+def _y_on(curve, x):
+    return min(curve, key=lambda p: abs(p[0] - x))[1]
+
+
+def rocking_chair(img):
+    """A hand-carved rocking chair seen three-quarters from the left, facing the window: spindle back under a carved
+    crest rail, scrolled arms, a thick seat, turned legs on long curved rockers."""
+    d = ImageDraw.Draw(img)
+    O = (16, -7)  # from the chair's near side to its far side
+    far = lambda p: (p[0] + O[0], p[1] + O[1])
+    dark, mid, lit, hi = hx("2e1c10"), hx("5a3a24"), hx("8a5c38"), hx("b88452")
+    fdark, fmid = hx("24160c"), hx("442c1a")
+
+    def stick(a, b, w, col, edge, glint=None):
+        d.line([a, b], fill=edge, width=w + 1)
+        d.line([a, b], fill=col, width=w)
+        if glint:
+            d.line([(a[0] + w // 2, a[1]), (b[0] + w // 2, b[1])], fill=glint)
+
+    rocker = _rocker_curve((108, 179), (142, 197), (178, 184))
+    seat_y, back_x, front_x = 170, 128, 160
+    legs = ((back_x, seat_y, back_x - 3), (front_x, seat_y, front_x + 3))
+    shadow(img, "polygon", [(110, 190), (182, 192), (198, 186), (128, 182)], 0.4, 3)
+    # far side: rocker, legs and arm, in shadow
+    fr = [far(p) for p in rocker]
+    d.line(fr, fill=fdark, width=3)
+    d.line([(x, y - 1) for x, y in fr], fill=fmid)
+    for (x, top, foot) in legs:
+        stick(far((x, top)), (foot + O[0], _y_on(fr, foot + O[0])), 2, fmid, fdark)
+    fa0, fa1 = far((front_x + 1, seat_y)), far((front_x - 1, 150))
+    stick(fa0, fa1, 2, fmid, fdark)
+    stick(far((back_x - 6, 146)), far((front_x + 2, 150)), 2, fmid, fdark)
+    # the back: posts leaning back, five turned spindles, a lower rail and the carved crest
+    np0, np1 = (back_x, seat_y), (back_x - 9, 124)
+    fp0, fp1 = far(np0), far(np1)
+    for i in range(1, 6):
+        t = i / 6
+        top = (np1[0] + (fp1[0] - np1[0]) * t, np1[1] + (fp1[1] - np1[1]) * t + 4)
+        bot = (np0[0] - 2 + (fp0[0] - np0[0]) * t, np0[1] - 7 + (fp0[1] - np0[1]) * t)
+        stick(top, bot, 1, mid, dark)
+        mx, my = (top[0] + bot[0]) / 2, (top[1] + bot[1]) / 2
+        d.line([(mx - 1, my), (mx + 1, my)], fill=lit)  # the turned bulge
+    stick((np0[0] - 2, np0[1] - 7), (fp0[0] - 2, fp0[1] - 7), 2, mid, dark, lit)
+    stick(fp0, (fp1[0], fp1[1]), 2, fmid, fdark)
+    crest = [(np1[0] - 1, np1[1] + 1), (np1[0] + 3, np1[1] - 3), ((np1[0] + fp1[0]) / 2, np1[1] - 7),
+             (fp1[0] + 1, fp1[1] - 3), (fp1[0] + 1, fp1[1] + 4), ((np1[0] + fp1[0]) / 2, np1[1] - 1),
+             (np1[0] + 1, np1[1] + 6)]
+    d.polygon(crest, fill=mid, outline=dark)
+    d.line([crest[1], crest[2], crest[3]], fill=hi)
+    cx_, cy_ = (np1[0] + fp1[0]) / 2 + 1, np1[1] - 3  # a carved fan in the middle of the crest
+    for a in (-60, -30, 0, 30, 60):
+        d.line([(cx_, cy_ + 2), (cx_ + 3 * math.sin(math.radians(a)), cy_ + 2 - 3 * math.cos(math.radians(a)))],
+               fill=dark)
+    d.point((cx_, cy_ + 2), fill=hi)
+    for k in (0.2, 0.8):  # notches along the crest
+        nx, ny = np1[0] + (fp1[0] - np1[0]) * k, np1[1] + (fp1[1] - np1[1]) * k + 2
+        d.point((nx, ny), fill=dark)
+    # seat: a thick plank with a rounded front edge
+    s0, s1 = (back_x - 2, seat_y), (front_x + 2, seat_y)
+    d.polygon([s0, s1, far(s1), far(s0)], fill=lit, outline=dark)
+    d.line([(s0[0] + 2, seat_y - 1), (far(s1)[0] - 2, far(s1)[1] + 1)], fill=mid)
+    d.line([(s1[0] - 1, seat_y - 1), (far(s1)[0] - 1, far(s1)[1])], fill=hi)
+    d.rectangle([s0[0], seat_y, s1[0], seat_y + 2], fill=mid, outline=dark)
+    d.line([(s0[0] + 1, seat_y + 1), (s1[0] - 1, seat_y + 1)], fill=lit)
+    # near posts, legs, rocker and arm
+    stick((np0[0], np0[1] + 2), np1, 3, mid, dark, lit)
+    d.ellipse([np1[0] - 2, np1[1] - 4, np1[0] + 2, np1[1]], fill=lit, outline=dark)  # finial
+    d.ellipse([fp1[0] - 2, fp1[1] - 4, fp1[0] + 2, fp1[1]], fill=mid, outline=fdark)
+    for (x, top, foot) in legs:
+        bottom = (foot, _y_on(rocker, foot))
+        stick((x, top + 2), bottom, 2, mid, dark, lit)
+        my = (top + bottom[1]) / 2 + 1
+        d.line([((x + foot) / 2 - 2, my), ((x + foot) / 2 + 2, my)], fill=hi)  # turned bead
+        d.point(((x + foot) / 2 - 2, my + 1), fill=dark)
+    stick((back_x - 1, seat_y + 9), (front_x + 2, seat_y + 9), 1, mid, dark)  # stretcher
+    d.line(rocker, fill=dark, width=4)
+    d.line([(x, y - 1) for x, y in rocker], fill=mid, width=2)
+    d.line([(x, y - 2) for x, y in rocker[3:-3]], fill=hi)
+    stick((front_x + 1, seat_y), (front_x - 1, 150), 2, mid, dark, lit)  # arm post
+    arm = [(back_x - 6, 146), (front_x - 4, 149), (front_x + 3, 150)]
+    d.line(arm, fill=dark, width=4)
+    d.line(arm, fill=lit, width=2)
+    d.line([(back_x - 5, 145), (front_x + 2, 149)], fill=hi)
+    d.ellipse([front_x + 1, 147, front_x + 6, 152], fill=lit, outline=dark)  # scrolled hand grip
+    d.point((front_x + 4, 149), fill=dark)
+    light(img, "polygon", [far(np1), (front_x + 8, 150), (front_x + 8, seat_y), far(s1)], hx("fff0d0"), 0.12, 3)
 
 
 def sheet_furniture(img, lifted=False):
@@ -232,19 +336,16 @@ def sheet_furniture(img, lifted=False):
         d.line([(114, 170), (196, 172)], fill=hx("e0d8c8"))
         light(img, "polygon", [(120, 140), (134, 126), (160, 122), (150, 190), (116, 190)], hx("fff0d0"), 0.2, 6)
         shadow(img, "polygon", [(184, 130), (194, 150), (200, 192), (176, 192)], 0.3, 4)
+        shadow(img, "ellipse", [110, 186, 206, 198], 0.45, 3)
     else:
-        # a rocking chair, and the sheet in a heap beside it
-        for x in (128, 172):
-            d.line([(x, 132), (x + 2, 184)], fill=hx("4a3020"), width=3)
-        for y in range(136, 160, 6):
-            d.line([(128, y), (172, y)], fill=hx("5a3a24"), width=2)
-        d.rectangle([124, 160, 178, 166], fill=hx("6a4a30"))
-        d.arc([110, 170, 196, 200], 200, 340, fill=hx("3a2416"), width=3)
-        for x in (130, 172):
-            d.line([(x, 166), (x - 2, 186)], fill=hx("4a3020"), width=2)
-        d.polygon([(178, 194), (182, 180), (196, 176), (204, 184), (202, 194)], fill=hx("c8c0b0"))
-        d.line([(186, 180), (192, 192)], fill=hx("a8a090"))
-    shadow(img, "ellipse", [110, 186, 206, 198], 0.45, 3)
+        rocking_chair(img)
+        # the sheet, dropped in a heap beside it
+        heap = [(184, 197), (186, 188), (192, 181), (200, 180), (207, 186), (208, 197)]
+        d.polygon(heap, fill=hx("c8c0b0"), outline=hx("8a8274"))
+        d.line([(190, 186), (196, 196)], fill=hx("a8a090"))
+        d.line([(199, 182), (202, 195)], fill=hx("a8a090"))
+        d.line([(187, 192), (193, 190)], fill=hx("e8e0d0"))
+        light(img, "polygon", [(192, 181), (200, 180), (207, 186), (200, 190)], hx("fff0d0"), 0.25, 2)
 
 
 CARTON = dict(front=hx("a08458"), top=hx("c8aa76"), side=hx("b49466"), edge=hx("4e3a22"), tape=hx("d0bc8c"),
@@ -448,19 +549,27 @@ def dress_form(img):
 
 
 def radio(img):
-    """A cathedral radio on a fruit crate: gothic fretwork over the grille cloth, a dial and three knobs."""
+    """A cathedral radio on a little bedside cabinet: gothic fretwork over the grille cloth, a dial and three knobs."""
     d = ImageDraw.Draw(img)
-    # crate
-    d.rectangle([40, 196, 88, 226], fill=hx("6a5038"), outline=hx("3a2a1c"))
-    for y in (203, 211, 219):
-        d.line([(41, y), (87, y)], fill=hx("3a2a1c"))
-        d.line([(41, y + 1), (87, y + 1)], fill=hx("8a6c4c"))
-    for x in (43, 85):
-        d.line([(x, 197), (x, 225)], fill=hx("4a3828"), width=2)
-        for y in (199, 207, 215, 223):
-            d.point((x, y), fill=hx("a89070"))
-    d.rectangle([86, 196, 88, 226], fill=hx("806448"))
-    shadow(img, "rect", [44, 194, 90, 200], 0.4, 2)
+    # the cabinet: a solid box with a drawer and a fielded panel, standing on short turned feet
+    shadow(img, "polygon", [(44, 211), (90, 211), (100, 204), (60, 204)], 0.5, 2)
+    for fx in (48, 85):
+        d.rectangle([fx, 209, fx + 2, 213], fill=hx("2a1c10"))
+        d.point((fx + 1, 210), fill=hx("8a6c4c"))
+    back = lambda p: along(p, 0.96)
+    d.polygon([(87, 199), back((87, 199)), back((87, 209)), (87, 209)], fill=hx("806448"), outline=hx("3a2a1c"))
+    hgrad(img, (47, 199, 87, 209), hx("4a3424"), hx("7a5c40"))
+    d.rectangle([47, 199, 87, 209], outline=hx("2a1c10"))
+    d.line([(48, 203), (86, 203)], fill=hx("2a1c10"))  # drawer
+    d.line([(48, 204), (86, 204)], fill=hx("8a6c4c"))
+    d.rectangle([65, 200, 69, 201], fill=hx("c8a050"))
+    d.point((67, 202), fill=hx("6a4a1c"))
+    d.rectangle([51, 205, 83, 208], outline=hx("3a2818"))  # fielded panel
+    d.line([(52, 205), (82, 205)], fill=hx("8a6c4c"))
+    # the top, overhanging a little, its far edge disappearing under the radio
+    d.polygon([(45, 197), (89, 197), back((89, 197)), back((45, 197))], fill=hx("8a6a48"), outline=hx("3a2a1c"))
+    d.rectangle([45, 197, 89, 199], fill=hx("6a5038"), outline=hx("2a1c10"))
+    d.line([(46, 197), (88, 197)], fill=hx("a88a64"))
     # cabinet: right side face, then the front
     sil = lambda md, ox=0, oy=0: (md.rectangle([48 + ox, 170 + oy, 80 + ox, 196 + oy], fill=255),
                                   md.ellipse([48 + ox, 154 + oy, 80 + ox, 186 + oy], fill=255))
@@ -491,30 +600,82 @@ def radio(img):
     light(img, "ellipse", [66, 156, 80, 170], hx("ffd8a0"), 0.3, 2)
 
 
-def suitcase(img):
-    """A battered leather suitcase lying against the left knee wall."""
+def suitcase(img, opened=False):
+    """A battered leather suitcase lying flat on the floor, handle towards the room; opened, its lid stands up."""
     d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 4, 189, 32, 207
-    tb = (x1 + 6, y0 - 4)
-    shadow(img, "rect", [x0, y1 - 2, x1 + 8, y1 + 3], 0.5, 2)
-    d.polygon([(x1, y0), tb, (tb[0], y1 - 3), (x1, y1)], fill=hx("9a5a40"), outline=hx("2a1a10"))
-    d.polygon([(x0, y0), (x1, y0), tb, (x0 + 6, y0 - 4)], fill=hx("a86a4a"), outline=hx("2a1a10"))
-    hgrad(img, (x0, y0, x1, y1), hx("4a2418"), hx("7e4430"))
-    d.rectangle([x0, y0, x1, y1], outline=hx("2a1a10"))
-    # lid seam, straps with buckles, brass corner caps, a handle and a hotel sticker
-    d.line([(x0 + 1, y0 + 5), (x1 - 1, y0 + 5)], fill=hx("2a1a10"))
-    d.line([(x0 + 1, y0 + 6), (x1 - 1, y0 + 6)], fill=hx("9a5a40"))
-    for sx in (x0 + 7, x1 - 8):
-        d.rectangle([sx, y0, sx + 2, y1], fill=hx("3a2014"))
-        d.line([(sx + 3 + (tb[0] - x1) * (sx - x0) // (x1 - x0) // 2, y0 - 3), (sx + 1, y0)], fill=hx("3a2014"), width=2)
-        d.rectangle([sx - 1, y0 + 4, sx + 3, y0 + 7], outline=hx("d8b060"))
-    for (cx, cy) in ((x0, y0), (x1 - 2, y0), (x0, y1 - 2), (x1 - 2, y1 - 2)):
-        d.rectangle([cx, cy, cx + 2, cy + 2], fill=hx("c8a050"))
-    d.line([(14, y0 - 2), (15, y0 - 4), (21, y0 - 4), (22, y0 - 2)], fill=hx("1e120a"), width=2)
-    d.ellipse([20, y0 + 9, 27, y0 + 15], fill=hx("e0d0a8"))
-    d.line([(20, y0 + 12), (27, y0 + 12)], fill=hx("b03828"), width=2)
-    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=hx("a86a4a"))
-
+    x0, x1, yt, yb = SUITCASE["x0"], SUITCASE["x1"], SUITCASE["top"], SUITCASE["bottom"]
+    k = SUITCASE["depth"]
+    leather, dark, edge, brass = hx("7e4430"), hx("4a2418"), hx("2a1a10"), hx("c8a050")
+    ys = yt + 4 if opened else yt  # the lid's own rim is part of the front face while it is shut
+    b0, b1 = along((x0, ys), k), along((x1, ys), k)
+    bb1 = along((x1, yb), k)
+    shadow(img, "polygon", [(x0 - 2, yb + 1), (x1 + 2, yb + 1), (bb1[0] + 4, bb1[1] + 1), (b1[0], yb - 6)], 0.55, 2)
+    # right end
+    d.polygon([(x1, ys), b1, bb1, (x1, yb)], fill=hx("5e2e1e"), outline=edge)
+    d.point((x1 + 2, yb - 2), fill=brass)
+    if not opened:
+        d.polygon([(x0, yt), (x1, yt), b1, b0], fill=hx("9a5a3e"), outline=edge)
+        tmp = Image.new("RGB", img.size)
+        hgrad(tmp, (x0, int(b0[1]), int(b1[0]), yt), hx("8a4c34"), hx("b4744e"))
+        m = Image.new("L", img.size, 0)
+        ImageDraw.Draw(m).polygon([(x0 + 1, yt - 1), (x1 - 1, yt - 1), (b1[0] - 1, b1[1] + 1), (b0[0] + 1, b0[1] + 1)],
+                                  fill=255)
+        img.paste(tmp, (0, 0), m)
+        for sx in (x0 + 8, x1 - 10):  # straps running over the lid
+            bx = along((sx, yt), k)
+            d.line([(sx, yt), bx], fill=hx("3a2014"), width=3)
+            d.line([(sx + 1, yt), (bx[0] + 1, bx[1])], fill=hx("5a3020"))
+        d.ellipse([x0 + 16, yt - 7, x0 + 25, yt - 3], fill=hx("e0d0a8"), outline=hx("8a7050"))  # hotel sticker
+        d.line([(x0 + 17, yt - 5), (x0 + 24, yt - 5)], fill=hx("b03828"))
+        d.point((b1[0] - 3, b1[1] + 2), fill=brass)
+        d.point((b0[0] + 2, b0[1] + 1), fill=brass)
+    else:
+        # the lid, thrown back on its hinges: its lining faces the room, torn where the key was sewn in
+        lift = SUITCASE["lid"]
+        l0, l1 = (b0[0] + 2, b0[1] - lift), (b1[0] + 2, b1[1] - lift)
+        d.polygon([b0, b1, l1, l0], fill=hx("6a2430"), outline=edge)
+        d.line([(b0[0] + 1, b0[1] - 1), (l0[0] + 1, l0[1] + 1)], fill=hx("a86a4a"))
+        d.line([(l0[0] + 1, l0[1] + 1), (l1[0] - 1, l1[1] + 1)], fill=hx("b4744e"))
+        d.line([(b1[0] - 1, b1[1] - 1), (l1[0] - 1, l1[1] + 1)], fill=hx("4a2418"))
+        px_, py_ = b0[0] + 4, b0[1] - lift + 4  # an elastic pocket across the top of the lid
+        d.line([(px_, py_), (b1[0] - 2, py_)], fill=hx("8a3a48"))
+        d.line([(px_, py_ + 1), (b1[0] - 2, py_ + 1)], fill=hx("4a1820"))
+        tx, ty = (b0[0] + b1[0]) / 2 + 3, b0[1] - lift / 2 + 1
+        d.line([(tx - 4, ty), (tx + 3, ty - 1)], fill=hx("1a0a0c"), width=2)  # the slit in the lining
+        d.polygon([(tx - 4, ty + 1), (tx + 3, ty), (tx + 1, ty + 4), (tx - 3, ty + 5)], fill=hx("a24c5a"),
+                  outline=hx("4a1a22"))  # the flap of lining hanging down
+        for (sx, sy) in ((tx - 5, ty), (tx + 4, ty - 1)):
+            d.point((sx, sy), fill=hx("c8a878"))  # cut stitches
+        # inside the case: the far wall catches the light, the bottom is in shadow
+        d.polygon([(x0, ys), (x1, ys), b1, b0], fill=hx("2a0e12"), outline=edge)
+        d.polygon([b0, b1, (b1[0] - 1, b1[1] + 3), (b0[0] + 1, b0[1] + 3)], fill=hx("7a2c38"))
+        d.polygon([(x0 + 2, ys - 1), (x1 - 2, ys - 1), (x1 - 3, ys - 3), (x0 + 3, ys - 3)], fill=hx("4a1a22"))
+        d.polygon([(x0 + 6, ys - 2), (x0 + 13, ys - 6), (x0 + 19, ys - 4), (x0 + 12, ys - 1)], fill=hx("d8ccb4"),
+                  outline=hx("8a8070"))  # old tissue paper
+        d.line([(x0 + 9, ys - 3), (x0 + 15, ys - 5)], fill=hx("a8a090"))
+    # the front: lid and body halves, two brass latches and the leather handle
+    hgrad(img, (x0, ys, x1, yb), dark, leather)
+    d.rectangle([x0, ys, x1, yb], outline=edge)
+    d.line([(x0 + 1, ys + 1), (x1 - 1, ys + 1)], fill=hx("a86a4a"))
+    if not opened:
+        d.line([(x0 + 1, yt + 4), (x1 - 1, yt + 4)], fill=edge)
+        d.line([(x0 + 1, yt + 5), (x1 - 1, yt + 5)], fill=hx("9a5a40"))
+    for sx in (x0 + 8, x1 - 10):
+        d.rectangle([sx - 1, ys, sx + 1, yb], fill=hx("3a2014"))
+        d.rectangle([sx - 2, yb - 4, sx + 2, yb - 2], outline=hx("d8b060"))
+    for lx in (x0 + 4, x1 - 6):
+        if opened:
+            d.rectangle([lx, ys - 1, lx + 2, ys + 1], fill=brass)
+        else:
+            d.rectangle([lx, yt + 3, lx + 2, yt + 6], fill=brass, outline=hx("6a4a1c"))
+    hx0 = (x0 + x1) // 2
+    d.line([(hx0 - 4, ys + 3), (hx0 - 3, ys + 1), (hx0 + 3, ys + 1), (hx0 + 4, ys + 3)], fill=hx("1e120a"), width=2)
+    d.point((hx0 - 4, ys + 3), fill=brass)
+    d.point((hx0 + 4, ys + 3), fill=brass)
+    for (cx, cy) in ((x0, ys), (x1 - 1, ys), (x0, yb - 1), (x1 - 1, yb - 1)):
+        d.rectangle([cx, cy, cx + 1, cy + 1], fill=brass)
+    for (sx, sy) in ((x0 + 14, yb - 2), (x1 - 3, ys + 3)):  # scuffs
+        d.point((sx, sy), fill=hx("a87458"))
 
 def hat_box(img):
     """A round, striped hat box with its lid on and a ribbon bow."""
@@ -550,8 +711,7 @@ def clutter(img):
     d.polygon([(422, 154), (449, 150), (452, 182), (424, 184)], fill=hx("2a3a4a"))
     d.ellipse([430, 158, 444, 174], fill=hx("6a7a7a"))
     d.polygon([(448, 156), (474, 154), (476, 186), (450, 188)], fill=hx("5a3a20"))
-    # a suitcase and a hat box tucked under the left eave
-    suitcase(img)
+    # a hat box tucked under the left eave
     hat_box(img)
     # Pendant socket; the emissive glass is painted after the room's colour grade.
     d.line([(260, 0), (260, 28)], fill=hx("1a1410"))
@@ -668,9 +828,9 @@ def relight_night(img):
     return out
 
 
-def paint(act=1, spill=False, lifted=False, opened=False, box_open=False):
+def paint(act=1, spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False):
     if act == "night":
-        return paint_night(spill, lifted, opened, box_open)
+        return paint_night(spill, lifted, opened, box_open, suitcase_open)
     mood = ACTS[act]
     img = Image.new("RGB", (W, H))
     shell(img)
@@ -679,6 +839,7 @@ def paint(act=1, spill=False, lifted=False, opened=False, box_open=False):
     clutter(img)
     boxes(img, box_open)
     sheet_furniture(img, lifted)
+    suitcase(img, suitcase_open)
     trunk(img, opened)
     if spill:
         spilled(img)
@@ -696,7 +857,7 @@ def paint(act=1, spill=False, lifted=False, opened=False, box_open=False):
     return img
 
 
-def paint_night(spill=False, lifted=False, opened=False, box_open=False):
+def paint_night(spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False):
     img = Image.new("RGB", (W, H))
     shell(img)
     floor(img)
@@ -704,6 +865,7 @@ def paint_night(spill=False, lifted=False, opened=False, box_open=False):
     clutter(img)
     boxes(img, box_open)
     sheet_furniture(img, lifted)
+    suitcase(img, suitcase_open)
     trunk(img, opened)
     if spill:
         spilled(img)
@@ -719,7 +881,7 @@ def paint_night(spill=False, lifted=False, opened=False, box_open=False):
 
 def build():
     act1 = paint(1)
-    act1_alt = paint(1, True, True, True, True)
+    act1_alt = paint(1, True, True, True, True, True)
     pal = palette_of(_side_by_side(act1, act1_alt), 128) + DAY_EXTRA
 
     outputs = {}
@@ -731,14 +893,14 @@ def build():
             save(px, "rooms", "attic.png")
 
     overlay_boxes = (("attic_papers", SPILL_BOX), ("attic_chair", SHEET_BOX), ("attic_trunk_open", TRUNK_BOX),
-                     ("attic_box_open", BOX_OPEN_BOX))
+                     ("attic_box_open", BOX_OPEN_BOX), ("attic_suitcase_open", SUITCASE_BOX))
     for act in (1, 2, 3):
-        alt = pixelize(paint(act, True, True, True, True), pal)
+        alt = pixelize(paint(act, True, True, True, True, True), pal)
         for name, box in overlay_boxes:
             suffix = "" if act == 1 else f"_act{act}"
             save(alt.crop(box), "rooms", f"{name}{suffix}.png")
 
-    night, night_alt = paint("night"), paint("night", True, True, True, True)
+    night, night_alt = paint("night"), paint("night", True, True, True, True, True)
     night_pal = palette_of(_side_by_side(night, night_alt), 116) + NIGHT_EXTRA + DAY_EXTRA[3:6]
     save(pixelize(night, night_pal), "rooms", "attic_night.png")
     night_alt = pixelize(night_alt, night_pal)
