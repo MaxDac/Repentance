@@ -108,16 +108,17 @@ public static partial class MusicSynth
 
     // ------------------------------------------------------------------ the office
 
-    // A slow, sad ballad in D minor at an adagio drag, the record left on long after the bar has emptied: sixteen bars,
-    // AABA, four to a section. The clarinet sighs low in its dark chalumeau register, lazy swung eighths and long held
-    // notes with rests between the phrases; the piano rolls one soft chord a bar (two when the harmony moves), the
-    // upright bass walks nothing, just roots and fifths on half notes, and the brushes barely move: a slow sweep, a
-    // ride whispered on the beat, a tap on two and four. The last A ends on the leading tone over A7, falling home to D.
+    // A slow, depressed ballad in D minor at an adagio drag, in the late-night vein of Chet Baker or Kind of Blue: the
+    // record a washed-up, half-drunk private eye leaves on after the bottle is empty. Sixteen bars, AABA, four to a
+    // section. A Harmon-muted trumpet plays few notes and leaves a lot of air between them: long aching tones, a
+    // lazy swung eighth here and there, every phrase falling. The piano rolls one soft chord a bar (two when the
+    // harmony moves), and the upright bass walks nothing, just roots and fifths on half notes. No drums: nobody is
+    // keeping time any more. The last A ends on the leading tone over A7, falling home to D.
     private const string BalladOpening =
-        "r:1 A3:2/3 D4:1/3 F4:2 E4:2/3 D4:1/3 C#4:2/3 D4:1/3 B3:2 r:2/3 G4:1/3 Bb4:1 A4:2/3 G4:1/3 E4:1 ";
+        "r:1 E4:3 r:2/3 F4:1/3 E4:2/3 D4:1/3 B3:2 r:1 Bb4:2 A4:2/3 G4:1/3 ";
 
     private const string BalladBridge =
-        "Bb4:2 A4:2/3 G4:1/3 F4:1 E4:2/3 G4:1/3 Bb4:1 D5:2 C5:2/3 A4:1/3 G4:1 E4:2 G4:2/3 E4:1/3 Bb3:1 C#4:2 ";
+        "Bb4:3 A4:2/3 G4:1/3 E4:2 r:2/3 D4:1/3 E4:1 r:2/3 G4:1/3 A4:3 Bb4:2/3 G4:1/3 E4:1 C#4:2 ";
 
     private const string BalladBassA = "D2:2 A1:2 D2:2 B1:2 E2:2 A1:2 ";
 
@@ -131,21 +132,19 @@ public static partial class MusicSynth
 
     private static readonly Piece Office = new(66, new Hall(0.8, 0.82, 0.6, 0.2), new Part[]
     {
-        new(Instrument.Clarinet, 0.5, -0.15,
-            BalladOpening + "D4:2 C#4:1 r:1 " +
-            BalladOpening + "D4:2 F#4:2/3 A4:1/3 C5:1 " +
+        new(Instrument.Trumpet, 0.45, -0.15,
+            BalladOpening + "F4:2/3 E4:1/3 D4:1 C#4:1 r:1 " +
+            BalladOpening + "D4:2 r:2/3 F#4:1/3 A4:1 " +
             BalladBridge +
-            BalladOpening + "F4:2/3 E4:1/3 D4:1 C#4:1 r:1"),
-        new(Instrument.Piano, 0.36, 0.25, Rolled(
+            BalladOpening + "F4:2/3 E4:1/3 C#4:2 r:1"),
+        new(Instrument.Piano, 0.3, 0.25, Rolled(
             "Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm7 D7b9|" +
             "Gm9|C9|Fmaj9|Em7b5 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9")),
         new(Instrument.UprightBass, 0.8, 0.05,
             BalladBassA + "D2:2 A1:2 " + BalladBassA + "D2:2 F#2:2 " +
             "G1:2 D2:2 C2:2 G1:2 F1:2 C2:2 E2:2 A1:2 " +
             BalladBassA + "D2:2 A1:2"),
-        new(Instrument.Drums, 0.45, 0.1, Repeat("E2:4 ", 16)),
-        new(Instrument.Drums, 0.18, -0.3, Repeat("Eb3:2 Eb3:2/3 Eb3:1/3 Eb3:1 ", 16)),
-        new(Instrument.Drums, 0.2, 0.3, Repeat("r:1 D2:1 r:1 D2:1 ", 16)),
+
     });
 
     /// <summary>

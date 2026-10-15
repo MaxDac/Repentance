@@ -17,8 +17,8 @@ public static partial class MusicSynth
             case Instrument.Piano:
                 Hammer(buf, rng, note, spb, velocity);
                 break;
-            case Instrument.Clarinet:
-                Reed(buf, rng, note, spb, velocity);
+            case Instrument.Trumpet:
+                Brass(buf, rng, note, spb, velocity);
                 break;
             case Instrument.UprightBass:
                 Pluck(buf, rng, note, spb, velocity);
@@ -36,10 +36,11 @@ public static partial class MusicSynth
         Instrument.OrganPlenum => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
         Instrument.OrganPedal => new[] { SoundSynth.Biquad.HighPass(25), SoundSynth.Biquad.LowPass(4000) },
         Instrument.Piano => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
-        Instrument.Clarinet => new[]
+        // the Harmon mute: thin in the low end, a soft nasal colour around 1.4 kHz, the top rolled well off
+        Instrument.Trumpet => new[]
         {
-            SoundSynth.Biquad.HighPass(140), SoundSynth.Biquad.Peaking(1400, 3, 1), SoundSynth.Biquad.LowPass(4500),
-            SoundSynth.Biquad.LowPass(6500),
+            SoundSynth.Biquad.HighPass(300), SoundSynth.Biquad.Peaking(1400, 4, 1.4), SoundSynth.Biquad.LowPass(2800),
+            SoundSynth.Biquad.LowPass(3200),
         },
         Instrument.UprightBass => new[]
         {
@@ -261,38 +262,42 @@ public static partial class MusicSynth
         }
     }
 
-    // ------------------------------------------------------------------ clarinet
+    // ------------------------------------------------------------------ muted trumpet
 
     /// <summary>
-    /// A clarinet: a hollow square wave (odd harmonics) with a touch of sawtooth, each note scooped up into pitch, a
-    /// slow vibrato that only starts on longer notes, and the breath behind the reed.
+    /// A trumpet with a Harmon mute, played soft and close as on a late-night ballad: a band-limited sawtooth whose
+    /// brightness follows the breath (a dark tone crossfaded into a bright one as the note swells), a slow airy attack
+    /// that sags into pitch, an almost straight tone with only a faint late vibrato, a long note fading as the air
+    /// runs out, and the breath hissing through the mute. The mute's thin, nasal colour is in its body filters.
     /// </summary>
-    private static void Reed(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    private static void Brass(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
     {
-        const double attack = 0.035, release = 0.09;
-        double f0 = Hz(note.Midi), held = note.Beats * spb * 0.95;
+        const double attack = 0.07, release = 0.16;
+        double f0 = Hz(note.Midi), held = note.Beats * spb * 0.96;
         int start = (int)Math.Round(note.Beat * spb * SampleRate), n = (int)((held + release) * SampleRate);
-        var tone = SoundSynth.Biquad.LowPass(Math.Min(5000, f0 * 5));
-        var breath = SoundSynth.Biquad.BandPass(Math.Min(5000, f0 * 4), 1.2);
-        var drift = SoundSynth.Biquad.LowPass(3);
+        var dark = SoundSynth.Biquad.LowPass(Math.Min(3000, f0 * 2.2));
+        var bright = SoundSynth.Biquad.LowPass(Math.Min(3500, f0 * 4));
+        var breath = SoundSynth.Biquad.BandPass(1200, 0.9);
+        var drift = SoundSynth.Biquad.LowPass(2);
         double phase = rng.NextDouble(), vibPhase = rng.NextDouble() * 2 * Math.PI;
-        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * 0.22;
+        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * 0.2;
         for (int i = 0; i < n; i++)
         {
             double t = (double)i / SampleRate;
-            double env = Smooth(t / attack) * (t < held ? 1 : Math.Cos(Math.PI / 2 * Math.Min(1, (t - held) / release)));
-            double cents = -35 * Math.Exp(-t / 0.05) + 12 * Smooth((t - 0.25) / 0.4) * Math.Sin(vibPhase + 2 * Math.PI * 5.2 * t)
-                + 25 * drift.Next(rng.NextDouble() * 2 - 1);
+            // a soft swell in, then a slow sigh down over a long note
+            double env = Smooth(t / attack) * (0.75 + 0.25 * Math.Exp(-t / 1.2))
+                * (t < held ? 1 : Math.Cos(Math.PI / 2 * Math.Min(1, (t - held) / release)));
+            double cents = -45 * Math.Exp(-t / 0.07) + 7 * Smooth((t - 0.6) / 0.8) * Math.Sin(vibPhase + 2 * Math.PI * 4.6 * t)
+                + 18 * drift.Next(rng.NextDouble() * 2 - 1);
             double dt = f0 * Cents(cents) / SampleRate;
             phase += dt; if (phase >= 1) phase -= 1;
-            double p2 = phase + 0.5 >= 1 ? phase - 0.5 : phase + 0.5;
-            double square = (phase < 0.5 ? 1 : -1) + PolyBlep(phase, dt) - PolyBlep(p2, dt);
             double saw = 2 * phase - 1 - PolyBlep(phase, dt);
-            double s = tone.Next(0.85 * square + 0.15 * saw) + 0.12 * breath.Next(rng.NextDouble() * 2 - 1);
+            double glow = env * (0.2 + 0.3 * velocity);
+            double s = (1 - glow) * dark.Next(saw) + glow * bright.Next(saw)
+                + (0.04 + 0.1 * Math.Exp(-t / 0.05)) * breath.Next(rng.NextDouble() * 2 - 1);
             buf[(start + i) % buf.Length] += (float)(amp * env * s);
         }
     }
-
     // ------------------------------------------------------------------ upright bass
 
     /// <summary>

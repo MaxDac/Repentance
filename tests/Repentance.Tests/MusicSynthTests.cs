@@ -130,15 +130,15 @@ public class MusicSynthTests
         Assert.Equal(64, MusicSynth.LengthBeats(Track.OfficeJazz));
         // adagio: slow, but not a lento crawl
         Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.OfficeJazz), 60, 72);
-        var clarinet = score.Where(n => n.Instrument == Instrument.Clarinet).ToList();
+        var trumpet = score.Where(n => n.Instrument == Instrument.Trumpet).ToList();
         // swung eighths: an offbeat always falls two thirds of the way through the beat, never half way
-        Assert.DoesNotContain(clarinet, n => Math.Abs(n.Beat % 1 - 0.5) < 1e-6);
-        Assert.Contains(clarinet, n => Math.Abs(n.Beat % 1 - 2.0 / 3) < 1e-6);
-        // low key: the clarinet stays down in its dark register
-        Assert.All(clarinet, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
+        Assert.DoesNotContain(trumpet, n => Math.Abs(n.Beat % 1 - 0.5) < 1e-6);
+        Assert.Contains(trumpet, n => Math.Abs(n.Beat % 1 - 2.0 / 3) < 1e-6);
+        // low key: the muted trumpet stays in its soft middle register, never reaching for the top
+        Assert.All(trumpet, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
         // AABA: the three A sections open with the same three bars
         IEnumerable<(double, int)> Bars(double from) =>
-            clarinet.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
+            trumpet.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
         Assert.Equal(Bars(0), Bars(16));
         Assert.Equal(Bars(0), Bars(48));
         Assert.NotEqual(Bars(0), Bars(32));
@@ -148,14 +148,13 @@ public class MusicSynthTests
         var opening = score.Where(n => n.Instrument == Instrument.Piano && n.Beat < 1).Select(n => n.Midi % 12).ToHashSet();
         Assert.Contains(5, opening);
         Assert.DoesNotContain(6, opening);
-        Assert.Equal(MusicSynth.Midi("C#4"), clarinet.MaxBy(n => n.Beat).Midi);
+        Assert.Equal(MusicSynth.Midi("C#4"), trumpet.MaxBy(n => n.Beat).Midi);
         // a slow two-feel: the bass plucks only on the half notes
         Assert.All(bass, n => Assert.True(n.Beats >= 2 && n.Beat % 2 == 0, $"{n}"));
-        // the band: clarinet, piano, plucked bass and brushes
+        // the band: muted trumpet, piano and plucked bass, no drums
         Assert.Equal(
-            new[] { Instrument.Clarinet, Instrument.Piano, Instrument.UprightBass, Instrument.Drums }.ToHashSet(),
+            new[] { Instrument.Trumpet, Instrument.Piano, Instrument.UprightBass }.ToHashSet(),
             score.Select(n => n.Instrument).ToHashSet());
-        Assert.All(score.Where(n => n.Instrument == Instrument.Drums), n => Assert.Contains(n.Midi, new[] { 36, 38, 40, 42, 51 }));
     }
 
     [Theory]
@@ -166,7 +165,7 @@ public class MusicSynthTests
         {
             [Instrument.DoubleBass] = ("E1", "G4"), [Instrument.Cello] = ("C2", "A5"), [Instrument.Viola] = ("C3", "E6"),
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
-            [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Clarinet] = ("D3", "Bb6"),
+            [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
         };
         Assert.All(MusicSynth.Score(track), n =>
