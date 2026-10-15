@@ -100,15 +100,38 @@ public partial class Player : Node2D, ISpeaker
 
     /// <summary>
     /// Steps back to <paramref name="target"/> over <paramref name="seconds"/> without turning round or dropping the
-    /// held pose: a slow retreat with the gun still up.
+    /// held pose: a slow retreat with the gun still up. With <paramref name="stepPose"/> (a strip of
+    /// <paramref name="stepFrames"/>-frame backward steps, one run per <paramref name="run"/>), the legs walk through
+    /// that run while he moves and its last frame stays held; the caller picks the pose to hold afterwards.
     /// </summary>
-    public async Task BackstepTo(Vector2 target, double seconds)
+    public async Task BackstepTo(Vector2 target, double seconds, string? stepPose = null, int run = 0, int stepFrames = 8)
     {
         _path.Clear();
         _walkDone?.TrySetResult(false);
-        Game.Instance?.Sfx?.Step(Game.Instance.Room?.Floor ?? FloorSurface.Wood, Scale.Y);
+        if (stepPose != null)
+        {
+            _poses.Hold(stepPose, _facing == Facing.Left);
+            _poses.ShowFrame(run * stepFrames);
+        }
+        var floor = Game.Instance?.Room?.Floor ?? FloorSurface.Wood;
+        Game.Instance?.Sfx?.Step(floor, Scale.Y);
+        var start = Position;
+        bool secondFoot = false;
         var tween = CreateTween();
-        tween.TweenMethod(Callable.From<Vector2>(p => { Position = p; UpdateScale(); }), Position, target, seconds)
+        tween.TweenMethod(Callable.From<float>(t =>
+            {
+                Position = start.Lerp(target, t);
+                UpdateScale();
+                if (stepPose == null) return;
+                int phase = Mathf.Min((int)(t * stepFrames), stepFrames - 1);
+                _poses.ShowFrame(run * stepFrames + phase);
+                // the far foot lands halfway through the step
+                if (!secondFoot && t >= 0.5f)
+                {
+                    secondFoot = true;
+                    Game.Instance?.Sfx?.Step(floor, Scale.Y);
+                }
+            }), 0f, 1f, seconds)
             .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         await ToSignal(tween, Tween.SignalName.Finished);
     }

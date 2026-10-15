@@ -271,6 +271,35 @@ class CharacterArtTests(unittest.TestCase):
                       for i in range(len(clip["frames"]))]
             self.assertEqual(len(frames), len(set(frames)), name)
 
+    def test_aim_back_steps_blend_between_aim_levels(self):
+        back = json.loads((ART / "sprites" / "micah_aim_back.json").read_text())
+        lower = json.loads((ART / "sprites" / "micah_aim_lower.json").read_text())
+        back_img = Image.open(ART / "sprites" / "micah_aim_back.png").convert("RGBA")
+        lower_img = Image.open(ART / "sprites" / "micah_aim_lower.png").convert("RGBA")
+        self.assertEqual(back["width"], lower["width"])
+        width, height = back["width"], back["height"]
+        steps = sprites.AIM_BACK_FRAMES
+        runs = len(back["frames"]) // steps
+        self.assertEqual(runs * steps, len(back["frames"]))
+        self.assertEqual(runs, len(lower["frames"]))
+        crop = lambda img, i: img.crop((i * width, 0, (i + 1) * width, height)).tobytes()
+        for run in range(runs):
+            with self.subTest(run=run):
+                frames = [crop(back_img, run * steps + k) for k in range(steps)]
+                self.assertEqual(frames[0], crop(lower_img, max(run - 1, 0)), "each step starts at the previous aim")
+                self.assertEqual(len(frames), len(set(frames)), "the legs walk through the step")
+
+    def test_mansion_rise_starts_from_the_bed_sprite(self):
+        clip = json.loads((ART / "sprites" / "eleanor_mansion_rise.json").read_text())
+        strip = Image.open(ART / "sprites" / "eleanor_mansion_rise.png").convert("RGBA")
+        self.assertEqual(len(clip["frames"]), 6)
+        width, height = clip["width"], clip["height"]
+        frames = [strip.crop((i * width, 0, (i + 1) * width, height)).tobytes() for i in range(6)]
+        self.assertEqual(len(frames), len(set(frames)))
+        source = (ROOT / "scripts" / "Rooms" / "MansionBedroom.cs").read_text(encoding="utf-8")
+        self.assertIn('PlayPose("eleanor_mansion_rise")', source)
+        self.assertIn("EleanorRise = new(382, 226)", source)
+
     def test_recovery_rejoins_normal_sheet(self):
         normal = Image.open(ART / "sprites" / "micah.png").crop((0, 0, 64, 96))
         for name in ("micah_recover", "micah_kneel_rise"):

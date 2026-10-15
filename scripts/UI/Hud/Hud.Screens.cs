@@ -1,4 +1,6 @@
 using Godot;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance;
@@ -6,6 +8,9 @@ namespace Repentance;
 /// <summary>Full-screen layers: the title, fades, captions and the pause banner.</summary>
 public partial class Hud
 {
+    private const float CaptionTop = 126;
+    private const int CaptionFontSize = 16;
+
     private void BuildTitle(Control root)
     {
         _title = new TextureRect
@@ -45,10 +50,10 @@ public partial class Hud
 
         _caption = new Label
         {
-            Position = new Vector2(0, 126),
+            Position = new Vector2(0, CaptionTop),
             Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = 16, FontColor = VerbHover },
+            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
@@ -92,7 +97,29 @@ public partial class Hud
     /// <summary>Large centred text drawn above the fade layer (chapter cards, "To be continued...").</summary>
     public void ShowCaption(string? text)
     {
+        _caption.Position = new Vector2(0, CaptionTop);
+        _caption.Size = new Vector2(ScreenW, 16);
+        _caption.LabelSettings.FontSize = CaptionFontSize;
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
+    }
+
+    /// <summary>
+    /// The first <paramref name="shown"/> of <paramref name="lines"/>, one under the other. The block is laid out (centred,
+    /// and at a size where the widest line fits) for all of them, so revealing the next line never moves the earlier ones.
+    /// </summary>
+    public void ShowCaptionLines(IReadOnlyList<string> lines, int shown)
+    {
+        int size = CaptionFontSize;
+        while (size > 8 && lines.Max(l => Font.GetStringSize(l, HorizontalAlignment.Left, -1, size).X) > ScreenW - 16)
+            size -= 8;
+        var settings = _caption.LabelSettings;
+        settings.FontSize = size;
+        float lineHeight = Font.GetHeight(size) + settings.LineSpacing;
+        float height = lineHeight * lines.Count;
+        _caption.Position = new Vector2(0, Mathf.Round(CaptionTop + 8 - height / 2));
+        _caption.Size = new Vector2(ScreenW, height);
+        _caption.Text = string.Join("\n", lines.Take(Mathf.Clamp(shown, 0, lines.Count)));
+        _caption.Visible = true;
     }
 }

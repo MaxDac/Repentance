@@ -31,7 +31,7 @@ public partial class AutoPlay
         Check(gs.HasItem("audit_folder") && gs.HasItem("audit_tracing") && !gs.HasFlag(Endings.TookDocuments),
             "cancelled room-use alignment retains clues but no evidence");
         await game.Perform(Verb.Walk, "door_right");
-        Check(!Offered("oldman_taunt", "Lower the gun") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
+        Check(!Offered("oldman_taunt", "Our Father") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
         Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
         // Seeded endings follow the permanent epilogue lock; exercise the recipe without reopening its blocked HUD.
         await game.Run(() => Story.StoryPuzzles.TryReadAccounts(game));
@@ -103,7 +103,7 @@ public partial class AutoPlay
         {
             Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "He had it coming", "I'll go to the police");
             await game.ChangeRoom("mansion_bedroom", "start");
-            Check(!Offered("oldman_taunt", "Lower the gun"), $"without {missing}, the final return is unavailable");
+            Check(!Offered("oldman_taunt", "Our Father"), $"without {missing}, the final return is unavailable");
         }
         Seed(alleyReady, act3Items.Where(i => i != "faith_ring"), "Shoot him");
         await game.ChangeRoom("alley", "act3");
@@ -124,26 +124,34 @@ public partial class AutoPlay
         await TheEnd("ending_1 (Tony)");
 
         // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
-        Seed(act3Flags.Append("rose_wait"), act3Items, "Lower the gun");
+        Seed(act3Flags.Append("rose_wait"), act3Items, "Our Father");
         float nearest = float.MaxValue;
-        bool lowering = false;
+        bool lowering = false, steppedBack = false;
         _ = game.ChangeRoom("mansion_bedroom", "start");
         var prayer = new List<string>();
+        var coda = new List<string>();
         string? lastPrayerLine = null;
         await Until(() =>
         {
             if (game.Room is Rooms.MansionBedroom)
             {
                 if (game.Player.PoseName == "micah_aim_lower") lowering = true;
+                if (game.Player.PoseName == "micah_aim_back") steppedBack = true;
                 if (lowering) nearest = Mathf.Min(nearest, game.Player.Position.X);
+                if (game.Hud.CaptionVisible && (coda.Count == 0 || coda[^1] != game.Hud.CaptionText)) coda.Add(game.Hud.CaptionText);
             }
             if (game.Hud.SpeechVisible && game.Hud.SpeechText != lastPrayerLine) prayer.Add(lastPrayerLine = game.Hud.SpeechText);
             return game.Room?.Name == "RoseHouse";
         }, 180, 0.05);
         Check(gs.HasFlag("spared_oldman") && gs.HasFlag("ending_1"), "ending 1: spared the old man");
         Check(lowering && nearest < 70, "Micah backs to the door, lowering the revolver step by step");
+        Check(steppedBack, "Micah's legs step back with each verse");
         Check(prayer.Any(l => l.Contains("Thy kingdom come", StringComparison.OrdinalIgnoreCase)) &&
-              prayer.Any(l => l.Contains("Amen")), "Micah says the whole Our Father on his way out");
+              prayer.Any(l => l.Contains("deliver us from evil")) && !prayer.Any(l => l.Contains("Amen")),
+            "Micah prays up to \"deliver us from evil\" on his way out, without the Amen");
+        var doxology = Rooms.MansionBedroom.Doxology;
+        Check(coda.SequenceEqual(Enumerable.Range(1, doxology.Length).Select(n => string.Join("\n", doxology.Take(n)))),
+            "the prayer ends over black, a line at a time, down to \"Amen.\"");
         await TheEnd("ending_1 (old man)");
 
         // 6: shoots the old man, then repents and turns himself in; Rose visits him in jail
