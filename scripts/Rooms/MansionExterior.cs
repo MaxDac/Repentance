@@ -144,7 +144,7 @@ public partial class MansionExterior : Room
         await Say("Let it ring now. Nobody will hear a thing.");
     }
 
-    /// <summary>Back out through the kitchen door, with or without Eleanor, and maybe with the house going up behind.</summary>
+    /// <summary>Back out through the kitchen door, with or without Eleanor, and maybe with the house burning behind.</summary>
     private async Task Escape()
     {
         var eleanor = FindActor("eleanor");
@@ -153,15 +153,12 @@ public partial class MansionExterior : Room
         await Wait(1.6);
         Player.Face(Facing.Right);
         eleanor?.FaceLeft(false);
-        if (State.HasFlag("gas_on") && State.HasFlag("candle_lit"))
+        if (State.HasFlag("cellar_fire"))
         {
             await Wait(1.0);
-            await Game.Hud.Fade(1, 0.08);
             State.SetFlag(Endings.MansionExploded);
-            await Wait(0.25);
-            await Game.Hud.Fade(0, 1.4);
-            await Say("*BOOOOOM*");
-            await Think("The kitchen goes first. Then the study. Then everything Harrington ever wrote down in it.");
+            await Say("*CRASH*");
+            await Think("The cellar goes first. Then the kitchen, then the study, and everything Harrington ever wrote down in it.");
             if (eleanor != null && eleanor.Visible)
             {
                 await Say("eleanor", "Oh my God. Oh my God, Micah.");

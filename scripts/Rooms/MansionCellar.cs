@@ -1,3 +1,4 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -6,16 +7,29 @@ namespace Repentance.Rooms;
 /// The Harrington wine cellar, under the kitchen: black as a coal hole. A storm lantern on a hook, delivery crates (one
 /// sloshes - kerosene) and, at the back, the bootleggers' stair up to a panel behind the old man's study bar. Fill the
 /// lantern, light it with Micah's lighter and the stair is there to be climbed. It is the only way into the house: the
-/// baize door upstairs is bolted from the study side.
+/// baize door upstairs is bolted from the study side. On the way out, Micah can come back down, open the Club's whiskey
+/// barrel, take the lantern off its nail and set the cellar alight under the house.
 /// </summary>
 public partial class MansionCellar : Room
 {
     private const string EscapeRefusal = "Not back in there. Somebody's on the stairs by now.";
 
     private bool Lit => State.HasFlag("cellar_lit");
+    private bool Escaping => State.HasFlag("escaping");
+    private bool Open => State.HasFlag("barrel_open");
 
     public override async Task OnEnter(string entry)
     {
+        if (Escaping && !State.HasFlag("cellar_fire") && !State.HasFlag("seen_cellar_escape"))
+        {
+            State.SetFlag("seen_cellar_escape");
+            await Game.Run(async () =>
+            {
+                await Wait(0.4);
+                await Think("The Club's whiskey, in a barrel on the floor. Enough proof down here to light up the Gold Coast.");
+            });
+            return;
+        }
         if (Lit || State.HasFlag("seen_mansion_cellar")) return;
         State.SetFlag("seen_mansion_cellar");
         await Game.Run(async () =>
@@ -58,6 +72,47 @@ public partial class MansionCellar : Room
                 await Say("Wine. Not what I came for.");
                 return true;
 
+            case ("barrel", Verb.Look) when Open:
+                await Say("Whiskey all over the flags. The cellar smells like a speakeasy at closing time.");
+                return true;
+            case ("barrel", Verb.Look):
+                await Say("Canadian rye, by the stencil, lying on its side. The spigot weeps a little.");
+                return true;
+            case ("barrel", Verb.Hand) when !Escaping:
+                await Say("I could use a drink. That's exactly why I won't. Eleanor's upstairs.");
+                return true;
+            case ("barrel", Verb.Hand) when Open:
+                await Say("It's running. Let it.");
+                return true;
+            case ("barrel", Verb.Hand or Verb.Kick):
+                State.SetFlag("barrel_open");
+                await Say("I knock the spigot wide open. Good Canadian rye, a dollar a glass on Rush Street, all over the floor.");
+                await Think(State.HasFlag("took_hung_lantern") ? "Now the flame." : "Now a flame. The lantern's still on its nail.");
+                return true;
+            case ("barrel", Verb.UseItem) when item == "lantern_lit" && !Escaping:
+                await Say("Not why I'm here. Eleanor's somewhere upstairs.");
+                return true;
+            case ("barrel", Verb.UseItem) when item == "lantern_lit" && !Open:
+                await Say("A lantern against a closed barrel just warms the oak. It wants opening first.");
+                return true;
+            case ("barrel", Verb.UseItem) when item == "lantern_lit":
+                await SetFire();
+                return true;
+            case ("barrel", Verb.UseItem) when item is MicahKit.LighterId or "matchbook":
+                await Say(Escaping && Open
+                    ? "Light that with my hand and I go up with it. I want something I can throw."
+                    : "Not why I'm here. Eleanor's somewhere upstairs.");
+                return true;
+
+            case ("hung_lantern", Verb.Hand) when !Escaping:
+                await Say("It's lighting my way back. Leave it where it is.");
+                return true;
+            case ("hung_lantern", Verb.Hand):
+                State.SetFlag("took_hung_lantern");
+                State.GiveItem("lantern_lit");
+                await Say("I lift the lantern off its nail. Still burning, and hot through the bail.");
+                return true;
+
             case ("stair" or "dark", Verb.UseItem) when item == "lantern_lit" && !Lit:
                 await LightCellar();
                 return true;
@@ -93,6 +148,18 @@ public partial class MansionCellar : Room
                 return true;
         }
         return false;
+    }
+
+    private async Task SetFire()
+    {
+        State.TakeItem("lantern_lit");
+        await Say("I step back to the stair, swing the lantern once, and let it go.");
+        State.SetFlag("cellar_fire");
+        await Say("*FWOOOSH*");
+        await Say("Blue across the floor, then orange, crawling up the oak. The Club's whiskey, all going up at once.");
+        await Think("They drank to their own health down here for twenty years. Let them drink to this.");
+        await Game.WalkTo(new Vector2(110, 226));
+        await Game.ChangeRoom("mansion_kitchen", "cellar");
     }
 
     private async Task LightCellar()

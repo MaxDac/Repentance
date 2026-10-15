@@ -568,25 +568,27 @@ def build_exterior():
     return px, v
 
 
-EXT_FIRE_FRAMES = 8
+EXT_FIRE_FRAMES = 16
 FLAME_LAYERS = ((hx("a82a12"), 1.0, 1.0), (hx("e0601e"), 0.84, 0.78), (hx("f8a032"), 0.64, 0.56),
                 (hx("ffd870"), 0.42, 0.36), (hx("fff6d8"), 0.2, 0.18))
 LOWER_SASHES = ((70, 116, 104, 166), (156, 116, 190, 166), (384, 116, 416, 150))
 
 
-def _flame(d, cx, base, h, w, t, ph, lean=0.0):
+def _flame(d, cx, base, h, w, t, ph, lean=0.0, flicker=1.0):
     """One tongue of flame, nested from a dark red skin to a white core: it narrows as it rises, ripples with a wave
     running up it, leans downwind at the tip and swells and sinks with phase t (looping on 1); a torn-off wisp
-    drifts up from the tip and burns out."""
+    drifts up from the tip and burns out. flicker scales how hard it leaps and sways."""
     tau = 2 * math.pi
-    h *= 0.8 + 0.16 * math.sin(tau * (t + ph)) + 0.07 * math.sin(tau * (3 * t + 2 * ph))
+    h *= 0.8 + flicker * (0.16 * math.sin(tau * (t + ph)) + 0.07 * math.sin(tau * (3 * t + 2 * ph)))
+    if h < 1.5:
+        return
     for col, hs, ws in FLAME_LAYERS:
         hh, ww = h * hs, w * ws + 0.6
         left, right = [], []
         n = 12
         for i in range(n + 1):
             f = i / n
-            mid = cx + lean * f * f * h * 0.3 + (1 + w * 0.3) * f * math.sin(tau * (1.3 * f - 2 * t + ph))
+            mid = cx + lean * f * f * h * 0.3 + flicker * (1 + w * 0.3) * f * math.sin(tau * (1.3 * f - 2 * t + ph))
             half = ww * (1 - f) ** 0.7 * (1 + 0.22 * math.sin(tau * (2 * f + t + ph)))
             left.append((mid - half, base - hh * f))
             right.append((mid + half, base - hh * f))
@@ -652,17 +654,19 @@ def _blaze(img, t, doorway=None):
         light(img, "ellipse", [x0 - 18, y0 - 26, x1 + 18, y1 + 12], hx("ff8a30"), 0.3, 8)
     d = ImageDraw.Draw(img)
     rf = random.Random(7)
+    fl = 1.9  # the house fire leaps harder than a hearth
     for i, x in enumerate(UPPER_X):
         x0, y0, x1, y1 = x, UPPER_Y[0], x + 26, UPPER_Y[1]
         for j in range(5):
             cx = x0 + 3 + j * (x1 - x0 - 6) / 4 + rf.uniform(-1, 1)
             hj = (y1 - y0) * rf.uniform(0.9, 1.35) + (10 if j in (1, 2, 3) else 0)
-            _flame(d, cx, y1 - 1, hj, rf.uniform(3.8, 5.2), t, rf.random(), lean=rf.uniform(0.2, 0.9))
+            _flame(d, cx, y1 - 1, hj, rf.uniform(3.8, 5.2), t, rf.random(), lean=rf.uniform(0.2, 0.9), flicker=fl)
+        _window_tongues(d, rf, x0, y0, x1, t, 3, 26)
     for x0, y0, x1, y1 in LOWER_SASHES:
         for j in range(5):
             cx = x0 + 3 + j * (x1 - x0 - 6) / 4 + rf.uniform(-1, 1)
             _flame(d, cx, y1 - 1, (y1 - y0) * rf.uniform(0.75, 1.15), rf.uniform(3.6, 5), t, rf.random(),
-                   lean=rf.uniform(0.1, 0.6))
+                   lean=rf.uniform(0.1, 0.6), flicker=fl)
         for bx in range(x0 + 3, x1, 5):  # the bars stand black against the flames
             d.line([(bx, y0 - 1), (bx, y1 + 1)], fill=hx("161414"))
         d.line([(x0, y0 + 4), (x1, y0 + 4)], fill=hx("161414"))
@@ -672,13 +676,26 @@ def _blaze(img, t, doorway=None):
         for j in range(7):
             cx = dx0 + 2 + j * (dx1 - dx0 - 4) / 6
             _flame(d, cx, dy1 - 1, (dy1 - dy0) * rf.uniform(0.3, 0.62), rf.uniform(3.4, 4.6), t, rf.random(),
-                   lean=rf.uniform(0.0, 0.4))
+                   lean=rf.uniform(0.0, 0.4), flicker=fl)
+        _window_tongues(d, rf, dx0, dy0, dx1, t, 3, 22)
     for k in range(48):  # sparks, spiralling up off the windows
         q = (t * 2 + k / 48) % 1.0
         sx0 = UPPER_X[k % len(UPPER_X)] + 13
         x = sx0 + rf.uniform(-12, 12) + q * 40 + 5 * math.sin(tau * (q * 2 + k * 0.17))
         y = UPPER_Y[0] - 10 - q * 60 - rf.uniform(0, 20)
         d.point((x, y), fill=hx("fff0a0") if q < 0.3 else hx("ffb040") if q < 0.7 else hx("a8401a"))
+
+
+def _window_tongues(d, rf, x0, y0, x1, t, n, reach):
+    """Flames licking out over a window head and up the brick: n tongues that leap to about reach px and fall back
+    to nothing in turn, so the fire visibly climbs out of the house."""
+    for j in range(n):
+        cx = x0 + (j + 0.5) * (x1 - x0) / n + rf.uniform(-2, 2)
+        ph = rf.random()
+        q = (t * 2 + ph) % 1.0  # each tongue leaps twice per loop
+        h = reach * rf.uniform(0.7, 1.1) * math.sin(math.pi * q) ** 0.8
+        if h >= 3:
+            _flame(d, cx, y0 + 3, h, rf.uniform(3.2, 4.4), t, ph, lean=rf.uniform(0.4, 1.0), flicker=1.4)
 
 
 # ------------------------------------------------------------------------------------------------ KITCHEN
@@ -1095,14 +1112,13 @@ def paint_kitchen(lit=False, gas=False):
 
 def build_kitchen():
     base = paint_kitchen()
+    # the candle-lit and gas-on variants are no longer used in the game; they only seed the committed palette
     v = {"lit": paint_kitchen(lit=True), "gas": paint_kitchen(gas=True)}
     pal = palette_of(Image.blend(Image.blend(base, v["lit"], 0.4), v["gas"], 0.3), 124)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_kitchen.png")
     fx, fy = paint_kitchen.flame
     print("kitchen flame", paint_kitchen.flame, "taps", paint_kitchen.taps)
-    overlay(v["gas"], px, pal, paint_kitchen.taps, "mansion_kitchen_gas")
-    overlay(v["lit"], px, pal, (0, 0, W, H), "mansion_kitchen_candle")
     return px, v
 
 
