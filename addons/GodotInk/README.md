@@ -29,6 +29,14 @@ official [engine documentation](https://docs.godotengine.org/).
 
 1. Enable **GodotInk** in your project settings.
 
+## Local resource reset integration
+
+This project's integration implements Godot's `_ResetState()` hook. Call the inherited
+`ResetState()` entry point to restart an initialized Ink story; Godot-initiated resource resets
+do the same, including calls through a `Resource` reference or native `reset_state`.
+Resetting an uninitialized resource (including importer/editor placeholders) is a safe no-op.
+An initialized reset retains compiled content, external bindings, observers, and signal connections.
+
 ## License
 
 *GodotInk* is released under MIT license (see the [LICENSE](/LICENSE) file for more information).

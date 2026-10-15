@@ -138,12 +138,12 @@ public partial class InkStory : Resource
     }
 
     /// <summary>
-    /// Reset the Story back to its initial state as it was when it was
-    /// first constructed.
+    /// Reset an initialized story through Godot's resource reset lifecycle.
+    /// Importer/editor placeholders have no runtime yet and need no reset.
     /// </summary>
-    public void ResetState()
+    public override void _ResetState()
     {
-        runtimeStory.ResetState();
+        runtimeStory?.ResetState();
     }
 
     /// <summary>

@@ -65,7 +65,7 @@ public partial class Room : Node2D
     protected GameState State => GameState.Instance;
 
     /// <summary>True when <paramref name="item"/> is the physical prop, or Micah's notepad once the matching note is written.</summary>
-    protected bool Shows(string item, string physical, string note) =>
+    protected bool Shows(string? item, string physical, string note) =>
         item == physical || (item == Notes.ItemId && Notes.Known(note, State.HasFlag));
     protected Player Player => Game.Player;
 
