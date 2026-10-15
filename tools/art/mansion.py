@@ -1771,7 +1771,44 @@ def _decanters(img, R):
         d.line([(tx - 1, ty - 2), (tx + 1, ty - 2)], fill=hx("c88a3a"))
 
 
-def paint_study(left=False, right=False, docs=True, closet=False):
+STUDY_MOON = (292, 40, 304, 52)
+
+
+def _study_moon(img, box):
+    """A waxing gibbous moon filling box exactly: a faint halo and ring, then a crisp disc shaded pixel by pixel -
+    limb darkening, the terminator softening the lower left into earthshine, the grey seas (Imbrium, Serenitatis,
+    Tranquillitatis, Crisium, Procellarum, Nubium) and the bright rayed craters Tycho and Copernicus."""
+    x0, y0, x1, y1 = box
+    cx, cy, r = (x0 + x1 + 1) / 2, (y0 + y1 + 1) / 2, (x1 - x0 + 1) / 2
+    light(img, "ellipse", [x0 - 7, y0 - 7, x1 + 7, y1 + 7], hx("8a98c8"), 0.22, 4)
+    d = ImageDraw.Draw(img)
+    seas = ((-0.28, -0.38, 0.30, 0.24), (0.12, -0.32, 0.20, 0.18), (0.32, 0.02, 0.24, 0.22), (0.70, -0.28, 0.12, 0.13),
+            (-0.55, 0.05, 0.26, 0.42), (-0.12, 0.40, 0.20, 0.14), (0.52, 0.30, 0.13, 0.16))
+    sun = np.array([0.62, -0.32, 0.72])
+    sun /= np.linalg.norm(sun)
+    lit_c, sea_c, dark_c = np.array(hx("fbf6e2"), float), np.array(hx("a8a490"), float), np.array(hx("8a8a96"), float)
+    px = img.load()
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            u, v = (x + 0.5 - cx) / r, (y + 0.5 - cy) / r
+            rr = u * u + v * v
+            if rr > 1:
+                continue
+            mu = math.sqrt(1 - rr)
+            sea = max(min(1.0, 1.6 * (1 - ((u - su) / ru) ** 2 - ((v - sv) / rv) ** 2)) for su, sv, ru, rv in seas)
+            col = lit_c + (sea_c - lit_c) * max(0.0, sea) * 0.75
+            col = col * (0.72 + 0.28 * mu ** 0.5)  # limb darkening
+            day = min(1.0, max(0.0, (np.dot((u, v, mu), sun) + 0.08) / 0.32))
+            col = dark_c + (col - dark_c) * day
+            px[x, y] = tuple(int(c) for c in col)
+    for (u, v), c in (((-0.10, 0.70), "ffffff"), ((-0.30, -0.06), "fffef4"), ((-0.62, -0.10), "f4f0de")):
+        d.point((int(cx + u * r), int(cy + v * r)), fill=hx(c))  # Tycho, Copernicus, Kepler
+    tx, ty = int(cx - 0.10 * r), int(cy + 0.70 * r)
+    for dx, dy in ((-1, -1), (1, -1), (0, -2)):  # Tycho's rays
+        d.point((tx + dx, ty + dy), fill=hx("efeadb"))
+
+
+def paint_study(left=False, right=False, docs=True, closet=False, moon=True):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
     em = Image.new("L", img.size, 0)
@@ -1838,18 +1875,24 @@ def paint_study(left=False, right=False, docs=True, closet=False):
     rs = random.Random(93)
     for _ in range(18):
         d.point((rs.randint(gx0, gx1), rs.randint(gy0, gy0 + 30)), fill=hx("a8b0d0"))
-    d.ellipse([292, 40, 304, 52], fill=hx("f4f0d8"))
+    if not moon:  # the plain disc the room's palette was first drawn from
+        d.ellipse(list(STUDY_MOON), fill=hx("f4f0d8"))
     light(img, "ellipse", [278, 28, 318, 64], hx("6a78b0"), 0.4, 6)
+    if moon:
+        _study_moon(img, STUDY_MOON)
     d = ImageDraw.Draw(img)
     vgrad(img, (gx0, 78, gx1, gy1), hx("1a2440"), hx("0e1428"))  # Lake Michigan
     d.line([(gx0, 78), (gx1, 78)], fill=hx("3a4470"))
     for x in range(gx0 + 2, 270, 5):  # the lights of the shore drive, far off
         d.point((x, 77), fill=hx("e8c070"))
     ed.rectangle([gx0, gy0, gx1, gy1], fill=170)
+    if moon:
+        ed.ellipse(list(STUDY_MOON), fill=255)  # the moon keeps its own light through the night grade
     d.rectangle([278, gy0, 281, gy1], fill=OAK_L)
     d.rectangle([gx0, 66, gx1, 69], fill=OAK_L)
     for x in range(gx0, gx1, 13):
         d.line([(x, gy0), (x, 66)], fill=OAK)
+        ed.line([(x, gy0), (x, 66)], fill=170)
     d.rectangle([gx0 - 8, gy1 + 6, gx1 + 8, gy1 + 10], fill=hx("8a6440"))
     # drapes and a pelmet
     for (a, b, c2, dd) in (((226, 20), (248, 20), (244, 128), (220, 132)), ((312, 20), (334, 20), (340, 132), (316, 128))):
@@ -2023,8 +2066,23 @@ def build_study():
     blend = base
     for img in v.values():
         blend = Image.blend(blend, img, 0.35)
+    # The room's palette comes from the window with its old plain moon, so the shaded moon, which gets a few colours of
+    # its own on top, leaves every other pixel of the room as it was.
+    window = (226, 14, 340, 120)
+    blend.paste(paint_study(moon=False).crop(window), window[:2])
+    mx0, my0, mx1, my1 = STUDY_MOON
+    r = (mx1 - mx0 + 1) / 2
+    inside = [base.getpixel((x, y)) for y in range(my0, my1 + 1) for x in range(mx0, mx1 + 1)
+              if (x + 0.5 - mx0 - r) ** 2 + (y + 0.5 - my0 - r) ** 2 <= r * r]
+    strip = Image.new("RGB", (len(inside), 1))
+    strip.putdata(inside)
+    disc = strip.quantize(colors=8, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).getpalette()[:24]
     pal = palette_of(blend, 124)
     px = pixelize(base, pal)
+    box = (mx0, my0, mx1 + 1, my1 + 1)
+    mask = Image.new("L", (box[2] - box[0], box[3] - box[1]))
+    ImageDraw.Draw(mask).ellipse([0, 0, mask.width - 1, mask.height - 1], fill=255)
+    px.paste(pixelize(base.crop(box), pal + [tuple(disc[i:i + 3]) for i in range(0, 24, 3)]), box[:2], mask)
     save(px, "rooms", "mansion_study.png")
     dl, dr = paint_study.drawers["left"], paint_study.drawers["right"]
     print("study drawers", paint_study.drawers)
