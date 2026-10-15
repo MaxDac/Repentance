@@ -311,13 +311,25 @@ public partial class AutoPlay
         Check(game.Room?.Name == "MansionCellar", "back down to the cellar during the escape");
         await game.Perform(Verb.Walk, "stair");
         Check(game.Room?.Name == "MansionCellar", "the bootleggers' stair stays shut during the escape");
+        await game.Perform(Verb.Walk, "kitchen_steps");
+        Check(game.Room?.Name == "MansionKitchen" && game.Room?.FindHotspot("eleanor")?.Visible == true && !gs.HasFlag("cellar_fire"),
+            "back up the steps without lighting anything: Eleanor still waits by the door");
+        await game.Perform(Verb.Walk, "cellar_door");
+        Check(game.Room?.Name == "MansionCellar", "and down again: the trapdoor stays open until the fire");
         await game.Perform(Verb.Hand, "hung_lantern");
         Check(gs.HasFlag("took_hung_lantern") && gs.HasItem("lantern_lit"), "the lit lantern off its nail");
+        await ReloadCheckpoint("the cellar mid-escape, lantern in hand");
+        Check(game.Room?.Name == "MansionCellar" && gs.HasFlag("escaping") && gs.HasItem("lantern_lit") &&
+              game.Room?.FindHotspot("hung_lantern")?.Visible != true,
+            "a save in the cellar mid-escape restores the lantern in hand, off its nail");
         await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
         Check(!gs.HasFlag("cellar_fire") && gs.HasItem("lantern_lit"), "a closed barrel won't burn");
         await game.Perform(Verb.UseItem, "barrel", MicahKit.LighterId);
         await game.Perform(Verb.Hand, "barrel");
         Check(gs.HasFlag("barrel_open") && !gs.HasFlag("cellar_fire"), "the whiskey runs out over the floor");
+        await ReloadCheckpoint("the cellar mid-escape, whiskey running");
+        Check(game.Room?.Name == "MansionCellar" && gs.HasFlag("barrel_open") && gs.HasItem("lantern_lit") && !gs.HasFlag("cellar_fire"),
+            "a save with the whiskey running restores the open barrel and the lantern in hand");
         await Shot("mansion_cellar_whiskey");
         var fire = game.Perform(Verb.UseItem, "barrel", "lantern_lit");
         await Until(() => gs.HasFlag("cellar_fire"));
@@ -326,6 +338,10 @@ public partial class AutoPlay
         await fire;
         await WaitIdle(game);
         Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("lantern_lit"), "up out of the burning cellar, the lantern left in the fire");
+        await ReloadCheckpoint("the kitchen after the cellar fire");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("cellar_fire") && gs.HasFlag("escaping") &&
+              game.Room?.FindHotspot("eleanor")?.Visible == true,
+            "a save in the kitchen after the fire restores the fire and Eleanor waiting by the door");
         await game.Perform(Verb.Walk, "cellar_door");
         Check(game.Room?.Name == "MansionKitchen", "no going back down into the fire");
         _ = game.Perform(Verb.Walk, "back_door");

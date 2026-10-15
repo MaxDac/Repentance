@@ -89,6 +89,8 @@ public partial class Game
         Hud.SetHover(null, Hud.MousePos);
         if (Room == null) return;
         Room.World.RemoveChild(Player);
+        // detached now so a reload of the same room keeps its node name instead of getting "@Node2D@N"
+        _roomHost.RemoveChild(Room);
         Room.QueueFree();
         Room = null;
         _roomScene = "";
