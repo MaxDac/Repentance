@@ -17,7 +17,7 @@ public partial class HarringtonOffice : Room
         await Game.Run(async () =>
         {
             await Wait(0.5);
-            await Think("Theodore Harrington's office. The light's on and the chair's empty. Old money keeps its lamps burning even when it goes home.");
+            await Think("Theodore Harrington's office. The lamps are dark and the chair's empty. Old money turns its lights out when it goes home.");
             await Think("The sister said Harrington senior. Let's see what senior keeps in his desk.");
         });
     }

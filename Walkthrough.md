@@ -423,7 +423,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - Two new locations, office of Harringhton father and the road below, at night.
 - **Road behind the Harrington Building, at night**: a watchman guards the back door and the alley; a trash can,
-  a pile of wooden crates and a fire escape whose ladder is pulled up, leading to a lit third-floor window.
+  a pile of wooden crates and a fire escape whose ladder is pulled up, leading to Harrington's dark office window.
   - While the watchman is there, touching the crates or the fire escape gets Micah spotted: the watchman
     shoos him back down the alley, and the back door is locked anyway. Threatening him with the revolver or kicking him is refused.
   - Step 1: use the lighter on the trash can. It catches fire, the watchman shouts "Fire!" and

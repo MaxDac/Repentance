@@ -172,16 +172,61 @@ def _layout_desk(d, paste):
     d.line([(sx - 11, y - 25), (sx + 11, y - 25)], fill=hx("0e1e10"))
     d.ellipse([sx - 10, y - 26, sx + 10, y - 22], fill=hx("e8dcb0"))
     d.ellipse([sx - 3, y - 25, sx + 3, y - 21], fill=hx("fff4cc"))
-    # the paste pot at the end, brush standing in it
-    if paste:
-        d.ellipse([428, y - 3, 446, y + 1], fill=hx("5a3e22"))
+    # shears and a trimmed column beside the paste, always on the desk
+    d.polygon([(455, y - 4), (464, y - 5), (464, y - 2), (456, y - 1)], fill=hx("dcd4bc"), outline=hx("8a8270"))
+    for k in (457, 460):
+        d.line([(k, y - 3), (k + 2, y - 3)], fill=hx("6a6252"))
+    d.line([(457, y - 6), (464, y - 9)], fill=hx("b8b8b0"))
+    d.line([(457, y - 5), (464, y - 7)], fill=hx("7a7a72"))
+    d.ellipse([453, y - 8, 456, y - 5], outline=hx("2a2a24"))
+    d.ellipse([453, y - 5, 456, y - 2], outline=hx("2a2a24"))
+    _paste_pot(d, y, paste)
+
+
+def _paste_pot(d, y, taken):
+    """The paste pot at the end of the desk: a stoneware crock with its label, paste slopped over the rim, the brush."""
+    if taken:
+        # a damp ring where it stood, a skin of dried paste and a couple of drips
+        d.ellipse([429, y - 3, 445, y + 1], fill=hx("5a3e22"))
+        d.ellipse([431, y - 2, 443, y], fill=hx("6e5032"))
+        d.arc([429, y - 3, 445, y + 1], 200, 340, fill=hx("c8bea0"))
+        for px_, py_ in ((426, y - 2), (448, y - 1), (447, y - 3)):
+            d.point((px_, py_), fill=hx("d8d0b4"))
         return
-    d.rectangle([428, y - 14, 446, y], fill=hx("e8e4d8"), outline=hx("4a4a44"))
-    d.rectangle([428, y - 10, 446, y - 6], fill=hx("6a2a2a"))
-    d.line([(430, y - 9), (444, y - 9)], fill=hx("8a4a3a"))
-    d.ellipse([428, y - 17, 446, y - 11], fill=hx("f0ecdc"), outline=hx("4a4a44"))
-    d.line([(440, y - 14), (446, y - 28)], fill=hx("8a6a3a"), width=2)
-    d.rectangle([438, y - 16, 442, y - 13], fill=hx("c8c0a0"))
+    x0, x1 = 430, 444
+    top = y - 15
+    d.ellipse([x0 - 2, y - 3, x1 + 2, y + 1], fill=hx("3a2614"))
+    # glazed body, rounded shoulders, a light edge on the lamp side
+    d.rectangle([x0, top + 2, x1, y - 1], fill=hx("d8d0b8"), outline=hx("4a4a40"))
+    d.ellipse([x0, y - 3, x1, y], fill=hx("b8b098"), outline=hx("4a4a40"))
+    d.line([(x0 + 1, top + 3), (x0 + 1, y - 2)], fill=hx("f4f0e0"))
+    d.line([(x0 + 2, top + 3), (x0 + 2, y - 3)], fill=hx("e8e2cc"))
+    d.line([(x1 - 1, top + 3), (x1 - 1, y - 2)], fill=hx("9a9280"))
+    d.line([(x1 - 2, top + 4), (x1 - 2, y - 3)], fill=hx("b0a890"))
+    # the paper label: a red band round the crock, a cream panel with a line of black lettering
+    d.rectangle([x0 + 1, top + 6, x1 - 1, top + 11], fill=hx("8a2a24"))
+    d.line([(x0 + 1, top + 6), (x1 - 1, top + 6)], fill=hx("b04a3a"))
+    d.rectangle([x0 + 4, top + 7, x1 - 4, top + 10], fill=hx("e8dcb8"))
+    d.line([(x0 + 5, top + 8), (x1 - 5, top + 8)], fill=hx("2a1a14"))
+    d.line([(x0 + 1, top + 12), (x1 - 1, top + 12)], fill=hx("4a1a14"))
+    # rim, the paste heaped inside with a wet sheen, slopped over and running down the side
+    d.ellipse([x0 - 1, top - 1, x1 + 1, top + 4], fill=hx("e4dcc4"), outline=hx("4a4a40"))
+    d.ellipse([x0 + 1, top, x1 - 1, top + 3], fill=hx("f4eedc"))
+    d.ellipse([x0 + 3, top - 1, x0 + 9, top + 2], fill=hx("fffaf0"))
+    d.point((x0 + 4, top), fill=hx("ffffff"))
+    for dx, ln in ((2, 6), (12, 3)):
+        d.line([(x0 + dx, top + 3), (x0 + dx, top + 3 + ln)], fill=hx("f8f2e0"))
+        d.point((x0 + dx, top + 4 + ln), fill=hx("fffaf0"))
+    # the brush stood in it: bristles in the paste, a tin ferrule, a long varnished handle tipped to the wall
+    d.line([(437, top + 1), (438, top - 2)], fill=hx("c8b890"), width=2)
+    d.rectangle([437, top - 6, 440, top - 2], fill=hx("a8a8a0"), outline=hx("4a4a44"))
+    d.point((438, top - 5), fill=hx("e8e8e0"))
+    d.line([(439, top - 6), (446, top - 16)], fill=hx("8a5a2a"), width=2)
+    d.line([(438, top - 7), (445, top - 16)], fill=hx("c08a4a"))
+    d.point((446, top - 17), fill=hx("3a2614"))
+    # the crock's lid set down beside it, upside down, a glob of paste on it
+    d.ellipse([445, y - 3, 452, y], fill=hx("c8c0a8"), outline=hx("4a4a40"))
+    d.point((448, y - 2), fill=hx("f4eedc"))
 
 
 def _ceiling_lamp(d):
@@ -202,6 +247,93 @@ def _ceiling_lamp(d):
     d.ellipse([cx - 19, 35, cx + 20, 41], fill=hx("e8dcb0"), outline=hx("8a7a50"))
     d.ellipse([cx - 5, 35, cx + 6, 43], fill=hx("fff4cc"), outline=hx("e0c070"))
     d.point((cx - 2, 37), fill=hx("ffffff"))
+
+
+def _carton(d, rnd, x0, y0, x1, y1, col, label=True, handle=True, string=False):
+    """A cardboard archive carton: overhanging lid, lit top edge, finger hole, an inked label, scuffed corners."""
+    c = hx(col)
+    d.rectangle([x0, y0 + 4, x1, y1], fill=c, outline=hx("2a1e0e"))
+    d.line([(x0 + 1, y0 + 5), (x0 + 1, y1 - 1)], fill=mul(c, 1.18))
+    d.line([(x1 - 1, y0 + 5), (x1 - 1, y1 - 1)], fill=mul(c, 0.72))
+    d.line([(x0 + 1, y1 - 1), (x1 - 1, y1 - 1)], fill=mul(c, 0.78))
+    # corrugated seams down the front, faint
+    for sx in range(x0 + 5, x1 - 2, 6):
+        d.line([(sx, y0 + 7), (sx, y1 - 2)], fill=mul(c, 0.9))
+    # the lid: a lip all round, lighter on top where the lamp catches it
+    d.rectangle([x0 - 1, y0, x1 + 1, y0 + 4], fill=mul(c, 1.1), outline=hx("2a1e0e"))
+    d.line([(x0, y0 + 1), (x1, y0 + 1)], fill=mul(c, 1.38))
+    d.line([(x0, y0 + 5), (x1, y0 + 5)], fill=mul(c, 0.55))
+    for cx_, cy_ in ((x0, y0 + 1), (x1, y0 + 1), (x0, y1 - 1), (x1, y1 - 1)):
+        d.point((cx_, cy_), fill=mul(c, 1.5))
+    # a torn corner showing the fluting, and scuffs
+    d.polygon([(x1 - 4, y1), (x1, y1), (x1, y1 - 4)], fill=mul(c, 0.6))
+    d.line([(x1 - 3, y1), (x1, y1 - 3)], fill=mul(c, 1.3))
+    for _ in range((x1 - x0) // 4):
+        d.point((rnd.randint(x0 + 2, x1 - 2), rnd.randint(y0 + 6, y1 - 2)), fill=mul(c, rnd.choice((0.82, 1.15))))
+    if handle:
+        hx0 = (x0 + x1) // 2 + 4
+        d.rounded_rectangle([hx0 - 3, y0 + 7, hx0 + 3, y0 + 9], 1, fill=hx("140e06"))
+        d.line([(hx0 - 2, y0 + 10), (hx0 + 2, y0 + 10)], fill=mul(c, 1.25))
+    if label:
+        lx, ly = x0 + 3, y0 + 7
+        d.rectangle([lx, ly, lx + 9, ly + 7], fill=hx("e4dcc0"), outline=hx("6a6050"))
+        d.line([(lx + 2, ly + 2), (lx + 7, ly + 2)], fill=hx("1a1a2a"))
+        d.line([(lx + 2, ly + 4), (lx + 6, ly + 4)], fill=hx("4a4a5a"))
+        d.point((lx + 7, ly + 5), fill=hx("8a1a1a"))
+    if string:
+        sx = (x0 + x1) // 2 - 3
+        d.line([(sx, y0), (sx, y1)], fill=hx("d8c89a"))
+        d.line([(x0, (y0 + y1) // 2 + 3), (x1, (y0 + y1) // 2 + 3)], fill=hx("d8c89a"))
+        d.ellipse([sx - 2, y0 - 2, sx + 2, y0 + 1], outline=hx("c8b880"))
+        d.line([(sx + 1, y0 + 1), (sx + 3, y0 + 4)], fill=hx("c8b880"))
+
+
+def _bundle(d, x0, y0, x1, layers, rnd):
+    """Bound back numbers stacked flat: folded spines, ragged page edges, twine round the lot."""
+    y = y0
+    for i in range(layers):
+        h = 3 + (i % 2)
+        dx = rnd.randint(-1, 1)
+        d.rectangle([x0 + dx, y, x1 + dx, y + h], fill=hx(("d8ccaa", "c8bc98", "e0d6b8")[i % 3]),
+                    outline=hx("6a6050"))
+        d.line([(x0 + dx + 1, y + 1), (x1 + dx - 1, y + 1)], fill=hx("f0e8d0"))
+        for px_ in range(x0 + dx + 2, x1 + dx - 1, 3):
+            d.point((px_, y + h - 1), fill=hx("9a8e70"))
+        d.line([(x0 + dx, y), (x0 + dx, y + h)], fill=hx("8a7a58"))
+        y += h + 1
+    tx = (x0 + x1) // 2 + 2
+    d.line([(tx, y0 - 1), (tx, y - 1)], fill=hx("b89a5a"))
+    d.line([(tx + 1, y0 - 1), (tx + 1, y - 1)], fill=hx("6a5430"))
+    d.line([(tx - 2, y0 - 2), (tx + 4, y0 - 2)], fill=hx("b89a5a"))
+
+
+def _archive_stacks(d, img):
+    rnd = random.Random(1311)
+    # left cabinet: two cartons of back numbers, the top one tied and set a little askew
+    _carton(d, rnd, 94, 74, 128, 92, "8a7048", string=False)
+    _carton(d, rnd, 99, 60, 124, 74, "a08a5c", label=True, handle=False, string=True)
+    # middle cabinet: a pile of bound editions under a dusty ledger
+    _bundle(d, 136, 80, 166, 3, rnd)
+    d.rectangle([139, 75, 163, 79], fill=hx("3a2a4a"), outline=hx("140a1a"))
+    d.line([(140, 76), (162, 76)], fill=hx("5a4a6a"))
+    d.rectangle([139, 75, 142, 79], fill=hx("6a2a1a"))
+    d.line([(144, 78), (162, 78)], fill=hx("d8ccaa"))
+    # right cabinet: an open carton, its flaps up, folders and loose clippings standing in it
+    x0, y0, x1, y1 = 176, 74, 208, 92
+    for fx, col in ((179, "e0d4b0"), (184, "c8a878"), (189, "d8ccaa"), (194, "b8a070"), (199, "e8dcc0")):
+        top = y0 - 4 + rnd.randint(0, 4)
+        d.rectangle([fx, top, fx + 5, y0 + 6], fill=hx(col), outline=hx("6a6050"))
+        d.line([(fx + 1, top + 1), (fx + 3, top + 1)], fill=hx("2a2a2a") if fx % 2 else hx("8a1a1a"))
+    _carton(d, rnd, x0, y0 + 4, x1, y1, "9a7e50", label=False, handle=True)
+    d.polygon([(x0 - 1, y0 + 4), (x0 - 6, y0 - 4), (x0 - 4, y0 - 5), (x0 + 3, y0 + 4)], fill=hx("8a7048"),
+              outline=hx("2a1e0e"))
+    d.polygon([(x1 + 1, y0 + 4), (x1 + 5, y0 - 3), (x1 + 3, y0 - 4), (x1 - 3, y0 + 4)], fill=hx("b0965e"),
+              outline=hx("2a1e0e"))
+    d.rectangle([x0 + 4, y0 + 10, x0 + 13, y0 + 15], fill=hx("e4dcc0"), outline=hx("6a6050"))
+    d.line([(x0 + 6, y0 + 12), (x0 + 11, y0 + 12)], fill=hx("1a1a2a"))
+    # dust along the cabinet tops
+    for x in range(90, 214, 3):
+        d.point((x, 92), fill=hx("6a6a58") if x % 2 else hx("56564a"))
 
 
 def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
@@ -240,11 +372,8 @@ def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
         if letter != "H":
             _drawer(d, img, x, y, letter, False)
     _drawer(d, img, CAB_X[1], CAB_Y[2], "H", drawer)
-    # a box of old editions stacked on the cabinets
-    d.rectangle([96, 76, 126, 92], fill=hx("8a7450"), outline=hx("3a2a14"))
-    d.rectangle([178, 82, 206, 92], fill=hx("c8bc98"), outline=hx("5a5040"))
-    for y in (85, 88):
-        d.line([(180, y), (204, y)], fill=hx("6a6050"))
+    # archive boxes and bound editions stacked on the cabinets
+    _archive_stacks(d, img)
     _loop_map(d, img, pin)
     _spike_stand(d, spike)
     _layout_desk(d, paste)
@@ -711,6 +840,50 @@ def _inner_door(d, img, gold, gold_d, door):
     d.rectangle([x0 - 4, y1 - 1, x1 + 4, y1 + 1], fill=gold, outline=GOLD_DK)
 
 
+def _vest_sconce(d, img, sx, oy=8):
+    """A gilt wall sconce: an oval backplate, a scrolled arm, a drip cup and a frosted tulip shade with its bulb lit."""
+    # glow on the damask behind it first, so the brass reads on top
+    light(img, "ellipse", [sx - 34, 36 + oy, sx + 34, 110 + oy], hx("e0a050"), 0.2, 14)
+    light(img, "ellipse", [sx - 12, 44 + oy, sx + 12, 58 + oy], hx("ffd890"), 0.18, 5)
+    # backplate: an oval with a beaded rim and a boss in the middle
+    d.ellipse([sx - 4, 72 + oy, sx + 4, 92 + oy], fill=GOLD_D, outline=GOLD_DK)
+    d.ellipse([sx - 3, 73 + oy, sx + 3, 91 + oy], outline=GOLD)
+    d.line([(sx - 2, 75 + oy), (sx - 2, 89 + oy)], fill=GOLD_L)
+    for by in range(75 + oy, 91 + oy, 3):
+        d.point((sx + 3, by), fill=GOLD_DK)
+    d.ellipse([sx - 2, 80 + oy, sx + 2, 84 + oy], fill=GOLD, outline=GOLD_DK)
+    d.point((sx - 1, 81 + oy), fill=hx("fff0c0"))
+    # a finial and a little tassel dropping below the plate
+    d.polygon([(sx - 2, 92 + oy), (sx + 2, 92 + oy), (sx, 96 + oy)], fill=GOLD_D)
+    d.line([(sx, 96 + oy), (sx, 98 + oy)], fill=GOLD_D)
+    d.polygon([(sx - 1, 98 + oy), (sx + 1, 98 + oy), (sx + 2, 102 + oy), (sx - 2, 102 + oy)], fill=hx("8a1a24"))
+    d.line([(sx, 99 + oy), (sx, 102 + oy)], fill=hx("c84050"))
+    # the scrolled arm, curling out of the boss and up to the cup
+    d.arc([sx - 1, 76 + oy, sx + 7, 86 + oy], 270, 90, fill=GOLD)
+    d.arc([sx, 77 + oy, sx + 6, 85 + oy], 270, 90, fill=GOLD_DK)
+    d.line([(sx + 3, 76 + oy), (sx + 1, 72 + oy), (sx, 69 + oy)], fill=GOLD)
+    d.point((sx + 2, 74 + oy), fill=GOLD_L)
+    d.ellipse([sx + 5, 84 + oy, sx + 7, 86 + oy], fill=GOLD_D)
+    # drip cup / bobeche
+    d.ellipse([sx - 5, 66 + oy, sx + 5, 70 + oy], fill=GOLD_D, outline=GOLD_DK)
+    d.line([(sx - 4, 67 + oy), (sx + 3, 67 + oy)], fill=GOLD_L)
+    for px_ in range(sx - 4, sx + 5, 2):
+        d.point((px_, 70 + oy), fill=GOLD)
+    # frosted tulip shade, scalloped at the lip, the bulb burning through it
+    shade = [(sx - 3, 66 + oy), (sx + 3, 66 + oy), (sx + 5, 62 + oy), (sx + 6, 57 + oy), (sx + 5, 54 + oy), (sx + 3, 55 + oy), (sx + 1, 53 + oy),
+             (sx - 1, 53 + oy), (sx - 3, 55 + oy), (sx - 5, 54 + oy), (sx - 6, 57 + oy), (sx - 5, 62 + oy)]
+    d.polygon(shade, fill=hx("c8843a"), outline=hx("5a2e10"))
+    for rx in (sx - 3, sx + 2):
+        d.line([(rx, 55 + oy), (rx + (1 if rx > sx else -1), 64 + oy)], fill=hx("9a5a24"))
+    d.line([(sx - 4, 62 + oy), (sx - 5, 57 + oy)], fill=hx("f0c070"))
+    d.line([(sx + 4, 62 + oy), (sx + 5, 57 + oy)], fill=hx("7a3e16"))
+    d.ellipse([sx - 1, 59 + oy, sx + 1, 63 + oy], fill=hx("fff8e0"))
+    d.point((sx, 60 + oy), fill=hx("ffffff"))
+    for lx in (sx - 5, sx - 1, sx + 3):
+        d.point((lx, 55 + oy), fill=hx("f8d890"))
+    light(img, "ellipse", [sx - 2, 58 + oy, sx + 2, 64 + oy], hx("fff2c8"), 0.3, 1)
+
+
 def paint_vestibule(wax=False, door=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -760,9 +933,7 @@ def paint_vestibule(wax=False, door=False):
     _inner_door(d, img, gold, gold_d, door)
     # sconces
     for sx in (206, 310, 464):
-        d.rectangle([sx - 2, 70, sx + 2, 80], fill=gold)
-        d.polygon([(sx - 5, 62), (sx + 5, 62), (sx + 3, 70), (sx - 3, 70)], fill=hx("f0d088"))
-        light(img, "ellipse", [sx - 34, 36, sx + 34, 110], hx("e0a050"), 0.2, 14)
+        _vest_sconce(d, img, sx)
     shadow(img, "ellipse", [214, 168, 302, 196], 0.3, 6)
     vignette(img, 0.6, (16, 6, 12), 40)
     return img

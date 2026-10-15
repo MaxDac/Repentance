@@ -23,7 +23,7 @@ def wall_mirror(img, box):
     d.line([(x0 + 2, y1 - 2), (x1 - 2, y1 - 2)], fill=hx("50504a"))
 
 
-def shell(img):
+def shell(img, night=False):
     d = ImageDraw.Draw(img)
     vgrad(img, (0, 0, W - 1, FLOOR), hx("9a9572"), hx("70694f"))
     for x in range(0, W, 10):
@@ -40,8 +40,9 @@ def shell(img):
         d.rectangle([x + 3, 104, x + 28, FLOOR - 8], outline=hx("443022"))
         d.line([(x + 4, 105), (x + 27, 105)], fill=hx("6e5740"))
 
-    wall_mirror(img, (126, 16, 160, 47))
-    wall_mirror(img, (210, 53, 254, 86))
+    if not night:
+        wall_mirror(img, (126, 16, 160, 47))
+        wall_mirror(img, (210, 53, 254, 86))
     for x, y in ((184, 24), (278, 65), (92, 80)):
         d.line([(x, y), (x + 3, y + 5), (x + 1, y + 9)], fill=hx("a79d79"))
 
@@ -140,7 +141,7 @@ def bottle(img):
     d.rectangle([bx - 1, by - 14, bx + 1, by - 13], fill=hx("2a1a10"))
 
 
-def dresser(img):
+def dresser(img, night=False):
     X0, X1, Z0, Z1 = 410, 466, 2, 22
     R.box(img, X0, X1, 0, 42, Z0, Z1, hx("4c3a2a"), top=hx("6a5038"), side=hx("2e2218"))
     for i, y in enumerate((30, 17, 4)):
@@ -150,6 +151,8 @@ def dresser(img):
         ImageDraw.Draw(img).rectangle([px - 3, py, px + 3, py + 1], fill=hx("b28a46"))
     a, b = R.P(X0, 42, Z0), R.P(X1, 0, Z1)
     noise(img, (int(a[0]), int(a[1]), int(b[0]), int(b[1])), 4, 410)
+    if night:
+        return
     # a clouded mirror hung over it
     d = ImageDraw.Draw(img)
     d.rectangle([420, 54, 456, 88], fill=WOOD_D)
@@ -169,8 +172,14 @@ def bulb(img):
     light(img, "ellipse", [210, -6, 278, 74], hx("b6b078"), 0.08, 16)
 
 
-def details(img):
+def details(img, night=False):
     d = ImageDraw.Draw(img)
+    if night:
+        # At night the wall keeps only two pieces: the lake painting over the bed and the mirror by the chair.
+        lake_painting(img)
+        night_mirror(img)
+        grime(d)
+        return
     # Motel print: a plain rectangular frame
     d.rectangle([77, 33, 119, 63], fill=hx("6c5237"))
     d.rectangle([81, 36, 115, 59], fill=hx("cabf9f"))
@@ -187,6 +196,366 @@ def details(img):
     d.rectangle([206, 30, 228, 52], fill=hx("efe6d0"), outline=hx("6a5038"))
     d.line([(206, 36), (228, 36)], fill=hx("a04040"))
     d.text((210, 38), "27", fill=hx("2a2018"))
+    grime(d)
+
+
+PAINTING = (60, 20, 134, 68)  # outer frame of the lake painting over the bed (night)
+MIRROR = (208, 52, 252, 90)  # outer frame of the mirror over the chair (night)
+
+
+def _gilt_frame(img, box, depth, lit, mid, dark, seed, from_below=False):
+    """A carved moulding: graded bevel, a bead run along the middle and rosettes at the corners.
+
+    The bevel catches light on its top and left faces, or on its bottom and right faces when lit from below."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = box
+    near, far = (dark, lit) if from_below else (lit, dark)
+    for i in range(depth):
+        t = i / max(1, depth - 1)
+        top = mix(near, mid, t)
+        bot = mix(far, mid, t)
+        d.line([(x0 + i, y0 + i), (x1 - i, y0 + i)], fill=top)
+        d.line([(x0 + i, y0 + i), (x0 + i, y1 - i)], fill=top)
+        d.line([(x0 + i, y1 - i), (x1 - i, y1 - i)], fill=bot)
+        d.line([(x1 - i, y0 + i), (x1 - i, y1 - i)], fill=bot)
+    d.rectangle([x0, y0, x1, y1], outline=mul(dark, 0.55))
+    d.rectangle([x0 + depth, y0 + depth, x1 - depth, y1 - depth], outline=mul(dark, 0.6))
+    m = depth // 2
+    bead = mix(lit, (255, 240, 190), 0.4)
+    bead_near, bead_far = (mid, bead) if from_below else (bead, mid)
+    for x in range(x0 + depth + 1, x1 - depth, 3):
+        d.point((x, y0 + m), fill=bead_near)
+        d.point((x, y1 - m), fill=bead_far)
+    for y in range(y0 + depth + 1, y1 - depth, 3):
+        d.point((x0 + m, y), fill=bead_near)
+        d.point((x1 - m, y), fill=bead_far)
+    for cx, cy in ((x0 + m, y0 + m), (x1 - m, y0 + m), (x0 + m, y1 - m), (x1 - m, y1 - m)):
+        d.rectangle([cx - 2, cy - 2, cx + 2, cy + 2], fill=dark)
+        d.rectangle([cx - 1, cy - 1, cx + 1, cy + 1], fill=lit)
+        d.point((cx, cy), fill=mul(dark, 0.6))
+        for ox, oy in ((-2, 0), (2, 0), (0, -2), (0, 2)):
+            d.point((cx + ox, cy + oy), fill=mid)
+
+
+def _painting_ornament(d, box, lit, mid, dark):
+    """Carved gilt ornament on the lake painting's frame: a shell crest, acanthus sprays and an egg-and-dart run.
+
+    Lit from the bedside lamp below and to the right, so the lower and right-facing faces catch the light."""
+    x0, y0, x1, y1 = box
+    nx = (x0 + x1) // 2
+    shine = mix(lit, (255, 240, 200), 0.45)
+    # egg-and-dart along the outer edge of the moulding
+    for x in range(x0 + 9, x1 - 8, 4):
+        d.point((x, y0 + 1), fill=mid)
+        d.point((x + 1, y0 + 1), fill=mul(dark, 0.8))
+        d.point((x, y1 - 1), fill=shine)
+        d.point((x + 1, y1 - 1), fill=mid)
+    for y in range(y0 + 9, y1 - 8, 4):
+        d.point((x0 + 1, y), fill=mid)
+        d.point((x0 + 1, y + 1), fill=mul(dark, 0.8))
+        d.point((x1 - 1, y), fill=shine)
+        d.point((x1 - 1, y + 1), fill=mid)
+    # acanthus sprays curling out of each corner rosette along both rails
+    m = 3
+    for cx, cy, sx, sy in ((x0 + m, y0 + m, 1, 1), (x1 - m, y0 + m, -1, 1), (x0 + m, y1 - m, 1, -1), (x1 - m, y1 - m, -1, -1)):
+        leaf = shine if (sx < 0 or sy < 0) else mid
+        d.line([(cx + 3 * sx, cy), (cx + 7 * sx, cy)], fill=leaf)
+        d.point((cx + 5 * sx, cy - 1), fill=leaf)
+        d.point((cx + 6 * sx, cy + 1), fill=mul(dark, 0.9))
+        d.line([(cx, cy + 3 * sy), (cx, cy + 6 * sy)], fill=leaf)
+        d.point((cx - 1, cy + 5 * sy), fill=leaf)
+        d.point((cx + 1, cy + 5 * sy), fill=mul(dark, 0.9))
+    # a scallop-shell cartouche standing proud of the top rail, flanked by two scrolls
+    d.pieslice([nx - 7, y0 - 6, nx + 7, y0 + 8], 180, 360, fill=mid, outline=mul(dark, 0.6))
+    for a in range(-75, 76, 25):
+        ang = math.radians(a - 90)
+        end = (nx + round(6 * math.cos(ang)), y0 + 1 + round(6 * math.sin(ang)))
+        d.line([(nx, y0 + 1), end], fill=dark if a < 0 else mix(mid, lit, 0.6))
+    d.line([(nx - 6, y0 + 1), (nx + 6, y0 + 1)], fill=lit)
+    d.point((nx, y0), fill=shine)
+    for sx in (nx - 11, nx + 8):
+        d.ellipse([sx, y0 - 2, sx + 3, y0 + 1], fill=mid, outline=mul(dark, 0.7))
+        d.point((sx + 2, y0), fill=shine)
+    # a pendant leaf hanging under the bottom rail, catching the lamp
+    d.polygon([(nx - 3, y1), (nx + 3, y1), (nx, y1 + 3)], fill=lit, outline=mid)
+    d.point((nx + 1, y1 + 1), fill=shine)
+
+
+def lake_painting(img, wall=True):
+    """An oil of a mountain lake at sundown in a gilt frame: the one thing in the room someone chose."""
+    import random
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = PAINTING
+    nx = (x0 + x1) // 2
+    if wall:
+        # The bedside lamp is below and to the right, so the frame throws its shadow up and to the left.
+        shadow(img, "rect", [x0 - 5, y0 - 6, x1 - 2, y1 - 3], 0.78, 2, hx("0c0a10"))
+        shadow(img, "ellipse", [nx - 12, y0 - 12, nx + 4, y0 + 2], 0.6, 2, hx("0c0a10"))
+        # hanging wire from a nail
+        d.line([(x0 + 14, y0 + 2), (nx, y0 - 9), (x1 - 14, y0 + 2)], fill=hx("4a4232"))
+        d.rectangle([nx - 1, y0 - 10, nx + 1, y0 - 9], fill=hx("2a2018"))
+    lit, mid, dark = hx("e0b860"), hx("a87c34"), hx("5a3a16")
+    _gilt_frame(img, PAINTING, 6, lit, mid, dark, 61, from_below=True)
+    _painting_ornament(d, PAINTING, lit, mid, dark)
+    # cream linen liner with a gilt sight edge; the liner's top and left bevels fall into shadow
+    lx0, ly0, lx1, ly1 = x0 + 6, y0 + 6, x1 - 6, y1 - 6
+    d.rectangle([lx0, ly0, lx1, ly1], fill=hx("d8cca8"))
+    d.line([(lx0, ly0), (lx1, ly0)], fill=hx("a09474"))
+    d.line([(lx0, ly0), (lx0, ly1)], fill=hx("a09474"))
+    d.line([(lx0 + 1, ly1), (lx1, ly1)], fill=hx("f0e6c8"))
+    d.line([(lx1, ly0 + 1), (lx1, ly1)], fill=hx("f0e6c8"))
+    cx0, cy0, cx1, cy1 = lx0 + 2, ly0 + 2, lx1 - 2, ly1 - 2
+    d.rectangle([cx0 - 1, cy0 - 1, cx1 + 1, cy1 + 1], outline=hx("c09040"))
+    px = img.load()
+
+    def put(x, y, col, k=1.0):
+        if cx0 <= x <= cx1 and cy0 <= y <= cy1:
+            old = px[x, y]
+            px[x, y] = mix(old[:3], col[:3], k) + tuple(old[3:])
+
+    # the canvas: sky, two mountain ranges, a lake, pines, a cabin and a rowboat
+    hz = cy0 + 15  # shoreline
+    vgrad(img, (cx0, cy0, cx1, cy0 + 8), hx("3e5cb8"), hx("b080a0"))
+    vgrad(img, (cx0, cy0 + 8, cx1, hz), hx("b080a0"), hx("ffa050"))
+    sx, sy = cx0 + 37, hz - 5
+    for y in range(cy0, hz + 1):
+        for x in range(cx0, cx1 + 1):
+            k = max(0.0, 1 - math.hypot(x - sx, (y - sy) * 1.4) / 15) ** 2
+            put(x, y, hx("ffd890"), 0.75 * k)
+    # clouds: violet bodies with undersides lit orange by the low sun
+    for (qx, qy, l) in ((cx0 + 2, cy0 + 2, 11), (cx0 + 17, cy0 + 4, 13), (cx0 + 42, cy0 + 1, 10), (cx0 + 6, cy0 + 8, 7)):
+        d.line([(qx + 2, qy), (qx + l - 3, qy)], fill=hx("8a6a9c"))
+        d.line([(qx, qy + 1), (qx + l, qy + 1)], fill=hx("b07a9c"))
+        d.line([(qx + 1, qy + 2), (qx + l - 1, qy + 2)], fill=hx("ffb07a"))
+        d.point((qx + l - 1, qy + 1), fill=hx("ffd0a0"))
+        d.point((qx + 3, qy - 1), fill=hx("9a7aa8"))
+    d.ellipse([sx - 3, sy - 3, sx + 3, sy + 3], fill=hx("ffe8a8"))
+    d.point((sx - 1, sy - 1), fill=hx("fffae0"))
+    # a streak of cloud drawn across the sun
+    d.line([(sx - 8, sy + 1), (sx + 7, sy + 1)], fill=hx("e08a6a"))
+    d.line([(sx - 5, sy + 2), (sx + 5, sy + 2)], fill=hx("ffc888"))
+    for (bx, by) in ((cx0 + 26, cy0 + 10), (cx0 + 30, cy0 + 8), (cx0 + 22, cy0 + 12)):
+        d.point((bx - 1, by - 1), fill=hx("2a2030"))
+        d.point((bx, by), fill=hx("2a2030"))
+        d.point((bx + 1, by - 1), fill=hx("2a2030"))
+    far = [(cx0, hz - 4), (cx0 + 6, hz - 9), (cx0 + 11, hz - 6), (cx0 + 19, hz - 13), (cx0 + 26, hz - 7),
+           (cx0 + 31, hz - 9), (cx0 + 37, hz - 5), (cx0 + 45, hz - 11), (cx1, hz - 6), (cx1, hz), (cx0, hz)]
+    d.polygon(far, fill=hx("6a5a98"))
+    for (qx, qy) in ((cx0 + 6, hz - 9), (cx0 + 19, hz - 13), (cx0 + 31, hz - 9), (cx0 + 45, hz - 11)):
+        # sunlit right flanks, shadowed gullies on the left
+        d.polygon([(qx, qy), (qx + 4, qy + 4), (qx + 1, qy + 6)], fill=hx("a07aa0"))
+        d.line([(qx - 1, qy + 2), (qx - 3, qy + 6)], fill=hx("4e4278"))
+        d.point((qx + 2, qy + 5), fill=hx("c890a8"))
+    for (qx, qy) in ((cx0 + 19, hz - 13), (cx0 + 45, hz - 11), (cx0 + 6, hz - 9)):
+        d.polygon([(qx - 3, qy + 3), (qx, qy), (qx + 3, qy + 3), (qx + 1, qy + 2), (qx - 1, qy + 3)], fill=hx("fff4f0"))
+        d.point((qx + 1, qy + 1), fill=hx("ffd8c0"))
+        d.point((qx - 2, qy + 3), fill=hx("b0a0c8"))
+    near = [(cx0, hz - 2), (cx0 + 8, hz - 5), (cx0 + 15, hz - 3), (cx0 + 30, hz - 1), (cx0 + 40, hz - 4),
+            (cx1, hz - 2), (cx1, hz), (cx0, hz)]
+    d.polygon(near, fill=hx("2e5a36"))
+    for x in range(cx0 + 1, cx1, 2):
+        d.point((x, hz - 1 - (x % 3 == 0)), fill=hx("1e4026"))
+    d.line([(cx0 + 8, hz - 5), (cx0 + 15, hz - 3)], fill=hx("4a7a46"))
+    d.line([(cx0 + 40, hz - 4), (cx1, hz - 2)], fill=hx("5a8048"))
+
+    def pine(qx, base, h, col, lit):
+        d.line([(qx, base), (qx, base - h)], fill=col)
+        for k in range(h - 1):
+            w = (k * 2) // 5 + (1 if (h - k) % 3 == 0 else 0)
+            y = base - h + 1 + k
+            d.line([(max(cx0, qx - w), y), (min(cx1, qx + w), y)], fill=col)
+            if qx + w <= cx1:
+                d.point((qx + w, y), fill=lit)
+            if qx - w >= cx0 and w > 0:
+                d.point((qx - w, y), fill=mul(col, 0.7))
+        d.point((qx, base + 1), fill=hx("3a2416"))
+
+    # the far shore: pines and a log cabin with a lit window and smoke from the chimney
+    for qx, h in ((cx1 - 1, 13), (cx1 - 4, 10), (cx1 - 18, 7), (cx1 - 20, 5)):
+        pine(qx, hz, h, hx("183020"), hx("8a7a3a"))
+    kx = cx1 - 15
+    d.rectangle([kx, hz - 4, kx + 7, hz], fill=hx("6a4028"))
+    for yy in (hz - 3, hz - 1):
+        d.line([(kx, yy), (kx + 7, yy)], fill=hx("4a2a18"))
+    d.line([(kx + 7, hz - 4), (kx + 7, hz)], fill=hx("a06a3a"))
+    d.polygon([(kx - 1, hz - 4), (kx + 3, hz - 8), (kx + 4, hz - 8), (kx + 8, hz - 4)], fill=hx("8a2a1c"))
+    d.line([(kx + 4, hz - 8), (kx + 8, hz - 4)], fill=hx("d8603a"))
+    d.line([(kx - 1, hz - 4), (kx + 8, hz - 4)], fill=hx("4a1810"))
+    d.line([(kx + 6, hz - 8), (kx + 6, hz - 6)], fill=hx("5a4a40"))
+    for i, (qx, qy) in enumerate(((kx + 6, hz - 9), (kx + 7, hz - 10), (kx + 7, hz - 11), (kx + 8, hz - 12))):
+        put(qx, qy, hx("d8b0b0"), 0.8 - 0.15 * i)
+    d.rectangle([kx + 1, hz - 3, kx + 2, hz - 2], fill=hx("ffd070"))
+    d.point((kx + 1, hz - 3), fill=hx("fff0b0"))
+    d.rectangle([kx + 4, hz - 3, kx + 5, hz], fill=hx("2a1810"))
+    # the lake mirrors everything above the shoreline, broken into ripples and sinking into the water's blue
+    rnd = random.Random(65)
+    src = {(x, y): px[x, y][:3] for x in range(cx0, cx1 + 1) for y in range(cy0, hz + 1)}
+    for i, y in enumerate(range(hz + 1, cy1 + 1)):
+        water = mix(hx("8090c8"), hx("24406c"), i / max(1, cy1 - hz - 1))
+        ry = hz - i
+        shift = rnd.choice((-1, 0, 0, 1)) if i > 1 else 0
+        k = min(0.92, 0.42 + 0.035 * i + (0.22 if i % 3 == 2 else 0))
+        for x in range(cx0, cx1 + 1):
+            if ry < cy0:
+                c = water
+            else:
+                c = mix(mul(src[(min(cx1, max(cx0, x + shift)), ry)], 0.8), water, k)
+            px[x, y] = c + tuple(px[x, y][3:])
+    # the sun's path across the water, and its glitter on the ripples
+    for i, y in enumerate(range(hz + 2, cy1 - 1, 2)):
+        w = 5 - i
+        if w > 0:
+            d.line([(sx - w, y), (sx + 1 + w, y)], fill=hx("ffd890"))
+            d.point((sx + w + 3, y + 1), fill=hx("e0a070"))
+    for _ in range(14):
+        qx, qy = rnd.randint(cx0 + 16, cx1 - 2), rnd.randint(hz + 3, cy1 - 2)
+        d.line([(qx, qy), (qx + rnd.randint(1, 3), qy)], fill=hx("a8b0e0") if rnd.random() < 0.6 else hx("e8b890"))
+    # the cabin window trembling in the lake, and a little jetty below the cabin
+    for i, y in enumerate(range(hz + 2, hz + 11, 2)):
+        put(kx + 1 + (i % 2), y, hx("ffd070"), 0.85 - 0.12 * i)
+    d.line([(kx - 5, hz + 2), (kx + 3, hz + 1)], fill=hx("7a5030"))
+    d.line([(kx - 5, hz + 3), (kx + 3, hz + 2)], fill=hx("3a2416"))
+    for qx in (kx - 4, kx - 1, kx + 2):
+        d.point((qx, hz + 4), fill=hx("2a1a10"))
+    # a dark wooded bank in the left foreground, its edge warmed by the sunset; mossy rocks at the waterline
+    d.polygon([(cx0, hz + 2), (cx0 + 6, hz + 3), (cx0 + 12, hz + 9), (cx0 + 15, cy1), (cx0, cy1)], fill=hx("1e3420"))
+    d.line([(cx0 + 6, hz + 3), (cx0 + 12, hz + 9), (cx0 + 15, cy1)], fill=hx("4a5a2a"))
+    for (qx, qy) in ((cx0 + 11, hz + 9), (cx0 + 13, cy1 - 3)):
+        d.ellipse([qx - 1, qy - 1, qx + 2, qy + 1], fill=hx("5a5a62"))
+        d.point((qx + 1, qy - 1), fill=hx("a8a0a0"))
+        d.line([(qx - 1, qy + 2), (qx + 2, qy + 2)], fill=hx("2a3a58"))
+    for qx, base, h in ((cx0 + 3, cy1 - 3, 22), (cx0 + 8, hz + 7, 15), (cx0 + 12, hz + 10, 9)):
+        pine(qx, base, h, hx("14281a"), hx("5a7a3a"))
+    # a white birch leaning out over the water
+    d.line([(cx0 + 14, cy1 - 2), (cx0 + 15, hz + 3)], fill=hx("d8d0c0"))
+    for qy in (hz + 5, hz + 8, hz + 12):
+        d.point((cx0 + 14 + (qy > hz + 6), qy), fill=hx("2a2420"))
+    for (qx, qy) in ((cx0 + 14, hz + 2), (cx0 + 16, hz + 2), (cx0 + 15, hz + 1), (cx0 + 17, hz + 4), (cx0 + 13, hz + 4)):
+        d.point((qx, qy), fill=hx("c0b040") if (qx + qy) % 2 else hx("7a8a30"))
+    # a rowboat with its oars out and a fisherman, his line slack in the water
+    d.line([(cx0 + 20, cy1 - 4), (cx0 + 26, cy1 - 4)], fill=hx("5a3018"))
+    d.line([(cx0 + 21, cy1 - 3), (cx0 + 25, cy1 - 3)], fill=hx("3a2010"))
+    d.line([(cx0 + 21, cy1 - 1), (cx0 + 25, cy1 - 1)], fill=hx("1a2a48"))
+    d.line([(cx0 + 18, cy1 - 2), (cx0 + 20, cy1 - 4)], fill=hx("c0a070"))
+    d.line([(cx0 + 26, cy1 - 4), (cx0 + 28, cy1 - 2)], fill=hx("c0a070"))
+    d.line([(cx0 + 23, cy1 - 6), (cx0 + 23, cy1 - 5)], fill=hx("a03020"))
+    d.point((cx0 + 23, cy1 - 7), fill=hx("e0a080"))
+    d.line([(cx0 + 24, cy1 - 6), (cx0 + 29, cy1 - 10)], fill=hx("8a7a60"))
+    d.line([(cx0 + 29, cy1 - 10), (cx0 + 30, cy1 - 4)], fill=hx("a0a8c8"))
+    # reeds with seed heads in the foreground, and the painter's signature
+    for rx in (cx0 + 16, cx0 + 18, cx1 - 3, cx1 - 1, cx1 - 5):
+        top = cy1 - 4 - (rx % 3 == 0)
+        d.line([(rx, cy1), (rx + (rx % 2), top)], fill=hx("2a3a20"))
+        d.point((rx + (rx % 2), top - 1), fill=hx("6a4a2a"))
+    d.line([(cx1 - 11, cy1 - 1), (cx1 - 7, cy1 - 1)], fill=hx("a03020"))
+    d.point((cx1 - 10, cy1 - 2), fill=hx("a03020"))
+    noise(img, (cx0, cy0, cx1, cy1), 5, 62)
+    # brass title plaque on the bottom rail
+    d.rectangle([nx - 6, y1 - 4, nx + 6, y1 - 1], fill=hx("c8a050"), outline=hx("5a3a16"))
+    d.line([(nx - 4, y1 - 3), (nx + 3, y1 - 3)], fill=hx("6a4a20"))
+    d.point((nx + 5, y1 - 2), fill=hx("fff0b0"))
+
+
+def night_mirror(img, wall=True):
+    """A bevelled wall mirror in a carved walnut frame, its silvering failing at the edges."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = MIRROR
+    cx = (x0 + x1) // 2
+    if wall:
+        shadow(img, "rect", [x0 + 2, y0 - 4, x1 + 4, y1 + 4], 0.55, 2)
+    # carved crest: a broken pediment with two scrolls and a fan shell in the middle
+    d.polygon([(x0 + 3, y0 + 1), (cx - 6, y0 - 4), (cx + 6, y0 - 4), (x1 - 3, y0 + 1)], fill=hx("5a3820"))
+    d.line([(x0 + 3, y0), (cx - 6, y0 - 5)], fill=hx("b8844c"))
+    d.line([(cx + 6, y0 - 5), (x1 - 3, y0)], fill=hx("b8844c"))
+    d.line([(x0 + 5, y0 + 1), (cx - 6, y0 - 3)], fill=hx("2a1a0e"))
+    d.line([(cx + 6, y0 - 3), (x1 - 5, y0 + 1)], fill=hx("2a1a0e"))
+    for sx in (cx - 8, cx + 6):
+        d.ellipse([sx, y0 - 7, sx + 3, y0 - 4], fill=hx("5a3820"), outline=hx("b8844c"))
+        d.point((sx + 1, y0 - 6), fill=hx("2a1a0e"))
+    d.pieslice([cx - 5, y0 - 11, cx + 5, y0 - 1], 180, 360, fill=hx("a87444"))
+    for a in (-64, -32, 0, 32, 64):
+        ang = math.radians(a - 90)
+        d.line([(cx, y0 - 2), (cx + round(5 * math.cos(ang)), y0 - 2 + round(5 * math.sin(ang)))], fill=hx("5a3820"))
+    d.point((cx, y0 - 2), fill=hx("e0b070"))
+    _gilt_frame(img, MIRROR, 5, hx("a87444"), hx("6a4426"), hx("2a1a0e"), 63)
+    gx0, gy0, gx1, gy1 = x0 + 5, y0 + 5, x1 - 5, y1 - 5
+    # the glass: dark depth, a lighter bevel and the room faintly behind you
+    vgrad(img, (gx0, gy0, gx1, gy1), hx("4a5866"), hx("1e242e"))
+    d.rectangle([gx0 + 15, gy0 + 6, gx0 + 25, gy1 - 3], fill=hx("2a2a2c"))  # the reflected door across the room
+    d.rectangle([gx0 + 17, gy0 + 8, gx0 + 23, gy0 + 15], outline=hx("3a3836"))
+    d.point((gx0 + 17, gy0 + 20), fill=hx("a08a50"))
+    d.line([(gx0 + 2, gy1 - 5), (gx1 - 2, gy1 - 5)], fill=hx("2e2c2a"))  # the reflected dado rail
+    shine = hx("b4c4cc")
+    for k, (l, c) in enumerate(((10, shine), (6, hx("8a9ca8")))):
+        sx = gx0 + 2 + l + k * 3
+        d.line([(sx, gy0 + 2), (sx - l + 1, gy0 + 1 + l)], fill=c)
+    d.line([(gx1 - 4, gy1 - 3), (gx1 - 9, gy1 - 8)], fill=hx("6a7c88"))
+    d.rectangle([gx0, gy0, gx1, gy1], outline=hx("a8b8c0"))
+    d.line([(gx0 + 1, gy1 - 1), (gx1 - 1, gy1 - 1)], fill=hx("5e6c76"))
+    d.line([(gx1 - 1, gy0 + 1), (gx1 - 1, gy1 - 1)], fill=hx("5e6c76"))
+    # desilvering: dark freckles creeping in from the bottom corners
+    import random
+    rnd = random.Random(64)
+    px = img.load()
+    for _ in range(70):
+        side = rnd.random() < 0.5
+        x = gx0 + 2 + int(rnd.random() ** 2 * 10) if side else gx1 - 2 - int(rnd.random() ** 2 * 10)
+        y = gy1 - 2 - int(rnd.random() ** 1.6 * 22)
+        col = hx("1e1a14") if rnd.random() < 0.6 else hx("5a4e3a")
+        px[x, y] = col + (255,) * (len(px[x, y]) - 3)
+    # a crack running from the top-right corner
+    d.line([(gx1 - 1, gy0 + 1), (gx1 - 6, gy0 + 8), (gx1 - 7, gy0 + 15)], fill=hx("c8d2d6"))
+    d.line([(gx1 - 6, gy0 + 8), (gx1 - 2, gy0 + 11)], fill=hx("98a4aa"))
+    d.line([(gx1 - 6, gy0 + 8), (gx1 - 11, gy0 + 6)], fill=hx("98a4aa"))
+    # a postcard tucked into the corner of the frame
+    d.polygon([(gx0 - 2, gy1 - 13), (gx0 + 9, gy1 - 15), (gx0 + 11, gy1 - 6), (gx0, gy1 - 4)], fill=hx("e8dcc0"))
+    d.polygon([(gx0, gy1 - 12), (gx0 + 8, gy1 - 13), (gx0 + 9, gy1 - 9), (gx0 + 1, gy1 - 8)], fill=hx("60a0c8"))
+    d.line([(gx0 + 1, gy1 - 8), (gx0 + 9, gy1 - 9)], fill=hx("e0c080"))
+    d.line([(gx0 + 6, gy1 - 13), (gx0 + 6, gy1 - 9)], fill=hx("3a5a2a"))
+    d.line([(gx0 + 4, gy1 - 12), (gx0 + 8, gy1 - 11)], fill=hx("3a6a2a"))
+    d.line([(gx0 + 2, gy1 - 6), (gx0 + 8, gy1 - 7)], fill=hx("a08a70"))
+
+
+def _painting_grade(size):
+    """The bedside lamp sits below and to the right of the painting: warm at the bottom-right, shadowed at the top-left."""
+    x0, y0, x1, y1 = PAINTING
+    grade = Image.new("RGB", size, (232, 204, 168))
+    px = grade.load()
+    for y in range(max(0, y0 - 12), min(size[1], y1 + 6)):
+        for x in range(max(0, x0 - 4), min(size[0], x1 + 4)):
+            t = max(0.0, min(1.0, 0.55 * (x - x0) / (x1 - x0) + 0.45 * (y - y0) / (y1 - y0)))
+            px[x, y] = mix((70, 64, 92), (255, 230, 180), t ** 1.15)
+    return grade
+
+
+def night_wall_glints(img):
+    """After the night grade: both pieces repainted in their own light so their detail survives the dark.
+
+    The painting takes the bedside lamp's warmth; the mirror stays cool and catches the neon from the window."""
+    for paint_fn, grade in ((lake_painting, _painting_grade(img.size)), (night_mirror, (176, 168, 200))):
+        layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        paint_fn(layer, wall=False)
+        tint = grade if isinstance(grade, Image.Image) else Image.new("RGB", img.size, grade)
+        rgb = ImageChops.multiply(layer.convert("RGB"), tint)
+        img.paste(rgb, (0, 0), layer.getchannel("A"))
+    x0, y0, x1, y1 = MIRROR
+    gx0, gy0, gx1, gy1 = x0 + 5, y0 + 5, x1 - 5, y1 - 5
+    # the neon grazes the glass from the window side: red above, blue below, fading leftwards
+    for col, box in ((hx("c03048"), (gx1 - 10, gy0 + 1, gx1 + 4, gy0 + 14)), (hx("2a5ad0"), (gx1 - 10, gy0 + 14, gx1 + 4, gy1 - 1))):
+        m = Image.new("L", img.size, 0)
+        ImageDraw.Draw(m).ellipse(box, fill=110)
+        m = m.filter(ImageFilter.GaussianBlur(2))
+        clip = Image.new("L", img.size, 0)
+        ImageDraw.Draw(clip).rectangle([gx0 + 1, gy0 + 1, gx1 - 1, gy1 - 1], fill=255)
+        m = ImageChops.multiply(m, clip)
+        img.paste(ImageChops.screen(img, Image.new("RGB", img.size, col)), (0, 0), m)
+    d = ImageDraw.Draw(img)
+    px0, py0, px1, py1 = PAINTING
+    for (x, y) in ((px1 - 1, py0 + 14), (px1 - 1, py0 + 30), (px1 - 3, py1 - 3), (px1 - 18, py1 - 1), (px1 - 34, py1 - 1)):
+        d.point((x, y), fill=hx("ffe0a0"))
+
+
+def grime(d):
     # Scuffs and grime around the baseboards
     for x in range(18, W, 28):
         d.line([(x, FLOOR - 8), (x + 8, FLOOR - 4)], fill=hx("271b13"))
@@ -582,22 +951,23 @@ def relight_night(img):
 
 def paint_night(rails=False):
     img = Image.new("RGB", (W, H))
-    shell(img)
+    shell(img, night=True)
     floor(img)
     window_night(img)
-    details(img)
+    details(img, night=True)
     door(img)
     bed_night(img, rails=rails)
     nightstand_night(img)
     chair(img)
     clothes(img)
-    dresser(img)
+    dresser(img, night=True)
     bottle(img)
-    bulb(img)
     img = relight_night(img)
+    night_wall_glints(img)
     glass_night(img)
     lamp_night(img)
     img = tall(img, ceiling_night)
+    pendant_night(img)
     vignette(img, 0.72, tint=(14, 12, 30), blur=46)
     lit_frame = img.copy() if rails else None
     white_bed_linen(img)
@@ -617,10 +987,94 @@ def ceiling_night(img):
     img.paste(band, (0, 0))
 
 
+PENDANT_X = 244  # the ceiling fixture over the mirror, in final (ceiling band included) pixels
+
+
+def pendant_night(img):
+    """The ceiling fixture, switched off: a stamped-tin canopy, a brass chain and socket, and a milk-glass
+    schoolhouse globe. Unlit, it only catches the bedside lamp low on its left and the window neon on its right."""
+    d = ImageDraw.Draw(img)
+    cx = PENDANT_X
+    brass_d, brass, brass_l = hx("2a2014"), hx("6a5230"), hx("b08a50")
+    # the canopy: a ceiling rose plate and a small dome over the hook, their lower rims catching the lamp
+    d.ellipse([cx - 8, 14, cx + 8, 21], fill=hx("2a2832"), outline=hx("16141c"))
+    d.arc([cx - 8, 14, cx + 8, 21], 25, 155, fill=hx("5a5058"))
+    for a in range(0, 360, 45):
+        ang = math.radians(a)
+        d.point((cx + round(6 * math.cos(ang)), 17 + round(2.4 * math.sin(ang))), fill=hx("3c3842"))
+    d.ellipse([cx - 4, 16, cx + 4, 22], fill=brass, outline=brass_d)
+    d.arc([cx - 4, 16, cx + 4, 22], 40, 150, fill=brass_l)
+    d.point((cx - 1, 18), fill=hx("e0c080"))
+    # the chain: links alternately face-on and edge-on
+    for y in range(23, 40):
+        k = (y - 23) % 4
+        if k == 0:
+            d.point((cx, y), fill=brass_l)
+        elif k == 1:
+            d.point((cx - 1, y), fill=brass)
+            d.point((cx + 1, y), fill=brass_d)
+        elif k == 2:
+            d.point((cx - 1, y), fill=brass_l)
+            d.point((cx + 1, y), fill=brass_d)
+        else:
+            d.point((cx, y), fill=brass_d)
+    # the brass socket with its turn-key, and the fitter collar that grips the globe's neck
+    d.rectangle([cx - 2, 40, cx + 2, 45], fill=brass)
+    d.line([(cx - 2, 40), (cx - 2, 45)], fill=brass_l)
+    d.line([(cx + 2, 40), (cx + 2, 45)], fill=brass_d)
+    d.line([(cx - 1, 42), (cx + 2, 42)], fill=brass_d)
+    d.line([(cx + 3, 41), (cx + 5, 41)], fill=brass)
+    d.point((cx + 5, 40), fill=brass_l)
+    d.rectangle([cx - 5, 46, cx + 5, 48], fill=brass, outline=brass_d)
+    d.line([(cx - 4, 48), (cx + 1, 48)], fill=brass_l)
+    for sx in (cx - 3, cx + 3):
+        d.point((sx, 47), fill=brass_d)
+    # the milk-glass globe, shaded per pixel as a sphere
+    gy, rx, ry = 56.5, 8.6, 8.2
+    lamp_dir = np.array((-0.72, 0.45, 0.52))
+    lamp_dir /= np.linalg.norm(lamp_dir)
+    neon_dir = np.array((0.86, -0.05, 0.5))
+    neon_dir /= np.linalg.norm(neon_dir)
+    px = img.load()
+    for y in range(49, 65):
+        for x in range(cx - 9, cx + 10):
+            nx, ny = (x - cx) / rx, (y - gy) / ry
+            r2 = nx * nx + ny * ny
+            if r2 > 1:
+                continue
+            n = np.array((nx, ny, math.sqrt(1 - r2)))
+            lam = max(0.0, float(n @ lamp_dir))
+            neo = max(0.0, float(n @ neon_dir))
+            neon = mix(hx("a02848"), hx("2850b0"), (y - 49) / 15)
+            base = mix(hx("24242c"), hx("5c5c66"), 0.35 + 0.65 * n[2])
+            c = [base[i] + lam ** 1.6 * (150, 104, 62)[i] + 0.7 * neo ** 2.2 * neon[i] for i in range(3)]
+            if r2 > 0.82:
+                c = [v * 0.78 for v in c]
+            px[x, y] = tuple(min(255, int(v)) for v in c)
+    # two painted rings round the globe, seen from below so they curve down at the front
+    for ring in (51, 61):
+        hw = rx * math.sqrt(max(0.0, 1 - ((ring - gy) / ry) ** 2)) - 1
+        for x in range(cx - int(hw), cx + int(hw) + 1):
+            y = ring + round(1.2 * (1 - ((x - cx) / hw) ** 2))
+            px[x, y] = tuple(int(v * 0.7) for v in px[x, y][:3])
+    # the open bottom: the glass lip and the dead bulb inside
+    d.ellipse([cx - 5, 62, cx + 5, 66], fill=hx("6a6670"))
+    d.ellipse([cx - 4, 63, cx + 4, 66], fill=hx("121018"))
+    d.ellipse([cx - 1, 62, cx + 1, 64], fill=hx("5a5450"))
+    d.point((cx - 1, 63), fill=hx("a89070"))
+    d.arc([cx - 5, 62, cx + 5, 66], 110, 200, fill=hx("c8a080"))
+    # highlights: neon on the right shoulder, the bedside lamp low on the left
+    for (x, y, col) in ((cx + 5, 53, "e890b0"), (cx + 5, 54, "d880a8"), (cx + 6, 58, "8098e8"),
+                        (cx - 5, 59, "ffd8a0"), (cx - 6, 57, "e0b080"), (cx - 3, 51, "a8a8b8")):
+        d.point((x, y), fill=hx(col))
+
+
 def build():
     night = paint_night()
     from .mansion import LINEN_PALETTE
-    palette = palette_of(night, 102) + NIGHT_EXTRA + LINEN_PALETTE
+    px0, py0, px1, py1 = PAINTING
+    canvas = night.crop((px0 + 8, py0 + 8 + TOP, px1 - 8, py1 - 8 + TOP))
+    palette = palette_of(night, 102) + NIGHT_EXTRA + LINEN_PALETTE + palette_of(canvas, 14)
     save(pixelize(night, palette), "rooms", "motel_night.png")
     rail_mask = Image.new("RGBA", (W, H))
     bed_rails_night(rail_mask)

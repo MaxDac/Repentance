@@ -106,11 +106,14 @@ class LocationRenderingTests(unittest.TestCase):
         self.assertGreater(len(back.getcolors(back.width * back.height)), 20)
         self.assertGreater(ImageStat.Stat(back).mean[0], ImageStat.Stat(back).mean[1] * 1.3)
 
-    def test_destination_window_is_lit(self):
+    def test_office_window_is_dark_like_the_rest(self):
+        # It's night and Harrington has gone home: his window must not stand out from the row.
         image = act2_rooms.paint_road()
-        destination = image.crop((336, 34, 350, 50))
-        other_window = image.crop((244, 34, 256, 50))
-        self.assertGreater(luminance(destination), luminance(other_window) + 35)
+        x0, y0, x1, y1 = act2_rooms.ROAD_WINDOW
+        office = image.crop((x0, y0, x1 + 1, y1 + 1))
+        other_window = image.crop((x0 - 124, y0, x1 - 123, y1 + 1))
+        self.assertLess(abs(luminance(office) - luminance(other_window)), 6)
+        self.assertLess(luminance(office), 60)
 
     def test_office_floor_does_not_erase_furniture_bases(self):
         with patch.object(act2_rooms, "light"), patch.object(act2_rooms, "vignette"):

@@ -61,6 +61,37 @@ def _guard():
     return fig(spec, pose(20, arms={1: ("swing", -8, 4, 16), -1: ("swing", -8, 4, 16)}), 48, 96)
 
 
+def _wall_clock(img, d, cx, cy):
+    """An institutional wall clock hung from the heating pipe: black bezel, cream dial, ten past two."""
+    ink = hx("141414")
+    d.rectangle([cx - 1, cy - 16, cx + 1, cy - 11], fill=hx("3a3a34"))  # the hanging bracket
+    d.point((cx - 1, cy - 16), fill=hx("8a8a80"))
+    d.rectangle([cx - 3, cy - 17, cx + 3, cy - 16], fill=hx("2a2a26"))
+    shadow(img, "ellipse", [cx - 10, cy - 9, cx + 13, cy + 14], 0.35, 1)
+    d.ellipse([cx - 12, cy - 12, cx + 12, cy + 12], fill=hx("1e1e1c"))
+    d.ellipse([cx - 11, cy - 11, cx + 11, cy + 11], fill=hx("34342e"))
+    d.arc([cx - 11, cy - 11, cx + 11, cy + 11], 190, 290, fill=hx("8a8a80"))  # bezel highlight
+    d.arc([cx - 11, cy - 11, cx + 11, cy + 11], 20, 110, fill=hx("101010"))
+    d.ellipse([cx - 9, cy - 9, cx + 9, cy + 9], fill=hx("ece6d4"))
+    d.arc([cx - 9, cy - 9, cx + 9, cy + 9], 0, 140, fill=hx("c8c0a8"))  # the dial shaded under the rim
+    d.arc([cx - 8, cy - 8, cx + 8, cy + 8], 10, 120, fill=hx("dcd4bc"))
+    for i in range(12):
+        a = i * math.pi / 6
+        x, y = cx + 7 * math.sin(a), cy - 7 * math.cos(a)
+        if i % 3 == 0:  # the quarter marks are bars pointing at the centre
+            x2, y2 = cx + 5.5 * math.sin(a), cy - 5.5 * math.cos(a)
+            d.line([(round(x), round(y)), (round(x2), round(y2))], fill=ink)
+        else:
+            d.point((round(x), round(y)), fill=hx("4a4a44"))
+    d.line([(cx, cy), (cx + 3, cy - 1)], fill=ink, width=2)  # hour hand just past two
+    d.line([(cx, cy), (cx + 2, cy - 6)], fill=ink)  # minute hand at ten past
+    d.line([(cx, cy), (cx - 2, cy + 5)], fill=hx("a02820"))  # the red sweep hand
+    d.point((cx, cy), fill=hx("b8a060"))
+    d.point((cx - 5, cy - 5), fill=hx("ffffff"))  # a glint on the glass
+    d.point((cx - 4, cy - 6), fill=hx("ffffff"))
+    d.point((cx - 6, cy - 3), fill=hx("f8f4e8"))
+
+
 def paint_prison():
     """Joliet, the visiting room: a long table under a hanging lamp, institutional
     green tiles and cracked cream plaster, a barred window high on the back wall, a riveted steel door and its warder."""
@@ -186,16 +217,7 @@ def paint_prison():
         d.rectangle([dx0 - 4, y, dx0 + 12, y + 4], fill=hx("2e322e"))
         d.line([(dx0 - 4, y), (dx0 + 12, y)], fill=hx("7a827a"))
     text(img, ((dx0 + dx1) // 2, FL - dh - 12), "C-3", hx("e8e0c8"))
-    ck = (dx0 + dx1) // 2, FL - dh - 34
-    d.ellipse([ck[0] - 11, ck[1] - 11, ck[0] + 11, ck[1] + 11], fill=hx("2a2a26"))
-    d.ellipse([ck[0] - 9, ck[1] - 9, ck[0] + 9, ck[1] + 9], fill=hx("ece6d4"))
-    for i in range(12):
-        a = i * math.pi / 6
-        d.point((ck[0] + 7 * math.cos(a), ck[1] + 7 * math.sin(a)), fill=hx("2a2a26"))
-    d.line([ck, (ck[0] + 4, ck[1] - 2)], fill=hx("141414"))  # ten past two
-    d.line([ck, (ck[0] + 3, ck[1] - 6)], fill=hx("141414"))
-    for k in range(-9, 10, 4):
-        d.line([(ck[0] + k, ck[1] - 10), (ck[0] + k, ck[1] + 10)], fill=hx("6a6a64"))
+    _wall_clock(img, d, (dx0 + dx1) // 2, FL - dh - 34)
 
     # ---- the warder by the door ----
     g = _guard()
