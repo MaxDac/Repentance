@@ -177,8 +177,18 @@ public partial class AutoPlay
             "past the florist's grille, but Sal is still to come");
 
         await Shot("speakeasy");
+        Vector2? salWhenPassed = null;
+        void OnSalPassed()
+        {
+            if (salWhenPassed == null && gs.HasFlag("sal_passed")) salWhenPassed = game.Room?.FindActor("sal")?.Position;
+        }
+        gs.Changed += OnSalPassed;
         await game.Perform(Verb.Talk, "bartender");
         await Until(() => !game.Busy);
+        gs.Changed -= OnSalPassed;
+        Check(salWhenPassed is { } p && p.DistanceTo(Rooms.Speakeasy.SalAside) > 4 &&
+            game.Room?.FindActor("sal")?.Position.DistanceTo(Rooms.Speakeasy.SalAside) < 0.5f,
+            $"Sal walks aside after the bribe instead of jumping there (at {salWhenPassed} when paid)");
         Check(game.Room?.Name == "Speakeasy" && _offered.Keys.Any(k => k.StartsWith("sal")),
             "walking past Sal makes him step in and start the talk");
         Check(gs.HasFlag("sal_passed") && gs.HasFlag("sal_bribed") && !gs.HasFlag("sal_password") &&
