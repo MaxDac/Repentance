@@ -5,6 +5,7 @@
     <RootNamespace>Repentance</RootNamespace>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <WarningsAsErrors>$(WarningsAsErrors);CS0108;CS0114</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests\**" />

@@ -35,6 +35,14 @@ Every planning session that implements its plan ends with a PR, without being as
 `ci-ok` is the required status check on `main` (the "main protection" ruleset), so nothing merges without the
 whole suite passing. When adding a CI job, add it to `ci-ok`'s `needs`, not to the ruleset.
 
+## Inheritance contracts
+
+Extend matching behavior through its intended virtual hook, retaining required base initialization and cleanup.
+For Godot resources, implement `_ResetState()` rather than hiding the public `ResetState()` entry point.
+Use distinct names for unrelated operations, not `new` or warning suppressions to hide inherited members.
+Valid overloads and overrides of intentionally empty hooks do not need redundant base calls.
+CS0108/CS0114 are build errors; AutoPlay also checks for explicit same-signature method hiding.
+
 ## Running the game autonomously (Windows)
 
 Prefer the scripts in `tools/run/` (PowerShell `.ps1`, bash `.sh`). See `docs/testing-and-film-mode.md`.
