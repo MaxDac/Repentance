@@ -21,7 +21,8 @@ CFL = 200  # where the cellar's back wall meets the floor
 LANTERN_HOOK = (179, 108)
 STAIR_NAIL = (388, 140)
 CAN = (305, 26, 46)  # world position of the kerosene can on the crates
-BARREL = (324, 372, 224, 13)  # left, right, centre y and radius of the whiskey barrel under the stair foot
+BARREL = (324, 372, 224, 13)  # the lying barrel of whiskey: left end, right end, axis row and radius
+BARREL_FEET = 239  # the floor row under its chocks, its y-sort point
 POOL = (372, 246)  # centre of the whiskey pool in front of its spigot
 CELLAR_FIRE_FRAMES = 8
 
@@ -162,11 +163,16 @@ def _cellar_fire(img, em, cx, cy, t):
     img.paste(out)
 
 
-def paint_cellar(lantern=True, can=True, lit=False, barrel_open=False, lantern_down=False, fire_t=None):
-    """lit hangs the lantern on the stair nail; lantern_down takes it back off (Micah carries it, so the light stays);
-    barrel_open runs the whiskey out over the flags; fire_t sets it alight at that phase."""
+def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=False, pool=False, lantern_down=False,
+                 fire_t=None):
+    """lit hangs the lantern on the stair nail; lantern_down takes it back off (Micah carries it, so the light stays).
+    The barrel is painted only for its own y-sorted sprites (see build_cellar), so Micah can walk behind it;
+    barrel_open turns its spigot so the whiskey runs out, and pool spreads it over the flags. fire_t sets it all alight
+    at that phase, barrel included, since the fire frames cover the whole room."""
     fire = fire_t is not None
+    barrel = barrel or fire
     barrel_open = barrel_open or fire
+    pool = pool or fire
     lantern_down = lantern_down or fire
     img = Image.new("RGB", (W, H))
     em = Image.new("L", img.size, 0)
@@ -272,9 +278,10 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel_open=False, lantern_d
     if can:
         p = R.P(*CAN)
         _kerosene_can(d, int(p[0]), int(p[1]))
-    # a barrel of whiskey lying on its side under the stair foot, on chocks, its head and tap turned to the room
-    _lying_barrel(img, *BARREL, open=barrel_open)
-    if barrel_open:
+    # a barrel of whiskey lying on its side out on the floor, on chocks, its head and tap turned to the room
+    if barrel:
+        _lying_barrel(img, *BARREL, open=barrel_open)
+    if pool:
         _whiskey_pool(img, *POOL)
     if fire:
         _cellar_fire(img, em, *POOL, fire_t)
@@ -306,17 +313,35 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel_open=False, lantern_d
     return img
 
 
+def _cut_barrel(variant, base_px, pal, name):
+    """The barrel (with its shadow) as an RGBA sprite: everything that differs from the room without it."""
+    a = np.asarray(pixelize(variant, pal).convert("RGB")).astype(np.int16)
+    b = np.asarray(base_px.convert("RGB")).astype(np.int16)
+    mask = np.abs(a - b).sum(axis=2) > 0
+    im = Image.fromarray(np.dstack([a.astype(np.uint8), (mask * 255).astype(np.uint8)]), "RGBA")
+    bb = im.getbbox()
+    save(im.crop(bb), "rooms", name + ".png")
+    print(f"{name} at ({bb[0]}, {bb[1]}) size {bb[2] - bb[0]}x{bb[3] - bb[1]}")
+    return bb
+
+
 def build_cellar():
     base = paint_cellar()
     lit = dict(lantern=False, can=False, lit=True)
     v = {"no_lantern": paint_cellar(lantern=False), "no_can": paint_cellar(can=False), "lit": paint_cellar(**lit),
-         "whiskey": paint_cellar(**lit, barrel_open=True), "lantern_down": paint_cellar(**lit, lantern_down=True)}
+         "whiskey": paint_cellar(**lit, pool=True), "lantern_down": paint_cellar(**lit, lantern_down=True)}
+    barrel = {"barrel": paint_cellar(barrel=True), "barrel_lit": paint_cellar(**lit, barrel=True),
+              "barrel_open": paint_cellar(**lit, barrel=True, barrel_open=True)}
     both = Image.new("RGB", (W * 3, H))
-    both.paste(base, (0, 0))
-    both.paste(v["lit"], (W, 0))
-    both.paste(v["whiskey"], (W * 2, 0))
+    both.paste(barrel["barrel"], (0, 0))
+    both.paste(barrel["barrel_lit"], (W, 0))
+    both.paste(paint_cellar(**lit, barrel=True, barrel_open=True, pool=True), (W * 2, 0))
     pal = palette_of(both, 124)
     px = pixelize(base, pal)
+    lit_px = pixelize(v["lit"], pal)
+    _cut_barrel(barrel["barrel"], px, pal, "mansion_cellar_barrel")
+    for name in ("barrel_lit", "barrel_open"):
+        _cut_barrel(barrel[name], lit_px, pal, "mansion_cellar_" + name)
     save(px, "rooms", "mansion_cellar.png")
     hx0, hy0 = LANTERN_HOOK
     overlay(v["no_lantern"], px, pal, (hx0 - 14, hy0 - 2, hx0 + 14, hy0 + 40), "mansion_cellar_lantern_taken")
@@ -325,7 +350,6 @@ def build_cellar():
             "mansion_cellar_can_taken")
     overlay(v["lit"], px, pal, (0, 0, W, H), "mansion_cellar_lit")
     # the escape: cut against the lit cellar, since they sit on top of it
-    lit_px = pixelize(v["lit"], pal)
     nx, ny = STAIR_NAIL
     overlay(v["lantern_down"], lit_px, pal, (nx - 12, ny - 2, nx + 12, ny + 36), "mansion_cellar_lantern_down")
     bx0, bx1, by, br = BARREL

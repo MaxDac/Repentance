@@ -329,18 +329,22 @@ class SceneImprovementsTests(unittest.TestCase):
                 composed.alpha_composite(sprite, tuple(map(int, position.groups())))
                 self.assert_image_equal(composed, common.pixelize(variant, pal))
 
-    def test_bedroom_screen_is_a_low_y_sorted_sprite_micah_shows_over(self):
+    def test_bedroom_screen_stands_edge_on_between_micah_and_the_bed(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_bedroom.tscn").read_text()
+        script = (ROOT / "scripts" / "Rooms" / "MansionBedroom.cs").read_text()
         block = re.search(r'\[node name="Screen" type="Sprite2D" parent="World"\]([^\[]*)', scene)[1]
         x, feet = map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", block).groups())
         offset = int(re.search(r"offset = Vector2\(0, (-?\d+)\)", block)[1])
+        mx, my = map(int, re.search(r"BesideScreen = new\((\d+), (\d+)\)", script).groups())
+        hx_, hy = map(int, re.search(r'name="Harrington"[^\[]*?position = Vector2\((\d+), (\d+)\)', scene).groups())
         self.assertEqual(feet, mansion.SCREEN_FEET)
-        self.assertGreater(feet, 214, "Micah's spot behind the screen must sort behind it")
         with Image.open(self.generated / "rooms" / "mansion_bedroom_screen.png") as sprite:
             top = feet + offset
-            self.assertGreaterEqual(top, 150, "the screen must be low enough to show his hat and shoulders")
-            self.assertLessEqual(x, 107 - 13)
-            self.assertGreaterEqual(x + sprite.width, 107 + 13)
+            self.assertLess(sprite.width, 48, "seen nearly edge-on, the screen is narrow")
+            self.assertGreaterEqual(x, mx + 14, "Micah stands clear of the screen, in full view")
+            self.assertLess(x + sprite.width, hx_ - 14, "the screen stands between Micah and Harrington")
+            self.assertLessEqual(top, my - 70, "the screen is as tall as a standing man")
+            self.assertGreater(feet, my, "the screen runs forward past the spot where Micah stands")
 
     def test_bedroom_fire_strip_loops_and_starts_on_the_background(self):
         x0, y0, x1, y1 = mansion.BED_FIRE_BOX

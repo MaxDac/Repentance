@@ -282,8 +282,8 @@ public partial class AutoPlay
             && !confront.IsCompleted && game.Room?.Name == "MansionBedroom",
             "Space freezes the Act Three confrontation mid-sentence");
         PressKey(Key.Space);
-        Check(game.Player.Visible && game.Player.Position.Y < 218 && game.Player.Position.X is > 68 and < 148,
-            "Micah listens in view behind the lowered folding screen (#104)");
+        Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(94, 222)) < 2,
+            "Micah listens beside the edge-on folding screen, in full view, the screen between him and the bed (#104)");
         await Shot("mansion_bedroom");
         await Until(() => gs.HasFlag("eleanor_up"));
         Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
