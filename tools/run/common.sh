@@ -10,19 +10,31 @@ GODOT_FLAGS="${GODOT_FLAGS:-}"
 # The same rule as CI: Game.Run catches script exceptions with GD.PushError, so a run can print its marker after one.
 ERROR_PATTERN='^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
 
+check_godot() {
+  local godot="$1" probe output status=0
+  probe="$(mktemp -d)" || return 1
+  # An empty project directory keeps the probe independent of this project's C# autoloads and import cache.
+  output="$("$godot" --headless --path "$probe" --script "$ROOT/tools/run/check-godot.gd" 2>&1)" || status=$?
+  rmdir "$probe"
+  if [ "$status" -eq 0 ] && grep -qF 'REPENTANCE GODOT OK' <<< "$output"; then return 0; fi
+  printf "Cannot use Godot '%s':\n%s\n" "$godot" "$output" >&2
+  echo "Install Godot 4 .NET/Mono (not the standard edition), then pass --godot <path> or set GODOT." >&2
+  return 1
+}
+
 find_godot() {
   local explicit="${1:-}"
-  if [ -n "$explicit" ]; then echo "$explicit"; return; fi
-  if [ -n "${GODOT:-}" ]; then echo "$GODOT"; return; fi
-  local name
-  for name in godot_console godot4 godot; do
-    if command -v "$name" >/dev/null 2>&1; then command -v "$name"; return; fi
+  if [ -n "$explicit" ]; then check_godot "$explicit" || return 1; echo "$explicit"; return; fi
+  if [ -n "${GODOT:-}" ]; then check_godot "$GODOT" || return 1; echo "$GODOT"; return; fi
+  local name found
+  for name in godot_console godot-mono godot4-mono godot4 godot; do
+    if found="$(command -v "$name")" && check_godot "$found"; then echo "$found"; return; fi
   done
-  local found
-  found="$(find "$HOME/godot" "$HOME/Applications" /Applications "${LOCALAPPDATA:-/nonexistent}/Godot" \
+  while IFS= read -r found; do
+    if check_godot "$found"; then echo "$found"; return; fi
+  done < <(find "$HOME/godot" "$HOME/Applications" /Applications "${LOCALAPPDATA:-/nonexistent}/Godot" \
     \( -name 'Godot_v*_mono_linux.x86_64' -o -name 'Godot_v*_mono_*console.exe' -o -path '*Godot_mono.app/Contents/MacOS/Godot' \) \
-    -type f 2>/dev/null | sort -r | head -n1 || true)"
-  if [ -n "$found" ]; then echo "$found"; return; fi
+    -type f 2>/dev/null | sort -r || true)
   echo "Godot 4 .NET not found. Pass --godot <path>, or set GODOT." >&2
   return 1
 }
@@ -55,8 +67,15 @@ build_and_import() {
     echo "== dotnet build"
     dotnet build Repentance.csproj --nologo -v quiet
     echo "== Godot import"
+    mkdir -p "$LOG_DIR"
+    local log="$LOG_DIR/import.log" status=0
     # shellcheck disable=SC2086
-    "$godot" --headless $GODOT_FLAGS --path . --import)
+    "$godot" --headless $GODOT_FLAGS --path . --import 2>&1 | tee "$log" || status=$?
+    if [ "$status" -ne 0 ]; then echo "Godot import failed (exit code $status); see $log." >&2; return 1; fi
+    if grep -nE "$ERROR_PATTERN" "$log" >&2; then
+      echo "Godot import logged errors; see $log. Launch cancelled." >&2
+      return 1
+    fi)
 }
 
 # godot_run <godot> <name> <markers, |-separated> [engine args...] -- <user args...>

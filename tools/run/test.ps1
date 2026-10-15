@@ -29,10 +29,12 @@ $order = @('unit', 'art') + @($godotSuites.Keys)
 $selected = if ($Suite -contains 'all') { $order } else { $order | Where-Object { $Suite -contains $_ } }
 $needsGodot = @($selected | Where-Object { $godotSuites.Contains($_) }).Count -gt 0
 
-if (-not $NoClean) { Reset-Generated }
 if ($needsGodot) {
     $godotExe = Find-Godot $Godot
     Write-Host "Godot: $godotExe"
+}
+if (-not $NoClean) { Reset-Generated }
+if ($needsGodot) {
     Build-And-Import $godotExe
 }
 

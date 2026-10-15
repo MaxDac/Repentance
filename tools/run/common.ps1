@@ -8,12 +8,34 @@ $LogDir = Join-Path $Root 'logs'
 # The same rule as CI: Game.Run catches script exceptions with GD.PushError, so a run can print its marker after one.
 $ErrorPattern = '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
 
+function Test-Godot([string]$Godot) {
+    $probe = Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())
+    New-Item -ItemType Directory $probe | Out-Null
+    $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        $output = @(& $Godot --headless --path $probe --script (Join-Path $Root 'tools/run/check-godot.gd') 2>&1 |
+            ForEach-Object { "$_" })
+        $code = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $eap
+        Remove-Item $probe
+    }
+    if ($code -eq 0 -and $output -contains 'REPENTANCE GODOT OK') { return $true }
+    Write-Warning "Cannot use Godot '$Godot':`n$($output -join "`n")"
+    return $false
+}
+
 function Find-Godot([string]$Explicit) {
-    if ($Explicit) { return (Resolve-Path $Explicit).Path }
-    if ($env:GODOT) { return $env:GODOT }
-    foreach ($name in 'godot_console', 'godot4', 'godot') {
+    $hint = 'Install Godot 4 .NET/Mono (not the standard edition), then pass -Godot <path> or set $env:GODOT.'
+    if ($Explicit -or $env:GODOT) {
+        $candidate = if ($Explicit) { (Resolve-Path $Explicit).Path } else { $env:GODOT }
+        if (Test-Godot $candidate) { return $candidate }
+        throw $hint
+    }
+    foreach ($name in 'godot_console', 'godot-mono', 'godot4-mono', 'godot4', 'godot') {
         $cmd = Get-Command $name -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($cmd) { return $cmd.Source }
+        if ($cmd -and (Test-Godot $cmd.Source)) { return $cmd.Source }
     }
     $installs = @()
     foreach ($dir in "$env:LOCALAPPDATA\Godot", "$env:ProgramFiles\Godot", "$HOME\Godot") {
@@ -21,9 +43,10 @@ function Find-Godot([string]$Explicit) {
             $installs += Get-ChildItem $dir -Recurse -Filter 'Godot_v*_mono_*console.exe' -ErrorAction SilentlyContinue
         }
     }
-    $best = $installs | Sort-Object Name -Descending | Select-Object -First 1
-    if ($best) { return $best.FullName }
-    throw "Godot 4 .NET not found. Pass -Godot <path to the console exe>, or set `$env:GODOT."
+    foreach ($install in ($installs | Sort-Object Name -Descending)) {
+        if (Test-Godot $install.FullName) { return $install.FullName }
+    }
+    throw "Godot 4 .NET not found. $hint"
 }
 
 function Get-UserDataDir {
@@ -62,9 +85,18 @@ function Build-And-Import([string]$Godot) {
     try {
         Invoke-Checked 'dotnet build' { dotnet build Repentance.csproj --nologo -v quiet }
         # Windows PowerShell 5.1 turns redirected native stderr into terminating errors under 'Stop'.
+        New-Item -ItemType Directory -Force $LogDir | Out-Null
+        $log = Join-Path $LogDir 'import.log'
         $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-        try { Invoke-Checked 'Godot import' { & $Godot --headless --path . --import 2>&1 | ForEach-Object { "$_" } | Out-Host } }
+        try {
+            Invoke-Checked 'Godot import' {
+                & $Godot --headless --path . --import 2>&1 | ForEach-Object { "$_" } |
+                    Tee-Object -FilePath $log | Out-Host
+            }
+        }
         finally { $ErrorActionPreference = $eap }
+        $errors = Get-Content $log | Select-String -CaseSensitive -Pattern $ErrorPattern
+        if ($errors) { throw "Godot import logged errors; see $log. Launch cancelled.`n$($errors -join "`n")" }
     }
     finally { Pop-Location }
 }

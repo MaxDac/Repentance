@@ -12,6 +12,8 @@ Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (vi
 ## Running it
 
 Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
+The standard Godot editor cannot load this game's C# scripts, even with the SDK installed.
+See [Testing and film mode](docs/testing-and-film-mode.md) to select the .NET executable.
 
 ### Tests and film mode
 
