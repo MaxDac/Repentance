@@ -79,12 +79,13 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Those who sat at His table. The days of the month He was born. The day He rested."
+  "Leaves on a lucky clover. The night when the Veil is thin. Saint Patrick's day in March." Eleanor's Celtic
+  roots, in the everyday, modern form anybody knows.
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
-  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
+  its graphical controls, not the safe itself. The references give **4** (the four-leaf clover), **31** (Halloween, the old Samhain) and
+  **17** (Saint Patrick's day); the paper gives no directions, so the player has to try them. Each stop that is right,
   counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
-  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
+  by trying each one: the solution is **right 4 / left 31 / right 17**. The paper remains readable; wrong
   settings can be reset or retried.
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
@@ -93,7 +94,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   - a matchbook with the name of the club, the Blue Lantern (next location). Micah connects it to the men the
     bellboy saw: fellas like that drink somewhere, and that's where her trail goes next;
   - a little vial of Mrs. Stewart's Bluing: Eleanor meant to dye a white flower blue and go to the Blue Lantern
-    herself. The florist's puzzle needs it, so the box has to be opened before the club's front can be passed.
+    herself. The florist's puzzle needs it, so the box has to be opened before the club's front can be passed;
+  - a Japanese water flower (a pressed-paper pellet, a dime-store novelty), tied with red thread and wrapped in a
+    scrap of hotel paper with Eleanor's hurried riddle: "Give me a drink and I'll tell you the word."
 - Leaving the room goes back across the corridor to the linen room and the staff lift; in the lobby the
   revolving door now leads to the club's front.
 
@@ -109,19 +112,25 @@ described here (other verbs, flavour lines) is left to the implementation.
   the inventory with Eleanor's vial of Mrs. Stewart's Bluing from the brass box to dye the carnation blue (the
   vial is used up). The sidewalk shelf only holds pots and a watering can. Use the blue carnation on the grille: the hatch opens and Micah is let
   through the cold room into the speakeasy. Afterwards the door opens for him directly.
+- **Puzzle 16 - Water flower (optional):** use Eleanor's water flower on the white carnations' bucket. It
+  swells and opens into a pink paper flower with **MOONSHINE** written along the petals: the Blue Lantern's
+  password (flag `knows_password`; the flower stays in the bucket). Used anywhere else, Micah notes that it wants
+  water.
 - The street exit on the left leads back to the Aurelian's lobby; the speakeasy's steel door leads back out here.
 
 #### Club (the Blue Lantern speakeasy)
 
 - Inside the cold-room entrance, Sal the guard still asks for the password; the blue carnation only got Micah
-  past the florist's grille. Micah doesn't know it and can give him $10 as a bribe.
+  past the florist's grille. Micah has two ways in: if the water flower gave him the password, "Moonshine." is
+  the first choice and Sal lets him in for free; otherwise he admits he doesn't know it and can give him $10 as a
+  bribe. Playthrough and film mode take the password; AutoPlay covers the bribe.
   Micah starts with $22, enough for the bellboy's two $1 payments and Sal's $10. The cash remains in his inventory:
-  $21 after the bellboy's first dollar, $20 after the second and $10 after Sal. Repeated conversations never charge either bribe again.
+  $21 after the bellboy's first dollar, $20 after the second and $10 after Sal (still $20 with the password). Repeated conversations never charge either bribe again.
   If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
 - Until Sal lets him in, Micah can still try to walk past him to the bar: when he crosses the curtain line Sal
   steps in front of him and the password conversation starts. Talking to Sal directly starts it as well. If
   Micah leaves the conversation without paying, Sal walks him back to the door.
-- If Micah bribes Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
+- Once past Sal, he can speak with Tony the bartender. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
   the entrance), and on to the next scene.
 

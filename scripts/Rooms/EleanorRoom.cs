@@ -39,7 +39,7 @@ public partial class EleanorRoom : Room
             case ("paper", Verb.Hand):
                 State.SetFlag("took_combination");
                 State.GiveItem("combination");
-                await Say("A slip of hotel paper in her hand. Three lines of Sunday school. Nobody writes that down unless it opens something.");
+                await Say("A slip of hotel paper in her hand. Three lines of Irish blarney. Nobody writes that down unless it opens something.");
                 return true;
             case ("paper", Verb.Look):
                 await Say("Three riddles in Eleanor's handwriting. No numbers, no right or left. She didn't trust paper with anything plain.");
@@ -57,7 +57,7 @@ public partial class EleanorRoom : Room
             case ("safe", Verb.UseItem) when Shows(item, "combination", "safe_riddle") && !State.HasFlag("safe_open"):
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
                 State.SetFlag("safe_open");
-                await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
+                await Say("Four leaves for luck. Halloween, the thirty-first. Saint Patrick's, the seventeenth. The tumblers fell like dominoes.");
                 await Say("Whoever tossed the room scratched the dial raw and never got the door open.");
                 return true;
             case ("safe", Verb.Hand):

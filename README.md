@@ -263,16 +263,20 @@ installs and uninstalls it.
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
    **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and decode the paper's references (apostles, December, the day of rest: 12, 31, 7). It gives
-   no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7.
+   open the closet and decode the paper's Celtic references (a lucky clover, the night the Veil is thin, Saint
+   Patrick's day: 4, 31, 17). It gives no directions; each right stop drops a tumbler, and the dial opens at
+   right 4 / left 31 / right 17.
    Then take the brass box.
    Open it in the satchel with the hand: a
-   calling card carrying her perfume, a matchbook from the Blue Lantern and a vial of laundry bluing.
+   calling card carrying her perfume, a matchbook from the Blue Lantern, a vial of laundry bluing and a
+   Japanese water flower with a riddle: "Give me a drink and I'll tell you the word."
 4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
    for blue carnations only. Take a white carnation from the bucket, combine it with Eleanor's
-   bluing and show the blue carnation at the cold-room grille to be let in.
-   **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
-   leaving $10 after all the bribes (mock him or refuse and
+   bluing and show the blue carnation at the cold-room grille to be let in. Drop the water flower in the
+   carnations' bucket and it opens with the club's password, MOONSHINE, written on its petals (optional).
+   **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Say "Moonshine." if the water flower gave you
+   the password and Sal lets you in for free; otherwise bribe him with $10, leaving $10 after all the bribes
+   (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
