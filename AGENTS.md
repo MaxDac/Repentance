@@ -48,8 +48,10 @@ py -3.14 -m unittest discover -s tests\art -v
 
 `Walkthrough.md` is the story spec. Implement changes in `scripts/Rooms` and `dialogue/repentance.ink`, then:
 
-- Update the beat in `scripts/Debug/Playthrough.cs` (the canonical story, also what film mode plays), or add one.
-  Act 3 routes branch on `_route`; every route must still reach "The End".
+- Update the beat in the matching act file in `scripts/Debug/Playthrough/` (`Playthrough.Act1.cs` ...
+  `Playthrough.Endings.cs`; the canonical story, also what film mode plays), or add one. Act 3 routes branch on
+  `_route` (choices per route in `Playthrough.Endings.cs`); every route must still reach "The End".
+  `Playthrough.cs` keeps the modes, the save/load round trip and the coverage gates.
 - Add regressions for things that could break quietly to the matching act file in `scripts/Debug/AutoPlay/`
   (`AutoPlay.Act1.cs` ... `AutoPlay.Endings.cs`). Shared test helpers (input, puzzles, satchel, checks) live in
   `scripts/Debug/Harness.cs`, not in `AutoPlay`.
