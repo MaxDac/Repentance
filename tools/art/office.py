@@ -46,8 +46,8 @@ def floor(img):
     noise(img, (118, 158, 392, 198), 6, 4)
 
 
-DOOR = (22, 18, 94, 127)
-DOOR_BOX = (17, 13 + TOP, 100, 140 + TOP)
+DOOR = (32, 18, 84, 127)
+DOOR_BOX = (27, 13 + TOP, 90, 140 + TOP)
 
 
 def door(img, state="closed"):
@@ -89,7 +89,7 @@ def door(img, state="closed"):
     for t, y in (("MICAH", 34), ("JONES", 44), ("P.I.", 56)):
         text(img, ((x0 + x1) // 2, y), t, hx("1e1a14"), size=8, mirror=True)
     # silhouette of a waiting stranger? no - empty corridor bulb glow
-    light(img, "ellipse", [x0 + 20, y0 + 10, x1 - 20, 50], hx("f8e8b0"), 0.35, 8)
+    light(img, "ellipse", [x0 + 12, y0 + 10, x1 - 12, 50], hx("f8e8b0"), 0.35, 8)
     # lower panels
     for py in (78, 102):
         d.rectangle([x0 + 8, py, x1 - 8, py + 18], outline=hx("2e1c0e"))
