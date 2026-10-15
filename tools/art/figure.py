@@ -1431,13 +1431,15 @@ def _draped_skirt(c, col, waist, hip, knee, across, length, floor=92.5):
         c.bias[m & c.capsule(np.array(a, float), np.array(b, float), 0.5, 0.6)[0]] -= 1
 
 
-def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False):
+def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
     hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
     joints may carry four more points, the far leg's knee, ankle, heel and toe (otherwise it shadows the near one).
     coat_drape: the coat skirt hangs with gravity, over the thigh and down to the floor, instead of following the thigh.
-    plain_chest: no shirt or tie along the trunk and the collar in the coat's colour, for a profile seen low down."""
+    plain_chest: no shirt or tie along the trunk and the collar in the coat's colour, for a profile seen low down.
+    head_sprite: (image, neck point) of ready-made head art pasted upright on the neck instead of painting the head;
+    the shoulder and collar are then one rounded mass of coat."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
@@ -1449,6 +1451,12 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     across = np.array([-up[1], up[0]])
     torso, skin = spec["torso"], spec["skin"]
     pants = spec.get("pants", torso)
+    if head_sprite is not None:  # the coat shoulder and the upper sleeve shade as one mass, without a seam
+        c.blend_parts = ("torso", "arm")
+        along = elbow - shoulder
+        t = ((c.X - shoulder[0]) * along[0] + (c.Y - shoulder[1]) * along[1]) / max(along @ along, 1e-6)
+        c.blend_zone = c.capsule(shoulder + up * 3, elbow, 7, 5)[0]
+        c.blend_w = np.clip(1.2 - t, 0, 1)
 
     def limb(a, b, ra, rb, col, part):
         c.put(c.capsule(a, b, ra, rb), col, part, dither=col != skin)
@@ -1507,7 +1515,12 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         seam = c.capsule(shoulder, hip + (knee - hip) * 0.6, 0.6, 0.8)[0]
         c.bias[m & seam] += 1
     head_axis = head - shoulder
-    if plain_chest:  # the coat's collar turned up round the neck, then a little skin under the jaw
+    if head_sprite is not None:  # one rounded mass of coat over the shoulder and up round the neck
+        neck = shoulder + head_axis * 0.3
+        ang = math.atan2(across[1], across[0])
+        c.put(c.ellipse(shoulder + across * 0.5 + head_axis * 0.05, 5.6, 4.6, ang), torso, "torso")
+        c.put(c.capsule(shoulder, neck + (0, 1), 3.2, 2.6), torso, "torso")
+    elif plain_chest:  # the coat's collar turned up round the neck, then a little skin under the jaw
         neck = shoulder + head_axis * 0.5
         limb(shoulder, shoulder + head_axis * 0.3, 2.6, 2.3, torso, "collar")
         limb(shoulder + head_axis * 0.3, neck, 1.8, 1.6, skin, "neck")
@@ -1519,6 +1532,10 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         neck = shoulder + head_axis * 0.25
         limb(shoulder, neck, 2.3, 2, skin, "neck")
     img = c.render(shadow_box=((fw / 2, 94), 36, 1.2))
+    if head_sprite is not None:
+        art, (bx, by) = head_sprite
+        img.alpha_composite(art, (round(neck[0] - bx), round(neck[1] - by)))
+        return img, tuple(head)
     # The screen-space head painter retains each character's hat, hair and mask.
     hc = Canvas(64, 64)
     phi = math.radians(80)
