@@ -536,14 +536,19 @@ public sealed class Playthrough : Harness
         {
             if (free)
             {
-                await Do(Verb.Hand, "range");
-                await Do(Verb.Hand, "candle");
+                await Do(Verb.Walk, "cellar_door");
+                Expect("MansionCellar", "back down to the cellar, Eleanor waiting in the kitchen");
+                await Do(Verb.Hand, "barrel");
+                await Do(Verb.Hand, "hung_lantern");
+                await Do(Verb.UseItem, "barrel", "lantern_lit");
+                Expect("MansionKitchen", "up out of the burning cellar");
+                Check(Gs.HasFlag("cellar_fire"), "the whiskey is alight");
             }
             _ = Do(Verb.Walk, "back_door");
             string room = free ? "Outskirts" : "Prison";
             await Until(() => _game.Room?.Name == "Outskirts" || _game.Room?.Name == "Prison", 300);
             Expect(room, free ? "out of town" : "prison");
-            Check(Gs.HasFlag(Endings.MansionExploded) == free, "the house goes up only after gas and candle");
+            Check(Gs.HasFlag(Endings.MansionExploded) == free, "the house burns only after the cellar fire");
             await TheEnd();
         }, roundTrip: false);
     }

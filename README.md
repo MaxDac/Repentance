@@ -123,7 +123,7 @@ All sound effects are synthesized at startup (no audio files) and play on an **E
 
 - **Footsteps** for Micah, Daniel and walking NPCs, voiced by each room's `Floor` export (`Wood`, `Stone` or `Carpet`).
 - **Story cues**: narration lines starting with `*` play a matching sound: `*BANG*` is a gunshot, and
-  `*Knock knock*... *knock*` keeps its rhythm. There are also cues for clangs, crashes, door slams, the doorbell and the explosion.
+  `*Knock knock*... *knock*` keeps its rhythm. There are also cues for clangs, crashes, door slams, the doorbell and the cellar fire's whoosh.
 - **Ambience**: rain loops in rooms with a `Rain` node. It sounds muffled when the rain is only seen through a window.
 
 **Settings > Effects volume** defaults to **80%**. Left click raises it and right click lowers it, in steps of 10%
@@ -301,9 +301,10 @@ From here the story follows Walkthrough.md:
    a verse at a time, backing to the door while the old man talks into every pause (ending 1). Then talk Eleanor into leaving ("I didn't come all this
    way...", or later "Every time I've seen you..."). Or, on the first turn, lower the gun and leave her to turn
    himself in (ending 6); or, if she still refuses on the second, shoot her, then himself (ending 7).
-32. **The escape**: in the kitchen, optionally turn on the gas and light the candle; the house blows up behind them.
-33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or explosion); 3 out of town
-   alone (not convinced, signed evidence or explosion); 4 prison, Eleanor visits (convinced, neither signed evidence nor explosion);
+32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
+   whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
+33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
+   alone (not convinced, signed evidence or fire); 4 prison, Eleanor visits (convinced, neither signed evidence nor fire);
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
    7 murder and suicide in the bedroom, the last entry written by Caleb. Each ends Act Three; the next morning
    (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose or to the faith, saying
@@ -321,10 +322,10 @@ Forgetting is the part you keep asking for."; her callback is concern, not forgi
 Micah offers coffee with "Nothing you owe me."; the journal places renewed vows a year later.
 His office reminder preserves the last opportunity to recover the wedding ring and visit Caleb.
 
-If Eleanor refuses to follow and Micah explodes the mansion, her fate remains unknown during escape.
+If Eleanor refuses to follow and Micah burns the mansion, her fate remains unknown during escape.
 The alone outskirts scene then begins **the next morning**: a newspaper lists Eleanor among the dead,
 and Micah admits "I told myself I was saving her. I left her there and lit the fuse."
-The fuse is figurative; the explosion still uses gas and a candle. "They know who died. They don't know what I did."
+The fuse is figurative; the fire is the cellar's whiskey and the lantern. "They know who died. They don't know what I did."
 replaces the previous claim that nobody will know what happened. Documents-only escape has no death report;
 when Eleanor accompanies him, the scene remains that night and she survives. The existing ending outcomes remain unchanged.
 

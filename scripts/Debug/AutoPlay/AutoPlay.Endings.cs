@@ -39,7 +39,11 @@ public partial class AutoPlay
         await game.Perform(Verb.Walk, "baize_door");
         Check(game.Room?.Name == "MansionKitchen", "skipped study cannot be revisited during escape");
         await game.Perform(Verb.Walk, "cellar_door");
-        Check(game.Room?.Name == "MansionKitchen", "nor reached through the cellar");
+        Check(game.Room?.Name == "MansionCellar", "the cellar is open during the escape");
+        await game.Perform(Verb.Walk, "stair");
+        Check(game.Room?.Name == "MansionCellar", "nor reached through the cellar stair");
+        await game.Perform(Verb.Walk, "kitchen_steps");
+        Check(game.Room?.Name == "MansionKitchen", "back up to the kitchen");
         await Shot("mansion_kitchen_alone");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
@@ -59,18 +63,22 @@ public partial class AutoPlay
         await Shot("ending_prison_eleanor");
         await TheEnd("ending_4");
 
-        // 3: the house goes up, Eleanor stays behind
-        Seed(act3Flags, act3Items, "Shoot him", "He had it coming", "I'll go to the police");
+        // 3: the house burns, Eleanor stays behind
+        Seed(act3Flags.Append("cellar_lit"), act3Items, "Shoot him", "He had it coming", "I'll go to the police");
         await game.ChangeRoom("mansion_bedroom", "start");
         Check(!gs.HasFlag("eleanor_convinced"), "Eleanor stays");
-        await game.Perform(Verb.Hand, "range");
-        await game.Perform(Verb.Hand, "candle");
+        await game.Perform(Verb.Walk, "cellar_door");
+        await game.Perform(Verb.Hand, "barrel");
+        await game.Perform(Verb.Hand, "hung_lantern");
+        await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("cellar_fire"), "alone, the cellar set alight");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded), "ending 3: out of town, alone");
         await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning", 10);
         bool nextMorning = game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
-        Check(nextMorning, "alone explosion escape opens with the next-morning caption");
+        Check(nextMorning, "alone fire escape opens with the next-morning caption");
         await game.Wait(3);
         await Shot("ending_alone");
         await TheEnd("ending_3", nextMorning);
@@ -85,8 +93,8 @@ public partial class AutoPlay
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts");
             string ending = convinced ? "ending_2" : "ending_3";
-            Check(gs.HasFlag(ending) && !gs.HasFlag(Endings.MansionExploded) &&
-                !gs.HasFlag("gas_on") && !gs.HasFlag("candle_lit"), $"{ending}: signed evidence without explosion");
+            Check(gs.HasFlag(ending) && !gs.HasFlag(Endings.MansionExploded) && !gs.HasFlag("cellar_fire"),
+                $"{ending}: signed evidence without fire");
             await TheEnd($"{ending} (documents only)");
         }
 
@@ -356,7 +364,7 @@ public partial class AutoPlay
         var gs = GameState.Instance;
         if (outskirts)
             Check(sawNextMorning == (gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded)),
-                $"{ending}: next-morning transition only after alone escape with explosion");
+                $"{ending}: next-morning transition only after alone escape with fire");
         int endingNumber = Enumerable.Range(1, 7).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
         bool keepJournal = Endings.KeepsJournal(endingNumber);
         bool dismissed = endingNumber is >= 2 and <= 5;

@@ -33,12 +33,14 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
 
 
 MICAH_HEAD = dict(skin="d09670", hair="3a2a1e", hair_style="cropped", brow="2a1c14", stubble="8e6c52",
-                  face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2")
+                  face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2",
+                  clean_jaw=True)
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
              brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35,
              torso="ae8848", collar="e3d7bf", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
              pants="4a433b", shoes="2b1b14",
-             decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
+             decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("knot", 0.205, "7b1f2a", "a8384a"),
+                                                                ("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
               face_w=0.047, jaw_w=0.037,
               shoes="ddd7ca", hipw=0.094, top_hem=0.47)
