@@ -182,8 +182,8 @@ between rooms that share a track does not restart it.
 - **Church** (interior): `ChurchOrgan`, the organist trying the pipes (single notes, a scale run, a full-organ chord),
   then a short mass chorale on the flutes and the full chorus, in a long stone-nave reverb.
 - **Convent** (corridor, Eleanor's cell): `ConventPiano`, a hymn-like piano prelude in E-flat over pedalled arpeggios.
-- **Office** (Micah's): `OfficeJazz`, a soft 1920s Chicago two-beat chorus for clarinet, piano, upright bass and
-  brushes, filtered like an old 78 with a little surface crackle.
+- **Office** (Micah's): `OfficeJazz`, a slow, depressed jazz ballad in D minor at an adagio 66 BPM, in the vein of
+  Chet Baker or Kind of Blue: a Harmon-muted trumpet over rolled piano chords and upright bass on half notes, no drums.
 
 **Settings > Music volume** defaults to **70%** and works like Effects volume (left click louder, right click quieter,
 0% mutes). The value is stored under `[audio] music_volume`.

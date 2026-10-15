@@ -229,9 +229,9 @@ public partial class Attic : Room
                 return true;
             case ("trunk", Verb.UseItem) when item == "crowbar" && !State.HasFlag("trunk_open"):
                 State.TakeItem("crowbar");
-                State.SetFlag("trunk_open");
                 await Say("Come on... come on...");
                 await Say("*CRACK*");
+                State.SetFlag("trunk_open");
                 await Say("Mothballs. An overcoat that's seen better decades. And under it...");
                 State.GiveItem("journal");
                 await Say("A journal. Leather, really old. \"M. Jones\" stamped on the cover.");
