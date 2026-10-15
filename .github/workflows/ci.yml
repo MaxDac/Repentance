@@ -126,6 +126,45 @@ jobs:
           test -f "build/${{ matrix.platform }}/${{ matrix.binary }}"
           # Godot exits 0 even when the C# export step fails; the .NET data folder proves it ran.
           ls -d build/${{ matrix.platform }}/data_Repentance_* >/dev/null
+          # Linux ships the desktop entry, its icons and the installer next to the binary (as release.yml does).
+          if [ "${{ matrix.platform }}" = linux ]; then cp -r dist/linux/. build/linux/; fi
+
+      - name: Windows icon is embedded in the .exe
+        if: matrix.platform == 'windows'
+        shell: python
+        run: |
+          import struct, sys
+          ico = open("assets/art/ui/icon.ico", "rb").read()
+          exe = open("build/windows/Repentance.exe", "rb").read()
+          count = struct.unpack_from("<H", ico, 4)[0]
+          missing = []
+          for i in range(count):
+              w, h, _, _, _, _, size, offset = struct.unpack_from("<BBBBHHII", ico, 6 + 16 * i)
+              if ico[offset:offset + size] not in exe:
+                  missing.append(w or 256)
+          if missing:
+              print(f"::error::icon frames {missing} are not in Repentance.exe")
+              sys.exit(1)
+          print(f"all {count} icon frames are embedded")
+
+      - name: Linux desktop integration installs
+        if: matrix.platform == 'linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq desktop-file-utils > /dev/null
+          desktop-file-validate dist/linux/Repentance.desktop
+          export XDG_DATA_HOME="$RUNNER_TEMP/xdg"
+          test -x build/linux/install-desktop.sh
+          build/linux/install-desktop.sh
+          entry="$XDG_DATA_HOME/applications/Repentance.desktop"
+          desktop-file-validate "$entry"
+          grep -qx "Exec=\"$PWD/build/linux/Repentance.x86_64\"" "$entry"
+          grep -qx "Path=$PWD/build/linux" "$entry"
+          for s in 16 32 48 64 128 256; do test -f "$XDG_DATA_HOME/icons/hicolor/${s}x${s}/apps/repentance.png"; done
+          build/linux/install-desktop.sh --uninstall
+          test ! -e "$entry"
+          test ! -e "$XDG_DATA_HOME/icons/hicolor/256x256/apps/repentance.png"
 
       - name: Install virtual display and software OpenGL
         if: matrix.platform == 'linux'
