@@ -112,6 +112,8 @@ jobs:
           # Godot exits 0 even when the C# export step fails; the .NET data folder proves it ran.
           ls -d build/${{ matrix.platform }}/data_Repentance_* >/dev/null
           rm -f build/${{ matrix.platform }}/*.tmp
+          # Linux: the desktop entry, its icons and install-desktop.sh go next to the binary.
+          if [ "${{ matrix.platform }}" = linux ]; then cp -r dist/linux/. build/linux/; fi
 
       - name: Package
         id: package

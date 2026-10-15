@@ -7,7 +7,8 @@ description: Launch and monitor the Repentance Release workflow that exports Lin
 
 The `Release` workflow (`.github/workflows/release.yml`) is manual-only. It computes the version, runs the unit
 tests, exports the `Linux` and `Windows Desktop` presets with Godot 4.7.2 .NET, and creates a GitHub Release tagged
-`vX.Y.Z` with `Repentance-vX.Y.Z-linux-x86_64.zip` and `Repentance-vX.Y.Z-windows-x86_64.zip`.
+`vX.Y.Z` with `Repentance-vX.Y.Z-linux-x86_64.zip` and `Repentance-vX.Y.Z-windows-x86_64.zip`. The `.exe` embeds the
+game icon. The Linux zip also carries `dist/linux/` (`Repentance.desktop`, hicolor icons, `install-desktop.sh`).
 
 ## Inputs
 
