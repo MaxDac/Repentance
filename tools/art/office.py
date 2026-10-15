@@ -46,8 +46,8 @@ def floor(img):
     noise(img, (118, 158, 392, 198), 6, 4)
 
 
-DOOR = (22, 18, 94, 127)
-DOOR_BOX = (17, 13 + TOP, 100, 140 + TOP)
+DOOR = (32, 18, 84, 127)
+DOOR_BOX = (27, 13 + TOP, 90, 140 + TOP)
 
 
 def door(img, state="closed"):
@@ -69,12 +69,16 @@ def door(img, state="closed"):
             for py in (78, 102):
                 d.rectangle([x0 + 6, py, fx - 6, py + 18], outline=hx("2e1c0e"))
             d.line([(fx, y0 - 2), (fx, y1 + 2)], fill=hx("2a180c"))
-            d.ellipse([fx - 9, 82, fx - 4, 87], fill=hx("c8a050"))
+            # the face is foreshortened to ~2/3 of its width, so the knob narrows with it
+            d.ellipse([fx - 8, 82, fx - 5, 87], fill=hx("c8a050"))
+            d.point((fx - 7, 83), fill=hx("fff0b0"))
         else:
             d.rectangle([x0, y0, x0 + 9, y1], fill=hx("4e321c"))
             d.rectangle([x0 + 1, y0 + 8, x0 + 7, 66], fill=hx("c8c098"))
             d.line([(x0 + 9, y0), (x0 + 9, y1)], fill=hx("2a180c"))
-            d.ellipse([x0 + 2, 80, x0 + 6, 85], fill=hx("c8a050"))
+            # swung wide open and seen almost edge-on: the knob is a thin sliver
+            d.rectangle([x0 + 3, 82, x0 + 4, 86], fill=hx("c8a050"))
+            d.point((x0 + 3, 83), fill=hx("fff0b0"))
         d.line([(x0 + 1, y1), (x1 - 1, y1)], fill=hx("d8c080"))
         return
     x0, y0, x1, y1 = DOOR
@@ -89,7 +93,7 @@ def door(img, state="closed"):
     for t, y in (("MICAH", 34), ("JONES", 44), ("P.I.", 56)):
         text(img, ((x0 + x1) // 2, y), t, hx("1e1a14"), size=8, mirror=True)
     # silhouette of a waiting stranger? no - empty corridor bulb glow
-    light(img, "ellipse", [x0 + 20, y0 + 10, x1 - 20, 50], hx("f8e8b0"), 0.35, 8)
+    light(img, "ellipse", [x0 + 12, y0 + 10, x1 - 12, 50], hx("f8e8b0"), 0.35, 8)
     # lower panels
     for py in (78, 102):
         d.rectangle([x0 + 8, py, x1 - 8, py + 18], outline=hx("2e1c0e"))
