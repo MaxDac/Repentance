@@ -13,7 +13,7 @@ public enum Track
     ChurchOrgan,
     /// <summary>The convent: a quiet piano prelude, hymn-like over pedalled arpeggios.</summary>
     ConventPiano,
-    /// <summary>Micah's office: a soft 1920s Chicago jazz quartet heard off an old record.</summary>
+    /// <summary>Micah's office: a slow, sad minor-key jazz ballad for clarinet, piano, upright bass and brushes.</summary>
     OfficeJazz,
 }
 

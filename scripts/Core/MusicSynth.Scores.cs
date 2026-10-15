@@ -108,54 +108,66 @@ public static partial class MusicSynth
 
     // ------------------------------------------------------------------ the office
 
-    // A 32-bar AABA chorus in F at a relaxed two-beat swing, as a small Chicago band might have cut it in 1927: the
-    // clarinet sings the tune low and soft in swung eighths, the piano answers on two and four, the upright bass plucks
-    // roots and fifths, and brushes sweep the snare under a quiet ride. All of it heard through a gramophone horn.
-    private const string JazzTheme =
-        "r:1 A4:2/3 C5:1/3 D5:1 C5:1 F#4:2/3 A4:1/3 C5:2/3 D5:1/3 Eb5:2 D5:1 B4:2/3 G4:1/3 F5:1 D5:1 E5:3 r:1 " +
-        "F5:2/3 E5:1/3 D5:2/3 C5:1/3 A4:1 F#4:1 G4:1 Bb4:2/3 D5:1/3 E5:2/3 G5:1/3 Bb4:1 ";
+    // A slow, sad ballad in D minor at an adagio drag, the record left on long after the bar has emptied: sixteen bars,
+    // AABA, four to a section. The clarinet sighs low in its dark chalumeau register, lazy swung eighths and long held
+    // notes with rests between the phrases; the piano rolls one soft chord a bar (two when the harmony moves), the
+    // upright bass walks nothing, just roots and fifths on half notes, and the brushes barely move: a slow sweep, a
+    // ride whispered on the beat, a tap on two and four. The last A ends on the leading tone over A7, falling home to D.
+    private const string BalladOpening =
+        "r:1 A3:2/3 D4:1/3 F4:2 E4:2/3 D4:1/3 C#4:2/3 D4:1/3 B3:2 r:2/3 G4:1/3 Bb4:1 A4:2/3 G4:1/3 E4:1 ";
 
-    private const string JazzBridge =
-        "E5:2/3 C#5:1/3 A4:1 E5:2 G5:2/3 F5:1/3 E5:2/3 C#5:1/3 A4:2 D5:3 F5:1 A5:2 F5:2/3 D5:1/3 A4:1 " +
-        "B4:2/3 D5:1/3 G5:1 F5:2/3 D5:1/3 B4:1 G4:3 r:1 E5:2/3 G5:1/3 Bb5:1 A5:2/3 G5:1/3 E5:1 Bb4:2 G4:1 C5:1 ";
+    private const string BalladBridge =
+        "Bb4:2 A4:2/3 G4:1/3 F4:1 E4:2/3 G4:1/3 Bb4:1 D5:2 C5:2/3 A4:1/3 G4:1 E4:2 G4:2/3 E4:1/3 Bb3:1 C#4:2 ";
 
-    private const string JazzBassA = "F2:2 C2:2 D2:2 A1:2 G1:2 D2:2 C2:2 G1:2 F2:2 D2:2 G1:2 C2:2 F2:2 C2:2 ";
+    private const string BalladBassA = "D2:2 A1:2 D2:2 B1:2 E2:2 A1:2 ";
 
     // declared before Office: static fields initialize in order
-    private static readonly Dictionary<string, string> JazzChords = new()
+    private static readonly Dictionary<string, string> BalladChords = new()
     {
-        ["F6"] = "A3+C4+D4+F4", ["D7"] = "A3+C4+F#4", ["G7"] = "B3+D4+F4", ["C7"] = "Bb3+E4+G4",
-        ["Gm7"] = "Bb3+D4+F4", ["A7"] = "C#4+E4+G4", ["Dm"] = "A3+D4+F4", ["E7"] = "G#3+D4+E4",
+        ["Dm9"] = "F3+A3+C4+E4", ["Dm6"] = "F3+A3+B3+D4", ["Dm7"] = "C3+F3+A3+D4", ["Em7b5"] = "E3+G3+Bb3+D4",
+        ["A7b9"] = "G3+Bb3+C#4+E4", ["D7b9"] = "F#3+C4+Eb4+A4", ["Gm9"] = "Bb3+D4+F4+A4", ["C9"] = "Bb3+D4+E4+G4",
+        ["Fmaj9"] = "A3+C4+E4+G4",
     };
 
-    private static readonly Piece Office = new(128, new Hall(0.6, 0.75, 0.5, 0.15), new Part[]
+    private static readonly Piece Office = new(66, new Hall(0.8, 0.82, 0.6, 0.2), new Part[]
     {
-        new(Instrument.Clarinet, 0.55, -0.15,
-            JazzTheme + "A4:4 r:1 G4:2/3 A4:1/3 Bb4:2/3 C5:1/3 Db5:1 " +
-            JazzTheme + "F4:3 r:1 r:1 E4:2/3 F4:1/3 G4:2/3 A4:1/3 C#5:1 " +
-            JazzBridge +
-            JazzTheme + "F5:2 D5:2/3 C5:1/3 A4:1 G4:2/3 A4:1/3 Bb4:2/3 C5:1/3 r:2"),
-        new(Instrument.Piano, 0.42, 0.25, Comping(
-            "F6|D7|G7|C7|F6 D7|Gm7 C7|F6|C7|F6|D7|G7|C7|F6 D7|Gm7 C7|F6|F6 E7|" +
-            "A7|A7|Dm|Dm|G7|G7|C7|C7|F6|D7|G7|C7|F6 D7|Gm7 C7|F6|C7")),
-        new(Instrument.UprightBass, 0.85, 0.05,
-            JazzBassA + "C2:2 E2:2 " + JazzBassA + "F2:2 E2:2 " +
-            "A1:2 E2:2 A1:2 C#2:2 D2:2 A1:2 D2:2 F2:2 G1:2 D2:2 G1:2 B1:2 C2:2 G1:2 C2:2 E2:2 " +
-            JazzBassA + "C2:2 E2:2"),
-        new(Instrument.Drums, 0.5, 0.1, Repeat("E2:4 ", 32)),
-        new(Instrument.Drums, 0.35, 0.3, Repeat("r:1 F#2:1 r:1 F#2:1 ", 32)),
-        new(Instrument.Drums, 0.3, -0.3, Repeat("Eb3:1 Eb3:2/3 Eb3:1/3 Eb3:1 Eb3:2/3 Eb3:1/3 ", 32)),
-        new(Instrument.Drums, 0.3, 0, Repeat("C2:1 ", 128)),
+        new(Instrument.Clarinet, 0.5, -0.15,
+            BalladOpening + "D4:2 C#4:1 r:1 " +
+            BalladOpening + "D4:2 F#4:2/3 A4:1/3 C5:1 " +
+            BalladBridge +
+            BalladOpening + "F4:2/3 E4:1/3 D4:1 C#4:1 r:1"),
+        new(Instrument.Piano, 0.36, 0.25, Rolled(
+            "Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm7 D7b9|" +
+            "Gm9|C9|Fmaj9|Em7b5 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9")),
+        new(Instrument.UprightBass, 0.8, 0.05,
+            BalladBassA + "D2:2 A1:2 " + BalladBassA + "D2:2 F#2:2 " +
+            "G1:2 D2:2 C2:2 G1:2 F1:2 C2:2 E2:2 A1:2 " +
+            BalladBassA + "D2:2 A1:2"),
+        new(Instrument.Drums, 0.45, 0.1, Repeat("E2:4 ", 16)),
+        new(Instrument.Drums, 0.18, -0.3, Repeat("Eb3:2 Eb3:2/3 Eb3:1/3 Eb3:1 ", 16)),
+        new(Instrument.Drums, 0.2, 0.3, Repeat("r:1 D2:1 r:1 D2:1 ", 16)),
     });
 
-    /// <summary>Short piano chords on two and four, one 4/4 bar per <c>|</c>; a bar with two chords changes on beat three.</summary>
-    private static string Comping(string bars)
+    /// <summary>
+    /// Soft piano chords rolled from the bottom up, one 4/4 bar per <c>|</c>; a bar with two chords changes on beat
+    /// three. Each note of a chord follows the one below it by an eighth of a beat and rings until the chord changes.
+    /// </summary>
+    private static string Rolled(string bars)
     {
         var sb = new StringBuilder();
         foreach (var bar in bars.Split('|'))
         {
             var chords = bar.Split(' ');
-            sb.Append($"r:1 {JazzChords[chords[0]]}:1>0.6 r:1 {JazzChords[chords[^1]]}:1>0.6 ");
+            int eighths = 32 / chords.Length;
+            foreach (var chord in chords)
+            {
+                var notes = BalladChords[chord].Split('+');
+                for (int i = 0; i < notes.Length; i++)
+                {
+                    int advance = i < notes.Length - 1 ? 1 : eighths - i;
+                    sb.Append($"{notes[i]}:{advance}/8>{eighths - i}/8 ");
+                }
+            }
         }
         return sb.ToString();
     }

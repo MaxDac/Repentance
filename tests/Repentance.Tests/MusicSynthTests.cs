@@ -124,20 +124,33 @@ public class MusicSynthTests
     }
 
     [Fact]
-    public void OfficeJazzSwingsAnAabaChorus()
+    public void OfficeJazzIsASlowSadBallad()
     {
         var score = MusicSynth.Score(Track.OfficeJazz);
-        Assert.Equal(128, MusicSynth.LengthBeats(Track.OfficeJazz));
+        Assert.Equal(64, MusicSynth.LengthBeats(Track.OfficeJazz));
+        // adagio: slow, but not a lento crawl
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.OfficeJazz), 60, 72);
         var clarinet = score.Where(n => n.Instrument == Instrument.Clarinet).ToList();
         // swung eighths: an offbeat always falls two thirds of the way through the beat, never half way
         Assert.DoesNotContain(clarinet, n => Math.Abs(n.Beat % 1 - 0.5) < 1e-6);
         Assert.Contains(clarinet, n => Math.Abs(n.Beat % 1 - 2.0 / 3) < 1e-6);
-        // AABA: the three A sections open with the same six bars
+        // low key: the clarinet stays down in its dark register
+        Assert.All(clarinet, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
+        // AABA: the three A sections open with the same three bars
         IEnumerable<(double, int)> Bars(double from) =>
-            clarinet.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 24 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
-        Assert.Equal(Bars(0), Bars(32));
-        Assert.Equal(Bars(0), Bars(96));
-        Assert.NotEqual(Bars(0), Bars(64));
+            clarinet.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
+        Assert.Equal(Bars(0), Bars(16));
+        Assert.Equal(Bars(0), Bars(48));
+        Assert.NotEqual(Bars(0), Bars(32));
+        // D minor: the bass opens on D under a chord with F, not F#, and the tune leads home from the leading tone
+        var bass = score.Where(n => n.Instrument == Instrument.UprightBass).ToList();
+        Assert.Equal(MusicSynth.Midi("D2"), bass[0].Midi);
+        var opening = score.Where(n => n.Instrument == Instrument.Piano && n.Beat < 1).Select(n => n.Midi % 12).ToHashSet();
+        Assert.Contains(5, opening);
+        Assert.DoesNotContain(6, opening);
+        Assert.Equal(MusicSynth.Midi("C#4"), clarinet.MaxBy(n => n.Beat).Midi);
+        // a slow two-feel: the bass plucks only on the half notes
+        Assert.All(bass, n => Assert.True(n.Beats >= 2 && n.Beat % 2 == 0, $"{n}"));
         // the band: clarinet, piano, plucked bass and brushes
         Assert.Equal(
             new[] { Instrument.Clarinet, Instrument.Piano, Instrument.UprightBass, Instrument.Drums }.ToHashSet(),
