@@ -745,11 +745,6 @@ def bluing_shelf(img):
     for bx, col in ((271, hx("6a4a2a")), (279, hx("3a5a3a"))):
         d.rectangle([bx, 122, bx + 5, 133], fill=col)
         d.rectangle([bx + 1, 119, bx + 4, 122], fill=mul(col, 0.8))
-    # watering can on the bottom shelf
-    d.ellipse([284, 146, 300, 158], fill=hx("6a7a6a"))
-    d.line([(299, 150), (305, 144)], fill=hx("6a7a6a"), width=2)
-    shadow(img, "rect", [x1 + 1, 104, x1 + 6, BASE], 0.3, 3)
-=======
         d.rectangle([bx + 1, 117, bx + 4, 118], fill=hx("b89060"))
         d.rectangle([bx, 125, bx + 5, 130], fill=hx("e0d4b0"))
         d.line([(bx + 1, 127), (bx + 4, 127)], fill=hx("4a3a2a"))
@@ -809,7 +804,6 @@ def bluing_shelf(img):
     for x in range(297, 306, 3):
         d.ellipse([x, 163, x + 2, 165], fill=hx("c8a878"))
     shadow(img, "rect", [x1 + 1, 92, x1 + 6, BASE], 0.3, 3)
->>>>>>> 90f906e (Art: more detail in linen room, Rizzo's Flowers, room 507)
 
 
 def cold_door(img, open_):
