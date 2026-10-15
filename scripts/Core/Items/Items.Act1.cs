@@ -8,7 +8,7 @@ public static partial class Items
         new("photo", "photograph", "res://assets/art/items/photo.png",
             "Eleanor Harrington. Pretty, poised, and looking at the camera like it owed her money."),
         new("dollar", "cash", "res://assets/art/items/dollar.png",
-            "My cash for the case. Two dollars for the bellboy; ten to get past Sal."),
+            "My cash for the case. Two dollars for the bellboy; ten to get past Sal, if I can't talk my way in."),
         new("matchbook", "matchbook", "res://assets/art/items/matchbook.png",
             "A blue lantern on the cover: The Blue Lantern, State Street. No password inside. A calling card for a speakeasy."),
         new("crowbar", "crowbar", "res://assets/art/items/crowbar.png",
@@ -26,7 +26,7 @@ public static partial class Items
         new("lockpick", "lockpicks", "res://assets/art/items/lockpick.png",
             "A roll of lockpicks. A souvenir from a burglar I once let off easy. He said I'd need them more than him."),
         new("combination", "slip of paper", "res://assets/art/items/combination.png",
-            "Hotel stationery, in Eleanor's hand: \"Those who sat at His table. The days of the month He was born. The day He rested.\" No directions."),
+            "Hotel stationery, in Eleanor's hand: \"Leaves on a lucky clover. The night when the Veil is thin. Saint Patrick's day in March.\" No directions."),
         new("brass_box", "brass box", "res://assets/art/items/brass_box.png",
             "A little brass box, engraved with lilies. Something slides around inside."),
         new("card", "business card", "res://assets/art/items/card.png",
@@ -47,5 +47,7 @@ public static partial class Items
             "Mrs. Stewart's Liquid Bluing, from Eleanor's brass box. Turns grey linen white, and white flowers blue."),
         new("blue_carnation", "blue carnation", "res://assets/art/items/blue_carnation.png",
             "A carnation dyed blue through its own stem. A member's buttonhole, as far as a grille can tell."),
+        new("water_flower", "paper pellet", "res://assets/art/items/water_flower.png",
+            "A Japanese water flower from Eleanor's brass box: a pellet of pressed paper tied with red thread, wrapped in a scrap of hotel paper. Scrawled on the scrap, in a hurry: \"Give me a drink and I'll tell you the word.\""),
     };
 }

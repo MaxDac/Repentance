@@ -1175,6 +1175,19 @@ def bluing(d, im):
     d.line([(12, 8), (12, 21)], fill=hx("5a7ae8"))
 
 
+def water_flower(d, im):
+    # a pressed paper pellet tied with red thread, on its scrap of hotel paper
+    d.polygon([(3, 13), (24, 10), (28, 21), (6, 23)], fill=hx("ece4d0"))
+    d.line([(8, 19), (22, 17)], fill=hx("3a3a6a"))
+    d.line([(9, 21), (19, 20)], fill=hx("3a3a6a"))
+    d.ellipse([10, 2, 22, 13], fill=hx("e8a0b0"))
+    d.ellipse([12, 3, 18, 8], fill=hx("f8d0d8"))
+    for x in (13, 16, 19):
+        d.line([(x, 3), (x - 1, 12)], fill=hx("c07088"))
+    d.line([(10, 7), (22, 8)], fill=hx("c82a2a"))
+    d.line([(22, 8), (25, 11)], fill=hx("c82a2a"))
+
+
 # ============================================================================================ build
 
 def _overlay(base, state, name):
@@ -1238,7 +1251,7 @@ def build_florist():
 
 def build_items():
     for name, fn in (("hanger", hanger), ("pliers", pliers), ("wire_hook", wire_hook), ("carnation", carnation),
-                     ("bluing", bluing), ("blue_carnation", blue_carnation)):
+                     ("bluing", bluing), ("blue_carnation", blue_carnation), ("water_flower", water_flower)):
         save(_icon(fn), "items", f"{name}.png")
 
 

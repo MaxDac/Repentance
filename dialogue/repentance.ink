@@ -217,6 +217,14 @@ BELLBOY: Fair warning, mister: somebody already turned it over. And it wasn't ho
 SAL: ...
 SAL: Password.
 - (opts)
+* {has_flag("knows_password")} [Moonshine.]
+    SAL: ...
+    SAL: Who gave you that?
+    MICAH: A lady who knows the place better than you'd think.
+    SAL: Huh. Go on in. Keep your hands where I can see 'em.
+    ~ set_flag("sal_password")
+    ~ set_flag("sal_passed")
+    -> END
 * [Swordfish?]
     SAL: No.
     -> sal.opts
@@ -237,6 +245,7 @@ SAL: Matches are free. The door ain't.
     SAL: ...
     SAL: That'll do.
     SAL: Go on in. Keep your hands where I can see 'em.
+    ~ set_flag("sal_bribed")
     ~ set_flag("sal_passed")
     -> END
 * [What's the matter, big fella? Forgot it yourself?]
