@@ -895,19 +895,40 @@ def portraits(img):
     d.line([(449, 157), (473, 155)], fill=hx("8a5a30"))
     d.line([(449, 157), (451, 187)], fill=hx("7a4e28"))
     d.polygon([(451, 159), (472, 157), (473, 184), (453, 186)], fill=hx("c8b890"))  # cream mat
-    d.ellipse([454, 160, 471, 184], fill=hx("7a6a4c"), outline=hx("8a7448"))
-    d.ellipse([455, 161, 470, 183], outline=hx("5a4c34"))
-    d.ellipse([459, 165, 466, 173], fill=hx("b89878"))  # a long, bald head
-    d.line([(459, 166), (461, 165)], fill=hx("e8e0d0"))  # white side-whiskers
-    d.line([(459, 167), (459, 172)], fill=hx("d8d0c0"))
-    d.line([(466, 167), (466, 172)], fill=hx("d8d0c0"))
-    d.line([(460, 169), (461, 169)], fill=hx("2a1a14"))
-    d.line([(464, 169), (465, 169)], fill=hx("2a1a14"))
-    d.line([(461, 172), (464, 172)], fill=hx("6a4a3a"))  # a thin, disapproving mouth
-    d.polygon([(458, 175), (463, 174), (467, 175), (469, 183), (456, 183)], fill=hx("161210"))
-    d.polygon([(461, 174), (464, 174), (463, 177)], fill=hx("e8e0d0"))
-    d.point((462, 178), fill=hx("c8a050"))  # watch chain
-    d.line([(462, 178), (465, 180)], fill=hx("a88a40"))
+    d.ellipse([454, 160, 471, 184], fill=hx("4a3e2c"), outline=hx("8a7448"))
+    d.ellipse([456, 162, 469, 178], fill=hx("524432"))  # the studio backdrop, lighter behind the head
+    sitter = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    s_ = ImageDraw.Draw(sitter)
+    skin, skin_d, hair = hx("c8a484"), hx("9a7860"), hx("b8b0a0")
+    # broad shoulders in a dark frock coat, white wing collar and a black cravat
+    s_.polygon([(455, 184), (456, 178), (459, 175), (466, 175), (469, 178), (470, 184)], fill=hx("1e1a16"))
+    s_.line([(459, 176), (461, 183)], fill=hx("3a322a"))  # lapels
+    s_.line([(466, 176), (464, 183)], fill=hx("3a322a"))
+    s_.polygon([(461, 174), (464, 174), (465, 177), (462, 179), (460, 177)], fill=hx("e8e0d0"))
+    s_.rectangle([462, 176, 463, 178], fill=hx("141010"))
+    s_.point((466, 181), fill=hx("c8a050"))  # watch chain
+    s_.line([(466, 181), (468, 182)], fill=hx("a88a40"))
+    # neck and head: receding grey hair, ears, heavy brows, mutton-chop whiskers and a moustache
+    s_.rectangle([461, 172, 464, 174], fill=skin_d)
+    s_.ellipse([459, 164, 466, 174], fill=skin)
+    s_.point((458, 169), fill=skin_d)
+    s_.point((467, 169), fill=skin_d)
+    s_.line([(460, 164), (465, 164)], fill=hair)
+    s_.point((459, 165), fill=hair)
+    s_.point((466, 165), fill=hair)
+    s_.line([(460, 167), (461, 167)], fill=hx("6a6258"))  # brows
+    s_.line([(464, 167), (465, 167)], fill=hx("6a6258"))
+    s_.point((460, 168), fill=hx("2a1a14"))
+    s_.point((465, 168), fill=hx("2a1a14"))
+    s_.line([(462, 168), (462, 170)], fill=skin_d)  # nose
+    s_.line([(459, 169), (459, 173)], fill=hair)  # whiskers down the cheeks
+    s_.line([(466, 169), (466, 173)], fill=hair)
+    s_.line([(460, 171), (465, 171)], fill=hx("d8d0c0"))  # moustache
+    s_.line([(461, 173), (464, 173)], fill=hx("8a6a58"))  # the thin, disapproving mouth
+    s_.point((465, 166), fill=hx("e0c0a0"))  # light from the bulb
+    clip = Image.new("L", img.size, 0)
+    ImageDraw.Draw(clip).ellipse([455, 161, 470, 183], fill=255)
+    oval.paste(sitter, (0, 0), ImageChops.multiply(sitter.getchannel("A"), clip))
     for (cx, cy) in ((452, 160), (471, 158), (472, 183), (454, 185)):
         d.point((cx, cy), fill=hx("a88a40"))
     img.paste(oval, (0, -8), oval)
