@@ -38,7 +38,8 @@ public partial class AutoPlay
         Check(gs.HasFlag("act2_church_thought"), "Micah thinks about Eleanor outside the cathedral, then goes in");
         await game.Wait(2);
         await Shot("church_act2");
-        await Until(() => game.Room?.Name == "ChicagoMap");
+        // the whole caleb_act2 conversation plays out here: about two minutes of game time
+        await Until(() => game.Room?.Name == "ChicagoMap", timeout: 240);
         Check(game.Music.Current == null, "the organ stops on the map");
         Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
         Check(_crossOffers == 0, "no pendant offer on the initial confession");

@@ -27,6 +27,9 @@ public partial class Hud : CanvasLayer
     public event Action<string, bool, Vector2>? ItemClicked;
     public event Action<string?>? ItemHovered;
     public static Font Font { get; private set; } = null!;
+    /// <summary>Mixed-case font for what is read at length: speech, journal thoughts, dialogue choices.</summary>
+    public static Font DialogueFont { get; private set; } = null!;
+    public const int DialogueFontSize = 11;
     public VerbWheel Wheel { get; private set; } = null!;
     public GameMenu Menu { get; private set; } = null!;
     public PuzzlePanel Puzzle { get; private set; } = null!;
@@ -95,6 +98,7 @@ public partial class Hud : CanvasLayer
         // keeps the pause input, cursor and menu alive while gameplay is paused
         ProcessMode = ProcessModeEnum.Always;
         Font = GD.Load<Font>("res://assets/fonts/Silkscreen-Regular.ttf");
+        DialogueFont = GD.Load<Font>("res://assets/fonts/DepartureMono-Regular.otf");
         // .godot/ is not committed: a fresh checkout has no imported assets until the editor (or --import) runs
         if (Font == null)
             GD.PushError("Assets are not imported (fresh checkout?). Run `godot --path . --headless --import` once, then start the game again.");
