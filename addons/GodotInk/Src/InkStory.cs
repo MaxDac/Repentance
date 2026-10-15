@@ -141,7 +141,7 @@ public partial class InkStory : Resource
     /// Reset the Story back to its initial state as it was when it was
     /// first constructed.
     /// </summary>
-    public void ResetState()
+    public new void ResetState()
     {
         runtimeStory.ResetState();
     }
