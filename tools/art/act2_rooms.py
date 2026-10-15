@@ -1749,6 +1749,7 @@ def _bedroom_nightstand(img, d, R, WX, z0, z1, cols, seed):
 def _bedroom_lamp(img, d, base, k, lit):
     """A table lamp: brass foot, a glazed urn, brass stem with a knuckle and switch, and a pleated drum shade."""
     x, y = base
+    top = y + 22 * k  # the stem is short: everything above the urn's collar is lowered by this much
     brass, brass_d, brass_l = hx("a88a44"), hx("5e4a24"), hx("ecd48e")
     d.ellipse([x - 6 * k, y - 2 * k, x + 6 * k, y + 2 * k], fill=brass_d)
     d.ellipse([x - 5 * k, y - 3 * k, x + 5 * k, y + 1 * k], fill=brass)
@@ -1760,30 +1761,30 @@ def _bedroom_lamp(img, d, base, k, lit):
     d.line([(x - 5 * k, y - 10 * k), (x + 5 * k, y - 10 * k)], fill=hx("c8b070"))
     d.rectangle([x - 2 * k, y - 20 * k, x + 2 * k, y - 16 * k], fill=brass)
     d.line([(x - 2 * k, y - 20 * k), (x + 2 * k, y - 20 * k)], fill=brass_l)
-    d.rectangle([x - 1, y - 48 * k, x + 1, y - 20 * k], fill=brass)
-    d.line([(x - 1, y - 48 * k), (x - 1, y - 20 * k)], fill=brass_l)
-    d.line([(x + 1, y - 48 * k), (x + 1, y - 20 * k)], fill=brass_d)
-    d.ellipse([x - 2 * k, y - 36 * k, x + 2 * k, y - 32 * k], fill=brass)
-    d.point((x - 1, y - 35 * k), fill=brass_l)
-    d.rectangle([x - 2.5 * k, y - 52 * k, x + 2.5 * k, y - 47 * k], fill=brass_d)
-    d.line([(x + 2.5 * k, y - 49 * k), (x + 4.5 * k, y - 49 * k)], fill=brass)
+    d.rectangle([x - 1, top - 48 * k, x + 1, y - 20 * k], fill=brass)
+    d.line([(x - 1, top - 48 * k), (x - 1, y - 20 * k)], fill=brass_l)
+    d.line([(x + 1, top - 48 * k), (x + 1, y - 20 * k)], fill=brass_d)
+    d.ellipse([x - 2 * k, y - 25 * k, x + 2 * k, y - 21 * k], fill=brass)
+    d.point((x - 1, y - 24 * k), fill=brass_l)
+    d.rectangle([x - 2.5 * k, top - 52 * k, x + 2.5 * k, top - 47 * k], fill=brass_d)
+    d.line([(x + 2.5 * k, top - 49 * k), (x + 4.5 * k, top - 49 * k)], fill=brass)
     if lit:  # painted bright so the night grade leaves it glowing warm
-        light(img, "ellipse", [x - 26 * k, y - 80 * k, x + 26 * k, y - 30 * k], hx("fff4d0"), 0.5, 8)
-        d.line([(x + 3 * k, y - 49 * k), (x + 3 * k, y - 44 * k)], fill=brass_d)
-        d.point((x + 3 * k, y - 43 * k), fill=brass_l)
+        light(img, "ellipse", [x - 26 * k, top - 80 * k, x + 26 * k, y - 30 * k], hx("fff4d0"), 0.5, 8)
+        d.line([(x + 3 * k, top - 49 * k), (x + 3 * k, top - 44 * k)], fill=brass_d)
+        d.point((x + 3 * k, top - 43 * k), fill=brass_l)
     body, pleat, rim, inside = ((hx("fffff0"), hx("efe2bc"), hx("e8c080"), hx("fff8d8")) if lit else
                                 (hx("c8bca4"), hx("a89c84"), hx("8a7e68"), hx("6a604e")))
-    shade = [(x - 10 * k, y - 50 * k), (x + 10 * k, y - 50 * k), (x + 8 * k, y - 64 * k), (x - 8 * k, y - 64 * k)]
+    shade = [(x - 10 * k, top - 50 * k), (x + 10 * k, top - 50 * k), (x + 8 * k, top - 64 * k), (x - 8 * k, top - 64 * k)]
     d.polygon(shade, fill=body)
     for i in range(1, 10):
         t = i / 10
         if i % 2:
-            d.line([(x - 10 * k + 20 * k * t, y - 50 * k), (x - 8 * k + 16 * k * t, y - 64 * k)], fill=pleat)
-    d.polygon([(x + 4 * k, y - 50 * k), (x + 10 * k, y - 50 * k), (x + 8 * k, y - 64 * k), (x + 3 * k, y - 64 * k)],
+            d.line([(x - 10 * k + 20 * k * t, top - 50 * k), (x - 8 * k + 16 * k * t, top - 64 * k)], fill=pleat)
+    d.polygon([(x + 4 * k, top - 50 * k), (x + 10 * k, top - 50 * k), (x + 8 * k, top - 64 * k), (x + 3 * k, top - 64 * k)],
               fill=mul(body, 0.9))
-    d.ellipse([x - 8 * k, y - 65.5 * k, x + 8 * k, y - 62.5 * k], fill=inside, outline=rim)
-    d.chord([x - 10 * k, y - 52 * k, x + 10 * k, y - 48 * k], 0, 180, fill=rim)
-    d.line([(x - 8 * k, y - 63 * k), (x + 8 * k, y - 63 * k)], fill=rim)
+    d.ellipse([x - 8 * k, top - 65.5 * k, x + 8 * k, top - 62.5 * k], fill=inside, outline=rim)
+    d.chord([x - 10 * k, top - 52 * k, x + 10 * k, top - 48 * k], 0, 180, fill=rim)
+    d.line([(x - 8 * k, top - 63 * k), (x + 8 * k, top - 63 * k)], fill=rim)
 
 
 def paint_bedroom():
