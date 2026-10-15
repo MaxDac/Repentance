@@ -14,7 +14,22 @@ tools\run\film.ps1 -Speed 2
 tools\run\film.ps1 -Speed 4 -Ending 5
 ```
 
-Linux / macOS / Git Bash:
+### Linux prerequisites
+
+Repentance needs Godot 4.7.x **.NET/Mono** and the **.NET 10 SDK**. On Arch Linux / Omarchy:
+
+```bash
+sudo pacman -Syu godot-mono dotnet-sdk
+godot-mono --version
+dotnet --list-sdks                 # must include a 10.x SDK
+```
+
+Install **`godot-mono`**, not `godot`: the standard `godot` package has no C# support.
+The launchers select `godot-mono` automatically; manual Godot commands on this distribution should also use
+`godot-mono` (for example, `godot-mono --path . --editor`).
+Other distributions can use the official **.NET** editor download described below.
+
+### Bash launchers (Linux / macOS / Git Bash)
 
 ```bash
 tools/run/test.sh
@@ -25,9 +40,21 @@ tools/run/film.sh 4 --ending 5
 ```
 
 Both scripts find Godot 4 .NET in this order: `-Godot <path>` / `--godot <path>`, then the `GODOT` environment
-variable, then `godot_console`, `godot4` or `godot` on `PATH`, then the usual install folders (on Windows,
-`%LOCALAPPDATA%\Godot`). Python 3 with `pillow` and `numpy` is needed for the art suite only; it's found on
+variable, then `godot_console`, `godot-mono`, `godot4-mono`, `godot4` or `godot` on `PATH`, then the usual install folders (on Windows,
+`%LOCALAPPDATA%\Godot`). Each executable is checked for Godot 4 with C# support **before any clean reset**.
+Automatic discovery skips incompatible executables; an incompatible explicit path or `GODOT` value fails immediately.
+Python 3 with `pillow` and `numpy` is needed for the art suite only; it's found on
 `PATH`, in `%LOCALAPPDATA%\Programs\Python`, or through the `PYTHON` environment variable.
+
+The standard Godot edition cannot run this C# game. If the log says `No loader found` for `.cs` files or
+`Could not find type "CSharpScript"`, install the **.NET/Mono** editor from
+[Godot's downloads](https://godotengine.org/download/archive/) and point the launcher at its executable:
+
+```bash
+tools/run/film.sh --godot "$HOME/godot/Godot_v4.7.2-stable_mono_linux_x86_64/Godot_v4.7.2-stable_mono_linux.x86_64"
+# Or set GODOT once for both launchers:
+export GODOT="/path/to/Godot_dotnet_executable"
+```
 
 ### Clean reset
 
@@ -39,6 +66,8 @@ Unless you pass `-NoClean` / `--no-clean`, both scripts first delete everything 
   (on Windows, under `%APPDATA%\Godot\app_userdata\Repentance\`).
 
 Then they run `dotnet build` and `godot --headless --import` (the build comes first, because the Ink importer is C#).
+Import output is saved to `logs/import.log`; a nonzero exit or an error line stops the launcher before the game starts,
+including in film mode.
 **Your own saves (`user://saves/`) and settings (`user://settings.cfg`) are never touched.**
 
 ## Film mode

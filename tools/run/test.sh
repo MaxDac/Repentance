@@ -48,10 +48,12 @@ for s in "${ORDER[@]}"; do
 done
 
 set -e
-[ "$clean" -eq 1 ] && reset_generated
 if [ "$needs_godot" -eq 1 ]; then
   godot="$(find_godot "$godot_arg")"
   echo "Godot: $godot"
+fi
+[ "$clean" -eq 1 ] && reset_generated
+if [ "$needs_godot" -eq 1 ]; then
   build_and_import "$godot"
 fi
 set +e
