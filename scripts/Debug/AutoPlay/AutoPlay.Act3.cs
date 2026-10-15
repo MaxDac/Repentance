@@ -92,7 +92,8 @@ public partial class AutoPlay
         Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned),
             "back on the stage with Micah's things, notepad and lighter first");
         Check(gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(3, i)) && !gs.HasItem("mirror") && !gs.HasItem("card") &&
-            !gs.HasItem("lockpick"), "Act 3 starts with only the revolver and Micah's commitments");
+            !gs.HasItem("lockpick"), "Act 3 starts with only the revolver, the cloth and Micah's commitments");
+        Check(gs.HasItem("cloth"), "Eleanor's cloth survives the Act 3 satchel reset");
         await game.Wait(3);
         Check(game.Hud.InsetVisible, "the close-up is back when Act 3 opens on the stage");
         await Shot("club_stage_act3");
