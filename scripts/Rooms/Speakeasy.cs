@@ -52,7 +52,10 @@ public partial class Speakeasy : Room
         if (State.HasFlag("sal_passed"))
         {
             if (sal != null) await sal.MoveTo(SalAside, 45);
-            if (!wasPassed) await Think("Ten dollars into a fist the size of a ham. Half of what I had left, and I haven't even had a drink.");
+            if (!wasPassed)
+                await Think(State.HasFlag("sal_password")
+                    ? "One word, and the vault steps aside. Ten dollars still in my pocket. Thank you, Eleanor."
+                    : "Ten dollars into a fist the size of a ham. Half of what I had left, and I haven't even had a drink.");
         }
         else if (State.HasFlag("thrown_out"))
             await ThrownOut();
