@@ -43,6 +43,7 @@ public partial class Game
                 finally { _busy--; }
                 UnloadRoom();
                 Sfx.SetAmbient(null);
+                Music.Play(null);
                 await TitleScreen();
                 break;
         }

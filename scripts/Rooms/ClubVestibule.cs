@@ -13,6 +13,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ClubVestibule : Room
 {
+    public override Track? Music => Track.ClubStrings;
+
     private static readonly string[] Signets = { "signet_raven", "signet_lion", "signet_stag" };
 
     public override async Task OnEnter(string entry)

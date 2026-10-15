@@ -5,6 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>The cathedral interior: a little peace, and a lot of guilt.</summary>
 public partial class Church : Room
 {
+    public override Track? Music => Track.ChurchOrgan;
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "act3")

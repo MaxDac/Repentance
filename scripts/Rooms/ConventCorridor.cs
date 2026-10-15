@@ -5,6 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>The convent on the North Side. A nun bars the corridor and asks Micah what he wants with Eleanor.</summary>
 public partial class ConventCorridor : Room
 {
+    public override Track? Music => Track.ConventPiano;
+
     /// <summary>Act 2: Micah comes back from the map to ask about the Club.</summary>
     private bool ClubVisit => State.HasFlag("caleb_club");
 

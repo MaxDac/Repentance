@@ -46,6 +46,7 @@ public partial class Game
         Player.Visible = Room.PlayerVisibleOnLoad;
         if (Room.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
         else Sfx.SetAmbient(null);
+        Music.Play(Room.Music);
     }
 
     /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>

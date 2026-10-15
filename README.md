@@ -117,6 +117,26 @@ All sound effects are synthesized at startup (no audio files) and play on an **E
 (it wraps at the ends), and each change plays a preview knock. 0% mutes the effects. The value is stored in
 `user://settings.cfg` under `[audio] effects_volume`.
 
+### Music
+
+Music is synthesized too (`MusicSynth`): original pieces written as scores and played by synthesized instruments
+(bowed strings, pipe organ, piano, clarinet, plucked bass, brushed drums) in a reverberant room. Each track is about a
+minute long, rendered once at startup on a background thread as exactly one period of a seamless loop, and
+plays on a **Music** bus. It keeps playing while the game is paused. A room picks its track with `Room.Music`. Moving
+between rooms that share a track does not restart it.
+
+- **Club** (vestibule, hall, lounge, stage): `ClubStrings`, a dark, 60-second string bolero in 3/4 on tritones and the
+  diminished scale. One bowed double-bass ostinato runs under a repeating cello theme. A second cello, the viola and,
+  at the very end, two strident violins build on it before it all falls back to the bass.
+- **Church** (interior): `ChurchOrgan`, the organist trying the pipes (single notes, a scale run, a full-organ chord),
+  then a short mass chorale on the flutes and the full chorus, in a long stone-nave reverb.
+- **Convent** (corridor, Eleanor's cell): `ConventPiano`, a hymn-like piano prelude in E-flat over pedalled arpeggios.
+- **Office** (Micah's): `OfficeJazz`, a soft 1920s Chicago two-beat chorus for clarinet, piano, upright bass and
+  brushes, filtered like an old 78 with a little surface crackle.
+
+**Settings > Music volume** defaults to **70%** and works like Effects volume (left click louder, right click quieter,
+0% mutes). The value is stored under `[audio] music_volume`.
+
 ### Saving
 
 The game autosaves every time you enter a room, and there are 3 manual slots. Saving is only possible
@@ -355,6 +375,7 @@ callbacks; add new code to the partial file for its concern, or start a new one.
 | `Voice` | An off-screen speaker (Leo, tutorial hints) for `Say("id", ...)` and Ink lines |
 | `WalkArea` | Polygon visibility-graph pathfinder |
 | `SoundSynth` / `Sfx` | Godot-free procedural sound effects and `*cue*` parsing, and the node that plays them (footsteps, story cues, room ambience) on the Effects bus |
+| `MusicSynth` / `Music` | Godot-free synthesized music (scores for strings, organ, piano and a jazz band rendered as seamless loops), and the node that plays each room's track on the Music bus |
 | `FlagSprite` | A sprite shown or hidden by story flags (e.g. the open drawer) |
 | `Items` | Inventory item catalogue (name, icon, description), listed per act in `scripts/Core/Items/`; an id defined twice throws |
 | `ItemScripts` / `CombineScripts` / `StoryPuzzles` (`scripts/Story`) | Story responses to inventory verbs and combinations that hold in any room, and the puzzles they share with room hotspots |

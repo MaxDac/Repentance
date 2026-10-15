@@ -17,6 +17,8 @@ public partial class AutoPlay
         await WaitIdle(game);
         Check(game.Room?.Name == "ClubVestibule" && gs.HasFlag("masked") && game.Player.Character == "micah_masked",
             "Micah goes in masked, by the vestibule");
+        int clubStarts = game.Music.Count(Track.ClubStrings);
+        Check(game.Music.Current == Track.ClubStrings, "the strings play in the vestibule");
         await Shot("club_vestibule");
         await game.Perform(Verb.Walk, "street_door");
         Check(game.Room?.Name == "ClubVestibule", "no way back out to the street");
@@ -59,6 +61,8 @@ public partial class AutoPlay
         await Shot("club_hall_masked");
         await game.Perform(Verb.Walk, "exit");
         Check(game.Room?.Name == "ClubLounge", "into the lounge");
+        Check(game.Music.Current == Track.ClubStrings && game.Music.Count(Track.ClubStrings) == clubStarts && game.Music.Playing,
+            "the same strings carry on through the vestibule, hall and lounge without restarting");
         await Shot("club_lounge");
         var stage = game.Perform(Verb.Walk, "stage_exit");
         await Until(() => game.Room?.Name == "ClubStage");
@@ -73,6 +77,7 @@ public partial class AutoPlay
         await Shot("club_stage");
         await Until(() => game.Room?.Name == "Attic");
         Check(!game.Hud.InsetVisible, "the close-up is gone in the attic");
+        Check(game.Music.Current == null, "the music stops when the journal closes");
         await game.Wait(2);
         await Shot("attic_night2");
         await Until(() => game.Hud.CaptionVisible);

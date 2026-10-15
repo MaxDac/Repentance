@@ -69,6 +69,25 @@ public partial class AutoPlay
             "effects volume restored");
         await Observe(0.1);
 
+        Check(game.Settings.MusicVolume == GameSettings.DefaultMusicVolume && game.Hud.Menu.HasEntry("Music volume: 70%"),
+            "music volume defaults to 70%");
+        Check(game.Hud.Menu.Press("Music volume"), "settings offers a music volume");
+        await Observe(0.1);
+        Check(game.Settings.MusicVolume == 80 && game.Hud.Menu.HasEntry("Music volume: 80%") &&
+            reloaded.Load() && reloaded.MusicVolume == 80 && reloaded.EffectsVolume == GameSettings.DefaultEffectsVolume,
+            "left click raises the music volume and persists it beside the effects volume");
+        Check(Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(Music.BusIndex), SoundSynth.PercentToDb(80)) &&
+            Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(Sfx.BusIndex), SoundSynth.PercentToDb(GameSettings.DefaultEffectsVolume)),
+            "the Music bus follows its own setting, the Effects bus is untouched");
+        Check(game.Hud.Menu.PressAlt("Music volume"), "right click lowers the music volume");
+        await Observe(0.1);
+        Check(game.Settings.MusicVolume == 70 && game.Hud.Menu.HasEntry("Music volume: 70%"), "music back down to 70%");
+        Check(game.Settings.SetMusicVolume(0) && AudioServer.IsBusMute(Music.BusIndex) && !AudioServer.IsBusMute(Sfx.BusIndex),
+            "0% mutes only the music");
+        Check(game.Settings.SetMusicVolume(GameSettings.DefaultMusicVolume) && !AudioServer.IsBusMute(Music.BusIndex),
+            "music volume restored");
+        await Observe(0.1);
+
         PressKey(Key.Escape);
         await Observe(0.1);
         Check(game.Hud.Menu.IsOpen && game.Hud.Menu.Press("New game"), "Esc returns from settings to the title");
