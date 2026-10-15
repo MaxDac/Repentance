@@ -120,6 +120,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "EleanorRoom", "across the corridor into Eleanor's room");
 
         await Shot("eleanor_room");
+        Check(game.Sfx.Ambient == Sound.Rain, "rain patters on Eleanor's window");
         await game.Perform(Verb.Hand, "desk_drawer");
         Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
