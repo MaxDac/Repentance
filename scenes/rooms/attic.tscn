@@ -33,10 +33,10 @@ size = Vector2(100, 82)
 size = Vector2(119, 31)
 
 [sub_resource type="RectangleShape2D" id="Rect_7"]
-size = Vector2(72, 50)
+size = Vector2(72, 54)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
-size = Vector2(58, 36)
+size = Vector2(58, 44)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
 size = Vector2(46, 63)
@@ -114,7 +114,7 @@ script = ExtResource("4_FlagSprite")
 ShowIfFlags = "sheet_lifted"
 
 [node name="SuitcaseOpen" type="Sprite2D" parent="."]
-position = Vector2(70, 199)
+position = Vector2(70, 186)
 z_index = -5
 texture = ExtResource("10_attic_suitcase_open")
 centered = false
@@ -263,7 +263,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Trunk"]
-position = Vector2(432.0, 205.0)
+position = Vector2(432.0, 203.0)
 shape = SubResource("Rect_7")
 
 [node name="Painting" type="Area2D" parent="Hotspots"]
@@ -278,7 +278,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Painting"]
-position = Vector2(447.0, 164.0)
+position = Vector2(447.0, 152.0)
 shape = SubResource("Rect_8")
 
 [node name="Radio" type="Area2D" parent="Hotspots"]

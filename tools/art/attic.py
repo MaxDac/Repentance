@@ -16,8 +16,8 @@ SPILL_BOX = (262, 184, 390, 222)
 SHEET_BOX = (104, 112, 210, 199)
 TRUNK_BOX = (388, 150, 476, 236)
 # the suitcase lying on the floor between the radio and the hatch: front face corners, depth and lid height
-SUITCASE = dict(x0=80, x1=114, top=222, bottom=232, depth=0.93, lid=15)
-SUITCASE_BOX = (70, 199, 134, 240)
+SUITCASE = dict(x0=80, x1=114, top=222, bottom=232, depth=0.93, lid=26)
+SUITCASE_BOX = (70, 186, 134, 240)
 
 ACTS = {
     1: dict(
@@ -468,35 +468,166 @@ def spilled(img):
 
 
 def trunk(img, opened=False):
+    """A canvas-covered steamer trunk with oak slats and brass corners, seen three-quarter from the room."""
     d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 396, 190, 468, 230
-    shadow(img, "rect", [x0 - 2, y1 - 2, x1 + 6, y1 + 6], 0.5, 3)
-    d.rectangle([x0, y0, x1, y1], fill=hx("3a4a3a"))
-    d.rectangle([x0, y0, x1, y1], outline=hx("1a2018"))
-    for x in (x0 + 16, x1 - 16):
-        d.rectangle([x - 2, y0, x + 2, y1], fill=hx("6a4a2a"))
-    for (cx, cy) in ((x0, y0), (x1 - 5, y0), (x0, y1 - 5), (x1 - 5, y1 - 5)):
-        d.rectangle([cx, cy, cx + 5, cy + 5], fill=hx("b8964a"))
-    # travel labels
-    d.ellipse([x0 + 22, y0 + 8, x0 + 34, y0 + 18], fill=hx("c8b080"))
-    d.rectangle([x1 - 30, y0 + 20, x1 - 20, y0 + 28], fill=hx("a84030"))
+    x0, x1, yt, ys, yb = 398, 466, 176, 196, 230  # front face: top, lid seam, bottom
+    k = 0.93
+    canvas, canvas_d, canvas_l = hx("3e4e3c"), hx("26321f"), hx("54664c")
+    oak, oak_d, oak_l = hx("6a4a2a"), hx("3a2814"), hx("8e6a3e")
+    brass, brass_d, brass_l = hx("b8964a"), hx("6a5020"), hx("e8cc80")
+    edge = hx("141a12")
+    top = ys if opened else yt  # with the lid thrown back, the body ends at the seam
+    bt0, bt1 = along((x0, top), k), along((x1, top), k)
+    bb0 = along((x0, yb), k)
+    shadow(img, "polygon", [(x0 - 4, yb + 1), (x1 + 6, yb + 2), (x1 + 2, yb - 6), bb0], 0.55, 3)
+
+    # left end, turned towards the window light only a little
+    d.polygon([(x0, top), bt0, bb0, (x0, yb)], fill=canvas_d, outline=edge)
+    sy = along((x0, ys), k)
+    d.line([(x0, ys), sy], fill=oak_d, width=2)
+    for yy in (top + 3, yb - 4):
+        d.line([(x0, yy), along((x0, yy), k)], fill=oak_d)
+    hy = (ys + yb) // 2 + 1  # leather end handle in its brass cleats
+    hp0, hp1 = along((x0, hy), 0.985), along((x0, hy), 0.945)
+    d.rectangle([hp1[0] - 1, hp1[1] - 1, hp1[0], hp1[1] + 1], fill=brass_d)
+    d.rectangle([hp0[0] - 1, hp0[1] - 1, hp0[0], hp0[1] + 1], fill=brass_d)
+    d.line([(hp1[0], hp1[1] + 1), (hp1[0] + 1, hp1[1] + 4), (hp0[0] - 1, hp0[1] + 4), (hp0[0], hp0[1] + 1)],
+           fill=hx("4a2a14"))
+
     if not opened:
-        d.rectangle([x0, y0 - 10, x1, y0], fill=hx("44543e"))
-        d.line([(x0, y0 - 10), (x1, y0 - 10)], fill=hx("6a7a5a"))
-        d.line([(x0, y0), (x1, y0)], fill=hx("1a2018"))
-        for x in (x0 + 16, x1 - 16):
-            d.rectangle([x - 2, y0 - 10, x + 2, y0], fill=hx("6a4a2a"))
-        d.rectangle([(x0 + x1) // 2 - 4, y0 - 4, (x0 + x1) // 2 + 4, y0 + 6], fill=hx("8a6a30"))
-        d.ellipse([(x0 + x1) // 2 - 2, y0 + 1, (x0 + x1) // 2 + 2, y0 + 5], fill=hx("2a1a0a"))
-    else:
-        # lid thrown back against the wall, the dark inside, an old fedora
-        d.polygon([(x0, y0), (x1, y0), (x1 + 2, y0 - 36), (x0 - 2, y0 - 36)], fill=hx("44543e"))
-        d.polygon([(x0 + 4, y0 - 2), (x1 - 4, y0 - 2), (x1 - 2, y0 - 32), (x0 + 2, y0 - 32)], fill=hx("6a3a3a"))
-        d.polygon([(x0 + 2, y0), (x1 - 2, y0), (x1 - 4, y0 + 8), (x0 + 4, y0 + 8)], fill=hx("1a1210"))
-        d.ellipse([x0 + 10, y0 + 1, x0 + 34, y0 + 7], fill=hx("3a3028"))
-        d.rectangle([x0 + 15, y0 - 4, x0 + 29, y0 + 3], fill=hx("4a3a30"))
-        d.line([(x0 + 15, y0 + 1), (x0 + 29, y0 + 1)], fill=hx("1a1010"))
-        d.rectangle([(x0 + x1) // 2 - 4, y0 + 2, (x0 + x1) // 2 + 4, y0 + 8], fill=hx("6a5a30"))
+        # the lid top, slightly domed, with its two oak slats running back
+        d.polygon([(x0, yt), (x1, yt), bt1, bt0], fill=canvas_l, outline=edge)
+        d.line([(x0 + 1, yt - 1), (x1 - 1, yt - 1)], fill=hx("6a7a5a"))
+        d.line([(bt0[0] + 2, bt0[1] + 1), (bt1[0] - 2, bt1[1] + 1)], fill=hx("4a5a44"))
+        for sx in (x0 + 15, x1 - 15):
+            bx = along((sx, yt), k)
+            d.polygon([(sx - 2, yt), (sx + 2, yt), (bx[0] + 2, bx[1]), (bx[0] - 2, bx[1])], fill=oak, outline=oak_d)
+            d.line([(sx - 1, yt - 1), (bx[0] - 1, bx[1] + 1)], fill=oak_l)
+        for (cx, cy) in (bt0, bt1):
+            d.rectangle([cx - 1, cy, cx + 2, cy + 2], fill=brass)
+
+    # the front: canvas over boards, with a little weave
+    tmp = Image.new("RGB", img.size)
+    hgrad(tmp, (x0, yt, x1, yb), canvas_d, canvas)
+    noise(tmp, (x0, yt, x1, yb), 6, seed=31)
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).rectangle([x0, ys if opened else yt, x1, yb], fill=255)
+    img.paste(tmp, (0, 0), m)
+    d.rectangle([x0, ys if opened else yt, x1, yb], outline=edge)
+    # oak bands round the body (and the lid, when shut)
+    bands = [(ys + 2, ys + 5), (yb - 6, yb - 3)] + ([] if opened else [(yt + 2, yt + 5), (ys - 7, ys - 4)])
+    for (a, b) in bands:
+        d.rectangle([x0 + 1, a, x1 - 1, b], fill=oak, outline=oak_d)
+        d.line([(x0 + 2, a + 1), (x1 - 2, a + 1)], fill=oak_l)
+        for rx in range(x0 + 6, x1 - 3, 9):
+            d.point((rx, (a + b) // 2), fill=brass_l)
+    for sx in (x0 + 15, x1 - 15):  # upright slats
+        d.rectangle([sx - 2, ys if opened else yt, sx + 2, yb], fill=oak, outline=oak_d)
+        d.line([(sx - 1, (ys if opened else yt) + 1), (sx - 1, yb - 1)], fill=oak_l)
+        for ry in range((ys if opened else yt) + 3, yb - 1, 6):
+            d.point((sx, ry), fill=brass_l)
+    # lid seam with its brass valance
+    if not opened:
+        d.line([(x0, ys), (x1, ys)], fill=edge)
+        d.line([(x0 + 1, ys - 1), (x1 - 1, ys - 1)], fill=brass_d)
+    d.line([(x0 + 1, ys + 1), (x1 - 1, ys + 1)], fill=brass)
+
+    # travel labels: a round hotel sticker, a red steamship tag, a torn customs slip
+    lx, ly = x0 + 21, ys + 9
+    d.ellipse([lx, ly, lx + 12, ly + 9], fill=hx("d8c08a"), outline=hx("8a7448"))
+    d.ellipse([lx + 3, ly + 2, lx + 9, ly + 7], outline=hx("a0503a"))
+    d.line([(lx + 4, ly + 4), (lx + 8, ly + 4)], fill=hx("4a3a2a"))
+    rx, ry = x1 - 31, ys + 17
+    d.rectangle([rx, ry, rx + 11, ry + 7], fill=hx("a84030"), outline=hx("5a1e14"))
+    d.line([(rx + 1, ry + 2), (rx + 10, ry + 2)], fill=hx("e8dcc0"))
+    d.line([(rx + 2, ry + 5), (rx + 7, ry + 5)], fill=hx("e0b080"))
+    d.polygon([(x1 - 13, ys + 9), (x1 - 5, ys + 8), (x1 - 4, ys + 14), (x1 - 8, ys + 13), (x1 - 12, ys + 15)],
+              fill=hx("c8c0a8"), outline=hx("7a7460"))
+    d.line([(x1 - 11, ys + 11), (x1 - 6, ys + 10)], fill=hx("5a6a8a"))
+
+    # leather straps buckled over the front
+    for sx in (x0 + 8, x1 - 8):
+        top = ys + 1 if opened else yt
+        d.rectangle([sx - 1, top, sx + 1, yb], fill=hx("4a2a14"))
+        d.line([(sx - 1, top), (sx - 1, yb)], fill=hx("6a4024"))
+        by = ys + 6
+        d.rectangle([sx - 2, by, sx + 2, by + 3], outline=brass)
+        d.point((sx, by + 1), fill=brass_l)
+
+    # brass corner caps with rivets
+    for (cx, cy, fx, fy) in ((x0, yt if not opened else ys, 1, 1), (x1, yt if not opened else ys, -1, 1),
+                             (x0, yb, 1, -1), (x1, yb, -1, -1)):
+        pts = [(cx, cy), (cx + 6 * fx, cy), (cx + 6 * fx, cy + 2 * fy), (cx + 2 * fx, cy + 6 * fy), (cx, cy + 6 * fy)]
+        d.polygon(pts, fill=brass, outline=brass_d)
+        d.point((cx + 2 * fx, cy + 2 * fy), fill=brass_l)
+    for cy in ((yt if not opened else ys), yb):
+        d.rectangle([bt0[0] - 1 if cy != yb else bb0[0] - 1, (bt0[1] if cy != yb else bb0[1]) - 1,
+                     (bt0[0] if cy != yb else bb0[0]) + 1, (bt0[1] if cy != yb else bb0[1]) + 1], fill=brass_d)
+
+    # the lock: a brass plate and, when shut, the hasp coming down from the lid
+    cx = (x0 + x1) // 2
+    d.rectangle([cx - 4, ys + 1, cx + 4, ys + 9], fill=brass, outline=brass_d)
+    d.line([(cx - 3, ys + 2), (cx + 3, ys + 2)], fill=brass_l)
+    d.rectangle([cx - 1, ys + 5, cx, ys + 7], fill=hx("1a1008"))
+    if not opened:
+        d.rectangle([cx - 3, ys - 5, cx + 3, ys + 3], fill=brass, outline=brass_d)
+        d.line([(cx - 2, ys - 4), (cx + 2, ys - 4)], fill=brass_l)
+    # scuffs and worn canvas
+    for (sx, sy) in ((x0 + 4, yb - 9), (x1 - 22, yb - 8), (x0 + 30, ys + 20)):
+        d.point((sx, sy), fill=hx("6a7a5e"))
+    d.line([(x0 + 33, yb - 9), (x0 + 37, yb - 10)], fill=canvas_d)
+
+    if opened:
+        # lid thrown back against the paintings, its papered lining towards the room
+        lt = 152
+        l0, l1 = (bt0[0] - 1, lt), (bt1[0] + 2, lt - 1)
+        d.polygon([bt0, bt1, l1, l0], fill=canvas_d, outline=edge)
+        i0, i1 = (bt0[0] + 3, bt0[1] - 2), (bt1[0] - 2, bt1[1] - 2)
+        j0, j1 = (l0[0] + 3, l0[1] + 3), (l1[0] - 3, l1[1] + 3)
+        tmp = Image.new("RGB", img.size)
+        vgrad(tmp, (int(j0[0]), int(j0[1]), int(i1[0]), int(i1[1])), hx("7a4444"), hx("5a2c2e"))
+        m = Image.new("L", img.size, 0)
+        ImageDraw.Draw(m).polygon([i0, i1, j1, j0], fill=255)
+        img.paste(tmp, (0, 0), m)
+        d.polygon([i0, i1, j1, j0], outline=oak_d)
+        for yy in range(int(j0[1]) + 4, int(i0[1]) - 1, 5):  # faded stripes in the lining paper
+            d.line([(j0[0] + 1, yy), (j1[0] - 1, yy)], fill=hx("6a3838"))
+        for xx in range(int(j0[0]) + 6, int(j1[0]), 8):
+            for yy in range(int(j0[1]) + 6, int(i0[1]) - 2, 5):
+                d.point((xx + (yy // 5) % 2 * 4, yy), fill=hx("9a6a50"))
+        # ribbons crossing the lid, pinned with brass buttons, holding a photograph
+        d.line([(j0[0] + 1, j0[1] + 1), (i1[0] - 1, i1[1] - 1)], fill=hx("c8b080"))
+        d.line([(j1[0] - 1, j1[1] + 1), (i0[0] + 1, i0[1] - 1)], fill=hx("c8b080"))
+        mx, my = (j0[0] + i1[0]) / 2, (j0[1] + i1[1]) / 2
+        d.rectangle([mx - 6, my - 5, mx + 4, my + 4], fill=hx("e0d6bc"), outline=hx("8a8068"))
+        d.rectangle([mx - 4, my - 3, mx + 2, my + 2], fill=hx("6a6258"))
+        d.ellipse([mx - 2, my - 2, mx, my], fill=hx("a89a88"))
+        for (px_, py_) in (j0, j1, i0, i1, (mx, my)):
+            d.point((px_ + (1 if px_ < mx else -1), py_ + (1 if py_ < my else -1)), fill=brass_l)
+        # lid edge banding and the stay strap holding it up
+        d.line([l0, l1], fill=oak)
+        d.line([(l0[0], l0[1] + 1), (l1[0], l1[1] + 1)], fill=oak_d)
+        d.line([(l1[0] - 1, l1[1] + 6), (bt1[0] - 1, bt1[1] - 1)], fill=hx("4a2a14"))
+        d.line([(l1[0] + 1, l1[1]), (bt1[0] + 1, bt1[1])], fill=hx("26321f"))
+        # the open body: a sliding tray inside, the fedora resting in it
+        d.polygon([(x0, ys), (x1, ys), bt1, bt0], fill=hx("1a1210"), outline=edge)
+        d.polygon([(x0 + 2, ys - 1), (x1 - 2, ys - 1), (bt1[0] - 2, bt1[1] + 4), (bt0[0] + 2, bt0[1] + 4)],
+                  fill=hx("4a3424"))
+        d.line([(x0 + 2, ys - 1), (x1 - 2, ys - 1)], fill=hx("7a5a3a"))
+        d.line([(cx + 8, ys - 1), (cx + 8, bt1[1] + 4)], fill=hx("2a1c12"))  # tray divider
+        d.polygon([(cx + 12, ys - 2), (cx + 22, ys - 4), (cx + 26, ys - 2), (cx + 16, ys)], fill=hx("c8bca0"),
+                  outline=hx("7a7058"))  # folded letters
+        d.line([(cx + 15, ys - 2), (cx + 22, ys - 3)], fill=hx("6a6a8a"))
+        # an old fedora: brim, crown with its pinch and a dark band
+        fx = x0 + 10
+        d.ellipse([fx, ys - 5, fx + 24, ys + 1], fill=hx("3a3028"), outline=hx("1a1410"))
+        d.line([(fx + 3, ys - 4), (fx + 20, ys - 4)], fill=hx("5a4a3a"))
+        d.polygon([(fx + 5, ys - 3), (fx + 6, ys - 10), (fx + 11, ys - 12), (fx + 13, ys - 10), (fx + 15, ys - 12),
+                   (fx + 19, ys - 10), (fx + 19, ys - 3)], fill=hx("4a3a30"), outline=hx("1a1410"))
+        d.line([(fx + 12, ys - 10), (fx + 12, ys - 7)], fill=hx("2a2018"))
+        d.line([(fx + 7, ys - 9), (fx + 10, ys - 10)], fill=hx("6a5848"))
+        d.rectangle([fx + 6, ys - 6, fx + 18, ys - 4], fill=hx("1a1010"))
+        d.point((fx + 17, ys - 5), fill=hx("5a3a2a"))
 
 
 def _shaded(img, outline, box, dark, lit, edge=None):
@@ -637,15 +768,21 @@ def suitcase(img, opened=False):
         d.line([(b0[0] + 1, b0[1] - 1), (l0[0] + 1, l0[1] + 1)], fill=hx("a86a4a"))
         d.line([(l0[0] + 1, l0[1] + 1), (l1[0] - 1, l1[1] + 1)], fill=hx("b4744e"))
         d.line([(b1[0] - 1, b1[1] - 1), (l1[0] - 1, l1[1] + 1)], fill=hx("4a2418"))
-        px_, py_ = b0[0] + 4, b0[1] - lift + 4  # an elastic pocket across the top of the lid
-        d.line([(px_, py_), (b1[0] - 2, py_)], fill=hx("8a3a48"))
-        d.line([(px_, py_ + 1), (b1[0] - 2, py_ + 1)], fill=hx("4a1820"))
-        tx, ty = (b0[0] + b1[0]) / 2 + 3, b0[1] - lift / 2 + 1
-        d.line([(tx - 4, ty), (tx + 3, ty - 1)], fill=hx("1a0a0c"), width=2)  # the slit in the lining
-        d.polygon([(tx - 4, ty + 1), (tx + 3, ty), (tx + 1, ty + 4), (tx - 3, ty + 5)], fill=hx("a24c5a"),
-                  outline=hx("4a1a22"))  # the flap of lining hanging down
-        for (sx, sy) in ((tx - 5, ty), (tx + 4, ty - 1)):
-            d.point((sx, sy), fill=hx("c8a878"))  # cut stitches
+        px_, py_ = b0[0] + 4, b0[1] - 7  # an elastic pocket across the bottom of the lid
+        d.polygon([(px_, py_), (b1[0] - 2, py_), (b1[0] - 2, b1[1] - 2), (px_, b0[1] - 2)], fill=hx("5a1e28"))
+        d.line([(px_, py_), (b1[0] - 2, py_)], fill=hx("9a4a58"))
+        for gx in range(int(px_) + 3, int(b1[0]) - 2, 4):
+            d.line([(gx, py_ + 1), (gx, py_ + 2)], fill=hx("4a1820"))
+        # the lining slit open along a seam near the top, a long flap peeled back to one side
+        sx0, sy0 = l0[0] + 5, l0[1] + 5
+        sx1, sy1 = l1[0] - 6, l1[1] + 7
+        d.polygon([(sx0, sy0), (sx1, sy1), (sx1 - 2, sy1 + 3), (sx0 + 3, sy0 + 2)], fill=hx("1a0a0c"))
+        d.polygon([(sx1, sy1), (sx1 - 2, sy1 + 3), (sx1 + 3, sy1 + 9), (sx1 + 5, sy1 + 4)], fill=hx("a24c5a"),
+                  outline=hx("4a1a22"))  # the flap, folded down at the right
+        d.line([(sx1 + 1, sy1 + 3), (sx1 + 3, sy1 + 7)], fill=hx("c8707a"))
+        for i in range(0, int(sx1 - sx0) - 1, 3):  # cut stitches along the top edge of the slit
+            t = i / max(1, sx1 - sx0)
+            d.point((sx0 + i, sy0 + (sy1 - sy0) * t - 1), fill=hx("c8a878"))
         # inside the case: the far wall catches the light, the bottom is in shadow
         d.polygon([(x0, ys), (x1, ys), b1, b0], fill=hx("2a0e12"), outline=edge)
         d.polygon([b0, b1, (b1[0] - 1, b1[1] + 3), (b0[0] + 1, b0[1] + 3)], fill=hx("7a2c38"))
@@ -702,15 +839,85 @@ def hat_box(img):
     d.polygon([(cx - 2, top - 1), (cx + 2, top - 3), (cx + 2, top + 1)], fill=hx("d8c49a"))
 
 
+def portraits(img):
+    """Two old family portraits leaning on the right knee wall: a group in a gilt frame and an oval in walnut."""
+    group = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(group)
+    gilt, gilt_d, gilt_l = hx("a08040"), hx("5a4420"), hx("e0c070")
+    # the family group, in a deep gilt frame with a moulded inner lip
+    d.polygon([(418, 150), (452, 146), (456, 186), (420, 188)], fill=gilt, outline=gilt_d)
+    d.line([(419, 151), (451, 147)], fill=gilt_l)
+    d.line([(419, 151), (421, 187)], fill=gilt_l)
+    d.polygon([(421, 153), (450, 149), (453, 183), (423, 185)], fill=hx("7a5a28"))
+    for (fx, fy) in ((420, 150), (450, 147), (453, 184), (421, 186)):  # carved corner bosses
+        d.rectangle([fx, fy, fx + 1, fy + 1], fill=gilt_l)
+    d.polygon([(423, 155), (449, 151), (451, 181), (425, 183)], fill=hx("34301f"))
+    d.polygon([(423, 155), (449, 151), (449, 157), (423, 161)], fill=hx("3e3826"))
+    d.polygon([(425, 172), (450, 168), (451, 181), (425, 183)], fill=hx("2a2418"))  # floor of the studio
+    d.polygon([(427, 160), (437, 158), (437, 172), (427, 173)], fill=hx("4a4030"))  # a painted drape
+    d.line([(429, 160), (430, 172)], fill=hx("5a5038"))
+    skin, coat, collar = hx("c8a080"), hx("1a1614"), hx("e8e0d0")
+    # father standing behind, wide moustache and a stiff collar
+    d.ellipse([437, 156, 441, 161], fill=skin)
+    d.line([(437, 156), (441, 156)], fill=hx("2a2018"))
+    d.line([(438, 160), (440, 160)], fill=hx("3a2a20"))
+    d.point((438, 158), fill=hx("2a1a14"))
+    d.point((440, 158), fill=hx("2a1a14"))
+    d.polygon([(435, 163), (443, 162), (444, 178), (434, 179)], fill=coat)
+    d.rectangle([438, 161, 440, 163], fill=collar)
+    d.point((439, 164), fill=hx("6a2020"))
+    # mother seated in front, hair in a bun, high-necked dark dress with a cameo
+    d.ellipse([430, 163, 434, 167], fill=skin)
+    d.ellipse([430, 161, 434, 164], fill=hx("3a2a1c"))
+    d.point((432, 160), fill=hx("3a2a1c"))
+    d.polygon([(429, 168), (435, 168), (437, 181), (427, 182)], fill=hx("2a1e24"))
+    d.point((432, 169), fill=hx("e8d8c0"))
+    d.line([(428, 175), (436, 174)], fill=hx("3a2e34"))
+    # a boy in a sailor collar, and a girl with a white bow
+    d.ellipse([443, 166, 446, 169], fill=skin)
+    d.polygon([(442, 170), (447, 170), (447, 178), (442, 178)], fill=hx("2a3040"))
+    d.line([(443, 170), (446, 171)], fill=collar)
+    d.ellipse([445, 170, 448, 173], fill=skin)
+    d.point((446, 169), fill=collar)
+    d.point((447, 169), fill=collar)
+    d.polygon([(444, 174), (449, 173), (450, 180), (444, 180)], fill=hx("5a4a3a"))
+    d.line([(424, 156), (448, 152)], fill=hx("6a5838"))  # varnish catching the bulb
+    d.line([(425, 182), (450, 179)], fill=gilt_d)
+    # a small brass title plate on the frame
+    d.rectangle([435, 185, 441, 186], fill=gilt_l)
+
+    img.paste(group, (0, -16), group)  # hung high, so the family looks out over the trunk
+
+    # the oval portrait of a stern old man, in a dark walnut frame
+    oval = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(oval)
+    d.polygon([(448, 156), (474, 154), (476, 186), (450, 188)], fill=hx("5a3a20"), outline=hx("2a180a"))
+    d.line([(449, 157), (473, 155)], fill=hx("8a5a30"))
+    d.line([(449, 157), (451, 187)], fill=hx("7a4e28"))
+    d.polygon([(451, 159), (472, 157), (473, 184), (453, 186)], fill=hx("c8b890"))  # cream mat
+    d.ellipse([454, 160, 471, 184], fill=hx("7a6a4c"), outline=hx("8a7448"))
+    d.ellipse([455, 161, 470, 183], outline=hx("5a4c34"))
+    d.ellipse([459, 165, 466, 173], fill=hx("b89878"))  # a long, bald head
+    d.line([(459, 166), (461, 165)], fill=hx("e8e0d0"))  # white side-whiskers
+    d.line([(459, 167), (459, 172)], fill=hx("d8d0c0"))
+    d.line([(466, 167), (466, 172)], fill=hx("d8d0c0"))
+    d.line([(460, 169), (461, 169)], fill=hx("2a1a14"))
+    d.line([(464, 169), (465, 169)], fill=hx("2a1a14"))
+    d.line([(461, 172), (464, 172)], fill=hx("6a4a3a"))  # a thin, disapproving mouth
+    d.polygon([(458, 175), (463, 174), (467, 175), (469, 183), (456, 183)], fill=hx("161210"))
+    d.polygon([(461, 174), (464, 174), (463, 177)], fill=hx("e8e0d0"))
+    d.point((462, 178), fill=hx("c8a050"))  # watch chain
+    d.line([(462, 178), (465, 180)], fill=hx("a88a40"))
+    for (cx, cy) in ((452, 160), (471, 158), (472, 183), (454, 185)):
+        d.point((cx, cy), fill=hx("a88a40"))
+    img.paste(oval, (0, -8), oval)
+
+
 def clutter(img):
     d = ImageDraw.Draw(img)
     dress_form(img)
     radio(img)
-    # paintings leaning on the right knee wall
-    d.polygon([(418, 150), (452, 146), (456, 186), (420, 188)], fill=hx("a08040"))
-    d.polygon([(422, 154), (449, 150), (452, 182), (424, 184)], fill=hx("2a3a4a"))
-    d.ellipse([430, 158, 444, 174], fill=hx("6a7a7a"))
-    d.polygon([(448, 156), (474, 154), (476, 186), (450, 188)], fill=hx("5a3a20"))
+    portraits(img)
     # a hat box tucked under the left eave
     hat_box(img)
     # Pendant socket; the emissive glass is painted after the room's colour grade.
@@ -896,17 +1103,32 @@ def build():
                      ("attic_box_open", BOX_OPEN_BOX), ("attic_suitcase_open", SUITCASE_BOX))
     for act in (1, 2, 3):
         alt = pixelize(paint(act, True, True, True, True, True), pal)
+        shut = pixelize(paint(act, True, True, True, True, False), pal)
         for name, box in overlay_boxes:
             suffix = "" if act == 1 else f"_act{act}"
-            save(alt.crop(box), "rooms", f"{name}{suffix}.png")
+            save(_overlay(alt, shut, name, box), "rooms", f"{name}{suffix}.png")
 
     night, night_alt = paint("night"), paint("night", True, True, True, True, True)
     night_pal = palette_of(_side_by_side(night, night_alt), 116) + NIGHT_EXTRA + DAY_EXTRA[3:6]
     save(pixelize(night, night_pal), "rooms", "attic_night.png")
+    night_shut = pixelize(paint("night", True, True, True, True, False), night_pal)
     night_alt = pixelize(night_alt, night_pal)
     for name, box in overlay_boxes:
-        save(night_alt.crop(box), "rooms", f"{name}_night.png")
+        save(_overlay(night_alt, night_shut, name, box), "rooms", f"{name}_night.png")
     return outputs[1]
+
+
+def _overlay(alt, shut, name, box):
+    """Crops an overlay. The open suitcase's lid rises into the chair's crop, so its overlay keeps only the pixels
+    that opening the suitcase changes and is transparent elsewhere."""
+    crop = alt.crop(box)
+    if name != "attic_suitcase_open":
+        return crop
+    diff = ImageChops.difference(crop.convert("RGB"), shut.crop(box).convert("RGB")).convert("L")
+    mask = diff.point(lambda v: 255 if v else 0)
+    out = crop.convert("RGBA")
+    out.putalpha(mask)
+    return out
 
 
 def _side_by_side(a, b):
