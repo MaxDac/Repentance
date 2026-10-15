@@ -44,7 +44,7 @@ public class SaveDataTests
     public void RecoveredRingAndAcceptedCrossPreserveOriginalChoice()
     {
         var data = Sample();
-        data.Flags.AddRange(new[] { "ring_left_act2", "took_faith_ring", "cross_refused", "took_cross", "church_act3_return", "act2_office_done" });
+        data.Flags.AddRange(new[] { "ring_left_act2", "took_faith_ring", "took_cross", "church_act3_return", "act2_office_done" });
         data.Inventory.AddRange(new[] { "faith_ring", "cross" });
         var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
         Assert.NotNull(back);
@@ -73,9 +73,10 @@ public class SaveDataTests
     [Theory]
     [InlineData(5)]
     [InlineData(6)]
-    public void SavesFromBeforeTheConventTransitionsAreRejected(int version)
+    [InlineData(7)]
+    public void SavesFromBeforeTheBluingMovedIntoTheBrassBoxAreRejected(int version)
     {
-        Assert.Equal(7, SaveData.CurrentVersion);
+        Assert.Equal(8, SaveData.CurrentVersion);
         var data = Sample();
         data.Version = version;
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));

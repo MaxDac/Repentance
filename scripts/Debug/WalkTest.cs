@@ -13,28 +13,24 @@ namespace Repentance;
 /// a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking.
 /// Prints WALK TEST OK / WALK TEST FAILED. Run with: godot -- --walk-test [--clock=fast|normal]
 /// </summary>
-public class WalkTest
+public class WalkTest : Harness
 {
+    protected override string Marker => "WALK TEST";
+
     /// <summary>Entries deliberately off the floor (the player is hidden there and teleported before he can move).</summary>
     private static readonly HashSet<string> OffFloorEntries = new();
     private const float Tolerance = 1.5f;
 
-    private Game _game = null!;
-    private readonly List<string> _failures = new();
-    private int _checks;
-
     public async Task Run(Game game)
     {
-        _game = game;
-        if (!AutoPlay.ApplyClock(out var clockError))
+        VerbosePasses = false;
+        if (!Begin(game, "walk_test"))
         {
-            GD.Print("WALK TEST FAILED:\n  " + clockError);
-            game.GetTree().Quit(1);
+            Finish();
             return;
         }
         game.AutosaveEnabled = false;
         game.SkipRoomEnter = true;
-        SaveSystem.Directory = "user://autoplay_saves/walk_test";
         GameState.Instance.Reset();
         // Sal stops Micah at the speakeasy curtain and starts a conversation; the test walks past him
         GameState.Instance.SetFlag("sal_passed");
@@ -49,9 +45,7 @@ public class WalkTest
         {
             _failures.Add(ex.ToString());
         }
-        GD.Print($"[walk] {_checks} checks");
-        GD.Print(_failures.Count == 0 ? "WALK TEST OK" : "WALK TEST FAILED:\n  " + string.Join("\n  ", _failures));
-        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        Finish($"[walk] {_checks} checks");
     }
 
     private static List<string> RoomNames() => DirAccess.GetFilesAt("res://scenes/rooms")
@@ -66,8 +60,7 @@ public class WalkTest
 
     private async Task TestRoom(string name)
     {
-        // an unknown entry name falls back to the first marker
-        await _game.ChangeRoom(name, "__first__");
+        await _game.ChangeRoom(name, Game.FirstEntry);
         var room = _game.Room!;
         if (!room.ShowPlayer)
         {
@@ -231,10 +224,11 @@ public class WalkTest
             await busy;
             Engine.TimeScale = timeScale;
 
-            // exits by clicking: the street's motel door, and back out of the motel room
-            await ClickExit("motel_door", "motel_room", "start");
-            await ClickExit("exit", "street", "motel");
-            await ClickExit("library_door", "library", "start");
+            // exits by clicking: out of the library onto the city map (their first-visit thoughts already had)
+            GameState.Instance.SetFlag("seen_library_night");
+            GameState.Instance.SetFlag("map_seen");
+            await _game.ChangeRoom("library", "start");
+            await ClickExit("exit", "chicago_map", "start");
         }
         finally
         {
@@ -247,7 +241,8 @@ public class WalkTest
         var player = _game.Player;
         player.Teleport(from, expected == Repentance.Facing.Left ? Repentance.Facing.Right : Repentance.Facing.Left);
         var walking = _game.WalkTo(to);
-        await _game.Wait(0.15);
+        // Wait for the walk to really start rather than a fixed delay, which a slow frame can outlast.
+        await Until(() => walking.IsCompleted || player.Position.DistanceTo(from) > 2, 5);
         Check(player.IsWalking && player.Facing == expected, $"walking {from} -> {to} faces {expected} (faces {player.Facing})");
         await Task.WhenAny(walking, _game.Wait(15));
         Check(!player.IsWalking && player.Facing == expected, $"stopping after {from} -> {to} still faces {expected}");
@@ -301,40 +296,4 @@ public class WalkTest
     }
 
     private static bool Clickable(Vector2 p) => p.X is > 2 and < 430 && p.Y is > 2 and < 228;
-
-    // ------------------------------------------------------------------ helpers
-
-    private void Move(Vector2 pos)
-    {
-        _game.GetViewport().PushInput(new InputEventMouseMotion { Position = pos, GlobalPosition = pos }, true);
-        _game.GetViewport().WarpMouse(pos);
-    }
-
-    private void Click(Vector2 pos)
-    {
-        foreach (var pressed in new[] { true, false })
-        {
-            _game.GetViewport().PushInput(new InputEventMouseButton
-            {
-                Position = pos, GlobalPosition = pos, ButtonIndex = MouseButton.Left, Pressed = pressed,
-            }, true);
-        }
-    }
-
-    private async Task Until(Func<bool> done, double timeout = 30)
-    {
-        for (double t = 0; t < timeout && !done(); t += 0.05) await _game.Wait(0.05);
-    }
-
-    private void Check(bool ok, string what)
-    {
-        _checks++;
-        if (!ok) Fail(what);
-    }
-
-    private void Fail(string what)
-    {
-        GD.Print($"[walk] FAIL {what}");
-        _failures.Add(what);
-    }
 }

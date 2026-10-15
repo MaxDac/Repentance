@@ -191,6 +191,12 @@ public partial class AutoPlay
         await game.Perform(Verb.Walk, "convent");
         Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_club_asked"), "asked the sister about the Club");
         await Shot("convent_act2");
+        for (var i = 0; i < 3; i++)
+        {
+            var nunLines = await Listen(game, game.Perform(Verb.Talk, "nun"));
+            Check(game.Room is Rooms.ConventCorridor && !gs.HasFlag("nun_threatened") &&
+                nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
+        }
         var threat = game.Perform(Verb.UseItem, "nun", "revolver");
         await game.Wait(1.5);
         await Shot("convent_gun");

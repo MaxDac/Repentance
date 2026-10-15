@@ -31,7 +31,7 @@ public static class Recipes
             Flag: "made_wire_hook"),
         // 12 - Rizzo's Flowers.
         new("carnation", "bluing", "blue_carnation", new[] { "carnation", "bluing" },
-            "A splash of bluing in the stem water, a minute's wait, and the carnation drinks itself blue. I put the bottle back on the shelf.",
+            "A splash of bluing in the stem water, a minute's wait, and the carnation drinks itself blue. The vial is empty now.",
             Flag: "made_blue_carnation"),
         // 13 - Tribune morgue.
         new("clipping_top", "clipping_bottom", "clipping", new[] { "clipping_top", "clipping_bottom" },

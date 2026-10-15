@@ -119,14 +119,6 @@ public partial class AutoPlay
         await WaitIdle(game);
     }
 
-    private static int IndexOf(string item)
-    {
-        var inv = GameState.Instance.Inventory;
-        for (int i = 0; i < inv.Count; i++)
-            if (inv[i] == item) return i;
-        throw new InvalidOperationException($"Inventory does not contain '{item}'.");
-    }
-
     /// <summary>
     /// Autosave on room change, Esc pause menu, saving to slot 1 through the menu, wiping progress and
     /// loading the slot back.
@@ -149,7 +141,7 @@ public partial class AutoPlay
         Check(game.Hud.Menu.Press("Slot 1"), "save menu lists slot 1");
         await Observe(0.1);
         var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
-        Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("matchbook"), "saved to slot 1 from the menu");
+        Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("brass_box"), "saved to slot 1 from the menu");
         PressKey(Key.Escape);
         await game.Wait(0.1);
         Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc resumes the game");
@@ -158,13 +150,13 @@ public partial class AutoPlay
         var ink = DialogueManager.Instance.SaveInk();
         gs.Reset();
         DialogueManager.Instance.ResetInk();
-        await game.ChangeRoom("street", "lobby");
+        await game.ChangeRoom("office", "start");
         await WaitIdle(game);
-        Check(!gs.HasItem("matchbook") && game.Room?.Name == "Street", "progress wiped before loading");
+        Check(!gs.HasItem("brass_box") && game.Room?.Name == "Office", "progress wiped before loading");
 
         await game.LoadGame(saved);
         Check(game.Room?.Name == "Lobby", "load returns to the saved room");
-        Check(gs.HasItem("matchbook") && gs.HasItem("photo") && gs.HasFlag("knows_lantern") && gs.HasFlag("seen_lobby"),
+        Check(gs.HasItem("brass_box") && gs.HasItem("photo") && gs.HasFlag("knows_lantern") && gs.HasFlag("seen_lobby"),
             "load restores items and flags");
         Check(game.Player.Position.DistanceTo(new Vector2(saved.X, saved.Y)) < 0.5f, "load restores the player's position");
         Check(ink.Length > 0 && DialogueManager.Instance.SaveInk() == ink, "load restores the Ink state");
@@ -225,13 +217,6 @@ public partial class AutoPlay
         Check(gs.Inventory[0] == Notes.ItemId && gs.Inventory[1] == MicahKit.LighterId,
             "new items never push the notepad and lighter out of the first slots");
         gs.TakeItem("hanger");
-    }
-
-    private void PressKey(Key key, bool alt = false)
-    {
-        foreach (var pressed in new[] { true, false })
-            _game.GetViewport().PushInput(
-                new InputEventKey { Keycode = key, PhysicalKeycode = key, AltPressed = alt, Pressed = pressed }, true);
     }
 
     /// <summary>Wherever a character is drawn over the scenery behind him, hovering or clicking there means him (#73, #97).</summary>

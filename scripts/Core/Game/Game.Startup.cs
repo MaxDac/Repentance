@@ -14,7 +14,9 @@ public partial class Game
         bool settingsTest = Array.IndexOf(args, "--settings-test") >= 0;
         bool pauseTest = Array.IndexOf(args, "--pause-test") >= 0;
         bool walkTest = Array.IndexOf(args, "--walk-test") >= 0;
-        bool anyTest = settingsTest || pauseTest || walkTest || Array.IndexOf(args, "--autoplay") >= 0;
+        bool film = args.Any(a => a == "--film" || a.StartsWith("--film="));
+        bool playthrough = Array.IndexOf(args, "--playthrough") >= 0;
+        bool anyTest = settingsTest || pauseTest || walkTest || film || playthrough || Array.IndexOf(args, "--autoplay") >= 0;
         Settings = new GameSettings(anyTest ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
         Sfx = new Sfx { Name = "Sfx" };
@@ -23,7 +25,8 @@ public partial class Game
         Music = new Music { Name = "Music" };
         AddChild(Music);
         Music.Bind(Settings);
-        AddChild(new WindowModeController(Settings, !anyTest) { Name = "WindowMode" });
+        // film mode is watched, so it may go fullscreen with F11 (the setting is the autoplay copy, not the player's)
+        AddChild(new WindowModeController(Settings, !anyTest || film) { Name = "WindowMode" });
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
         Player = new Player { Name = "Player" };
@@ -38,6 +41,11 @@ public partial class Game
             if (a.StartsWith("--room=")) StartRoom = a[7..];
             if (a.StartsWith("--entry=")) StartEntry = a[8..];
             if (a.StartsWith("--flag=")) _startFlags.AddRange(a[7..].Split(',', StringSplitOptions.RemoveEmptyEntries));
+        }
+        if (film || playthrough)
+        {
+            await new Playthrough(film).Run(this);
+            return;
         }
         if (walkTest)
         {
@@ -74,6 +82,7 @@ public partial class Game
 
     public async Task NewGame()
     {
+        ReleaseTheEnd();
         GameState.Instance.Reset();
         DialogueManager.Instance.ResetInk();
         _playtime = 0;
@@ -86,6 +95,6 @@ public partial class Game
             if (MicahKit.DebugAct(StartRoom) > 1) gs.SetStoryAct(MicahKit.DebugAct(StartRoom));
         }
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
-        await ChangeRoom(StartRoom, StartEntry);
+        await ChangeRoom(StartRoom, StartEntry == "start" && RoomTargetError(StartRoom, StartEntry) != null ? FirstEntry : StartEntry);
     }
 }

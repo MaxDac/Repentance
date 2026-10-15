@@ -503,7 +503,7 @@ def shop_door(img):
     d.ellipse([x1 - 8, top + 54, x1 - 4, top + 58], fill=GOLD)
 
 
-def bluing_shelf(img, with_bluing):
+def bluing_shelf(img):
     d = ImageDraw.Draw(img)
     x0, x1 = SHELF
     d.rectangle([x0, 100, x0 + 2, BASE], fill=hx("4a3020"))
@@ -523,14 +523,6 @@ def bluing_shelf(img, with_bluing):
     for bx, col in ((271, hx("6a4a2a")), (279, hx("3a5a3a"))):
         d.rectangle([bx, 122, bx + 5, 133], fill=col)
         d.rectangle([bx + 1, 119, bx + 4, 122], fill=mul(col, 0.8))
-    if with_bluing:
-        bx = 292
-        d.rectangle([bx, 120, bx + 7, 133], fill=hx("1e3aa8"))
-        d.rectangle([bx + 2, 116, bx + 5, 120], fill=hx("142a80"))
-        d.rectangle([bx + 2, 114, bx + 5, 116], fill=hx("6a4a2a"))
-        d.rectangle([bx, 124, bx + 7, 129], fill=hx("e8dcb0"))
-        d.line([(bx + 1, 126), (bx + 6, 126)], fill=hx("1e3aa8"))
-        d.line([(bx + 1, 121), (bx + 1, 132)], fill=hx("5a7ae8"))
     # watering can on the bottom shelf
     d.ellipse([284, 146, 300, 158], fill=hx("6a7a6a"))
     d.line([(299, 150), (305, 144)], fill=hx("6a7a6a"), width=2)
@@ -753,14 +745,14 @@ def florist_ground(img):
     light(img, "rect", [20, BASE + 10, 36, CURB], hx("ffe0a0"), 0.18, 4)
 
 
-def paint_florist(bluing=True, grille_open=False, pose=None):
+def paint_florist(grille_open=False, pose=None):
     """The street front. The regular is animated in the scene, so he is only painted when a smoking pose is given;
     returns the painting and the regular's mask (None without him)."""
     img = Image.new("RGB", (W, FULL_H))
     florist_facade(img)
     display_window(img)
     shop_door(img)
-    bluing_shelf(img, bluing)
+    bluing_shelf(img)
     cold_door(img, grille_open)
     florist_ground(img)
     # where the regular always stands: his shadow belongs to the pavement
@@ -857,11 +849,10 @@ def build_linen():
 
 def build_florist():
     variants = {
-        "base": paint_florist(bluing=False)[0],
-        "bluing": paint_florist(bluing=True)[0],
-        "grille": paint_florist(bluing=False, grille_open=True)[0],
+        "base": paint_florist()[0],
+        "grille": paint_florist(grille_open=True)[0],
     }
-    frames = [paint_florist(bluing=False, pose=k) for k in range(len(SMOKE_POSES))]
+    frames = [paint_florist(pose=k) for k in range(len(SMOKE_POSES))]
     box = frames[0][1].getbbox()
     for _, mask in frames[1:]:
         b = mask.getbbox()
@@ -873,7 +864,6 @@ def build_florist():
     pal = palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45)]
     px = {k: pixelize(v, pal) for k, v in variants.items()}
     save(px["base"], "rooms", "blue_lantern_front.png")
-    _overlay(px["base"], px["bluing"], "blue_lantern_front_bluing")
     _overlay(px["base"], px["grille"], "blue_lantern_front_grille_open")
     fw, fh = box[2] - box[0], box[3] - box[1]
     strip = Image.new("RGBA", (fw * len(frames), fh), (0, 0, 0, 0))

@@ -148,8 +148,8 @@ DisplayName = "entrance"
 LookText = "The way back out to the street, through the same unmarked door."
 WalkTo = Vector2(40, 226)
 Face = 2
-ExitTo = "street"
-ExitEntry = "club"
+ExitTo = "chicago_map"
+ExitEntry = "start"
 monitoring = false
 monitorable = false
 

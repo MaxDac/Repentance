@@ -36,6 +36,7 @@ public partial class Game
     public async Task LoadGame(SaveData data)
     {
         _busy++;
+        ReleaseTheEnd();
         try
         {
             await Hud.Fade(1, 0.35);

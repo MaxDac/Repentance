@@ -1,10 +1,10 @@
-"""State Street on a wet 1920s Chicago night (and a grey, rain-washed day): a side-on block of facades - the
+"""State Street on a wet 1920s Chicago night: a side-on block of facades - the
 Aurelian, an alley, a brick walk-up with the motel office and a lunch counter, the public library and a corner
 drugstore - above a wide wet sidewalk, a granite curb and a strip of cobbles with a sedan parked at the kerb.
 Down the cross street on the right the cathedral rises behind the L.
 
 Lamp posts, the hydrant and the car stand nearer the camera than anyone on the sidewalk, so they are also cut
-out into street_<mode>_fg.png, which the scene y-sorts in front of the characters."""
+out into street_night_fg.png, which the scene y-sorts in front of the characters."""
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
 import math
 import random
@@ -891,7 +891,7 @@ def paint(mode):
 
 
 def build():
-    for mode in ("day", "night"):
+    for mode in ("night",):
         base, mask = paint(mode)
         pal = palette_of(base, 128)
         px = pixelize(base, pal)

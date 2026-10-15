@@ -10,11 +10,10 @@ public partial class AutoPlay
 {
     public async Task RunPauseTests(Game game)
     {
-        _game = game;
-        if (!ApplyClock(out var clockError))
+        _marker = "PAUSE TEST";
+        if (!Begin(game, "pause_test"))
         {
-            GD.Print("PAUSE TEST FAILED:\n  " + clockError);
-            game.GetTree().Quit(1);
+            Finish();
             return;
         }
         game.AutosaveEnabled = false;
@@ -31,8 +30,7 @@ public partial class AutoPlay
         {
             if (game.IsPaused) game.TogglePause();
         }
-        GD.Print(_failures.Count == 0 ? "PAUSE TEST OK" : "PAUSE TEST FAILED:\n  " + string.Join("\n  ", _failures));
-        game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        Finish();
     }
 
     private async Task PauseTest(Game game)

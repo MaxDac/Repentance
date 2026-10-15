@@ -96,6 +96,9 @@ public partial class ConventCorridor : Room
     {
         switch (target.Id, verb)
         {
+            case ("nun", Verb.Talk) when State.HasFlag("nun_club_asked"):
+                await Say("nun", "I told you. I know nothing. Good night.");
+                return true;
             case ("nun", Verb.Talk):
                 await Talk("nun_club");
                 return true;

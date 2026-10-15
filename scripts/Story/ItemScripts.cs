@@ -17,11 +17,13 @@ public static class ItemScripts
             state.TakeItem("brass_box");
             state.GiveItem("card");
             state.GiveItem("matchbook");
+            state.GiveItem("bluing");
             state.SetFlag("opened_brass_box");
-            await game.Say("The clasp gave with a click. Inside: a calling card, and a matchbook.");
+            await game.Say("The clasp gave with a click. Inside: a calling card, a matchbook, and a little vial of Mrs. Stewart's Bluing.");
             await game.Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
             await game.Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
             await game.Say("The matchbook: a blue lantern on the cover. The Blue Lantern, State Street.");
+            await game.Say("Laundry bluing in a lady's jewellery box. Somebody meant to dye a white flower blue. She was going there herself.");
             await game.Say("Two big fellas walked her out the back door without a soul seeing. Fellas like that drink somewhere. That's where her trail goes next.");
             return true;
         }

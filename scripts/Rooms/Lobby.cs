@@ -70,16 +70,14 @@ public partial class Lobby : Room
             case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
-            case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("staff_elevator") &&
-                !State.HasFlag("took_brass_box") && !State.HasFlag("club_lead"):
-                await Say("Not yet. I bought a look at room 507. I should collect its clues before I go chasing anybody.");
+            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern"):
+                await Say("Not yet. Somebody in this lobby saw her go. Rain and State Street will keep until I find out who.");
                 return true;
-            case ("revolving_door", Verb.Walk or Verb.Hand) when State.HasFlag("knows_lantern") &&
-                !State.HasFlag("staff_elevator") && !State.HasFlag("club_lead"):
+            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("staff_elevator"):
                 await Say("Not yet. Her room could tell me more than the bellboy did. Another dollar buys me the back way.");
                 return true;
-            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("knows_lantern") || State.HasFlag("club_lead"):
-                await Game.ChangeRoom("street", "lobby");
+            case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("took_brass_box"):
+                await Say("Not yet. I bought a look at room 507. I should collect its clues before I go chasing anybody.");
                 return true;
             case ("revolving_door", Verb.Kick):
                 await Say("It's a revolving door. It only goes round in circles. Like this case.");

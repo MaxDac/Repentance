@@ -87,7 +87,7 @@ public class EndingsTests
         if (met) flags.Add("caleb_met");
         if (accepted) flags.Add("took_cross");
         Assert.Equal(expected, Endings.CanOfferCross(act, Flags(flags.ToArray())));
-        flags.AddRange(new[] { "took_faith_ring", "cross_refused" });
+        flags.Add("took_faith_ring");
         Assert.Equal(expected, Endings.CanOfferCross(act, Flags(flags.ToArray())));
     }
 }

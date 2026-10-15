@@ -1,24 +1,9 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Street.cs" id="1_Street"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/street_day.png" id="2_street_day"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/street_night.png" id="2_street_night"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/street_day_fg.png" id="4_street_day_fg"]
-
-[sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(44, 90)
-
-[sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(30, 84)
-
-[sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(42, 96)
-
-[sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(60, 110)
-
-[sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(24, 80)
+[ext_resource type="Texture2D" path="res://assets/art/rooms/street_night_fg.png" id="4_street_night_fg"]
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
 size = Vector2(16, 214)
@@ -28,12 +13,6 @@ size = Vector2(34, 52)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
 size = Vector2(176, 76)
-
-[sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(20, 70)
-
-[sub_resource type="RectangleShape2D" id="Rect_10"]
-size = Vector2(24, 70)
 
 [node name="Street" type="Node2D"]
 script = ExtResource("1_Street")
@@ -47,7 +26,7 @@ PlayerCharacter = "micah"
 
 [node name="Background" type="Sprite2D" parent="."]
 z_index = -10
-texture = ExtResource("2_street_day")
+texture = ExtResource("2_street_night")
 centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
@@ -60,34 +39,6 @@ polygon = PackedVector2Array(0, 172, 480, 172, 480, 240, 0, 240)
 position = Vector2(240, 210)
 metadata/facing = 1
 
-[node name="hotel" type="Marker2D" parent="Entries"]
-position = Vector2(78, 182)
-metadata/facing = 1
-
-[node name="motel" type="Marker2D" parent="Entries"]
-position = Vector2(194, 182)
-metadata/facing = 1
-
-[node name="library" type="Marker2D" parent="Entries"]
-position = Vector2(355, 182)
-metadata/facing = 1
-
-[node name="church" type="Marker2D" parent="Entries"]
-position = Vector2(446, 186)
-metadata/facing = 1
-
-[node name="outskirts" type="Marker2D" parent="Entries"]
-position = Vector2(462, 214)
-metadata/facing = 3
-
-[node name="club" type="Marker2D" parent="Entries"]
-position = Vector2(160, 180)
-metadata/facing = 1
-
-[node name="lobby" type="Marker2D" parent="Entries"]
-position = Vector2(14, 214)
-metadata/facing = 4
-
 [node name="thrown_out" type="Marker2D" parent="Entries"]
 position = Vector2(170, 214)
 metadata/facing = 1
@@ -96,86 +47,6 @@ metadata/facing = 1
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
-
-[node name="HotelDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "hotel_door"
-DisplayName = "hotel entrance"
-LookText = "The Aurelian glows over the door like it still believes in first impressions."
-WalkTo = Vector2(78, 178)
-Face = 2
-ExitTo = "aurelian_room"
-ExitEntry = "start"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/HotelDoor"]
-position = Vector2(78.0, 124.0)
-shape = SubResource("Rect_1")
-
-[node name="MotelDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "motel_door"
-DisplayName = "motel office"
-LookText = "The motel sign sags over the door like even the bulbs have given up."
-WalkTo = Vector2(194, 178)
-Face = 2
-ExitTo = "motel_room"
-ExitEntry = "start"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/MotelDoor"]
-position = Vector2(194.0, 126.0)
-shape = SubResource("Rect_2")
-
-[node name="LibraryDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "library_door"
-DisplayName = "library doors"
-LookText = "An old stone library, keeping its secrets alphabetized and behind heavy doors."
-WalkTo = Vector2(355, 178)
-Face = 2
-ExitTo = "library"
-ExitEntry = "start"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/LibraryDoor"]
-position = Vector2(355.0, 114.0)
-shape = SubResource("Rect_3")
-
-[node name="ChurchDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "church_door"
-DisplayName = "church steps"
-LookText = "The cathedral waits down the block, all stone, shadow, and uncollected prayers."
-WalkTo = Vector2(446, 184)
-Face = 2
-ExitTo = "church_exterior"
-ExitEntry = "start"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/ChurchDoor"]
-position = Vector2(450.0, 74.0)
-shape = SubResource("Rect_4")
-
-[node name="RoadOut" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "road_out"
-DisplayName = "road out of town"
-LookText = "The road east slips out of the city limits like a man leaving before the questions start."
-WalkTo = Vector2(472, 214)
-Face = 4
-ExitTo = "outskirts"
-ExitEntry = "start"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/RoadOut"]
-position = Vector2(468.0, 206.0)
-shape = SubResource("Rect_5")
 
 [node name="Lamppost" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
@@ -219,40 +90,8 @@ monitorable = false
 position = Vector2(330.0, 230.0)
 shape = SubResource("Rect_8")
 
-[node name="ClubDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "club_door"
-DisplayName = "unmarked door"
-LookText = "No sign, no number. Just a door that knows exactly who it's for."
-WalkTo = Vector2(160, 176)
-Face = 2
-ExitTo = "club_hall"
-ExitEntry = "from_street"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/ClubDoor"]
-position = Vector2(163.0, 129.0)
-shape = SubResource("Rect_9")
-
-[node name="LobbyDoor" type="Area2D" parent="Hotspots"]
-script = ExtResource("3_Hotspot")
-Id = "lobby_door"
-DisplayName = "the Aurelian's entrance"
-LookText = "Round the corner, back to the Aurelian's revolving door."
-WalkTo = Vector2(6, 214)
-Face = 3
-ExitTo = "lobby"
-ExitEntry = "street"
-monitoring = false
-monitorable = false
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/LobbyDoor"]
-position = Vector2(12.0, 206.0)
-shape = SubResource("Rect_10")
-
 [node name="StreetFront" type="Sprite2D" parent="World"]
 position = Vector2(0, 250)
-texture = ExtResource("4_street_day_fg")
+texture = ExtResource("4_street_night_fg")
 centered = false
 offset = Vector2(0, -250)

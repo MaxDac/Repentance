@@ -13,6 +13,17 @@ Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (vi
 
 Requirements: Godot 4.7.x **.NET/Mono** edition and the .NET 10 SDK.
 
+### Tests and film mode
+
+The quickest way to run everything, or to watch the whole game play itself at 1x, 2x or 4x, is the scripts in
+`tools/run/` (they reset every generated file and rebuild first). See
+**[Testing and film mode](docs/testing-and-film-mode.md)**.
+
+```powershell
+tools\run\test.ps1                 # every test suite (bash: tools/run/test.sh)
+tools\run\film.ps1 -Speed 2        # watch the story (bash: tools/run/film.sh 2)
+```
+
 ### Common commands
 
 ```powershell
@@ -45,11 +56,13 @@ Command-line options (after `--`):
 | `--skip-title` | Skip the title screen |
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
-| `--autoplay` | Plays the whole demo by itself and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story |
+| `--autoplay` | Plays the whole demo by itself with targeted regression checks, and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
+| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`5`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
+| `--film[=1\|2\|4]` | Film mode: the same story to watch at 1x, 2x or 4x speed, from the title to "The End"; input is ignored except Space, F11 and Esc. `--ending=N` picks the route (default 2). Prints `FILM OK` |
+| `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story. Prints `SETTINGS TEST OK` |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
 | `--walk-test` | Movement checks in every room: entry markers stand on the floor, every hotspot and exit is reachable from every entry without crossing a wall, the player really walks there at the right scale, and every exit leads to an existing entry (room entry cutscenes are skipped). Then real mouse input: floor clicks, clicks off the floor, interrupting a walk, clicks ignored while busy, facing in all four directions and exits taken by clicking. Prints `WALK TEST OK` and exits with code 0 on success |
-| `--clock=fast` | Default for the four checks above. Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
+| `--clock=fast` | Default for the automated checks above (not film mode). Runs at 60× game time with vsync off, so dialogue and scripted waits do not take wall-clock story time. Every choice, flag check, pose frame and screenshot still runs. `--pause-test` still forces 1× while it asserts that pause freezes time, and `--walk-test` does the same for its mouse checks |
 | `--clock=normal` | Previous automated clock: 8× game time, display timing left alone. Use this when screenshots should be closer to the paced game |
 
 ```powershell
@@ -95,7 +108,7 @@ Wait for `AUTOPLAY OK` from the console process rather than treating a successfu
 implied-nude variant, with hair and hand coverage. The choice updates the club scene immediately
 and applies in both Act Two and Act Three. Preferences are stored in `user://settings.cfg`,
 independently of saves, so loading an older save or starting a new game cannot override the choice.
-Automated checks use a separate `user://autoplay_settings.cfg` and never modify player preferences.
+Automated checks and film mode use a separate `user://autoplay_settings.cfg` and never modify player preferences.
 
 ### Display settings
 
@@ -145,9 +158,10 @@ between actions, not during a cutscene or conversation. Saves are JSON files in 
 inventory, the story act, the Ink state, the current room and the player's position. Loading a save
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
-autoplay test uses `user://autoplay_saves/`, so it never touches your own saves.
-The current save format is version 7; earlier saves are incompatible because the Act One convent visit now
-includes a playable exterior arrival and a return to the corridor for Sister Agatha's farewell.
+automated checks and film mode use `user://autoplay_saves/<suite>/`, so they never touch your own saves.
+The current save format is version 8; earlier saves are incompatible because the laundry bluing now comes
+from Eleanor's brass box instead of the florist's shelf, and the prototype State Street hub is gone. Version 7
+added the Act One convent's playable exterior arrival and the return to the corridor for Sister Agatha's farewell.
 The preceding five collect-and-combine locations reroute the staff lift, the Blue Lantern entrance,
 the Harrington lead, the masked Club entrance and the
 mansion entrance. The puzzle expansion's separate original-puzzle
@@ -190,10 +204,10 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
    no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7.
    Then take the brass box.
    Open it in the satchel with the hand: a
-   calling card carrying her perfume and a matchbook from the Blue Lantern.
+   calling card carrying her perfume, a matchbook from the Blue Lantern and a vial of laundry bluing.
 4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
-   for blue carnations only. Take a white carnation from the bucket and the laundry bluing from the shelf,
-   combine them and show the blue carnation at the cold-room grille to be let in.
+   for blue carnations only. Take a white carnation from the bucket, combine it with Eleanor's
+   bluing and show the blue carnation at the cold-room grille to be let in.
    **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
    leaving $10 after all the bribes (mock him or refuse and
    you're thrown straight out back). Tony the bartender won't talk; when you're done he decides he doesn't
@@ -351,7 +365,8 @@ scripts/Story/       story logic that holds in any room (inventory verbs, item c
 scripts/Rooms/       per-room puzzle scripts
 scripts/UI/           Hud (hover label, satchel, inventory, choices, speech, fades, framed close-ups, cursor), CloseUp (the close-up catalog), VerbWheel and GameMenu (title/pause/save slots)
 scripts/UI/Hud/      Hud's partial files: inventory, dialogue, screens and images
-scripts/Debug/       AutoPlay smoke test; its partial files in scripts/Debug/AutoPlay/ (one per act, plus the focused checks)
+scripts/Debug/       Automated runs: Harness (shared base), Playthrough (story + film mode), AutoPlay (partials in
+                     scripts/Debug/AutoPlay/, one per act plus the focused checks), WalkTest
 tools/               Python art generator
 ```
 

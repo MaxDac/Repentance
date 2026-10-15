@@ -380,7 +380,8 @@ public partial class Attic : Room
         await Wait(0.6);
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.ShowCaption("The End");
-        // the story is over: keep the game on the caption
-        await new TaskCompletionSource().Task;
+        // the story is over: keep the game on the caption until a load or a new game
+        await Game.HoldTheEnd();
+        Game.Hud.ShowCaption(null);
     });
 }

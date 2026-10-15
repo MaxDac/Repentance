@@ -48,33 +48,6 @@ def journal(d, im):
     d.line([(20, 2), (21, 23)], fill=hx("8a1a1a"))
 
 
-def key(d, im):
-    d.ellipse([3, 7, 13, 17], fill=hx("c8a040"))
-    d.ellipse([6, 10, 10, 14], fill=(0, 0, 0, 0))
-    d.rectangle([12, 11, 27, 13], fill=hx("c8a040"))
-    d.rectangle([22, 13, 24, 17], fill=hx("c8a040"))
-    d.rectangle([26, 13, 27, 16], fill=hx("c8a040"))
-    d.polygon([(14, 14), (22, 14), (22, 21), (14, 21)], fill=hx("8a1a2a"))
-    text(im, (18, 17), "4", hx("e8d8a0", 255), size=6)
-
-
-def diary(d, im):
-    d.polygon([(7, 3), (25, 3), (25, 21), (7, 21)], fill=hx("6a2a4a"))
-    d.rectangle([7, 3, 9, 21], fill=hx("4a1a32"))
-    d.rectangle([25, 4, 26, 20], fill=hx("e8dcc0"))
-    d.rectangle([13, 9, 21, 14], fill=hx("d8b050"))
-    d.rectangle([22, 10, 27, 13], fill=hx("b89040"))
-
-
-def ledger(d, im):
-    d.polygon([(4, 4), (28, 4), (28, 20), (4, 20)], fill=hx("2a3a2a"))
-    d.rectangle([4, 4, 7, 20], fill=hx("6a4a2a"))
-    d.rectangle([25, 4, 28, 20], fill=hx("6a4a2a"))
-    d.rectangle([12, 8, 22, 12], fill=hx("c8b890"))
-    d.line([(13, 10), (21, 10)], fill=hx("3a2a1a"))
-    d.line([(6, 20), (27, 20)], fill=hx("e0d4b0"))
-
-
 def suitcase_key(d, im):
     d.ellipse([6, 8, 13, 15], fill=hx("b89040"))
     d.ellipse([8, 10, 11, 13], fill=(0, 0, 0, 0))
@@ -281,7 +254,7 @@ def lighter(d, im):
 
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
-                     ("journal", journal), ("key", key), ("diary", diary), ("ledger", ledger),
+                     ("journal", journal),
                      ("suitcase_key", suitcase_key), ("revolver", revolver),
                      ("lockpick", lockpick), ("combination", combination), ("brass_box", brass_box),
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),

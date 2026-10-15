@@ -75,9 +75,7 @@ public partial class AutoPlay
         await Shot("lobby");
         await game.Perform(Verb.Talk, "concierge");
         await game.Perform(Verb.Walk, "revolving_door");
-        Check(game.Room?.Name == "Street", "revolving door leads to the street before the tip");
-        await game.Perform(Verb.Walk, "lobby_door");
-        Check(game.Room?.Name == "Lobby", "back in the lobby");
+        Check(game.Room is Rooms.Lobby, "the revolving door holds Micah in the lobby before the bellboy's tip");
         await game.Perform(Verb.Talk, "bellboy");
         await game.Perform(Verb.UseItem, "bellboy", "dollar");
         Check(gs.HasItem("dollar") && CashRules.Balance(gs.HasFlag) == 21 && gs.HasFlag("knows_lantern") &&
@@ -139,8 +137,6 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "brass_box");
         Check(gs.HasItem("brass_box"), "took the brass box");
         await Shot("eleanor_safe_empty");
-        await game.ItemVerb(Verb.Hand, "brass_box");
-        Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook"), "the brass box holds a card and the matchbook");
         await game.Perform(Verb.Walk, "exit");
         Check(game.Room?.Name == "HotelLinen", "back across the corridor to the linen room");
         await game.Perform(Verb.Walk, "lift");
@@ -163,11 +159,15 @@ public partial class AutoPlay
         Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened") && gs.HasItem("carnation"),
             "a white carnation gets a shut slot");
         await game.Perform(Verb.Hand, "shelf");
-        Check(gs.HasItem("bluing") && gs.HasFlag("took_bluing"), "took the bottle of bluing");
+        Check(!gs.HasItem("bluing") && gs.HasItem("brass_box") && !gs.HasFlag("opened_brass_box"),
+            "the florist's shelf has no bluing: the carnation can't be dyed until the brass box is opened");
+        await game.ItemVerb(Verb.Hand, "brass_box");
+        Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook") && gs.HasItem("bluing") &&
+            gs.HasFlag("opened_brass_box"), "the brass box holds a card, the matchbook and Eleanor's bluing");
         await Shot("blue_lantern_front_taken");
         await CombineAndWait("carnation", "bluing");
         Check(gs.HasItem("blue_carnation") && !gs.HasItem("carnation") && !gs.HasItem("bluing") && gs.HasFlag("made_blue_carnation"),
-            "dyed the carnation blue; the bluing goes back on the shelf");
+            "dyed the carnation blue with Eleanor's bluing");
         await game.Perform(Verb.UseItem, "grille", "blue_carnation");
         Check(game.Room?.Name == "Speakeasy", "the grille opens for a blue carnation");
         Check(gs.HasFlag("grille_opened") && !gs.HasItem("blue_carnation") && !gs.HasFlag("sal_passed"),

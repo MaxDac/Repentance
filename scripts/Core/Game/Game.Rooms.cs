@@ -14,8 +14,29 @@ public partial class Game
     /// <summary>File name (in scenes/rooms) of the loaded room.</summary>
     public string RoomScene => _roomScene;
 
+    /// <summary>Entry name that places the player on a room's first marker, for tools that visit every room.</summary>
+    public const string FirstEntry = "__first__";
+
+    /// <summary>Why <paramref name="room"/>/<paramref name="entry"/> is not a valid destination, or null if it is.</summary>
+    public static string? RoomTargetError(string room, string entry)
+    {
+        var path = RoomScenePath(room);
+        if (!ResourceLoader.Exists(path)) return $"no room scene {path}";
+        if (entry == FirstEntry) return null;
+        var state = GD.Load<PackedScene>(path).GetState();
+        for (var i = 0; i < state.GetNodeCount(); i++)
+            if (state.GetNodePath(i).ToString() == $"./Entries/{entry}") return null;
+        return $"room '{room}' has no entry marker '{entry}'";
+    }
+
     public async Task ChangeRoom(string name, string entry)
     {
+        // a typo would otherwise leave the player on a grey screen; stay put and fail loudly instead
+        if (RoomTargetError(name, entry) is { } error)
+        {
+            GD.PushError($"ChangeRoom({name}, {entry}): {error}");
+            return;
+        }
         _busy++;
         try
         {

@@ -1,10 +1,9 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/BlueLanternFront.cs" id="1_BlueLanternFront"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front.png" id="2_blue_lantern_front"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_bluing.png" id="5_bluing"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_grille_open.png" id="6_grille_open"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="7_Rain"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/blue_lantern_front_regular.png" id="8_regular"]
@@ -61,22 +60,6 @@ z_index = -10
 texture = ExtResource("2_blue_lantern_front")
 centered = false
 
-[node name="Bluing" type="Sprite2D" parent="."]
-z_index = -9
-position = Vector2(292, 114)
-texture = ExtResource("5_bluing")
-centered = false
-script = ExtResource("4_FlagSprite")
-HideIfFlags = "took_bluing"
-
-[node name="BluingReturned" type="Sprite2D" parent="."]
-z_index = -9
-position = Vector2(292, 114)
-texture = ExtResource("5_bluing")
-centered = false
-script = ExtResource("4_FlagSprite")
-ShowIfFlags = "made_blue_carnation"
-
 [node name="GrilleOpen" type="Sprite2D" parent="."]
 z_index = -9
 position = Vector2(342, 73)
@@ -123,8 +106,8 @@ DisplayName = "State Street"
 LookText = "State Street, back toward the Aurelian. The rain hasn't let up since Tuesday."
 WalkTo = Vector2(14, 220)
 Face = 3
-ExitTo = "street"
-ExitEntry = "lobby"
+ExitTo = "lobby"
+ExitEntry = "street"
 monitoring = false
 monitorable = false
 
@@ -194,7 +177,7 @@ shape = SubResource("Rect_5")
 script = ExtResource("3_Hotspot")
 Id = "shelf"
 DisplayName = "sidewalk shelf"
-LookText = "Pots, a watering can, and a bottle of Mrs. Stewart's Bluing. Florists use it to dye white flowers."
+LookText = "Pots of geraniums, tins of plant food and a watering can."
 WalkTo = Vector2(287, 196)
 Face = 2
 monitoring = false

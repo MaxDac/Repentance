@@ -13,9 +13,31 @@ public partial class Game
     {
         _busy++;
         try { await sequence(); }
-        catch (Exception ex) { GD.PushError(ex.ToString()); }
+        catch (Exception ex)
+        {
+            GD.PushError(ex.ToString());
+            SequenceFailed?.Invoke(ex);
+        }
         finally { _busy--; }
     }
+
+    private TaskCompletionSource? _theEnd;
+
+    /// <summary>Keeps the final caption up (and the game busy) until a load or a new game replaces the story.</summary>
+    public Task HoldTheEnd()
+    {
+        _theEnd = new TaskCompletionSource();
+        return _theEnd.Task;
+    }
+
+    private void ReleaseTheEnd()
+    {
+        _theEnd?.TrySetResult();
+        _theEnd = null;
+    }
+
+    /// <summary>Raised when <see cref="Run"/> swallows an exception, so automated runs can fail on it.</summary>
+    public static event Action<Exception>? SequenceFailed;
 
     public async Task<bool> WalkTo(Vector2 point)
     {

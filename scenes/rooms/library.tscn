@@ -69,8 +69,8 @@ DisplayName = "hall door"
 LookText = "The hall door. Polished brass, old money, no welcome."
 WalkTo = Vector2(42, 182)
 Face = 2
-ExitTo = "street"
-ExitEntry = "library"
+ExitTo = "chicago_map"
+ExitEntry = "start"
 monitoring = false
 monitorable = false
 

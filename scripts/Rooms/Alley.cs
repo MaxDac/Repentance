@@ -230,7 +230,6 @@ public partial class Alley : Room
         await Wait(0.8);
         await Talk("bartender_shot");
         Player.SetPose(null);
-        State.SetFlag("alley3_done");
         await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
         await Think("I shot a man tonight. My hand doesn't shake. That's what scares me.");
         await Game.WalkTo(StreetMouth);

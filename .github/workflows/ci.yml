@@ -20,8 +20,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      # Includes StoryIntegrityTests and InkWalkTests; the project downloads the Ink compiler (GodotInk.props).
       - name: Unit tests
-        run: dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --configuration Release
+        run: tools/run/test.sh unit --no-clean
 
   art-tests:
     runs-on: ubuntu-latest
@@ -32,31 +33,17 @@ jobs:
           python-version: '3.14'
       - name: Art generator dependencies
         run: python -m pip install pillow numpy
-      - name: Art regression tests
-        run: python -m unittest discover -s tests/art -v
-      - name: Character art tests
-        run: python -m unittest discover -s tests -p test_character_art.py -v
+      - name: Art tests
+        run: tools/run/test.sh art --no-clean
 
   godot-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: autoplay
-            args: --autoplay
-            marker: AUTOPLAY OK
-          - name: settings
-            args: --settings-test
-            marker: AUTOPLAY OK
-          - name: pause
-            args: --pause-test
-            marker: PAUSE TEST OK
-          - name: walk
-            args: --walk-test
-            marker: WALK TEST OK
-    name: godot-tests (${{ matrix.name }})
+        suite: [autoplay, settings, pause, walk, playthrough]
+    name: godot-tests (${{ matrix.suite }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -90,40 +77,20 @@ jobs:
           echo "GODOT=$godot" >> "$GITHUB_ENV"
           "$godot" --headless --version
 
-      - name: Build C# and import assets
-        run: |
-          set -euo pipefail
-          dotnet build Repentance.csproj
-          "$GODOT" --headless --path . --import
-
+      # tools/run/test.sh resets, builds, imports and runs the suite with the same pass rule as a local run: the
+      # marker printed, exit status 0, and no ERROR / SCRIPT ERROR / USER ERROR / Unhandled exception lines.
       # Not --headless: AutoPlay captures viewport screenshots, which need a real renderer.
-      - name: Run ${{ matrix.args }}
+      - name: Run ${{ matrix.suite }}
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
-        run: |
-          set -uo pipefail
-          timeout 20m xvfb-run -a -s "-screen 0 1280x720x24" \
-            "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy -- ${{ matrix.args }} 2>&1 | tee godot.log
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            echo "::error::Godot exited with status $status"
-            exit 1
-          fi
-          if ! grep -qF "${{ matrix.marker }}" godot.log; then
-            echo "::error::'${{ matrix.marker }}' not found in output"
-            exit 1
-          fi
-          # Game.Run catches script exceptions with GD.PushError, so a run can reach its marker after one.
-          if grep -nE '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception' godot.log; then
-            echo "::error::Godot logged errors (see above)"
-            exit 1
-          fi
+          GODOT_FLAGS: --rendering-driver opengl3
+        run: timeout 30m xvfb-run -a -s "-screen 0 1280x720x24" tools/run/test.sh ${{ matrix.suite }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: godot-tests-${{ matrix.name }}
+          name: godot-tests-${{ matrix.suite }}
           path: |
-            godot.log
+            logs/
             screenshots/
           if-no-files-found: ignore
