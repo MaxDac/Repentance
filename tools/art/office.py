@@ -69,12 +69,16 @@ def door(img, state="closed"):
             for py in (78, 102):
                 d.rectangle([x0 + 6, py, fx - 6, py + 18], outline=hx("2e1c0e"))
             d.line([(fx, y0 - 2), (fx, y1 + 2)], fill=hx("2a180c"))
-            d.ellipse([fx - 9, 82, fx - 4, 87], fill=hx("c8a050"))
+            # the face is foreshortened to ~2/3 of its width, so the knob narrows with it
+            d.ellipse([fx - 8, 82, fx - 5, 87], fill=hx("c8a050"))
+            d.point((fx - 7, 83), fill=hx("fff0b0"))
         else:
             d.rectangle([x0, y0, x0 + 9, y1], fill=hx("4e321c"))
             d.rectangle([x0 + 1, y0 + 8, x0 + 7, 66], fill=hx("c8c098"))
             d.line([(x0 + 9, y0), (x0 + 9, y1)], fill=hx("2a180c"))
-            d.ellipse([x0 + 2, 80, x0 + 6, 85], fill=hx("c8a050"))
+            # swung wide open and seen almost edge-on: the knob is a thin sliver
+            d.rectangle([x0 + 3, 82, x0 + 4, 86], fill=hx("c8a050"))
+            d.point((x0 + 3, 83), fill=hx("fff0b0"))
         d.line([(x0 + 1, y1), (x1 - 1, y1)], fill=hx("d8c080"))
         return
     x0, y0, x1, y1 = DOOR
