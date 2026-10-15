@@ -61,7 +61,7 @@ public sealed partial class Playthrough
             await Do(Verb.Hand, "paper");
             await Do(Verb.Hand, "closet");
             await SolvePuzzle(() => Do(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-                new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+                new[] { ("n0", 4), ("d1", 1), ("t1", 3), ("n1", 1), ("t2", 1), ("n2", 7) }, "safe_dial");
             await Do(Verb.Hand, "brass_box");
             Check(Gs.HasItem("brass_box"), "the brass box from the safe");
             await Do(Verb.Walk, "exit");
@@ -76,14 +76,16 @@ public sealed partial class Playthrough
             await Pace(0.6);
             await _game.ItemVerb(Verb.Hand, "brass_box");
             await CombineAndWait("carnation", "bluing");
+            await Do(Verb.UseItem, "bucket", "water_flower");
+            Check(Gs.HasFlag("knows_password") && !Gs.HasItem("water_flower"), "Eleanor's water flower blooms with the password");
             await Do(Verb.UseItem, "grille", "blue_carnation");
             Expect("Speakeasy", "the blue carnation opens the grille");
         });
         await Beat("speakeasy", async () =>
         {
-            await Do(Verb.Talk, "bartender");
-            await Until(() => !_game.Busy);
-            Check(Gs.HasFlag("sal_passed"), "Sal takes the bribe");
+            await Do(Verb.Talk, "sal");
+            Check(Gs.HasFlag("sal_passed") && Gs.HasFlag("sal_password") && CashRules.Balance(Gs.HasFlag) == 20,
+                "Moonshine gets Micah past Sal without paying");
             await Do(Verb.Talk, "bartender");
             await WaitIdle();
             Expect("Alley", "thrown out into the alley");

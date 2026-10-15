@@ -131,7 +131,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("closet_open"), "opened the closet");
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+            new[] { ("n0", 4), ("d1", 1), ("t1", 3), ("n1", 1), ("t2", 1), ("n2", 7) }, "safe_dial");
         Check(gs.HasFlag("safe_open"), "opened the safe");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");
@@ -163,7 +163,10 @@ public partial class AutoPlay
             "the florist's shelf has no bluing: the carnation can't be dyed until the brass box is opened");
         await game.ItemVerb(Verb.Hand, "brass_box");
         Check(!gs.HasItem("brass_box") && gs.HasItem("card") && gs.HasItem("matchbook") && gs.HasItem("bluing") &&
-            gs.HasFlag("opened_brass_box"), "the brass box holds a card, the matchbook and Eleanor's bluing");
+            gs.HasItem("water_flower") && gs.HasFlag("opened_brass_box"),
+            "the brass box holds a card, the matchbook, Eleanor's bluing and her water flower");
+        await game.Perform(Verb.UseItem, "chalkboard", "water_flower");
+        Check(gs.HasItem("water_flower") && !gs.HasFlag("knows_password"), "the water flower only talks in water");
         await Shot("blue_lantern_front_taken");
         await CombineAndWait("carnation", "bluing");
         Check(gs.HasItem("blue_carnation") && !gs.HasItem("carnation") && !gs.HasItem("bluing") && gs.HasFlag("made_blue_carnation"),
@@ -188,7 +191,8 @@ public partial class AutoPlay
             $"Sal walks aside after the bribe instead of jumping there (at {salWhenPassed} when paid)");
         Check(game.Room?.Name == "Speakeasy" && _offered.Keys.Any(k => k.StartsWith("sal")),
             "walking past Sal makes him step in and start the talk");
-        Check(gs.HasFlag("sal_passed") && !gs.HasFlag("thrown_out") && !gs.HasFlag("photo_shown"),
+        Check(gs.HasFlag("sal_passed") && gs.HasFlag("sal_bribed") && !gs.HasFlag("sal_password") &&
+              !gs.HasFlag("thrown_out") && !gs.HasFlag("photo_shown"),
             "no password, but Sal takes the bribe before Micah reaches the bar");
         await game.Perform(Verb.Talk, "sal");
         Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
