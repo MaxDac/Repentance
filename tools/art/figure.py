@@ -1407,14 +1407,43 @@ def _drape_sheet(c, drape, hip, shoulder, knee, ankle, floor=92.0):
         c.bias[m & (c.Y > floor - 1.5)] -= 1
 
 
-def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
+def _draped_skirt(c, col, waist, hip, knee, across, length, floor=92.5):
+    """Coat tails hanging with gravity in an action frame: the front panel lies over the thigh and falls from the knee,
+    the back panel drops straight from the seat, and whatever is longer than the drop to the floor pools behind."""
+    thigh = knee - hip
+    t = thigh / np.linalg.norm(thigh)
+    n = max((np.array([-t[1], t[0]]), np.array([t[1], -t[0]])), key=lambda v: v[0] - v[1])  # the knee's top/front
+    length *= 1 + 0.45 * t[0] ** 2  # the lower the knee, the more cloth reaches the floor
+    seat = hip - across * 6
+    drop = seat[1] + length
+    pool = max(0.0, drop - floor)
+    back_low = np.array([seat[0] - 1, min(drop, floor)])
+    tip = back_low + (-min(pool * 2, 6), 0)
+    over = knee + n * 3.5
+    front = knee + t * 3 + n
+    front_hem = np.array([front[0] + 0.5, min(floor, max(front[1], knee[1]) + min(7.0, max(2.5, length - np.linalg.norm(thigh))))])
+    sag = (front_hem + back_low) / 2 + (0, 2)
+    sag[1] = min(sag[1], floor)
+    pts = [waist - across * 5, seat, back_low, tip, sag, front_hem, front, over, waist + across * 5]
+    m = c.put(c.poly(pts), col, "coat")
+    for a, b in ((hip + (-2, 3), (back_low + tip) / 2 + (1, -1)), (hip + (1, 4), sag + (0, -1)),
+                 (knee + (-1, 2), front_hem + (-1, -1))):  # folds running down to the hem
+        c.bias[m & c.capsule(np.array(a, float), np.array(b, float), 0.5, 0.6)[0]] -= 1
+
+
+def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
-    hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips."""
+    hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
+    joints may carry four more points, the far leg's knee, ankle, heel and toe (otherwise it shadows the near one).
+    coat_drape: the coat skirt hangs with gravity, over the thigh and down to the floor, instead of following the thigh.
+    plain_chest: no shirt or tie along the trunk and the collar in the coat's colour, for a profile seen low down."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
-    hip, shoulder, head, knee, ankle, elbow, hand = grounded_joints(joints, fw)
+    points = grounded_joints(joints, fw)
+    hip, shoulder, head, knee, ankle, elbow, hand = points[:7]
+    far_leg = points[7:11] if len(points) >= 11 else None
     up = shoulder - hip
     up /= np.linalg.norm(up)
     across = np.array([-up[1], up[0]])
@@ -1427,9 +1456,15 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
     for far in (True, False):
         off = np.array([-3, -2]) if far else np.zeros(2)
         part = "farleg" if far else "leg"
-        limb(hip + off, knee + off, 4.3, 3.1, pants, part)
-        limb(knee + off, ankle + off, 3.1, 2.4, pants, part)
-        limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
+        if far and far_leg is not None:
+            fknee, fankle, fheel, ftoe = far_leg
+            limb(hip + off, fknee, 4.3, 3.1, pants, part)
+            limb(fknee, fankle, 3.1, 2.4, pants, part)
+            limb(fheel, ftoe, 2, 1.5, spec["shoes"], part)
+        else:
+            limb(hip + off, knee + off, 4.3, 3.1, pants, part)
+            limb(knee + off, ankle + off, 3.1, 2.4, pants, part)
+            limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
         if far:
             limb(shoulder + off, elbow + off, 3, 2.5, spec.get("sleeves", torso), "fararm")
             limb(elbow + off, hand + off, 2.5, 2, spec.get("sleeves", torso), "fararm")
@@ -1442,18 +1477,21 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
     coat = None if drape else spec.get("coat")
     if coat:
         tail = hip + (knee - hip) * min(1, (coat["hem"] - 0.5) / 0.24)
-        if chest_down:
-            # The skirt wraps the upright thigh and its front panel hangs under the belly, rather than being spread
-            # across the trunk's axis (a sliver down the thigh).
-            back = np.array([-(tail - hip)[1], (tail - hip)[0]]) / np.linalg.norm(tail - hip)
-            back = back if back @ up < 0 else -back
-            pts = [waist - across * 5, hip + back * 6, tail + back * 5, tail - back * 4, waist + across * 5]
+        if coat_drape:
+            _draped_skirt(c, coat["col"], waist, hip, knee, across, np.linalg.norm(tail - hip))
         else:
-            pts = [waist - across * 5, hip - across * 6, tail - across * 5,
-                   tail + across * 5, hip + across * 6, waist + across * 5]
-        c.put(c.poly(pts), coat["col"], "coat")
+            if chest_down:
+                # The skirt wraps the upright thigh and its front panel hangs under the belly, rather than being
+                # spread across the trunk's axis (a sliver down the thigh).
+                back = np.array([-(tail - hip)[1], (tail - hip)[0]]) / np.linalg.norm(tail - hip)
+                back = back if back @ up < 0 else -back
+                pts = [waist - across * 5, hip + back * 6, tail + back * 5, tail - back * 4, waist + across * 5]
+            else:
+                pts = [waist - across * 5, hip - across * 6, tail - across * 5,
+                       tail + across * 5, hip + across * 6, waist + across * 5]
+            c.put(c.poly(pts), coat["col"], "coat")
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
-    if not spec.get("cloak") and not chest_down and not drape:
+    if not spec.get("cloak") and not chest_down and not drape and not plain_chest:
         shirt = shoulder - up * 5
         limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
         tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)
@@ -1469,7 +1507,11 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
         seam = c.capsule(shoulder, hip + (knee - hip) * 0.6, 0.6, 0.8)[0]
         c.bias[m & seam] += 1
     head_axis = head - shoulder
-    if coat and abs(head_axis[0]) > abs(head_axis[1]):
+    if plain_chest:  # the coat's collar turned up round the neck, then a little skin under the jaw
+        neck = shoulder + head_axis * 0.5
+        limb(shoulder, shoulder + head_axis * 0.3, 2.6, 2.3, torso, "collar")
+        limb(shoulder + head_axis * 0.3, neck, 1.8, 1.6, skin, "neck")
+    elif coat and abs(head_axis[0]) > abs(head_axis[1]):
         neck = shoulder + head_axis * 0.55
         limb(shoulder, neck, 2.3, 2, spec.get("collar", torso), "collar")
         limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")

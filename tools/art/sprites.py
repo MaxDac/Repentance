@@ -448,10 +448,20 @@ UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
 # Beaten down on hands and knees: hips over the knees, shins flat behind, the back sagging down to shoulders a little
 # lower than the hips, arms braced (elbows soft) under the shoulders and the head hanging towards the ground.
 KNEEL = [(60, 71), (82, 76), (91, 79), (61, 88), (41, 91), (81, 84), (86, 90)]
-# Hiding behind something, facing right: knees bent, then sitting low on the heels with the back straight and leaning
-# forward, the head up to listen and the near hand resting on the knee.
-HALF_CROUCH = [(62, 64), (66, 41), (68, 26), (76, 75), (66, 91), (70, 54), (75, 65)]
-HIDE_CROUCH = [(62, 76), (69, 54), (73, 40), (79, 78), (66, 91), (77, 64), (85, 74)]
+# Hiding behind something, facing right, down on one knee: the far knee and shin flat on the floor with the toe tucked
+# under, the near leg bent with its foot flat, the trunk a little forward but upright, the head up to listen and the
+# near hand resting on the knee. The four extra points are the far leg's knee, ankle, heel and toe.
+HALF_KNEEL = [(60, 65), (64, 42), (67, 27), (73, 75), (66, 91), (68, 54), (73, 65),
+              (55, 81), (42, 87), (42, 84), (38, 91)]
+HIDE_KNEEL = [(55, 72), (60, 50), (64, 36), (71, 74), (66, 91), (64, 62), (72, 71),
+              (54, 90), (37, 90), (37, 87), (32, 92)]
+
+
+def with_far_leg(joints):
+    """A 7-joint pose with the far leg's knee, ankle, heel and toe made explicit (shadowing the near leg)."""
+    knee, ankle = joints[3], joints[4]
+    fk, fa = (knee[0] - 3, knee[1] - 2), (ankle[0] - 3, ankle[1] - 2)
+    return list(joints) + [fk, fa, (fa[0] - 2, fa[1] - 1), (fa[0] + 5, fa[1])]
 FALL = [UPRIGHT,
         [(64, 59), (60, 35), (57, 20), (70, 74), (74, 91), (69, 44), (78, 39)],
         [(64, 67), (53, 45), (47, 30), (75, 78), (79, 91), (48, 59), (44, 72)],
@@ -508,12 +518,14 @@ def action_sequences(spec, name):
 
 
 def crouch_strips(scaled, standing):
-    """Micah ducking down out of sight behind something (micah_crouch), the low pose he holds there (micah_crouched),
-    and standing back up (micah_crouch_rise: the same frames reversed). All face right."""
+    """Micah ducking down out of sight behind something onto one knee (micah_crouch), the kneel he holds there
+    (micah_crouched), and standing back up (micah_crouch_rise: the same frames reversed). All face right; the coat
+    hangs with gravity and the chest shows only coat, seen low and side-on."""
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
-    keys = [UPRIGHT, between(UPRIGHT, HALF_CROUCH), HALF_CROUCH, between(HALF_CROUCH, HIDE_CROUCH), HIDE_CROUCH]
-    frames = [standing] + [action_figure(scaled, k) for k in keys]
+    upright = with_far_leg(UPRIGHT)
+    keys = [upright, between(upright, HALF_KNEEL), HALF_KNEEL, between(HALF_KNEEL, HIDE_KNEEL), HIDE_KNEEL]
+    frames = [standing] + [action_figure(scaled, k, coat_drape=True, plain_chest=True) for k in keys]
     action_strip("micah_crouch", frames, [0.08, 0.07, 0.07, 0.08, 0.09, 0.14])
     action_strip("micah_crouched", frames[-1:], [1])
     action_strip("micah_crouch_rise", frames[::-1], [0.12, 0.09, 0.08, 0.07, 0.07, 0.1])
