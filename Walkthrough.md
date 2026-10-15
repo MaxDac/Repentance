@@ -246,6 +246,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   his brother that, right now, he's too far off to be saved.
 - Caleb replies that this is crap, no one is beyond salvation, and that thinking that is the Devil's work.
   His original counsel remains: "Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace."
+- Micah admits he tried praying, but he no longer remembers the Our Father: "Our Father, who art in heaven, hallowed
+  be Thy name... and then nothing. I can't get past it." Caleb answers: "Then start there. He remembers the rest."
 - Micah replies "I'll think about that", then says that coming here was a mistake, and walks out. The scene moves
   to the map.
 
@@ -508,9 +510,11 @@ described here (other verbs, flavour lines) is left to the implementation.
   unless he allows it, and they come back every Thursday to bow.
 - Harrington, unmasked, continues: "You brought Eleanor back to us. For that, the intrusion is forgiven. This is as
   far as you go."
-- Then the player has two choices in dialogue:
+- Then the player has three choices in dialogue:
   - Use the revolver, but this will end with another man coming from behind and knocking him out.
   - Do nothing, and the same man from behind will knock him out nonetheless.
+  - "Our Father...": Micah gets as far as "hallowed be Thy name" before Harrington cuts him off ("How childish...
+    This is ruining the mood.") and signals the man behind him, who knocks him out.
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 - Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
   you for bringing me back."), never calling him Micah.
@@ -616,6 +620,11 @@ described here (other verbs, flavour lines) is left to the implementation.
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
     - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
+    - On the first turn he can instead lower the gun, leave her and walk out to turn himself in (ending 6), whatever
+      evidence he carries.
+    - On the second turn, if she still refuses, he can shoot Eleanor (ending 7): she drops to her knees under the
+      sheet and falls face-down, blood spreading from her stomach. Micah puts the revolver to his temple; the screen
+      cuts to black and the shot is heard over black.
     - If Micah manages to convince her, they both are in the kitchen: here, Micah has the possibility to set the
       mansion on fire. Eleanor waits for him in the kitchen while he goes back down to the bootleggers' wine cellar.
     - If he doesn't manage, he's alone in the kitchen, and can set the mansion on fire either way.
@@ -631,8 +640,10 @@ described here (other verbs, flavour lines) is left to the implementation.
       now." and so does the bootleggers' stair in the cellar, so the bedroom confrontation can't be replayed.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
-    at least three forgiveness appeals. If this is the case, Micah gets out saying "Yeah... I'm done with this. All of it."
-    and the scene skips to *End of Act 3*.
+    at least three forgiveness appeals. If this is the case, Micah says the whole Our Father, a verse at a time
+    ("Our Father... who art in heaven..." through "Amen"), stepping back towards the door and lowering the gun a little
+    with each verse, while the old man talks into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody
+    forgives a man like you"). Micah reaches the door and walks out, and the scene skips to *End of Act 3* (ending 1).
 
 ### End of Act 3
 
@@ -696,11 +707,30 @@ described here (other verbs, flavour lines) is left to the implementation.
   says that his wife doens't want to have anything to do with him, and that Eleanor keeps living with Harrington son.
 - In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
 
+#### Option 6 - Prison - With Rose
+
+- Accessible if Micah shoots the old man, then lowers the gun on the first persuasion turn and leaves Eleanor to turn
+  himself in. It overrides the evidence and the fire: there is no kitchen escape.
+- In the prison parlour, Rose (new seated sprite) visits. Micah says he's sorry; Rose doesn't know if she can forgive
+  him and doesn't really understand why he asked her to come, but she'll try.
+- The journal ends: "I made a lot of awful choices, but now I know, I returned to the faith..."
+
+#### Option 7 - The bedroom - Murder and suicide
+
+- Accessible if Micah shoots the old man, fails to convince Eleanor, and then shoots her.
+- Eleanor falls like the old man (new sprites: kneeling, then face-down under the sheet, the stain growing into a
+  pool). Micah raises the revolver to his temple; cut to black, then the shot.
+- *End of Act Three* follows straight away; the present-day attic scene has no "The next morning" caption.
+- The last entry is written by Caleb, from the police reports and the newspapers: he couldn't make Micah repent,
+  finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
+  brother's footsteps.
+
 ### Present
 
-The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife, the father
-keeps the journal, saying "Maybe Leo would like to read it some day." In all other endings, he throws the journal back
-in the trunk.
+The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife (ending 1)
+or found his faith in prison (ending 6), the father keeps the journal, saying "Maybe Leo would like to read it some
+day." In ending 7 he respects Caleb's decision and puts the journal back, maybe for Leo in a couple of years. In all
+other endings, he throws the journal back in the trunk.
 
 ### Puzzle pacing and saves
 
@@ -733,7 +763,7 @@ His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
 The adventure remains a compact, single-case indie point-and-click: fifteen puzzles, the alley encounter, optional
-dialogue and five ending outcomes. The five collect-and-combine locations each sit on a route the story already
+dialogue and seven ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)

@@ -16,12 +16,13 @@ namespace Repentance;
 /// <item><c>--film[=1|2|4]</c>: the same story to watch, at 1×, 2× or 4× speed, one ending (<c>--ending</c>, default 2).
 /// The viewer's input is ignored (Space pauses, F11 toggles full screen, Esc stops). Prints "FILM OK".</item>
 /// </list>
-/// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), and the three ways to
-/// ending 1: 1 (walk away from Tony), 1-oldman (spare Harrington), 1-steps (give up on the church steps).
+/// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
+/// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
+/// 1 (walk away from Tony), 1-oldman (spare Harrington, praying back to the door), 1-steps (give up on the church steps).
 /// </summary>
 public sealed class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "1", "1-oldman", "1-steps" };
+    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps" };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.
@@ -510,6 +511,20 @@ public sealed class Playthrough : Harness
                 over = true;
                 return;
             }
+            if (_route is "6" or "7")
+            {
+                if (_route == "6")
+                {
+                    await Until(() => _game.Room?.Name == "Prison", 300);
+                    Expect("Prison", "Micah turns himself in");
+                }
+                await TheEnd();
+                Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
+                Check(Gs.HasFlag(_route == "6" ? Endings.Repented : Endings.ShotEleanor),
+                    _route == "6" ? "Micah repents" : "Micah shoots Eleanor");
+                over = true;
+                return;
+            }
             await confront;
             await WaitIdle();
             Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
@@ -546,9 +561,10 @@ public sealed class Playthrough : Harness
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 300);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionText == "The End", $"route {_route}: the epilogue ends on \"The End\"");
-        for (int n = 1; n <= 5; n++)
+        for (int n = 1; n <= 7; n++)
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
-        Check(Gs.HasItem("journal") == (ending == 1), $"route {_route}: Daniel {(ending == 1 ? "keeps the journal for Leo" : "puts the journal back")}");
+        bool keeps = Endings.KeepsJournal(ending);
+        Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
         // Choose() falls back to the first option, so a renamed or wrongly gated choice would otherwise pass silently.
         // By now the cross is taken, so Wants() names the Blue Lantern; Caleb was asked for on the first visit. Giving up
         // on the steps ends the story before Act 3's office, so that route only answers the stage.
@@ -592,6 +608,16 @@ public sealed class Playthrough : Harness
                 yield return "Shoot him";
                 yield return "You can't stay";
                 yield return "I'll go to the police";
+                break;
+            case "6":
+                yield return "Our Father";
+                yield return "Shoot him";
+                yield return "turn yourself in";
+                break;
+            case "7":
+                yield return "Shoot him";
+                yield return "He had it coming";
+                yield return "Shoot Eleanor";
                 break;
         }
     }

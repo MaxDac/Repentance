@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -365,17 +366,23 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    /// <summary>The morning after Act 3: Daniel reads the last entry and keeps the journal for Leo only if Micah returned to Rose.</summary>
+    private int EndingNumber() => Enumerable.Range(1, 7).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
+
+    /// <summary>
+    /// After Act 3: Daniel reads the last entry. He keeps the journal for Leo if Micah found his way back
+    /// (<see cref="Endings.KeepsJournal"/>); otherwise it goes back in the trunk.
+    /// </summary>
     private Task Epilogue() => Game.Run(async () =>
     {
         await Wait(0.8);
         await Talk("epilogue");
-        if (!State.HasFlag("ending_1"))
+        if (!Endings.KeepsJournal(EndingNumber()))
         {
             await Game.WalkTo(new Vector2(384, 224));
             Player.Face(Facing.Right);
             State.TakeItem("journal");
-            await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
+            if (!State.HasFlag("ending_7"))
+                await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
         }
         await Wait(0.6);
         await Game.Hud.Fade(1, 2.0);

@@ -378,6 +378,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.02), 0.40, 0.15])
             hand = body([s * 0.02, 0.2025 if kind == "drink" else 0.39, 0.10])
             wr = hand + np.array([s * 0.015, 0.035, 0.018])
+        elif kind == "temple":  # hand raised beside the head, a held gun pointing back into the temple
+            el = body([s * (sw + 0.11), 0.12, -0.03])
+            hand = body([s * 0.08, 0.09, 0.0])
+            wr = hand + (el - hand) * 0.2
         else:
             fr, orr, er = (math.radians(x) for x in (f, o, e))
             d1 = np.array([s * math.sin(orr), math.cos(orr) * math.cos(fr), math.cos(orr) * math.sin(fr)])
@@ -399,7 +403,8 @@ def figure(spec, ps, fw=56, fh=80):
                 c.put(c.capsule(P(wr), P(wr), H * 0.026, H * 0.026), col["cuff"], part)
             if hand is not None:
                 c.put(c.capsule(P(wr), P(hand), H * 0.025, H * 0.021), skin, f"hand{s}", dither=False)
-        add(2.0 + Ds + 0.05 * abs(cp), arm)
+        # a hand held up to the head goes in front of it
+        add(2.9 if kind == "temple" else 2.0 + Ds + 0.05 * abs(cp), arm)
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
@@ -441,7 +446,7 @@ def figure(spec, ps, fw=56, fh=80):
             # trigger guard under the frame, just ahead of the fist
             g = P(fist + d * 0.03 - up * 0.004)
             c.dot(g[0], g[1], "1a1a20")
-        add(2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
+        add(2.95 if ps["arms"][ps["gun"]][0] == "temple" else 2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
 
     if col.get("held_mask"):  # a mask taken off and held in the hand of arm side, face out: (side, plate, accent)
         def held(spec_=col["held_mask"]):
@@ -1355,6 +1360,53 @@ def grounded_joints(joints, fw=192):
     return [p + shift for p in points]
 
 
+def _drape_sheet(c, drape, hip, shoulder, knee, ankle, floor=92.0):
+    """A bed sheet wrapped from the armpits to the ankles of an articulated (screen-space) figure. It hugs the body,
+    and its loose edge hangs straight down under gravity from every part of the body, until it rests on the floor,
+    where the hem spreads out a little. The far arm stays under it; the near arm is drawn over it afterwards."""
+    col = drape["col"]
+    chest = shoulder + (hip - shoulder) * 0.14
+    foot = ankle + np.array([3.0, 0.0])
+    chain = [(chest, 6.0), (hip, 6.5), (knee, 4.8), (foot, 3.6)]
+    hang = drape.get("hang", 12.0)
+    curtain = np.zeros((c.h, c.w), bool)
+    pooled = []
+    for (a, ra), (b, rb) in zip(chain, chain[1:]):
+        c.put(c.capsule(a, b, ra, rb), col, "sheet")
+        da, db = min(floor, a[1] + hang), min(floor, b[1] + hang)
+        pts = [(a[0] - ra * 0.3, a[1]), (b[0] + rb * 0.3, b[1]), (b[0], db), (a[0], da)]
+        m = c.put(c.poly(pts, curve=0.3), col, "sheet")
+        curtain |= m
+        pooled += [p[0] for p, d in ((a, da), (b, db)) if d >= floor - 0.5]
+    if pooled:
+        x0, x1 = min(pooled) - 5, max(pooled) + 5
+        m = c.put(c.poly([(x0, floor + 0.5), (x0 + 3, floor - 3), (x1 - 3, floor - 3), (x1, floor + 0.5)], curve=0.2),
+                  col, "sheet")
+        curtain |= m
+    # Vertical folds where the cloth hangs free, and a darker hem along the floor.
+    body = np.zeros_like(curtain)
+    for (a, ra), (b, rb) in zip(chain, chain[1:]):
+        body |= c.capsule(a, b, ra, rb)[0]
+    free = curtain & ~body
+    folds = free & (np.floor(c.X).astype(int) % 5 == 0) & (c.Y < floor - 1.5)
+    c.bias[folds] -= 1
+    c.bias[free & (c.Y > floor - 1.5)] -= 1
+    if hip[1] < floor - 12:
+        # Upright enough for the cloth to fall free from the hips: a loose bell over the folded legs, spreading on
+        # the floor, with folds radiating from the hip.
+        tip = min(knee[0], foot[0]) - 4, max(knee[0], foot[0], hip[0]) + 7
+        top = hip + (shoulder - hip) * 0.1
+        bell = [(top[0] - 6, top[1]), (top[0] + 6, top[1]), (tip[1], floor + 0.5), (tip[0], floor + 0.5)]
+        m = c.put(c.poly(bell, curve=0.5), col, "sheet")
+        im = Image.new("L", (c.w, c.h), 0)
+        d = ImageDraw.Draw(im)
+        for k in range(1, 5):
+            fx = tip[0] + (tip[1] - tip[0]) * k / 5
+            d.line([(top[0] + (k - 2.5) * 2, top[1] + 4), (fx, floor - 1)], fill=255)
+        c.bias[m & (np.array(im) > 0)] -= 1
+        c.bias[m & (c.Y > floor - 1.5)] -= 1
+
+
 def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
@@ -1384,7 +1436,10 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
     waist = hip + up * 10
     limb(hip, waist, 6, 5, torso, "torso")
     limb(waist, shoulder, 5, 6, torso, "torso")
-    coat = spec.get("coat")
+    drape = spec.get("drape")
+    if drape:
+        _drape_sheet(c, drape, hip, shoulder, knee, ankle)
+    coat = None if drape else spec.get("coat")
     if coat:
         tail = hip + (knee - hip) * min(1, (coat["hem"] - 0.5) / 0.24)
         if chest_down:
@@ -1398,7 +1453,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
                    tail + across * 5, hip + across * 6, waist + across * 5]
         c.put(c.poly(pts), coat["col"], "coat")
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
-    if not spec.get("cloak") and not chest_down:
+    if not spec.get("cloak") and not chest_down and not drape:
         shirt = shoulder - up * 5
         limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
         tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)
@@ -1432,6 +1487,8 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False):
         return (32 + (-x * cp + z * sp) * H, 40 + (y - 0.2) * H + (x * sp + z * cp) * H * PITCH, 0)
     ident = lambda p: np.array(p, float)
     _head(hc, spec, P, ident, H, cp, sp, 0)
+    if spec.get("hair_style") == "long":
+        _long_hair_back(hc, spec, P, ident, H, cp, sp, 0)
     _face(hc, spec, P, ident, H, cp, sp, 0, 0)
     if spec.get("mask"):
         _mask(hc, spec, P, ident, H, cp, sp, 0)

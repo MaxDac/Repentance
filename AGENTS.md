@@ -11,7 +11,7 @@ then `dotnet build` and import, and apply CI's pass rule. CI runs the same scrip
 ```powershell
 tools\run\test.ps1                                # all suites; summary + non-zero exit on failure
 tools\run\test.ps1 -Suite unit, playthrough -NoClean   # unit|art|autoplay|settings|pause|walk|playthrough
-tools\run\film.ps1 -Speed 4 -Ending 3 -NoClean   # film mode: 1|2|4, ending 1-5|1-oldman|1-steps
+tools\run\film.ps1 -Speed 4 -Ending 3 -NoClean   # film mode: 1|2|4, ending 1-7|1-oldman|1-steps
 ```
 
 Godot logs go to `logs/<suite>.log`. Manual equivalents (always `godot_console.exe`; the GUI `godot.exe` can

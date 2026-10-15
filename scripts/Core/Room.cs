@@ -156,6 +156,9 @@ public partial class Room : Node2D
     /// <summary>Handle a wheel verb on an inventory item (e.g. Hand on a journal = read it). Look falls back to the description.</summary>
     public virtual Task<bool> OnItemVerb(Verb verb, string item) => Task.FromResult(false);
 
+    /// <summary>Runs a "CUE: name" line from Ink: stage business the room plays in the middle of a conversation.</summary>
+    public virtual Task OnCue(string cue) => Task.CompletedTask;
+
     private static IEnumerable<T> FindAll<T>(Node root) where T : Node
     {
         foreach (var child in root.GetChildren())

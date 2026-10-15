@@ -100,6 +100,14 @@ public sealed class PosePlayback
         if (last) { Frame = FrameCount - 1; Apply(); }
     }
 
+    /// <summary>Holds frame <paramref name="frame"/> (clamped) of the loaded strip; ignored while nothing is loaded.</summary>
+    public void ShowFrame(int frame)
+    {
+        if (!Active) return;
+        Frame = Math.Clamp(frame, 0, FrameCount - 1);
+        Apply();
+    }
+
     public Task<bool> Play(string name, bool flipped = false)
     {
         Load(name, flipped);

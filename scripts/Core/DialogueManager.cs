@@ -75,6 +75,12 @@ public partial class DialogueManager : Node
                     await game.Hud.ShowImage(GD.Load<Texture2D>($"res://assets/art/ui/{text}.png"));
                     continue;
                 }
+                // "CUE: name" hands the stage to the room (Room.OnCue) and resumes when it is done
+                if (speaker == "CUE")
+                {
+                    if (game.Room != null) await game.Room.OnCue(text);
+                    continue;
+                }
                 // "THOUGHT: text" is Micah's journal narration, shown at the top of the screen
                 if (speaker == "THOUGHT")
                 {

@@ -35,6 +35,30 @@ public class EndingsTests
     }
 
     [Fact]
+    public void RepentingAfterTheShotEndsInJailWhateverTheLeverage()
+    {
+        Assert.Equal(6, Endings.Resolve(Flags("repented")));
+        Assert.Equal(6, Endings.Resolve(Flags("repented", "mansion_exploded", "took_documents")));
+        Assert.Equal(1, Endings.Resolve(Flags("spared_oldman", "repented")));
+    }
+
+    [Fact]
+    public void ShootingEleanorOverridesTheLeverage()
+    {
+        Assert.Equal(7, Endings.Resolve(Flags("shot_eleanor")));
+        Assert.Equal(7, Endings.Resolve(Flags("shot_eleanor", "mansion_exploded", "took_documents")));
+    }
+
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(2, false)]
+    [InlineData(5, false)]
+    [InlineData(6, true)]
+    [InlineData(7, false)]
+    public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
+        Assert.Equal(keeps, Endings.KeepsJournal(ending));
+
+    [Fact]
     public void WalkingAwayNeedsAChurchReturn()
     {
         Assert.False(Endings.CanWalkAwayFromBartender(Flags(), Flags("faith_ring")));
