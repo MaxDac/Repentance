@@ -39,8 +39,22 @@ class LauncherTests(unittest.TestCase):
             "IMPORT_EXIT": "0",
             "PROBE_EXIT": "0",
             "PROBE_MARKER": "REPENTANCE GODOT OK",
+            "REAL_DOTNET": shutil.which("dotnet") or "",
         }
-        self.write_executable("dotnet", 'print("dotnet")\n')
+        for name in ("godot_console", "godot-mono", "godot4-mono", "godot4"):
+            self.write_executable(name, "import sys\nsys.exit(1)\n")
+        self.write_executable(
+            "dotnet",
+            """\
+import os
+import sys
+
+# PowerShell installed as a .NET tool also starts through dotnet.
+if sys.argv[1] not in ("build", "test"):
+    os.execv(os.environ["REAL_DOTNET"], ["dotnet", *sys.argv[1:]])
+print("dotnet")
+""",
+        )
         self.engine = self.write_executable(
             "godot",
             """\

@@ -14,7 +14,22 @@ tools\run\film.ps1 -Speed 2
 tools\run\film.ps1 -Speed 4 -Ending 5
 ```
 
-Linux / macOS / Git Bash:
+### Linux prerequisites
+
+Repentance needs Godot 4.7.x **.NET/Mono** and the **.NET 10 SDK**. On Arch Linux / Omarchy:
+
+```bash
+sudo pacman -Syu godot-mono dotnet-sdk
+godot-mono --version
+dotnet --list-sdks                 # must include a 10.x SDK
+```
+
+Install **`godot-mono`**, not `godot`: the standard `godot` package has no C# support.
+The launchers select `godot-mono` automatically; manual Godot commands on this distribution should also use
+`godot-mono` (for example, `godot-mono --path . --editor`).
+Other distributions can use the official **.NET** editor download described below.
+
+### Bash launchers (Linux / macOS / Git Bash)
 
 ```bash
 tools/run/test.sh

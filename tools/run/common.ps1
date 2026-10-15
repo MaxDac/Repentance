@@ -87,6 +87,7 @@ function Build-And-Import([string]$Godot) {
         # Windows PowerShell 5.1 turns redirected native stderr into terminating errors under 'Stop'.
         New-Item -ItemType Directory -Force $LogDir | Out-Null
         $log = Join-Path $LogDir 'import.log'
+        New-Item -ItemType File -Force $log | Out-Null
         $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
         try {
             Invoke-Checked 'Godot import' {
