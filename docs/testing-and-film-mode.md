@@ -55,7 +55,7 @@ watching: your mouse and keyboard can't skip lines or change anything. Only thes
 | Option | Values |
 |---|---|
 | Speed (`-Speed`, first argument in bash) | `1` (normal), `2`, `4` |
-| Ending (`-Ending`, `--ending`) | `2` (default), `1`, `3`, `4`, `5`, plus the other two ways to reach ending 1: `1-oldman`, `1-steps` |
+| Ending (`-Ending`, `--ending`) | `2` (default), `1`, `3`, `4`, `5`, `6`, `7`, plus the other two ways to reach ending 1: `1-oldman`, `1-steps` |
 
 When Micah has a decision to make, the choices stay on screen for a moment and the one picked is highlighted before
 the story continues. The film uses the test-only save and settings files and plays with real sound.
@@ -92,7 +92,7 @@ marker, waits, mouse input, screenshots, and a separate save folder per suite (`
 items, solve the puzzles and pick the choices.
 
 - **Every ending, for real.** Acts 1 and 2 are played once. At the Club vestibule the run saves to a manual slot,
-  then reloads that save and plays each Act 3 route through to "The End": endings 2, 3, 4, 5 and the three ways to
+  then reloads that save and plays each Act 3 route through to "The End": endings 2, 3, 4, 5, 6, 7 and the three ways to
   ending 1 (Tony, the old man, the steps). No state is seeded.
 - **Decisions.** Every Ink choice the beats pick is logged; the run fails if a choice its route wants is never offered by the time the route reaches "The End".
 - **Save/load at every beat.** After each beat the game saves, loads that save and compares the flags, items, act,

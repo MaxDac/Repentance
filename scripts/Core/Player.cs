@@ -95,6 +95,24 @@ public partial class Player : Node2D, ISpeaker
         return _poses.Play(id, _facing == Facing.Left);
     }
 
+    /// <summary>Shows one frame of the held pose strip (for poses the story steps through, like lowering the gun).</summary>
+    public void SetPoseFrame(int frame) => _poses.ShowFrame(frame);
+
+    /// <summary>
+    /// Steps back to <paramref name="target"/> over <paramref name="seconds"/> without turning round or dropping the
+    /// held pose: a slow retreat with the gun still up.
+    /// </summary>
+    public async Task BackstepTo(Vector2 target, double seconds)
+    {
+        _path.Clear();
+        _walkDone?.TrySetResult(false);
+        Game.Instance?.Sfx?.Step(Game.Instance.Room?.Floor ?? FloorSurface.Wood, Scale.Y);
+        var tween = CreateTween();
+        tween.TweenMethod(Callable.From<Vector2>(p => { Position = p; UpdateScale(); }), Position, target, seconds)
+            .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        await ToSignal(tween, Tween.SignalName.Finished);
+    }
+
     public override void _ExitTree() => _poses?.Clear();
 
     /// <summary>Walks along a path. Resolves to false if interrupted by another walk.</summary>

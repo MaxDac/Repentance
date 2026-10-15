@@ -458,6 +458,11 @@ INSET: none
     ELEANOR: Thank you for bringing me back, Mr. Jones. Go home, Mr. Jones.
     MICAH: Eleanor...?
     ELEANOR: Thank you for bringing me back.
+* [Our Father...]
+    MICAH: ...who art in heaven... hallowed be Thy name...
+    HARRINGTON: How childish...
+    HARRINGTON: This is ruining the mood.
+    THOUGHT: He lifts two fingers, the way a man calls for the check. Not at me. At somebody behind me.
 - -> END
 
 // ---------------------------------------------------------------- CATHEDRAL
@@ -479,6 +484,10 @@ CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody.
 CALEB: A man who decides he's past saving has stopped listening to God and started listening to somebody else.
 CALEB: That's the Devil's work, brother. It's the oldest trick he has.
 CALEB: Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace.
+MICAH: Grace. I tried praying, Caleb. In France, in the mud. Last week, at my desk, with the bottle watching.
+MICAH: Our Father, who art in heaven, hallowed be Thy name... and then nothing. I can't get past it.
+MICAH: Ma taught us both the whole thing before we could tie our shoes. I don't remember the rest.
+CALEB: Then start there. He remembers the rest.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
@@ -794,9 +803,38 @@ THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")
 * {has_flag("can_spare")} [(Lower the gun.)]
-    MICAH: Yeah. I'm done with this. All of it.
     ~ set_flag("spared_oldman")
+    -> oldman_prayer
 - -> END
+
+// Micah backs out of the room saying the prayer he couldn't finish, a verse at a time; the old man talks into every gap.
+// CUE: step moves him back towards the door and lowers the gun a little more (MansionBedroom.OnCue).
+=== oldman_prayer ===
+MICAH: Our Father...
+MICAH: Our Father... who art in heaven...
+CUE: step
+HARRINGTON: Prayers? In my house? Put the gun down if you're going to pray, Mr. Jones. You look ridiculous.
+MICAH: Hallowed be... hallowed be Thy name.
+CUE: step
+HARRINGTON: That's your brother talking. The priest. Does he know where you are tonight? Does he know what you came here to do?
+MICAH: Thy kingdom come. Thy will be done, on earth as it is in heaven.
+CUE: step
+HARRINGTON: Look at her, Mr. Jones. Look at her. You came all this way. You can still have her. I'm an old man; I can be generous.
+MICAH: Give us this day our daily bread.
+CUE: step
+HARRINGTON: Bread. I can give you bread. I can give you a house on the lake and a seat at the table on Thursdays. Name it.
+MICAH: And forgive us our trespasses...
+MICAH: ...as we forgive those who trespass against us.
+CUE: step
+HARRINGTON: Forgive? Nobody forgives a man like you. Not your wife. Not your God. Ask the girl what forgiveness is worth.
+MICAH: And lead us not into temptation...
+CUE: step
+HARRINGTON: You'll be back. They always come back, Mr. Jones. Every one of them.
+MICAH: ...but deliver us from evil.
+MICAH: Amen.
+CUE: door
+THOUGHT: The whole of it, start to finish, for the first time since France. He's still talking when I reach the door. Let him. I know where I'm going.
+-> END
 
 === eleanor_persuade ===
 ELEANOR: You... you killed him. Micah, what have you done?
@@ -810,6 +848,15 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     ~ set_flag("eleanor_convinced")
 * [He had it coming. They all do.]
     ELEANOR: And who decides that? You? With a gun in your hand?
+* [(Lower the gun. Leave her, and turn yourself in.)]
+    ~ set_flag("repented")
+    THOUGHT: The gun weighs nothing now. It's the rest of me that's heavy.
+    MICAH: No. You're right. I'm not taking anybody anywhere. Not tonight, not ever again.
+    MICAH: I'm going to walk out of here, find the first cop who isn't on this family's payroll, and tell him what I did.
+    ELEANOR: There isn't one, Micah. Not in this city.
+    MICAH: Then I'll keep walking until I find one.
+    THOUGHT: I came here to save somebody. All this time, I had the wrong one in mind.
+    -> END
 - {has_flag("eleanor_convinced"): -> eleanor_comes}
 ELEANOR: Please, Micah. Just go. Before they come.
 * [Nobody's coming. The house is asleep.]
@@ -820,6 +867,10 @@ ELEANOR: Please, Micah. Just go. Before they come.
     ELEANOR: ...
     ~ set_flag("eleanor_convinced")
     -> eleanor_comes
+* [(Shoot Eleanor.)]
+    ~ set_flag("shot_eleanor")
+    THOUGHT: She won't come. She'll stay here with him, on his carpet, in his house, for the rest of her life.
+    THOUGHT: Then let the rest of her life be short. The gun comes up again before the rest of me can stop it.
 - -> END
 
 === eleanor_comes ===
@@ -892,6 +943,21 @@ MICAH: You always say that. One of these days I'd like to know what you ask for.
 THOUGHT: He goes out into the daylight. I go back to my cell and think about Rose, and Tommy, and what Caleb asks for.
 -> END
 
+=== prison_rose ===
+THOUGHT: Six months of grey walls and grey soup. I wrote to her every week. Today, for the first time, she wrote back. Today, she came.
+ROSE: Micah.
+MICAH: Rose. You came.
+ROSE: I almost didn't. I sat on the bus outside the gate for an hour.
+MICAH: I'm sorry, Rose. For all of it. For the bottle, for the nights, for Tommy waiting by the window. For what I did in that house.
+MICAH: I'm not asking you for anything. I just needed to say it to your face, once, sober.
+ROSE: I don't know if I can forgive you, Micah. I honestly don't.
+ROSE: I don't even really understand why you called me here. What you want from me, after everything.
+MICAH: Nothing. That's the strange part. Just for you to know I'm sorry.
+ROSE: ...
+ROSE: I'll try. That's all I can promise. I'll try.
+THOUGHT: She doesn't touch the glass between us. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
+-> END
+
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
 
 === dinner_call2 ===
@@ -928,13 +994,28 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "One bullet left in the revolver. I always was bad at keeping things."
     DANIEL: The rest of the page is stained. Whiskey... and something darker.
     DANIEL: ...Jesus, Micah.
+- has_flag("ending_6"):
+    DANIEL: "Rose came again today. She brought Tommy's drawings. She doesn't say she forgives me, and I don't ask her to."
+    DANIEL: "I said the whole Our Father this morning, start to finish, the way Ma taught us. Caleb says I sound like a choirboy with a hangover."
+    DANIEL: "I made a lot of awful choices, but now I know, I returned to the faith..."
+    DANIEL: ...He found his way back. Behind bars, but he found it.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_7"):
+    DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
+    DANIEL: "These are my brother's last pages, and he could not write them, so I have. I took them from the police reports and the newspapers, and from what I could bear to imagine."
+    DANIEL: "He shot Mr. Harrington in his bed. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
+    DANIEL: "I prayed for him every day of his life, and I could not make him turn back. Finishing his journal is the only thing that eases the pain."
+    DANIEL: "If you are reading this, whoever you are, and whenever: do not walk in my brother's footsteps. It is never too late to turn around, until it is."
+    DANIEL: ...
+    DANIEL: I don't know if this is good for anyone else, but I'll respect Caleb's decision.
+    DANIEL: I'll put the journal back. Maybe in a couple of years I'll give it to Leo...
 - else:
     DANIEL: "Rose. Tommy. I know you won't come, and I don't blame you. I'd have stayed away from me too."
     DANIEL: "Tommy, be a better man than your father. It isn't a high bar. Rose, I'm sorry. I always was. I just never said it right."
     DANIEL: "They took my belt. They left me the sheets."
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END

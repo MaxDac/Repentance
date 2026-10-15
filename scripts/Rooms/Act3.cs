@@ -28,19 +28,26 @@ public static class Act3
         {
             1 => Game.ChangeRoom("rose_house", "coffee"),
             2 or 3 => Game.ChangeRoom("outskirts", "ending"),
+            7 => Finish(nextMorning: false),
             _ => Game.ChangeRoom("prison", "ending"),
         };
     }
 
-    /// <summary>"End of Act Three", then the next morning in the attic, where Daniel reads the last entry.</summary>
-    public static async Task Finish()
+    /// <summary>
+    /// "End of Act Three", then the attic, where Daniel reads the last entry: the next morning, or straight on from his
+    /// bed when <paramref name="nextMorning"/> is false (ending 7, which has already cut to black).
+    /// </summary>
+    public static async Task Finish(bool nextMorning = true)
     {
         await Game.Wait(1.0);
         await Game.Hud.Fade(1, 1.5);
         Game.Hud.ShowCaption("End of Act Three");
         await Game.Wait(2.5);
-        Game.Hud.ShowCaption("The next morning");
-        await Game.Wait(2.2);
+        if (nextMorning)
+        {
+            Game.Hud.ShowCaption("The next morning");
+            await Game.Wait(2.2);
+        }
         Game.Hud.ShowCaption(null);
         Attic.StashMicahItems();
         State.SetFlag("masked", false);

@@ -115,12 +115,63 @@ public partial class AutoPlay
         await Shot("rose_coffee");
         await TheEnd("ending_1 (Tony)");
 
-        // 1: sparing the old man
+        // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
         Seed(act3Flags.Append("rose_wait"), act3Items, "Lower the gun");
+        float nearest = float.MaxValue;
+        bool lowering = false;
         _ = game.ChangeRoom("mansion_bedroom", "start");
-        await Until(() => game.Room?.Name == "RoseHouse");
+        var prayer = new List<string>();
+        string? lastPrayerLine = null;
+        await Until(() =>
+        {
+            if (game.Room is Rooms.MansionBedroom)
+            {
+                if (game.Player.PoseName == "micah_aim_lower") lowering = true;
+                if (lowering) nearest = Mathf.Min(nearest, game.Player.Position.X);
+            }
+            if (game.Hud.SpeechVisible && game.Hud.SpeechText != lastPrayerLine) prayer.Add(lastPrayerLine = game.Hud.SpeechText);
+            return game.Room?.Name == "RoseHouse";
+        }, 180, 0.05);
         Check(gs.HasFlag("spared_oldman") && gs.HasFlag("ending_1"), "ending 1: spared the old man");
+        Check(lowering && nearest < 70, "Micah backs to the door, lowering the revolver step by step");
+        Check(prayer.Any(l => l.Contains("Thy kingdom come", StringComparison.OrdinalIgnoreCase)) &&
+              prayer.Any(l => l.Contains("Amen")), "Micah says the whole Our Father on his way out");
         await TheEnd("ending_1 (old man)");
+
+        // 6: shoots the old man, then repents and turns himself in; Rose visits him in jail
+        Seed(act3Flags.Append(Endings.TookDocuments), act3Items.Append("documents"), "Shoot him", "turn yourself in");
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() => game.Room?.Name == "Prison", 180);
+        Check(gs.HasFlag(Endings.Repented) && gs.HasFlag("ending_6") && !gs.HasFlag("escaping"),
+            "ending 6: straight to jail, even with the signed evidence");
+        Check(game.Room?.GetNodeOrNull<CanvasItem>("Rose")?.Visible == true &&
+              game.Room?.GetNodeOrNull<CanvasItem>("Caleb")?.Visible != true &&
+              game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible != true, "ending 6: Rose sits across the table");
+        await game.Wait(4);
+        await Shot("ending_prison_rose");
+        await TheEnd("ending_6");
+
+        // 7: Eleanor won't come; Micah shoots her, then himself
+        Seed(act3Flags, act3Items, "Shoot him", "He had it coming", "Shoot Eleanor");
+        int shots = game.Sfx.Count(Sound.Gunshot);
+        bool eleanorDown = false, aimSelf = false, morning = false;
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() =>
+        {
+            if (game.Room is Rooms.MansionBedroom bedroom)
+            {
+                eleanorDown |= bedroom.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("eleanor_shot.png") == true;
+                aimSelf |= game.Player.PoseName == "micah_aim_self";
+            }
+            morning |= game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
+            return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
+        }, 180, 0.05);
+        Check(gs.HasFlag(Endings.ShotEleanor) && gs.HasFlag("ending_7"), "ending 7: Micah shoots Eleanor");
+        Check(eleanorDown, "ending 7: Eleanor falls like the old man, shot in the stomach");
+        Check(aimSelf, "ending 7: Micah puts the revolver to his temple");
+        Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, "ending 7: the last shot is heard over black");
+        await TheEnd("ending_7");
+        Check(!morning && !gs.HasFlag("escaping"), "ending 7: no escape and no \"The next morning\"");
 
         // 1: giving up on the church steps
         Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
@@ -306,7 +357,9 @@ public partial class AutoPlay
         if (outskirts)
             Check(sawNextMorning == (gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded)),
                 $"{ending}: next-morning transition only after alone escape with explosion");
-        bool keepJournal = gs.HasFlag("ending_1");
+        int endingNumber = Enumerable.Range(1, 7).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
+        bool keepJournal = Endings.KeepsJournal(endingNumber);
+        bool dismissed = endingNumber is >= 2 and <= 5;
         await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 120);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End",
             $"{ending}: final attic caption");
@@ -320,8 +373,8 @@ public partial class AutoPlay
             string[] lines = story.ContinueMaximally().Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             Check(lines.Contains("DANIEL: Maybe Leo would like to read it some day.") == keepJournal,
                 $"{ending}: Leo's exact line only appears after reconciliation");
-            Check(lines.Contains("DANIEL: That's enough of you for one lifetime, Micah Jones.") == !keepJournal,
-                $"{ending}: dismissal only appears without reconciliation");
+            Check(lines.Contains("DANIEL: That's enough of you for one lifetime, Micah Jones.") == dismissed,
+                $"{ending}: dismissal only appears for the bleak endings 2-5");
         }
         finally
         {

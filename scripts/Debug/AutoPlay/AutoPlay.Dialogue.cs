@@ -70,6 +70,7 @@ public partial class AutoPlay
             {
                 ("nun", "\"I will shew thee, O man, what is good.\""),
                 ("caleb_act2", "Turn back to God and believe, Micah. Salvation isn't wages for being good; it's grace."),
+                ("caleb_act2", "Our Father, who art in heaven, hallowed be Thy name... and then nothing. I can't get past it."),
                 ("caleb_warn", "There's still a way back. There always is. But not where you're going."),
                 ("caleb_last", "God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him."),
             })

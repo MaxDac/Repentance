@@ -292,11 +292,40 @@ def npc_standing(spec, arms):
     return standing, (96, 18)
 
 
-def fall_strip(spec, name, final_name, arms):
+def fall_strip(spec, name, final_name, arms, wound=False):
     """Drop onto both knees, pitch forward, and settle face-down; the last frame is also saved alone as final_name,
-    the texture held afterwards, so there's no jump at the end."""
+    the texture held afterwards, so there's no jump at the end. wound: shot in the stomach, the clothes soaked from
+    the first kneeling frame on and a pool of blood spreading on the ground under the body at the end."""
+    from PIL import Image, ImageDraw, ImageChops
     scaled = dict(spec, h=spec["h"] * SCALE)
-    frames = [npc_standing(spec, arms)] + [action_figure(scaled, joints) for joints in KNEES_PRONE]
+    frames = [npc_standing(spec, arms)]
+    for i, joints in enumerate(KNEES_PRONE):
+        img, head = action_figure(scaled, joints)
+        if wound:
+            hip, shoulder = grounded_joints(joints)[:2]
+            wx, wy = hip + (shoulder - hip) * 0.45
+            r = (3, 4.5, 5.5)[min(i, 2)]
+            stain = Image.new("RGBA", img.size)
+            sd = ImageDraw.Draw(stain)
+            sd.ellipse([wx - r, wy - r * 0.9, wx + r, wy + r * 0.9], fill=(138, 18, 22, 255))
+            if i == len(KNEES_PRONE) - 1:
+                # face-down, the soaked patch runs down the sheet and straight into the pool on the floor
+                sd.polygon([(wx - r, wy), (wx + r, wy), (wx + r + 3, 93), (wx - r - 4, 93)], fill=(138, 18, 22, 255))
+            stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+            img.alpha_composite(stain)
+        frames.append((img, head))
+    if wound:
+        down, head = frames[-1]
+        hip, shoulder = grounded_joints(KNEES_PRONE[-1])[:2]
+        wx = (hip + (shoulder - hip) * 0.45)[0]
+        pool = Image.new("RGBA", down.size)
+        ImageDraw.Draw(pool).ellipse([wx - 11, 87, wx + 10, 93], fill=(104, 12, 16, 255))
+        pool.alpha_composite(down)
+        # seeping out from under the hem onto the floor, so it shows even where a sheet hangs to the ground
+        seep = Image.new("RGBA", down.size)
+        ImageDraw.Draw(seep).ellipse([wx - 10, 90, wx + 9, 94], fill=(104, 12, 16, 255))
+        pool.alpha_composite(seep)
+        frames[-1] = (pool, head)
     action_strip(name, frames, [0.12, 0.35, 0.18, 0.3])
     action_strip(final_name, [frames[-1]], [1])
     return frames
@@ -360,8 +389,34 @@ def kneeling_figure(spec, joints):
 def aim_frame(spec, name):
     """Single 96x96 frame of a character in profile facing right, revolver raised at shoulder height in a two-handed
     grip, arms out straight so the gun stands clear of the body."""
-    ps = pose(90, arms={1: ("swing", 98, 2, 0), -1: ("swing", 94, -12, 4)}, gun=1,
-              legs={1: (8, 4, 0), -1: (-8, 6, -4)}, lean=-2.0)
+    img = figure(spec, _aim_pose(98, 94), FW + 32, FH)
+    action_strip(name, [(img, (FW / 2 + 16, 18))], [1], anchor=((FW + 32) / 2, FH - 3))
+    return img
+
+
+def _aim_pose(gun_arm, off_arm, off_kind="swing"):
+    off = ("swing", off_arm, -12, 4) if off_kind == "swing" else _arms(off_kind)[-1]
+    return pose(90, arms={1: ("swing", gun_arm, 2, 0), -1: off}, gun=1,
+                legs={1: (8, 4, 0), -1: (-8, 6, -4)}, lean=-2.0)
+
+
+def aim_lower_strip(spec, name):
+    """The aim, lowered a little at a time until the revolver hangs at the side: frame 0 matches aim_frame, and the
+    story steps through the rest (one frame per verse of the prayer), so each frame is held, not played."""
+    fw = FW + 32
+    arms = [98, 84, 70, 56, 42, 26, 8]
+    frames = []
+    for i, a in enumerate(arms):
+        ps = _aim_pose(a, a - 4) if i < 4 else _aim_pose(a, 0, "down")
+        frames.append((figure(spec, ps, fw, FH), (FW / 2 + 16, 18)))
+    action_strip(name, frames, [1] * len(frames), anchor=(fw / 2, FH - 3))
+    return frames
+
+
+def aim_self_frame(spec, name):
+    """Single frame in profile facing right: the revolver held to his own temple, elbow up and out in front."""
+    ps = pose(90, arms={1: ("temple", 0, 0, 0), -1: ("swing", 2, 6, 8)}, gun=1,
+              legs={1: (4, 3, 0), -1: (-4, 6, -4)}, nod=0.008)
     img = figure(spec, ps, FW + 32, FH)
     action_strip(name, [(img, (FW / 2 + 16, 18))], [1], anchor=((FW + 32) / 2, FH - 3))
     return img
@@ -460,6 +515,8 @@ def build():
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")
+    aim_lower_strip(MICAH, "micah_aim_lower")
+    aim_self_frame(MICAH, "micah_aim_self")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
     door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
@@ -477,6 +534,9 @@ def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
     shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
+    fall_strip(dict(ELEANOR_SHEET, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("fold"),
+               wound=True)
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
+    seated_frame(ROSE, "rose_seated", flip=True)

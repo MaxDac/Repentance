@@ -57,7 +57,7 @@ Command-line options (after `--`):
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself with targeted regression checks, and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`5`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
+| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`7`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
 | `--film[=1\|2\|4]` | Film mode: the same story to watch at 1x, 2x or 4x speed, from the title to "The End"; input is ignored except Space, F11 and Esc. `--ending=N` picks the route (default 2). Prints `FILM OK` |
 | `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story. Prints `SETTINGS TEST OK` |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
@@ -232,7 +232,8 @@ use the `release` skill in `.github/skills/release/SKILL.md`.
     it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
     unable to think of anything but Eleanor.
 12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
-   Devil's work. "I'll think about that." Coming was a mistake, and Micah walks out.
+   Devil's work. Micah admits he can't get past "hallowed be Thy name" in the Our Father; "Then start there. He
+   remembers the rest." "I'll think about that." Coming was a mistake, and Micah walks out.
 13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
 14. **Library, by day**: ask the librarian about the knot (shown full screen). He wants to know where
    the mirror came from; Micah won't say, so neither will he. Consult the desk catalogue: match the
@@ -275,7 +276,7 @@ From here the story follows Walkthrough.md:
    of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
-25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver or don't; either way Bruno knocks Micah out.
+25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
 27. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
@@ -296,17 +297,22 @@ From here the story follows Walkthrough.md:
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
-   Rose at least three times **and carries both ring and cross**) lower the gun (ending 1). Then talk Eleanor into leaving ("I didn't come all this
-   way...", or later "Every time I've seen you...").
+   Rose at least three times **and carries both ring and cross**) lower the gun: Micah says the whole Our Father,
+   a verse at a time, backing to the door while the old man talks into every pause (ending 1). Then talk Eleanor into leaving ("I didn't come all this
+   way...", or later "Every time I've seen you..."). Or, on the first turn, lower the gun and leave her to turn
+   himself in (ending 6); or, if she still refuses on the second, shoot her, then himself (ending 7).
 32. **The escape**: in the kitchen, optionally turn on the gas and light the candle; the house blows up behind them.
 33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or explosion); 3 out of town
    alone (not convinced, signed evidence or explosion); 4 prison, Eleanor visits (convinced, neither signed evidence nor explosion);
-   5 prison, Caleb visits. Each ends Act Three; the next morning Daniel keeps the journal for Leo if Micah returned
-   to Rose, saying "Maybe Leo would like to read it some day." Otherwise, he puts it back in the trunk. *The End.*
+   5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
+   7 murder and suicide in the bedroom, the last entry written by Caleb. Each ends Act Three; the next morning
+   (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose or to the faith, saying
+   "Maybe Leo would like to read it some day." After ending 7 he respects Caleb's decision and puts it back.
+   Otherwise, he puts it back in the trunk. *The End.*
 
 ### Story notes
 
-The core plot and five endings are unchanged; the fifteen puzzles include five collect-and-combine locations. Sal receives a cash bribe Micah can afford.
+The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The fifteen puzzles include five collect-and-combine locations. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.

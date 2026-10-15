@@ -9,6 +9,9 @@ namespace Repentance;
 ///   3  Outskirts   - Eleanor not convinced, and the mansion blew up or Micah took the documents.
 ///   4  Prison      - Eleanor convinced, but nothing to bargain with: Eleanor visits.
 ///   5  Prison      - Eleanor not convinced, nothing to bargain with: Caleb visits.
+///   6  Prison      - Micah shot the old man, then repented and walked out without Eleanor: Rose visits.
+///   7  Mansion     - Micah shot the old man, then Eleanor, then himself: Caleb finishes the journal.
+/// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
 /// </summary>
 public static class Endings
 {
@@ -18,6 +21,11 @@ public static class Endings
     public const string EleanorConvinced = "eleanor_convinced";
     public const string MansionExploded = "mansion_exploded";
     public const string TookDocuments = "took_documents";
+    public const string Repented = "repented";
+    public const string ShotEleanor = "shot_eleanor";
+
+    /// <summary>Endings in which Daniel keeps the journal for Leo.</summary>
+    public static bool KeepsJournal(int ending) => ending is 1 or 6;
 
     /// <summary>Micah went back to Caleb at least once while hunting for Eleanor.</summary>
     public static bool ChurchReturned(Func<string, bool> has) =>
@@ -43,6 +51,10 @@ public static class Endings
     {
         if (has(GaveUpSteps) || has(WalkedAway) || has(SparedOldMan))
             return 1;
+        if (has(Repented))
+            return 6;
+        if (has(ShotEleanor))
+            return 7;
         var convinced = has(EleanorConvinced);
         if (StaysFree(has))
             return convinced ? 2 : 3;

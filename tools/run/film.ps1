@@ -11,7 +11,7 @@
 #>
 param(
     [ValidateSet(1, 2, 4)][int]$Speed = 1,
-    [ValidateSet('1', '2', '3', '4', '5', '1-oldman', '1-steps')][string]$Ending = '2',
+    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '1-oldman', '1-steps')][string]$Ending = '2',
     [switch]$NoClean,
     [string]$Godot
 )
