@@ -532,7 +532,7 @@ def _head(c, col, P, body, H, cp, sp, nod):
         x, y, _ = P(center)
         return (x, y), H * math.sqrt((ax * cp) ** 2 + (az * sp) ** 2), H * ay
 
-    if col.get("chin_cut"):
+    if col.get("chin_cut") or col.get("clean_jaw"):
         before = (c.mat.copy(), c.part.copy(), c.n.copy(), c.bias.copy())
     if abs(sp) > 0.3:  # back of the skull: heads are deeper than they are wide
         oc, orx, ory = ell3(body([0, 0.068 + nod, -0.018 * HEAD]), 0.045 * HEAD, 0.064 * HEAD, 0.052 * HEAD)
@@ -577,6 +577,15 @@ def _head(c, col, P, body, H, cp, sp, nod):
     if col.get("soft_face"):
         c.bias[c.parts_mask("neck") & (c.Y > hy_ - 1)] += 1
     _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod)
+    if col.get("clean_jaw") and facing:
+        # where the skull ellipse meets the square jaw a lone head pixel can stick out of the jaw outline with
+        # nothing above or below it: show what lay behind it instead
+        head = c.parts_mask("head")
+        up, down = np.zeros_like(head), np.zeros_like(head)
+        up[1:], down[:-1] = head[:-1], head[1:]
+        spur = head & ~up & ~down & (c.Y > hy_)
+        for dst, src in zip((c.mat, c.part, c.n, c.bias), before):
+            dst[spur] = src[spur]
 
 
 def _leg_at(leg, y):
@@ -1105,6 +1114,14 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
                 c.dot(bx + ddx, by_ + ddy, colour)
             c.dot(bx - 1, by_ - 1, colour)
             c.dot(bx + 1, by_ + 1, colour)
+        elif kind == "knot" and cp > 0.05:  # tie knot in the collar, lit on top: (knot, y, colour, highlight)
+            _, y, colour, light = d
+            kx, ky, _ = P(body([0, y, 0.05]))
+            kx, ky = math.floor(kx), math.floor(ky)
+            knot = c.parts_mask(*body_parts)
+            for ddx, ddy, lit in ((-1, 0, 0), (0, 0, 1), (1, 0, 1), (2, 0, 0), (0, 1, 0), (1, 1, 0)):
+                if 0 <= ky + ddy < c.h and 0 <= kx + ddx < c.w and knot[ky + ddy, kx + ddx]:
+                    c.dot(kx + ddx, ky + ddy, light if lit else colour)
         elif kind == "pearls" and cp > 0.05:  # a single strand: (pearls, y, colour)
             _, y, colour = d
             for i, u in enumerate((-0.03, -0.015, 0.0, 0.015, 0.03)):
