@@ -94,8 +94,8 @@ are in `screenshots/`. CI runs the very same scripts (`.github/workflows/ci.yml`
 | `export (linux / windows)` | Exports the `Linux` and `Windows Desktop` presets exactly as `release.yml` does; the Linux build then runs `--walk-test` itself, so the shipped build is proven to boot and load every room |
 | `ci-ok` | Passes only if every job above passed |
 
-Make `ci-ok` the required status check on `main` (Settings → Branches or Rulesets) so that a pull request can't be
-merged until the whole suite passes. Godot (and its export templates) are installed by the shared
+`ci-ok` is the only required status check on `main` (the "main protection" ruleset, under Settings → Rules), so a
+pull request can't be merged until the whole suite passes. New jobs go in `ci-ok`'s `needs`, not in the ruleset. Godot (and its export templates) are installed by the shared
 `.github/actions/setup-godot` action, which `release.yml` uses too.
 
 Because CI runs everything, local runs before a pull request can be limited to the suites that match the change;

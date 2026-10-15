@@ -32,8 +32,8 @@ Every planning session that implements its plan ends with a PR, without being as
    plus the uploaded `logs/` artifact), fix it, push, and repeat until `ci-ok` is green.
 4. Never merge, or call the work done, while a check is red, pending or missing.
 
-`ci-ok` should be a required status check on `main` (repository settings, branch protection or ruleset), so nothing
-merges without the whole suite passing.
+`ci-ok` is the required status check on `main` (the "main protection" ruleset), so nothing merges without the
+whole suite passing. When adding a CI job, add it to `ci-ok`'s `needs`, not to the ruleset.
 
 ## Running the game autonomously (Windows)
 
