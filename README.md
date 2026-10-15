@@ -281,7 +281,8 @@ installs and uninstalls it.
    click the convent door to enter. Sister Agatha questions Micah, warns him off "that Jezebel", then lets
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
    the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
-   mirror and cloth to reveal the symbol. Micah returns the cloth and won't leave before that discovery.
+   mirror and cloth to reveal the symbol. Micah means to return the cloth but can't bring himself to: he keeps
+   Eleanor's perfumed cloth until the end (ending 1 throws it away). He won't leave before that discovery.
    The cell door returns to the corridor. Talk to the sister for her farewell, or click the front door and
    she calls Micah back for the same exchange before letting him leave.
 7. **Outside the convent**: Eleanor, in black, opens with a question about his late visit. After that opening,
@@ -382,7 +383,8 @@ or he let something slip, without establishing either as fact. While still supin
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving is easy, Micah.
 Forgetting is the part you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
-Micah offers coffee with "Nothing you owe me."; the journal places renewed vows a year later.
+Micah throws Eleanor's perfumed cloth in the street before ringing, then offers coffee with "Nothing you owe me.";
+the journal places renewed vows a year later.
 His office reminder preserves the last opportunity to recover the wedding ring and visit Caleb.
 
 If Eleanor refuses to follow and Micah burns the mansion, her fate remains unknown during escape.

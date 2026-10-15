@@ -108,7 +108,7 @@ public sealed partial class Playthrough
             await DismissImage("the symbol behind the mirror");
             await WaitIdle();
             await Do(Verb.Hand, "comb");
-            Check(Gs.HasItem("mirror"), "the cleaned mirror");
+            Check(Gs.HasItem("mirror") && Gs.HasItem("cloth"), "the cleaned mirror, and Micah keeps her cloth");
             await Do(Verb.Walk, "exit");
             Expect("ConventCorridor", "back to the corridor");
         });

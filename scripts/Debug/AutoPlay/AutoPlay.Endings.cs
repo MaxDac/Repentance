@@ -48,6 +48,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
+        Check(gs.HasItem("cloth"), "ending 5: Eleanor's cloth is still in Micah's pocket");
         await game.Wait(4);
         await Shot("ending_prison_caleb");
         await TheEnd("ending_5");
@@ -111,12 +112,14 @@ public partial class AutoPlay
         Check(!Offered("bartender_gun", "Lower the gun"), "church return without ring doesn't allow walking away from Tony");
 
         // 1: walking away from Tony
+        Check(act3Items.Contains("cloth"), "Act 3 seeds carry Eleanor's cloth");
         Seed(alleyReady, act3Items.Where(i => i != "cross"), "Lower the gun");
         await game.ChangeRoom("alley", "act3");
         _ = game.Perform(Verb.Talk, "back_door");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1"), "ending 1: walked away from Tony, coffee with Rose");
         await Until(() => gs.HasFlag("rose_door"));
+        Check(!gs.HasItem("cloth"), "ending 1: Micah throws Eleanor's cloth in the street before ringing");
         await game.Wait(1);
         await Until(() => game.Player.Facing == Facing.Up && game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
         Check(game.Player.Facing == Facing.Up, "Act 3: Micah stands by the bell, his back to the screen");
