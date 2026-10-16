@@ -18,6 +18,8 @@ public sealed partial class Playthrough
             await WaitIdle();
             Expect("EleanorRoom", "the First Interlude opens in Room 507");
             Check(Gs.HasFlag("interlude1") && _game.Player.Character == "eleanor_play", "the player is Eleanor");
+            Check(_game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("eleanor_room_interlude.png") == true,
+                "Room 507 is still in order the night she leaves");
             // Puzzle 17: the brass box, the flower, the riddle and the thread, packed and locked in the closet safe
             await Do(Verb.Hand, "vanity");
             Check(Gs.HasItem("eleanor_box") && Gs.HasItem("pellet"), "the open brass box and the bare paper flower");

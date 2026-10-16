@@ -145,7 +145,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   Tony behind Sal.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
-- Before leaving, Micah pushes up from his hands and knees through a supported crouch to standing.
+- Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent.
 
 #### Convent
@@ -248,8 +248,9 @@ window..."). Eleanor speaks aloud only to people and on look/hand. She carries h
 starts: she can take, join and use only what she finds in the room she is in. **N** does nothing while she plays;
 Micah's things are stashed and come back when the interlude ends, and none of hers go with him.
 
-1. **Room 507, the Aurelian, the Tuesday night.** The room is already turned over: she did it herself ("Let
-   them think she'd been taken."). She packs the brass box (**Puzzle 17**, below), puts the combination in the
+1. **Room 507, the Aurelian, the Tuesday night.** The room is still in order (its own tidy background,
+   `eleanor_room_interlude.png`): Theodore's men only turn it over after she has gone. She packs the brass box
+   (**Puzzle 17**, below), puts the combination in the
    drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
 2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the

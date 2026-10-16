@@ -1,12 +1,27 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>Room 507 at the Aurelian: where Eleanor slept the night she vanished, turned over by someone in a hurry.</summary>
+/// <summary>
+/// Room 507 at the Aurelian: where Eleanor slept the night she vanished, turned over by someone in a hurry.
+/// In the First Interlude it is still in order: the old man's men only search it after she has gone.
+/// </summary>
 public partial class EleanorRoom : Room
 {
+    private const string Tidy = "res://assets/art/rooms/eleanor_room_interlude.png";
+
     /// <summary>The First Interlude: Eleanor, the Tuesday night she left (Story.Interlude).</summary>
     private bool Interlude => State.HasFlag("interlude1");
+
+    private Texture2D? _searched;
+
+    protected override void OnRefresh()
+    {
+        if (GetNodeOrNull<Sprite2D>("Background") is not { } bg) return;
+        _searched ??= bg.Texture;
+        bg.Texture = Interlude ? GD.Load<Texture2D>(Tidy) : _searched;
+    }
 
     public override async Task OnEnter(string entry)
     {
@@ -142,7 +157,7 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("closet", Verb.Look):
-                await Say("Half my dresses on the floor. The safe's at the back, behind the rest.");
+                await Say("My dresses in a row, waiting like I'll be back to wear them. The safe's at the back, behind them.");
                 return true;
             case ("closet", Verb.UseItem) when item == "eleanor_box_packed" && !State.HasFlag("interlude_safe_locked"):
                 State.TakeItem("eleanor_box_packed");
@@ -176,7 +191,7 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("bed", Verb.Look):
-                await Say("I slit the mattress myself. Let them think somebody went looking for something.");
+                await Say("Turned down by the maid, and I won't sleep in it. By morning Theodore's men will have it in ribbons.");
                 return true;
             case ("bed", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_drawer_locked"):
                 await Say("Not yet. The box in the safe, the riddle in the drawer. Then I call.");
@@ -204,8 +219,8 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("clothes", Verb.Look):
-                await Say("I threw them down myself. Some of them deserved it.");
-                if (!State.HasFlag("interlude_took_thread")) await Say("The red one's torn at the hem. Silk thread, hanging loose.");
+                await Say("My red dress, laid out on the bench. Theodore's favourite.");
+                if (!State.HasFlag("interlude_took_thread")) await Say("It's torn at the hem. Silk thread, hanging loose.");
                 return true;
             case ("clothes", Verb.Hand) when !State.HasFlag("interlude_took_thread"):
                 State.SetFlag("interlude_took_thread");
@@ -213,10 +228,10 @@ public partial class EleanorRoom : Room
                 await Say("A length of red thread from the torn hem. Theodore bought me that dress. It can tie up one last thing for me.");
                 return true;
             case ("clothes", Verb.Hand):
-                await Say("I threw them down myself. Some of them deserved it.");
+                await Say("Let it lie there. When his men come looking, they can trample it.");
                 return true;
             case ("chair", Verb.Look or Verb.Hand):
-                await Say("I kicked it over. It felt better than it should have.");
+                await Say("Pulled up to the desk, the way I leave it every night. Tonight's the last.");
                 return true;
             case ("window", Verb.Look or Verb.Hand):
                 await Say("Five floors down to the alley. The rain doesn't care who's leaving.");

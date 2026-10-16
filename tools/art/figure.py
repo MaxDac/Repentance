@@ -1645,8 +1645,8 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     across = np.array([-up[1], up[0]])
     torso, skin = spec["torso"], spec["skin"]
     pants = spec.get("pants", torso)
-    if head_sprite is not None:  # the coat shoulder and the upper sleeve shade as one mass, without a seam
-        c.blend_parts = ("torso", "arm")
+    if head_sprite is not None or chest_down:  # the coat shoulder and the upper sleeve shade as one mass, no seam
+        c.blend_parts = ("torso", "arm", "collar")
         along = elbow - shoulder
         t = ((c.X - shoulder[0]) * along[0] + (c.Y - shoulder[1]) * along[1]) / max(along @ along, 1e-6)
         c.blend_zone = c.capsule(shoulder + up * 3, elbow, 7, 5)[0]
@@ -1704,7 +1704,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         if tie:
             limb(shoulder - up * 2, shoulder - up * 9, 0.7, 0.6, tie, "tie")
     hk = max(ak, 0.7)
-    limb(shoulder + across * 2, elbow, 3.2 * ak, 2.7 * ak, spec.get("sleeves", torso), "arm")
+    limb(shoulder + across * (0 if chest_down else 2), elbow, 3.2 * ak, 2.7 * ak, spec.get("sleeves", torso), "arm")
     limb(elbow, hand - (hand - elbow) * 0.12, 2.7 * ak, 2 * ak, spec.get("sleeves", torso), "arm")
     limb(hand - (hand - elbow) * 0.12, hand, 2 * hk, 1.7 * hk, skin, "hand")
     if spec.get("cloak"):

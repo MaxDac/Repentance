@@ -20,6 +20,8 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "EleanorRoom");
         await WaitIdle(game);
         Check(gs.HasFlag("interlude1") && game.Player.Character == "eleanor_play", "the player is Eleanor in Room 507");
+        Check(game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("eleanor_room_interlude.png") == true,
+            "Room 507 is still in order: Theodore's men search it only after she has gone");
         Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0 && !gs.HasItem("revolver") && !gs.HasItem("journal"),
             "Micah's things (and Daniel's journal) are put away; Eleanor's satchel starts empty");
         await game.ItemVerb(Verb.Hand, Notes.ItemId);

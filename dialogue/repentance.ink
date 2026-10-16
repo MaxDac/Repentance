@@ -82,8 +82,8 @@ DANIEL: Wait. These first pages aren't about him at all. "What follows, she told
 // night, ELEANOR is the player. The choices only colour the scenes, except Agatha's night visit (interlude_agatha_night).
 
 === interlude_aurelian ===
-THOUGHT: Tuesday night, the Aurelian. Room 507. She'd already turned the place upside down herself. Let them think she'd been taken.
-THOUGHT: Silk on the floor, feathers in the air. She said it was the first honest mess she'd made in that marriage.
+THOUGHT: Tuesday night, the Aurelian. Room 507. The bed turned down, the dresses on their hangers, the chair squared to the desk.
+THOUGHT: She left it neater than she ever kept that marriage. The mess came after, when Theodore's men came looking for what she'd hidden.
 ELEANOR: The box. The safe. The drawer. Then a telephone call, and the door. Don't look back, Ellie.
 -> END
 
@@ -193,7 +193,7 @@ THOUGHT: On the third night, a man with a split lip came up that road in the dar
 ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
 THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
 ELEANOR: Coat. Gloves. And a face that's been waiting on that road all night.
-THOUGHT: When I came out of that convent, she was already on the road, under the trees, like it was the most natural place in the world to be. Now I know why. She told me Agatha had sent me. That was the first lie she ever told me, and the smallest.
+THOUGHT: When I came out of that convent, she was already on the road, under the trees, like it was the most natural place in the world to be. Now I know why. She told me Tony's boys had put her wise. That was the first lie she ever told me, and the smallest.
 -> END
 
 // ---------------------------------------------------------------- OFFICE
@@ -491,7 +491,8 @@ INSET: convent
 MICAH: Eleanor Harrington. You wouldn't happen to know her?
 ELEANOR: That depends on who's asking.
 MICAH: Micah Jones. Private detective.
-ELEANOR: Sister Agatha said a man came asking for me. A man with a split lip and a prophet's name.
+ELEANOR: Tony's boys said a gumshoe came around asking for me, with a prophet's name.
+ELEANOR: They gave him a split lip to remember them by.
 ELEANOR: Why are you looking for me, Mr. Jones?
 MICAH: Your husband hired me to bring you home.
 ELEANOR: Teddy. Of course. And what do you get, if you bring me home?
