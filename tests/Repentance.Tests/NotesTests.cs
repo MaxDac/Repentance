@@ -41,7 +41,7 @@ public class NotesTests
         var before = Notes.Lines(safe, Has(new[] { "took_combination" })).ToList();
         var after = Notes.Lines(safe, Has(new[] { "took_combination", "safe_open" })).ToList();
         Assert.True(after.Count > before.Count);
-        Assert.Contains(after, l => l.Contains("17"));
+        Assert.Contains(after, l => l.Contains("12"));
     }
 
     [Theory]

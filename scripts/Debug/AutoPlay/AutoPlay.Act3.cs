@@ -22,7 +22,15 @@ public partial class AutoPlay
         Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && gs.Inventory.Count == 0 && !gs.HasItem("revolver"),
             "the player is Eleanor at the motel, with nothing of Micah's");
         await Shot("interlude_motel_goons");
-        await game.Perform(Verb.Hand, "door");
+        var taken = game.Perform(Verb.Hand, "door");
+        await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
+            || game.Room?.Name != "MotelNight", 30);
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorKicked")?.Visible == true && game.Sfx.Count(Sound.Crash) > 0,
+            "the Order's men kick the motel door in");
+        Check(game.Room?.FindActor("goon") is { Visible: true } && game.Player.Position.X >= 120,
+            "Bruno and the goon walk in; Eleanor stopped halfway, well away from the door");
+        await Shot("interlude_motel_kicked");
+        await taken;
         await WaitIdle(game);
         Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
             "the Order's men take her to the Club's dressing room, in the pink gown");
@@ -44,7 +52,8 @@ public partial class AutoPlay
         Check(Offered("interlude_oldman", "(Push it away.)") && !gs.HasFlag(Endings.RefusedDrugs),
             "the old man's gin can be refused; taking it saves nothing");
         Check(_poseCounts.GetValueOrDefault("eleanor_drink") == drinks + 1, "Eleanor drinks: her drink strip plays");
-        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in") && !gs.HasFlag("interlude_made_up"),
+        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in") && !gs.HasFlag("interlude_door_kicked")
+            && !gs.HasFlag("interlude_made_up"),
             "the interlude's flags are cleared for Micah's part");
         Check(gs.HasItem("revolver") && !new[] { "compact", "lipstick", "puff", "puff_powdered", "hairpin" }.Any(gs.HasItem),
             "Micah gets his kit back, and none of her makeup");
@@ -300,9 +309,11 @@ public partial class AutoPlay
         await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
             new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
         Check(gs.HasFlag("bell_wedged"), "gagged the bell with the tie");
+        Check(game.Player.Character == "micah_no_tie", "Micah has left his tie on the bell");
         await Shot("mansion_exterior_wedged");
         await game.Perform(Verb.Hand, "door");
         Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("kitchen_key"), "in through the kitchen, quietly");
+        Check(game.Player.Character == "micah_no_tie", "still without his tie in the next room");
         await Shot("mansion_kitchen");
         await game.Perform(Verb.Hand, "range");
         await game.Perform(Verb.Hand, "back_door");
@@ -378,6 +389,7 @@ public partial class AutoPlay
             "Micah walks out from behind the screen to take aim (#104)");
         Check(_poseCounts.GetValueOrDefault("micah_crouch_rise") == 1 && game.Player.PoseName == "micah_aim",
             "Micah stands back up before stepping out, so the crouch is released");
+        Check(game.Player.Poses.Source == "micah_no_tie_aim", "Micah aims without his tie");
         await game.Wait(0.5);
         await Shot("mansion_bedroom_gun");
         await confront;

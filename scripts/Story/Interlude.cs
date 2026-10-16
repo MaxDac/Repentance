@@ -30,7 +30,7 @@ public static class Interlude
     private static readonly string[] SecondBeats =
     {
         "interlude_goons_in", "interlude_took_makeup", "interlude_took_puff", "interlude_took_pin",
-        "interlude_powdered", "interlude_lips", "interlude_made_up",
+        "interlude_powdered", "interlude_lips", "interlude_made_up", "interlude_door_kicked",
     };
 
     /// <summary>True while the player is Eleanor (an interlude, the coda, or her epilogue scene).</summary>
