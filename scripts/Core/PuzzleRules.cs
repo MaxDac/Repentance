@@ -121,7 +121,7 @@ public static class PuzzleRules
     /// <summary>How many stops, in order from the first, are set right: each one drops a tumbler you can hear.</summary>
     public static int SafeTumblers(IReadOnlyList<int> directions, IReadOnlyList<int> numbers)
     {
-        int[] wantDirections = { 0, 1, 0 }, wantNumbers = { 4, 31, 17 };
+        int[] wantDirections = { 0, 1, 0 }, wantNumbers = { 12, 31, 7 };
         if (directions.Count != 3 || numbers.Count != 3) return 0;
         int clicks = 0;
         while (clicks < 3 && directions[clicks] == wantDirections[clicks] && numbers[clicks] == wantNumbers[clicks]) clicks++;

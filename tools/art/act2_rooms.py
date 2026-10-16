@@ -1102,83 +1102,89 @@ def _drawer_front(d, x0, y0, x1, y1, keyhole, col=hx("553620")):
         d.rectangle([mx - 1, my + 7, mx, my + 9], fill=hx("0a0604"))
 
 
+DESK_DROP = 14  # how far the desk top sits below where it was first painted: lowered to about Micah's belt
+
+
 def desk(img, d, left, right):
     """A partners' desk in mahogany: moulded top, two panelled pedestals with a drawer over a cupboard in each, a
     kneehole between, a green leather blotter, a brass inkstand, a candlestick telephone and a lit banker's lamp."""
     wood, edge = hx("4e321c"), hx("1e1209")
+    DROP = DESK_DROP
     # kneehole: the back panel in shadow, a shallow pencil drawer under the top
-    d.rectangle([230, 150, 270, 204], fill=hx("24160a"))
-    d.rectangle([232, 166, 268, 202], fill=hx("2e1c0e"), outline=hx("1a1006"))
-    d.rectangle([230, 150, 270, 160], fill=hx("3e2814"), outline=edge)
-    _bevel(d, (231, 151, 269, 159), hx("5a3a20"), hx("2a1a0c"))
-    d.rectangle([248, 154, 252, 156], fill=hx("c8a858"))
+    d.rectangle([230, 164, 270, 204], fill=hx("24160a"))
+    d.rectangle([232, 176, 268, 202], fill=hx("2e1c0e"), outline=hx("1a1006"))
+    d.rectangle([230, 164, 270, 172], fill=hx("3e2814"), outline=edge)
+    _bevel(d, (231, 165, 269, 171), hx("5a3a20"), hx("2a1a0c"))
+    d.rectangle([248, 167, 252, 169], fill=hx("c8a858"))
     for x0 in (186, 270):
-        d.rectangle([x0, 150, x0 + 44, 204], fill=wood)
-        _grain(d, (x0 + 1, 151, x0 + 43, 203), wood, x0)
-        d.line([(x0 + 1, 151), (x0 + 1, 203)], fill=hx("6a4628"))
-        d.line([(x0 + 43, 151), (x0 + 43, 203)], fill=hx("341f0e"))
+        d.rectangle([x0, 164, x0 + 44, 204], fill=wood)
+        _grain(d, (x0 + 1, 165, x0 + 43, 203), wood, x0)
+        d.line([(x0 + 1, 165), (x0 + 1, 203)], fill=hx("6a4628"))
+        d.line([(x0 + 43, 165), (x0 + 43, 203)], fill=hx("341f0e"))
         d.rectangle([x0 + 1, 199, x0 + 43, 203], fill=hx("341f0e"))  # plinth
         d.line([(x0 + 1, 199), (x0 + 43, 199)], fill=hx("6a4628"))
-        d.rectangle([x0, 150, x0 + 44, 204], outline=edge)
+        d.rectangle([x0, 164, x0 + 44, 204], outline=edge)
         # cupboard door with a raised panel and a little turned knob
-        d.rectangle([x0 + 4, 178, x0 + 40, 197], fill=hx("4a2f1a"), outline=hx("2a1a0c"))
-        _bevel(d, (x0 + 7, 181, x0 + 37, 194), hx("6e4a2c"), hx("2c1a0c"))
-        d.rectangle([x0 + 10, 184, x0 + 34, 191], fill=hx("553620"))
-        d.ellipse([x0 + 34, 186, x0 + 37, 189], fill=hx("c8a858"))
+        d.rectangle([x0 + 4, 188, x0 + 40, 197], fill=hx("4a2f1a"), outline=hx("2a1a0c"))
+        _bevel(d, (x0 + 6, 190, x0 + 38, 195), hx("6e4a2c"), hx("2c1a0c"))
+        d.rectangle([x0 + 9, 191, x0 + 31, 194], fill=hx("553620"))
+        d.ellipse([x0 + 33, 191, x0 + 36, 194], fill=hx("c8a858"))
     for x0, opened in ((190, left), (274, right)):
         if opened:
             # pulled out towards the room: its insides, then a larger, lower front
-            d.polygon([(x0, 155), (x0 + 36, 155), (x0 + 40, 161), (x0 - 4, 161)], fill=hx("2a1a0e"), outline=edge)
-            d.line([(x0 - 3, 160), (x0 + 39, 160)], fill=hx("4a3018"))
+            d.polygon([(x0, 167), (x0 + 36, 167), (x0 + 40, 173), (x0 - 4, 173)], fill=hx("2a1a0e"), outline=edge)
+            d.line([(x0 - 3, 172), (x0 + 39, 172)], fill=hx("4a3018"))
             if x0 == 190:
-                d.rectangle([x0 + 1, 156, x0 + 13, 160], fill=hx("7a2e1a"), outline=hx("2a0e06"))  # cigar box
-                d.rectangle([x0 + 4, 157, x0 + 10, 158], fill=hx("e0c880"))
-                d.line([(x0 + 15, 159), (x0 + 25, 157)], fill=hx("d0d0d8"))  # letter opener
-                d.point((x0 + 15, 159), fill=hx("8a7a3a"))
-                d.rectangle([x0 + 27, 156, x0 + 35, 160], fill=hx("9a5824"), outline=hx("3a1a08"))  # rye
-                d.rectangle([x0 + 35, 157, x0 + 37, 159], fill=hx("3a2a1a"))
-                d.line([(x0 + 28, 157), (x0 + 33, 157)], fill=hx("e8b060"))
+                d.rectangle([x0 + 1, 168, x0 + 13, 172], fill=hx("7a2e1a"), outline=hx("2a0e06"))  # cigar box
+                d.rectangle([x0 + 4, 169, x0 + 10, 170], fill=hx("e0c880"))
+                d.line([(x0 + 15, 171), (x0 + 25, 169)], fill=hx("d0d0d8"))  # letter opener
+                d.point((x0 + 15, 171), fill=hx("8a7a3a"))
+                d.rectangle([x0 + 27, 168, x0 + 35, 172], fill=hx("9a5824"), outline=hx("3a1a08"))  # rye
+                d.rectangle([x0 + 35, 169, x0 + 37, 171], fill=hx("3a2a1a"))
+                d.line([(x0 + 28, 169), (x0 + 33, 169)], fill=hx("e8b060"))
             else:
                 for i in range(3):  # bank drafts
-                    d.rectangle([x0 + 1 + i, 156 + i // 2, x0 + 20 + i, 159], fill=hx("f0ead8"), outline=hx("8a8270"))
-                d.line([(x0 + 4, 158), (x0 + 16, 158)], fill=hx("6a7a6a"))
-                d.rectangle([x0 + 23, 156, x0 + 36, 160], fill=hx("141018"), outline=hx("c8a040"))  # the invitation
-                d.point((x0 + 29, 158), fill=hx("e0c060"))
-            _drawer_front(d, x0 - 4, 161, x0 + 40, 180, x0 == 274, hx("6a4628"))
+                    d.rectangle([x0 + 1 + i, 168 + i // 2, x0 + 20 + i, 171], fill=hx("f0ead8"), outline=hx("8a8270"))
+                d.line([(x0 + 4, 170), (x0 + 16, 170)], fill=hx("6a7a6a"))
+                d.rectangle([x0 + 23, 168, x0 + 36, 172], fill=hx("141018"), outline=hx("c8a040"))  # the invitation
+                d.point((x0 + 29, 170), fill=hx("e0c060"))
+            _drawer_front(d, x0 - 4, 173, x0 + 40, 192, x0 == 274, hx("6a4628"))
         else:
-            _drawer_front(d, x0, 155, x0 + 36, 174, x0 == 274)
+            _drawer_front(d, x0, 167, x0 + 36, 186, x0 == 274)
     # the top: a moulded edge, the leather and the brass on it
-    d.rectangle([180, 138, 320, 150], fill=hx("6a4426"), outline=edge)
-    d.rectangle([181, 139, 319, 143], fill=hx("7a5232"))
-    d.line([(181, 144), (319, 144)], fill=hx("a0703e"))
-    d.line([(181, 148), (319, 148)], fill=hx("4a2c16"))
-    d.rectangle([232, 139, 270, 143], fill=hx("2a4a32"), outline=hx("1a2a1a"))  # blotter
+    d.rectangle([180, 138 + DROP, 320, 150 + DROP], fill=hx("6a4426"), outline=edge)
+    d.rectangle([181, 139 + DROP, 319, 143 + DROP], fill=hx("7a5232"))
+    d.line([(181, 144 + DROP), (319, 144 + DROP)], fill=hx("a0703e"))
+    d.line([(181, 148 + DROP), (319, 148 + DROP)], fill=hx("4a2c16"))
+    d.rectangle([232, 139 + DROP, 270, 143 + DROP], fill=hx("2a4a32"), outline=hx("1a2a1a"))  # blotter
     for x in (232, 266):
-        d.rectangle([x, 139, x + 4, 143], fill=hx("5a2a1a"))
-    d.rectangle([241, 136, 262, 139], fill=hx("d8ccb0"))  # letters
-    d.line([(244, 137), (259, 137)], fill=hx("6a6050"))
-    d.rectangle([243, 135, 258, 136], fill=hx("ece4cc"))
+        d.rectangle([x, 139 + DROP, x + 4, 143 + DROP], fill=hx("5a2a1a"))
+    d.rectangle([241, 136 + DROP, 262, 139 + DROP], fill=hx("d8ccb0"))  # letters
+    d.line([(244, 137 + DROP), (259, 137 + DROP)], fill=hx("6a6050"))
+    d.rectangle([243, 135 + DROP, 258, 136 + DROP], fill=hx("ece4cc"))
     # brass inkstand with two wells and a pen
-    d.rectangle([197, 140, 215, 142], fill=hx("a08838"), outline=hx("3a2a10"))
+    d.rectangle([197, 140 + DROP, 215, 142 + DROP], fill=hx("a08838"), outline=hx("3a2a10"))
     for x in (200, 209):
-        d.rectangle([x, 136, x + 4, 140], fill=hx("16161a"), outline=hx("5a5a60"))
-        d.point((x + 1, 137), fill=hx("8a8a98"))
-    d.line([(205, 139), (212, 131)], fill=hx("1a1a1a"))
-    d.point((212, 131), fill=hx("d8b860"))
+        d.rectangle([x, 136 + DROP, x + 4, 140 + DROP], fill=hx("16161a"), outline=hx("5a5a60"))
+        d.point((x + 1, 137 + DROP), fill=hx("8a8a98"))
+    d.line([(205, 139 + DROP), (212, 131 + DROP)], fill=hx("1a1a1a"))
+    d.point((212, 131 + DROP), fill=hx("d8b860"))
     # candlestick telephone, the receiver on its hook
-    d.ellipse([217, 139, 227, 142], fill=hx("16141a"))
-    d.rectangle([221, 126, 223, 140], fill=hx("1a181e"))
-    d.line([(222, 127), (222, 138)], fill=hx("4a4850"))
-    d.polygon([(218, 122), (226, 122), (224, 127), (220, 127)], fill=hx("16141a"))
-    d.line([(219, 122), (225, 122)], fill=hx("5a5860"))
-    d.line([(224, 129), (226, 130)], fill=hx("2a282e"))
-    d.rectangle([226, 128, 228, 136], fill=hx("16141a"))
-    d.line([(227, 136), (226, 140), (220, 141)], fill=hx("1a1a1a"))
+    d.ellipse([217, 139 + DROP, 227, 142 + DROP], fill=hx("16141a"))
+    d.rectangle([221, 126 + DROP, 223, 140 + DROP], fill=hx("1a181e"))
+    d.line([(222, 127 + DROP), (222, 138 + DROP)], fill=hx("4a4850"))
+    d.polygon([(218, 122 + DROP), (226, 122 + DROP), (224, 127 + DROP), (220, 127 + DROP)], fill=hx("16141a"))
+    d.line([(219, 122 + DROP), (225, 122 + DROP)], fill=hx("5a5860"))
+    d.line([(224, 129 + DROP), (226, 130 + DROP)], fill=hx("2a282e"))
+    d.rectangle([226, 128 + DROP, 228, 136 + DROP], fill=hx("16141a"))
+    d.line([(227, 136 + DROP), (226, 140 + DROP), (220, 141 + DROP)], fill=hx("1a1a1a"))
     # banker's lamp: brass foot and stem, green glass shade, the bulb glowing under it
-    d.ellipse([287, 139, 305, 143], fill=hx("8a7a3a"), outline=hx("3a2a10"))
-    d.line([(290, 140), (300, 140)], fill=hx("d8c070"))
-    d.rectangle([295, 125, 297, 140], fill=hx("a08a40"))
-    d.line([(295, 125), (295, 139)], fill=hx("e0c878"))
+    d.ellipse([287, 139 + DROP, 305, 143 + DROP], fill=hx("8a7a3a"), outline=hx("3a2a10"))
+    d.line([(290, 140 + DROP), (300, 140 + DROP)], fill=hx("d8c070"))
+    d.rectangle([295, 125 + DROP, 297, 140 + DROP], fill=hx("a08a40"))
+    d.line([(295, 125 + DROP), (295, 139 + DROP)], fill=hx("e0c878"))
+
+
 
 
 def _coat(d, cx, top, bottom, col, seed):
@@ -1248,14 +1254,14 @@ def lamp_shade(d):
     """The banker's lamp's green glass shade, the lit bulb under it and the pull chain. Painted over the moonlight,
     since it's the one thing in the room making its own light."""
     dark, mid, hi = (hx(c) for c in LAMP_GREENS)
-    d.polygon([(283, 125), (309, 125), (306, 117), (286, 117)], fill=mid, outline=dark)
-    d.line([(287, 118), (305, 118)], fill=hi)
-    d.line([(285, 121), (291, 121)], fill=hi)
-    d.line([(299, 120), (306, 123)], fill=dark)
-    d.line([(283, 125), (309, 125)], fill=hx("b89a48"))
-    d.rectangle([288, 126, 304, 127], fill=hx("fff0b8"))
-    d.line([(302, 126), (302, 131)], fill=hx("a08840"))
-    d.point((302, 132), fill=hx("e0c878"))
+    d.polygon([(283, 139), (309, 139), (306, 131), (286, 131)], fill=mid, outline=dark)
+    d.line([(287, 132), (305, 132)], fill=hi)
+    d.line([(285, 135), (291, 135)], fill=hi)
+    d.line([(299, 134), (306, 137)], fill=dark)
+    d.line([(283, 139), (309, 139)], fill=hx("b89a48"))
+    d.rectangle([288, 140, 304, 141], fill=hx("fff0b8"))
+    d.line([(302, 140), (302, 145)], fill=hx("a08840"))
+    d.point((302, 146), fill=hx("e0c878"))
 
 
 def wardrobe(img, d, opened, secret):
@@ -1411,8 +1417,8 @@ def paint_office(left=False, right=False, closet=False, secret=False):
     # moonlight: everything cold, a blue shaft from the window
     img.paste(ImageChops.multiply(img, Image.new("RGB", img.size, (118, 128, 186))))
     light(img, "polygon", [(30, 36), (106, 36), (300, 262), (110, 262)], hx("5a70b0"), 0.35, 14)
-    light(img, "ellipse", [268, 100, 326, 174], hx("d8a058"), 0.16, 10)
-    light(img, "ellipse", [280, 124, 312, 146], hx("ffd890"), 0.3, 4)
+    light(img, "ellipse", [268, 100 + DESK_DROP, 326, 174 + DESK_DROP], hx("d8a058"), 0.16, 10)
+    light(img, "ellipse", [280, 124 + DESK_DROP, 312, 146 + DESK_DROP], hx("ffd890"), 0.3, 4)
     lamp_shade(ImageDraw.Draw(img))
     light(img, "ellipse", [218, 12, 278, 74], hx("e0b868"), 0.12, 8)
     vignette(img, 0.6, (8, 8, 22), 40)
@@ -1432,8 +1438,8 @@ def build_office():
     face = pixelize(base, [hx(c) for c in PORTRAIT_FACE_COLOURS.split()])
     px.paste(face.crop(PORTRAIT_FACE_BOX), PORTRAIT_FACE_BOX[:2])
     save(px, "rooms", "harrington_office.png")
-    overlay(v["drawer_left"], px, pal, (180, 150, 236, 206), "harrington_office_drawer_left")
-    overlay(v["drawer_right"], px, pal, (264, 150, 320, 206), "harrington_office_drawer_right")
+    overlay(v["drawer_left"], px, pal, (180, 162, 236, 206), "harrington_office_drawer_left")
+    overlay(v["drawer_right"], px, pal, (264, 162, 320, 206), "harrington_office_drawer_right")
     overlay(v["closet"], px, pal, (350, 40, 476, 212), "harrington_office_closet")
     # the niche is drawn over the open closet, so it's cut against the open-closet state
     closet_px = pixelize(v["closet"], pal)

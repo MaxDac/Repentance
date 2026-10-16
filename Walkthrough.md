@@ -24,6 +24,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
 - The top drawer of the desk holds a revolver, the money ($22 cash) and a lockpick. Micah takes all three
+  and shuts the drawer; it stays shut for the rest of the story
   (the bottom drawer only holds unpaid bills).
   The cash is framed as his existing fictional $20 daily fee plus $2 from a previous job, not a claim
   about average PI income. For purchasing-power context, the
@@ -79,14 +80,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Leaves on a lucky clover. The night of Samhain, when the Veil is thin. Saint Patrick's day in March." Eleanor's Celtic
-  roots, in the everyday, modern form anybody knows.
+  "Those who sat at His table. The days of the month He was born. The day He rested."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. The references give **4** (the four-leaf clover), **31** (Halloween, the old Samhain) and
-  **17** (Saint Patrick's day); the paper gives no directions, so the player has to try them. Each stop that is right,
+  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
+  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
   counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
-  by trying each one: the solution is **right 4 / left 31 / right 17**. The paper remains readable; wrong
-  settings can be reset or retried.
+  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
+  settings can be reset or retried. When the safe opens, Micah finds it strange that a woman like Eleanor would
+  bring Christ into it ("Strange, a dame like her bringin' Christ into it.").
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
     perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
@@ -643,6 +644,8 @@ satchel, no **N**, Micah's things stashed until the interlude ends.
   Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
   option. Incorrect plans are rejected before touching the mechanism; no alarm sounds and retries
   cost nothing. Close/reset preserves the unrestrained state. Use the lintel key only after securing it.
+  The tie stays on the bell: from here on (the mansion and every ending after it) Micah goes without it, collar
+  open at the throat (`micah_no_tie` sheet and its crouch/aim strips; the mask still takes precedence).
 - The kitchen is dark and quiet. The green baize door to the house is **bolted from the house side**: Micah
   says so and notes that houses like this always kept another way up for the deliveries. In the floor by
   the table is a cellar trapdoor with an iron ring.

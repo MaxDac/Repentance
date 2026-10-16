@@ -264,9 +264,9 @@ installs and uninstalls it.
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
    **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and decode the paper's Celtic references (a lucky clover, the night of Samhain, when the Veil is thin, Saint
-   Patrick's day: 4, 31, 17). It gives no directions; each right stop drops a tumbler, and the dial opens at
-   right 4 / left 31 / right 17.
+   open the closet and decode the paper's references (apostles, December, the day of rest: 12, 31, 7). It gives
+   no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7. Micah
+   finds it strange that a dame like her would bring Christ into it.
    Then take the brass box.
    Open it in the satchel with the hand: a
    calling card carrying her perfume, a matchbook from the Blue Lantern, a vial of laundry bluing and a
@@ -366,7 +366,8 @@ From here the story follows Walkthrough.md:
    back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house.
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
-   tie hammer, release hand; cutting the wire would release the spring. Then open the door.
+   tie hammer, release hand; cutting the wire would release the spring. Then open the door. Micah leaves his tie
+   on the bell and goes on with his collar open.
 30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
    door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
    lantern, light it with the matchbook (kept), use the lit lantern on the dark stair, then climb the

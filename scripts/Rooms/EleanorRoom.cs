@@ -48,7 +48,7 @@ public partial class EleanorRoom : Room
             case ("paper", Verb.Hand):
                 State.SetFlag("took_combination");
                 State.GiveItem("combination");
-                await Say("A slip of hotel paper in her hand. Three lines of Irish blarney. Nobody writes that down unless it opens something.");
+                await Say("A slip of hotel paper in her hand. Three lines of Sunday school. Nobody writes that down unless it opens something.");
                 return true;
             case ("paper", Verb.Look):
                 await Say("Three riddles in Eleanor's handwriting. No numbers, no right or left. She didn't trust paper with anything plain.");
@@ -66,7 +66,8 @@ public partial class EleanorRoom : Room
             case ("safe", Verb.UseItem) when Shows(item, "combination", "safe_riddle") && !State.HasFlag("safe_open"):
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
                 State.SetFlag("safe_open");
-                await Say("Four leaves for luck. Halloween, the thirty-first. Saint Patrick's, the seventeenth. The tumblers fell like dominoes.");
+                await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
+                await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
                 await Say("Whoever tossed the room scratched the dial raw and never got the door open.");
                 return true;
             case ("safe", Verb.Hand):
@@ -136,7 +137,7 @@ public partial class EleanorRoom : Room
                 return true;
             case ("closet", Verb.Hand) when !State.HasFlag("interlude_safe_locked"):
                 State.SetFlag("interlude_safe_locked");
-                await Say("Into the safe, and spin the dial. Halloween. Saint Patrick's. A four-leaf clover, for luck.");
+                await Say("Into the safe, and spin the dial. The Twelve at His table. December. The day He rested.");
                 await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
                 return true;
             case ("closet", Verb.Hand):
@@ -148,7 +149,7 @@ public partial class EleanorRoom : Room
                 return true;
             case ("desk_drawer", Verb.Hand) when !State.HasFlag("interlude_drawer_locked"):
                 State.SetFlag("interlude_drawer_locked");
-                await Say("Three lines of Irish nonsense on hotel paper. My grandmother would be proud.");
+                await Say("Three lines of Sunday school on hotel paper. My grandmother would be proud.");
                 await Say("Into the drawer, and turn the key. Whoever opens this one, I want him to have earned it.");
                 return true;
             case ("desk_drawer", _):
