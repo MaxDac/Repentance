@@ -55,7 +55,7 @@ centered = false
 
 [node name="DrawerLeft" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(187, 156)
+position = Vector2(187, 168)
 texture = ExtResource("5_harrington_office_drawer_left")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -63,7 +63,7 @@ ShowIfFlags = "drawer_left_open"
 
 [node name="DrawerRight" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(271, 156)
+position = Vector2(271, 168)
 texture = ExtResource("6_harrington_office_drawer_right")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -127,7 +127,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/DrawerLeft"]
-position = Vector2(208, 165)
+position = Vector2(208, 177)
 shape = SubResource("Rect_2")
 
 [node name="DrawerRight" type="Area2D" parent="Hotspots"]
@@ -142,7 +142,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/DrawerRight"]
-position = Vector2(292, 165)
+position = Vector2(292, 177)
 shape = SubResource("Rect_3")
 
 [node name="Desk" type="Area2D" parent="Hotspots"]
@@ -157,7 +157,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
-position = Vector2(250, 168)
+position = Vector2(250, 178)
 shape = SubResource("Rect_4")
 
 [node name="Closet" type="Area2D" parent="Hotspots"]

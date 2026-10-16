@@ -24,6 +24,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
 - The top drawer of the desk holds a revolver, the money ($22 cash) and a lockpick. Micah takes all three
+  and shuts the drawer; it stays shut for the rest of the story
   (the bottom drawer only holds unpaid bills).
   The cash is framed as his existing fictional $20 daily fee plus $2 from a previous job, not a claim
   about average PI income. For purchasing-power context, the
