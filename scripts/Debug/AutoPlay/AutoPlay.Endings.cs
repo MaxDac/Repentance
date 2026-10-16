@@ -129,7 +129,7 @@ public partial class AutoPlay
         // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
         Seed(act3Flags.Append("rose_wait"), act3Items, "Our Father");
         float nearest = float.MaxValue;
-        bool lowering = false, steppedBack = false;
+        bool lowering = false, steppedBack = false, versesFaded = false;
         _ = game.ChangeRoom("mansion_bedroom", "start");
         var prayer = new List<string>();
         var coda = new List<string>();
@@ -141,7 +141,9 @@ public partial class AutoPlay
                 if (game.Player.PoseName == "micah_aim_lower") lowering = true;
                 if (game.Player.PoseName == "micah_aim_back") steppedBack = true;
                 if (lowering) nearest = Mathf.Min(nearest, game.Player.Position.X);
-                if (game.Hud.CaptionVisible && (coda.Count == 0 || coda[^1] != game.Hud.CaptionText)) coda.Add(game.Hud.CaptionText);
+                if (game.Hud.VersesVisible && game.Hud.VersesText != "" && (coda.Count == 0 || coda[^1] != game.Hud.VersesText))
+                    coda.Add(game.Hud.VersesText);
+                if (game.Hud.VersesVisible && game.Hud.VersesFading) versesFaded = true;
             }
             if (game.Hud.SpeechVisible && game.Hud.SpeechText != lastPrayerLine) prayer.Add(lastPrayerLine = game.Hud.SpeechText);
             return game.Room?.Name == "RoseHouse";
@@ -155,6 +157,8 @@ public partial class AutoPlay
         var doxology = Rooms.MansionBedroom.Doxology;
         Check(coda.SequenceEqual(Enumerable.Range(1, doxology.Length).Select(n => string.Join("\n", doxology.Take(n)))),
             "the prayer ends over black, a line at a time, down to \"Amen.\"");
+        Check(versesFaded, "the closing verses fade in and out");
+        Check(prayer.Count(l => l.Contains("Our Father")) == 1, "Micah says \"Our Father...\" once, then goes on with the prayer");
         await TheEnd("ending_1 (old man)");
 
         // 6: shoots the old man, then repents and turns himself in; Rose visits him in jail

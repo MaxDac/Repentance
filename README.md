@@ -263,7 +263,7 @@ installs and uninstalls it.
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
    **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and decode the paper's Celtic references (a lucky clover, the night the Veil is thin, Saint
+   open the closet and decode the paper's Celtic references (a lucky clover, the night of Samhain, when the Veil is thin, Saint
    Patrick's day: 4, 31, 17). It gives no directions; each right stop drops a tumbler, and the dial opens at
    right 4 / left 31 / right 17.
    Then take the brass box.

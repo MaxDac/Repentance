@@ -2784,7 +2784,7 @@ def eleanor_rise_strip(occupied, empty):
         standing(pose(35, arms=arms)),
     ]
     stored = [(ImageOps.mirror(img), (w - head[0], head[1])) for img, head in frames]
-    action_strip("eleanor_mansion_rise", stored, [0.35, 0.3, 0.4, 0.28, 0.25, 0.3], anchor=(w - (px - x0), py - y0))
+    action_strip("eleanor_mansion_rise", stored, [0.175, 0.15, 0.2, 0.14, 0.125, 0.15], anchor=(w - (px - x0), py - y0))
     return frames
 
 

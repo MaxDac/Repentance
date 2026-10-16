@@ -47,7 +47,7 @@ public static class Notes
             L("The transom's open an inch. Something with a hook could reach that bolt.")),
         N("safe_riddle", "The safe", "took_combination",
             L("Slip of paper from her room:"),
-            L("Leaves on a lucky clover. The night when the Veil is thin. Saint Patrick's day in March."),
+            L("Leaves on a lucky clover. The night of Samhain, when the Veil is thin. Saint Patrick's day in March."),
             L("No directions given."),
             L("Right 4, left 31, right 17. It opened.", "safe_open")),
         new NoteDef("brass_box", "The brass box", new[] { "opened_brass_box", "seen_blue_lantern_front", "club_lead" }, new[]

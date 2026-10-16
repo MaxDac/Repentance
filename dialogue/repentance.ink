@@ -832,8 +832,7 @@ THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice
 // Micah backs out of the room saying the prayer he couldn't finish, a verse at a time; the old man talks into every gap.
 // CUE: step moves him back towards the door and lowers the gun a little more (MansionBedroom.OnCue).
 === oldman_prayer ===
-MICAH: Our Father...
-MICAH: Our Father... who art in heaven...
+MICAH: ...who art in heaven...
 CUE: step
 HARRINGTON: Prayers? In my house? Put the gun down if you're going to pray, Mr. Jones. You look ridiculous.
 MICAH: Hallowed be... hallowed be Thy name.
