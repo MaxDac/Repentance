@@ -269,7 +269,7 @@ BARTENDER: What'll it be?
 * (menu) [What've you got?]
     BARTENDER: Gin. Gin with ice. Gin that tastes like it was made in a bathtub. Because it was.
     -> bartender.opts
-* {menu && cash_amount() >= 1 && !has_flag("lantern_gin")} [Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal.]
+* {menu && cash_amount() >= 1 && !has_flag("lantern_gin")} [Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal. #short: Bathtub? Swell. Set 'em up, pal.]
     -> bartender.gin
 * [Nice place.]
     BARTENDER: It's a dump. But it's a dump with a band on Fridays.
@@ -600,7 +600,7 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
     ~ pushes = 1
     ROSE: You always are. It's the one thing you were ever reliable about.
     -> opts
-+ {pushes == 1} [I know what I did. I left you and Tommy alone, and I called it work.]
++ {pushes == 1} [I know what I did. I left you and Tommy alone, and I called it work. #short: I know what I did. I left you and Tommy alone.]
     ~ pushes = 2
     ROSE: You called it a lot of things. Tommy called it "When's Daddy coming home?" For a year.
     -> opts
@@ -608,7 +608,7 @@ ROSE: Nobody passes by this street, Micah. You have no business being here. Not 
     ~ pushes = 3
     ROSE: Forgiving's the easy part, Micah. Forgetting is what you keep asking for.
     -> opts
-+ {pushes == 3} [I've done something terrible this week. I need to hear it from somebody. From you.]
++ {pushes == 3} [I've done something terrible this week. I need to hear it from somebody. From you. #short: I've done something terrible. I need to hear it from you.]
     ~ pushes = 4
     ROSE: And there it is. You're not here for us. You're here because you need something.
     -> opts
@@ -668,7 +668,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     MICAH: Doors don't open that easily the first time. Maybe she'd been there before.
     CALEB: The sisters open their door to anybody who knocks. That's what the door is for.
     -> opts
-* (roof) [The convent answers to the Church. And you're the Church on this side of town.]
+* (roof) [The convent answers to the Church. And you're the Church on this side of town. #short: The convent answers to the Church. And you're the Church.]
     CALEB: The convent is Mother Superior's house, not mine. I say Mass for the sisters. I don't keep their books.
     MICAH: But it's all one roof, in the end. Somebody under it might have heard something. Maybe you.
     -> opts
@@ -883,7 +883,7 @@ ELEANOR: Please, Micah. Just go. Before they come.
     ELEANOR: This house never sleeps.
 * [I'll go to the police. I'll tell them everything.]
     ELEANOR: The police? The police dine here on Sundays.
-* [Every time I've seen you, you've said you can't go back there. Now you don't have to.]
+* [Every time I've seen you, you've said you can't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
     ELEANOR: ...
     ~ set_flag("eleanor_convinced")
     -> eleanor_comes

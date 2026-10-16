@@ -12,6 +12,8 @@ namespace Repentance;
 /// conversation. Lines are written "SPEAKER: text" (speaker = actor/voice Id; MICAH or DANIEL for the player).
 /// "THOUGHT: text" is Micah's journal narration (top of the screen, nobody speaks it).
 /// Choice text is spoken by the player; wrap it in parentheses, e.g. "(Leave)", to keep them quiet.
+/// A choice too long for the choice bar gets a "#short: label" tag inside its brackets: the bar shows the short
+/// label, the player still says the full text (docs/dialogue-choice-labels.md).
 /// Ink can call give_item/take_item/has_item/set_flag/has_flag to touch the game state.
 /// </summary>
 public partial class DialogueManager : Node
@@ -25,6 +27,11 @@ public partial class DialogueManager : Node
     public Func<string, IReadOnlyList<string>, Task<int>>? AutoChoose;
     /// <summary>Raised with the talk knot and every option shown, before one is picked (choice coverage).</summary>
     public event Action<string, IReadOnlyList<string>>? ChoicesOffered;
+    /// <summary>
+    /// The labels the choice bar shows for the choices on offer, in the same order as the full labels given to
+    /// <see cref="AutoChoose"/>: a choice's <c>#short:</c> tag, else its full text.
+    /// </summary>
+    public IReadOnlyList<string> ShownChoices { get; private set; } = Array.Empty<string>();
 
     public override void _EnterTree() => Instance = this;
 
@@ -92,8 +99,9 @@ public partial class DialogueManager : Node
             var choices = story.CurrentChoices;
             if (choices.Count == 0) break;
             var labels = choices.Select(c => c.Text.Trim()).ToList();
+            ShownChoices = choices.Select((c, i) => InkScan.ShownLabel(labels[i], c.Tags)).ToList();
             ChoicesOffered?.Invoke(knot, labels);
-            int picked = AutoChoose != null ? await AutoChoose(knot, labels) : await game.Hud.ShowChoices(labels);
+            int picked = AutoChoose != null ? await AutoChoose(knot, labels) : await game.Hud.ShowChoices(ShownChoices);
             var said = labels[picked];
             story.ChooseChoiceIndex(choices[picked].Index);
             if (!said.StartsWith('(')) await game.Say(game.Player, said);

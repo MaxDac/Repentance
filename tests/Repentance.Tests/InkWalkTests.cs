@@ -106,6 +106,7 @@ public class InkWalkTests
         public World World = null!;
         public readonly List<string> Errors = new();
         public readonly HashSet<string> Offered = new();
+        public readonly HashSet<string> Shown = new();
         public int Nodes;
 
         public Walk()
@@ -123,14 +124,15 @@ public class InkWalkTests
         }
     }
 
-    private static readonly Lazy<(HashSet<string> Offered, List<string> Problems)> Result = new(Explore);
+    private static readonly Lazy<(HashSet<string> Offered, HashSet<string> Shown, List<string> Problems)> Result = new(Explore);
 
-    private static (HashSet<string>, List<string>) Explore()
+    private static (HashSet<string>, HashSet<string>, List<string>) Explore()
     {
         var scan = InkScan.Parse(InkText);
         var oneShot = OneShotKnotsOf();
         var entries = TalkTargets(scan);
         var offered = new HashSet<string>();
+        var shown = new HashSet<string>();
         var problems = new List<string>();
         foreach (var knot in entries)
             foreach (var world in Worlds())
@@ -141,8 +143,9 @@ public class InkWalkTests
                 var seen = new HashSet<string>();
                 Visit(walk, knot, oneShot.Contains(knot) ? 0 : Repeats, new List<string>(), seen, problems);
                 offered.UnionWith(walk.Offered);
+                shown.UnionWith(walk.Shown);
             }
-        return (offered, problems);
+        return (offered, shown, problems);
     }
 
     private static void Visit(Walk walk, string knot, int repeats, List<string> path, HashSet<string> seen, List<string> problems)
@@ -174,6 +177,7 @@ public class InkWalkTests
             return;
         }
         walk.Offered.UnionWith(choices);
+        walk.Shown.UnionWith(story.currentChoices.Select(c => InkScan.ShownLabel(c.text, c.tags ?? new List<string>())));
         string key = $"{repeats}|{story.state.currentPathString}|{string.Join("|", choices)}|{string.Join(",", walk.World.Flags.Order())}|{string.Join(",", walk.World.Items.Order())}|{story.variablesState["pushes"]}";
         if (!seen.Add(key)) return;
         string state = story.state.ToJson();
@@ -234,5 +238,17 @@ public class InkWalkTests
         Assert.True(missing.Count == 0, "choices no conversation offers: " + string.Join(" | ", missing));
         var stale = UnreachedChoices.Keys.Where(k => scan.Choices.Any(c => $"{c.Knot}: {c.Label}" == k && offered.Any(o => InkScan.Matches(c, o)))).ToList();
         Assert.True(stale.Count == 0, "UnreachedChoices entries that are offered now: " + string.Join(" | ", stale));
+    }
+
+    [Fact]
+    public void EveryOfferedChoiceFitsTheChoiceBar()
+    {
+        var shown = Result.Value.Shown;
+        Assert.NotEmpty(shown);
+        var tooLong = shown.Where(s => s.Length > InkScan.MaxChoiceChars).Order().ToList();
+        Assert.True(tooLong.Count == 0, $"choice bar labels over {InkScan.MaxChoiceChars} characters (add a '#short: ...' tag): " +
+            string.Join(" | ", tooLong));
+        Assert.Contains("Bathtub? Swell. Set 'em up, pal.", shown);
+        Assert.DoesNotContain(shown, s => s.Contains('#'));
     }
 }

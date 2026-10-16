@@ -57,8 +57,47 @@ public partial class AutoPlay
         }
     }
 
+    private readonly HashSet<string> _choiceBarProblems = new();
+
+    /// <summary>
+    /// Every offer: the bar shows one label per choice, each fits on one row in the dialogue font, and a shortened
+    /// label is the choice's #short: tag (the spoken text, <paramref name="options"/>, stays full).
+    /// </summary>
+    private void CheckChoiceBar(Game game, string knot, IReadOnlyList<string> options, bool drawn = true)
+    {
+        var shown = DialogueManager.Instance.ShownChoices;
+        void Problem(string what)
+        {
+            if (_choiceBarProblems.Add(what)) Check(false, what);
+        }
+        if (shown.Count != options.Count)
+        {
+            Problem($"{knot}: choice bar has {shown.Count} labels for {options.Count} choices");
+            return;
+        }
+        if (drawn && !game.Hud.ChoiceTexts.SequenceEqual(shown))
+            Problem($"{knot}: choice bar buttons show [{string.Join(" | ", game.Hud.ChoiceTexts)}]");
+        for (int i = 0; i < shown.Count; i++)
+        {
+            float width = Hud.DialogueFont.GetStringSize(shown[i], HorizontalAlignment.Left, -1, Hud.DialogueFontSize).X;
+            if (width > Hud.ChoiceTextWidth) Problem($"{knot}: choice label is cut off ({width:F0}px > {Hud.ChoiceTextWidth}px): {shown[i]}");
+            if (shown[i] != options[i] && shown[i].Length >= options[i].Length)
+                Problem($"{knot}: short label is not shorter than the spoken line: {shown[i]}");
+        }
+    }
+
+    /// <summary>InkScan.MaxChoiceChars (checked by the unit tests) must match the font and the bar it stands for.</summary>
+    private void ChoiceBarLimitTest()
+    {
+        float Width(int chars) => Hud.DialogueFont.GetStringSize(new string('W', chars), HorizontalAlignment.Left, -1, Hud.DialogueFontSize).X;
+        Check(Width(InkScan.MaxChoiceChars) <= Hud.ChoiceTextWidth && Width(InkScan.MaxChoiceChars + 1) > Hud.ChoiceTextWidth,
+            $"InkScan.MaxChoiceChars ({InkScan.MaxChoiceChars}) is the most characters that fit the choice bar " +
+            $"({Width(InkScan.MaxChoiceChars):F0}px of {Hud.ChoiceTextWidth}px)");
+    }
+
     private async Task StoryDialogueTest(Game game)
     {
+        ChoiceBarLimitTest();
         var dialogue = DialogueManager.Instance;
         _ = dialogue.Get("pushes");
         var original = game.CaptureSave();
@@ -111,11 +150,46 @@ public partial class AutoPlay
             timer.Stop();
             Check(GameState.Instance.HasFlag("teddy_gone"), "unaccelerated office sample completes its real dialogue");
             GD.Print($"[story timing] Office introduction at normal speed, automatic choices, no speech skipping: {timer.Elapsed.TotalSeconds:F1}s. Not a full-game or human playtime.");
+            Engine.TimeScale = scale;
+            await ShortChoiceLabelTest(game);
         }
         finally
         {
             Engine.TimeScale = scale;
             await game.LoadGame(original);
+        }
+    }
+
+    /// <summary>A #short: choice shows its short label in the bar, and Micah still says the whole line.</summary>
+    private async Task ShortChoiceLabelTest(Game game)
+    {
+        const string spoken = "The convent answers to the Church. And you're the Church on this side of town.";
+        const string label = "The convent answers to the Church. And you're the Church.";
+        var dialogue = DialogueManager.Instance;
+        var originalPrefer = _prefer;
+        IReadOnlyList<string> offered = Array.Empty<string>(), shown = Array.Empty<string>();
+        void Offered(string knot, IReadOnlyList<string> options)
+        {
+            if (knot != "caleb_club" || offered.Count > 0) return;
+            offered = options.ToArray();
+            shown = dialogue.ShownChoices.ToArray();
+        }
+        dialogue.ChoicesOffered += Offered;
+        try
+        {
+            _prefer = new[] { spoken };
+            var talk = dialogue.Talk("caleb_club");
+            await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == spoken);
+            int i = offered.ToList().IndexOf(spoken);
+            Check(i >= 0 && i < shown.Count && shown[i] == label,
+                "a choice with a #short: tag shows the short label in the choice bar");
+            Check(game.Hud.SpeechText == spoken, "picking a shortened choice still speaks the full line");
+            await talk;
+        }
+        finally
+        {
+            dialogue.ChoicesOffered -= Offered;
+            _prefer = originalPrefer;
         }
     }
 
