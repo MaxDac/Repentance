@@ -21,6 +21,7 @@ public partial class Game
         if (outcome == null) return false;
         Recipes.Apply(outcome, id => state.TakeItem(id), id => state.GiveItem(id), id => state.SetFlag(id));
         await Say(outcome.Line);
+        if (outcome.Result != null && Room != null) await Room.OnCombined(outcome.Result);
         return true;
     }
 

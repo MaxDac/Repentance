@@ -6,8 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Act 2, puzzle 13: the Tribune's newspaper morgue. Harrington senior keeps his name off doors, but the paper once ran
 /// "HARRINGTON BUILDS..." - torn in two straight through the address. The top half is filed in drawer H, the bottom
-/// half is on the copy spike; the layout desk's paste pot mends them (see <see cref="Recipes"/>), and pinning the
-/// mended clipping on the Loop wall map locates the Harrington Building on LaSalle Street (<c>harrington_located</c>),
+/// half is on the copy spike; the layout desk's paste pot mends them (see <see cref="Recipes"/>), and Micah pins the
+/// mended clipping on the Loop wall map at once (<see cref="OnCombined"/>), locating the Harrington Building on LaSalle Street (<c>harrington_located</c>),
 /// which swaps the Tribune for Harrington's office on the Chicago map. The paste pot is only borrowed.
 /// </summary>
 public partial class NewspaperMorgue : Room
@@ -89,11 +89,7 @@ public partial class NewspaperMorgue : Room
                 return true;
             case ("wall_map", Verb.UseItem) when item == "clipping" || (!Located && Shows(item, "", "harrington_building")):
                 if (item == "clipping") State.TakeItem("clipping");
-                State.SetFlag("harrington_located");
-                await Say("\"Harrington senior keeps his offices at the Harrington Building, LaSalle Street.\"");
-                await Say("I pin it where it belongs. The Harrington Building, LaSalle Street - right in the middle of the Loop, where the money sleeps.");
-                await Think("One pin in a city of pins. Somewhere under it, an old man who knows where Eleanor is.");
-                if (PasteOut) await Say("I'll put the paste back on my way out.");
+                await PinClipping();
                 return true;
             case ("wall_map", Verb.UseItem) when item is "clipping_top" or "clipping_bottom":
                 await Say("Half an address is no address. I need both halves stuck together first.");
@@ -103,6 +99,24 @@ public partial class NewspaperMorgue : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>The mended clipping goes straight onto the wall map: Micah doesn't need telling where it belongs.</summary>
+    public override async Task OnCombined(string result)
+    {
+        if (result != "clipping" || Located || !State.HasItem("clipping")) return;
+        if (FindHotspot("wall_map") is { } map) await Game.WalkTo(map.WalkTo);
+        State.TakeItem("clipping");
+        await PinClipping();
+    }
+
+    private async Task PinClipping()
+    {
+        State.SetFlag("harrington_located");
+        await Say("\"Harrington senior keeps his offices at the Harrington Building, LaSalle Street.\"");
+        await Say("I pin it where it belongs. The Harrington Building, LaSalle Street - right in the middle of the Loop, where the money sleeps.");
+        await Think("One pin in a city of pins. Somewhere under it, an old man who knows where Eleanor is.");
+        if (PasteOut) await Say("I'll put the paste back on my way out.");
     }
 
     private async Task ReturnPaste()

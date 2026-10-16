@@ -40,6 +40,7 @@ Foreground props the player walks behind go in `World` as `Sprite2D` with `posit
 | `Task OnEnter(string entry)` | Arrival cutscene. Guard one-shots with a flag (`seen_lobby`). Not replayed on load |
 | `Task<bool> OnInteract(Verb, Hotspot, string? item)` | Main handler. `switch (target.Id, verb)`; return `true` if handled |
 | `Task<bool> OnCombine(string item, string other)` | Room-only item combinations |
+| `Task OnCombined(string result)` | Follow-up after a `Recipes` combination succeeds (the morgue pins the clipping) |
 | `Task<bool> OnItemVerb(Verb, string item)` | Room-only verbs on satchel items |
 | `Task OnCue(string cue)` | Stage business for Ink `CUE: name` lines |
 | `void OnRefresh()` | After every `GameState.Changed` (visibility already refreshed) |
