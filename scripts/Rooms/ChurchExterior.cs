@@ -35,9 +35,9 @@ public partial class ChurchExterior : Room
     {
         Player.SetPose("micah_supine");
         await Wait(1.5);
-        // his face from above, flat on the stones, while he argues with himself; gone before he gets up
-        Game.Hud.ShowCloseUp(CloseUps.Beaten);
         await Think("Cathedral steps. Somebody has a sense of humour. Probably Bruno. Probably not.");
+        // after his first line, his face from above, flat on the stones, while he argues with himself; gone before he gets up
+        Game.Hud.ShowCloseUp(CloseUps.Beaten);
         await Think("My ribs are talking to each other. My mouth tastes like a penny.");
         await Think("What am I doing? She told me to go home. She looked at me like a stranger who'd wandered onto the stage.");
         await Think("Caleb's in there, a hundred feet away, praying for me. Rose is across town, not praying for anybody.");
