@@ -171,13 +171,13 @@ ELEANOR: What do you want, Mother?
 NUN: What do I want? Child, I want nothing. It's you. I felt it the moment you walked in. The way you looked at me.
 NUN: Say it. Say what you want from me, and I'll pray over it, and God will forgive you. Say it.
 THOUGHT: She told me she knew that look. She'd seen it on every man at the Club. It was the first time she'd seen it on a woman who thought it was hers to forgive.
-+ [(Refuse her.) Go back to bed, Mother. Whatever you came here for, it isn't mine to give you.]
++ [(Refuse her.) Go back to bed, Mother. Whatever you came here for, it isn't mine to give you. #short: (Refuse her.) Go back to bed, Mother.]
     ~ set_flag("eleanor_refused_abbess")
     NUN: How dare you. How dare you. I came to pray over you.
     ELEANOR: Then pray, Mother. From the other side of the door.
     NUN: You'll leave this house in the morning. I won't have it said I sheltered a... a creature like you.
     THOUGHT: The door shut hard enough to blow the candle out. Eleanor said she slept like a child, after. The first time in years.
-+ [(Indulge her.) Sit down, then, Mother. Tell me what I'm supposed to confess.]
++ [(Indulge her.) Sit down, then, Mother. Tell me what I'm supposed to confess. #short: (Indulge her.) Sit down, then, Mother.]
     NUN: Yes. Yes. Tell me. Tell me all of it, child, every...
     THOUGHT: She sat on the edge of the cot. The candle shook. Eleanor said she'd done this a hundred times, for a hundred men, and she knew to the second when it would turn.
     NUN: No.
