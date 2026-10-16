@@ -236,7 +236,8 @@ def mix_(a, b, t):
 def window_night(img):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 156, 28, 230, 100
-    city(img, (x0, y0, x1, y1), seed=507, lit=0.3)
+    # the rain is animated in-game (Rain node in eleanor_room.tscn)
+    city(img, (x0, y0, x1, y1), seed=507, lit=0.3, rain=False)
     # lace sheers behind the drapes: the right one hanging true, the left one half torn from its hooks
     _sheer(img, [(x1 - 22, y0), (x1, y0), (x1, y1), (x1 - 18, y1)], 71)
     _sheer(img, [(x0, y0), (x0 + 8, y0), (x0 + 20, y1 - 18), (x0 + 12, y1 - 6), (x0, y1 - 10)], 72)

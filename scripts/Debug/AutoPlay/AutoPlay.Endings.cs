@@ -48,6 +48,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
+        Check(gs.HasItem("cloth"), "ending 5: Eleanor's cloth is still in Micah's pocket");
         await game.Wait(4);
         await Shot("ending_prison_caleb");
         await TheEnd("ending_5");
@@ -111,12 +112,14 @@ public partial class AutoPlay
         Check(!Offered("bartender_gun", "Lower the gun"), "church return without ring doesn't allow walking away from Tony");
 
         // 1: walking away from Tony
+        Check(act3Items.Contains("cloth"), "Act 3 seeds carry Eleanor's cloth");
         Seed(alleyReady, act3Items.Where(i => i != "cross"), "Lower the gun");
         await game.ChangeRoom("alley", "act3");
         _ = game.Perform(Verb.Talk, "back_door");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1"), "ending 1: walked away from Tony, coffee with Rose");
         await Until(() => gs.HasFlag("rose_door"));
+        Check(!gs.HasItem("cloth"), "ending 1: Micah throws Eleanor's cloth in the street before ringing");
         await game.Wait(1);
         await Until(() => game.Player.Facing == Facing.Up && game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
         Check(game.Player.Facing == Facing.Up, "Act 3: Micah stands by the bell, his back to the screen");
@@ -201,14 +204,18 @@ public partial class AutoPlay
         var openingFlags = originalFlags.Where(f => f is not ("ring_taken_act2" or "took_faith_ring" or
             "act2_office_done" or "act2_whiskey_drunk" or "caleb_met" or "act2_church_thought"))
             .Append("act2_church");
-        gs.Restore(openingFlags, originalItems.Where(i => i != "faith_ring"), 2);
+        gs.Restore(openingFlags.Append("office_door_open"), originalItems.Where(i => i != "faith_ring"), 2);
         _prefer = new[] { "Leave the wedding ring" };
         await game.ChangeRoom("office", "act2");
+        Check(gs.HasFlag("office_door_open"), "Micah opens the office door himself on his way out at the start of Act 2");
         Check(gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") && !gs.HasItem("faith_ring"),
             "leaving the ring records the original choice without granting it");
         Check(_crossOffers == offers, "initial confession never offers the cross even when ring was left");
         gs.SetFlag("teddy_gone", false);
         await game.Perform(Verb.Walk, "office");
+        Check(!gs.HasFlag("office_door_open") && !gs.HasFlag("office_door_ajar")
+            && game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false,
+            "the office door is shut again when Micah comes back");
         Check(gs.HasFlag("teddy_gone") && game.Room?.FindHotspot("teddy")?.Visible != true,
             "Teddy doesn't come back to the office after Act 1");
         Check(game.Room?.GetNodeOrNull<Sprite2D>("WeddingRing/Glint") != null
@@ -246,6 +253,8 @@ public partial class AutoPlay
         gs.SetStoryAct(3);
         await game.ChangeRoom("office", "act3");
         Check(game.Room?.Name == "Office" && !game.Busy, "Act 3 office waits for player input");
+        Check(!gs.HasFlag("office_door_open") && game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false,
+            "the Act 3 office starts with the door shut");
         await game.Perform(Verb.Hand, "faith_ring");
         Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2"), "left ring can be recovered at the Act 3 office");
 

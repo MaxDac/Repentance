@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/EleanorRoom.cs" id="1_EleanorRoom"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room.png" id="2_eleanor_room"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_brass_box.png" id="7_eleanor_room_brass_box"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_drawer_open.png" id="8_eleanor_room_drawer_open"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_paper.png" id="9_eleanor_room_paper"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="10_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 100)
@@ -60,6 +61,18 @@ PlayerCharacter = "micah"
 z_index = -10
 texture = ExtResource("2_eleanor_room")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("10_Rain")
+Areas = Array[Rect2]([Rect2(176, 58, 16, 30), Rect2(195, 58, 13, 30), Rect2(176, 92, 16, 38), Rect2(195, 92, 13, 38)])
+Density = 9.0
+Speed = 170.0
+Slant = -0.3
+Length = 4
+Tint = Color(0.6, 0.66, 0.84, 0.5)
+Drips = 4
+Seed = 507
 
 [node name="ClosetOpen" type="Sprite2D" parent="."]
 position = Vector2(61, 77)
