@@ -66,7 +66,7 @@ public partial class Hud
                 Flat = true,
                 Alignment = HorizontalAlignment.Left,
                 FocusMode = Control.FocusModeEnum.None,
-                CustomMinimumSize = new Vector2(ScreenW - 16, ChoiceRowH),
+                CustomMinimumSize = new Vector2(ChoiceTextWidth, ChoiceRowH),
                 ClipText = true,
             };
             b.AddThemeFontOverride("font", DialogueFont);
@@ -90,7 +90,7 @@ public partial class Hud
         _choicesBg.Position = new Vector2(0, ScreenH - h);
         _choicesBg.Size = new Vector2(ScreenW, h);
         _choices.Position = new Vector2(8, ScreenH - h + 4);
-        _choices.Size = new Vector2(ScreenW - 16, h - 8);
+        _choices.Size = new Vector2(ChoiceTextWidth, h - 8);
         _choices.Visible = _choicesBg.Visible = true;
         _interface.Visible = false;
         _choiceTcs = new TaskCompletionSource<int>();
@@ -98,6 +98,21 @@ public partial class Hud
     }
 
     public void HideChoices() => _choices.Visible = _choicesBg.Visible = false;
+
+    /// <summary>Width a choice label can use before the bar clips it.</summary>
+    public const int ChoiceTextWidth = ScreenW - 16;
+
+    /// <summary>The labels on the choice bar's buttons, top to bottom (tests).</summary>
+    public IReadOnlyList<string> ChoiceTexts
+    {
+        get
+        {
+            var texts = new List<string>();
+            foreach (var c in _choices.GetChildren())
+                if (c is Button b && !b.IsQueuedForDeletion()) texts.Add(b.Text);
+            return texts;
+        }
+    }
 
     /// <summary>Film mode: draws the option about to be picked in the hover colour.</summary>
     public void HighlightChoice(int index)

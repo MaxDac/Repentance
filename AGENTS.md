@@ -101,6 +101,8 @@ py -3.14 -m unittest discover -s tests\art -v
   allowlist entry (`OneShotKnots`, `UnreadFlags`, `UnsetFlags`, `IndirectItems`, `UnreachedChoices`,
   `UnheardSounds`) with a real reason; a knot with only `*` choices that the game can run twice is a dead end.
 - Bump `SaveData.CurrentVersion` if the save format changes, and the version stated in README and Walkthrough.
+- Choice labels must fit the choice bar (66 characters). For a longer line, add a `#short:` tag with the label to
+  show and keep the spoken text; see `docs/dialogue-choice-labels.md`.
 - Inventory verbs and combinations that hold in any room go in `scripts/Story/` (not in `Game`).
 - New items go in the act file in `scripts/Core/Items/` that introduces them.
 - `Game`, `Hud` and `AutoPlay` are partial classes split by concern to keep merges conflict-free:

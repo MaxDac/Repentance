@@ -45,10 +45,12 @@ public partial class AutoPlay : Harness
             GD.Print($"[autoplay] {knot}: {string.Join(" | ", options)}");
             if (_shotKnots.Add(knot))
             {
-                _ = game.Hud.ShowChoices(options);
+                _ = game.Hud.ShowChoices(DialogueManager.Instance.ShownChoices);
+                CheckChoiceBar(game, knot, options);
                 await Shot($"choices_{knot.Replace('.', '_')}");
                 game.Hud.HideChoices();
             }
+            else CheckChoiceBar(game, knot, options, drawn: false);
             _offered[knot] = options.ToArray();
             _offerLog.Add((knot, options.ToArray()));
             if (knot == "caleb_cross") _crossOffers++;
