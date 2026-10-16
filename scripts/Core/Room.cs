@@ -83,6 +83,8 @@ public partial class Room : Node2D
 
     protected Task Say(string text) => Game.Say(text);
     protected Task Say(string actorId, string text) => Game.Say(actorId, text);
+    /// <summary>The player speaks under her breath (see <see cref="Game.Whisper"/>).</summary>
+    protected Task Whisper(string text) => Game.Whisper(text);
     /// <summary>Micah's journal narration at the top of the screen (see <see cref="Game.Think"/>).</summary>
     protected Task Think(string text) => Game.Think(text);
     protected Task Talk(string knot) => DialogueManager.Instance.Talk(knot);

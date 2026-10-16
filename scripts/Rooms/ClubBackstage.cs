@@ -1,17 +1,33 @@
 using System.Threading.Tasks;
+using Godot;
 
 namespace Repentance.Rooms;
 
 /// <summary>
-/// The Club's dressing room, behind the stage (Second Interlude). Eleanor, in a short pink gown, at a mirror ringed
-/// with bulbs; the old man, unmasked, with a glass of gin and a line of powder "as always". Taking it plays her drink
-/// strip; refusing is saved ("eleanor_refused_drugs") and the scene cuts to black on "Noooo!". Either way the journal
-/// goes back to Micah on the Club stage. Before he talks, she has to put the face on (Puzzle 18): face powder and
-/// a puff, then the lipstick, then a pin for the curl, each one a step back into the life she wants to leave.
+/// The Club's dressing room, behind the stage (Second Interlude). Eleanor, in a short pink gown, alone at a mirror
+/// ringed with bulbs, with a glass of gin and a line of powder waiting "as always". She has to put the face on
+/// (Puzzle 18): face powder and a puff, then the lipstick, then a pin for the curl, each one a step back into the
+/// life she wants to leave. When it's on, the stage door opens and the old man, unmasked, walks in. Taking his gin
+/// plays her drink strip; refusing is saved ("eleanor_refused_drugs") and the scene cuts to black on "Noooo!". Either
+/// way the journal goes back to Micah on the Club stage.
 /// </summary>
 public partial class ClubBackstage : Room
 {
     public override Track? Music => Track.ClubStrings;
+
+    /// <summary>Just inside the stage door, where the old man first shows.</summary>
+    public static readonly Vector2 Doorway = new(47, 182);
+
+    /// <summary>Where he stands to talk, by the screens; the scene's position for him.</summary>
+    public static readonly Vector2 OldManSpot = new(362, 214);
+
+    public override void _Ready()
+    {
+        // the door is only ever open while he comes through it
+        State.SetFlag("backstage_door_ajar", false);
+        State.SetFlag("backstage_door_open", false);
+        base._Ready();
+    }
 
     public override async Task OnEnter(string entry)
     {
@@ -20,7 +36,7 @@ public partial class ClubBackstage : Room
         {
             await Wait(0.6);
             await Think("The dressing room behind the stage. Bulbs round the mirror, and a pink gown that wouldn't keep a cat warm.");
-            await Say("harrington", "Look at the state of you. Put your face on, my dear. They didn't pay to see you.");
+            await Think("They had left her alone with the mirror. Nobody had to tell her what for. He would come when she looked like herself.");
             await Think("Her compact and her lipstick waited on the ledge under the bulbs, where she had left them on Tuesday. A lifetime ago.");
         });
     }
@@ -34,11 +50,9 @@ public partial class ClubBackstage : Room
     {
         switch (target.Id, verb)
         {
-            case ("harrington", Verb.Talk) when !MadeUp:
             case ("table", Verb.Hand) when !MadeUp:
-                if (FindActor("harrington") is { } waiting) Player.FaceTowards(waiting.Position);
-                await Say("harrington", "Put your face on first, my dear. We'll talk when you look like yourself.");
-                await Think("Like herself. He meant the other one. The one in the bulbs.");
+                await Say("Not yet. He likes to watch me take it.");
+                await Think("And he wouldn't come until the face was on. She knew that much about him. She knew far too much about him.");
                 return true;
             case ("harrington", Verb.Talk):
             case ("table", Verb.Hand):
@@ -104,6 +118,9 @@ public partial class ClubBackstage : Room
             case ("door", Verb.Look):
                 await Say("The door to the stage. Bruno's on the other side of it, breathing.");
                 return true;
+            case ("door", Verb.Walk or Verb.Hand) when !MadeUp:
+                await Say("The only door out of here goes to the stage, and Bruno's leaning on it. He'll open it for the old man. Not for me.");
+                return true;
             case ("door", Verb.Walk or Verb.Hand):
                 await Say("The only door out of here goes to the stage. And he hasn't finished with me.");
                 return true;
@@ -168,11 +185,11 @@ public partial class ClubBackstage : Room
                 return;
             case "hairpin" when lips:
                 State.TakeItem("hairpin");
-                State.SetFlag("interlude_made_up");
                 await Say("And a curl pinned back, so it won't fall in my eyes when I sing. Pinned in place. Like the cranes.");
                 await Think("She looked at the woman in the bulbs and wanted, more than anything, to wipe her off with the back of her hand.");
                 await Say("I could stop. Tonight. I could just... stop.");
                 await Think("Her hand didn't move. The silk, the car, the big house, the quiet when she did as she was told. And beneath all of it the smell of him, of all of them, sweet and rotten.");
+                await TheOldManComesIn();
                 await Say("harrington", "There. Now you look like yourself. Sit down, my dear. We have a few minutes, you and I.");
                 await Think("Like herself. She nearly laughed. She nearly cried. She did neither. It would only spoil the face.");
                 return;
@@ -195,5 +212,50 @@ public partial class ClubBackstage : Room
                 await Say("That's not part of the face.");
                 return;
         }
+    }
+
+    /// <summary>
+    /// The face is on, so the stage door opens. Eleanor smells him before she sees him and says so under her breath;
+    /// the old man walks in to his place by the screens and the door swings shut behind him.
+    /// </summary>
+    private async Task TheOldManComesIn()
+    {
+        await Wait(0.5);
+        Game.Sfx.Play(Sound.Click);
+        State.SetFlag("backstage_door_ajar");
+        await Wait(0.35);
+        Game.Sfx.Play(Sound.Scrape);
+        State.SetFlag("backstage_door_open");
+        await Wait(0.5);
+        Player.Face(Facing.Left);
+        await Whisper("A foul odour of death and ashes. He's here.");
+        if (FindActor("harrington") is { } oldMan)
+        {
+            oldMan.Position = Doorway;
+            oldMan.FaceLeft(false);
+            State.SetFlag("interlude_made_up");
+            await Wait(0.4);
+            await oldMan.MoveTo(new Vector2(150, 228), 38);
+            var toHisPlace = oldMan.MoveTo(OldManSpot, 38);
+            await ShutTheDoor();
+            await toHisPlace;
+            oldMan.FaceLeft(true);
+            await Wait(0.3);
+            Player.FaceTowards(oldMan.Position);
+        }
+        else
+        {
+            State.SetFlag("interlude_made_up");
+            await ShutTheDoor();
+        }
+        await Wait(0.3);
+    }
+
+    private async Task ShutTheDoor()
+    {
+        State.SetFlag("backstage_door_open", false);
+        await Wait(0.2);
+        State.SetFlag("backstage_door_ajar", false);
+        Game.Sfx.Play(Sound.DoorSlam);
     }
 }

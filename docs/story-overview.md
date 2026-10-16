@@ -107,7 +107,8 @@ From here the story follows Walkthrough.md:
    **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps; the next pages aren't in Micah's hand.
     **Second Interlude** (Eleanor): the Order's men take her from the motel. In the Club's dressing room, in a short
-    pink gown, the old man offers gin and powder "as always": take them, or refuse (saved; the screen goes black,
+    pink gown, she puts her face on alone; then the old man comes in by the stage door and offers gin and powder "as
+    always": take them, or refuse (saved; the screen goes black,
     "Noooo!"). Then Micah's journal goes on at the Club stage.
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor

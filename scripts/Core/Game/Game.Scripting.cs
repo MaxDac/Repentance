@@ -63,13 +63,18 @@ public partial class Game
     /// <summary>Ends the current spoken line early, as a click would.</summary>
     public void SkipSpeech() => _skipSpeech?.TrySetResult();
 
-    public async Task Say(ISpeaker who, string text)
+    public Task Say(ISpeaker who, string text) => Speak(who, text, whisper: false);
+
+    /// <summary>The player says a line under her breath: drawn faded and lowercase, with no voice cues.</summary>
+    public Task Whisper(string text) => Speak(Player, text, whisper: true);
+
+    private async Task Speak(ISpeaker who, string text, bool whisper)
     {
         _skipSpeech = new TaskCompletionSource();
         var skip = _skipSpeech;
         who.Talking = true;
-        Hud.ShowSpeech(text, who);
-        Sfx.PlayCues(text);
+        Hud.ShowSpeech(text, who, whisper);
+        if (!whisper) Sfx.PlayCues(text);
         var seconds = Math.Clamp(0.9 + text.Length * 0.055, 1.5, 7.0);
         // ignore the click that triggered this line
         await Wait(0.15);
