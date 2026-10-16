@@ -87,6 +87,7 @@ public partial class AutoPlay
         await Shot("interlude_corridor");
         await game.Perform(Verb.Walk, "cell_door");
         Check(game.Room?.Name == "ConventCell", "to her cell");
+        Check(game.Room?.FindActor("nun") is { Visible: false }, "Eleanor is alone in the cell until the knock");
         var prefer = _prefer;
         _prefer = new[] { "(Indulge her.)" };
         var night = game.Perform(Verb.Hand, "bed");

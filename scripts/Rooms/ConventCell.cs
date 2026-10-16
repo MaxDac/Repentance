@@ -19,7 +19,21 @@ public partial class ConventCell : Room
     /// <summary>Agatha's night visit: she comes in at the door and stops a step short of Eleanor at the bed.</summary>
     private static readonly Vector2 AgathaDoor = new(92, 228), AgathaByTheBed = new(238, 222);
 
-    protected override void OnRefresh() => Modulate = Interlude ? Night : Colors.White;
+    protected override void OnRefresh()
+    {
+        Modulate = Interlude ? Night : Colors.White;
+        // Room.Refresh shows every hotspot without flag rules; Agatha is only here during her night visit
+        if (FindActor("nun") is { } agatha) agatha.Visible = _agathaIn;
+    }
+
+    /// <summary>Agatha is in the cell: set for her night visit only, never saved.</summary>
+    private bool _agathaIn;
+
+    private void AgathaIn(bool inside)
+    {
+        _agathaIn = inside;
+        Refresh();
+    }
 
     public override async Task OnEnter(string entry)
     {
@@ -117,7 +131,7 @@ public partial class ConventCell : Room
                 if (agatha != null)
                 {
                     agatha.Position = AgathaDoor;
-                    agatha.Visible = true;
+                    AgathaIn(true);
                     await agatha.MoveTo(AgathaByTheBed, 32);
                     agatha.FaceLeft(false);
                     Player.FaceTowards(agatha.Position);
@@ -126,7 +140,7 @@ public partial class ConventCell : Room
                 if (agatha != null)
                 {
                     await agatha.MoveTo(AgathaDoor, 44);
-                    agatha.Visible = false;
+                    AgathaIn(false);
                 }
                 await Game.Hud.Fade(1, 1.2);
                 Game.Hud.ShowCaption("The next morning");
