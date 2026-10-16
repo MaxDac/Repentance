@@ -29,7 +29,7 @@ public partial class Game
         return $"room '{room}' has no entry marker '{entry}'";
     }
 
-    public async Task ChangeRoom(string name, string entry)
+    public async Task ChangeRoom(string name, string entry, double fadeInSeconds = 0.35)
     {
         // a typo would otherwise leave the player on a grey screen; stay put and fail loudly instead
         if (RoomTargetError(name, entry) is { } error)
@@ -45,7 +45,7 @@ public partial class Game
             var marker = Room!.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);
-            await Hud.Fade(0, 0.35);
+            await Hud.Fade(0, fadeInSeconds);
         }
         finally { _busy--; }
         if (SkipRoomEnter) return;
