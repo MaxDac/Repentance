@@ -11,9 +11,18 @@ namespace Repentance.Rooms;
 public partial class MansionKitchen : Room
 {
     private bool Escaping => State.HasFlag("escaping");
+    private bool Coda => State.HasFlag("eleanor_coda");
 
     public override async Task OnEnter(string entry)
     {
+        if (Coda)
+        {
+            if (entry == "eleanor_coda")
+                await Game.Run(() => Think("The kitchen, in the dark. Copper pans, and the back door, and past it the whole of the night."));
+            else if (entry == "cellar" && State.HasFlag(Endings.EleanorBurned))
+                await Game.Run(() => Think("Smoke came up the cellar steps behind her, sweet with rye."));
+            return;
+        }
         if (entry == "escape")
         {
             await Game.Run(async () =>
@@ -52,6 +61,7 @@ public partial class MansionKitchen : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Coda) return await CodaInteract(verb, target);
         switch (target.Id, verb)
         {
             case ("back_door", Verb.Hand or Verb.Walk) when Escaping:
@@ -101,6 +111,30 @@ public partial class MansionKitchen : Room
                     await Say("No need. The cellar's doing the job for me.");
                 else
                     await Say("Gas and a candle? It would explode before we'd be far enough. But maybe if I use all that alcohol in the cellar...");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Eleanor on her way out: the back door, or the cellar and the Club's whiskey first.</summary>
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("back_door", Verb.Hand or Verb.Walk):
+                await Game.ChangeRoom("mansion_exterior", "eleanor_coda");
+                return true;
+            case ("baize_door", Verb.Hand or Verb.Walk):
+                await Say("eleanor", "Not back up there. Not back to him.");
+                return true;
+            case ("cellar_door", Verb.Hand or Verb.Walk) when State.HasFlag(Endings.EleanorBurned):
+                await Say("eleanor", "There's nothing down there now but fire.");
+                return true;
+            case ("cellar_door", Verb.Hand or Verb.Walk):
+                await Game.ChangeRoom("mansion_cellar", "kitchen");
+                return true;
+            case ("range" or "candle", Verb.Hand):
+                await Say("eleanor", "Gas and a candle. I'd go up with the house, and he isn't worth that.");
                 return true;
         }
         return false;

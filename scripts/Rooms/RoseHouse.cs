@@ -125,7 +125,10 @@ public partial class RoseHouse : Room
         await Game.ChangeRoom("chicago_map", "start");
     }
 
-    /// <summary>Ending 1, giving up on Eleanor: Micah asks Rose out for a coffee, and that's the end of Act Three.</summary>
+    /// <summary>
+    /// Ending 1, giving up on Eleanor: Micah asks Rose out for a coffee, and that's the end of Act Three. In endings 8
+    /// and 9 (Eleanor struck the old man after Micah left) the same scene leads on to hers.
+    /// </summary>
     private Task Coffee() => Game.Run(async () =>
     {
         await Wait(0.6);
@@ -143,6 +146,14 @@ public partial class RoseHouse : Room
         await RoseOpens();
         await Talk("rose_coffee");
         await Think("Why not. Two small words. I'll walk home on them like they're solid ground.");
+        if (State.HasFlag(Endings.EleanorStruck))
+        {
+            // endings 8 and 9: Micah's last entry ends here, and the story goes on with Eleanor's last scene
+            await Wait(1.0);
+            await Game.Hud.Fade(1, 1.5);
+            await Act3.EleanorAfterRose();
+            return;
+        }
         await Act3.Finish();
     });
 }

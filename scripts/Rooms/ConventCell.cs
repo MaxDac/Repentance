@@ -11,8 +11,20 @@ public partial class ConventCell : Room
 {
     public override Track? Music => Track.ConventPiano;
 
+    /// <summary>The First Interlude: Eleanor's first night in the cell, and Mother Agatha's visit.</summary>
+    private bool Interlude => State.HasFlag("interlude1");
+
+    private static readonly Color Night = new(0.5f, 0.56f, 0.78f);
+
+    protected override void OnRefresh() => Modulate = Interlude ? Night : Colors.White;
+
     public override async Task OnEnter(string entry)
     {
+        if (Interlude)
+        {
+            await Game.Run(() => Think("Narrow enough to touch both walls. After Room 507, it feels like a coffin with a window."));
+            return;
+        }
         if (State.HasFlag("cell_seen")) return;
         State.SetFlag("cell_seen");
         await Game.Run(async () =>
@@ -25,6 +37,7 @@ public partial class ConventCell : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Interlude) return await InterludeInteract(verb, target);
         switch (target.Id, verb)
         {
             case ("exit", Verb.Walk or Verb.Hand) when !State.HasFlag("got_mirror"):
@@ -81,6 +94,43 @@ public partial class ConventCell : Room
                 return true;
             case ("bed" or "nightstand" or "lampstand", Verb.Kick):
                 await Say("Kick a nun's furniture. Nice, Micah. Very nice.");
+                return true;
+        }
+        return false;
+    }
+
+    private async Task<bool> InterludeInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("bed", Verb.Hand or Verb.Walk):
+                await Game.WalkTo(target.WalkTo);
+                await Say("Lights out at nine. I lie down in my clothes, in case.");
+                await Game.Hud.Fade(0.6f, 1.0);
+                await Wait(0.6);
+                await Say("nun", "*Knock, knock*");
+                await Game.Hud.Fade(0, 0.6);
+                await Talk("interlude_agatha_night");
+                await Game.Hud.Fade(1, 1.2);
+                Game.Hud.ShowCaption("The next morning");
+                await Wait(1.6);
+                Game.Hud.ShowCaption(null);
+                await Game.ChangeRoom("motel_night", "interlude1");
+                return true;
+            case ("exit", Verb.Walk or Verb.Hand):
+                await Say("The corridor's dark, and somebody in it is still awake. I can feel it.");
+                return true;
+            case ("window", Verb.Look or Verb.Hand):
+                await Say("Bars, and a moon behind them. Even the moon's in a cell tonight.");
+                return true;
+            case ("book", Verb.Look or Verb.Hand):
+                await Say("A breviary. I open it at the Psalms and can't read a line of it.");
+                return true;
+            case ("lampstand", Verb.Look or Verb.Hand):
+                await Say("A lamp turned low. Somebody wanted me to have just enough light to be sorry by.");
+                return true;
+            case ("nightstand" or "drawer", Verb.Look or Verb.Hand):
+                await Say("A comb and a little mirror in the drawer. Somebody's idea of a welcome.");
                 return true;
         }
         return false;

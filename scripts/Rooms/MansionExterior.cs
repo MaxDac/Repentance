@@ -16,6 +16,11 @@ public partial class MansionExterior : Room
 
     public override async Task OnEnter(string entry)
     {
+        if (entry == "eleanor_coda")
+        {
+            await Game.Run(EleanorLeaves);
+            return;
+        }
         if (entry == "escape")
         {
             await Game.Run(Escape);
@@ -143,6 +148,22 @@ public partial class MansionExterior : Room
         await Say("Hold the hammer back, tie it clear of the gong, then let go. The wire stays intact.");
         await Think("My tie. Rose gave it to me, a lifetime ago. Now it's all that keeps this house asleep.");
         await Say("Let it ring now. Nobody will hear a thing.");
+    }
+
+    /// <summary>
+    /// The coda's last beat: Eleanor out of the kitchen door in the sheet, alone, and off down the road. Micah's journal
+    /// takes the night back at Rose's door, where <see cref="RoseHouse"/> resolves ending 8 or 9.
+    /// </summary>
+    private async Task EleanorLeaves()
+    {
+        await Game.WalkTo(new Vector2(150, 238));
+        Player.Face(Facing.Right);
+        await Wait(0.6);
+        await Talk("coda_outside");
+        await Game.WalkTo(new Vector2(30, 236));
+        await Game.Hud.Fade(1, 1.5);
+        State.SetFlag("eleanor_coda", false);
+        await Game.ChangeRoom("rose_house", "coffee");
     }
 
     /// <summary>Back out through the kitchen door, with or without Eleanor, and maybe with the house burning behind.</summary>

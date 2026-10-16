@@ -8,8 +8,15 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionStudy : Room
 {
+    private bool Coda => State.HasFlag("eleanor_coda");
+
     public override async Task OnEnter(string entry)
     {
+        if (entry == "eleanor_coda")
+        {
+            await Game.Run(() => Think("His study. She had only ever seen it from the doorway, on her way to the other room."));
+            return;
+        }
         if (State.HasFlag("seen_mansion_study")) return;
         State.SetFlag("seen_mansion_study");
         await Game.Run(async () =>
@@ -21,6 +28,7 @@ public partial class MansionStudy : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Coda) return await CodaInteract(verb, target);
         switch (target.Id, verb)
         {
             case ("door_left", Verb.Hand or Verb.Walk):
@@ -84,6 +92,38 @@ public partial class MansionStudy : Room
             case ("closet", Verb.Hand):
                 Toggle("study_closet_open");
                 if (State.HasFlag("study_closet_open")) await Say("Coats, a dinner jacket, a hatbox. No skeletons. He keeps those in the bank.");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Eleanor in the sheet, on her way out after the candlestick: down to the kitchen, or the cellar stair.</summary>
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("door_left", Verb.Hand or Verb.Walk):
+                if (!State.HasFlag("baize_unbolted"))
+                {
+                    State.SetFlag("baize_unbolted");
+                    await Say("eleanor", "Bolted. Of course it is. He bolts everything.");
+                }
+                await Game.ChangeRoom("mansion_kitchen", "eleanor_coda");
+                return true;
+            case ("door_right", Verb.Hand or Verb.Walk):
+                await Say("eleanor", "Not back in there. Not back to him.");
+                return true;
+            case ("bar_panel", Verb.Hand or Verb.Walk) when State.HasFlag("cellar_lit"):
+                await Game.ChangeRoom("mansion_cellar", "stair");
+                return true;
+            case ("bar_panel", Verb.Look) when State.HasFlag("cellar_lit"):
+                await Say("eleanor", "The panel behind his bar, standing open. So that's how Micah came in. Bootleggers' manners.");
+                return true;
+            case ("drawer_left" or "drawer_right" or "documents", Verb.Hand):
+                await Say("eleanor", "His papers. Let them burn with him, or let the lawyers have them. They were never mine.");
+                return true;
+            case ("closet", Verb.Hand):
+                await Say("eleanor", "His coats. I won't wear anything of his. Not ever again.");
                 return true;
         }
         return false;

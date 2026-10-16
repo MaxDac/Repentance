@@ -84,7 +84,7 @@ watching: your mouse and keyboard can't skip lines or change anything. Only thes
 | Option | Values |
 |---|---|
 | Speed (`-Speed`, first argument in bash) | `1` (normal), `2`, `4` |
-| Ending (`-Ending`, `--ending`) | `2` (default), `1`, `3`, `4`, `5`, `6`, `7`, plus the other two ways to reach ending 1: `1-oldman`, `1-steps` |
+| Ending (`-Ending`, `--ending`) | `2` (default), `1`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10` (Eleanor's endings: she refuses both times), plus the other two ways to reach ending 1: `1-oldman`, `1-steps` |
 
 When Micah has a decision to make, the choices stay on screen for a moment and the one picked is highlighted before
 the story continues. The film uses the test-only save and settings files and plays with real sound.

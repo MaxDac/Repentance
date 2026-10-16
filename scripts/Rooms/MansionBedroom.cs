@@ -12,6 +12,7 @@ public partial class MansionBedroom : Room
 {
     private static readonly Texture2D Shot = GD.Load<Texture2D>("res://assets/art/sprites/harrington_shot.png");
     private static readonly Texture2D EleanorShot = GD.Load<Texture2D>("res://assets/art/sprites/eleanor_shot.png");
+    private static readonly Texture2D StruckDown = GD.Load<Texture2D>("res://assets/art/sprites/harrington_struck_down.png");
     private const string AimLower = "micah_aim_lower";
     private const string AimBack = "micah_aim_back";
     private const int PrayerSteps = 6;
@@ -26,9 +27,20 @@ public partial class MansionBedroom : Room
     // where her feet are while she gets out of bed (tools/art/mansion.py ELEANOR_RISE_AT)
     private static readonly Vector2 EleanorRise = new(382, 226);
     private const float EleanorHurry = 120;
+    // The coda: the old man at the foot of the bed with his back to her, listening at the door for Micah's car; the
+    // nightstand a step from where she stands, and the spot just behind him from where the candlestick reaches him
+    // (eleanor_strike reaches about 35px ahead of her feet).
+    public static readonly Vector2 HarringtonCoda = new(330, 238);
+    public static readonly Vector2 Nightstand = new(402, 216);
+    public static readonly Vector2 BehindHim = new(358, 238);
+    private bool _striking;
+
+    private bool Coda => State.HasFlag("eleanor_coda");
+    private bool Struck => State.HasFlag(Endings.EleanorStruck);
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Coda) return await CodaInteract(verb, target);
         switch (target.Id, verb)
         {
             case ("bed", Verb.Hand):
@@ -40,8 +52,124 @@ public partial class MansionBedroom : Room
 
     public override async Task OnEnter(string entry)
     {
+        if (entry == "eleanor_coda")
+        {
+            await Game.Run(async () =>
+            {
+                await Wait(0.6);
+                await Talk("coda_wake");
+            });
+            return;
+        }
         if (entry != "start") return;
         await Game.Run(Confrontation);
+    }
+
+    /// <summary>
+    /// The coda's state comes from flags, since textures and poses aren't saved: the old man faces the door Micah left
+    /// by, and lies face-down on the carpet once she has struck him (the candlestick FlagSprite hides on the same flag).
+    /// </summary>
+    protected override void OnRefresh()
+    {
+        if (!Coda || FindActor("harrington") is not { } harrington) return;
+        harrington.Position = HarringtonCoda;
+        harrington.WalkTo = BehindHim;
+        harrington.FaceLeft(true);
+        if (Struck && !_striking && harrington.Texture != StruckDown) harrington.SetTexture(StruckDown);
+    }
+
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("bed", Verb.Hand or Verb.Walk) when !Struck:
+                await ReturnToBed();
+                return true;
+            case ("bed", Verb.Hand or Verb.Walk):
+                await Say("eleanor", "Not that bed. Not ever again.");
+                return true;
+            case ("bed", Verb.Look):
+                await Say("eleanor", "Walnut and rose satin. I know every inch of that canopy. I've had a lot of time to look at it.");
+                return true;
+
+            case ("candlestick", Verb.Hand) when !Struck:
+                await Strike();
+                return true;
+            case ("candlestick", Verb.Look):
+                await Say("eleanor", "A brass candlestick. Heavy. He bought it in Venice, he said. He tells everyone what everything cost.");
+                return true;
+
+            case ("harrington", Verb.Look) when Struck:
+                await Say("eleanor", "Face down on his own carpet. He's breathing, or he isn't. I'm not going to bend down and find out.");
+                return true;
+            case ("harrington", Verb.Look):
+                await Say("eleanor", "His back. All these years, and I've never once seen him turn it on me.");
+                return true;
+            case ("harrington", Verb.Talk) when Struck:
+                await Say("eleanor", "Nothing to say, Mr. Harrington? That's a first.");
+                return true;
+            case ("harrington", Verb.Talk):
+                await Say("eleanor", "Yes, Mr. Harrington.");
+                await Say("harrington", "Bed, my dear. I said I'd be a moment.");
+                return true;
+            case ("harrington", Verb.Hand or Verb.Kick) when !Struck:
+                await Say("eleanor", "With my bare hands? He'd laugh. He'd laugh, and then he'd ring for Bruno.");
+                return true;
+
+            case ("door", Verb.Hand or Verb.Walk) when !Struck:
+                await Say("eleanor", "Past him, in a sheet? He'd have me by the hair before I reached the stairs.");
+                return true;
+            case ("door", Verb.Hand or Verb.Walk):
+                await Game.ChangeRoom("mansion_study", "eleanor_coda");
+                return true;
+            case ("landing", Verb.Hand or Verb.Walk):
+                await Say("eleanor", "Not that way. His men sleep across the landing.");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Ending 1 for her: back under the sheet, the way she got out of it, and Micah's story goes on to Rose's.</summary>
+    private async Task ReturnToBed()
+    {
+        await Game.WalkTo(EleanorRise);
+        Player.Face(Facing.Left);
+        await Player.PlayPose("eleanor_mansion_return");
+        Player.Visible = false;
+        State.SetFlag("eleanor_up", false);
+        await Talk("coda_bed");
+        await Game.Hud.Fade(1, 1.5);
+        State.SetFlag("eleanor_coda", false);
+        await Act3.End();
+    }
+
+    /// <summary>
+    /// Endings 8 and 9: the candlestick off the nightstand, and down on the back of his head while he watches the door.
+    /// </summary>
+    private async Task Strike()
+    {
+        var harrington = FindActor("harrington");
+        harrington?.FaceLeft(true);
+        await Game.WalkTo(Nightstand);
+        Player.Face(Facing.Up);
+        // he doesn't turn round: he's listening at the door for the car
+        await Say("harrington", "There. A Ford. Of course it's a Ford.");
+        _striking = true;
+        State.SetFlag(Endings.EleanorStruck);
+        await Wait(0.3);
+        await Game.WalkTo(BehindHim);
+        Player.Face(Facing.Left);
+        await Player.PlayPose("eleanor_strike");
+        if (harrington != null)
+        {
+            await harrington.PlayPose("harrington_struck");
+            harrington.SetTexture(StruckDown);
+        }
+        _striking = false;
+        await Wait(0.8);
+        Player.SetPose(null);
+        Player.Face(Facing.Left);
+        await Talk("coda_strike");
     }
 
     private async Task Confrontation()
@@ -91,6 +219,13 @@ public partial class MansionBedroom : Room
             Player.SetPose(null);
             await Game.WalkTo(Door);
             await PrayerEnding();
+            if (Endings.EleanorHeldOut(State.HasFlag))
+            {
+                // She never gave in: the story stays in the room after he's gone, and the player is Eleanor.
+                State.SetFlag("eleanor_coda");
+                await Game.ChangeRoom("mansion_bedroom", "eleanor_coda");
+                return;
+            }
             await Act3.End();
             return;
         }
@@ -104,6 +239,15 @@ public partial class MansionBedroom : Room
         await Wait(1.0);
         Player.SetPose(null);
         await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
+        if (Endings.EleanorHeldOut(State.HasFlag))
+        {
+            // She sends him away: no persuasion, no kitchen, no fire. He leaves the revolver and gives himself up.
+            await Talk("eleanor_dismiss");
+            State.TakeItem("revolver");
+            await Game.WalkTo(Door);
+            await Act3.End();
+            return;
+        }
         await Talk("eleanor_persuade");
 
         if (State.HasFlag(Endings.Repented))

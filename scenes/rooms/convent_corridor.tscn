@@ -50,6 +50,10 @@ metadata/facing = 4
 position = Vector2(410, 200)
 metadata/facing = 3
 
+[node name="interlude" type="Marker2D" parent="Entries"]
+position = Vector2(60, 215)
+metadata/facing = 4
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]

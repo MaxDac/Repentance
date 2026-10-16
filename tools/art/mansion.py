@@ -2163,14 +2163,16 @@ def linen_surface(size, outline, folds, fill=SHEET, falloff=0.35, loft=None):
 
 
 def _bare_eleanor():
-    from .sprites import ELEANOR, figure, pose, _arms, FW, FH
+    from .sprites import ELEANOR, SHEET_BODY, figure, pose, _arms, FW, FH
     skin = ELEANOR["skin"]
-    spec = dict(ELEANOR, torso=skin, pelvis=skin, sleeves=skin, coat=None, neckline=None, decals=[])
+    spec = dict(ELEANOR, **SHEET_BODY)
+    spec.update(torso=skin, pelvis=skin, sleeves=skin, coat=None, neckline=None, collar=None,
+                bust=None, decals=[])
     f = figure(spec, pose(16, arms=_arms("side")), FW, FH).convert("RGBA")
     f.putalpha(f.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     bb = f.getbbox()
     body = f.crop((bb[0], bb[1], bb[2], bb[1] + 44))
-    seated = Image.new("RGBA", (body.width + 14, body.height))
+    seated = Image.new("RGBA", (max(body.width, 20) + 14, body.height))  # the sheet's outline is drawn for this width
     seated.paste(body, (8, 0))
     return seated
 
@@ -2559,9 +2561,10 @@ def _bed_front(img, R):
         d.ellipse([p[0] - 3, p[1] - 6, p[0] + 3, p[1]], fill=WAL_L, outline=WAL_D)
     R.line(img, (x0 - 2, 4, z1 + 3), (x1 + 2, 4, z1 + 3), WAL)
 
-def paint_bedroom(bed=None, screen=False, fire_t=0.0):
+def paint_bedroom(bed=None, screen=False, fire_t=0.0, candlestick=False):
     """The room; bed is None (the room alone), "eleanor" or "empty"; screen adds the folding screen (cut as its own
-    sprite); fire_t in [0, 1) is the phase of the hearth fire's flame and smoke loop."""
+    sprite); fire_t in [0, 1) is the phase of the hearth fire's flame and smoke loop; candlestick adds the brass
+    candlestick on the nightstand (cut as its own sprite, so Eleanor can take it)."""
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
     em = Image.new("L", img.size, 0)
@@ -2653,15 +2656,39 @@ def paint_bedroom(bed=None, screen=False, fire_t=0.0):
     a, b = R.P(402, 30, 18), R.P(422, 0, 18)
     d.rectangle([a[0] + 2, a[1] + 3, b[0] - 2, a[1] + 10], outline=hx("2a1a0c"))
     d.point(((a[0] + b[0]) / 2, a[1] + 6), fill=GILT)
-    lp = R.P(414, 30, 8)
-    lx, ly = lp
-    d.rectangle([lx - 1, ly - 14, lx + 1, ly], fill=hx("c8a040"))
-    d.ellipse([lx - 4, ly - 2, lx + 4, ly + 1], fill=hx("c8a040"))
-    d.polygon([(lx - 9, ly - 14), (lx + 9, ly - 14), (lx + 5, ly - 25), (lx - 5, ly - 25)], fill=hx("f0b088"))
-    d.line([(lx - 9, ly - 14), (lx + 9, ly - 14)], fill=hx("c87858"))
-    ed.polygon([(lx - 9, ly - 14), (lx + 9, ly - 14), (lx + 5, ly - 25), (lx - 5, ly - 25)], fill=220)
+    lp = R.P(417, 30, 8)  # right of centre, leaving the front left corner clear for the candlestick
+    lx, ly = round(lp[0]), round(lp[1])
+    brass, brass_l, brass_d = hx("c8a040"), hx("f4d880"), hx("5a4014")
+    # a turned brass base: a stepped foot, a round urn body with a lit highlight, a knopped column
+    d.ellipse([lx - 5, ly - 2, lx + 5, ly + 1], fill=brass, outline=brass_d)
+    d.line([(lx - 3, ly - 1), (lx + 2, ly - 1)], fill=brass_l)
+    d.rectangle([lx - 2, ly - 4, lx + 2, ly - 2], fill=brass_d)
+    d.ellipse([lx - 4, ly - 9, lx + 4, ly - 3], fill=brass, outline=brass_d)
+    d.line([(lx - 2, ly - 8), (lx - 3, ly - 5)], fill=brass_l)
+    d.point((lx - 2, ly - 7), fill=hx("fff4c8"))
+    d.rectangle([lx - 1, ly - 13, lx + 1, ly - 9], fill=brass, outline=brass_d)
+    d.line([(lx - 2, ly - 11), (lx + 2, ly - 11)], fill=brass_l)
+    d.point((lx, ly - 12), fill=brass_l)
+    # a pleated silk shade: a narrow top rim, box pleats catching the bulb, a gilt braid and a beaded fringe
+    st, sb = ly - 26, ly - 14
+    shade = [(lx - 8, sb), (lx + 8, sb), (lx + 5, st), (lx - 5, st)]
+    d.polygon(shade, fill=hx("e8a080"))
+    for k in range(-7, 8, 2):
+        top_x = lx + round(k * 5 / 8)
+        d.line([(top_x, st + 1), (lx + k, sb - 1)], fill=hx("c87860") if k % 4 == 1 else hx("f8c8a0"))
+    d.line([(lx - 5, st), (lx + 5, st)], fill=hx("8a4a34"))
+    d.line([(lx - 5, st + 1), (lx + 5, st + 1)], fill=GILT)
+    d.line([(lx - 8, sb), (lx + 8, sb)], fill=GILT)
+    d.line([(lx - 8, sb + 1), (lx + 8, sb + 1)], fill=hx("8a5a28"))
+    for k in range(-8, 9, 2):
+        d.point((lx + k, sb + 2), fill=hx("e8c870"))
+    d.line([(lx - 8, sb), (lx - 5, st)], fill=hx("a85a48"))
+    d.line([(lx + 8, sb), (lx + 5, st)], fill=hx("a85a48"))
+    ed.polygon([(lx - 7, sb - 1), (lx + 7, sb - 1), (lx + 4, st + 2), (lx - 4, st + 2)], fill=150)
     p = R.P(408, 30, 14)  # a book and a glass of water
     d.rectangle([p[0] - 4, p[1] - 2, p[0] + 2, p[1]], fill=hx("2a3a5a"))
+    if candlestick:
+        _nightstand_candlestick(d, *R.P(*NIGHTSTAND_CANDLESTICK))
     # ---- floor: parquet, a pale Aubusson rug ----
     floor_boards(img, BFL, H - 1, (240, 100), 14, hx("6a4428"), hx("5a3820"), hx("2e1c0e"), 104)
     shadow(img, "rect", [0, BFL, W, BFL + 6], 0.5, 3)
@@ -2672,18 +2699,42 @@ def paint_bedroom(bed=None, screen=False, fire_t=0.0):
         _folding_screen(img)
     # ---- light: firelight low on the left, the lamp's pink pool by the bed, moonlight from the window ----
     light(img, "polygon", [(gx0, gy0), (gx1, gy0), (330, H), (200, H)], hx("5a6ab0"), 0.22, 12)
-    pools = [((fx0 + fx1) / 2, BFL - 10, 110, 70, (1.3, 0.85, 0.55), 1.0), (lx, ly - 10, 80, 60, (1.2, 0.95, 0.8), 0.9),
+    pools = [((fx0 + fx1) / 2, BFL - 10, 110, 70, (1.3, 0.85, 0.55), 1.0), (lx, ly - 10, 60, 45, (1.15, 0.95, 0.8), 0.75),
              (265, 80, 50, 70, (0.7, 0.75, 1.05), 0.5)]
     img = grade(img, (0.42, 0.4, 0.6), pools, em)
     light(img, "ellipse", [fx0 + 10, BFL - 40, fx1 - 10, BFL + 6], hx("f08040"), 0.3, 8)
-    light(img, "ellipse", [lx - 16, ly - 34, lx + 16, ly - 6], hx("f0b080"), 0.3, 6)
+    light(img, "ellipse", [lx - 13, ly - 32, lx + 13, ly - 8], hx("f0a070"), 0.16, 5)
+    light(img, "polygon", [(lx - 7, ly - 13), (lx + 7, ly - 13), (lx + 14, ly + 2), (lx - 14, ly + 2)], hx("ffc890"),
+          0.14, 3)
     vignette(img, 0.5, (10, 6, 16), 40)
     if bed == "eleanor":
         _restamp_white_sheet(img, R)
     return img
 
 
-def _cut_sprite(variant_px, base_px, name):
+NIGHTSTAND_CANDLESTICK = (409, 30, 12)  # room-space foot of the candlestick, clear of the bed's footpost
+
+
+def _nightstand_candlestick(d, x, y):
+    """A short brass chamber candlestick, unlit: a domed foot, a knopped stem, a wide drip tray, a ring handle and a
+    stub of ivory candle, all outlined dark so it reads against the lamp and the rose wall."""
+    x, y = round(x), round(y)
+    br, br_l, br_d, out = hx("d0a840"), hx("fce48a"), hx("7a5a1c"), hx("2a1808")
+    d.ellipse([x - 4, y - 3, x + 3, y + 1], fill=br, outline=out)
+    d.line([(x - 2, y - 2), (x, y - 2)], fill=br_l)
+    d.rectangle([x - 2, y - 10, x + 1, y - 3], fill=br, outline=out)
+    d.line([(x - 1, y - 9), (x - 1, y - 4)], fill=br_l)
+    d.rectangle([x - 3, y - 7, x + 2, y - 6], fill=br_d, outline=out)
+    d.arc([x + 2, y - 11, x + 6, y - 6], 270, 90, fill=out)
+    d.ellipse([x - 5, y - 13, x + 4, y - 10], fill=br, outline=out)
+    d.line([(x - 3, y - 12), (x + 1, y - 12)], fill=br_l)
+    d.rectangle([x - 2, y - 21, x + 1, y - 13], fill=hx("f4ecd8"), outline=out)
+    d.line([(x - 1, y - 20), (x - 1, y - 14)], fill=hx("fffaf0"))
+    d.point((x + 1, y - 18), fill=hx("e0d0b0"))
+    d.line([(x - 1, y - 23), (x - 1, y - 22)], fill=hx("1a0e04"))
+
+
+def _cut_sprite(variant_px, base_px, name, folder="rooms"):
     """Everything that differs from the empty room, as an RGBA sprite; returns its top-left."""
     a = np.asarray(variant_px.convert("RGB")).astype(np.int16)
     b = np.asarray(base_px.convert("RGB")).astype(np.int16)
@@ -2691,7 +2742,7 @@ def _cut_sprite(variant_px, base_px, name):
     rgba = np.dstack([a.astype(np.uint8), (mask * 255).astype(np.uint8)])
     im = Image.fromarray(rgba, "RGBA")
     bb = im.getbbox()
-    save(im.crop(bb), "rooms", name + ".png")
+    save(im.crop(bb), folder, name + ".png")
     print(f"{name} at ({bb[0]}, {bb[1]}) size {bb[2] - bb[0]}x{bb[3] - bb[1]}")
     return bb
 
@@ -2707,6 +2758,7 @@ def build_bedroom():
     _cut_sprite(occupied, px, "mansion_bed")
     _cut_sprite(empty, px, "mansion_bed_empty")
     _cut_sprite(pixelize(screen, pal), px, "mansion_bedroom_screen")
+    _cut_sprite(pixelize(paint_bedroom(candlestick=True), pal), px, "mansion_candlestick", "sprites")
     bed_fire_strip(pal)
     eleanor_rise_strip(occupied, empty)
     return px, v
@@ -2785,6 +2837,9 @@ def eleanor_rise_strip(occupied, empty):
     ]
     stored = [(ImageOps.mirror(img), (w - head[0], head[1])) for img, head in frames]
     action_strip("eleanor_mansion_rise", stored, [0.175, 0.15, 0.2, 0.14, 0.125, 0.15], anchor=(w - (px - x0), py - y0))
+    # and back under the sheet: the same frames played backwards, from her standing turn to lying in the bed
+    action_strip("eleanor_mansion_return", stored[::-1], [0.15, 0.125, 0.14, 0.2, 0.15, 0.175],
+                 anchor=(w - (px - x0), py - y0))
     return frames
 
 

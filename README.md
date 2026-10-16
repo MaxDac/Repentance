@@ -96,7 +96,7 @@ Command-line options (after `--`):
 | `--room=lobby --entry=office` | Start in a given room/entry (handy while building a room). Micah's notepad is pre-filled with the notes he would have taken on the way there (`Notes.DebugStartFlags`), and the satchel holds that act's kit: the office drawer and Teddy's photo past the office in Act 1, the Act 2/3 reset kit later on (`MicahKit.DebugItems`); Act 2/3 rooms also set the story act |
 | `--flag=masked` | Set story flags (comma-separated) before the start room loads, e.g. `--room=club_hall --flag=masked` |
 | `--autoplay` | Plays the whole demo by itself with targeted regression checks, and saves screenshots to `screenshots/`. Prints `AUTOPLAY OK` and exits with code 0 on success |
-| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs` and its act files in `scripts/Debug/Playthrough/`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`7`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
+| `--playthrough` | Plays the canonical story (`scripts/Debug/Playthrough.cs` and its act files in `scripts/Debug/Playthrough/`) and every ending route from a real save, with a save/load round trip after every beat and sound coverage. Prints `PLAYTHROUGH OK`. `--ending=N` (`1`-`10`, `1-oldman`, `1-steps` or `all`, the default) limits it to one route |
 | `--film[=1\|2\|4]` | Film mode: the same story to watch at 1x, 2x or 4x speed, from the title to "The End"; input is ignored except Space, F11 and Esc. `--ending=N` picks the route (default 2). Prints `FILM OK` |
 | `--settings-test` | Checks content, display and effects-volume settings, persistence, menus and both Eleanor variants without playing through the story. Prints `SETTINGS TEST OK` |
 | `--pause-test` | Runs focused Space pause/resume regression checks. Prints `PAUSE TEST OK` and exits with code 0 on success |
@@ -198,8 +198,9 @@ inventory, the story act, the Ink state, the current room and the player's posit
 doesn't replay the room's entry cutscene. Bump `SaveData.CurrentVersion` when saved decisions, identifiers or room flow
 change incompatibly: older saves then show up as *Incompatible* instead of loading into a broken state. The
 automated checks and film mode use `user://autoplay_saves/<suite>/`, so they never touch your own saves.
-The current save format is version 8; earlier saves are incompatible because the laundry bluing now comes
-from Eleanor's brass box instead of the florist's shelf, and the prototype State Street hub is gone. Version 7
+The current save format is version 9; earlier saves are incompatible because Act Two and Act Three now open with
+Eleanor's interludes (new rooms, entries and flags). Version 8 moved the laundry bluing to Eleanor's brass box
+instead of the florist's shelf and removed the prototype State Street hub. Version 7
 added the Act One convent's playable exterior arrival and the return to the corridor for Sister Agatha's farewell.
 The preceding five collect-and-combine locations reroute the staff lift, the Blue Lantern entrance,
 the Harrington lead, the masked Club entrance and the
@@ -297,6 +298,12 @@ installs and uninstalls it.
    and Micah drops the case.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
 10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
+    **First Interlude** (the player is Eleanor, in Micah's journal voice: what she told him that night at the motel):
+    pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
+    the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
+    "another Jezebel from that hideous Club"; that night in the cell Agatha comes to her: refuse (saved) or indulge
+    (Agatha turns back at the last moment, cursing her as a demon). From the motel window she watches Micah reach
+    the convent, and the journal goes back to his office.
 11. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
     it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
     unable to think of anything but Eleanor.
@@ -344,7 +351,10 @@ From here the story follows Walkthrough.md:
    bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
    of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
-24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps.
+24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps; the next pages aren't in Micah's hand.
+    **Second Interlude** (Eleanor): the Order's men take her from the motel. In the Club's dressing room, in a short
+    pink gown, the old man offers gin and powder "as always": take them, or refuse (saved; the screen goes black,
+    "Noooo!"). Then Micah's journal goes on at the Club stage.
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
@@ -372,13 +382,21 @@ From here the story follows Walkthrough.md:
    the four right lines in a row convince her (see `Walkthrough.md`). On the first turn he can lower the gun and
    leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
+   If Eleanor refused both Agatha and the old man: after the Our Father the player is Eleanor in the sheet, with the
+   old man's back turned. Return to bed (ending 1), or take the candlestick off the nightstand and strike him, then
+   leave by the kitchen door, optionally burning the house from the cellar first (Micah's lantern, then the barrel).
+   If Micah shoots instead, she sends him away ("Enough. I'm done with all of you...") and he turns himself in.
 32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
    whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
 33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
    alone (not convinced, signed evidence or fire); 4 prison, Eleanor visits (convinced, neither signed evidence nor fire);
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
-   7 murder and/or suicide in the bedroom, the last entry written by Caleb. Each ends Act Three; the next morning
-   (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose or to the faith, saying
+   7 murder and/or suicide in the bedroom, the last entry written by Caleb; 8 coffee with Rose, then Eleanor alone
+   at the city's edge (she struck the old man and burned the house); 9 coffee with Rose, then Eleanor in a jumpsuit
+   confessing to Caleb, who absolves her (she struck him and didn't burn it); 10 Micah confesses to Caleb in prison,
+   then Eleanor leaves Chicago alone (she sent him away). Every last entry says who wrote Eleanor's pages. Each ends
+   Act Three; the next morning (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose
+   or to the faith, or in endings 8-10, saying
    "Maybe Leo would like to read it some day." After ending 7 he respects Caleb's decision and puts it back.
    Otherwise, he puts it back in the trunk. *The End.*
 

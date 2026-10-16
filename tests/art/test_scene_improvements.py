@@ -260,13 +260,14 @@ class SceneImprovementsTests(unittest.TestCase):
         from art import sprites
         figure = mansion._bare_eleanor()
         skin = sprites.ELEANOR["skin"]
-        spec = dict(sprites.ELEANOR, torso=skin, pelvis=skin, sleeves=skin,
-                    coat=None, neckline=None, decals=[])
+        spec = dict(sprites.ELEANOR, **sprites.SHEET_BODY)
+        spec.update(torso=skin, pelvis=skin, sleeves=skin,
+                    coat=None, neckline=None, collar=None, bust=None, decals=[])
         canonical = sprites.figure(spec, sprites.pose(16, arms=sprites._arms("side")),
                                    sprites.FW, sprites.FH).convert("RGBA")
         canonical.putalpha(canonical.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
         bx, by, right, _ = canonical.getbbox()
-        self.assert_image_equal(figure.crop((8, 0, 28, 19)), canonical.crop((bx, by, right, by + 19)))
+        self.assert_image_equal(figure.crop((8, 0, 8 + right - bx, 19)), canonical.crop((bx, by, right, by + 19)))
         original = ImageOps.mirror(figure.crop((8, 0, 28, 19))).getbbox()
         current = ImageOps.mirror(figure.crop((0, 0, figure.width, 19))).getbbox()
         self.assertEqual(motel.ELEANOR_ORIGIN[0] + current[0] - (111 + original[0]), 5)

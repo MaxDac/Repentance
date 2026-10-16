@@ -65,7 +65,9 @@ public partial class Player : Node2D, ISpeaker
     public void SetCharacter(string id)
     {
         Character = id;
-        SpeechColor = id == "daniel" ? new Color("b8d8e8") : new Color("f0e0a0");
+        SpeechColor = id == "daniel" ? new Color("b8d8e8")
+            : id.StartsWith("eleanor") ? new Color(0.96f, 0.78f, 0.62f)
+            : new Color("f0e0a0");
         if (_sprite == null) return;
         _poses.Clear();
         _sprite.Texture = GD.Load<Texture2D>($"res://assets/art/sprites/{id}.png");

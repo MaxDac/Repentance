@@ -10,8 +10,27 @@ public partial class ConventCorridor : Room
     /// <summary>Act 2: Micah comes back from the map to ask about the Club.</summary>
     private bool ClubVisit => State.HasFlag("caleb_club");
 
+    /// <summary>The First Interlude: Eleanor arrives the night she ran, and Mother Agatha meets her in the corridor.</summary>
+    private bool Interlude => State.HasFlag("interlude1");
+
     public override async Task OnEnter(string entry)
     {
+        if (Interlude)
+        {
+            if (State.HasFlag("interlude_agatha_met")) return;
+            await Game.Run(async () =>
+            {
+                await Wait(0.6);
+                await Think("Tony's sister's convent. Wax and cold stone, and somebody already waiting at the end of the corridor.");
+                if (FindActor("nun") is { } nun)
+                {
+                    await Game.WalkTo(nun.WalkTo);
+                    Player.FaceTowards(nun.Position);
+                }
+                await Talk("interlude_agatha");
+            });
+            return;
+        }
         if (ClubVisit)
         {
             if (State.HasFlag("nun_club_asked")) return;
@@ -35,6 +54,7 @@ public partial class ConventCorridor : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Interlude) return await InterludeInteract(verb, target);
         if (ClubVisit && await ClubInteract(verb, target, item)) return true;
         switch (target.Id, verb)
         {
@@ -123,6 +143,39 @@ public partial class ConventCorridor : Room
                 return true;
             case ("entrance", Verb.Walk or Verb.Hand):
                 await LeaveToMap();
+                return true;
+        }
+        return false;
+    }
+
+    private async Task<bool> InterludeInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("nun", Verb.Talk) when !State.HasFlag("interlude_agatha_met"):
+                await Talk("interlude_agatha");
+                return true;
+            case ("nun", Verb.Talk):
+                await Say("nun", "Your cell is at the end of the corridor. Lights out at nine. We rise at five.");
+                return true;
+            case ("nun", Verb.Hand or Verb.Kick):
+                await Say("She'd like that. It would prove her right.");
+                return true;
+            case ("cell_door", Verb.Walk or Verb.Hand) when !State.HasFlag("interlude_agatha_met"):
+                await Say("Not without asking the lady of the house.");
+                return true;
+            case ("cell_door", Verb.Walk or Verb.Hand):
+                await Game.WalkTo(target.WalkTo);
+                await Game.ChangeRoom("convent_cell", "interlude");
+                return true;
+            case ("entrance", Verb.Walk or Verb.Hand):
+                await Say("Out there is Theodore's city. In here, at least, the walls are thick.");
+                return true;
+            case ("statue" or "candles", Verb.Hand):
+                await Say("One candle. For nobody in particular. For me, maybe.");
+                return true;
+            case ("bench", Verb.Hand):
+                await Say("If I sit down now, I won't get up again.");
                 return true;
         }
         return false;

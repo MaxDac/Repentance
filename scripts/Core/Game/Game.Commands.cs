@@ -32,9 +32,20 @@ public partial class Game
 
         await Run(async () =>
         {
+            if (verb == Verb.UseItem && IsEleanor)
+            {
+                await Say("Not with that.");
+                return;
+            }
             if (Room != null && await Room.OnInteract(verb, target, item)) return;
             if (verb is Verb.Walk or Verb.Hand && target.IsExit)
             {
+                // Eleanor's scenes script their own way out; Micah's exits stay shut to her
+                if (IsEleanor)
+                {
+                    await Say(Story.Interlude.BlockedExitLine(RoomScene));
+                    return;
+                }
                 await ChangeRoom(target.ExitTo, target.ExitEntry);
                 return;
             }
@@ -51,6 +62,11 @@ public partial class Game
     private async Task DefaultResponse(Verb verb, Hotspot target, string? item)
     {
         bool person = target is Actor;
+        if (IsEleanor)
+        {
+            await Say(Story.Interlude.DefaultLine(RoomScene, target.Id, verb, person, Pick));
+            return;
+        }
         switch (verb)
         {
             case Verb.Look:
