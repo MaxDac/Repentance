@@ -560,7 +560,7 @@ py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's buildin
                                            # stag portrait is reduced from tools\art\src\club_painting.png (head, antlers, collar)
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
-                                     also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;
+                                     also Micah's close-up lying on the ground (Hubbard Street, the cathedral steps), from tools\art\src\beaten_closeup.png;
                                      and Micah and Eleanor outside the convent, two portraits in one panel, from
                                      tools\art\src\convent_micah.png and convent_eleanor.png; and the heraldry band at the foot
                                      of Harrington's portrait, painted by act2_rooms.heraldry
