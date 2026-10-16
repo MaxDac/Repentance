@@ -237,7 +237,34 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present Day
 
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
-  The caption "Chicago, 1927." leads to Micah's office.
+  The black captions "Chicago, 1927." and "First Interlude" lead to the First Interlude; after it, the story
+  picks up in Micah's office.
+
+### First Interlude - Eleanor
+
+The player moves **Eleanor** (new playable sheet, black dress). The narration is Micah's journal voice, in the
+third person: he is writing down what she told him during the night at the motel ("She told me she sat by that
+window..."). Eleanor speaks aloud only to people and on look/hand. She has no satchel and no puzzles: the satchel
+button is hidden and **N** does nothing while she plays; Micah's things are stashed and come back when the
+interlude ends.
+
+1. **Room 507, the Aurelian, the Tuesday night.** Colour only. The room is already turned over: she did it
+   herself ("Let them think she'd been taken."). She packs the brass box at the vanity (the card, the
+   matchbook, the bluing, the water flower), locks it in the safe and the combination in the drawer, and phones
+   Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
+   the service stairs, told over black: the bellboy's memory, from her side.
+2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the
+   sacramental wine and sends her to the convent. Sal stays out of her way: the doorman's interception is off.
+3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
+   hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
+4. **Convent cell, that night.** Agatha comes to the cell and talks round and round, trying to make Eleanor admit
+   that she wants something impure from her, while it is the other way around. The choice is saved:
+   - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
+   - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
+   Eleanor leaves the convent the next morning.
+5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed) and watches from the
+   window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
+   on the road, where he finds her. Fade to black, then Micah's office.
 
 ### Chicago, 1927
 
@@ -510,7 +537,23 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Act 3 - Present day, bedroom
 
 - Father in the bedroom (new location) reading with the nightstand lamp on, wife covered by the blankets, light off on her side.
-- Father keeps reading.
+- Father keeps reading, then frowns: "These pages read differently. Not sure that's Micah's hand." Every ending's
+  last entry answers him (see *Present*). The black captions "Chicago, 1927." and "Second Interlude" follow.
+
+### Second Interlude - Eleanor
+
+The player moves Eleanor again. The narration is a neutral third voice. Same rules as the First Interlude: no
+satchel, no **N**, Micah's things stashed until the interlude ends.
+
+1. **The motel room, after Micah has gone.** Colour only. A knock at the door: Bruno and a second goon (new
+   sprite). They followed "your detective" there. Her answers are colour; they take her, over black.
+2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
+   short pink gown (new playable sheet). The old man, robed, unmasked, the stag mask in his hand, talks her into
+   gin and powder, "as always". The choice is saved:
+   - **Take it**: she drinks and takes the powder (new sprite).
+   - **Refuse** (`eleanor_refused_drugs`): he forces her anyway. Nothing is shown: the screen goes black and
+     "Noooo!" appears over black.
+   Fade to black, then the Club stage, as before.
 
 #### Club
 
@@ -634,6 +677,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
+    - **Exception (ending 10).** If Eleanor refused both the Mother Superior and the old man's gin and powder in the
+      interludes, there is no persuasion: she stays where she is and says "Enough. I'm done with all of you. Go,
+      just go, return to your life, Micah Jones. Leave the pistol here, and go." Micah leaves the revolver on the
+      carpet and walks out to turn himself in: no kitchen, no fire, no shooting.
     - Eleanor always gets four turns, each with three lines for Micah. Only one line per turn is right, and only
       the four right lines in a row convince her. A wrong line silently breaks the chain: the conversation goes on,
       but she slips away (Micah's thoughts hint at it), and a right line after a wrong one no longer reaches her.
@@ -680,6 +727,18 @@ described here (other verbs, flavour lines) is left to the implementation.
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
     a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
     Then the scene skips to *End of Act 3* (ending 1).
+  - **Eleanor's coda.** If Eleanor refused both the Mother Superior and the old man's gin and powder, the prayer
+    doesn't end the act. After the "Amen." the bedroom comes back with the player as Eleanor in the sheet and
+    Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
+    for his car. Two choices:
+    - **Return to bed** (her rise played backwards): ending 1, as above.
+    - **The candlestick** on the nightstand, a step from where she stands: she takes it while he mutters at the door
+      ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
+      sprites: her swing, his fall forward, no wound). She leaves through the study and the kitchen; the doors back to the bedroom
+      refuse her. The cellar is optional: the lantern hangs on its nail (Micah came in that way), she takes it
+      and opens the whiskey barrel over it, and the house burns. No satchel: two hand actions. The kitchen door
+      leads outside, a short beat in her voice, without Micah's escape. Then Micah's coffee scene at Rose's (as in
+      ending 1), followed by ending 8 (she burned the house) or ending 9 (she didn't).
 
 ### End of Act 3
 
@@ -762,16 +821,66 @@ described here (other verbs, flavour lines) is left to the implementation.
   the revolver to his temple; cut to black, then the shot.
 - *End of Act Three* follows straight away; the present-day attic scene has no "The next morning" caption.
 - If Micah shot only himself, Eleanor survives; Caleb's entry says so.
-- The last entry is written by Caleb, from the police reports and the newspapers: he couldn't make Micah repent,
+- The last entry is written by Caleb, from what the Club's men said in court (or, if Micah shot only himself, from
+  what Eleanor told him after the funeral): he couldn't make Micah repent,
   finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
   brother's footsteps.
+
+#### Endings 8, 9 and 10 - Eleanor's own way
+
+These need Eleanor to have refused **both** the Mother Superior (First Interlude) and the old man's gin and powder
+(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
+returning to bed in her coda. Endings 2-7 need her to have given in at least once.
+
+#### Option 8 - Outskirts, Eleanor alone, after the fire
+
+- Eleanor's coda: she strikes Harrington and burns the house. Micah's coffee scene at Rose's comes first, as in
+  ending 1.
+- Then the outskirts at night: Eleanor alone, in her black dress, walking out of the city. No car, no Micah, no
+  newspaper.
+- Micah keeps the journal; the last entry is his, copied from a letter she sent him at Rose's, without a return
+  address.
+
+#### Option 9 - Prison - Eleanor confesses
+
+- Eleanor's coda: she strikes Harrington and leaves without burning the house. Micah's coffee scene at Rose's comes
+  first.
+- The prison parlour: Eleanor in an inmate's jumpsuit, seated where Micah sits (new sprite), Caleb across the
+  table. She confesses her life's crimes and asks for Micah: "He's with his wife now." "It's better this way."
+  Caleb absolves her.
+- The last entry is Caleb's: he added her pages to his brother's journal from her confession.
+
+#### Option 10 - Prison, then Eleanor alone
+
+- The shoot route with both refusals: Eleanor sends Micah away ("Enough. I'm done with all of you...").
+- The prison parlour: Micah in the jumpsuit confesses to Caleb, who absolves him. Then the outskirts: Eleanor
+  alone, leaving Chicago.
+- The last entry is Caleb's: he heard her side from her after the trial, before she left Chicago.
 
 ### Present
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife (ending 1)
-or found his faith in prison (ending 6), the father keeps the journal, saying "Maybe Leo would like to read it some
-day." In ending 7 he respects Caleb's decision and puts the journal back, maybe for Leo in a couple of years. In all
-other endings, he throws the journal back in the trunk.
+or found his faith in prison (ending 6), or the journal ends on Eleanor's own way (endings 8, 9 and 10), the father
+keeps the journal, saying "Maybe Leo would like to read it some day." In ending 7 he respects Caleb's decision and
+puts the journal back, maybe for Leo in a couple of years. In all other endings, he throws the journal back in the
+trunk. Endings 8, 9 and 10 keep the "The next morning" caption; only ending 7 skips it.
+
+Every last entry also says where the Second Interlude's pages came from, answering Daniel's "Not sure that's
+Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he never really knew."):
+
+| Ending | Who wrote the Second Interlude, and from what |
+|---|---|
+| 1 | Micah: Caleb passed it on; she came to St. Brendan's confessional months later. |
+| 2 | Micah: she told him on the road. |
+| 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
+| 4 | Micah: she told him across the parlour table. |
+| 5, 6 | Caleb's note: he heard it from her after the trial. |
+| 7 | Caleb: what the Club's men said in court; or, if Micah shot only himself, she told him after the funeral. |
+| 8 | Micah: a letter from her, no return address, arrived at Rose's house. |
+| 9 | Caleb: from her confession. |
+| 10 | Caleb: from her after the trial, before she left Chicago. |
+
+The First Interlude is always Micah's: she told him during the night at the motel.
 
 ### Puzzle pacing and saves
 
@@ -789,7 +898,7 @@ motel map and burial survey are not part of the completed Act 3.
 All fifteen puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 8 (`SaveData.CurrentVersion`); earlier versions are incompatible with the bluing moving into the
+is version 9 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in
 compatible saves remain completed, using independent markers
@@ -804,7 +913,7 @@ His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
 The adventure remains a compact, single-case indie point-and-click: fifteen puzzles, the alley encounter, optional
-dialogue and seven ending outcomes. The five collect-and-combine locations each sit on a route the story already
+dialogue, two playable Eleanor interludes and ten ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)

@@ -74,9 +74,10 @@ public class SaveDataTests
     [InlineData(5)]
     [InlineData(6)]
     [InlineData(7)]
-    public void SavesFromBeforeTheBluingMovedIntoTheBrassBoxAreRejected(int version)
+    [InlineData(8)]
+    public void SavesFromBeforeTheInterludesAreRejected(int version)
     {
-        Assert.Equal(8, SaveData.CurrentVersion);
+        Assert.Equal(9, SaveData.CurrentVersion);
         var data = Sample();
         data.Version = version;
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));

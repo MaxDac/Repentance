@@ -17,9 +17,16 @@ public partial class MansionCellar : Room
     private bool Lit => State.HasFlag("cellar_lit");
     private bool Escaping => State.HasFlag("escaping");
     private bool Open => State.HasFlag("barrel_open");
+    private bool Coda => State.HasFlag("eleanor_coda");
 
     public override async Task OnEnter(string entry)
     {
+        if (Coda)
+        {
+            if (State.HasFlag("took_hung_lantern")) return;
+            await Game.Run(() => Think("The cellar. Micah's lantern still burned on its nail, and the Club's whiskey lay on its side by the racks."));
+            return;
+        }
         if (Escaping && !State.HasFlag("cellar_fire") && !State.HasFlag("seen_cellar_escape"))
         {
             State.SetFlag("seen_cellar_escape");
@@ -42,6 +49,7 @@ public partial class MansionCellar : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Coda) return await CodaInteract(verb, target);
         switch (target.Id, verb)
         {
             case ("kitchen_steps", Verb.Hand or Verb.Walk):
@@ -148,6 +156,54 @@ public partial class MansionCellar : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Eleanor's fire needs no inventory: the lantern Micah hung on its nail on the way in, then the barrel's spigot.
+    /// </summary>
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    {
+        bool lantern = State.HasFlag("took_hung_lantern");
+        switch (target.Id, verb)
+        {
+            case ("kitchen_steps", Verb.Hand or Verb.Walk):
+                await Game.ChangeRoom("mansion_kitchen", "cellar");
+                return true;
+            case ("stair", Verb.Hand or Verb.Walk):
+                await Say("eleanor", "Not back up there. Not back to him.");
+                return true;
+            case ("hung_lantern", Verb.Hand):
+                State.SetFlag("took_hung_lantern");
+                await Say("eleanor", "Micah's lantern, still burning. Hot through the handle. I'll hold it anyway.");
+                return true;
+            case ("barrel", Verb.Hand or Verb.Kick) when !lantern:
+                await Say("eleanor", "The Club's rye. Twenty years of Thursdays in one barrel. It wants a flame.");
+                return true;
+            case ("barrel", Verb.Hand or Verb.Kick) when !State.HasFlag(Endings.EleanorBurned):
+                await EleanorFire();
+                return true;
+            case ("barrel", Verb.Hand or Verb.Kick):
+                await Say("eleanor", "Let it burn.");
+                return true;
+            case ("barrel", Verb.Look):
+                await Say("eleanor", "The Club's whiskey. They poured it for the gentlemen on Thursdays, and for me, before I went on.");
+                return true;
+            case ("crates" or "lantern", Verb.Hand):
+                await Say("eleanor", "Nothing of mine down here.");
+                return true;
+        }
+        return false;
+    }
+
+    private async Task EleanorFire()
+    {
+        State.SetFlag("barrel_open");
+        await Talk("coda_fire");
+        State.SetFlag(Endings.EleanorBurned);
+        State.SetFlag("cellar_fire");
+        await Say("*FWOOOSH*");
+        await Game.WalkTo(new Vector2(110, 226));
+        await Game.ChangeRoom("mansion_kitchen", "cellar");
     }
 
     private async Task SetFire()

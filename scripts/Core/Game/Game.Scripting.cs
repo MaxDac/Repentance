@@ -30,7 +30,8 @@ public partial class Game
         return _theEnd.Task;
     }
 
-    private void ReleaseTheEnd()
+    /// <summary>Lets a held "The End" go (a load, a new game, or the autoplay test seeding its next ending).</summary>
+    public void ReleaseTheEnd()
     {
         _theEnd?.TrySetResult();
         _theEnd = null;
@@ -52,7 +53,8 @@ public partial class Game
     public Task Say(string actorId, string text)
     {
         var id = actorId.ToLowerInvariant();
-        ISpeaker who = id == "micah" || id == "daniel" || id == Player.Character
+        bool eleanor = Player.Character.StartsWith("eleanor");
+        ISpeaker who = (eleanor ? id == "eleanor" : id == "micah" || id == "daniel" || id == Player.Character)
             ? Player
             : Room?.FindSpeaker(id) ?? Player;
         return Say(who, text);

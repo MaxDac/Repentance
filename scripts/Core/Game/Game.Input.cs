@@ -31,7 +31,7 @@ public partial class Game
         {
             GetViewport().SetInputAsHandled();
             if (Room != null && !_onTitle && !Busy && !Hud.Menu.IsOpen && !Hud.Puzzle.IsOpen && !Hud.Wheel.IsOpen &&
-                Hud.InterfaceVisible && GameState.Instance.HasItem(Notes.ItemId))
+                Hud.InterfaceVisible && GameState.Instance.HasItem(Notes.ItemId) && !Story.Interlude.EleanorPlays(GameState.Instance.HasFlag))
                 _ = ItemVerb(Verb.Look, Notes.ItemId);
             return;
         }

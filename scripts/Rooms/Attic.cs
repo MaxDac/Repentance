@@ -294,19 +294,8 @@ public partial class Attic : Room
         if (State.StoryAct >= 2)
         {
             await Talk("journal_act2");
-            RestoreMicahItems(2);
-            // pick up the 1927 story where the old lead from the Blue Lantern left it
-            State.SetFlag("sal_passed");
-            State.SetFlag("photo_shown");
-            State.SetFlag("club_lead");
-            // The office opening leads to the cathedral, then the city map.
-            State.SetFlag("act2_church");
-            State.SetFlag("on_map");
-            await Game.Hud.Fade(1, 1.5);
-            Game.Hud.ShowCaption("Chicago, 1927.");
-            await Wait(2.8);
-            Game.Hud.ShowCaption(null);
-            await Game.ChangeRoom("office", "act2");
+            // Eleanor's side of it first; Story.Interlude.EndFirst hands the story back to Micah's office
+            await Story.Interlude.BeginFirst();
             return true;
         }
         await Talk("journal");
@@ -377,7 +366,7 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    private int EndingNumber() => Enumerable.Range(1, 7).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
+    private int EndingNumber() => Enumerable.Range(1, 10).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
 
     /// <summary>
     /// After Act 3: Daniel reads the last entry. He keeps the journal for Leo if Micah found his way back

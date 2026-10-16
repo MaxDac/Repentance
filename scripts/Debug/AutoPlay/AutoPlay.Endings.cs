@@ -221,12 +221,139 @@ public partial class AutoPlay
             Check(!morning && !gs.HasFlag("escaping"), $"{label}: no escape and no \"The next morning\"");
         }
 
+        await EleanorEndings(game, gs, act3Flags, act3Items);
+
         // 1: giving up on the church steps
         Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
         _ = game.ChangeRoom("church_exterior", "beaten");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
+    }
+
+    /// <summary>
+    /// Endings 8, 9 and 10, and ending 1 from Eleanor's coda: seeded with both of her refusals (Agatha and the old man's
+    /// gin), which the main run's interludes didn't make.
+    /// </summary>
+    private async Task EleanorEndings(Game game, GameState gs, string[] act3Flags, string[] act3Items)
+    {
+        var heldOut = act3Flags.Append(Endings.RefusedAbbess).Append(Endings.RefusedDrugs).ToArray();
+
+        // 10: Micah shoots the old man; Eleanor sends him away and keeps the pistol. Micah confesses to Caleb in prison,
+        // then Eleanor walks out of the city alone.
+        Seed(heldOut, act3Items, "Shoot him");
+        bool prison = false;
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() =>
+        {
+            prison |= game.Room?.Name == "Prison" && game.Room.GetNodeOrNull<CanvasItem>("Caleb")?.Visible == true;
+            return game.Room?.Name == "Outskirts";
+        }, 240, 0.05);
+        Check(gs.HasFlag("ending_10") && gs.HasFlag(Endings.EleanorDismissed) && !gs.HasItem("revolver"),
+            "ending 10: Eleanor sends Micah away and keeps the pistol");
+        Check(!_offered.ContainsKey("eleanor_persuade"), "no persuasion: Eleanor has the last word");
+        Check(prison, "ending 10: Micah confesses to Caleb in prison");
+        Check(game.Player.Character == "eleanor_play" && gs.HasFlag("eleanor_epilogue"), "ending 10: Eleanor on the outskirts, alone");
+        await game.Wait(3);
+        await Shot("ending_eleanor_alone");
+        await TheEnd("ending_10");
+
+        // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.
+        // Ending 8 sets the cellar alight on the way.
+        foreach (bool fire in new[] { false, true })
+        {
+            string label = fire ? "ending_8" : "ending_9";
+            Seed(heldOut.Append("rose_wait"), act3Items, "Our Father");
+            _ = game.ChangeRoom("mansion_bedroom", "start");
+            await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
+            await WaitIdle(game);
+            Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("eleanor_coda"), $"{label}: after the prayer, the player is Eleanor");
+            Check(!game.Hud.SatchelVisible, $"{label}: no satchel for Eleanor");
+            var harrington = game.Room?.FindActor("harrington");
+            Check(harrington?.Visible == true && harrington.Texture?.ResourcePath.EndsWith("harrington_struck_down.png") != true,
+                $"{label}: the old man stands watching the door");
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "MansionBedroom" && !gs.HasFlag(Endings.EleanorStruck), $"{label}: she can't get past him");
+            if (!fire) await Shot("eleanor_coda");
+            Check(harrington?.Position == Rooms.MansionBedroom.HarringtonCoda && harrington.FlipH,
+                $"{label}: he stands at the foot of the bed, his back to her");
+            int strikes = _poseCounts.GetValueOrDefault("eleanor_strike");
+            float left = float.MaxValue;
+            bool candleHidden = false, mutter = false, reached = false;
+            var striking = game.Perform(Verb.Hand, "candlestick");
+            await Until(() =>
+            {
+                reached |= game.Player.Position.DistanceTo(Rooms.MansionBedroom.Nightstand) < 3;
+                if (reached) left = Mathf.Min(left, game.Player.Position.X);
+                mutter |= game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("A Ford");
+                candleHidden |= game.Player.PoseName == "eleanor_strike" &&
+                    game.Room?.GetNodeOrNull<CanvasItem>("CandlestickSprite")?.Visible == false;
+                return striking.IsCompleted;
+            }, 60, 0.02);
+            await WaitIdle(game);
+            Check(mutter, $"{label}: he mutters at the door, back turned, while she takes it");
+            Check(left >= Rooms.MansionBedroom.BehindHim.X - 2 && candleHidden,
+                $"{label}: candlestick off the nightstand, a step to him, no walk across the room (leftmost x {left:0})");
+            var down = game.Room?.FindActor("harrington");
+            Check(down?.Position == Rooms.MansionBedroom.HarringtonCoda, $"{label}: he falls where he stood");
+            Check(gs.HasFlag(Endings.EleanorStruck) && _poseCounts.GetValueOrDefault("eleanor_strike") == strikes + 1,
+                $"{label}: the candlestick, from behind");
+            Check(game.Room?.FindActor("harrington")?.Texture?.ResourcePath.EndsWith("harrington_struck_down.png") == true,
+                $"{label}: the old man lies face down");
+            if (!fire)
+            {
+                await ReloadCheckpoint("eleanor_coda");
+                Check(game.Player.Character == "eleanor_sheet_play" && gs.HasFlag("eleanor_coda") &&
+                      game.Room?.FindActor("harrington")?.Texture?.ResourcePath.EndsWith("harrington_struck_down.png") == true,
+                    "a save in the coda loads back as Eleanor, with the old man down");
+                await Shot("eleanor_struck");
+            }
+            await game.Perform(Verb.Walk, "door");
+            Check(game.Room?.Name == "MansionStudy", $"{label}: through his study");
+            await game.Perform(Verb.Walk, "door_left");
+            Check(game.Room?.Name == "MansionKitchen", $"{label}: down to the kitchen");
+            if (fire)
+            {
+                await game.Perform(Verb.Walk, "cellar_door");
+                Check(game.Room?.Name == "MansionCellar", "ending 8: down to the cellar");
+                await game.Perform(Verb.Hand, "barrel");
+                Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the barrel wants a flame first");
+                await game.Perform(Verb.Hand, "hung_lantern");
+                await game.Perform(Verb.Hand, "barrel");
+                await WaitIdle(game);
+                Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && game.Room?.Name == "MansionKitchen",
+                    "ending 8: the Club's rye alight, and back up to the kitchen");
+            }
+            bool eleanorInmate = false, sawRose = false;
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() =>
+            {
+                sawRose |= game.Room?.Name == "RoseHouse";
+                eleanorInmate |= game.Room?.Name == "Prison" && game.Room.GetNodeOrNull<CanvasItem>("EleanorInmate")?.Visible == true &&
+                    game.Room.GetNodeOrNull<CanvasItem>("Micah")?.Visible != true;
+                return game.Room?.Name == (fire ? "Outskirts" : "Prison") && !game.Busy || game.Hud.CaptionText == "End of Act Three";
+            }, 240, 0.05);
+            Check(sawRose && !gs.HasItem("cloth"), $"{label}: Micah's journal goes on to Rose's door, without the cloth");
+            Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
+            if (fire)
+                Check(game.Player.Character == "eleanor_play" && !gs.HasFlag(Endings.MansionExploded), "ending 8: Eleanor alone, out of the city");
+            else
+                Check(eleanorInmate && gs.HasFlag("caleb_visits"), "ending 9: Eleanor in prison grey, confessing to Caleb");
+            await TheEnd(label);
+        }
+
+        // 1: back under the sheet, the way she got out of it; Micah's story goes on to Rose's
+        Seed(heldOut.Append("rose_wait"), act3Items, "Our Father");
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
+        await WaitIdle(game);
+        int returns = _poseCounts.GetValueOrDefault("eleanor_mansion_return");
+        _ = game.Perform(Verb.Hand, "bed");
+        await Until(() => game.Room?.Name == "RoseHouse", 120);
+        Check(gs.HasFlag("ending_1") && !gs.HasFlag(Endings.EleanorStruck) && !gs.HasFlag("eleanor_coda"),
+            "ending 1: Eleanor goes back to bed, and Micah to Rose");
+        Check(_poseCounts.GetValueOrDefault("eleanor_mansion_return") == returns + 1, "ending 1: her climb back into bed plays");
+        await TheEnd("ending_1 (Eleanor's bed)");
     }
 
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
@@ -416,6 +543,8 @@ public partial class AutoPlay
     private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
     {
         _seedLog = _offerLog.Count;
+        // the previous ending holds "The End", and the game busy, until something replaces the story
+        _game.ReleaseTheEnd();
         _game.Hud.ShowCaption(null);
         GameState.Instance.Restore(flags.ToArray(), items.ToArray(), 3);
         DialogueManager.Instance.LoadInk(_act3Ink);
@@ -441,7 +570,7 @@ public partial class AutoPlay
         if (outskirts)
             Check(sawNextMorning == (gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded)),
                 $"{ending}: next-morning transition only after alone escape with fire");
-        int endingNumber = Enumerable.Range(1, 7).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
+        int endingNumber = Enumerable.Range(1, 10).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
         bool keepJournal = Endings.KeepsJournal(endingNumber);
         bool dismissed = endingNumber is >= 2 and <= 5;
         await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 120);

@@ -9,6 +9,43 @@ namespace Repentance;
 /// <summary>Act 3 of the autoplay run, up to the main ending.</summary>
 public partial class AutoPlay
 {
+    /// <summary>
+    /// The Second Interlude: the Order's men at the motel door, then the Club's dressing room, where Eleanor takes the
+    /// old man's gin this time (the playthrough's Eleanor routes refuse it). Micah's journal goes on at the stage.
+    /// </summary>
+    private async Task SecondInterlude(Game game, GameState gs)
+    {
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Second Interlude", 30);
+        Check(game.Hud.CaptionText == "Second Interlude", "Act 3 opens on black with \"Second Interlude\"");
+        await Until(() => game.Room?.Name == "MotelNight");
+        await WaitIdle(game);
+        Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && !game.Hud.SatchelVisible,
+            "the player is Eleanor at the motel, without Micah's satchel");
+        await Shot("interlude_motel_goons");
+        await game.Perform(Verb.Hand, "door");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
+            "the Order's men take her to the Club's dressing room, in the pink gown");
+        Check(game.Music.Current == Track.ClubStrings, "the Club's strings behind the dressing room wall");
+        Check(game.Room?.FindActor("harrington") is { Visible: true }, "the old man is waiting, unmasked");
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "ClubBackstage", "the only door leads to the stage, and he hasn't finished");
+        await ReloadCheckpoint("second_interlude");
+        Check(game.Player.Character == "eleanor_gown_play", "a save in the dressing room loads back in the gown");
+        await game.Wait(0.5);
+        await Shot("club_backstage");
+        int drinks = _poseCounts.GetValueOrDefault("eleanor_drink");
+        var prefer = _prefer;
+        _prefer = new[] { "(Take the glass" };
+        _ = game.Perform(Verb.Talk, "harrington");
+        await Until(() => game.Room?.Name == "ClubStage");
+        _prefer = prefer;
+        Check(Offered("interlude_oldman", "(Push it away.)") && !gs.HasFlag(Endings.RefusedDrugs),
+            "the old man's gin can be refused; taking it saves nothing");
+        Check(_poseCounts.GetValueOrDefault("eleanor_drink") == drinks + 1, "Eleanor drinks: her drink strip plays");
+        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in"), "the interlude's flags are cleared for Micah's part");
+    }
+
     /// <summary>The masked Club, Act 3 and the main ending.</summary>
     private async Task PlayActThree(Game game, GameState gs)
     {
@@ -88,6 +125,7 @@ public partial class AutoPlay
         Check(gs.StoryAct == 3, "Act Three");
         await game.Wait(2);
         await Shot("bedroom");
+        await SecondInterlude(game, gs);
         await Until(() => game.Room?.Name == "ClubStage");
         Check(gs.HasItem("revolver") && gs.HasFlag("masked") && gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned),
             "back on the stage with Micah's things, notepad and lighter first");
@@ -158,7 +196,8 @@ public partial class AutoPlay
         _prefer = new[] { "Go to the Blue Lantern" };
         await game.Perform(Verb.Walk, "door");
         Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
-        var act3Flags = _act3Flags = gs.Flags.ToArray();
+        // the seeded endings add Eleanor's refusals themselves
+        var act3Flags = _act3Flags = gs.Flags.Where(f => f is not (Endings.RefusedAbbess or Endings.RefusedDrugs)).ToArray();
         var act3Items = _act3Items = gs.Inventory.ToArray();
         _act3Ink = DialogueManager.Instance.SaveInk();
 

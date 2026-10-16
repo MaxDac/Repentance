@@ -15,16 +15,19 @@ public partial class Speakeasy : Room
 
     protected override void OnRefresh()
     {
-        if (!_talkingToSal && FindActor("sal") is { } sal && State.HasFlag("sal_passed"))
+        if (!_talkingToSal && FindActor("sal") is { } sal && (State.HasFlag("sal_passed") || Interlude))
             sal.Position = SalAside;
     }
 
     private bool _intercepting;
 
+    /// <summary>The First Interlude: Sal walked Eleanor in himself, so nobody stops her at the curtain.</summary>
+    private bool Interlude => State.HasFlag("interlude1");
+
     /// <summary>Micah can try to walk past Sal; the moment he crosses the curtain line, Sal steps in and the talk starts.</summary>
     public override void _Process(double delta)
     {
-        if (_intercepting || State.HasFlag("sal_passed") || Game.Busy || Game.IsPaused) return;
+        if (_intercepting || State.HasFlag("sal_passed") || Interlude || Game.Busy || Game.IsPaused) return;
         if (!Player.Visible || Player.Position.X <= BarrierX) return;
         _intercepting = true;
         _ = Game.Run(async () =>
@@ -81,6 +84,16 @@ public partial class Speakeasy : Room
 
     public override async Task OnEnter(string entry)
     {
+        if (Interlude)
+        {
+            if (entry == "interlude")
+                await Game.Run(async () =>
+                {
+                    await Game.Hud.Fade(0, 0.8);
+                    await Think("Sal's coat smelled of rain and cigars. He didn't say a word the whole way down State Street.");
+                });
+            return;
+        }
         if (State.HasFlag("seen_lantern")) return;
         State.SetFlag("seen_lantern");
         await Game.Run(async () =>
@@ -93,6 +106,7 @@ public partial class Speakeasy : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (Interlude) return await InterludeInteract(verb, target);
         bool beyondSal = target.Bounds.Position.X > BarrierX && target.Id != "sal";
         if (beyondSal && !State.HasFlag("sal_passed") && verb != Verb.Look)
         {
@@ -196,5 +210,31 @@ public partial class Speakeasy : Room
             await sal.MoveTo(Game.Player.Position + new Vector2(-18, 0), 70);
         await Say("sal", "Out back, pal. Tony wants a word. Several, actually.");
         await Game.ChangeRoom("alley", "start");
+    }
+
+    /// <summary>Eleanor at the Blue Lantern after hours: Tony at the bar is the only one with anything to say.</summary>
+    private async Task<bool> InterludeInteract(Verb verb, Hotspot target)
+    {
+        switch (target.Id, verb)
+        {
+            case ("bartender", Verb.Talk or Verb.Hand):
+                await Talk("interlude_tony");
+                await Game.Hud.Fade(1, 1.0);
+                await Game.ChangeRoom("convent_corridor", "interlude");
+                return true;
+            case ("sal", Verb.Talk or Verb.Hand):
+                await Say("sal", "Tony's the one you want, Miss. I just carry things.");
+                return true;
+            case ("door", Verb.Walk or Verb.Hand):
+                await Say("Back out into the rain? Not without somewhere to go.");
+                return true;
+            case ("stage", Verb.Look):
+                await Say("I sang on that stage the first summer. Before the Club. Before I knew the price of anything.");
+                return true;
+            case ("piano", Verb.Look or Verb.Hand):
+                await Say("Somebody's left the lid up. I could play the first bars of anything, and none of the rest.");
+                return true;
+        }
+        return false;
     }
 }

@@ -3,7 +3,7 @@
 # Resets every generated file (imports, builds, logs, test saves) and rebuilds first. Your own saves are never touched.
 # Input is ignored, except Space (pause), F11 (full screen) and Esc (stop).
 #
-# Usage: tools/run/film.sh [1|2|4] [--ending 1-7|1-oldman|1-steps] [--no-clean] [--godot PATH]
+# Usage: tools/run/film.sh [1|2|4] [--ending 1-10|1-oldman|1-steps] [--no-clean] [--godot PATH]
 #   tools/run/film.sh            # 1x, ending 2
 #   tools/run/film.sh 4 --ending 5
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -21,7 +21,7 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-case "$ending" in 1|2|3|4|5|6|7|1-oldman|1-steps) ;; *) echo "--ending must be 1-7, 1-oldman or 1-steps." >&2; exit 2 ;; esac
+case "$ending" in 1|2|3|4|5|6|7|8|9|10|1-oldman|1-steps) ;; *) echo "--ending must be 1-10, 1-oldman or 1-steps." >&2; exit 2 ;; esac
 
 godot="$(find_godot "$godot_arg")"
 echo "Godot: $godot"
