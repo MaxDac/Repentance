@@ -366,8 +366,8 @@ From here the story follows Walkthrough.md:
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
-   Rose at least three times **and carries both ring and cross**) lower the gun: Micah says the whole Our Father,
-   a verse at a time, backing to the door while the old man talks into every pause (ending 1). Then talk Eleanor into leaving ("I didn't come all this
+   Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
+   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving ("I didn't come all this
    way...", or later "Every time I've seen you..."). Or, on the first turn, lower the gun and leave her to turn
    himself in (ending 6); or, if she still refuses on the second, shoot her, then himself (ending 7).
 32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
@@ -562,7 +562,7 @@ py -3.14 tools\gen_art.py club harrington  # club rooms and Harrington's buildin
                                            # stag portrait is reduced from tools\art\src\club_painting.png (head, antlers, collar)
 py -3.14 tools\gen_art.py expansion_act1 expansion_act2 expansion_act3  # the five collect-and-combine locations, overlays and item icons
 py -3.14 tools\gen_art.py closeup    # Eleanor's stage close-up and Rose's doorstep close-up, reduced to VGA pixels from the original pictures in tools\art\src\ (stage_closeup.png, rose_closeup.png); Eleanor's clothed variant paints her dress on;
-                                     also Micah's close-up on the cathedral steps, from tools\art\src\beaten_closeup.png;
+                                     also Micah's close-up lying on the ground (Hubbard Street, the cathedral steps), from tools\art\src\beaten_closeup.png;
                                      and Micah and Eleanor outside the convent, two portraits in one panel, from
                                      tools\art\src\convent_micah.png and convent_eleanor.png; and the heraldry band at the foot
                                      of Harrington's portrait, painted by act2_rooms.heraldry

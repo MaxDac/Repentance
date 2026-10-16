@@ -370,6 +370,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.006), 0.40, 0.0])
             wr = body([s * 0.03, 0.50, 0.07])
             hand = body([s * 0.0, 0.535, 0.075])
+        elif kind == "clutch":  # both hands holding a wrapped sheet up against the chest, elbows tucked in
+            el = body([s * (sw + 0.004), 0.385, 0.03])
+            wr = body([s * 0.03, 0.31, 0.08])
+            hand = body([s * 0.008, 0.29, 0.088])
         elif kind == "side":  # hanging still, drawn back behind the flank
             el = body([s * (sw - 0.01), 0.40, -0.035])
             wr = body([s * (hipw - 0.01), 0.50, -0.045])

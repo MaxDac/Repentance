@@ -824,7 +824,7 @@ ELEANOR: Micah...
 THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice somewhere far behind it.
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")
-* {has_flag("can_spare")} [(Lower the gun.)]
+* {has_flag("can_spare")} [Our Father...]
     ~ set_flag("spared_oldman")
     -> oldman_prayer
 - -> END
@@ -853,9 +853,8 @@ MICAH: And lead us not into temptation...
 CUE: step
 HARRINGTON: You'll be back. They always come back, Mr. Jones. Every one of them.
 MICAH: ...but deliver us from evil.
-MICAH: Amen.
 CUE: door
-THOUGHT: The whole of it, start to finish, for the first time since France. He's still talking when I reach the door. Let him. I know where I'm going.
+THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. I know where I'm going.
 -> END
 
 === eleanor_persuade ===

@@ -25,6 +25,7 @@ public partial class AutoPlay : Harness
     private int _crossOffers;
     private bool? _insetAtCaughtChoice;
     private bool? _insetAtBeatenChoice;
+    private bool? _insetAtStreetChoice;
     private string[] _act3Flags = Array.Empty<string>();
     private string[] _act3Items = Array.Empty<string>();
     private CloseUp? _closeUpAtRoadChoice;
@@ -53,6 +54,7 @@ public partial class AutoPlay : Harness
             if (knot == "caleb_cross") _crossOffers++;
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;
+            if (knot == "street_choice") _insetAtStreetChoice = game.Hud.InsetVisible;
             if (knot == "eleanor_road")
             {
                 _closeUpAtRoadChoice = game.Hud.CurrentCloseUp;
