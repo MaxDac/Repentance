@@ -29,7 +29,8 @@ public partial class ConventRoad : Room
             await Talk("eleanor_road");
             State.SetFlag("eleanor_found");
             await Wait(0.8);
-            await Game.ChangeRoom("motel_night", "start");
+            await Game.Hud.Fade(1, 1.5);
+            await Game.ChangeRoom("motel_night", "start", fadeInSeconds: 1.5);
         });
     }
 
