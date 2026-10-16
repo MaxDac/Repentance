@@ -1,0 +1,158 @@
+# Testing
+
+## Quick reference
+
+```powershell
+tools\run\test.ps1 -Suite unit, walk         # some suites (first run clean)
+tools\run\test.ps1 -Suite unit -NoClean      # skip deletion of generated files
+tools\run\film.ps1 -Speed 4 -Ending 5        # watch the game play itself
+```
+
+```bash
+tools/run/test.sh unit walk --no-clean
+tools/run/film.sh 4 --ending 5
+```
+
+Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
+all suites from a clean slate (~10 min). Do not do this or run film mode unless requested.
+
+| Change | Suites |
+|---|---|
+| Docs only | none |
+| Any C# | `unit` (after `dotnet build`) |
+| Story: Ink, `scripts/Rooms`, `scripts/Story`, items, endings, playthrough | `unit, playthrough` |
+| AutoPlay act file or `Harness.cs` | add `autoplay` |
+| Scenes: walk areas, hotspots, entries, exits | `unit, walk` |
+| Art generators or `assets/art` | `art` |
+| Settings menu / pause | `settings` / `pause` |
+| CI, launchers, export presets | no additional suites; validate the changed tooling, then CI |
+
+## Suites
+
+| Suite | Runs | Covers | Pass |
+|---|---|---|---|
+| `unit` | `dotnet test tests/Repentance.Tests` | Godot-free rules, scene graph, story integrity, Ink walk | exit code |
+| `art` | Python `unittest` in `tests/` | Generated art matches the generators and contracts | exit code |
+| `playthrough` | `--playthrough` | Canonical story, every ending, save/load after every beat, sound/music coverage | `PLAYTHROUGH OK` |
+| `autoplay` | `--autoplay` | Targeted regressions: puzzles, wrong items, mouse, wheel, inventory, notepad, poses, dialogue variants, seeded endings; screenshots | `AUTOPLAY OK` |
+| `settings` | `--settings-test` | Content, display, volume settings, persistence, menus, both Eleanor variants | `SETTINGS TEST OK` |
+| `pause` | `--pause-test` | Space freezes and resumes everything | `PAUSE TEST OK` |
+| `walk` | `--walk-test` | Movement and reachability in every room, real mouse input | `WALK TEST OK` |
+
+A Godot suite passes only if Godot exits 0, prints the marker, **and** `logs/<suite>.log` has no `ERROR:`,
+`SCRIPT ERROR:`, `USER ERROR:` or `Unhandled exception` line (`Game.Run` turns exceptions into `GD.PushError`, so a
+run can reach its marker after one). Test suites use `--audio-driver Dummy`; CI uses the same pass rule.
+A local pass does not cover CI's other suites or exported builds.
+
+Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses
+xvfb).
+
+## Launchers (`tools/run/`)
+
+`test.ps1`/`test.sh`, `film.ps1`/`film.sh`, shared `common.ps1`/`common.sh`, and `check-godot.gd` (rejects
+non-4.x or non-C# Godot before anything is deleted).
+
+Without `-NoClean`/`--no-clean`, they delete `.godot/`, `.mono/`, `bin/`, `obj/`, `tests/**/bin|obj`,
+`screenshots/`, `frames/`, `logs/` and the test user data (`user://autoplay_saves/`, `user://autoplay_settings.cfg`;
+never your saves or settings). **Godot suites and film always build and import**, including with `-NoClean`
+(log `logs/import.log`; an error stops the run). `unit` uses `dotnet test`; `art` uses Python only.
+Python discovery: `PYTHON`, `PATH`, or `%LOCALAPPDATA%\Programs\Python`.
+
+`tests/test_run_scripts.py` tests the launchers themselves (run in CI's unit job).
+
+## The harness (`scripts/Debug/`)
+
+`Harness` supplies `--clock` (fast 60x by default, normal 8x; restored to 1x at the end), checks, failure accounting,
+markers and exit codes, `WaitIdle`/`Until`/`Observe`, synthetic mouse and
+keyboard input (`Viewport.PushInput`), screenshots to `screenshots/`, a wiped per-suite save folder, and shared
+puzzle/satchel helpers. Put new shared helpers here, not in `AutoPlay`.
+
+### `Playthrough` (`--playthrough`, `--film`)
+
+Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick choices. Beats:
+`Playthrough/Playthrough.Act1.cs` ... `Act3.cs`; Act 3 routes branch on
+`_route`, and `Playthrough.Endings.cs` holds each route's choices and "The End" checks. `Playthrough.cs` keeps the
+modes, the save/load round trip and the coverage gates.
+
+- Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
+  1-oldman 1-steps 8 9 10`. No seeded state. `--ending=N` runs one route.
+- After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
+- A beat that cannot reach what it needs times out and fails, naming the beat.
+- Coverage: every `Sound` and every `Track` must play (`UnheardSounds` exceptions, empty), and every choice a route
+  wants must be offered.
+
+### `AutoPlay` (`--autoplay`, `--settings-test`, `--pause-test`)
+
+Regressions that would break quietly: one partial per area (`AutoPlay.Act1/2/3`, `Endings`, `Dialogue` (choice bar,
+short labels), `Interface` (wheel, satchel, menus, save/load, notepad), `Pause`, `Presentation` (settings, poses),
+`Puzzles` (cancel, retry, migration), `Inheritance` (`#if TOOLS` contracts, Ink reset)). It may seed state to reach
+a branch quickly; the playthrough may not.
+
+### `WalkTest` (`--walk-test`)
+
+See [Rooms and scenes](rooms-and-scenes.md#invariants-checked-by-tests).
+
+### Film mode (`--film[=1|2|4]`)
+
+The playthrough at real speed (1x, 2x, 4x), from the title to "The End", ending `2` unless `--ending` is given.
+Choices linger on screen so you can read them. `SpectatorFilter` ignores viewer input except Space (pause), F11 /
+Alt+Enter, and Esc (prints `FILM STOPPED`, exits 0). Uses real sound and the test save/settings files. Log:
+`logs/film_<speed>x.log`; `ERROR:` lines are warnings here (no audio device logs errors).
+
+## Unit tests (`tests/Repentance.Tests`)
+
+`net10.0` xunit project. It links the [Godot-free sources](conventions.md#godot-free-files) and imports
+`GodotInk.props` to compile the same Ink story.
+
+| Class | Checks |
+|---|---|
+| `ItemsTests` | Catalogue, ids, cash |
+| `EndingsTests` | Resolution order and gates |
+| `MicahKitTests` | Pinned items, act kits, debug kits |
+| `NotesTests` | Pages, conditional lines, debug flags |
+| `PuzzleTests` | Every puzzle rule, migration |
+| `RecipeTests` | Recipe integrity, symmetry, refusals |
+| `SaveDataTests` | Round trips, versions, corrupt input |
+| `SceneGraphTests` | Parses `.tscn`/`.cs`: exits and `ChangeRoom` targets exist, markers on the floor, all rooms reachable from the attic |
+| `SoundSynthTests`, `MusicSynthTests` | Audibility, clipping, seams, cue parsing |
+| `StoryIntegrityTests` | Static story checks (below) |
+| `InkWalkTests` | Exhaustive Ink walk (below) |
+
+Filter: `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter <Name>`.
+
+### Story tests and allowlists
+
+- `StoryIntegrityTests`: every knot called exists and every knot is reachable; every flag read is set and every flag
+  set is read; every item exists and is obtainable; knots with only `*` choices are one-shot by design; every choice
+  label fits (66 chars, `#short:` rules); `docs/saves-and-settings.md` and `Walkthrough.md` state the current save
+  version.
+- `InkWalkTests`: explores choice paths from every `Talk(...)` target, including repeat visits, under learned,
+  cash-in-hand, all-true and 24 deterministic seeded worlds. Fails on Ink runtime errors and unreachable choices.
+
+Add allowlist entries only with a reason. Tests reject stale entries.
+
+| List | File | For |
+|---|---|---|
+| `OneShotKnots` | `StoryIntegrityTests.cs` | Knots with only `*` choices that the game plays once |
+| `UnreadFlags` | same | Flags set only for tests or the recipe book |
+| `UnsetFlags` | same | Flags set in a way the scan can't see |
+| `IndirectItems` | same | Items given by code the scan can't follow |
+| `UnreachedChoices` | `InkWalkTests.cs` | Choices no path reaches |
+| `OffFloorEntries` | `SceneGraphTests.cs` | Entry markers allowed off the floor |
+| `UnheardSounds` | `scripts/Debug/Playthrough.cs` | Sounds the story never plays |
+
+## Art and launcher tests (Python)
+
+- `tests/art/` (Pillow, NumPy): committed PNGs match their generators; lighting, geometry, overlay composition.
+- `tests/test_character_art.py`: sprite sheet sizes, strips, alpha, determinism.
+- `tests/test_run_scripts.py`: launcher argument parsing, cleaning, pass rules.
+
+## Seeing what the game draws
+
+Record frames instead of taking screenshots of the desktop:
+
+```powershell
+godot_console --path . --write-movie frames\f.png --fixed-fps 30 --quit-after 120 -- --room=lobby --skip-title
+```
+
+Then open the last PNG (480x270).

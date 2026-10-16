@@ -152,7 +152,7 @@ public class StoryIntegrityTests
             .Where(x => x.shown.Length > InkScan.MaxChoiceChars)
             .Select(x => $"line {x.c.Line} ({x.shown.Length} chars): {x.c.Shown}").ToList();
         Assert.True(tooLong.Count == 0, $"choice labels longer than {InkScan.MaxChoiceChars} characters are cut off in the choice bar; " +
-            "add a '#short: ...' tag (docs/dialogue-choice-labels.md): " + string.Join(" | ", tooLong));
+            "add a '#short: ...' tag (docs/story-and-dialogue.md): " + string.Join(" | ", tooLong));
         var badShort = choices.Where(c => c.Shown != c.Label && (c.Shown.Length == 0 || c.Shown.Length >= c.Label.Length))
             .Select(c => $"line {c.Line}: {c.Shown}").ToList();
         Assert.True(badShort.Count == 0, "#short: labels must be non-empty and shorter than the spoken text: " + string.Join(" | ", badShort));
@@ -245,7 +245,7 @@ public class StoryIntegrityTests
     }
 
     [Theory]
-    [InlineData("README.md")]
+    [InlineData("docs/saves-and-settings.md")]
     [InlineData("Walkthrough.md")]
     public void DocsStateTheCurrentSaveVersion(string doc)
     {
