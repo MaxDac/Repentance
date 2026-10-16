@@ -130,6 +130,12 @@ public partial class RoseHouse : Room
     {
         await Wait(0.6);
         await Think("Same door. Same bell. A different man pressing it, I hope.");
+        if (State.HasItem("cloth"))
+        {
+            State.TakeItem("cloth");
+            await Think("Her rag. Still in my pocket, still smellin' of her.");
+            await Think("Into the gutter with it. No more chasin' that dame.");
+        }
         await Game.WalkTo(TalkSpot);
         Player.Face(Facing.Up);
         await Say("*Ring*");

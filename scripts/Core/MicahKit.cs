@@ -18,9 +18,10 @@ public static class MicahKit
     public static bool IsPinned(string id) => Pinned.Contains(id);
 
     // Act 1 leaves the case kit; the clues (photo, cash, matchbook) stay behind with the notepad holding what they said.
-    private static readonly string[] Act2Keep = { "revolver", "lockpick", "card", "mirror", "faith_ring", "cross" };
-    // Act 3 is the gun and the two commitments the endings weigh.
-    private static readonly string[] Act3Keep = { "revolver", "faith_ring", "cross" };
+    // Eleanor's cloth rides along until Micah gives up on her (ending 1).
+    private static readonly string[] Act2Keep = { "revolver", "lockpick", "card", "mirror", "cloth", "faith_ring", "cross" };
+    // Act 3 is the gun, Eleanor's cloth and the two commitments the endings weigh.
+    private static readonly string[] Act3Keep = { "revolver", "cloth", "faith_ring", "cross" };
 
     /// <summary>Stashed items that come back when <paramref name="act"/> starts; anything else stays in the past.</summary>
     public static IReadOnlyList<string> ActKeep(int act) => act switch

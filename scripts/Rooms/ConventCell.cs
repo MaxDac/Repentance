@@ -77,7 +77,7 @@ public partial class ConventCell : Room
                     if (firstPickup)
                         await Say("Her perfume. I've lifted the cloth to my nose before I even know I'm doing it.");
                 }
-                else await Say("Thin mattress, and the borrowed cloth back where it belongs.");
+                else await Say("Thin mattress. Her rag oughta be lying here. It's in my pocket instead.");
                 return true;
             case ("bed" or "nightstand" or "lampstand", Verb.Kick):
                 await Say("Kick a nun's furniture. Nice, Micah. Very nice.");
