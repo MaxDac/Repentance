@@ -12,6 +12,7 @@ tools\run\test.ps1 -Suite unit, walk    # just some suites
 tools\run\film.ps1                      # film mode, 1x
 tools\run\film.ps1 -Speed 2
 tools\run\film.ps1 -Speed 4 -Ending 5
+tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, skipping straight to the ending
 ```
 
 ### Linux prerequisites
@@ -37,6 +38,7 @@ tools/run/test.sh unit walk
 tools/run/film.sh            # 1x
 tools/run/film.sh 2
 tools/run/film.sh 4 --ending 5
+tools/run/film.sh 16 --from act2
 ```
 
 Both scripts find Godot 4 .NET in this order: `-Godot <path>` / `--godot <path>`, then the `GODOT` environment
@@ -83,16 +85,21 @@ watching: your mouse and keyboard can't skip lines or change anything. Only thes
 
 | Option | Values |
 |---|---|
-| Speed (`-Speed`, first argument in bash) | `1` (normal), `2`, `4` |
+| Speed (`-Speed`, first argument in bash) | `1` (normal), `2`, `4`, `8`, `16`, `60` or `hyper` (60x, frame rate uncapped) |
 | Ending (`-Ending`, `--ending`) | `2` (default), `1`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10` (Eleanor's endings: she refuses both times), plus the other two ways to reach ending 1: `1-oldman`, `1-steps` |
+| Start (`-From`, `--from`) | `act1` (default, from the title), `interlude1`, `act2`, `interlude2`, `act3` (Micah's office), `ending` (the route's deciding scene: the mansion study, Tony's back door for `1`, the old man for `1-steps`). `act3` with `1-steps` is refused: that route ends before Act 3 |
+
+Starting past `act1` still plays the earlier story for real, so everything Micah carries and has decided is right, but
+unseen and muted at 60x behind a black "Fast-forwarding" screen; the chosen speed and sound come back at the chapter.
+Reaching `ending` this way takes about as long as one playthrough route.
 
 When Micah has a decision to make, the choices stay on screen for a moment and the one picked is highlighted before
 the story continues. The film uses the test-only save and settings files and plays with real sound.
-The log goes to `logs/film_<speed>x.log`. Unlike the tests, `ERROR:` lines in the log are shown as warnings rather
+The log goes to `logs/film_<speed>x.log` (`logs/film_<speed>x_from_<chapter>.log` with a start chapter). Unlike the tests, `ERROR:` lines in the log are shown as warnings rather
 failing the film (without an audio device, for instance, Godot logs WASAPI errors and plays silently); the test
 suites run with `--audio-driver Dummy`.
 
-Without the scripts: `godot_console --path . -- --film=2 --ending=3` (after a build and import).
+Without the scripts: `godot_console --path . -- --film=2 --ending=3 --from=act2` (after a build and import).
 
 ## The suites
 
