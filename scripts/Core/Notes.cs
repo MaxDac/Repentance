@@ -40,7 +40,7 @@ public static class Notes
         N("service_lift", "The back way", "staff_elevator",
             L("Staff door by the potted palm, then the service lift."),
             L("Fifth-floor linen room, next door to 507."),
-            L("501 is by the stairs, west. 509 by the fire escape, east."),
+            L("501 is by the stairs, west. 513 by the fire escape, east."),
             L("Somebody turned her room over before me.", "seen_eleanor_room")),
         N("night_bolt", "Room 507", "seen_hotel_linen",
             L("Linen room door to 507: night bolt, shot from the corridor side."),

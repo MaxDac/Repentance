@@ -185,6 +185,9 @@ public partial class ClubBackstage : Room
             case "lipstick" when lips:
                 await Say("The mouth is on. Red enough to fool anybody.");
                 return;
+            case "hairpin" when powdered:
+                await Say("Powder's on. The mouth next.");
+                return;
             case "lipstick" or "hairpin":
                 await Say("Not on a bare face. " + Order);
                 return;

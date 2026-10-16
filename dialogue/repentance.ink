@@ -109,7 +109,7 @@ ELEANOR: The service stairs. Tell them to use the service stairs.
 THOUGHT: They came up the service stairs, like she'd asked. Sal from the Blue Lantern door, and a hood with a broken nose she never got the name of.
 SAL: Mrs. Harrington. Tony sends his regards. Keep your head down and walk like you're bored.
 ELEANOR: I've had years of practice.
-THOUGHT: The bellboy saw them go: a lady between two large men, laughing at nothing, going down the back way. He told me she looked drunk. She told me she'd never been so sober in her life.
+THOUGHT: The bellboy saw them go: a lady between two large men, going down the back way like the guest of honour. He told me they were escorting her. She told me she'd never been so sober in her life.
 -> END
 
 === interlude_tony ===
@@ -188,8 +188,8 @@ THOUGHT: She told me she knew that look. She'd seen it on every man at the Club.
 - -> END
 
 === interlude_motel_window ===
-THOUGHT: She took a room at the motel on the hill, the one with the sign that buzzes. From the window you can see the convent door. She watched it for three days.
-THOUGHT: On the third night, a man with a split lip walked up that hill in the dark and rang the bell. Me.
+THOUGHT: She took a room at the motel on the road below the convent, the one with the sign that buzzes. From the window you can see the convent door. She watched it for three days.
+THOUGHT: On the third night, a man with a split lip came up that road in the dark and rang the bell. Me.
 ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
 THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
 ELEANOR: Coat. Gloves. And a face that's been waiting on that road all night.
@@ -287,7 +287,7 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     BELLBOY: I'll be here. I'm always here.
     -> END
 = after
-BELLBOY: Back door, Tuesday night, two of Tony's boys either side of her. Nobody saw nothin'. Including me.
+BELLBOY: Back door, Tuesday night, two big fellas either side of her. Nobody saw nothin'. Including me.
 {has_flag("staff_elevator"):
     BELLBOY: And the lady's room is 507. Staff door, service elevator. You didn't hear that either.
 - else:
@@ -937,7 +937,7 @@ THOUGHT: Good girl. Like he's talking to a spaniel. My hand finds the revolver b
 -> END
 
 === oldman_taunt ===
-HARRINGTON: Well. Mr. Jones, again. You weren't listening the other night. My son's money paid for that coat, I believe.
+HARRINGTON: Well. Mr. Jones, again. You weren't listening earlier tonight. My son's money paid for that coat, I believe.
 MICAH: Get away from her.
 HARRINGTON: Or what? You'll shoot an old man in his dressing gown? You haven't got the guts. You'd have done it by now.
 HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one, I grant you. But her place is here.
@@ -1190,7 +1190,7 @@ ELEANOR: Enough. I'm done with all of you. Go, just go, return to your life, Mic
 MICAH: Eleanor, they'll be up those stairs any minute--
 ELEANOR: Let them come. They're my problem. They always were. Go home, Micah.
 ~ set_flag("eleanor_dismissed")
-THOUGHT: I put the revolver on the nightstand, by the lamp, butt towards her. She doesn't look at it. She doesn't look at me.
+THOUGHT: I put the revolver on the carpet, butt towards her. She doesn't look at it. She doesn't look at me.
 THOUGHT: I walk out the front door and down the drive, and I keep walking until I find a precinct with its lights on.
 -> END
 
@@ -1273,11 +1273,11 @@ THOUGHT: Our Father, who art in heaven. I get to the end of it. Caleb doesn't sa
 === ending_eleanor_alone ===
 {has_flag("eleanor_burned"):
     THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
+    THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
 - else:
     THOUGHT: The morning she left Chicago, after the trial. A cardboard suitcase and a bus ticket west, and nobody to see her off.
 }
-ELEANOR: So this is where Chicago ends. Micah said it just runs out of streetlights.
-ELEANOR: He was right about that much.
+ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
 {has_flag("ending_8"):
     ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
 - else:
@@ -1422,9 +1422,9 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, after the funeral."
     }
     {has_flag("shot_eleanor"):
-        DANIEL: "He shot Mr. Harrington in his bed. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
+        DANIEL: "He shot Mr. Harrington on his own carpet. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
     - else:
-        DANIEL: "He shot Mr. Harrington in his bed. The girl he had gone to save would not go with him, and there were men on the stairs. He turned the revolver on himself, in front of her. She lived. The papers called it a madman's grief. It was not."
+        DANIEL: "He shot Mr. Harrington on his own carpet. The girl he had gone to save would not go with him, and there were men on the stairs. He turned the revolver on himself, in front of her. She lived. The papers called it a madman's grief. It was not."
     }
     DANIEL: "I prayed for him every day of his life, and I could not make him turn back. Finishing his journal is the only thing that eases the pain."
     DANIEL: "If you are reading this, whoever you are, and whenever: do not walk in my brother's footsteps. It is never too late to turn around, until it is."
