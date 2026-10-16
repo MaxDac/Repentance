@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -6,7 +6,8 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer.png" id="5_drawer"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
-[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="8_nun"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(42, 110)
@@ -204,8 +205,16 @@ monitorable = false
 position = Vector2(241, 90)
 shape = SubResource("Rect_8")
 
-[node name="NunVoice" type="Node2D" parent="."]
-position = Vector2(60, 150)
-script = ExtResource("7_Voice")
+[node name="Nun" type="Area2D" parent="World"]
+visible = false
+position = Vector2(92, 228)
+script = ExtResource("7_Actor")
 Id = "nun"
+DisplayName = "Sister Agatha"
+LookText = "Agatha, in her night veil, a candle in both hands."
+WalkTo = Vector2(150, 222)
+Face = 3
+monitoring = false
+monitorable = false
+Texture = ExtResource("8_nun")
 SpeechColor = Color(0.85, 0.85, 0.92, 1)

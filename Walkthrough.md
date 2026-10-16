@@ -256,8 +256,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    sacramental wine and sends her to the convent. Sal stays out of her way: the doorman's interception is off.
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
-4. **Convent cell, that night.** Agatha comes to the cell and talks round and round, trying to make Eleanor admit
-   that she wants something impure from her, while it is the other way around. The choice is saved:
+4. **Convent cell, that night.** After a knock, Agatha comes into the cell and talks round and round, trying to make Eleanor admit
+   that she wants something impure from her, while it is the other way around. She walks out again before the
+   morning. The choice is saved:
    - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
    - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
    Eleanor leaves the convent the next morning.
@@ -273,7 +274,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
   - Wrong joins and wrong items on the closet get a hint in her voice. The drawer, the call and the door keep
     their order.
-5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed) and watches from the
+5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
    on the road, where he finds her. Fade to black, then Micah's office.
 
