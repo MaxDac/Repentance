@@ -11,7 +11,8 @@ namespace Repentance;
 /// <param name="Sticky"><c>+</c> choices can be picked again; <c>*</c> choices are used up once picked.</param>
 /// <param name="Fallback">A choice without text (<c>* -> knot</c>), taken automatically when nothing else is left.</param>
 /// <param name="Conditional">Guarded by a <c>{condition}</c>, so it may not be offered.</param>
-public sealed record InkChoice(string Knot, int Line, string Label, bool Sticky, bool Fallback, bool Conditional);
+/// <param name="Shown">What the choice bar displays: the <c>#short:</c> tag if the choice has one, else <paramref name="Label"/>.</param>
+public sealed record InkChoice(string Knot, int Line, string Label, bool Sticky, bool Fallback, bool Conditional, string Shown);
 
 /// <summary>
 /// A light static reader for dialogue/repentance.ink: knots, choices and calls to the game's external functions.
@@ -24,6 +25,26 @@ public sealed class InkScan
     private static readonly Regex Call = new(@"\b(set_flag|has_flag|give_item|take_item|has_item|knows_note)\(\s*""([^""]+)""");
     private static readonly Regex Condition = new(@"^\{[^{}]*\}\s*");
     private static readonly Regex LabelName = new(@"^\(\w+\)\s*");
+
+    /// <summary>Choice tag prefix that sets the label shown in the choice bar (the full text is still spoken).</summary>
+    public const string ShortTag = "short:";
+
+    /// <summary>
+    /// Longest label that fits one choice-bar row: the bar is <c>Hud.ScreenW - 16</c> = 464 px and the dialogue font
+    /// (Departure Mono, 11 px) is monospace at 7 px per character. See docs/dialogue-choice-labels.md.
+    /// </summary>
+    public const int MaxChoiceChars = 66;
+
+    /// <summary>The label to display for a choice with text <paramref name="text"/> and Ink choice <paramref name="tags"/>.</summary>
+    public static string ShownLabel(string text, IEnumerable<string> tags)
+    {
+        foreach (var tag in tags)
+        {
+            var t = tag.Trim();
+            if (t.StartsWith(ShortTag, StringComparison.Ordinal)) return t[ShortTag.Length..].Trim();
+        }
+        return text;
+    }
 
     public List<string> Knots { get; } = new();
     public HashSet<string> Functions { get; } = new();
@@ -92,8 +113,10 @@ public sealed class InkScan
             int divert = rest.IndexOf("->", StringComparison.Ordinal);
             label = divert >= 0 ? rest[..divert] : rest;
         }
-        label = label.Trim();
-        return new InkChoice(knot, number, label, sticky, label.Length == 0, conditional);
+        var parts = label.Split('#');
+        label = parts[0].Trim();
+        string shown = ShownLabel(label, parts.Skip(1));
+        return new InkChoice(knot, number, label, sticky, label.Length == 0, conditional, shown);
     }
 
     /// <summary>All literal arguments of an external call, e.g. every flag passed to <c>set_flag</c>.</summary>

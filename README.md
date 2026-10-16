@@ -518,6 +518,9 @@ Foreground props that characters can walk behind go inside `World` as Sprite2Ds 
 
 Edit `dialogue/repentance.ink`. Lines use the format `SPEAKER: text`, where the speaker is an actor `Id` in upper case and `MICAH` is the player.
 Micah speaks the choice text aloud, unless it starts with `(`.
+A choice label longer than 66 characters is cut off in the choice bar. For a longer one, add a short label with a
+`#short:` tag inside the brackets; Micah still says the full text. See
+[Dialogue choice labels](docs/dialogue-choice-labels.md).
 In the 1927 scenes, Micah's inner monologue is journal narration: `THOUGHT: text` in ink, or `await Think("...")`
 in a room script. It is shown in faded sepia (`Hud.ThoughtColor`) along the top of the screen, blocks and skips like
 speech, and nobody's mouth moves. Write it first person, present tense; keep replies to objects and lines said to

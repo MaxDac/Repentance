@@ -142,6 +142,26 @@ public class StoryIntegrityTests
     }
 
     [Fact]
+    public void EveryChoiceFitsTheChoiceBar()
+    {
+        var choices = Ink.Value.Choices.Where(c => !c.Fallback).ToList();
+        Assert.NotEmpty(choices);
+        // inline {...} content is counted by its literal text, so keep dynamic labels well under the limit
+        var tooLong = choices
+            .Select(c => (c, shown: Regex.Replace(c.Shown, @"\{[^{}]*\}", "")))
+            .Where(x => x.shown.Length > InkScan.MaxChoiceChars)
+            .Select(x => $"line {x.c.Line} ({x.shown.Length} chars): {x.c.Shown}").ToList();
+        Assert.True(tooLong.Count == 0, $"choice labels longer than {InkScan.MaxChoiceChars} characters are cut off in the choice bar; " +
+            "add a '#short: ...' tag (docs/dialogue-choice-labels.md): " + string.Join(" | ", tooLong));
+        var badShort = choices.Where(c => c.Shown != c.Label && (c.Shown.Length == 0 || c.Shown.Length >= c.Label.Length))
+            .Select(c => $"line {c.Line}: {c.Shown}").ToList();
+        Assert.True(badShort.Count == 0, "#short: labels must be non-empty and shorter than the spoken text: " + string.Join(" | ", badShort));
+        var needless = choices.Where(c => c.Shown != c.Label && c.Label.Length <= InkScan.MaxChoiceChars)
+            .Select(c => $"line {c.Line}: {c.Label}").ToList();
+        Assert.True(needless.Count == 0, "#short: tags on choices that already fit (remove them): " + string.Join(" | ", needless));
+    }
+
+    [Fact]
     public void EveryKnotTheGameCallsExists()
     {
         var targets = TalkTargets();

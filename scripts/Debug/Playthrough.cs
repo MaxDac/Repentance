@@ -208,7 +208,7 @@ public sealed partial class Playthrough : Harness
         GD.Print($"[{Tag}] choice {knot}: {string.Join(" | ", options)} -> {options[pick]}");
         if (_film)
         {
-            _ = _game.Hud.ShowChoices(options);
+            _ = _game.Hud.ShowChoices(DialogueManager.Instance.ShownChoices);
             await _game.Wait(1.5);
             _game.Hud.HighlightChoice(pick);
             await _game.Wait(1.0);
