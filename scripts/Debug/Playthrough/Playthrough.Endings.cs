@@ -45,7 +45,7 @@ public sealed partial class Playthrough
                 break;
             case "1-oldman":
                 yield return "Shoot him in the shoulder";
-                yield return "Lower the gun";
+                yield return "Our Father";
                 break;
             case "2":
                 yield return "Shoot him";
@@ -67,8 +67,9 @@ public sealed partial class Playthrough
                 yield return "I'll go to the police";
                 break;
             case "6":
-                yield return "Our Father";
+                // "Shoot him" first: the old man's taunt offers both, the club only the prayer
                 yield return "Shoot him";
+                yield return "Our Father";
                 yield return "turn yourself in";
                 break;
             case "7":

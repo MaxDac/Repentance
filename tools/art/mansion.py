@@ -2703,11 +2703,89 @@ def build_bedroom():
     pal = bedroom_palette(base, v["eleanor"], v["empty"], screen)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_bedroom.png")
-    _cut_sprite(pixelize(v["eleanor"], pal), px, "mansion_bed")
-    _cut_sprite(pixelize(v["empty"], pal), px, "mansion_bed_empty")
+    occupied, empty = pixelize(v["eleanor"], pal), pixelize(v["empty"], pal)
+    _cut_sprite(occupied, px, "mansion_bed")
+    _cut_sprite(empty, px, "mansion_bed_empty")
     _cut_sprite(pixelize(screen, pal), px, "mansion_bedroom_screen")
     bed_fire_strip(pal)
+    eleanor_rise_strip(occupied, empty)
     return px, v
+
+
+# Where Eleanor's actor stands while she gets out of bed (her feet, room pixels), and the room box the strip covers.
+ELEANOR_RISE_AT = (382, 226)
+ELEANOR_RISE_BOX = (300, 104, 424, 230)
+
+
+def eleanor_rise_strip(occupied, empty):
+    """Eleanor getting out of the walnut bed, played by her actor at ELEANOR_RISE_AT as the bed swaps to the empty one.
+    Frame 0 is everything the occupied bed adds to the empty one (her, sitting up, and the sheet over the mattress), so
+    it starts pixel-for-pixel where the bed sprite leaves off; she gathers the sheet to her, sits on the front edge
+    wrapped in it, slides down onto her feet and turns, the last frame being eleanor_sheet's idle frame. Drawn facing
+    left in room pixels, then mirrored so the actor (facing left, so flipped) shows it the right way round."""
+    from PIL import ImageOps
+    from .sprites import ELEANOR_SHEET, figure, pose, _arms, NPC_W, FH, action_strip
+    x0, y0, x1, y1 = ELEANOR_RISE_BOX
+    w, h = x1 - x0, y1 - y0
+    px, py = ELEANOR_RISE_AT
+    a = np.asarray(occupied.convert("RGB")).astype(np.int16)
+    b = np.asarray(empty.convert("RGB")).astype(np.int16)
+    added = (np.abs(a - b).sum(axis=2) > 0)
+    ys, xs = np.mgrid[0:a.shape[0], 0:a.shape[1]]
+
+    def in_bed(keep):
+        mask = added & keep
+        rgba = np.dstack([a.astype(np.uint8), (mask * 255).astype(np.uint8)])
+        # where the sheet has been pulled away, its new edge is a shaded fold
+        edge = mask & ~np.roll(keep, 1, axis=1) & ~np.all(keep)
+        rgba[edge, :3] = MANSION_SHEET_FOLD
+        return Image.fromarray(rgba, "RGBA").crop((x0, y0, x1, y1))
+
+    head_in_bed = (376 - x0, 150 - y0)
+    arms = _arms("clutch")
+    sheet_col = tuple(int(c, 16) for c in (ELEANOR_SHEET["torso"][i:i + 2] for i in (0, 2, 4)))
+
+    def standing(ps, lift=0, wrap=False):
+        img = Image.new("RGBA", (w, h))
+        fig = ImageOps.mirror(figure(ELEANOR_SHEET, ps, NPC_W, FH))
+        if lift:  # sitting up on the mattress: no floor shadow under her
+            fa = np.asarray(fig).copy()
+            fa[fa[..., 3] < 255] = 0
+            fig = Image.fromarray(fa, "RGBA")
+        if wrap:  # the sheet hangs over her lap and knees in one piece, hiding the legs down to the ankles
+            fa = np.asarray(fig).copy()
+            rows = np.nonzero((fa[..., 3] == 255).any(axis=1))[0]
+            lit, side = np.array(sheet_col), np.array(MANSION_SHEET_SIDE)
+            rgb = fa[..., :3].astype(int)
+            skin = (fa[..., 3] == 255) & (rgb[..., 0] - rgb[..., 2] > 40)
+            # start below her hands, which hold the sheet at her chest
+            top = max(y for y in range(40, 76) if skin[y].any()) + 1
+            for y in range(top, rows.max() - 2):
+                xs_ = np.nonzero(fa[y, :, 3] == 255)[0]
+                if len(xs_) < 2:
+                    continue
+                a_, b_ = xs_.min(), xs_.max()
+                for x in range(a_, b_ + 1):
+                    col = side if x in (a_, b_) or (x - a_) % 5 == 2 else lit
+                    fa[y, x] = tuple(int(c) for c in col) + (255,)
+            fig = Image.fromarray(fa, "RGBA")
+        fx, fy = px - NPC_W // 2 - x0, py - FH + 3 - y0 - lift
+        img.alpha_composite(fig, (fx, fy))
+        return img, (fx + NPC_W - 1 - NPC_W // 2, fy + 18)
+
+    frames = [
+        (in_bed(np.ones_like(added)), head_in_bed),
+        # the sheet drawn up off the foot of the bed toward her, its trailing edge slanting back over the mattress
+        (in_bed(xs - 352 > (ys - 170) * 0.6), head_in_bed),
+        # sitting on the mattress's front edge, the sheet clutched to her, feet hanging
+        standing(pose(16, arms=arms, legs={1: (85, 90, 0), -1: (82, 88, 0)}), lift=20, wrap=True),
+        standing(pose(16, arms=arms, legs={1: (50, 60, 0), -1: (48, 58, 0)}, lean=8), wrap=True),
+        standing(pose(16, arms=arms)),
+        standing(pose(35, arms=arms)),
+    ]
+    stored = [(ImageOps.mirror(img), (w - head[0], head[1])) for img, head in frames]
+    action_strip("eleanor_mansion_rise", stored, [0.35, 0.3, 0.4, 0.28, 0.25, 0.3], anchor=(w - (px - x0), py - y0))
+    return frames
 
 
 def bed_fire_strip(pal):

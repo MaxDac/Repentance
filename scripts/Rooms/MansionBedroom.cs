@@ -13,6 +13,7 @@ public partial class MansionBedroom : Room
     private static readonly Texture2D Shot = GD.Load<Texture2D>("res://assets/art/sprites/harrington_shot.png");
     private static readonly Texture2D EleanorShot = GD.Load<Texture2D>("res://assets/art/sprites/eleanor_shot.png");
     private const string AimLower = "micah_aim_lower";
+    private const string AimBack = "micah_aim_back";
     private const int PrayerSteps = 6;
     private int _prayerStep;
 
@@ -22,6 +23,8 @@ public partial class MansionBedroom : Room
     private static readonly Vector2 PrayerStop = new(52, 236);
     private static readonly Vector2 Door = new(30, 236);
     private static readonly Vector2 EleanorUp = new(396, 240);
+    // where her feet are while she gets out of bed (tools/art/mansion.py ELEANOR_RISE_AT)
+    private static readonly Vector2 EleanorRise = new(382, 226);
     private const float EleanorHurry = 120;
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -66,7 +69,14 @@ public partial class MansionBedroom : Room
         harrington?.FaceLeft(true);
         if (eleanor != null)
         {
-            eleanor.Position = EleanorUp;
+            // She gets out of bed clutching the sheet; the strip starts exactly where the occupied bed sprite leaves off.
+            eleanor.Position = EleanorRise;
+            eleanor.FaceLeft(true);
+            var rising = eleanor.PlayPose("eleanor_mansion_rise");
+            State.SetFlag("eleanor_up");
+            await rising;
+            eleanor.SetPose(null);
+            await eleanor.MoveTo(EleanorUp, EleanorHurry * 0.5f);
             eleanor.FaceLeft(true);
         }
         State.SetFlag("eleanor_up");
@@ -80,6 +90,7 @@ public partial class MansionBedroom : Room
             // oldman_taunt went on into oldman_prayer: the Our Father, backing towards the door (OnCue).
             Player.SetPose(null);
             await Game.WalkTo(Door);
+            await PrayerEnding();
             await Act3.End();
             return;
         }
@@ -133,10 +144,11 @@ public partial class MansionBedroom : Room
         {
             case "step":
                 _prayerStep++;
+                var x = Mathf.Lerp(MicahAims.X, PrayerStop.X, Mathf.Min(_prayerStep, PrayerSteps) / (float)PrayerSteps);
+                // Each verse he steps back and lowers the gun one level along the way, then holds it there.
+                await Player.BackstepTo(new Vector2(x, MicahAims.Y), 0.9, AimBack, Mathf.Min(_prayerStep, PrayerSteps));
                 Player.SetPose(AimLower);
                 Player.SetPoseFrame(_prayerStep);
-                var x = Mathf.Lerp(MicahAims.X, PrayerStop.X, Mathf.Min(_prayerStep, PrayerSteps) / (float)PrayerSteps);
-                await Player.BackstepTo(new Vector2(x, MicahAims.Y), 0.7);
                 break;
             case "door":
                 Player.SetPose(AimLower);
@@ -144,6 +156,23 @@ public partial class MansionBedroom : Room
                 await Wait(0.5);
                 break;
         }
+    }
+
+    /// <summary>The end of the prayer Micah left the room on, over black, a line at a time, on the way to Rose's.</summary>
+    public static readonly string[] Doxology =
+        { "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen." };
+
+    private async Task PrayerEnding()
+    {
+        await Game.Hud.Fade(1, 1.0);
+        await Wait(0.6);
+        for (int i = 1; i <= Doxology.Length; i++)
+        {
+            Game.Hud.ShowCaptionLines(Doxology, i);
+            await Wait(i < Doxology.Length ? 1.0 : 1.8);
+        }
+        Game.Hud.ShowCaption(null);
+        await Wait(0.5);
     }
 
     /// <summary>

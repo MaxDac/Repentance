@@ -12,7 +12,7 @@ import json
 import math
 from pathlib import Path
 from . import common
-from .figure import figure as _figure, pose, walk_pose, sheet, action_figure, grounded_joints
+from .figure import figure as _figure, pose, walk_pose, sheet, action_figure, grounded_joints, _walk_leg
 
 
 def figure(spec, ps, fw, fh):
@@ -197,7 +197,8 @@ MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a",
 def _arms(kind_r, kind_l=None):
     def one(k):
         return {"down": ("swing", 3, 6, 10), "hip": ("hip", 0, 0, 0), "pocket": ("pocket", 0, 0, 0),
-                "fold": ("fold", 0, 0, 0), "cover": ("cover", 0, 0, 0), "side": ("side", 0, 0, 0)}[k]
+                "fold": ("fold", 0, 0, 0), "cover": ("cover", 0, 0, 0), "side": ("side", 0, 0, 0),
+                "clutch": ("clutch", 0, 0, 0)}[k]
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
@@ -252,7 +253,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("leader_unmasked", LEADER_UNMASKED, _arms("fold")),
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
-        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("fold")))
+        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("clutch")))
 
 
 def supine_frame(spec, name, wound=None):
@@ -403,15 +404,50 @@ def _aim_pose(gun_arm, off_arm, off_kind="swing"):
                 legs={1: (8, 4, 0), -1: (-8, 6, -4)}, lean=-2.0)
 
 
+AIM_LEVELS = [98, 84, 70, 56, 42, 26, 8]
+AIM_BACK_FRAMES = 8
+
+
+def _aim_angle_pose(a, legs=None):
+    # above the midpoint between levels 3 and 4 the off hand still steadies the grip; below it, it hangs
+    ps = _aim_pose(a, a - 4) if a > (AIM_LEVELS[3] + AIM_LEVELS[4]) / 2 else _aim_pose(a, 0, "down")
+    if legs is not None:
+        ps = dict(ps, legs=legs)
+    return ps
+
+
+def _aim_level_pose(i, legs=None):
+    return _aim_angle_pose(AIM_LEVELS[i], legs)
+
+
 def aim_lower_strip(spec, name):
     """The aim, lowered a little at a time until the revolver hangs at the side: frame 0 matches aim_frame, and the
     story steps through the rest (one frame per verse of the prayer), so each frame is held, not played."""
     fw = FW + 32
-    arms = [98, 84, 70, 56, 42, 26, 8]
+    frames = [(figure(spec, _aim_level_pose(i), fw, FH), (FW / 2 + 16, 18)) for i in range(len(AIM_LEVELS))]
+    action_strip(name, frames, [1] * len(frames), anchor=(fw / 2, FH - 3))
+    return frames
+
+
+def aim_back_strip(spec, name):
+    """One step backwards for each verse of the prayer, still facing right, lowering the gun on the way: run i (frames
+    i * AIM_BACK_FRAMES onward) takes the arm from aim_lower_strip's level i - 1 down to level i a little each frame.
+    Frame 0 of each run is level i - 1's held aim; the rest play the walk cycle in reverse, short (the legs swing
+    about as far as the aim stance's), so the feet travel back under him over the ~18px he retreats per verse. Run 0
+    holds level 0 throughout."""
+    fw = FW + 32
     frames = []
-    for i, a in enumerate(arms):
-        ps = _aim_pose(a, a - 4) if i < 4 else _aim_pose(a, 0, "down")
-        frames.append((figure(spec, ps, fw, FH), (FW / 2 + 16, 18)))
+    for i in range(len(AIM_LEVELS)):
+        a0, a1 = AIM_LEVELS[max(i - 1, 0)], AIM_LEVELS[i]
+        frames.append((figure(spec, _aim_angle_pose(a0), fw, FH), (FW / 2 + 16, 18)))
+        for k in range(1, AIM_BACK_FRAMES):
+            phase = (AIM_BACK_FRAMES - k) * 8 / AIM_BACK_FRAMES
+            legs = {}
+            for s, offset in ((1, 0), (-1, 4)):
+                thigh, knee, foot = _walk_leg(phase + offset)
+                legs[s] = (thigh * 0.32, knee * 0.7, foot * 0.5)
+            a = a0 + (a1 - a0) * k / (AIM_BACK_FRAMES - 1)
+            frames.append((figure(spec, _aim_angle_pose(a, legs), fw, FH), (FW / 2 + 16, 18)))
     action_strip(name, frames, [1] * len(frames), anchor=(fw / 2, FH - 3))
     return frames
 
@@ -569,6 +605,7 @@ def build():
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")
     aim_lower_strip(MICAH, "micah_aim_lower")
+    aim_back_strip(MICAH, "micah_aim_back")
     aim_self_frame(MICAH, "micah_aim_self")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
@@ -587,7 +624,7 @@ def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
     shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
-    fall_strip(dict(ELEANOR_SHEET, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("fold"),
+    fall_strip(dict(ELEANOR_SHEET, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)

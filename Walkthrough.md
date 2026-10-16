@@ -651,10 +651,13 @@ described here (other verbs, flavour lines) is left to the implementation.
       now." and so does the bootleggers' stair in the cellar, so the bedroom confrontation can't be replayed.
   - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
     **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
-    at least three forgiveness appeals. If this is the case, Micah says the whole Our Father, a verse at a time
-    ("Our Father... who art in heaven..." through "Amen"), stepping back towards the door and lowering the gun a little
-    with each verse, while the old man talks into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody
-    forgives a man like you"). Micah reaches the door and walks out, and the scene skips to *End of Act 3* (ending 1).
+    at least three forgiveness appeals. If this is the case, the option reads "Our Father..." and Micah starts the
+    prayer straight away. He says it a verse at a time ("Our Father... who art in heaven..." through "deliver us from
+    evil"), walking backwards towards the door and lowering the gun gradually with each verse, while the old man talks
+    into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody forgives a man like you"). Micah reaches
+    the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
+    a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
+    Then the scene skips to *End of Act 3* (ending 1).
 
 ### End of Act 3
 

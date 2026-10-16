@@ -365,8 +365,8 @@ From here the story follows Walkthrough.md:
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
-   Rose at least three times **and carries both ring and cross**) lower the gun: Micah says the whole Our Father,
-   a verse at a time, backing to the door while the old man talks into every pause (ending 1). Then talk Eleanor into leaving ("I didn't come all this
+   Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
+   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving ("I didn't come all this
    way...", or later "Every time I've seen you..."). Or, on the first turn, lower the gun and leave her to turn
    himself in (ending 6); or, if she still refuses on the second, shoot her, then himself (ending 7).
 32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the

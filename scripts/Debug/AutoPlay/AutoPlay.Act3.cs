@@ -297,7 +297,7 @@ public partial class AutoPlay
         await Shot("mansion_bedroom_gun");
         await confront;
         await WaitIdle(game);
-        Check(Offered("oldman_taunt", "Lower the gun") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
+        Check(Offered("oldman_taunt", "Our Father") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
         Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");
