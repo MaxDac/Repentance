@@ -190,6 +190,7 @@ public partial class AutoPlay
                 ? Refuses.Take(3).Prepend("Shoot him").Append("(Shoot Eleanor.)")
                 : Refuses.Prepend("Shoot him").Append("(Pull the trigger on myself.)");
             Seed(act3Flags, act3Items, prefer.ToArray());
+            HeardLog = new List<string>();
             int shots = game.Sfx.Count(Sound.Gunshot);
             bool eleanorDown = false, aimSelf = false, morning = false, lastWords = false, facedAway = false;
             _ = game.ChangeRoom("mansion_bedroom", "start");
@@ -218,10 +219,25 @@ public partial class AutoPlay
             Check(aimSelf, $"{label}: Micah puts the revolver to his temple");
             Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, $"{label}: the last shot is heard over black");
             await TheEnd(label);
+            Check(HeardLog.Count(l => l.Contains("He shot Mr. Harrington on his own carpet.")) == 1 && !HeardLog.Any(l => l.Contains("in his bed.")),
+                $"{label}: Daniel's epilogue has the old man shot on his own carpet, not in his bed");
+            HeardLog = null;
             Check(!morning && !gs.HasFlag("escaping"), $"{label}: no escape and no \"The next morning\"");
         }
 
         await EleanorEndings(game, gs, act3Flags, act3Items);
+
+        // One refusal isn't enough to send Micah away: with only the gin refused, the persuasion still runs.
+        Seed(act3Flags.Append(Endings.RefusedDrugs), act3Items, Convinces.Prepend("Shoot him").ToArray());
+        await game.ChangeRoom("mansion_bedroom", "start");
+        Check(_offered.ContainsKey("eleanor_persuade") && gs.HasFlag(Endings.EleanorConvinced) &&
+              !gs.HasFlag(Endings.EleanorDismissed) && !gs.HasFlag("ending_10"),
+            "one refusal (the gin only): Micah gets his four turns, and no ending 10");
+        _ = game.Perform(Verb.Walk, "back_door");
+        await Until(() => game.Room?.Name == "Prison");
+        Check(gs.HasFlag("ending_4") && !gs.HasFlag("ending_10") && !gs.HasFlag(Endings.EleanorDismissed),
+            "one refusal (the gin only): the ordinary prison ending 4, not ending 10");
+        await TheEnd("ending_4 (gin refused only)");
 
         // 1: giving up on the church steps
         Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
@@ -229,6 +245,25 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
+
+        // Eleanor's refusals only matter once Micah shoots the old man: both of them still give way to the give-ups.
+        var bothRefused = new[] { Endings.RefusedAbbess, Endings.RefusedDrugs };
+        Seed(act3Flags.Where(f => f != "keep_going").Concat(bothRefused), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        _ = game.ChangeRoom("church_exterior", "beaten");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
+              !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorStruck),
+            "ending 1: giving up on the steps wins over both of Eleanor's refusals");
+        await TheEnd("ending_1 (steps, Eleanor held out)");
+
+        Seed(alleyReady.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
+        await game.ChangeRoom("alley", "act3");
+        _ = game.Perform(Verb.Talk, "back_door");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
+              !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorDismissed),
+            "ending 1: walking away from Tony wins over both of Eleanor's refusals");
+        await TheEnd("ending_1 (Tony, Eleanor held out)");
     }
 
     /// <summary>
@@ -242,6 +277,7 @@ public partial class AutoPlay
         // 10: Micah shoots the old man; Eleanor sends him away and keeps the pistol. Micah confesses to Caleb in prison,
         // then Eleanor walks out of the city alone.
         Seed(heldOut, act3Items, "Shoot him");
+        HeardLog = new List<string>();
         bool prison = false;
         _ = game.ChangeRoom("mansion_bedroom", "start");
         await Until(() =>
@@ -254,16 +290,20 @@ public partial class AutoPlay
         Check(!_offered.ContainsKey("eleanor_persuade"), "no persuasion: Eleanor has the last word");
         Check(prison, "ending 10: Micah confesses to Caleb in prison");
         Check(game.Player.Character == "eleanor_play" && gs.HasFlag("eleanor_epilogue"), "ending 10: Eleanor on the outskirts, alone");
-        await game.Wait(3);
+        await Until(() => HeardLog.Any(l => l.Contains("So this is where Chicago ends")), 30);
         await Shot("ending_eleanor_alone");
         await TheEnd("ending_10");
+        Check(HeardLog.Any(l => l.Contains("revolver on the carpet")), "ending 10: the revolver goes on the carpet, as the walkthrough has it");
+        Check(HeardLog.Any(l => l.Contains("So this is where Chicago ends")) && !HeardLog.Any(l => l.Contains("Micah said")),
+            "ending 10: the streetlights line is Eleanor's own; she never heard Micah say it");
+        HeardLog = null;
 
         // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.
         // Ending 8 sets the cellar alight on the way.
         foreach (bool fire in new[] { false, true })
         {
             string label = fire ? "ending_8" : "ending_9";
-            Seed(heldOut.Append("rose_wait"), act3Items, "Our Father");
+            Seed(fire ? heldOut.Append("rose_wait").Append("cellar_lit") : heldOut.Append("rose_wait"), act3Items, "Our Father");
             _ = game.ChangeRoom("mansion_bedroom", "start");
             await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
             await WaitIdle(game);
@@ -274,6 +314,11 @@ public partial class AutoPlay
                 $"{label}: the old man stands watching the door");
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "MansionBedroom" && !gs.HasFlag(Endings.EleanorStruck), $"{label}: she can't get past him");
+            Check(game.Player.Position.X >= Rooms.MansionBedroom.BehindHim.X - 2,
+                $"{label}: the door refusal leaves her on the bed side of him (x {game.Player.Position.X:0})");
+            await game.WalkTo(new Vector2(40, 238));
+            Check(game.Room?.Name == "MansionBedroom" && game.Player.Position.X >= Rooms.MansionBedroom.BehindHim.X - 2,
+                $"{label}: a click on the floor by the door doesn't walk her through him (x {game.Player.Position.X:0})");
             if (!fire) await Shot("eleanor_coda");
             Check(harrington?.Position == Rooms.MansionBedroom.HarringtonCoda && harrington.FlipH,
                 $"{label}: he stands at the foot of the bed, his back to her");
@@ -310,21 +355,28 @@ public partial class AutoPlay
             }
             await game.Perform(Verb.Walk, "door");
             Check(game.Room?.Name == "MansionStudy", $"{label}: through his study");
-            await game.Perform(Verb.Walk, "door_left");
-            Check(game.Room?.Name == "MansionKitchen", $"{label}: down to the kitchen");
             if (fire)
             {
-                await game.Perform(Verb.Walk, "cellar_door");
-                Check(game.Room?.Name == "MansionCellar", "ending 8: down to the cellar");
+                // the other way down: the panel behind his bar, open since Micah came up the bootleggers' stair
+                await game.Perform(Verb.Walk, "bar_panel");
+                Check(game.Room?.Name == "MansionCellar", "ending 8: down the bootleggers' stair from the study");
+                await game.Perform(Verb.Walk, "stair");
+                Check(game.Room?.Name == "MansionCellar", "ending 8: not back up to him");
                 await game.Perform(Verb.Hand, "barrel");
                 Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the barrel wants a flame first");
                 await game.Perform(Verb.Hand, "hung_lantern");
                 await game.Perform(Verb.Hand, "barrel");
                 await WaitIdle(game);
                 Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && game.Room?.Name == "MansionKitchen",
-                    "ending 8: the Club's rye alight, and back up to the kitchen");
+                    "ending 8: the Club's rye alight, and up to the kitchen");
+            }
+            else
+            {
+                await game.Perform(Verb.Walk, "door_left");
+                Check(game.Room?.Name == "MansionKitchen", $"{label}: down to the kitchen");
             }
             bool eleanorInmate = false, sawRose = false;
+            HeardLog = new List<string>();
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() =>
             {
@@ -340,6 +392,9 @@ public partial class AutoPlay
             else
                 Check(eleanorInmate && gs.HasFlag("caleb_visits"), "ending 9: Eleanor in prison grey, confessing to Caleb");
             await TheEnd(label);
+            Check(HeardLog.Any(l => l.Contains("her black dress still on the back seat")) == fire,
+                fire ? "ending 8: out of the sheet and into her own black dress, from the Club's car" : $"{label}: no car at the gate");
+            HeardLog = null;
         }
 
         // 1: back under the sheet, the way she got out of it; Micah's story goes on to Rose's

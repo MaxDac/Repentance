@@ -26,8 +26,9 @@ public partial class AutoPlay
         Check(!game.Hud.Notepad.Visible, "Micah's notepad doesn't open for Eleanor");
         await game.Wait(0.5);
         await Shot("interlude_aurelian");
-        await game.Perform(Verb.Walk, "exit");
-        Check(game.Room?.Name == "EleanorRoom", "Eleanor won't leave before the call and the locks");
+        var leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The box goes in the safe first."),
+            "Eleanor won't leave before the call and the locks; the safe comes first");
         await game.Perform(Verb.Hand, "closet");
         Check(!gs.HasFlag("interlude_safe_locked"), "the safe waits for the packed box");
         await LegacyPackedBox(game, gs);
@@ -62,7 +63,16 @@ public partial class AutoPlay
         Check(gs.HasItem("eleanor_box_packed") && !gs.HasFlag("interlude_safe_locked"), "a save holding the packed box loads back");
         await game.Perform(Verb.UseItem, "closet", "eleanor_box_packed");
         Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 0, "the packed box locked in the closet safe");
+        var early = await Spoken(() => game.Perform(Verb.Hand, "bed"));
+        Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The box in the safe, the riddle in the drawer. Then I call."),
+            "no call before the riddle is locked in the drawer");
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nothing of mine stays out in the open for them."),
+            "with the safe locked, the exit points to the drawer");
         await game.Perform(Verb.Hand, "desk_drawer");
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nobody's coming for me unless I call."),
+            "with the drawer locked, the exit points to the call");
         await game.Perform(Verb.Hand, "bed");
         Check(gs.HasFlag("interlude_phoned") && gs.HasFlag("interlude_drawer_locked"), "the box in the safe, the riddle in the drawer, the call made");
         await ReloadCheckpoint("first_interlude");

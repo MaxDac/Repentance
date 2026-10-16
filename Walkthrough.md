@@ -271,8 +271,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
     Without the thread, it won't stay wrapped.
   - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
-  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer, the call and the door keep
-    their order.
+  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
+    for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed) and watches from the
    window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
    on the road, where he finds her. Fade to black, then Micah's office.

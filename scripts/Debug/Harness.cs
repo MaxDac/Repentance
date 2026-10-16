@@ -152,9 +152,39 @@ public abstract class Harness
         for (int i = 0; i < 300 && game.Busy; i++) await game.Wait(0.1);
     }
 
+    /// <summary>When set, every <see cref="Until"/> step records the speech and thoughts on screen into it.</summary>
+    protected List<string>? HeardLog;
+
     protected async Task Until(Func<bool> done, double timeout = 90, double step = 0.1)
     {
-        for (double t = 0; t < timeout && !done(); t += step) await _game.Wait(step);
+        for (double t = 0; t < timeout; t += step)
+        {
+            if (HeardLog != null) Heard(HeardLog);
+            if (done()) break;
+            await _game.Wait(step);
+        }
+    }
+
+    /// <summary>Runs an action to the end and returns every speech line and thought shown while it ran, in order.</summary>
+    protected async Task<List<string>> Spoken(Func<Task> action, double timeout = 90)
+    {
+        var lines = new List<string>();
+        var running = action();
+        await Until(() =>
+        {
+            Heard(lines);
+            return running.IsCompleted;
+        }, timeout, 0.02);
+        await running;
+        return lines;
+    }
+
+    /// <summary>Adds the speech line or thought on screen to <paramref name="lines"/>, once while it stays up.</summary>
+    protected void Heard(List<string> lines)
+    {
+        foreach (var (visible, text) in new[] { (_game.Hud.SpeechVisible, _game.Hud.SpeechText), (_game.Hud.ThoughtVisible, _game.Hud.ThoughtText) })
+            if (visible && text != "" && !lines.TakeLast(2).Contains(text))
+                lines.Add(text);
     }
 
     // ------------------------------------------------------------------ synthetic input
