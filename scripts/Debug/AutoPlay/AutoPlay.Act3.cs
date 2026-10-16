@@ -94,8 +94,9 @@ public partial class AutoPlay
         await ReloadCheckpoint("second_interlude_powdered");
         Check(gs.HasFlag("interlude_powdered") && gs.HasItem("lipstick") && gs.HasItem("hairpin") && game.Hud.SatchelVisible,
             "a save with the face half on loads back half on");
-        await game.Perform(Verb.UseItem, "mirror", "hairpin");
-        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up"), "the mouth before the hair");
+        var early = await Spoken(() => game.Perform(Verb.UseItem, "mirror", "hairpin"));
+        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up") && early.Contains("Powder's on. The mouth next."),
+            "the mouth before the hair, and she says so");
         await game.Perform(Verb.UseItem, "mirror", "lipstick");
         Check(game.Room?.FindActor("harrington") is { Visible: false }, "the mouth on, and still no old man");
         var hairpin = game.Perform(Verb.UseItem, "mirror", "hairpin");

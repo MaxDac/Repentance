@@ -97,8 +97,40 @@ new ItemDef("photo", "photograph", "res://assets/art/items/photo.png", "...descr
   `Recipes`, and wrong pairs with a hint to `Refusals`. Recipes are symmetric.
 - Combinations with staging (room change, image, puzzle screen): `Story.CombineScripts.TryCombine`, which runs first.
 - Puzzle screens are opened with `await Game.Hud.Puzzle.Open(PuzzleKind.X)` (returns `false` on cancel); answers
-  live in `PuzzleRules` (e.g. safe: directions `0,1,0`, numbers `4,31,17`). Puzzles are untimed and retryable.
+  live in `PuzzleRules` (e.g. safe: directions `0,1,0`, numbers `12,31,7`). Puzzles are untimed and retryable.
 - Changed saved puzzle progress: follow [migration/versioning rules](saves-and-settings.md#changing-the-format).
+
+### Riddles and ordered steps
+
+For interlude puzzles 17 and 18, order is enforced in the room script: each step is a `case` guarded by the flags of
+the steps before it, and an out-of-order attempt gets a hint line instead of an action. The guarded case goes before
+the one that acts. Keep each step's flag on the item or room so a save made halfway loads back halfway. The safe and
+alarm bell instead validate their ordered settings in their puzzle screens through `PuzzleRules`.
+
+| Puzzle | Steps and flags | Out of order |
+|---|---|---|
+| 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> safe (`interlude_safe_locked`) -> riddle in the drawer (`interlude_drawer_locked`) -> call from the bed (`interlude_phoned`) | the drawer and the bed say what comes first; the door names the first missing step |
+| 18, dressing room (`ClubBackstage`) | powder (`interlude_powdered`) -> lipstick (`interlude_lips`) -> hairpin (`interlude_made_up`) | lipstick on a bare face, or the hairpin before the mouth, is refused and kept |
+| Safe, Room 507 (`PuzzleKind.Safe`) | directions right, left, right; numbers 12, 31, 7 (`PuzzleRules.Safe`) | the handle says how many tumblers fell; nothing is used up |
+| Alarm bell (`MansionExterior`, `PuzzleKind.Bell`) | plan: hold the hammer, tie it, release the hand (`PuzzleRules.Bell`) | any other plan (cutting the wire would ring the gong) stops before he touches it |
+
+Room numbers on the service-lift note follow `LiftMaze.Width` (501 to 513); `NotesTests` checks it.
+
+### Decisions
+
+Most story decisions are Ink choices that set a flag (`~ set_flag(...)`); the room script reads the flag after the
+knot ends and chooses where to go. Giving up on the steps is the exception: "(Give up.)" in `beaten_choice` sets
+nothing, and `ChurchExterior` sets `gave_up_steps` when `keep_going` is absent. Choices behind a gate read derived
+flags (`can_walk_away`, `can_spare`) that
+`Act3.UpdateGates` sets from `Endings` helpers just before the knot. For the bedroom branches, Eleanor's two refusals
+(`eleanor_refused_abbess`, `eleanor_refused_drugs`) are combined through `Endings.EleanorHeldOut`, which needs both.
+`ClubBackstage` also reads `eleanor_refused_drugs` directly, to play the blackout instead of the ordinary departure.
+The full branch map is in [Story overview](story-overview.md#branches-and-endings).
+
+To add a branch: set a new flag from the choice, add the gate helper to `Endings` if the choice is conditional, give
+`Endings.Resolve` a case in the right priority (and `EndingsTests` a row), route the scene in `Act3.End`, add a
+`Playthrough` route that reaches "The End", and an `AutoPlay` regression for any combination of flags that could
+send the story the wrong way.
 
 ## Acts and interludes
 
@@ -135,6 +167,8 @@ Endings 8-10 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_ref
 1, 6, 8, 9, 10. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan`, `CanOfferCross`, `ChurchReturned`, `InsistedForgiveness`.
 Every route must reach "The End" (`Playthrough` routes `1`-`10`, `1-oldman`, `1-steps`).
+In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
+click or refusal walks her past him to the door.
 
 ## Checklist for a story change
 
