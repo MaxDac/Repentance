@@ -43,6 +43,7 @@ public partial class Library : Room
                     return true;
                 }
                 Player.Face(Player.Position.X <= target.Position.X ? Facing.Right : Facing.Left);
+                await Player.PlayPose("micah_draw");
                 Player.SetPose("micah_aim");
                 await Talk("librarian_threat");
                 State.SetFlag("librarian_threatened");

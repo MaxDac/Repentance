@@ -127,6 +127,7 @@ public partial class ConventCorridor : Room
                 return true;
             case ("nun", Verb.UseItem) when item == "revolver":
                 Player.Face(Facing.Right);
+                await Player.PlayPose("micah_draw");
                 Player.SetPose("micah_aim");
                 await Say("I'm sorry, sister. I'm not asking anymore.");
                 await Talk("nun_threat2");

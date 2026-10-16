@@ -226,9 +226,11 @@ public partial class AutoPlay
         await CancelPuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue, "catalogue_identified", "catalogue");
         await SolvePuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue,
             new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
+        int draws = _poseCounts.GetValueOrDefault("micah_draw");
         var threaten = game.Perform(Verb.UseItem, "librarian", "revolver");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Good Lord", StringComparison.Ordinal));
-        Check(game.Player.PoseName == "micah_aim", "Micah aims the revolver at the librarian");
+        Check(game.Player.PoseName == "micah_aim" && _poseCounts.GetValueOrDefault("micah_draw") == draws + 1,
+            "Micah draws the revolver and aims it at the librarian");
         await Shot("library_threat");
         await threaten;
         Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&

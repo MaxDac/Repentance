@@ -427,26 +427,32 @@ def kneeling_figure(spec, joints):
 
 
 def aim_frame(spec, name):
-    """Single 96x96 frame of a character in profile facing right, revolver raised at shoulder height in a two-handed
-    grip, arms out straight so the gun stands clear of the body."""
-    img = figure(spec, _aim_pose(98, 94), FW + 32, FH)
+    """Single 96x96 frame of a character in profile facing right, revolver held out one-handed the old-picture way:
+    upper arm tucked against the side, forearm level at the target, the free hand hanging."""
+    img = figure(spec, _aim_angle_pose(AIM_LEVELS[0]), FW + 32, FH)
     action_strip(name, [(img, (FW / 2 + 16, 18))], [1], anchor=((FW + 32) / 2, FH - 3))
     return img
 
 
-def _aim_pose(gun_arm, off_arm, off_kind="swing"):
-    off = ("swing", off_arm, -12, 4) if off_kind == "swing" else _arms(off_kind)[-1]
-    return pose(90, arms={1: ("swing", gun_arm, 2, 0), -1: off}, gun=1,
-                legs={1: (8, 4, 0), -1: (-8, 6, -4)}, lean=-2.0)
+# The stance shared by the aim and the draw, and the hanging free arm.
+AIM_LEGS = {1: (8, 4, 0), -1: (-8, 6, -4)}
+AIM_OFF_ARM = ("swing", -2, 4, 12)
 
 
-AIM_LEVELS = [98, 84, 70, 56, 42, 26, 8]
+def _aim_pose(upper, elbow):
+    return pose(90, arms={1: ("swing", upper, 2, elbow), -1: AIM_OFF_ARM}, gun=1, legs=AIM_LEGS, lean=-2.0)
+
+
+# Forearm angles from straight down (0) to level (90): the aim tips the muzzle a little up, the last level hangs.
+AIM_LEVELS = [94, 80, 66, 52, 38, 24, 8]
 AIM_BACK_FRAMES = 8
+AIM_UPPER = 16  # how far forward of the side the upper arm sits while aiming
 
 
 def _aim_angle_pose(a, legs=None):
-    # above the midpoint between levels 3 and 4 the off hand still steadies the grip; below it, it hangs
-    ps = _aim_pose(a, a - 4) if a > (AIM_LEVELS[3] + AIM_LEVELS[4]) / 2 else _aim_pose(a, 0, "down")
+    # the elbow comes away from the side only as far as the forearm is raised
+    upper = AIM_UPPER * (a - AIM_LEVELS[-1]) / (AIM_LEVELS[0] - AIM_LEVELS[-1])
+    ps = _aim_pose(upper, a - upper)
     if legs is not None:
         ps = dict(ps, legs=legs)
     return ps
@@ -495,6 +501,27 @@ def aim_self_frame(spec, name):
     img = figure(spec, ps, FW + 32, FH)
     action_strip(name, [(img, (FW / 2 + 16, 18))], [1], anchor=((FW + 32) / 2, FH - 3))
     return img
+
+
+def draw_strip(spec, name):
+    """Drawing the revolver from a shoulder holster under the coat, in profile facing right: the near hand comes up,
+    the elbow lifts in front of the chest as the hand goes in under the far lapel, the gun comes out at chest height
+    muzzle down, swings forward past the belt, and the last frame is aim_frame's held aim."""
+    fw = FW + 32
+
+    def stance(arm, **kw):
+        return pose(90, arms={1: arm, -1: AIM_OFF_ARM}, legs=AIM_LEGS, lean=-2.0, **kw)
+    poses = [
+        stance(("swing", 4, 6, 10)),
+        stance(("pts", (0.15, 0.36, 0.11), (0.06, 0.31, 0.13), (0.02, 0.29, 0.11))),
+        stance(("pts", (0.13, 0.31, 0.17), (0.02, 0.28, 0.10), (-0.04, 0.27, 0.05)), hand_in_coat=1),
+        stance(("pts", (0.12, 0.34, 0.15), (0.04, 0.31, 0.11), (0.03, 0.31, 0.135)), gun=1, gun_dir=(0, 0.9, 0.5)),
+        stance(("pts", (0.14, 0.38, 0.09), (0.07, 0.37, 0.16), (0.06, 0.37, 0.19)), gun=1, gun_dir=(0, 0.5, 1)),
+        _aim_angle_pose(AIM_LEVELS[0]),
+    ]
+    frames = [(figure(spec, ps, fw, FH), (FW / 2 + 16, 18)) for ps in poses]
+    action_strip(name, frames, [0.15, 0.08, 0.2, 0.1, 0.08, 0.3], anchor=(fw / 2, FH - 3))
+    return frames
 
 
 # Hip, shoulder, head, near knee/ankle, elbow/hand, before grounding into the wide action frame.
@@ -790,6 +817,7 @@ def build():
     aim_lower_strip(MICAH, "micah_aim_lower")
     aim_back_strip(MICAH, "micah_aim_back")
     aim_self_frame(MICAH, "micah_aim_self")
+    draw_strip(MICAH, "micah_draw")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
     door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
@@ -811,7 +839,7 @@ def build():
 
 # The poses Micah strikes after he leaves his tie on the mansion's alarm bell; Player loads these instead of the
 # shared micah_* strips while he wears the micah_no_tie sheet.
-NO_TIE_POSES = ("crouch", "crouched", "crouch_rise", "aim", "aim_lower", "aim_back", "aim_self")
+NO_TIE_POSES = ("crouch", "crouched", "crouch_rise", "aim", "aim_lower", "aim_back", "aim_self", "draw")
 
 
 def build_no_tie():
@@ -820,6 +848,7 @@ def build_no_tie():
     aim_lower_strip(MICAH_NO_TIE, "micah_no_tie_aim_lower")
     aim_back_strip(MICAH_NO_TIE, "micah_no_tie_aim_back")
     aim_self_frame(MICAH_NO_TIE, "micah_no_tie_aim_self")
+    draw_strip(MICAH_NO_TIE, "micah_no_tie_draw")
     action_sequences(MICAH_NO_TIE, "micah_no_tie")
 
 

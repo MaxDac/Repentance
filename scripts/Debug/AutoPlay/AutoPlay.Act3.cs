@@ -401,11 +401,13 @@ public partial class AutoPlay
         Check(game.Player.PoseName == "micah_crouched" && _poseCounts.GetValueOrDefault("micah_crouch") == 1,
             "Micah crouches down behind the screen and holds the crouch while he listens");
         await Shot("mansion_bedroom");
+        int draws = _poseCounts.GetValueOrDefault("micah_draw");
         await Until(() => gs.HasFlag("eleanor_up"));
         Check(game.Player.Visible && game.Player.Position.DistanceTo(new Vector2(160, 236)) < 2,
             "Micah walks out from behind the screen to take aim (#104)");
         Check(_poseCounts.GetValueOrDefault("micah_crouch_rise") == 1 && game.Player.PoseName == "micah_aim",
             "Micah stands back up before stepping out, so the crouch is released");
+        Check(_poseCounts.GetValueOrDefault("micah_draw") == draws + 1, "Micah draws the revolver from under his coat");
         Check(game.Player.Poses.Source == "micah_no_tie_aim", "Micah aims without his tie");
         await game.Wait(0.5);
         await Shot("mansion_bedroom_gun");
