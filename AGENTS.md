@@ -46,6 +46,8 @@ CS0108/CS0114 are build errors; AutoPlay also checks for explicit same-signature
 ## Running the game autonomously (Windows)
 
 Prefer the scripts in `tools/run/` (PowerShell `.ps1`, bash `.sh`). See `docs/testing-and-film-mode.md`.
+Run them through a subagent on the least powerful model (e.g. `claude-haiku-4.5`) that reports only the result and
+failures; see the `run-game` skill (`.github/skills/run-game/SKILL.md`).
 They reset generated files (`.godot/`, `bin/`, `obj/`, `logs/`, `screenshots/`, `frames/`, test-only user data),
 then `dotnet build` and import, and apply CI's pass rule. CI runs the same scripts.
 
