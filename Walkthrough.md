@@ -544,8 +544,10 @@ interlude ends.
 The player moves Eleanor again. The narration is a neutral third voice. Same rules as the First Interlude: no
 satchel, no **N**, Micah's things stashed until the interlude ends.
 
-1. **The motel room, after Micah has gone.** Colour only. A knock at the door: Bruno and a second goon (new
-   sprite). They followed "your detective" there. Her answers are colour; they take her, over black.
+1. **The motel room, after Micah has gone.** Colour only. A knock at the door. Eleanor goes to it but stops
+   halfway; the door is kicked in, and Bruno and a second goon (new sprite) walk in and stand between her and it.
+   They followed "your detective" there. Her answers are colour; they walk her out through the broken door, over
+   black.
 2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
    short pink gown (new playable sheet). The old man, robed, unmasked, the stag mask in his hand, talks her into
    gin and powder, "as always". The choice is saved:

@@ -7,7 +7,7 @@ namespace Repentance.Rooms;
 /// A motel room, that same night. Micah gets dressed. Eleanor stays against the pillows under the white sheet.
 /// They agree never to see each other again. End of the first act of the journal.
 /// In the interludes the room is Eleanor's: in the First she watches the convent from the window until Micah comes;
-/// in the Second, after he has gone, two of the Order's men knock at the door.
+/// in the Second, after he has gone, two of the Order's men knock at the door, kick it in and walk her out.
 /// </summary>
 public partial class MotelNight : Room
 {
@@ -100,16 +100,67 @@ public partial class MotelNight : Room
         return false;
     }
 
+    /// <summary>Where the Order's men stand in the doorway: on the walkway outside, framed by the kicked-in door.</summary>
+    private static readonly Vector2 Doorway = new(28, 170);
+
+    /// <summary>
+    /// Eleanor goes to the door but stops halfway, calling out; the second knock is a shoulder, the third a boot.
+    /// Bruno comes in first and the goon a step behind; they stop between her and the door.
+    /// </summary>
+    private async Task TheDoorGoesIn()
+    {
+        await Game.WalkTo(new Vector2(150, 206));
+        Player.Face(Facing.Left);
+        await Say("Micah? Did you forget your...");
+        await Wait(0.5);
+        Game.Sfx.Play(Sound.Thunk);
+        await Wait(0.7);
+        await Say("...Micah?");
+        await Wait(0.3);
+        if (FindActor("brute") is not { } brute || FindActor("goon") is not { } goon) return;
+        Vector2 bruteSpot = brute.Position, goonSpot = goon.Position;
+        brute.Position = Doorway;
+        goon.Position = Doorway + new Vector2(-4, -2);
+        brute.FaceLeft(false);
+        goon.FaceLeft(false);
+        Game.Sfx.Play(Sound.Crash);
+        Game.Sfx.Play(Sound.DoorSlam);
+        State.SetFlag("interlude_door_kicked");
+        State.SetFlag("interlude_goons_in");
+        await Wait(0.8);
+        var bruteIn = brute.MoveTo(bruteSpot, 38);
+        await Wait(0.9);
+        await Task.WhenAll(bruteIn, goon.MoveTo(goonSpot, 38));
+        brute.FaceLeft(false);
+        goon.FaceLeft(false);
+        Player.Face(Facing.Left);
+        await Wait(0.4);
+    }
+
+    /// <summary>Bruno leads the way out, Eleanor follows him through the door, and the goon falls in behind her.</summary>
+    private async Task TheyTakeHer()
+    {
+        if (FindActor("brute") is not { } brute || FindActor("goon") is not { } goon) return;
+        var bruteOut = brute.MoveTo(Doorway, 40);
+        await Wait(0.6);
+        var eleanorOut = Game.WalkTo(new Vector2(30, 190));
+        await Wait(0.8);
+        await Task.WhenAll(bruteOut, eleanorOut, goon.MoveTo(new Vector2(70, 210), 40));
+        await Wait(0.3);
+    }
+
     private async Task<bool> SecondInteract(Verb verb, Hotspot target)
     {
         switch (target.Id, verb)
         {
             case ("door", Verb.Walk or Verb.Hand) when !State.HasFlag("interlude_goons_in"):
-                await Game.WalkTo(target.WalkTo);
-                await Say("Micah? Did you forget your...");
-                State.SetFlag("interlude_goons_in");
+                await TheDoorGoesIn();
                 await Talk("interlude_goons");
+                await TheyTakeHer();
                 await Story.Interlude.Taken();
+                return true;
+            case ("door", Verb.Look) when State.HasFlag("interlude_door_kicked"):
+                await Say("Kicked in. The lock's hanging out of the jamb like a tooth.");
                 return true;
             case ("door", Verb.Look):
                 await Say("Somebody's knocking. Micah would have used his key. He'd have left it on the dresser, anyway.");
