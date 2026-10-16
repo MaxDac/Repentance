@@ -36,6 +36,8 @@ public sealed class PosePlayback
 
     public PosePlayback(Sprite2D sprite) => _sprite = sprite;
     public string? Action { get; private set; }
+    /// <summary>The sprite files the loaded strip is painted from: <see cref="Action"/>, or its outfit variant.</summary>
+    public string? Source { get; private set; }
     public int Frame { get; private set; }
     public int FrameCount => _clip?.Frames.Length ?? 0;
     public bool Active => _clip != null;
@@ -62,10 +64,12 @@ public sealed class PosePlayback
         }
     }
 
-    private void Load(string name, bool flipped)
+    /// <summary>Loads strip <paramref name="name"/>, painted from <paramref name="source"/>'s files when given (an outfit
+    /// variant of the same pose); <see cref="Action"/> keeps the logical name.</summary>
+    private void Load(string name, bool flipped, string? source)
     {
         Clear();
-        var path = $"res://assets/art/sprites/{name}";
+        var path = $"res://assets/art/sprites/{source ?? name}";
         var json = Godot.FileAccess.GetFileAsString($"{path}.json");
         var clip = JsonSerializer.Deserialize<ClipData>(json)
             ?? throw new InvalidOperationException($"Invalid pose metadata: {name}");
@@ -85,6 +89,7 @@ public sealed class PosePlayback
         }
         _clip = clip;
         Action = name;
+        Source = source ?? name;
         _flipped = flipped;
         Frame = 0;
         _elapsed = 0;
@@ -94,9 +99,9 @@ public sealed class PosePlayback
         Apply();
     }
 
-    public void Hold(string name, bool flipped = false, bool last = false)
+    public void Hold(string name, bool flipped = false, bool last = false, string? source = null)
     {
-        Load(name, flipped);
+        Load(name, flipped, source);
         if (last) { Frame = FrameCount - 1; Apply(); }
     }
 
@@ -108,9 +113,9 @@ public sealed class PosePlayback
         Apply();
     }
 
-    public Task<bool> Play(string name, bool flipped = false)
+    public Task<bool> Play(string name, bool flipped = false, string? source = null)
     {
-        Load(name, flipped);
+        Load(name, flipped, source);
         _done = new TaskCompletionSource<bool>();
         Observe();
         return _done.Task;
@@ -167,6 +172,7 @@ public sealed class PosePlayback
         _clip = null;
         _observation = null;
         Action = null;
+        Source = null;
         done?.TrySetResult(false);
     }
 }
