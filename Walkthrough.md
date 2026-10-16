@@ -642,6 +642,8 @@ satchel, no **N**, Micah's things stashed until the interlude ends.
   Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
   option. Incorrect plans are rejected before touching the mechanism; no alarm sounds and retries
   cost nothing. Close/reset preserves the unrestrained state. Use the lintel key only after securing it.
+  The tie stays on the bell: from here on (the mansion and every ending after it) Micah goes without it, collar
+  open at the throat (`micah_no_tie` sheet and its crouch/aim strips; the mask still takes precedence).
 - The kitchen is dark and quiet. The green baize door to the house is **bolted from the house side**: Micah
   says so and notes that houses like this always kept another way up for the deliveries. In the floor by
   the table is a cellar trapdoor with an iron ring.
