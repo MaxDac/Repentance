@@ -14,7 +14,7 @@ public class RecipeTests
             Assert.Contains(recipe.A, Items.All.Keys);
             Assert.Contains(recipe.B, Items.All.Keys);
             Assert.Contains(recipe.Result, Items.All.Keys);
-            Assert.All(recipe.Consumes, id => Assert.Contains(id, recipe.Inputs));
+            Assert.All(recipe.Consumes, id => Assert.Contains(id, recipe.Inputs.Concat(recipe.Requires ?? Array.Empty<string>())));
             Assert.All(recipe.Requires ?? Array.Empty<string>(), id => Assert.Contains(id, Items.All.Keys));
         }
         foreach (var refusal in Recipes.Refusals)
@@ -32,7 +32,7 @@ public class RecipeTests
         Assert.Equal(keys.Count, keys.Distinct().Count());
         foreach (var recipe in Recipes.All)
         {
-            var held = Holding(recipe.A, recipe.B, "paste");
+            var held = Holding(new[] { recipe.A, recipe.B, "paste" }.Concat(recipe.Requires ?? Array.Empty<string>()).ToArray());
             Assert.Equal(recipe.Result, Recipes.Evaluate(recipe.A, recipe.B, held)!.Result);
             Assert.Equal(recipe.Result, Recipes.Evaluate(recipe.B, recipe.A, held)!.Result);
         }
@@ -72,6 +72,43 @@ public class RecipeTests
     }
 
     [Fact]
+    public void EleanorsBoxChainUsesUpTheThreadAndEndsPacked()
+    {
+        var bag = new HashSet<string> { "eleanor_box", "pellet", "riddle_scrap", "red_thread" };
+        var flags = new List<string>();
+        void Combine(string a, string b)
+        {
+            var outcome = Recipes.Evaluate(a, b, bag.Contains);
+            Assert.NotNull(outcome?.Result);
+            Recipes.Apply(outcome!, id => bag.Remove(id), id => bag.Add(id), flags.Add);
+        }
+        Combine("riddle_scrap", "pellet");
+        Assert.Equal(new[] { "eleanor_box", "eleanor_flower" }, bag.Order());
+        Combine("eleanor_box", "eleanor_flower");
+        Assert.Equal(new[] { "eleanor_box_packed" }, bag.ToArray());
+        Assert.Equal(new[] { "interlude_box_packed" }, flags);
+    }
+
+    [Fact]
+    public void EleanorsFlowerWithoutThreadAsksForSomethingToTie()
+    {
+        var outcome = Recipes.Evaluate("pellet", "riddle_scrap", Holding("pellet", "riddle_scrap"));
+        Assert.NotNull(outcome);
+        Assert.Null(outcome!.Result);
+        Assert.Contains("tie it with", outcome.Line);
+    }
+
+    [Fact]
+    public void PowderNeedsThePuff()
+    {
+        var bag = new HashSet<string> { "compact", "puff", "lipstick", "hairpin" };
+        var outcome = Recipes.Evaluate("puff", "compact", bag.Contains);
+        Assert.Equal("puff_powdered", outcome?.Result);
+        Recipes.Apply(outcome!, id => bag.Remove(id), id => bag.Add(id), _ => { });
+        Assert.Equal(new[] { "hairpin", "lipstick", "puff_powdered" }, bag.Order());
+    }
+
+    [Fact]
     public void HalvesWithoutPasteExplainWhatIsMissing()
     {
         var outcome = Recipes.Evaluate("clipping_top", "clipping_bottom", Holding("clipping_top", "clipping_bottom"));
@@ -87,6 +124,11 @@ public class RecipeTests
     [InlineData("lantern", "lighter", "fuel")]
     [InlineData("sealing_wax", "matchbook", "lighter")]
     [InlineData("lantern_filled", "matchbook", "lighter")]
+    [InlineData("pellet", "eleanor_box", "word")]
+    [InlineData("riddle_scrap", "eleanor_box", "flower")]
+    [InlineData("red_thread", "pellet", "riddle")]
+    [InlineData("red_thread", "riddle_scrap", "pellet")]
+    [InlineData("compact", "lipstick", "puff")]
     public void WrongCombinationsAreRefusedWithAHint(string a, string b, string hint)
     {
         var outcome = Recipes.Evaluate(a, b, Holding(a, b));

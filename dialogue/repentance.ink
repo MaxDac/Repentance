@@ -1338,7 +1338,7 @@ THOUGHT: They didn't touch her. They didn't have to. She knew the way to the car
 HARRINGTON: There she is. My songbird, home from the woods.
 HARRINGTON: The nuns. A motel. A drunk who calls himself a detective. You've had quite a holiday, my dear.
 ELEANOR: It wasn't a holiday.
-HARRINGTON: No. I suppose it wasn't. Look at you. Pale as a candle. You need something to put the colour back.
+HARRINGTON: No. I suppose it wasn't. Look at you. Painted like a saint in a window, and not a drop of colour under it. You need something to put the colour back.
 THOUGHT: A glass of gin on the dressing table, and beside it, on a silver saucer, a little white line, laid out neat as a signature. As always.
 + [I don't want it tonight.]
     HARRINGTON: You always say that. And then the band starts, and you want it more than you want to breathe.

@@ -18,8 +18,21 @@ public sealed partial class Playthrough
             await WaitIdle();
             Expect("EleanorRoom", "the First Interlude opens in Room 507");
             Check(Gs.HasFlag("interlude1") && _game.Player.Character == "eleanor_play", "the player is Eleanor");
+            // Puzzle 17: the brass box, the flower, the riddle and the thread, packed and locked in the closet safe
             await Do(Verb.Hand, "vanity");
-            await Do(Verb.Hand, "closet");
+            Check(Gs.HasItem("eleanor_box") && Gs.HasItem("pellet"), "the open brass box and the bare paper flower");
+            await Do(Verb.Hand, "desk");
+            await Do(Verb.Look, "clothes");
+            await Do(Verb.Hand, "clothes");
+            Check(Gs.HasItem("riddle_scrap") && Gs.HasItem("red_thread"), "the riddle on stationery and the red thread");
+            await Pace(0.6);
+            await CombineAndWait("riddle_scrap", "pellet");
+            Check(Gs.HasItem("eleanor_flower") && !Gs.HasItem("red_thread"), "the riddle tied round the flower in red");
+            await Pace(0.6);
+            await CombineAndWait("eleanor_flower", "eleanor_box");
+            Check(Gs.HasItem("eleanor_box_packed") && Gs.HasFlag("interlude_box_packed"), "the flower in the box, the lid down");
+            await Do(Verb.UseItem, "closet", "eleanor_box_packed");
+            Check(Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"), "the box locked in the closet safe");
             await Do(Verb.Hand, "desk_drawer");
             await Do(Verb.Hand, "bed");
             Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");

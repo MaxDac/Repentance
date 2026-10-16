@@ -156,7 +156,7 @@ From here the story follows Walkthrough.md:
 
 ## Story notes
 
-The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The fifteen puzzles include five collect-and-combine locations. Sal receives a cash bribe Micah can afford.
+The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The fifteen puzzles include five collect-and-combine locations; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.

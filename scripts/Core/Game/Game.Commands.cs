@@ -32,7 +32,7 @@ public partial class Game
 
         await Run(async () =>
         {
-            if (verb == Verb.UseItem && IsEleanor)
+            if (verb == Verb.UseItem && IsEleanor && !Story.Interlude.SatchelOpen(GameState.Instance.HasFlag))
             {
                 await Say("Not with that.");
                 return;

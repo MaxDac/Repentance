@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,8 +20,8 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "EleanorRoom");
         await WaitIdle(game);
         Check(gs.HasFlag("interlude1") && game.Player.Character == "eleanor_play", "the player is Eleanor in Room 507");
-        Check(!game.Hud.SatchelVisible && !gs.HasItem("revolver") && !gs.HasItem("journal"),
-            "Micah's things (and Daniel's journal) are put away; no satchel while she plays");
+        Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0 && !gs.HasItem("revolver") && !gs.HasItem("journal"),
+            "Micah's things (and Daniel's journal) are put away; Eleanor's satchel starts empty");
         await game.ItemVerb(Verb.Hand, Notes.ItemId);
         Check(!game.Hud.Notepad.Visible, "Micah's notepad doesn't open for Eleanor");
         await game.Wait(0.5);
@@ -29,8 +30,38 @@ public partial class AutoPlay
         Check(game.Room?.Name == "EleanorRoom", "Eleanor won't leave before the call and the locks");
         await game.Perform(Verb.Hand, "closet");
         Check(!gs.HasFlag("interlude_safe_locked"), "the safe waits for the packed box");
+        await LegacyPackedBox(game, gs);
+        // Puzzle 17: wrong joins first, then the box packed and locked away
         await game.Perform(Verb.Hand, "vanity");
+        Check(gs.HasItem("eleanor_box") && gs.HasItem("pellet"), "the open brass box and the bare paper flower from the vanity");
+        await CombineAndWait("pellet", "eleanor_box");
+        Check(gs.HasItem("pellet") && gs.HasItem("eleanor_box") && !gs.HasFlag("interlude_box_packed"), "a bare pellet won't go in the box");
+        await game.Perform(Verb.Hand, "desk");
+        await CombineAndWait("pellet", "riddle_scrap");
+        Check(gs.HasItem("pellet") && gs.HasItem("riddle_scrap") && !gs.HasItem("eleanor_flower"), "the riddle won't stay on without thread");
+        await game.Perform(Verb.Hand, "clothes");
+        await CombineAndWait("red_thread", "pellet");
+        Check(gs.HasItem("red_thread") && gs.HasItem("pellet"), "thread round a bare pellet is refused");
+        await CombineAndWait("riddle_scrap", "pellet");
+        Check(gs.HasItem("eleanor_flower") && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
+            "the riddle tied round the flower uses up the thread");
+        await game.Perform(Verb.Hand, "vanity");
+        await game.Perform(Verb.Hand, "desk");
+        await game.Perform(Verb.Hand, "clothes");
+        Check(gs.Inventory.Count == 2 && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
+            "the vanity, the desk and the dress give nothing twice");
+        await game.Perform(Verb.UseItem, "closet", "eleanor_flower");
+        Check(!gs.HasFlag("interlude_safe_locked") && gs.HasItem("eleanor_flower"), "the flower alone doesn't go in the safe");
+        await ReloadCheckpoint("first_interlude_flower");
+        Check(gs.HasItem("eleanor_flower") && gs.HasItem("eleanor_box") && game.Hud.SatchelVisible, "a save holding the wrapped flower loads back");
+        await CombineAndWait("eleanor_flower", "eleanor_box");
+        Check(gs.HasItem("eleanor_box_packed") && gs.HasFlag("interlude_box_packed") && gs.Inventory.Count == 1, "the flower packed in the box");
         await game.Perform(Verb.Hand, "closet");
+        Check(!gs.HasFlag("interlude_safe_locked") && gs.HasItem("eleanor_box_packed"), "the box has to be put in the safe, not just the hand");
+        await ReloadCheckpoint("first_interlude_packed");
+        Check(gs.HasItem("eleanor_box_packed") && !gs.HasFlag("interlude_safe_locked"), "a save holding the packed box loads back");
+        await game.Perform(Verb.UseItem, "closet", "eleanor_box_packed");
+        Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 0, "the packed box locked in the closet safe");
         await game.Perform(Verb.Hand, "desk_drawer");
         await game.Perform(Verb.Hand, "bed");
         Check(gs.HasFlag("interlude_phoned") && gs.HasFlag("interlude_drawer_locked"), "the box in the safe, the riddle in the drawer, the call made");
@@ -61,6 +92,34 @@ public partial class AutoPlay
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
+        Check(!new[] { "eleanor_box", "pellet", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
+            && !gs.HasFlag("interlude_took_box") && !gs.HasFlag("interlude_took_thread"),
+            "nothing of Eleanor's, and none of her puzzle flags, follow Micah out of the interlude");
+    }
+
+    /// <summary>
+    /// A save from before Puzzle 17 holds "interlude_box_packed" with no box in the satchel: the closet hand still
+    /// locks it, so the old save can finish. The run resumes from where it was.
+    /// </summary>
+    private async Task LegacyPackedBox(Game game, GameState gs)
+    {
+        await WaitIdle(game);
+        Check(game.SaveToSlot(SaveSystem.ManualSlot(2)), "saved before the legacy box check");
+        var resume = SaveSystem.Read(SaveSystem.ManualSlot(2));
+        var legacy = new SaveData
+        {
+            Room = "eleanor_room", RoomTitle = "Aurelian Hotel", StoryAct = 2, X = 300, Y = 230, Facing = 3,
+            Flags = resume!.Flags.Append("interlude_box_packed").ToList(),
+            Inventory = new List<string>(), Ink = resume.Ink,
+        };
+        await game.LoadGame(legacy);
+        await WaitIdle(game);
+        Check(game.Player.Character == "eleanor_play" && game.Hud.SatchelVisible, "the legacy save loads as Eleanor");
+        await game.Perform(Verb.Hand, "closet");
+        Check(gs.HasFlag("interlude_safe_locked"), "a legacy packed box locks by hand, with no box in the satchel");
+        await game.LoadGame(resume);
+        await WaitIdle(game);
+        Check(!gs.HasFlag("interlude_safe_locked") && !gs.HasFlag("interlude_box_packed"), "back to the run");
     }
 
     /// <summary>The end of Act 1 and Act 2: the cathedral, the library, the Club, the morgue and the Harrington office.</summary>

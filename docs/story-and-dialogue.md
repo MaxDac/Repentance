@@ -111,8 +111,10 @@ new ItemDef("photo", "photograph", "res://assets/art/items/photo.png", "...descr
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |
 
-`Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad and satchel
-are hidden, held items are refused, generic exits are blocked, and `Interlude.DefaultLine` replaces generic lines.
+`Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad is hidden, generic
+exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes (`Interlude.SatchelOpen`)
+she has her own satchel for Puzzles 17 and 18: she takes, joins and uses only what she finds there, and `EndFirst`/
+`EndSecond` clear it before Micah's kit comes back. In the coda and epilogue the satchel is hidden and held items are refused.
 Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeInteract`).
 
 ## Endings

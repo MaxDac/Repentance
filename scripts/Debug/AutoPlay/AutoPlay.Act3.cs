@@ -19,8 +19,8 @@ public partial class AutoPlay
         Check(game.Hud.CaptionText == "Second Interlude", "Act 3 opens on black with \"Second Interlude\"");
         await Until(() => game.Room?.Name == "MotelNight");
         await WaitIdle(game);
-        Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && !game.Hud.SatchelVisible,
-            "the player is Eleanor at the motel, without Micah's satchel");
+        Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && gs.Inventory.Count == 0 && !gs.HasItem("revolver"),
+            "the player is Eleanor at the motel, with nothing of Micah's");
         await Shot("interlude_motel_goons");
         var taken = game.Perform(Verb.Hand, "door");
         await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
@@ -42,6 +42,7 @@ public partial class AutoPlay
         Check(game.Player.Character == "eleanor_gown_play", "a save in the dressing room loads back in the gown");
         await game.Wait(0.5);
         await Shot("club_backstage");
+        await TheFaceTheyPaidFor(game, gs);
         int drinks = _poseCounts.GetValueOrDefault("eleanor_drink");
         var prefer = _prefer;
         _prefer = new[] { "(Take the glass" };
@@ -51,8 +52,53 @@ public partial class AutoPlay
         Check(Offered("interlude_oldman", "(Push it away.)") && !gs.HasFlag(Endings.RefusedDrugs),
             "the old man's gin can be refused; taking it saves nothing");
         Check(_poseCounts.GetValueOrDefault("eleanor_drink") == drinks + 1, "Eleanor drinks: her drink strip plays");
-        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in") && !gs.HasFlag("interlude_door_kicked"),
+        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in") && !gs.HasFlag("interlude_door_kicked")
+            && !gs.HasFlag("interlude_made_up"),
             "the interlude's flags are cleared for Micah's part");
+        Check(gs.HasItem("revolver") && !new[] { "compact", "lipstick", "puff", "puff_powdered", "hairpin" }.Any(gs.HasItem),
+            "Micah gets his kit back, and none of her makeup");
+    }
+
+    /// <summary>
+    /// Puzzle 18: the old man won't talk until her face is on; the makeup goes on in order (face powder with the puff,
+    /// the lipstick, the hairpin), and a save halfway loads back halfway.
+    /// </summary>
+    private async Task TheFaceTheyPaidFor(Game game, GameState gs)
+    {
+        Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0, "Eleanor's satchel in the dressing room, empty");
+        await game.Perform(Verb.Talk, "harrington");
+        Check(game.Room?.Name == "ClubBackstage" && !gs.HasFlag("interlude_made_up"), "the old man won't talk before her face is on");
+        await game.Perform(Verb.Hand, "table");
+        Check(game.Room?.Name == "ClubBackstage" && gs.Inventory.Count == 0, "the gin table waits too, and gives nothing");
+        await game.Perform(Verb.Hand, "mirror");
+        Check(gs.HasItem("compact") && gs.HasItem("lipstick"), "her compact and lipstick from the ledge");
+        await game.Perform(Verb.UseItem, "mirror", "lipstick");
+        Check(gs.HasItem("lipstick") && !gs.HasFlag("interlude_lips"), "no lipstick on a bare face");
+        await game.Perform(Verb.UseItem, "mirror", "compact");
+        Check(gs.HasItem("compact") && !gs.HasFlag("interlude_powdered"), "no face powder without a puff");
+        await CombineAndWait("compact", "lipstick");
+        Check(gs.HasItem("compact") && gs.HasItem("lipstick"), "the compact and the lipstick don't go together");
+        await game.Perform(Verb.Hand, "rack");
+        await game.Perform(Verb.Hand, "screens");
+        Check(gs.HasItem("puff") && gs.HasItem("hairpin"), "the puff from a gown pocket, the pin from a crane's wing");
+        await game.Perform(Verb.Hand, "mirror");
+        await game.Perform(Verb.Hand, "rack");
+        await game.Perform(Verb.Hand, "screens");
+        Check(gs.Inventory.Count == 4, "the ledge, the rail and the screen give nothing twice");
+        await CombineAndWait("puff", "compact");
+        Check(gs.HasItem("puff_powdered") && !gs.HasItem("puff") && !gs.HasItem("compact"), "the puff in the face powder");
+        await game.Perform(Verb.UseItem, "mirror", "hairpin");
+        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up"), "the hair waits for the face");
+        await game.Perform(Verb.UseItem, "mirror", "puff_powdered");
+        Check(gs.HasFlag("interlude_powdered") && !gs.HasItem("puff_powdered"), "face powder first");
+        await ReloadCheckpoint("second_interlude_powdered");
+        Check(gs.HasFlag("interlude_powdered") && gs.HasItem("lipstick") && gs.HasItem("hairpin") && game.Hud.SatchelVisible,
+            "a save with the face half on loads back half on");
+        await game.Perform(Verb.UseItem, "mirror", "hairpin");
+        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up"), "the mouth before the hair");
+        await game.Perform(Verb.UseItem, "mirror", "lipstick");
+        await game.Perform(Verb.UseItem, "mirror", "hairpin");
+        Check(gs.HasFlag("interlude_lips") && gs.HasFlag("interlude_made_up") && gs.Inventory.Count == 0, "the face they paid for, on");
     }
 
     /// <summary>The masked Club, Act 3 and the main ending.</summary>

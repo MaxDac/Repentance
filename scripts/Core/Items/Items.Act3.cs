@@ -22,5 +22,16 @@ public static partial class Items
             "The storm lantern, fuelled and trimmed. It only needs a light."),
         new("lantern_lit", "lit lantern", "res://assets/art/items/lantern_lit.png",
             "The storm lantern, burning low and steady. Enough light to find a stair by."),
+        // Puzzle 18 - The Club's dressing room, Second Interlude. Eleanor's things, in her own words.
+        new("compact", "face powder compact", "res://assets/art/items/compact.png",
+            "Gold, engraved \"For my songbird.\" The old man gave it to me the first night. The puff's missing."),
+        new("lipstick", "lipstick", "res://assets/art/items/lipstick.png",
+            "A gold tube of red. Not my colour. His."),
+        new("puff", "swansdown puff", "res://assets/art/items/puff.png",
+            "A powder puff from some other wife's pocket. Soft as a lie."),
+        new("puff_powdered", "powdered puff", "res://assets/art/items/puff_powdered.png",
+            "The puff, heavy with face powder. Enough to cover anything. Almost."),
+        new("hairpin", "hairpin", "res://assets/art/items/hairpin.png",
+            "A black pin from the painted screen. Small, sharp, and all it's for is holding things where they're put."),
     };
 }
