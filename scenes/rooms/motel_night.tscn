@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="6_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/brute.png" id="7_brute"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/goon.png" id="8_goon"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_door_kicked.png" id="9_door_kicked"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="10_FlagSprite"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 64)
@@ -35,6 +37,14 @@ PlayerCharacter = "micah_dressing"
 z_index = -10
 texture = ExtResource("2_motel_night")
 centered = false
+
+[node name="DoorKicked" type="Sprite2D" parent="."]
+position = Vector2(0, 56)
+z_index = -6
+texture = ExtResource("9_door_kicked")
+centered = false
+script = ExtResource("10_FlagSprite")
+ShowIfFlags = "interlude_door_kicked"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -132,11 +142,11 @@ position = Vector2(26, 128)
 shape = SubResource("Rect_4")
 
 [node name="Brute" type="Area2D" parent="World"]
-position = Vector2(70, 222)
+position = Vector2(84, 212)
 script = ExtResource("6_Actor")
 Id = "brute"
 DisplayName = "Bruno"
-WalkTo = Vector2(110, 226)
+WalkTo = Vector2(120, 214)
 ShowIfFlags = "interlude_goons_in"
 monitoring = false
 monitorable = false
@@ -144,11 +154,11 @@ Texture = ExtResource("7_brute")
 SpeechColor = Color(0.86, 0.62, 0.52, 1)
 
 [node name="Goon" type="Area2D" parent="World"]
-position = Vector2(30, 246)
+position = Vector2(52, 232)
 script = ExtResource("6_Actor")
 Id = "goon"
 DisplayName = "goon"
-WalkTo = Vector2(70, 246)
+WalkTo = Vector2(90, 234)
 ShowIfFlags = "interlude_goons_in"
 monitoring = false
 monitorable = false

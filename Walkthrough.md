@@ -80,14 +80,14 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Leaves on a lucky clover. The night of Samhain, when the Veil is thin. Saint Patrick's day in March." Eleanor's Celtic
-  roots, in the everyday, modern form anybody knows.
+  "Those who sat at His table. The days of the month He was born. The day He rested."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. The references give **4** (the four-leaf clover), **31** (Halloween, the old Samhain) and
-  **17** (Saint Patrick's day); the paper gives no directions, so the player has to try them. Each stop that is right,
+  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
+  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
   counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
-  by trying each one: the solution is **right 4 / left 31 / right 17**. The paper remains readable; wrong
-  settings can be reset or retried.
+  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
+  settings can be reset or retried. When the safe opens, Micah finds it strange that a woman like Eleanor would
+  bring Christ into it ("Strange, a dame like her bringin' Christ into it.").
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
     perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
@@ -545,8 +545,10 @@ interlude ends.
 The player moves Eleanor again. The narration is a neutral third voice. Same rules as the First Interlude: no
 satchel, no **N**, Micah's things stashed until the interlude ends.
 
-1. **The motel room, after Micah has gone.** Colour only. A knock at the door: Bruno and a second goon (new
-   sprite). They followed "your detective" there. Her answers are colour; they take her, over black.
+1. **The motel room, after Micah has gone.** Colour only. A knock at the door. Eleanor goes to it but stops
+   halfway; the door is kicked in, and Bruno and a second goon (new sprite) walk in and stand between her and it.
+   They followed "your detective" there. Her answers are colour; they walk her out through the broken door, over
+   black.
 2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
    short pink gown (new playable sheet). The old man, robed, unmasked, the stag mask in his hand, talks her into
    gin and powder, "as always". The choice is saved:

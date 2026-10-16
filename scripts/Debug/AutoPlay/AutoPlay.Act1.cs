@@ -136,7 +136,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("closet_open"), "opened the closet");
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("n0", 4), ("d1", 1), ("t1", 3), ("n1", 1), ("t2", 1), ("n2", 7) }, "safe_dial");
+            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
         Check(gs.HasFlag("safe_open"), "opened the safe");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");

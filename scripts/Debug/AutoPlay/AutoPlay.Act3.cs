@@ -22,7 +22,15 @@ public partial class AutoPlay
         Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && !game.Hud.SatchelVisible,
             "the player is Eleanor at the motel, without Micah's satchel");
         await Shot("interlude_motel_goons");
-        await game.Perform(Verb.Hand, "door");
+        var taken = game.Perform(Verb.Hand, "door");
+        await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
+            || game.Room?.Name != "MotelNight", 30);
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorKicked")?.Visible == true && game.Sfx.Count(Sound.Crash) > 0,
+            "the Order's men kick the motel door in");
+        Check(game.Room?.FindActor("goon") is { Visible: true } && game.Player.Position.X >= 120,
+            "Bruno and the goon walk in; Eleanor stopped halfway, well away from the door");
+        await Shot("interlude_motel_kicked");
+        await taken;
         await WaitIdle(game);
         Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
             "the Order's men take her to the Club's dressing room, in the pink gown");
@@ -43,7 +51,8 @@ public partial class AutoPlay
         Check(Offered("interlude_oldman", "(Push it away.)") && !gs.HasFlag(Endings.RefusedDrugs),
             "the old man's gin can be refused; taking it saves nothing");
         Check(_poseCounts.GetValueOrDefault("eleanor_drink") == drinks + 1, "Eleanor drinks: her drink strip plays");
-        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in"), "the interlude's flags are cleared for Micah's part");
+        Check(!gs.HasFlag("interlude2") && !gs.HasFlag("interlude_goons_in") && !gs.HasFlag("interlude_door_kicked"),
+            "the interlude's flags are cleared for Micah's part");
     }
 
     /// <summary>The masked Club, Act 3 and the main ending.</summary>
