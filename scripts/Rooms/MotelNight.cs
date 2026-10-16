@@ -91,7 +91,7 @@ public partial class MotelNight : Room
                 await Say("If I lie down, I'll miss him. If he comes at all.");
                 return true;
             case ("chair", Verb.Look or Verb.Hand):
-                await Say("My coat, over the back of the chair. Ready to go, the way I like it.");
+                await Say("An empty chair. I'd sit, but from there I can't see the road.");
                 return true;
             case ("door", Verb.Walk or Verb.Hand):
                 await Say("Not yet. First I want to see who comes up that road.");

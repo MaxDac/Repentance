@@ -89,7 +89,12 @@ public partial class AutoPlay
         Check(game.Room?.Name == "ConventCell", "to her cell");
         var prefer = _prefer;
         _prefer = new[] { "(Indulge her.)" };
-        await game.Perform(Verb.Hand, "bed");
+        var night = game.Perform(Verb.Hand, "bed");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake"));
+        Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
+            "Agatha is in the cell, by the bed, while she talks");
+        await Shot("interlude_agatha_night");
+        await night;
         await WaitIdle(game);
         _prefer = prefer;
         Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),

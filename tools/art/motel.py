@@ -998,7 +998,8 @@ def paint_night(rails=False, empty=False, kicked=False):
     bed_night(img, rails=rails)
     nightstand_night(img)
     chair(img)
-    clothes(img)
+    if not empty:  # in the interludes Micah has gone, and his coat and hat with him
+        clothes(img)
     dresser(img, night=True)
     bottle(img)
     img = relight_night(img)

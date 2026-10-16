@@ -16,6 +16,9 @@ public partial class ConventCell : Room
 
     private static readonly Color Night = new(0.5f, 0.56f, 0.78f);
 
+    /// <summary>Agatha's night visit: she comes in at the door and stops a step short of Eleanor at the bed.</summary>
+    private static readonly Vector2 AgathaDoor = new(92, 228), AgathaByTheBed = new(238, 222);
+
     protected override void OnRefresh() => Modulate = Interlude ? Night : Colors.White;
 
     public override async Task OnEnter(string entry)
@@ -110,7 +113,21 @@ public partial class ConventCell : Room
                 await Wait(0.6);
                 await Say("nun", "*Knock, knock*");
                 await Game.Hud.Fade(0, 0.6);
+                var agatha = FindActor("nun");
+                if (agatha != null)
+                {
+                    agatha.Position = AgathaDoor;
+                    agatha.Visible = true;
+                    await agatha.MoveTo(AgathaByTheBed, 32);
+                    agatha.FaceLeft(false);
+                    Player.FaceTowards(agatha.Position);
+                }
                 await Talk("interlude_agatha_night");
+                if (agatha != null)
+                {
+                    await agatha.MoveTo(AgathaDoor, 44);
+                    agatha.Visible = false;
+                }
                 await Game.Hud.Fade(1, 1.2);
                 Game.Hud.ShowCaption("The next morning");
                 await Wait(1.6);
