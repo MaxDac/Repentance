@@ -68,6 +68,9 @@ public partial class AutoPlay
         Check(gs.HasItem("revolver") && gs.HasItem("dollar") && gs.HasItem("lockpick"), "took the revolver, the dollar and the lockpick");
         Check(CashRules.Balance(gs.HasFlag) == 22, "case cash covers every bribe");
         await Shot("office_drawer_empty");
+        Check(!gs.HasFlag("drawer_open"), "Micah shuts the top drawer once it's empty");
+        await game.Perform(Verb.Hand, "drawer");
+        Check(!gs.HasFlag("drawer_open"), "the empty top drawer stays shut");
         await NotepadTest(game);
         await MouseTest(game);
         await game.Perform(Verb.Walk, "door");
