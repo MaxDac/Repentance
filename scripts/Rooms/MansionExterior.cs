@@ -138,9 +138,10 @@ public partial class MansionExterior : Room
     private async Task WedgeBell()
     {
         if (!await Game.Hud.Puzzle.Open(PuzzleKind.Bell)) return;
+        State.SetFlag("bell_wedged");
+        Player.SetCharacter(ResolvePlayerCharacter());
         await Say("Hold the hammer back, tie it clear of the gong, then let go. The wire stays intact.");
         await Think("My tie. Rose gave it to me, a lifetime ago. Now it's all that keeps this house asleep.");
-        State.SetFlag("bell_wedged");
         await Say("Let it ring now. Nobody will hear a thing.");
     }
 

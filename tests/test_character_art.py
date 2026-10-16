@@ -23,7 +23,8 @@ class CharacterArtTests(unittest.TestCase):
         self.assertGreater(sprites.PLAYER_IDLE_YAW, 45)
         self.assertLess(sprites.PLAYER_IDLE_YAW, 75)
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
-                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):
+                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED),
+                           ("micah_no_tie", sprites.MICAH_NO_TIE)):
             image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
             self.assertEqual(image.size, (640, 288))
             for column, extra in ((0, {}), (9, dict(mouth=1, nod=0.004))):
@@ -96,7 +97,8 @@ class CharacterArtTests(unittest.TestCase):
 
     def test_player_walk_and_vertical_views_keep_existing_poses(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH),
-                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED)):
+                           ("micah_dressing", sprites.MICAH_DRESSING), ("micah_masked", sprites.MICAH_MASKED),
+                           ("micah_no_tie", sprites.MICAH_NO_TIE)):
             image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
             poses = [(0, i + 1, sprites.walk_pose(90, i)) for i in range(8)]
             for row, yaw in ((1, 16), (2, 164)):
@@ -437,6 +439,34 @@ class CharacterArtTests(unittest.TestCase):
         red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
         self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any(), "tie painted along the bent-over trunk")
 
+    def test_micah_without_his_tie_after_the_alarm_bell(self):
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+        red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
+
+        def has_tie(path):
+            pixels = np.array(Image.open(path).convert("RGBA")).reshape(-1, 4).astype(int)
+            pixels = pixels[pixels[:, 3] == 255][:, :3]
+            return (np.abs(pixels - red).sum(axis=1) < 40).any()
+
+        self.assertTrue(has_tie(ART / "sprites" / "micah.png"))
+        self.assertTrue(has_tie(ART / "sprites" / "micah_aim.png"))
+        for name in ("micah_no_tie",) + tuple(f"micah_no_tie_{pose}" for pose in sprites.NO_TIE_POSES):
+            with self.subTest(sprite=name):
+                self.assertTrue((ART / "sprites" / f"{name}.png").is_file())
+                self.assertFalse(has_tie(ART / "sprites" / f"{name}.png"), "the tie is left on the bell")
+        for pose in sprites.NO_TIE_POSES:
+            with self.subTest(pose=pose):
+                shared = json.loads((ART / "sprites" / f"micah_{pose}.json").read_text())
+                variant = json.loads((ART / "sprites" / f"micah_no_tie_{pose}.json").read_text())
+                self.assertEqual([f["seconds"] for f in shared["frames"]], [f["seconds"] for f in variant["frames"]])
+                self.assertEqual((shared["width"], shared["height"]), (variant["width"], variant["height"]))
+        # the collar parts at the throat over bare skin, front on
+        front = np.array(Image.open(ART / "sprites" / "micah_no_tie.png").convert("RGB").crop((0, 96, 64, 192))).astype(int)
+        tied = np.array(Image.open(ART / "sprites" / "micah.png").convert("RGB").crop((0, 96, 64, 192))).astype(int)
+        skin = np.array([int(sprites.MICAH["skin"][i:i + 2], 16) for i in (0, 2, 4)])
+        throat = lambda img: (np.abs(img[30:40, 26:38] - skin).sum(axis=2) < 60).sum()
+        self.assertGreater(throat(front), throat(tied) + 4, "an open collar shows skin at the throat")
+
     def test_motel_sleeper_stays_painted_in_the_bed(self):
         source = (ROOT / "scripts" / "Rooms" / "MotelNight.cs").read_text(encoding="utf-8")
         self.assertNotIn("eleanor_sheet_rise", source)
@@ -469,7 +499,7 @@ def artifacts(destination):
     contact = Image.new("RGB", (350, len(models) * 108), "#282834")
     draw = ImageDraw.Draw(contact)
     for row, path in enumerate(models):
-        width = 64 if path.stem in ("micah", "daniel", "micah_dressing", "micah_masked") else 56
+        width = 64 if path.stem in ("micah", "daniel", "micah_dressing", "micah_masked", "micah_no_tie") else 56
         draw.text((4, row * 108 + 8), path.stem, fill="#e4ddcc")
         for x, source in ((150, before / path.name), (250, path)):
             if source.exists():

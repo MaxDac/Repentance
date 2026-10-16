@@ -498,6 +498,10 @@ def figure(spec, ps, fw=56, fh=80):
         band = c.parts_mask("torso") & (c.Y < ny0 + H * 0.02) & (np.abs(c.X - nx0) < neck_r * 1.55)
         c.recolor(band, col["collar"])
         c.bias[band & (c.Y < ny0 + H * 0.012)] += 1
+        if col.get("open_collar") and cp > 0.05:  # top button undone: the collar parts at the throat over bare skin
+            fx = P(body([0, 0.2, 0.05]))[0]
+            notch = band & (np.abs(c.X - fx) < max(neck_r * 0.85 * cp, 0.6))
+            c.recolor(notch, col["skin"])
     add(2.05, collar)
 
     def head():

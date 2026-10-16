@@ -356,7 +356,8 @@ From here the story follows Walkthrough.md:
    back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house.
 29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
-   tie hammer, release hand; cutting the wire would release the spring. Then open the door.
+   tie hammer, release hand; cutting the wire would release the spring. Then open the door. Micah leaves his tie
+   on the bell and goes on with his collar open.
 30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
    door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
    lantern, light it with the matchbook (kept), use the lit lantern on the dark stair, then climb the

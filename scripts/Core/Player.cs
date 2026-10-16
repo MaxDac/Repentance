@@ -83,7 +83,19 @@ public partial class Player : Node2D, ISpeaker
     {
         if (id == null) { SetCharacter(Character); return; }
         Stop();
-        _poses.Hold(id, _facing == Facing.Left);
+        _poses.Hold(id, _facing == Facing.Left, source: Outfit(id));
+    }
+
+    /// <summary>
+    /// The current outfit's own copy of a shared "micah_*" pose (e.g. "micah_no_tie_aim" for "micah_aim" while he
+    /// wears "micah_no_tie"), or null to use the shared strip.
+    /// </summary>
+    private string? Outfit(string id)
+    {
+        if (Character == "micah" || !Character.StartsWith("micah_") || !id.StartsWith("micah_")
+            || id.StartsWith(Character + "_")) return null;
+        var variant = Character + id["micah".Length..];
+        return ResourceLoader.Exists($"res://assets/art/sprites/{variant}.png") ? variant : null;
     }
 
     /// <summary>The held or playing pose, or null while the normal sheet is shown.</summary>
@@ -92,7 +104,7 @@ public partial class Player : Node2D, ISpeaker
     public Task<bool> PlayPose(string id)
     {
         Stop();
-        return _poses.Play(id, _facing == Facing.Left);
+        return _poses.Play(id, _facing == Facing.Left, Outfit(id));
     }
 
     /// <summary>Shows one frame of the held pose strip (for poses the story steps through, like lowering the gun).</summary>
@@ -110,7 +122,7 @@ public partial class Player : Node2D, ISpeaker
         _walkDone?.TrySetResult(false);
         if (stepPose != null)
         {
-            _poses.Hold(stepPose, _facing == Facing.Left);
+            _poses.Hold(stepPose, _facing == Facing.Left, source: Outfit(stepPose));
             _poses.ShowFrame(run * stepFrames);
         }
         var floor = Game.Instance?.Room?.Floor ?? FloorSurface.Wood;
