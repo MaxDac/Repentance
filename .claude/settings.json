@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(tools/run/test.sh:*)",
+      "Bash(tools/run/film.sh:*)",
+      "Bash(godot-mono --path . --headless --import:*)",
+      "Bash(py -3.14 tools/gen_art.py:*)",
+      "Bash(py -3.14 -m unittest:*)",
+      "Bash(python3 -m unittest:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh release delete:*)"
+    ]
+  }
+}

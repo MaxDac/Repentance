@@ -31,7 +31,7 @@ public sealed class InkScan
 
     /// <summary>
     /// Longest label that fits one choice-bar row: the bar is <c>Hud.ScreenW - 16</c> = 464 px and the dialogue font
-    /// (Departure Mono, 11 px) is monospace at 7 px per character. See docs/dialogue-choice-labels.md.
+    /// (Departure Mono, 11 px) is monospace at 7 px per character. See docs/story-and-dialogue.md.
     /// </summary>
     public const int MaxChoiceChars = 66;
 

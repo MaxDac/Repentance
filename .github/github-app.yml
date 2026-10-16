@@ -1,6 +1,4 @@
 instructions: |
-  Follow AGENTS.md, especially "Workflow: local tests, then a PR, then CI":
-  - Before a PR, run only the local suites that match the change (the table in AGENTS.md), never the full
-    clean suite unless asked. CI runs every suite and the exports.
-  - When a planning session's implementation is done, commit, push and open the PR without being asked,
-    listing the local suites run. Then watch the checks and fix failures until `ci-ok` is green.
+  Follow AGENTS.md: run only the local suites matching the change, and finish every implemented plan with a PR
+  whose checks you watch and fix until ci-ok is green (skill pr-and-ci).
+
