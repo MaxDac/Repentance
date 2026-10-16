@@ -363,11 +363,12 @@ public partial class AutoPlay
         Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
         await Shot("newspaper_morgue_taken");
         await CombineAndWait("clipping_top", "clipping_bottom");
-        Check(gs.HasItem("clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
+        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
             "pasted the halves together; the paste pot is kept");
+        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"),
+            "the mended clipping is pinned on the wall map at once: the Harrington Building on LaSalle");
         await ReloadCheckpoint("morgue_clipping");
-        await game.Perform(Verb.UseItem, "wall_map", "clipping");
-        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the clipping pins the Harrington Building on LaSalle");
+        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the pin survives a reload");
         await Shot("newspaper_morgue_pin");
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "ChicagoMap" && !gs.HasItem("paste") && !gs.HasFlag("paste_out"), "the paste pot goes back on the way out");
