@@ -26,7 +26,7 @@ public static class Interlude
         "interlude_box_packed", "interlude_safe_locked", "interlude_drawer_locked", "interlude_phoned",
         "interlude_agatha_met", "interlude_agatha_sorry", "interlude_agatha_proud",
     };
-    private static readonly string[] SecondBeats = { "interlude_goons_in" };
+    private static readonly string[] SecondBeats = { "interlude_goons_in", "interlude_door_kicked" };
 
     /// <summary>True while the player is Eleanor (an interlude, the coda, or her epilogue scene).</summary>
     public static bool EleanorPlays(Func<string, bool> has) =>

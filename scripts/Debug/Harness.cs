@@ -84,10 +84,7 @@ public abstract class Harness
         if (value is null or "fast")
         {
             Engine.TimeScale = FastTimeScale;
-            Engine.MaxPhysicsStepsPerFrame = 256;
-            Engine.MaxFps = 0;
-            OS.LowProcessorUsageMode = false;
-            DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
+            Uncap();
             GD.Print("[harness] clock fast (60x, vsync off)");
             return true;
         }
@@ -99,6 +96,15 @@ public abstract class Harness
         }
         error = $"unknown --clock={value} (use normal or fast)";
         return false;
+    }
+
+    /// <summary>Lets a high <see cref="Engine.TimeScale"/> run as fast as the machine allows: no frame cap, no vsync.</summary>
+    internal static void Uncap()
+    {
+        Engine.MaxPhysicsStepsPerFrame = 256;
+        Engine.MaxFps = 0;
+        OS.LowProcessorUsageMode = false;
+        DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
     }
 
     /// <summary>The value of <c>--name=value</c> among the user arguments, or null.</summary>

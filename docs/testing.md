@@ -6,6 +6,7 @@
 tools\run\test.ps1 -Suite unit, walk         # some suites (first run clean)
 tools\run\test.ps1 -Suite unit -NoClean      # skip deletion of generated files
 tools\run\film.ps1 -Speed 4 -Ending 5        # watch the game play itself
+tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, straight to the ending
 ```
 
 ```bash
@@ -92,13 +93,18 @@ a branch quickly; the playthrough may not.
 
 See [Rooms and scenes](rooms-and-scenes.md#invariants-checked-by-tests).
 
-### Film mode (`--film[=1|2|4]`)
+### Film mode (`--film[=1|2|4|8|16|60|hyper]`)
 
-The playthrough at real speed (1x, 2x, 4x), from the title to "The End", ending `2` unless `--ending` is given.
-Choices linger on screen so you can read them. `SpectatorFilter` ignores viewer input except Space (pause), F11 /
-Alt+Enter, and Esc (prints `FILM STOPPED`, exits 0). Uses real sound and the test save/settings files. Log:
-`logs/film_<speed>x.log`; `ERROR:` lines are warnings here (no audio device logs errors).
+The playthrough to watch, from the title to "The End": speed 1x-60x (`hyper` = 60x with the frame rate uncapped),
+ending `2` unless `--ending` is given. `--from=act1|interlude1|act2|interlude2|act3|ending` starts at a chapter
+(`ending` = the route's deciding scene; `act3` with `1-steps` is refused): the earlier story still plays for real,
+muted at 60x behind a black "Fast-forwarding" cover (`FilmCover`), so items and decisions are right; reaching
+`ending` takes about one route's time. Choices linger on screen so you can read them. `SpectatorFilter` ignores
+viewer input except Space (pause), F11 / Alt+Enter, and Esc (prints `FILM STOPPED`, exits 0). Uses real sound and
+the test save/settings files. Log: `logs/film_<speed>x.log` (`..._from_<chapter>.log` with `--from`); `ERROR:`
+lines are warnings here (no audio device logs errors).
 
+Launchers: `film.ps1 -Speed <s> -Ending <n> -From <chapter>`; `film.sh <s> --ending <n> --from <chapter>`.
 ## Unit tests (`tests/Repentance.Tests`)
 
 `net10.0` xunit project. It links the [Godot-free sources](conventions.md#godot-free-files) and imports

@@ -84,6 +84,42 @@ def door(img):
     shadow(img, "rect", [x0 - 2, FLOOR - 2, x1 + 8, FLOOR + 6], 0.4, 3)
 
 
+def door_kicked_night(img):
+    """Room 6's door kicked in, painted after the night grade: the leaf has swung in on its left hinges and stands
+    almost edge-on against the jamb, the strike plate splintered out of the right jamb, and the night outside: the
+    walkway rail, the parking lot, and the red and blue of the neon sign on the wet concrete."""
+    d = ImageDraw.Draw(img)
+    x0, x1, top = 8, 44, FLOOR - 88
+    vgrad(img, (x0, top, x1, FLOOR - 1), hx("0c0e22"), hx("1c1630"))
+    # the lot below the walkway: a parked car's roof and a lamp far off
+    d.rectangle([x0, top + 46, x1, FLOOR - 16], fill=hx("0a0a14"))
+    d.polygon([(x0 + 12, top + 52), (x1 - 2, top + 52), (x1, top + 58), (x0 + 10, top + 58)], fill=hx("1a1a2a"))
+    d.line([(x0 + 13, top + 52), (x1 - 3, top + 52)], fill=hx("4a3a5a"))
+    d.point((x0 + 18, top + 30), fill=hx("e8c060"))
+    light(img, "ellipse", [x0 + 4, top - 6, x1 + 10, top + 40], hx("c8203a"), 0.32, 8)
+    light(img, "ellipse", [x0 + 10, top + 30, x1 + 10, top + 70], hx("2a5ad0"), 0.22, 8)
+    # the walkway rail, and the concrete walkway at the threshold
+    d.line([(x0, top + 44), (x1, top + 44)], fill=hx("5a4a5e"), width=2)
+    for px in (x0 + 4, x0 + 24):
+        d.line([(px, top + 44), (px, FLOOR - 16)], fill=hx("3a3044"))
+    d.polygon([(x0, FLOOR - 16), (x1, FLOOR - 16), (x1, FLOOR - 1), (x0, FLOOR - 1)], fill=hx("2a2632"))
+    d.line([(x0, FLOOR - 16), (x1, FLOOR - 16)], fill=hx("5a3a52"))
+    light(img, "rect", [x0, FLOOR - 15, x1, FLOOR - 2], hx("c8203a"), 0.18, 3)
+    # the leaf, swung in against the hinge side and seen nearly edge-on
+    d.rectangle([x0, top, x0 + 7, FLOOR], fill=hx("2e2224"))
+    d.line([(x0 + 1, top + 2), (x0 + 1, FLOOR - 2)], fill=hx("4a3834"))
+    d.line([(x0 + 7, top), (x0 + 7, FLOOR)], fill=hx("16100e"))
+    d.rectangle([x0 + 3, top + 44, x0 + 4, top + 48], fill=hx("8a7448"))
+    # the strike plate torn out of the right jamb, splinters showing pale
+    for (sx, sy, ex, ey) in ((x1, top + 40, x1 - 3, top + 43), (x1, top + 44, x1 - 4, top + 46),
+                             (x1, top + 48, x1 - 2, top + 51)):
+        d.line([(sx, sy), (ex, ey)], fill=hx("8a6a4e"))
+    d.line([(x1 + 1, top + 38), (x1 + 1, top + 52)], fill=hx("7a5c40"))
+    # the night spills in across the floorboards from the doorway
+    light(img, "polygon", [(x0, FLOOR), (x1, FLOOR), (x1 + 30, FLOOR + 24), (x0 - 6, FLOOR + 24)],
+          hx("8a2a4a"), 0.14, 6)
+
+
 IRON, IRON_L, BRASS = hx("2a2422"), hx("4a403a"), hx("a49470")
 
 
@@ -952,7 +988,7 @@ def relight_night(img):
     return out
 
 
-def paint_night(rails=False, empty=False):
+def paint_night(rails=False, empty=False, kicked=False):
     img = Image.new("RGB", (W, H))
     shell(img, night=True)
     floor(img)
@@ -966,6 +1002,8 @@ def paint_night(rails=False, empty=False):
     dresser(img, night=True)
     bottle(img)
     img = relight_night(img)
+    if kicked:
+        door_kicked_night(img)
     night_wall_glints(img)
     glass_night(img)
     lamp_night(img)
@@ -1087,7 +1125,16 @@ def build():
     foreground = pixelize(paint_night(rails=True), palette).convert("RGBA")
     foreground.putalpha(alpha)
     save(foreground, "rooms", "motel_night_rails.png")
-    save(pixelize(paint_night(empty=True), palette), "rooms", "motel_empty.png")
+    empty = pixelize(paint_night(empty=True), palette)
+    save(empty, "rooms", "motel_empty.png")
+    # Second Interlude: the door the Order's men kick in, an overlay over the empty room (placed at its box)
+    kicked = pixelize(paint_night(empty=True, kicked=True), palette)
+    diff = ImageChops.difference(empty, kicked).convert("L").point(lambda v: 255 if v else 0)
+    box = diff.getbbox()
+    out = kicked.convert("RGBA")
+    out.putalpha(diff)
+    save(out.crop(box), "rooms", "motel_night_door_kicked.png")
+    print(f"  motel_night_door_kicked.png at {box[:2]}")
     eleanor_rise(palette)
     return night
 

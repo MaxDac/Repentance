@@ -15,6 +15,7 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 
 1. Select local suites from [Testing](docs/testing.md#quick-reference): docs need none; C# needs `dotnet build`
    then `unit`. First launcher run clean, later `-NoClean`. Never the full clean suite or film mode unless asked.
+   Run launchers through a subagent on the cheapest model that reports only results (`run-tests` skill).
 2. A planning session that implements its plan ends with a PR, unasked: commit, push, list suites run in the PR,
    watch checks and fix until `ci-ok` is green (`pr-and-ci`). Never merge; never call work done with red, pending
    or missing checks.

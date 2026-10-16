@@ -1,6 +1,6 @@
 ---
 name: run-tests
-description: Build, import, run and test Repentance (Godot 4.7 .NET) locally, pick the right test suites for a change, run film mode, or capture what the game draws. Use when asked to run, test, verify, debug a failing suite, or look at the screen.
+description: Build, import, run and test Repentance (Godot 4.7 .NET) locally, pick the right test suites for a change, run film mode (any speed, ending or start chapter), or capture what the game draws. Use when asked to run, test, verify, debug a failing suite, play/watch the film, or look at the screen.
 ---
 
 # Running and testing Repentance
@@ -24,6 +24,21 @@ Logs: `logs/<suite>.log`, `logs/import.log`. Failure = bad exit, missing marker 
 3. xunit: rerun one class:
    `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter FullyQualifiedName~StoryIntegrityTests`.
 4. Art: `py -3.14 -m unittest discover -s tests\art -v`.
+
+## Delegate launcher runs to a cheap model
+
+Launchers need no reasoning and print 100+ KB. Run each through a subagent on the least powerful model
+(`claude-haiku-4.5` or the cheapest available), e.g. `task(agent_type: "task", model: "claude-haiku-4.5", ...)`.
+Give it the worktree path, the exact command, a long wait (all suites ~10 min; a 1x film up to an hour, so prefer
+`-Speed 16|60|hyper` unless the user wants to watch), and ask it to report only: exit code, the `== Summary` block
+or `FILM OK` / `FILM STOPPED` / `FILM FAILED` lines, every `FAIL` / `ERROR:` line with context, and the log path.
+It must not edit files, retry with other options or fix failures.
+
+Never run two launchers in the same worktree at once (shared `logs/`, `.godot/`, test user data); run them in
+sequence, all but the first with `-NoClean`.
+
+Film: `tools\run\film.ps1 -Speed 1|2|4|8|16|60|hyper -Ending 1-10|1-oldman|1-steps -From act1|interlude1|act2|interlude2|act3|ending`
+(bash: `tools/run/film.sh hyper --from ending --ending 8 --no-clean`).
 
 For manual runs use `godot_console.exe`; bound diagnostic runs with `--quit-after N`.
 Never use `--headless` for `--autoplay` or `--settings-test`. Commands and options: `docs/getting-started.md`.

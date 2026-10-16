@@ -100,4 +100,4 @@ await Game.Run(async () =>
 
 - Gameplay uses Godot's game time; `Wait` timers stop when the tree is paused.
 - `_playtime` accumulates in `_Process` and is saved.
-- Only test and film runs change `Engine.TimeScale` (60x fast clock, 8x normal, film 1/2/4x).
+- Only test and film runs change `Engine.TimeScale` (60x fast clock, 8x normal, film 1-60x).
