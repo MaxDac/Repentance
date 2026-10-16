@@ -46,13 +46,16 @@ CS0108/CS0114 are build errors; AutoPlay also checks for explicit same-signature
 ## Running the game autonomously (Windows)
 
 Prefer the scripts in `tools/run/` (PowerShell `.ps1`, bash `.sh`). See `docs/testing-and-film-mode.md`.
+Run them through a subagent on the least powerful model (e.g. `claude-haiku-4.5`) that reports only the result and
+failures; see the `run-game` skill (`.github/skills/run-game/SKILL.md`).
 They reset generated files (`.godot/`, `bin/`, `obj/`, `logs/`, `screenshots/`, `frames/`, test-only user data),
 then `dotnet build` and import, and apply CI's pass rule. CI runs the same scripts.
 
 ```powershell
 tools\run\test.ps1                                # all suites; summary + non-zero exit on failure
 tools\run\test.ps1 -Suite unit, playthrough -NoClean   # unit|art|autoplay|settings|pause|walk|playthrough
-tools\run\film.ps1 -Speed 4 -Ending 3 -NoClean   # film mode: 1|2|4, ending 1-7|1-oldman|1-steps
+tools\run\film.ps1 -Speed 4 -Ending 3 -NoClean   # film mode: 1|2|4|8|16|60|hyper, ending 1-10|1-oldman|1-steps
+tools\run\film.ps1 -Speed hyper -From ending -NoClean   # -From act1|interlude1|act2|interlude2|act3|ending
 ```
 
 Godot logs go to `logs/<suite>.log`. Manual equivalents (always `godot_console.exe`; the GUI `godot.exe` can
@@ -66,7 +69,7 @@ godot_console --path . -- --playthrough      # pass = "PLAYTHROUGH OK" (story, e
 godot_console --path . -- --settings-test    # pass = "SETTINGS TEST OK"
 godot_console --path . -- --pause-test       # pass = "PAUSE TEST OK"
 godot_console --path . -- --walk-test        # pass = "WALK TEST OK" (movement in every room + mouse input)
-godot_console --path . -- --film=4 --ending=2   # watch-only, pass = "FILM OK"
+godot_console --path . -- --film=4 --ending=2   # watch-only, pass = "FILM OK" (--from=act2 starts at a chapter)
 dotnet test tests/Repentance.Tests/Repentance.Tests.csproj
 py -3.14 -m unittest discover -s tests\art -v
 ```

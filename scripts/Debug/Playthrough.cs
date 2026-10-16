@@ -13,8 +13,10 @@ namespace Repentance;
 /// <item><c>--playthrough</c>: a test. Acts 1–2 once, then every ending route reloaded from a real save at the Club
 /// vestibule. Every beat ends with a save → load round trip; coverage of sounds and Ink choices is checked at the end.
 /// Prints "PLAYTHROUGH OK".</item>
-/// <item><c>--film[=1|2|4]</c>: the same story to watch, at 1×, 2× or 4× speed, one ending (<c>--ending</c>, default 2).
-/// The viewer's input is ignored (Space pauses, F11 toggles full screen, Esc stops). Prints "FILM OK".</item>
+/// <item><c>--film[=1|2|4|8|16|60|hyper]</c>: the same story to watch, at 1× to 60× speed (hyper is 60×, uncapped),
+/// one ending (<c>--ending</c>, default 2), from a chapter (<c>--from</c>, see <see cref="Chapters"/>; the earlier
+/// beats play unseen and muted at 60×). The viewer's input is ignored (Space pauses, F11 toggles full screen, Esc
+/// stops). Prints "FILM OK".</item>
 /// </list>
 /// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
 /// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
@@ -35,7 +37,31 @@ public sealed partial class Playthrough : Harness
     {
     };
 
+    /// <summary>Film speeds; "hyper" is 60.</summary>
+    public static readonly string[] Speeds = { "1", "2", "4", "8", "16", "60", "hyper" };
+
+    /// <summary>Where <c>--from</c> may start the film, in story order.</summary>
+    public static readonly string[] Chapters = { "act1", "interlude1", "act2", "interlude2", "act3", "ending" };
+
+    /// <summary>The first beat shown for a chapter on a route; null starts at the title.</summary>
+    public static string? StartBeat(string chapter, string route) => chapter switch
+    {
+        "act1" => null,
+        "interlude1" => "first_interlude_aurelian",
+        "act2" => "act_two_opening",
+        "interlude2" => "second_interlude_taken",
+        "act3" => route == "1-steps" ? throw new ArgumentException("ending 1-steps ends in the Second Interlude, before Act 3") : "act_three_office",
+        "ending" => route switch { "1" => "alley_act_three", "1-steps" => "second_interlude_oldman", _ => "mansion_study" },
+        _ => throw new ArgumentException($"unknown chapter {chapter} (use {string.Join(", ", Chapters)})"),
+    };
+
     private readonly bool _film;
+    private double _speed = 1;
+    private string _chapter = "act1";
+    private string? _startBeat;
+    private bool _skipping;
+    private FilmCover? _cover;
+    private (int PhysicsSteps, int MaxFps, bool LowProcessor, DisplayServer.VSyncMode Vsync) _capped;
     private string _route = "2";
     private string[] _routes = { "2" };
     private readonly List<string> _decisions = new();
@@ -91,18 +117,37 @@ public sealed partial class Playthrough : Harness
             _failures.Add($"unknown --ending={ending} (use {string.Join(", ", Routes)}{(_film ? "" : " or all")})");
             return false;
         }
-        if (!_film) return Begin(game, "playthrough");
+        if (!_film)
+        {
+            if (Arg("from") != null)
+            {
+                _failures.Add("--from is for film mode only");
+                return false;
+            }
+            return Begin(game, "playthrough");
+        }
 
         string speed = Arg("film") ?? "1";
-        if (speed is not ("1" or "2" or "4"))
+        if (!Speeds.Contains(speed))
         {
-            _failures.Add($"unknown --film={speed} (use 1, 2 or 4)");
+            _failures.Add($"unknown --film={speed} (use {string.Join(", ", Speeds)})");
+            return false;
+        }
+        _speed = speed == "hyper" ? 60 : double.Parse(speed);
+        _chapter = Arg("from") ?? "act1";
+        try { _startBeat = StartBeat(_chapter, _routes[0]); }
+        catch (ArgumentException ex)
+        {
+            _failures.Add($"--from={_chapter}: {ex.Message}");
             return false;
         }
         if (!Begin(game, "film", applyClock: false)) return false;
-        Engine.TimeScale = double.Parse(speed);
+        _capped = (Engine.MaxPhysicsStepsPerFrame, Engine.MaxFps, OS.LowProcessorUsageMode, DisplayServer.WindowGetVsyncMode());
+        // above 4x the frame rate and physics steps would hold the clock back
+        if (_speed > 4 || _startBeat != null) Uncap();
+        Engine.TimeScale = _speed;
         game.GetTree().Root.CallDeferred(Node.MethodName.AddChild, new SpectatorFilter { Name = "SpectatorFilter" });
-        GD.Print($"[film] {speed}x, ending {_routes[0]}. Space pauses, F11 toggles full screen, Esc stops.");
+        GD.Print($"[film] {_speed}x, ending {_routes[0]}, from {_chapter}. Space pauses, F11 toggles full screen, Esc stops.");
         return true;
     }
 
@@ -111,17 +156,60 @@ public sealed partial class Playthrough : Harness
     private async Task Film()
     {
         _route = _routes[0];
-        _game.Hud.ShowTitle(true);
-        await _game.Hud.Fade(0, 0.8);
-        await _game.Wait(3);
-        await _game.Hud.Fade(1, 0.5);
-        _game.Hud.ShowTitle(false);
+        if (_startBeat != null)
+        {
+            _skipping = true;
+            Engine.TimeScale = FastTimeScale;
+            AudioServer.SetBusMute(0, true);
+            _cover = new FilmCover($"Fast-forwarding to {ChapterTitle(_chapter)}...");
+            _game.GetTree().Root.CallDeferred(Node.MethodName.AddChild, _cover);
+            GD.Print($"[film] fast-forwarding to {_chapter} (beat {_startBeat})");
+        }
+        else
+        {
+            _game.Hud.ShowTitle(true);
+            await _game.Hud.Fade(0, 0.8);
+            await _game.Wait(3);
+            await _game.Hud.Fade(1, 0.5);
+            _game.Hud.ShowTitle(false);
+        }
         await _game.NewGame();
         await WaitIdle();
         await ActOne();
         await ActTwo();
         await ActThree();
+        if (_skipping) Fail($"--from={_chapter}: never reached beat {_startBeat} on route {_route}");
         await _game.Wait(4);
+    }
+
+    private static string ChapterTitle(string chapter) => chapter switch
+    {
+        "interlude1" => "the First Interlude",
+        "act2" => "Act 2",
+        "interlude2" => "the Second Interlude",
+        "act3" => "Act 3",
+        "ending" => "the ending",
+        _ => "Act 1",
+    };
+
+    /// <summary>Reached the <c>--from</c> chapter: back to the chosen speed, with sound, and lift the curtain.</summary>
+    private async Task EndSkip()
+    {
+        _skipping = false;
+        await WaitIdle();
+        Engine.TimeScale = _speed;
+        if (_speed <= 4)
+        {
+            Engine.MaxPhysicsStepsPerFrame = _capped.PhysicsSteps;
+            Engine.MaxFps = _capped.MaxFps;
+            OS.LowProcessorUsageMode = _capped.LowProcessor;
+            DisplayServer.WindowSetVsyncMode(_capped.Vsync);
+        }
+        AudioServer.SetBusMute(0, false);
+        _cover?.Lift();
+        _cover = null;
+        GD.Print($"[film] {_chapter} starts");
+        await Pace(1.0);
     }
 
     private async Task Test()
@@ -156,6 +244,7 @@ public sealed partial class Playthrough : Harness
     /// <summary>One named step of the story. Afterwards the playthrough saves, loads and compares the whole state.</summary>
     private async Task Beat(string id, Func<Task> body, bool roundTrip = true)
     {
+        if (_skipping && id == _startBeat) await EndSkip();
         GD.Print($"[{Tag}] beat {id}" + (Gs.StoryAct == 3 ? $" (route {_route})" : ""));
         await body();
         if (roundTrip && !_film) await RoundTrip(id);
@@ -206,7 +295,7 @@ public sealed partial class Playthrough : Harness
         }
         _decisions.Add($"{knot}: {options[pick]}");
         GD.Print($"[{Tag}] choice {knot}: {string.Join(" | ", options)} -> {options[pick]}");
-        if (_film)
+        if (_film && !_skipping)
         {
             _ = _game.Hud.ShowChoices(DialogueManager.Instance.ShownChoices);
             await _game.Wait(1.5);
@@ -249,7 +338,7 @@ public sealed partial class Playthrough : Harness
 
     // ------------------------------------------------------------------ helpers
 
-    protected override Task Pace(double seconds) => _film ? _game.Wait(seconds) : Task.CompletedTask;
+    protected override Task Pace(double seconds) => _film && !_skipping ? _game.Wait(seconds) : Task.CompletedTask;
 
     private async Task Do(Verb verb, string hotspot, string? item = null)
     {
