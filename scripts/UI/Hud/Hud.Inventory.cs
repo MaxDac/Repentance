@@ -88,6 +88,7 @@ public partial class Hud
     public Vector2 InventoryPageCenter(bool next) => (next ? _nextPage : _previousPage).GetGlobalRect().GetCenter();
 
     public Vector2 SatchelCenter => SatchelPos + _satchel.Size / 2;
+    public bool SatchelVisible => _satchel.Visible;
 
     private void OnSlotInput(int slot, InputEvent e)
     {
@@ -110,11 +111,13 @@ public partial class Hud
             _slots[s].Icon = id == null ? null : GD.Load<Texture2D>(Items.Get(id).IconPath);
         }
         _satchel.Disabled = false;
+        // Eleanor carries nothing of Micah's: no satchel while she plays
+        _satchel.Visible = !Story.Interlude.EleanorPlays(GameState.Instance.HasFlag);
     }
 
     public void ShowInventory(bool show)
     {
-        if (show && Game.Instance.Busy) return;
+        if (show && (Game.Instance.Busy || Story.Interlude.EleanorPlays(GameState.Instance.HasFlag))) return;
         _inventory.Visible = show;
         if (!show) ItemHovered?.Invoke(null);
     }

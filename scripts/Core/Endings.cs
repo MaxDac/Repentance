@@ -11,6 +11,10 @@ namespace Repentance;
 ///   5  Prison      - Eleanor not convinced, nothing to bargain with: Caleb visits.
 ///   6  Prison      - Micah shot the old man, then repented and walked out without Eleanor: Rose visits.
 ///   7  Mansion     - Micah shot the old man, then himself (after Eleanor, or with her left alive): Caleb finishes the journal.
+///   8  Outskirts   - Eleanor (both refusals, Micah prayed) struck the old man and burned the house: she leaves alone.
+///   9  Prison      - Eleanor struck the old man and left the house standing: she confesses to Caleb.
+///  10  Prison      - Eleanor (both refusals) sent Micah away after he shot: he confesses to Caleb, she leaves alone.
+/// Eleanor's own endings need both interlude refusals; the refusals alone change nothing (a give-up is still 1).
 /// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
 /// </summary>
 public static class Endings
@@ -26,9 +30,22 @@ public static class Endings
     public const string ShotEleanor = "shot_eleanor";
     /// <summary>Micah turned the revolver on himself and left Eleanor alive.</summary>
     public const string ShotHimself = "shot_himself";
+    /// <summary>First Interlude: Eleanor turned the Mother Superior away in the convent cell.</summary>
+    public const string RefusedAbbess = "eleanor_refused_abbess";
+    /// <summary>Second Interlude: Eleanor refused the old man's gin and powder backstage.</summary>
+    public const string RefusedDrugs = "eleanor_refused_drugs";
+    /// <summary>Eleanor's coda: she struck the old man with the candlestick.</summary>
+    public const string EleanorStruck = "eleanor_struck";
+    /// <summary>Eleanor's coda: she burned the house on her way out.</summary>
+    public const string EleanorBurned = "eleanor_burned";
+    /// <summary>Micah shot the old man and Eleanor sent him away.</summary>
+    public const string EleanorDismissed = "eleanor_dismissed";
 
     /// <summary>Endings in which Daniel keeps the journal for Leo.</summary>
-    public static bool KeepsJournal(int ending) => ending is 1 or 6;
+    public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10;
+
+    /// <summary>Eleanor refused both the Mother Superior and the old man: her own endings open up.</summary>
+    public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
 
     /// <summary>Micah went back to Caleb at least once while hunting for Eleanor.</summary>
     public static bool ChurchReturned(Func<string, bool> has) =>
@@ -52,6 +69,10 @@ public static class Endings
 
     public static int Resolve(Func<string, bool> has)
     {
+        if (has(EleanorStruck))
+            return has(EleanorBurned) ? 8 : 9;
+        if (has(EleanorDismissed))
+            return 10;
         if (has(GaveUpSteps) || has(WalkedAway) || has(SparedOldMan))
             return 1;
         if (has(Repented))

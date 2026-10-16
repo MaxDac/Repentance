@@ -189,7 +189,7 @@ public class StoryIntegrityTests
     }
 
     /// <summary>Flags built at runtime: ending_N from <see cref="Endings.Resolve"/>, stash_* for Micah's stashed items.</summary>
-    private static bool Dynamic(string flag) => Regex.IsMatch(flag, @"^(ending_\d|stash_\w*)$");
+    private static bool Dynamic(string flag) => Regex.IsMatch(flag, @"^(ending_\d+|stash_\w*)$");
 
     [Fact]
     public void EveryItemExistsAndCanBeObtained()

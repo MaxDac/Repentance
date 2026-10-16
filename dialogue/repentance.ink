@@ -74,6 +74,126 @@ DANIEL: Right. Where were we, Micah?
 === journal_act2 ===
 DANIEL: The next entry. Same steady hand, but the ink is darker. Pressed harder into the page.
 DANIEL: "I told myself I was done with the Harringtons. Chicago had other plans."
+DANIEL: Wait. These first pages aren't about him at all. "What follows, she told me at the motel, in the dark. I wrote it down the next morning, as near to her words as I could."
+-> END
+
+// ---------------------------------------------------------------- FIRST INTERLUDE (Eleanor, before Micah's Act 2)
+// Micah's journal, written from what Eleanor told him at the motel: THOUGHT is his third-person narration of her
+// night, ELEANOR is the player. The choices only colour the scenes, except Agatha's night visit (interlude_agatha_night).
+
+=== interlude_aurelian ===
+THOUGHT: Tuesday night, the Aurelian. Room 507. She'd already turned the place upside down herself. Let them think she'd been taken.
+THOUGHT: Silk on the floor, feathers in the air. She said it was the first honest mess she'd made in that marriage.
+ELEANOR: The box. The safe. The drawer. Then a telephone call, and the door. Don't look back, Ellie.
+-> END
+
+=== interlude_rizzo ===
+ELEANOR: Operator? Rizzo's Flowers, on State Street. Yes. I'll hold.
+RIZZO: Rizzo's. We're closed.
+ELEANOR: Not to me, you're not. This is the lady who sends lilies every Thursday.
+RIZZO: Lotta ladies send lilies. Who's askin'?
++ [Somebody who always paid her bills on time.]
+    RIZZO: Then you got the wrong number, lady. Nobody pays on time.
+    ELEANOR: I did. Ask Tony.
++ [Tell Tony it's Eleanor. He'll know.]
+    RIZZO: ...Hold on.
+    THOUGHT: She said she could hear the jazz through the receiver, and a glass breaking, and a man laughing at it.
++ [Someone who knows what you keep under the roses.]
+    RIZZO: Lady, you got a smart mouth for a telephone.
+    ELEANOR: It's the only part of me that ever got me anywhere.
+- RIZZO: Tony says sit tight. Somebody'll come up for you.
+ELEANOR: The service stairs. Tell them to use the service stairs.
+-> END
+
+=== interlude_sal ===
+THOUGHT: They came up the service stairs, like she'd asked. Sal from the Blue Lantern door, and a hood with a broken nose she never got the name of.
+SAL: Mrs. Harrington. Tony sends his regards. Keep your head down and walk like you're bored.
+ELEANOR: I've had years of practice.
+THOUGHT: The bellboy saw them go: a lady between two large men, laughing at nothing, going down the back way. He told me she looked drunk. She told me she'd never been so sober in her life.
+-> END
+
+=== interlude_tony ===
+BARTENDER: Mrs. Harrington. In my bar, at this hour, with the whole North Side looking for you.
+ELEANOR: Hello, Tony. You still water the gin?
+BARTENDER: Only for people I like. What do you want?
++ [A place to hide. Somewhere they won't think to look.]
+    BARTENDER: There ain't a place in this city they won't look. There's only places they won't go.
++ [A drink first. Then a place to hide.]
+    BARTENDER: The drink's on the house. The hiding'll cost you.
+    THOUGHT: She told me she didn't touch it. She just held the glass, to have something to hold.
++ [I need to disappear, Tony. Tonight.]
+    BARTENDER: People don't disappear, lady. They just end up someplace nobody thought to dig.
+- BARTENDER: Who's after you? The husband?
++ [The husband's the least of it.]
+    BARTENDER: That's what I was afraid of.
++ [His father.]
+    BARTENDER: ...Yeah. I figured you'd say that.
++ [(Say nothing.)]
+    BARTENDER: Fine. The less I know, the longer I live.
+- BARTENDER: There's a convent up on the North Side. I sell the sisters their sacramental wine, and they don't ask where it comes from.
+BARTENDER: The Mother Superior owes me. Nobody from that Club goes near those nuns. Not even them.
+ELEANOR: A convent. Me.
+BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you.
+THOUGHT: She said Tony wouldn't take her money. That frightened her more than anything else he said.
+-> END
+
+=== interlude_agatha ===
+NUN: So. Tony's parcel. He said a lady. He didn't say what kind.
+NUN: I know that face. I know that perfume. Another Jezebel from that hideous Club, come to hide her paint behind our walls.
++ [I'm not here to sin, Sister. I'm here to hide.]
+    ~ set_flag("interlude_agatha_sorry")
+    NUN: Every sinner says that. It's the oldest prayer there is.
++ [Jezebel was a queen, Sister. I've only been a wife.]
+    ~ set_flag("interlude_agatha_proud")
+    NUN: And the dogs ate her in the street. Mind your tongue in this house.
++ [(Say nothing. Lower your eyes.)]
+    NUN: Silence. Well. That's a start. We'll see how long it lasts.
+- NUN: Mother Superior, if you must call me anything. Sister Agatha, to the Lord.
+NUN: The last cell on the left. Lights out at nine. You will not leave it until you're told.
+~ set_flag("interlude_agatha_met")
+THOUGHT: She told me Agatha watched her all the way down that corridor. Not like a nun watches a sinner. Like a cat watches a door.
+-> END
+
+// The night visit: Agatha wants Eleanor to say she wants something from her. Refusing her is saved
+// (eleanor_refused_abbess, one of the two refusals the endings 8-10 need); indulging her ends with Agatha cursing her.
+=== interlude_agatha_night ===
+THOUGHT: Past midnight. A candle under the door, then the door. Agatha, in her night veil, with the candle in both hands like she was carrying it to an altar.
+NUN: You're awake. I knew you would be. Women like you don't sleep at night. You work.
+{
+- has_flag("interlude_agatha_proud"):
+    NUN: A queen, you said. I've thought of nothing else since vespers. What a queen does, to make men kneel.
+- has_flag("interlude_agatha_sorry"):
+    NUN: Here to hide, you said. Hide what, I wonder. I lay awake wondering.
+- else:
+    NUN: You lowered your eyes to me in the corridor. I know that trick. I've seen it in paintings. I've seen it in the confessional.
+}
+ELEANOR: What do you want, Mother?
+NUN: What do I want? Child, I want nothing. It's you. I felt it the moment you walked in. The way you looked at me.
+NUN: Say it. Say what you want from me, and I'll pray over it, and God will forgive you. Say it.
+THOUGHT: She told me she knew that look. She'd seen it on every man at the Club. It was the first time she'd seen it on a woman who thought it was hers to forgive.
++ [(Refuse her.) Go back to bed, Mother. Whatever you came here for, it isn't mine to give you.]
+    ~ set_flag("eleanor_refused_abbess")
+    NUN: How dare you. How dare you. I came to pray over you.
+    ELEANOR: Then pray, Mother. From the other side of the door.
+    NUN: You'll leave this house in the morning. I won't have it said I sheltered a... a creature like you.
+    THOUGHT: The door shut hard enough to blow the candle out. Eleanor said she slept like a child, after. The first time in years.
++ [(Indulge her.) Sit down, then, Mother. Tell me what I'm supposed to confess.]
+    NUN: Yes. Yes. Tell me. Tell me all of it, child, every...
+    THOUGHT: She sat on the edge of the cot. The candle shook. Eleanor said she'd done this a hundred times, for a hundred men, and she knew to the second when it would turn.
+    NUN: No.
+    NUN: No! Get thee behind me! You are no girl. You are a demon in a girl's skin, sent here to try me!
+    ELEANOR: I didn't send for you, Mother. You came.
+    NUN: Out of my house at first light. And may God have more mercy on you than I can.
+    THOUGHT: She told me she laughed, after the door slammed. Then she cried, and she didn't know which of them she was crying for.
+- -> END
+
+=== interlude_motel_window ===
+THOUGHT: She took a room at the motel on the hill, the one with the sign that buzzes. From the window you can see the convent door. She watched it for three days.
+THOUGHT: On the third night, a man with a split lip walked up that hill in the dark and rang the bell. Me.
+ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
+THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
+ELEANOR: Coat. Gloves. And a face that's been waiting on that road all night.
+THOUGHT: When I came out of that convent, she was already on the road, under the trees, like it was the most natural place in the world to be. Now I know why. She told me Agatha had sent me. That was the first lie she ever told me, and the smallest.
 -> END
 
 // ---------------------------------------------------------------- OFFICE
@@ -1060,6 +1180,113 @@ ROSE: I'll try. That's all I can promise. I'll try.
 THOUGHT: She doesn't touch the glass between us. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
 -> END
 
+// ---------------------------------------------------------------- ELEANOR'S OWN WAY (endings 8, 9 and 10)
+// Only when she refused both Agatha and the old man (Endings.EleanorHeldOut).
+
+// Ending 10: Micah has shot the old man; instead of the persuasion, Eleanor sends him away.
+=== eleanor_dismiss ===
+ELEANOR: ...
+ELEANOR: Enough. I'm done with all of you. Go, just go, return to your life, Micah Jones. Leave the pistol here, and go.
+MICAH: Eleanor, they'll be up those stairs any minute--
+ELEANOR: Let them come. They're my problem. They always were. Go home, Micah.
+~ set_flag("eleanor_dismissed")
+THOUGHT: I put the revolver on the nightstand, by the lamp, butt towards her. She doesn't look at it. She doesn't look at me.
+THOUGHT: I walk out the front door and down the drive, and I keep walking until I find a precinct with its lights on.
+-> END
+
+// Endings 1, 8 and 9: after Micah's prayer, the player is Eleanor in the sheet, and the old man has his back to her.
+=== coda_wake ===
+THOUGHT: The door closed on the last of his prayer. The old man stood at the foot of the bed looking at it, his back to her, and laughed, a little, the way he laughed at the theatre.
+HARRINGTON: A prayer. In my house. In my bedroom.
+HARRINGTON: Get back into bed, my dear. I'll be with you in a moment. I want to hear the car leave.
+THOUGHT: On the nightstand at her elbow, the brass candlestick. The bed, warm and waiting. And his back, for once, turned, an arm's length away.
+-> END
+
+=== coda_bed ===
+ELEANOR: Yes, Mr. Harrington.
+THOUGHT: She got back into the walnut bed, and pulled the sheet up, and looked at the ceiling. She had had a lot of practice at that, too.
+-> END
+
+=== coda_strike ===
+THOUGHT: Brass, heavy as a sin. He never turned round. He never heard her bare feet on the carpet.
+THOUGHT: He went down onto his own rug without a word, the first time in his life he had nothing to say.
+ELEANOR: Good girl.
+THOUGHT: She didn't look at him twice. The door Micah had used stood open on the dark of the study.
+-> END
+
+=== coda_fire ===
+THOUGHT: The lantern Micah had hung on its nail, still burning. The Club's whiskey barrel on the floor, the rye they poured on Thursdays.
+ELEANOR: You always said this house would outlive us all.
+THOUGHT: She opened the spigot, and set the lantern down in what ran out of it, and took the kitchen steps two at a time.
+-> END
+
+=== coda_outside ===
+{has_flag("eleanor_burned"):
+    THOUGHT: Behind her, the windows of the big house went orange one by one, like it was throwing a party she wasn't invited to.
+- else:
+    THOUGHT: Behind her, the big house stood dark and quiet, as if nothing had happened in it at all. Nothing ever had, as far as the papers would know.
+}
+ELEANOR: Goodbye, Mr. Harrington.
+THOUGHT: She walked down to the road barefoot, with the cook's coat from the kitchen peg over the sheet. Nobody stopped her. Nobody ever looked twice at a woman leaving that house before dawn.
+-> END
+
+// Ending 9: Joliet, Eleanor in a jumpsuit, and Caleb, who came because she asked for a priest.
+=== prison_eleanor_caleb ===
+THOUGHT: The women's wing at Joliet. Grey walls, grey soup. She asked for a priest, and they sent the one whose name she knew.
+CALEB: Mrs. Harrington. They said you asked for me by name.
+ELEANOR: Eleanor. Nobody's called me Mrs. Harrington since the trial. They call me 4471.
+ELEANOR: You're his brother. You have his hands.
+CALEB: I've been told. What can I do for you, Eleanor?
+ELEANOR: I want to confess, Father. All of it. Not just the old man. All of it.
+CALEB: Then I'm listening. Take your time. We have the hour.
+THOUGHT: She told him. The Club, the Thursdays, the gin and the powder. The convent, and Agatha's candle. The motel. A walnut bed, and a brass candlestick, and the back of an old man's head.
+ELEANOR: How is he? Micah.
+CALEB: He's with his wife now.
+ELEANOR: ...
+ELEANOR: It's better this way.
+CALEB: Do you repent of these sins, Eleanor? Truly?
+ELEANOR: Every one but the last. God help me, Father, I can't be sorry for the last one.
+CALEB: Then be sorry that it came to it. That's enough to begin with. The rest is His.
+CALEB: Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti.
+ELEANOR: Amen.
+THOUGHT: She said it was the first time anybody had touched her forehead without wanting something for it.
+-> END
+
+// Ending 10: Joliet, Micah in a jumpsuit, confessing to his brother.
+=== prison_micah_caleb ===
+THOUGHT: Six months of grey walls and grey soup. Today, my brother, in his collar, with his stole in his pocket. I asked him to bring it.
+CALEB: Micah. The guard says you want a priest, not a brother.
+MICAH: I want both. I'll take whichever one's cheaper.
+CALEB: They're the same price. Go on.
+MICAH: Bless me, Father, for I have sinned. It's been... God knows. Since France.
+MICAH: I killed a man in his bedroom. I'd have killed him twice if I could. I broke my wife's heart and my boy's, and I'd do that over too, if I'm honest. I'm trying to be honest.
+MICAH: And there was a woman. She sent me away, at the end. She was right to.
+CALEB: Are you sorry, Micah?
+MICAH: I'm sorry I'm the man who did it. I don't know if that's the same thing.
+CALEB: It's where it starts. For your penance, the Our Father. All of it, this time. Every word.
+CALEB: Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti.
+MICAH: Amen.
+THOUGHT: Our Father, who art in heaven. I get to the end of it. Caleb doesn't say anything. He doesn't have to.
+-> END
+
+// Endings 8 and 10: Eleanor alone at the edge of the city, leaving it.
+=== ending_eleanor_alone ===
+{has_flag("eleanor_burned"):
+    THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
+- else:
+    THOUGHT: The morning she left Chicago, after the trial. A cardboard suitcase and a bus ticket west, and nobody to see her off.
+}
+ELEANOR: So this is where Chicago ends. Micah said it just runs out of streetlights.
+ELEANOR: He was right about that much.
+{has_flag("ending_8"):
+    ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
+- else:
+    ELEANOR: No more Thursdays. No more mirrors. No more good girl.
+}
+ELEANOR: Goodbye, Chicago.
+THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
+-> END
+
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
 
 === dinner_call2 ===
@@ -1079,32 +1306,121 @@ MOM: ...Goodnight, Dan.
 DANIEL: Five more minutes.
 -> END
 
+// ---------------------------------------------------------------- SECOND INTERLUDE (Eleanor, before Micah's Act 3)
+// Pages in another hand: a neutral narrator (THOUGHT) and Eleanor as the player. Who wrote them comes out in the
+// epilogue. The goons are colour; the old man's offer (interlude_oldman) is saved when she refuses it.
+
+=== interlude_motel ===
+THOUGHT: The motel, the night after. His side of the bed still warm, then not. She lay awake and listened to the sign buzz.
+THOUGHT: She had told him never to come back. She had meant it. She kept looking at the door anyway.
+-> END
+
+=== interlude_goons ===
+THOUGHT: Two of them. The big one from the Club's back stairs, Bruno, and a younger one in a borrowed suit, with his hands in his pockets like he was cold.
+BRUTE: Evening, Mrs. Harrington. Your detective left a trail a blind man could follow. We just followed it.
+GOON: Nice place. Real classy. The sign's missing a letter.
++ [Who sent you? Theodore?]
+    BRUTE: The young master don't send nobody anywhere. You know who sent us.
++ [I'll scream.]
+    BRUTE: Go ahead. Motels like this, nobody comes. They turn the radio up.
++ [Let me put my shoes on, at least.]
+    GOON: Sure, lady. Take your time. We got all night.
+    BRUTE: No, we don't.
+- GOON: He said you'd be trouble. You don't look like trouble.
+ELEANOR: Then he's wrong about one of us.
+BRUTE: Coat. Hat. And no tricks with the window. It's a long way down for a lady.
+THOUGHT: They didn't touch her. They didn't have to. She knew the way to the car better than they did.
+-> END
+
+// The old man's dressing-room offer. "Take it" plays her drink-and-powder strip (CUE drink); refusing is saved
+// (eleanor_refused_drugs, the other refusal endings 8-10 need), and ClubBackstage cuts to black on "Noooo!".
+=== interlude_oldman ===
+HARRINGTON: There she is. My songbird, home from the woods.
+HARRINGTON: The nuns. A motel. A drunk who calls himself a detective. You've had quite a holiday, my dear.
+ELEANOR: It wasn't a holiday.
+HARRINGTON: No. I suppose it wasn't. Look at you. Pale as a candle. You need something to put the colour back.
+THOUGHT: A glass of gin on the dressing table, and beside it, on a silver saucer, a little white line, laid out neat as a signature. As always.
++ [I don't want it tonight.]
+    HARRINGTON: You always say that. And then the band starts, and you want it more than you want to breathe.
++ [Where's Theodore?]
+    HARRINGTON: In the front row, where a husband belongs. Clapping, as he's told.
++ [(Look at the mirror, not at him.)]
+    THOUGHT: The bulbs round the glass made her look like somebody else. She told herself it was somebody else. It had always helped, before.
+- HARRINGTON: Drink, my dear. It makes the stage shorter. It makes the night shorter. It makes everything so much easier, for everyone.
++ [(Take the glass, and the powder.)]
+    ELEANOR: As always.
+    CUE: drink
+    HARRINGTON: Good girl. There's my songbird.
+    THOUGHT: The gin, then the powder. The mirror went soft at the edges, and so did she. She stopped being afraid of the stage somewhere between the two.
++ [(Push it away.) No. Not tonight. Not ever again.]
+    ~ set_flag("eleanor_refused_drugs")
+    HARRINGTON: ...
+    HARRINGTON: That wasn't a question, my dear.
+    THOUGHT: He set the mask down on the dressing table, very carefully, the way a man takes off his gloves.
+- -> END
+
 === epilogue ===
 DANIEL: The last entry. The handwriting's different. Shakier.
 {
+- has_flag("ending_8"):
+    DANIEL: "A letter came to Rose's house today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    DANIEL: "The motel, the Order's men, the old man's gin she wouldn't drink. And what she did with his candlestick after I'd gone. I've copied it all into the pages before these, in her words. I owed her that much."
+    DANIEL: "The Harrington house burned to the cellar the night I left it. The papers said a gas main. Nobody ever asked me, and I never said."
+    DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
+    DANIEL: ...So that's whose hand it was. Hers, copied out by his.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_9"):
+    DANIEL: Wait. This isn't Micah's writing. It's signed... Father Caleb Jones.
+    DANIEL: "My brother kept these pages honestly, as far as he knew. What he could not know, I have added from her own confession, at her asking. She said someone should write it down who wouldn't make her prettier than she was."
+    DANIEL: "Micah drinks coffee now, and goes to Mass with his wife. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    DANIEL: "Whoever reads this: she said no, twice, when no was the hardest word in Chicago. Remember that about her, if you remember anything."
+    DANIEL: ...So that's whose hand it was. Caleb's.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_10"):
+    DANIEL: Wait. It's not Micah's handwriting. It's signed... Father Caleb Jones.
+    DANIEL: "My brother confessed to me in Joliet, and asked me to finish his journal, since he could not bring himself to. What happened to her before that night, she told me herself, after the trial, before she left Chicago."
+    DANIEL: "She sent him away from that room, and it saved what was left of him. He serves his time. He says the Our Father every morning, start to finish, and he writes to Rose on Sundays."
+    DANIEL: "She left on a westbound bus, with one suitcase. She didn't say where, and I didn't ask. Some people have earned the right not to be followed."
+    DANIEL: ...So that's whose hand it was. Caleb's.
+    DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_1"):
     DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
+    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's, to his confessional. What he could tell me without breaking the seal, I wrote in, and the rest I guessed."
+    DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_2"):
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
     DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."
+    DANIEL: "She told me about the motel on the road that night, and the old man's gin. I wrote it down the way she said it. It's the only part of her I ever really had."
     DANIEL: He got the girl. And then the girl got him.
 - has_flag("ending_3"):
     DANIEL: "I see her every night. On the ceiling. At the bottom of the glass. The old man on the carpet, and the look on her face."
     DANIEL: "One bullet left in the revolver. I always was bad at keeping things."
+    {has_flag("mansion_exploded"):
+        DANIEL: "What happened to her after the motel, I put together from what the Club's men said in court. She wasn't there to say it herself."
+    - else:
+        DANIEL: "What happened to her after the motel, I put together from what the Club's men said in court. She never testified. I never asked her."
+    }
+    DANIEL: So he never really knew. He wrote her pages from a courtroom bench.
     DANIEL: The rest of the page is stained. Whiskey... and something darker.
     DANIEL: ...Jesus, Micah.
 - has_flag("ending_6"):
     DANIEL: "Rose came again today. She brought Tommy's drawings. She doesn't say she forgives me, and I don't ask her to."
     DANIEL: "I said the whole Our Father this morning, start to finish, the way Ma taught us. Caleb says I sound like a choirboy with a hangover."
     DANIEL: "I made a lot of awful choices, but now I know, I returned to the faith..."
+    DANIEL: There's a note pinned to the page, in another hand: "She told me the rest herself, after the trial. I have written it in for him. - C."
+    DANIEL: So that's whose hand it was.
     DANIEL: ...He found his way back. Behind bars, but he found it.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_7"):
     DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
-    DANIEL: "These are my brother's last pages, and he could not write them, so I have. I took them from the police reports and the newspapers, and from what I could bear to imagine."
+    {has_flag("shot_eleanor"):
+        DANIEL: "These are my brother's last pages, and he could not write them, so I have. I took them from what the Club's men said in court, and from what I could bear to imagine."
+    - else:
+        DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, after the funeral."
+    }
     {has_flag("shot_eleanor"):
         DANIEL: "He shot Mr. Harrington in his bed. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
     - else:
@@ -1119,9 +1435,15 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "Rose. Tommy. I know you won't come, and I don't blame you. I'd have stayed away from me too."
     DANIEL: "Tommy, be a better man than your father. It isn't a high bar. Rose, I'm sorry. I always was. I just never said it right."
     DANIEL: "They took my belt. They left me the sheets."
+    {has_flag("ending_4"):
+        DANIEL: "Eleanor comes on Sundays. She told me the rest of it across the parlour table, a little every week. The motel. The old man's gin. I wrote it in. Somebody should."
+    - else:
+        DANIEL: There's a note pinned to the page, in another hand: "She told me the rest herself, after the trial. I have written it in for him. - C."
+        DANIEL: So that's whose hand it was.
+    }
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END

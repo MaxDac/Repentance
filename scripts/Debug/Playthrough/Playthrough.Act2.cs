@@ -11,11 +11,45 @@ public sealed partial class Playthrough
 {
     private async Task ActTwo()
     {
-        await Beat("act_two_opening", async () =>
+        await Beat("first_interlude_aurelian", async () =>
         {
             await Pace(0.6);
             await _game.ItemVerb(Verb.Hand, "journal");
             await WaitIdle();
+            Expect("EleanorRoom", "the First Interlude opens in Room 507");
+            Check(Gs.HasFlag("interlude1") && _game.Player.Character == "eleanor_play", "the player is Eleanor");
+            await Do(Verb.Hand, "vanity");
+            await Do(Verb.Hand, "closet");
+            await Do(Verb.Hand, "desk_drawer");
+            await Do(Verb.Hand, "bed");
+            Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");
+            await Do(Verb.Walk, "exit");
+            await WaitIdle();
+            Expect("Speakeasy", "Sal takes her to the Blue Lantern");
+        });
+        await Beat("first_interlude_convent", async () =>
+        {
+            await Do(Verb.Talk, "bartender");
+            await WaitIdle();
+            Expect("ConventCorridor", "Tony sends her to the convent");
+            Check(Gs.HasFlag("interlude_agatha_met"), "Agatha meets her in the corridor");
+            await Do(Verb.Walk, "cell_door");
+            await WaitIdle();
+            Expect("ConventCell", "to her cell");
+        });
+        await Beat("first_interlude_night", async () =>
+        {
+            await Do(Verb.Hand, "bed");
+            await WaitIdle();
+            Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor refuses Agatha (saved)");
+            Expect("MotelNight", "the next morning, the motel");
+        });
+        await Beat("act_two_opening", async () =>
+        {
+            await Do(Verb.Walk, "window");
+            await Until(() => _game.Room?.Name == "ChicagoMap", 600);
+            await WaitIdle();
+            Check(!Story.Interlude.EleanorPlays(Gs.HasFlag) && !_game.Player.Character.StartsWith("eleanor"), "Micah's journal again");
             Check(Gs.HasItem("faith_ring") && Gs.HasFlag("caleb_met"), "whiskey, the ring and Caleb");
             Expect("ChicagoMap", "Act 2 opens on the map");
         });

@@ -65,15 +65,27 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  decals=_vee(0.30, 0.03, "ebe6d8", "2a1818") +
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
                   ("belt", 0.42, "d8d0c0")])
-# Sober upper-class mourning black: long-sleeved crepe dress to mid-calf, high black neckline, a single strand of pearls.
-ELEANOR = dict(h=62, sw=0.112, hw=0.046, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.058, skin="ecc4a2",
-               face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85, fringe=0.3,
-               front_gaze=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
-               hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12",
-               torso="2c2830", coat=dict(col="2c2830", top=0.40, hem=0.84, flare=0.016), stockings="3e3434",
-               shoes="141014",
-               decals=[("strip", 0.235, 0.6, 0.0, 0.0, "2c2830"),
-                       ("pearls", 0.232, "cfc8ba"), ("belt", 0.40, "1e1a20")])
+# Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
+# figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat.
+ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85,
+                    fringe=0.3, front_gaze=True, full_jaw=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
+                    hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12")
+# In profile her torso is slim and flat: a near-straight back from nape to waist, the front straight down from the
+# neck to a small bust, a thin neck column rising a little forward. Levels: (y, half-width, back z, front z).
+ELEANOR_FIGURE = dict(h=62, sw=0.1, hw=0.044, waist=0.054, hipw=0.09, leg_r=0.78, foot=0.056, arm_r=0.64, cap_r=0.6,
+                      cap_y=0.258, shoulder_y=0.262, bust=0.062, bust_y=0.295, waist_z=0.038,
+                      rear=(0.035, 0.058, 0.52), fitted=True, neck_r=0.022, neck_lean=0.005,
+                      profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.026, 0.026), (0.232, 0.085, -0.032, 0.036),
+                               (0.25, 0.1, -0.036, 0.044), (0.31, 0.095, -0.038, 0.052), (0.40, 0.054, -0.036, 0.044),
+                               (0.47, 0.09, -0.07, 0.046), (0.53, 0.0774, -0.06, 0.044)], flat_front=True)
+# A 1920s widow's black: the high-necked, long-sleeved black bodice of her portrait, a dropped waist with a sash at
+# the hip, a pleated skirt to mid-calf, sheer dark stockings, black heels and a short strand of white pearls.
+# Her outfits keep these curves; the black dress, of heavier cloth, softens bust and seat a little.
+_CURVES = dict(bust_hi=0, bust=ELEANOR_FIGURE["bust"], rear=ELEANOR_FIGURE["rear"])
+ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035, 0.044, 0.52), "torso": "1c1a20",
+           "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034), "stockings": "5e4a46", "shoes": "120e10",
+           "decals": [("belt", 0.465, "4a3c48"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "4a3c48"), ("pleats", 0.53),
+                      ("strand", 0.222, 0.252, 0.03, "f2eee4", "b8b0a4")]}
 # Rose, as in her close-up: long wavy blonde hair over the shoulders, blue-green eyes, a cream knit cardigan open
 # over a white collared blouse, and her navy skirt.
 ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c89c4a",
@@ -168,30 +180,44 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
 # Eleanor on stage: retain the dressed variant for players who opt out of nudity, in the close-up panel's red dress.
-ELEANOR_STAGE_CLOTHED = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="ecc4a2", sleeves="ecc4a2", lips="a83e3c",
-                            eye="3a2416", brow="2e1a12", mask=None, torso="781f27",
-                            coat=dict(MASKED_WOMAN["coat"], col="781f27"),
-                            decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")])
+_STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
+ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": "ecc4a2",
+                         "sleeves": "ecc4a2", "torso": "781f27",
+                         "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
+                         "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
 # The implied-nude variant: front locks define a subtle chest contour, one
 # hand lowered over her lap, the other arm hanging at her side.
-ELEANOR_STAGE = dict(MASKED_WOMAN, hair="4a2a1c", hair_style="long", skin="e4b898", sleeves="e4b898", lips="a83e3c",
-                     eye="3a2416", brow="2e1a12", mask=None, torso="e4b898", pelvis="e4b898", neckline=None,
-                     coat=None, stockings="e4b898", shoes="c89a7c", hair_front=0.34, hair_bulge=0.03,
-                     hair_back=0.32, hair_back_width=1.12, hair_back_shade=-1,
-                     front_line=(0.36, 0.53), rear=(0.04, 0.05),
-                     seamless=("torso", "leg1", "leg-1"), decals=[])
+_SKIN = "e4b898"
+ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
+                 "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
+                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.03,
+                 "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
+                 "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
                        coat=dict(col="5a1e26", top=0.40, hem=0.86, flare=0.02), pants="2a1a1e",
                        decals=[("strip", 0.21, 0.36, 0.05, 0.004, "3a1018"), ("belt", 0.42, "d8b860")])
+# Sitting up in bed (mansion and motel) she keeps her earlier upper body: a longer bare neck and the fuller bust.
+SHEET_BODY = dict(bust_hi=0, profile=None, neck_r=0.029, neck_lean=0.0, neck_drop=0.026, bust=0.078, bust_y=0.33, rear=(0.035, 0.058, 0.52))
 # Eleanor out of Harrington's bed, wrapped in the white sheet from the armpits down, bare shoulders and arms.
-ELEANOR_SHEET = dict(ELEANOR, torso="e8e4dc", sleeves="ecc4a2", neckline=0.262,
+ELEANOR_SHEET = dict(ELEANOR, **_CURVES, torso="e8e4dc", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
                      coat=dict(col="e8e4dc", top=0.40, hem=0.97, flare=0.03), stockings="e8e4dc", shoes="ecc4a2",
                      decals=[("strip", 0.30, 0.95, 0.01, 0.01, "c8c4bc")])
 # Micah in Joliet: a faded tan prison coverall buttoned to the throat.
 MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a", sleeves="b8743a",
                     cuff="b8743a", pants="b8743a", shoes="2b1b14",
                     decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
+# Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls.
+ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
+                    coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03), stockings="e4c4ae", shoes="7a3448",
+                    decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.42, "b85a78")])
+# Eleanor in Joliet: a grey prison jumpsuit buttoned to the throat, cut like Micah's coverall.
+ELEANOR_INMATE = dict(ELEANOR, **_CURVES, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
+                      coat=None, stockings=None, shoes="2a2a2e",
+                      decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
+# A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
+GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
+            pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
 
 
 def _arms(kind_r, kind_l=None):
@@ -202,16 +228,21 @@ def _arms(kind_r, kind_l=None):
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
-def player_sheet(spec, name):
-    side = [figure(spec, pose(PLAYER_IDLE_YAW), FW, FH)]
-    side += [figure(spec, walk_pose(90, i), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, pose(PLAYER_IDLE_YAW, mouth=1, nod=0.004), FW, FH)]
-    front = [figure(spec, pose(16), FW, FH)]
-    front += [figure(spec, walk_pose(16, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
+def player_sheet(spec, name, arms=None):
+    """arms: arms held still in every frame (e.g. both hands clutching a sheet) instead of the walk's swing."""
+    def held(ps):
+        if arms:
+            ps["arms"] = {k: (ps["arms"][k] if arms[k][0] == "swing" else arms[k]) for k in (1, -1)}
+        return ps
+    side = [figure(spec, held(pose(PLAYER_IDLE_YAW)), FW, FH)]
+    side += [figure(spec, held(walk_pose(90, i)), FW, FH) for i in range(STRIDE_FRAMES)]
+    side += [figure(spec, held(pose(PLAYER_IDLE_YAW, mouth=1, nod=0.004)), FW, FH)]
+    front = [figure(spec, held(pose(16)), FW, FH)]
+    front += [figure(spec, held(walk_pose(16, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
-    front += [figure(spec, pose(16, mouth=1), FW, FH), figure(spec, pose(16, mouth=2, nod=0.004), FW, FH)]
-    back = [figure(spec, pose(164), FW, FH)]
-    back += [figure(spec, walk_pose(164, i * 8 / 6, amp=0.8), FW, FH) for i in range(6)]
+    front += [figure(spec, held(pose(16, mouth=1)), FW, FH), figure(spec, held(pose(16, mouth=2, nod=0.004)), FW, FH)]
+    back = [figure(spec, held(pose(164)), FW, FH)]
+    back += [figure(spec, held(walk_pose(164, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
     save(img, "sprites", f"{name}.png")
     return img
@@ -253,7 +284,8 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("leader_unmasked", LEADER_UNMASKED, _arms("fold")),
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
-        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("clutch")))
+        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("clutch")),
+        ("goon", GOON, _arms("fold")))
 
 
 def supine_frame(spec, name, wound=None):
@@ -617,6 +649,130 @@ def build_gin():
     action_strip("micah_gin", frames, seconds, anchor=(FW / 2, FH - 3))
 
 
+# Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,
+# then dips her fingers in the compact and lifts a pinch of powder to her nose: (hand height, reach, powder, nod, s).
+POWDER_KEYS = [
+    (0.29, 0.24, False, 0.0, 0.3),
+    (0.22, 0.14, True, 0.0, 0.14),
+    (0.185, 0.075, True, 0.004, 0.5),
+    (0.19, 0.08, False, 0.009, 0.35),
+]
+
+
+def eleanor_drink_strip():
+    frames, seconds = [(figure(ELEANOR_GOWN, pose(90), FW, FH), (FW / 2, 18))], [0.3]
+    for height, reach, tip, full, duration in GIN_KEYS:
+        ps = pose(90, arms={1: ("hold", height, reach, tip), -1: ("side", 0, 0, 0)}, cup=1, glass="gin", full=full)
+        frames.append((figure(ELEANOR_GOWN, ps, FW, FH), (FW / 2, 18)))
+        seconds.append(duration)
+    for height, reach, powder, nod, duration in POWDER_KEYS:
+        ps = pose(90, arms={1: ("hold", height, reach, 0), -1: ("side", 0, 0, 0)}, nod=nod,
+                  **({"powder": 1} if powder else {}))
+        frames.append((figure(ELEANOR_GOWN, ps, FW, FH), (FW / 2, 18)))
+        seconds.append(duration)
+    frames.append(frames[0])
+    seconds.append(0.4)
+    action_strip("eleanor_drink", frames, seconds, anchor=(FW / 2, FH - 3))
+
+
+# Eleanor in the sheet takes the candlestick off the nightstand and brings it down on the back of Harrington's head,
+# facing right. The near (right) arm swings; the far one keeps the sheet clutched to her. (arm, candle way, lean, legs)
+STRIKE_STANCE = {1: (12, 8, 0), -1: (-12, 10, -6)}
+STRIKE_KEYS = [
+    (("clutch", 0, 0, 0), None, 0.0, None, 0.35),
+    (("swing", 48, 4, 26), (0, 1, 0.15), 7.0, None, 0.3),
+    (("swing", 92, 4, 70), (0, 1, 0.3), 2.0, STRIKE_STANCE, 0.22),
+    (("swing", 128, 6, 56), None, -6.0, STRIKE_STANCE, 0.35),
+    (("swing", 100, 4, 2), None, 9.0, STRIKE_STANCE, 0.07),
+    (("swing", 28, 4, 8), None, 13.0, STRIKE_STANCE, 0.45),
+]
+
+
+def eleanor_strike_strip():
+    fw = FW + 32
+    frames, seconds = [], []
+    for arm, way, lean, legs, duration in STRIKE_KEYS:
+        kw = dict(arms={1: arm, -1: ("clutch", 0, 0, 0)}, lean=lean)
+        if legs:
+            kw["legs"] = legs
+        if arm[0] != "clutch":
+            kw["candlestick"] = (1, way) if way else 1
+        frames.append((figure(ELEANOR_SHEET, pose(90, **kw), fw, FH), (fw / 2, 18)))
+        seconds.append(duration)
+    action_strip("eleanor_strike", frames, seconds, anchor=(fw / 2, FH - 3))
+
+
+def inmate_seated_strip(spec, name):
+    """seated_frame's pose (facing right, the same seat as micah_inmate_seated) with action-strip metadata."""
+    ps = pose(90, legs={1: (88, 92, 0), -1: (86, 90, 0)}, arms={1: ("swing", 36, 4, 70), -1: ("swing", 30, 4, 74)})
+    action_strip(name, [(figure(spec, ps, FW, FH), (FW / 2, 18))], [1], anchor=(FW / 2, FH - 3))
+
+
+# Struck on the back of the head from behind, facing right: the head snaps forward and the hands fly up, he drops onto
+# his knees, pitches forward and lies face-down with his arms flung out past his head. No wound.
+STRUCK = [
+    [(64, 57), (67, 34), (74, 23), (66, 74), (66, 91), (72, 45), (78, 54)],
+    KNEES_PRONE[0],
+    KNEES_PRONE[1],
+    [(78, 83), (101, 83), (115, 83), (60, 83), (42, 83), (110, 90), (124, 91)],
+]
+
+
+BLOOD = ((86, 8, 12, 255), (116, 16, 20, 255), (146, 28, 28, 255))  # deep shadow, blood, wet highlight
+
+
+def _head_wound(img, joints, head, i, last):
+    """The candlestick's wound on the back of the bald head, blood running from it down the back of the neck, more
+    as he goes down; on the floor (last) a small dark pool spreads under the head."""
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageChops
+    shoulder, head = np.array(grounded_joints(joints)[1], float), np.array(head, float)
+    up = (head - shoulder) / np.linalg.norm(head - shoulder)
+    fwd = np.array([-up[1], up[0]])  # facing right: the face is on this side of the skull
+    w = head - fwd * 3.6 - up * 1.2
+    r = (1.4, 1.8, 2.2, 2.5)[min(i, 3)]
+    blood = Image.new("RGBA", img.size)
+    d = ImageDraw.Draw(blood)
+    reach = (0.4, 0.6, 0.8, 0.95)[min(i, 3)]
+    end = w + (shoulder - fwd * 1.5 - w) * reach
+    d.line([tuple(w), tuple(end)], fill=BLOOD[1], width=2 if i >= 2 else 1)
+    d.line([tuple(w - fwd * 0.6), tuple(w + (end - w) * 0.6 - fwd * 0.6)], fill=BLOOD[0], width=1)
+    d.ellipse([w[0] - r, w[1] - r, w[0] + r, w[1] + r], fill=BLOOD[0])
+    d.ellipse([w[0] - r * 0.55, w[1] - r * 0.55, w[0] + r * 0.45, w[1] + r * 0.45], fill=BLOOD[1])
+    d.point((round(w[0] - 0.5), round(w[1] - 1)), fill=BLOOD[2])
+    if last:  # running off the side of the head to the floor
+        d.line([(w[0] + 1, w[1] + 1), (w[0] + 2, 92)], fill=BLOOD[1], width=1)
+    blood.putalpha(ImageChops.multiply(blood.getchannel("A"), img.getchannel("A")))
+    img.alpha_composite(blood)
+    if not last:
+        return img
+    hx = head[0]
+    pool = Image.new("RGBA", img.size)
+    pd = ImageDraw.Draw(pool)
+    pd.ellipse([hx - 10, 88, hx + 9, 94], fill=BLOOD[0])
+    pool.alpha_composite(img)
+    seep = Image.new("RGBA", img.size)
+    sd = ImageDraw.Draw(seep)
+    sd.ellipse([hx - 8, 91, hx + 10, 94], fill=BLOOD[0])
+    sd.ellipse([hx - 4, 91, hx + 5, 93], fill=BLOOD[1])
+    sd.point((round(hx + 1), 92), fill=BLOOD[2])
+    pool.alpha_composite(seep)
+    return pool
+
+
+def struck_strip(spec, name, final_name, arms):
+    """Hit on the back of the head: he staggers, drops to his knees and falls forward face-down. The wound bleeds
+    from the hit on, and a small pool spreads under his head once he's down."""
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [npc_standing(spec, arms)]
+    for i, joints in enumerate(STRUCK):
+        img, head = action_figure(scaled, joints)
+        frames.append((_head_wound(img, joints, head, i, i == len(STRUCK) - 1), head))
+    action_strip(name, frames, [0.1, 0.12, 0.3, 0.18, 0.3])
+    action_strip(final_name, [frames[-1]], [1])
+    return frames
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -639,6 +795,10 @@ def build():
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
     # Rose on her doorstep, square to the camera once the door is open
     npc_strip(ROSE, "rose_front", _arms("fold"), phi=0)
+    player_sheet(ELEANOR, "eleanor_play")
+    player_sheet(ELEANOR_GOWN, "eleanor_gown_play")
+    player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
+    eleanor_drink_strip()
     build_act3()
 
 
@@ -648,7 +808,10 @@ def build_act3():
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
     fall_strip(dict(ELEANOR_SHEET, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
+    struck_strip(HARRINGTON_GOWN, "harrington_struck", "harrington_struck_down", _arms("down", "pocket"))
+    eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
+    inmate_seated_strip(ELEANOR_INMATE, "eleanor_inmate_seated")
     seated_frame(ELEANOR, "eleanor_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)

@@ -1,10 +1,13 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="4_Voice"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_rails.png" id="5_rails"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="6_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/brute.png" id="7_brute"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/goon.png" id="8_goon"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 64)
@@ -14,6 +17,9 @@ size = Vector2(114, 76)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(38, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(40, 104)
 
 [node name="MotelNight" type="Node2D"]
 script = ExtResource("1_MotelNight")
@@ -37,6 +43,14 @@ polygon = PackedVector2Array(6, 264, 474, 264, 474, 182, 146, 182, 146, 192, 34,
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(206, 206)
+metadata/facing = 3
+
+[node name="interlude1" type="Marker2D" parent="Entries"]
+position = Vector2(206, 206)
+metadata/facing = 4
+
+[node name="interlude2" type="Marker2D" parent="Entries"]
 position = Vector2(206, 206)
 metadata/facing = 3
 
@@ -101,3 +115,42 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Chair"]
 position = Vector2(247, 148)
 shape = SubResource("Rect_3")
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "door"
+LookText = "The motel door, number six. The chain's off."
+WalkTo = Vector2(40, 200)
+Face = 2
+ShowIfFlags = "interlude2"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(26, 128)
+shape = SubResource("Rect_4")
+
+[node name="Brute" type="Area2D" parent="World"]
+position = Vector2(70, 222)
+script = ExtResource("6_Actor")
+Id = "brute"
+DisplayName = "Bruno"
+WalkTo = Vector2(110, 226)
+ShowIfFlags = "interlude_goons_in"
+monitoring = false
+monitorable = false
+Texture = ExtResource("7_brute")
+SpeechColor = Color(0.86, 0.62, 0.52, 1)
+
+[node name="Goon" type="Area2D" parent="World"]
+position = Vector2(30, 246)
+script = ExtResource("6_Actor")
+Id = "goon"
+DisplayName = "goon"
+WalkTo = Vector2(70, 246)
+ShowIfFlags = "interlude_goons_in"
+monitoring = false
+monitorable = false
+Texture = ExtResource("8_goon")
+SpeechColor = Color(0.7, 0.78, 0.66, 1)

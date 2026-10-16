@@ -20,7 +20,22 @@ public sealed partial class Playthrough
             await WaitIdle();
             await Do(Verb.Walk, "exit");
             Expect("ClubLounge", "into the lounge");
-            var stage = Do(Verb.Walk, "stage_exit");
+            _ = Do(Verb.Walk, "stage_exit");
+            await Until(() => _game.Room?.Name == "MotelNight", 900);
+            await WaitIdle();
+            Expect("MotelNight", "the Second Interlude opens in the motel");
+            Check(Gs.StoryAct == 3 && Gs.HasFlag("interlude2") && _game.Player.Character == "eleanor_play", "Act 3: the player is Eleanor");
+        });
+        await Beat("second_interlude_taken", async () =>
+        {
+            await Do(Verb.Hand, "door");
+            await WaitIdle();
+            Expect("ClubBackstage", "the Order's men take her to the Club's dressing room");
+            Check(_game.Player.Character == "eleanor_gown_play", "Eleanor in the pink gown");
+        });
+        await Beat("second_interlude_oldman", async () =>
+        {
+            var oldman = Do(Verb.Talk, "harrington");
             if (_route == "1-steps")
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 900);
@@ -29,9 +44,10 @@ public sealed partial class Playthrough
                 over = true;
                 return;
             }
-            await stage;
+            await oldman;
             await WaitIdle();
-            Check(Gs.StoryAct == 3 && Gs.HasFlag("keep_going"), "Act 3: Micah keeps going");
+            Check(Gs.HasFlag(Endings.RefusedDrugs) == EleanorRoute, "Eleanor's answer to the old man follows the route");
+            Check(Gs.HasFlag("keep_going") && !Gs.HasFlag("interlude2"), "Micah keeps going");
             Expect("Office", "Act 3 opens at Micah's desk");
         }, roundTrip: _route != "1-steps");
         if (over) return;
@@ -106,18 +122,31 @@ public sealed partial class Playthrough
                 over = true;
                 return;
             }
-            if (_route is "6" or "7")
+            if (_route is "6" or "7" or "10")
             {
-                if (_route == "6")
+                if (_route is "6" or "10")
                 {
                     await Until(() => _game.Room?.Name == "Prison", 300);
                     Expect("Prison", "Micah turns himself in");
                 }
+                if (_route == "10")
+                {
+                    await Until(() => _game.Room?.Name == "Outskirts", 300);
+                    Check(_game.Player.Character == "eleanor_play", "Eleanor alone at the city's edge");
+                }
                 await TheEnd();
                 Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
-                Check(Gs.HasFlag(_route == "6" ? Endings.Repented : Endings.ShotEleanor),
-                    _route == "6" ? "Micah repents" : "Micah shoots Eleanor");
+                string flag = _route switch { "6" => Endings.Repented, "7" => Endings.ShotEleanor, _ => Endings.EleanorDismissed };
+                Check(Gs.HasFlag(flag), $"route {_route}: {flag}");
                 over = true;
+                return;
+            }
+            if (_route is "8" or "9")
+            {
+                await confront;
+                await WaitIdle();
+                Expect("MansionBedroom", "after the prayer, the player is Eleanor");
+                Check(Gs.HasFlag("eleanor_coda") && _game.Player.Character == "eleanor_sheet_play", "Eleanor in the sheet");
                 return;
             }
             await confront;
@@ -125,8 +154,13 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
             Check(Gs.HasFlag(Endings.EleanorConvinced) == (_route is "2" or "4"), "Eleanor's answer follows the route");
             Expect("MansionKitchen", "the escape through the kitchen");
-        }, roundTrip: _route is "2" or "3" or "4" or "5");
+        }, roundTrip: _route is "2" or "3" or "4" or "5" or "8" or "9");
         if (over) return;
+        if (_route is "8" or "9")
+        {
+            await EleanorCoda();
+            return;
+        }
         if (free)
         {
             await Beat("mansion_escape_cellar", async () =>

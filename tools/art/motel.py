@@ -728,7 +728,7 @@ def body_mound(cloth, legs, radius=5.0, lift=1.2):
     return Image.fromarray(rgba.astype("uint8"), "RGBA")
 
 
-def white_bed_linen(img):
+def white_bed_linen(img, empty=False):
     from .mansion import linen_surface, SHEET, SHEET_SIDE
     for outline, center in (
         ([(124, 104), (134, 106), (138, 110), (136, 122), (131, 124), (122, 120), (122, 108)],
@@ -766,6 +766,9 @@ def white_bed_linen(img):
         ([(61, 128), (68, 127), (73, 129)], 1.0, 14),
     ], SHEET, falloff=0.35)
     img.paste(side, (0, TOP), side)
+    if empty:  # nobody under it: the sheet lies thrown back, rumpled but flat
+        img.paste(top, (0, TOP), top)
+        return
     img.paste(body_mound(top, [LEGS, FAR_LEG]), (0, TOP), top)
     # Cotton compressed under the seated hip and between the two pillows.
     shadow(img, "ellipse", [120, 145, 138, 157], 0.25, 2)
@@ -949,7 +952,7 @@ def relight_night(img):
     return out
 
 
-def paint_night(rails=False):
+def paint_night(rails=False, empty=False):
     img = Image.new("RGB", (W, H))
     shell(img, night=True)
     floor(img)
@@ -970,9 +973,10 @@ def paint_night(rails=False):
     pendant_night(img)
     vignette(img, 0.72, tint=(14, 12, 30), blur=46)
     lit_frame = img.copy() if rails else None
-    white_bed_linen(img)
+    white_bed_linen(img, empty=empty)
     if not rails:
-        sleeper(img)
+        if not empty:
+            sleeper(img)
     else:
         rail_mask = Image.new("RGBA", (W, H))
         bed_rails_night(rail_mask)
@@ -1083,6 +1087,7 @@ def build():
     foreground = pixelize(paint_night(rails=True), palette).convert("RGBA")
     foreground.putalpha(alpha)
     save(foreground, "rooms", "motel_night_rails.png")
+    save(pixelize(paint_night(empty=True), palette), "rooms", "motel_empty.png")
     eleanor_rise(palette)
     return night
 
@@ -1114,7 +1119,7 @@ def eleanor_rise(palette):
         d = ImageDraw.Draw(img)
         head, shoulder, hip, knee, foot, hand = [np.array(local(p), float) for p in points]
         skin, shade, hair = hx("e8b890"), hx("b88060"), hx("3a2014")
-        _ell(d, tuple(shoulder + (0, 4)), 5, 6, skin)
+        _ell(d, tuple(shoulder + (0, 4)), 4, 5, skin)
         # The same hem drapes over the near mattress edge, then gathers around her planted feet.
         gather = max(0, 1 - index / 5)
         front = [tuple(shoulder + (-5, 6)), tuple(hip + (-7, 5)), tuple(knee + (-6, 4)),
@@ -1130,10 +1135,10 @@ def eleanor_rise(palette):
         if gather:
             d.line([tuple(knee + (0, 5)), tuple(knee + (1, 2 + 15 * gather))], fill=hx("a88a64"))
         d.line([tuple(head + (0, 4)), tuple(shoulder)], fill=skin, width=4)
-        d.line([tuple(shoulder + (2, 4)), tuple(hand)], fill=shade, width=4)
-        d.line([tuple(shoulder + (1, 3)), tuple(hand)], fill=skin, width=2)
+        d.line([tuple(shoulder + (2, 4)), tuple(hand)], fill=shade, width=2)
+        d.line([tuple(shoulder + (1, 3)), tuple(hand)], fill=skin, width=1)
         grip = shoulder + (-3, 7)
-        d.line([tuple(shoulder + (-4, 3)), tuple(grip)], fill=skin, width=3)
+        d.line([tuple(shoulder + (-4, 3)), tuple(grip)], fill=skin, width=2)
         d.line([tuple(shoulder + (-5, 7)), tuple(shoulder + (5, 7))], fill=hx("f0dcb0"), width=2)
         _ell(d, (head[0] + 2, head[1] + 2), 6, 7 if index > 1 else 4, hair)
         if index > 1:

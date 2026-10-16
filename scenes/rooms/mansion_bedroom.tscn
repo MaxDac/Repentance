@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionBedroom.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom.png" id="2_bg"]
@@ -12,9 +12,16 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom_screen.png" id="14_screen"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_bedroom_fire.png" id="15_fire"]
 [ext_resource type="Script" path="res://scripts/Core/LoopStrip.cs" id="16_LoopStrip"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/mansion_candlestick.png" id="17_candlestick"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(96, 72)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(18, 30)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(52, 118)
 
 [node name="MansionBedroom" type="Node2D"]
 script = ExtResource("1_Room")
@@ -41,6 +48,10 @@ polygon = PackedVector2Array(0, 210, 134, 210, 119, 230, 121, 234, 132, 234, 147
 position = Vector2(36, 234)
 metadata/facing = 4
 
+[node name="eleanor_coda" type="Marker2D" parent="Entries"]
+position = Vector2(396, 240)
+metadata/facing = 3
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="Bed" type="Area2D" parent="Hotspots"]
@@ -56,6 +67,53 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
 position = Vector2(354.0, 176.0)
 shape = SubResource("Rect_1")
+
+[node name="Candlestick" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "candlestick"
+DisplayName = "candlestick"
+LookText = "A brass candlestick on the nightstand."
+WalkTo = Vector2(402, 216)
+Face = 2
+ShowIfFlags = "eleanor_coda"
+HideIfFlags = "eleanor_struck"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Candlestick"]
+position = Vector2(412, 166)
+shape = SubResource("Rect_2")
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "door"
+LookText = "The door to the study."
+WalkTo = Vector2(36, 234)
+Face = 3
+ShowIfFlags = "eleanor_coda"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(32, 147)
+shape = SubResource("Rect_3")
+
+[node name="Landing" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "landing"
+DisplayName = "door"
+LookText = "The door to the landing."
+WalkTo = Vector2(448, 230)
+Face = 4
+ShowIfFlags = "eleanor_coda"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Landing"]
+position = Vector2(454, 147)
+shape = SubResource("Rect_3")
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -91,6 +149,14 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "eleanor_up"
 
+[node name="CandlestickSprite" type="Sprite2D" parent="."]
+z_index = -8
+position = Vector2(406, 152)
+texture = ExtResource("17_candlestick")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "eleanor_struck"
+
 [node name="Harrington" type="Area2D" parent="World"]
 position = Vector2(250, 236)
 script = ExtResource("5_Actor")
@@ -111,6 +177,7 @@ DisplayName = "Eleanor"
 LookText = "Eleanor, holding the sheet around her."
 WalkTo = Vector2(370, 222)
 ShowIfFlags = "eleanor_up"
+HideIfFlags = "eleanor_coda"
 monitoring = false
 monitorable = false
 Texture = ExtResource("12_eleanor_sheet")

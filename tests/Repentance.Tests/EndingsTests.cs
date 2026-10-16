@@ -62,8 +62,41 @@ public class EndingsTests
     [InlineData(5, false)]
     [InlineData(6, true)]
     [InlineData(7, false)]
+    [InlineData(8, true)]
+    [InlineData(9, true)]
+    [InlineData(10, true)]
     public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
         Assert.Equal(keeps, Endings.KeepsJournal(ending));
+
+    private const string Abbess = "eleanor_refused_abbess", Drugs = "eleanor_refused_drugs";
+
+    [Theory]
+    // Eleanor's coda: struck and burned, struck only; and her sending Micah away
+    [InlineData(8, Abbess, Drugs, "spared_oldman", "eleanor_struck", "eleanor_burned")]
+    [InlineData(9, Abbess, Drugs, "spared_oldman", "eleanor_struck")]
+    [InlineData(10, Abbess, Drugs, "shot_oldman", "eleanor_dismissed")]
+    // the refusals alone never change an outcome
+    [InlineData(1, Abbess, Drugs, "gave_up_steps")]
+    [InlineData(1, Abbess, Drugs, "walked_away")]
+    [InlineData(1, Abbess, Drugs, "spared_oldman")]
+    [InlineData(1, Abbess, "gave_up_steps")]
+    [InlineData(5, Drugs, "shot_oldman")]
+    [InlineData(2, Abbess, "eleanor_convinced", "mansion_exploded")]
+    [InlineData(7, Drugs, "shot_eleanor")]
+    // the coda's flags win over everything Micah's part could have set
+    [InlineData(10, Abbess, Drugs, "eleanor_dismissed", "eleanor_convinced", "mansion_exploded")]
+    [InlineData(8, Abbess, Drugs, "eleanor_struck", "eleanor_burned", "mansion_exploded", "took_documents")]
+    public void EleanorsEndingsTakePrecedence(int ending, params string[] flags) =>
+        Assert.Equal(ending, Endings.Resolve(Flags(flags)));
+
+    [Fact]
+    public void EleanorHoldsOutOnlyIfSheRefusedBothTimes()
+    {
+        Assert.True(Endings.EleanorHeldOut(Flags(Abbess, Drugs)));
+        Assert.False(Endings.EleanorHeldOut(Flags(Abbess)));
+        Assert.False(Endings.EleanorHeldOut(Flags(Drugs)));
+        Assert.False(Endings.EleanorHeldOut(Flags()));
+    }
 
     [Fact]
     public void WalkingAwayNeedsAChurchReturn()
