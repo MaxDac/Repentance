@@ -15,6 +15,7 @@ EXTERNAL take_item(id)
 EXTERNAL set_flag(flag)
 
 VAR pushes = 0
+VAR persuade_ok = true
 
 -> END
 
@@ -856,18 +857,23 @@ CUE: door
 THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. I know where I'm going.
 -> END
 
+// Four turns, and only one line on each turn reaches her: all four in a row and she comes. A wrong line breaks the
+// chain for good (persuade_ok), but she still answers, colder each time. "(Leave her.)" is offered from the third turn,
+// "(Shoot Eleanor.)" on the fourth. If the fourth turn ends without her, eleanor_refused sends MansionBedroom to the
+// footsteps and eleanor_footsteps.
 === eleanor_persuade ===
+~ persuade_ok = true
 ELEANOR: You... you killed him. Micah, what have you done?
 MICAH: Get dressed. We're leaving.
 ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
-* [You can't stay here. Not now. They'll pin it on you.]
-    ELEANOR: They'll pin it on whoever they like. They always do.
 * [I didn't come all this way to leave you here, Eleanor.]
-    ELEANOR: ...
-    ELEANOR: You mean it. God help you, you actually mean it.
-    ~ set_flag("eleanor_convinced")
-* [He had it coming. They all do.]
-    ELEANOR: And who decides that? You? With a gun in your hand?
+    ~ persuade_ok = false
+    ELEANOR: Every man who ever bought me a drink said something like that, Micah. Then he went home.
+* [Then we don't stay in this city. We're out of it tonight.]
+    ELEANOR: Out of it. You say it like it's a door you can just walk through.
+* [You can't stay here. Not now. They'll pin it on you.]
+    ~ persuade_ok = false
+    ELEANOR: They'll pin it on whoever they like. They always do.
 * [(Lower the gun. Leave her, and turn yourself in.)]
     ~ set_flag("repented")
     THOUGHT: The gun weighs nothing now. It's the rest of me that's heavy.
@@ -877,21 +883,97 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     MICAH: Then I'll keep walking until I find one.
     THOUGHT: I came here to save somebody. All this time, I had the wrong one in mind.
     -> END
-- {has_flag("eleanor_convinced"): -> eleanor_comes}
-ELEANOR: Please, Micah. Just go. Before they come.
-* [Nobody's coming. The house is asleep.]
-    ELEANOR: This house never sleeps.
-* [I'll go to the police. I'll tell them everything.]
-    ELEANOR: The police? The police dine here on Sundays.
+- ELEANOR: Theodore will be here by morning. He'll know what to do. He always does.
+{not persuade_ok:
+    THOUGHT: She's talking to the carpet now, not to me.
+}
+* [Forget Theodore. You've got me now.]
+    ~ persuade_ok = false
+    ELEANOR: Got you. That's what they all say, right before they've got me.
+* [Theodore's a coward. I'll handle him.]
+    ~ persuade_ok = false
+    ELEANOR: With that? You'd have to shoot every Harrington in Chicago. There are more of them than bullets.
+* [He'll take you back like he always does. And lend you out again on Thursdays. #short: He'll take you back. And lend you out again on Thursdays.]
+    {persuade_ok:
+        ELEANOR: ...
+        ELEANOR: Yes. He will. He'll even say he's sorry about it.
+    - else:
+        ELEANOR: You don't have to tell me what he does. I was there.
+    }
+- ELEANOR: And what would I do out there? I don't know how to be anything but theirs.
+{not persuade_ok:
+    THOUGHT: Her eyes keep going to the other door. I'm losing her.
+}
+* [You'll be with me. I'll look after you.]
+    ~ persuade_ok = false
+    ELEANOR: Look after me. Like he did. Like his son does.
+* [You don't have to know tonight. You only have to walk through that door. #short: You only have to walk through that door tonight.]
+    {persuade_ok:
+        ELEANOR: One door.
+        ELEANOR: I've walked through a lot of doors, Micah. I never once picked which.
+    - else:
+        ELEANOR: Doors. This house is all doors, and every one of them opens onto him.
+    }
+* [You can be anything you like. A singer. A nurse. Anything.]
+    ~ persuade_ok = false
+    ELEANOR: The Club said that too, the first night. Anything I liked.
+* [(Leave her.)]
+    -> leave
+- ELEANOR: Why do you even care, Micah? What do you want from me?
+{not persuade_ok:
+    THOUGHT: Further away with every word. Somewhere I can't follow, in the same room.
+}
+* [I love you, Eleanor.]
+    ~ persuade_ok = false
+    ELEANOR: No, you don't. You love the girl in the photograph. She doesn't live here anymore.
 * [Every time I've seen you, you've said you can't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
-    ELEANOR: ...
-    ~ set_flag("eleanor_convinced")
-    -> eleanor_comes
+    ~ persuade_ok = false
+    ELEANOR: I say a lot of things, Micah. To a lot of men.
+* [Nothing. Come or stay, it's yours to decide. But decide it yourself, for once. #short: Nothing. Come or stay, but decide it yourself, for once.]
+    {persuade_ok:
+        ELEANOR: ...
+        ELEANOR: Nobody ever asked me. Not once. Not him, not Theodore, not the nuns.
+        ELEANOR: You mean it. God help you, you actually mean it.
+        ~ set_flag("eleanor_convinced")
+        -> eleanor_comes
+    - else:
+        ELEANOR: Then I've decided. I'm staying, Micah. Go.
+    }
+* [(Leave her.)]
+    -> leave
 * [(Shoot Eleanor.)]
     ~ set_flag("shot_eleanor")
     THOUGHT: She won't come. She'll stay here with him, on his carpet, in his house, for the rest of her life.
     THOUGHT: Then let the rest of her life be short. The gun comes up again before the rest of me can stop it.
-- -> END
+    -> END
+- ~ set_flag("eleanor_refused")
+ELEANOR: Please, Micah. Just go. Before they come.
+-> END
+
+= leave
+MICAH: Suit yourself. I'm not dying in this house for somebody who won't walk out of it.
+ELEANOR: Goodbye, Micah.
+THOUGHT: I don't look back. If I look back, I stay.
+-> END
+
+// The persuasion ran out and the men are on the stairs: the last choice in the bedroom.
+=== eleanor_footsteps ===
+THOUGHT: Two men. Maybe three. Coming up the stairs, in no hurry. They don't need to hurry.
+THOUGHT: She isn't coming. A door behind me, a gun in my hand, and maybe ten seconds to choose.
+* [(Pull the trigger on myself.)]
+    ~ set_flag("shot_himself")
+    THOUGHT: No more running. Not from them, not from Caleb, not from the man in the mirror.
+    ELEANOR: Micah... Micah, no...
+    -> END
+* [(Shoot Eleanor.)]
+    ~ set_flag("shot_eleanor")
+    THOUGHT: She'll stay here with him, on his carpet, in his house, for the rest of her life.
+    THOUGHT: Then let the rest of her life be short. The gun comes up again before the rest of me can stop it.
+    -> END
+* [(Leave her to them.)]
+    MICAH: That's my cue. Goodbye, Eleanor.
+    -> END
+
 
 === eleanor_comes ===
 ELEANOR: All right. All right. Don't let go of my hand.
@@ -1023,7 +1105,11 @@ DANIEL: The last entry. The handwriting's different. Shakier.
 - has_flag("ending_7"):
     DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
     DANIEL: "These are my brother's last pages, and he could not write them, so I have. I took them from the police reports and the newspapers, and from what I could bear to imagine."
-    DANIEL: "He shot Mr. Harrington in his bed. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
+    {has_flag("shot_eleanor"):
+        DANIEL: "He shot Mr. Harrington in his bed. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
+    - else:
+        DANIEL: "He shot Mr. Harrington in his bed. The girl he had gone to save would not go with him, and there were men on the stairs. He turned the revolver on himself, in front of her. She lived. The papers called it a madman's grief. It was not."
+    }
     DANIEL: "I prayed for him every day of his life, and I could not make him turn back. Finishing his journal is the only thing that eases the pain."
     DANIEL: "If you are reading this, whoever you are, and whenever: do not walk in my brother's footsteps. It is never too late to turn around, until it is."
     DANIEL: ...

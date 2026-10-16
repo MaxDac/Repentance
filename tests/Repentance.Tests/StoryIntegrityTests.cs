@@ -36,6 +36,7 @@ public class StoryIntegrityTests
         ["caleb_club"] = "Church: Act 2 Club talk, guarded by caleb_club; later visits use other knots",
         ["club_caught"] = "ClubStage: the unmasking cutscene, once",
         ["eleanor_persuade"] = "MansionBedroom: the finale, once",
+        ["eleanor_footsteps"] = "MansionBedroom: the last choice after the persuasion fails, once",
         ["eleanor_road"] = "ConventRoad: the Act 1 farewell cutscene, once",
         ["moc"] = "ClubHall: the first, unmasked visit, once; club_out is set when Micah is thrown out",
         ["nun"] = "redirects to nun.again once the first talk sets nun_talked",

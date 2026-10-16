@@ -367,15 +367,16 @@ From here the story follows Walkthrough.md:
    ends this opportunity; skipping remains possible and preserves the prison endings.
 31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
-   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving ("I didn't come all this
-   way...", or later "Every time I've seen you..."). Or, on the first turn, lower the gun and leave her to turn
-   himself in (ending 6); or, if she still refuses on the second, shoot her, then himself (ending 7).
+   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving: four turns, and only
+   the four right lines in a row convince her (see `Walkthrough.md`). On the first turn he can lower the gun and
+   leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
+   himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
 32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
    whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
 33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
    alone (not convinced, signed evidence or fire); 4 prison, Eleanor visits (convinced, neither signed evidence nor fire);
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
-   7 murder and suicide in the bedroom, the last entry written by Caleb. Each ends Act Three; the next morning
+   7 murder and/or suicide in the bedroom, the last entry written by Caleb. Each ends Act Three; the next morning
    (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose or to the faith, saying
    "Maybe Leo would like to read it some day." After ending 7 he respects Caleb's decision and puts it back.
    Otherwise, he puts it back in the trunk. *The End.*

@@ -47,24 +47,30 @@ public sealed partial class Playthrough
                 yield return "Shoot him in the shoulder";
                 yield return "Our Father";
                 break;
+            // Eleanor's four turns: only the four right lines in a row convince her (see Walkthrough.md)
             case "2":
-                yield return "Shoot him";
-                yield return "You can't stay";
-                yield return "Every time";
-                break;
-            case "3":
-                yield return "Shoot him";
-                yield return "He had it coming";
-                yield return "Nobody's coming";
-                break;
             case "4":
                 yield return "Shoot him";
-                yield return "I didn't come all this way";
+                yield return "we don't stay in this city";
+                yield return "lend you out again";
+                yield return "walk through that door";
+                yield return "decide it yourself";
+                break;
+            case "3":
+                // one wrong line breaks the chain; she's left on the third turn, as soon as Micah may
+                yield return "Shoot him";
+                yield return "They'll pin it on you";
+                yield return "Forget Theodore";
+                yield return "(Leave her.)";
                 break;
             case "5":
+                // four turns without her, then the footsteps on the landing, and Micah leaves her to them
                 yield return "Shoot him";
-                yield return "You can't stay";
-                yield return "I'll go to the police";
+                yield return "I didn't come all this way";
+                yield return "Theodore's a coward";
+                yield return "A singer";
+                yield return "I love you";
+                yield return "(Leave her to them.)";
                 break;
             case "6":
                 // "Shoot him" first: the old man's taunt offers both, the club only the prayer
@@ -73,9 +79,12 @@ public sealed partial class Playthrough
                 yield return "turn yourself in";
                 break;
             case "7":
+                // the shot is offered only on the fourth turn
                 yield return "Shoot him";
-                yield return "He had it coming";
-                yield return "Shoot Eleanor";
+                yield return "I didn't come all this way";
+                yield return "Forget Theodore";
+                yield return "I'll look after you";
+                yield return "(Shoot Eleanor.)";
                 break;
         }
     }
