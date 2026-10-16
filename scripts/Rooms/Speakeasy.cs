@@ -126,7 +126,13 @@ public partial class Speakeasy : Room
                 await BartenderDislikes();
                 return true;
             case ("bartender", Verb.UseItem) when item == "dollar":
-                await Say("bartender", "A buck buys you the bathtub gin. You want it? No? Smart man.");
+                if (State.HasFlag("lantern_gin") || State.HasFlag("photo_shown"))
+                {
+                    await Say("bartender", "One's plenty, pal. That stuff's been known to take the paint off a Packard.");
+                    return true;
+                }
+                await Talk("bartender.gin");
+                await BartenderDislikes();
                 return true;
 
             case ("private_door", Verb.Hand or Verb.Kick):
@@ -146,6 +152,24 @@ public partial class Speakeasy : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>Where Micah stands at the bar to pick up Tony's gin (the glass sits on the counter in reach).</summary>
+    public static readonly Vector2 GinSpot = new(384, 178);
+
+    /// <summary>Micah takes the tumbler off the counter, knocks it back and sets the empty glass down.</summary>
+    public override async Task OnCue(string cue)
+    {
+        if (cue != "gin") return;
+        await Game.WalkTo(GinSpot);
+        Player.Face(Facing.Right);
+        State.SetFlag("lantern_gin_held");
+        try
+        {
+            if (!await Player.PlayPose("micah_gin")) return;
+            Player.SetPose(null);
+        }
+        finally { State.SetFlag("lantern_gin_held", false); }
     }
 
     /// <summary>Wise guys and tightwads get walked out the back by Sal.</summary>

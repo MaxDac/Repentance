@@ -19,6 +19,7 @@ public partial class AutoPlay : Harness
     private readonly Dictionary<PosePlayback, int> _lastPoseFrame = new();
     private string[] _prefer = Array.Empty<string>();
     private readonly Dictionary<string, string[]> _offered = new();
+    private readonly List<(string Knot, string[] Options)> _offerLog = new();
     private bool _theEndShot;
     private string _act3Ink = "";
     private int _crossOffers;
@@ -49,6 +50,7 @@ public partial class AutoPlay : Harness
                 game.Hud.HideChoices();
             }
             _offered[knot] = options.ToArray();
+            _offerLog.Add((knot, options.ToArray()));
             if (knot == "caleb_cross") _crossOffers++;
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;

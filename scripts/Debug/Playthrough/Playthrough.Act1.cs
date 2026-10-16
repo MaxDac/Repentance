@@ -88,6 +88,8 @@ public sealed partial class Playthrough
                 "Moonshine gets Micah past Sal without paying");
             await Do(Verb.Talk, "bartender");
             await WaitIdle();
+            Check(Gs.HasFlag("lantern_gin") && CashRules.Balance(Gs.HasFlag) == 19,
+                "Micah knocks back a buck's worth of bathtub gin");
             Expect("Alley", "thrown out into the alley");
         });
         await Beat("convent_road", async () =>

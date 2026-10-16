@@ -397,4 +397,34 @@ def build():
     mask = Image.new("L", (W, H + TOP), 0)
     ImageDraw.Draw(mask).rectangle([334, 88 + TOP, 480, 140 + TOP], fill=255)
     save(cut(px, mask), "rooms", "speakeasy_fg.png")
+    build_gin()
     return px
+
+
+GIN_GLASS_AT = (398, 124)  # top-left in the room: on the counter where micah_gin picks the glass up and sets it down
+
+
+def gin_glass(full):
+    """Tony's tumbler of bathtub gin on the counter (5x7), full or drained, in the colours micah_gin holds it in."""
+    from .figure import ramp
+    glass, gin = ramp("aac4cc"), ramp("e4ecd2")
+    inside = mix(tuple(int(v) for v in glass[1]), hx("4a2a18"), 0.5)
+    img = Image.new("RGBA", (5, 7))
+    px = img.load()
+    for y in range(7):
+        for x in range(5):
+            if y == 6 or x in (0, 4):
+                tone = 4 if x == 0 and y < 6 else 1 if x == 4 else 2
+                px[x, y] = tuple(int(v) for v in glass[tone]) + (255,)
+            elif y == 0:
+                px[x, y] = tuple(int(v) for v in glass[3]) + (255,)
+            elif full:
+                px[x, y] = tuple(int(v) for v in gin[3 if y == 1 else 2 if x == 1 else 1]) + (255,)
+            else:
+                px[x, y] = inside + (255,)
+    return img
+
+
+def build_gin():
+    save(gin_glass(True), "rooms", "speakeasy_gin.png")
+    save(gin_glass(False), "rooms", "speakeasy_gin_empty.png")

@@ -596,6 +596,27 @@ def build_drinking():
         action_strip(f"micah_{kind}", [(image, (FW / 2, 18))], [1], anchor=(FW / 2, FH - 3))
 
 
+# Micah takes Tony's bathtub gin from the bar, facing right: (hand height, reach forward, tip, gin left, seconds). He picks the glass up off the counter, raises it, tips it back at his lips, and sets the empty glass down.
+GIN_KEYS = [
+    (0.27, 0.25, 0.0, True, 0.3),
+    (0.26, 0.18, 0.0, True, 0.16),
+    (0.2, 0.12, 0.4, True, 0.14),
+    (0.17, 0.1, 1.0, True, 1.1),
+    (0.2, 0.12, 0.4, False, 0.16),
+    (0.26, 0.18, 0.0, False, 0.16),
+    (0.27, 0.25, 0.0, False, 0.35),
+]
+
+
+def build_gin():
+    frames, seconds = [], []
+    for height, reach, tip, full, duration in GIN_KEYS:
+        ps = pose(90, arms={1: ("hold", height, reach, tip), -1: ("side", 0, 0, 0)}, cup=1, glass="gin", full=full)
+        frames.append((figure(MICAH, ps, FW, FH), (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_gin", frames, seconds, anchor=(FW / 2, FH - 3))
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -613,6 +634,7 @@ def build():
     door_strip(TEDDY, "teddy_open_door", 35)
     door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
+    build_gin()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
     # Rose on her doorstep, square to the camera once the door is open

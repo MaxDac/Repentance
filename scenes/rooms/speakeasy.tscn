@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Speakeasy.cs" id="1_Speakeasy"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/speakeasy.png" id="2_speakeasy"]
@@ -7,6 +7,9 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="6_sal"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/bartender.png" id="7_bartender"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="8_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/speakeasy_gin.png" id="9_gin"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/speakeasy_gin_empty.png" id="10_gin_empty"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(60, 87)
@@ -229,6 +232,24 @@ position = Vector2(0, 170)
 texture = ExtResource("4_speakeasy_fg")
 centered = false
 offset = Vector2(0, -170)
+
+[node name="Gin" type="Sprite2D" parent="World"]
+position = Vector2(398, 171)
+texture = ExtResource("9_gin")
+centered = false
+offset = Vector2(0, -47)
+script = ExtResource("8_FlagSprite")
+ShowIfFlags = "lantern_gin_poured"
+HideIfFlags = "lantern_gin_held, lantern_gin"
+
+[node name="GinEmpty" type="Sprite2D" parent="World"]
+position = Vector2(398, 171)
+texture = ExtResource("10_gin_empty")
+centered = false
+offset = Vector2(0, -47)
+script = ExtResource("8_FlagSprite")
+ShowIfFlags = "lantern_gin"
+HideIfFlags = "lantern_gin_held"
 
 [node name="Sal" type="Area2D" parent="World"]
 position = Vector2(156, 192)
