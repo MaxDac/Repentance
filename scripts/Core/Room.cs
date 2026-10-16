@@ -167,6 +167,9 @@ public partial class Room : Node2D
     /// <summary>Handle "Use item with other item" inside the inventory.</summary>
     public virtual Task<bool> OnCombine(string item, string other) => Task.FromResult(false);
 
+    /// <summary>Called after a <see cref="Recipes"/> combination made <paramref name="result"/> and its line was spoken.</summary>
+    public virtual Task OnCombined(string result) => Task.CompletedTask;
+
     /// <summary>Handle a wheel verb on an inventory item (e.g. Hand on a journal = read it). Look falls back to the description.</summary>
     public virtual Task<bool> OnItemVerb(Verb verb, string item) => Task.FromResult(false);
 

@@ -130,7 +130,6 @@ public sealed partial class Playthrough
             await Do(Verb.Hand, "spike");
             await Do(Verb.Hand, "paste_pot");
             await CombineAndWait("clipping_top", "clipping_bottom");
-            await Do(Verb.UseItem, "wall_map", "clipping");
             Check(Gs.HasFlag("harrington_located"), "the Harrington Building located");
             await Do(Verb.Walk, "door");
             Expect("ChicagoMap", "back to the map");

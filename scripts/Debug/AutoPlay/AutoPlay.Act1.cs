@@ -272,6 +272,7 @@ public partial class AutoPlay
         await Shot("convent_corridor");
         await game.Perform(Verb.Walk, "cell_door");
         Check(game.Room?.Name == "ConventCell", "entered Eleanor's cell");
+        Check(game.Room?.FindActor("nun") is { Visible: false }, "nobody but Micah in Eleanor's cell");
         Check(game.Music.Current == Track.ConventPiano && game.Music.Count(Track.ConventPiano) == pianoStarts,
             "the piano carries on into the cell without restarting");
         await Shot("convent_cell");

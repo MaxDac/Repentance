@@ -459,8 +459,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Combining the two halves without paste is refused: "Torn straight through the address. I'd need something
     to hold them together." Take the paste pot from the layout desk, then combine the halves into the mended
     clipping (the paste is kept; it goes back on the desk when Micah leaves, or by using it on the desk).
-  - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." Use the mended
-    clipping on it: Micah pins the Harrington Building, LaSalle Street (flag `harrington_located`).
+  - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
+    halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
+    LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.
 - The door leads back to the map.
 
 #### Map of Chicago

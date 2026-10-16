@@ -87,7 +87,8 @@ see the [scripting API](core-framework.md#scripting-api-use-inside-gamerun).
 
 Inventory actions follow the same pattern with their own chains:
 
-- item on item: `Story.CombineScripts.TryCombine` -> `Recipes.Evaluate` / `Apply` -> `Room.OnCombine` -> refusal.
+- item on item: `Story.CombineScripts.TryCombine` -> `Recipes.Evaluate` / `Apply` (then `Room.OnCombined` with the result) ->
+  `Room.OnCombine` -> refusal.
 - verb on item: notepad -> `Room.OnItemVerb` -> `Story.ItemScripts.TryHandle` -> generic.
 
 ## State and data flow
