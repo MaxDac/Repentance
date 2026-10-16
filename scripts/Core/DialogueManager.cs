@@ -13,7 +13,7 @@ namespace Repentance;
 /// "THOUGHT: text" is Micah's journal narration (top of the screen, nobody speaks it).
 /// Choice text is spoken by the player; wrap it in parentheses, e.g. "(Leave)", to keep them quiet.
 /// A choice too long for the choice bar gets a "#short: label" tag inside its brackets: the bar shows the short
-/// label, the player still says the full text (docs/dialogue-choice-labels.md).
+/// label, the player still says the full text (docs/story-and-dialogue.md).
 /// Ink can call give_item/take_item/has_item/set_flag/has_flag to touch the game state.
 /// </summary>
 public partial class DialogueManager : Node

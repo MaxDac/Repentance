@@ -5,10 +5,8 @@ description: Launch and monitor the Repentance Release workflow that exports Lin
 
 # Releasing Repentance
 
-The `Release` workflow (`.github/workflows/release.yml`) is manual-only. It computes the version, runs the unit
-tests, exports the `Linux` and `Windows Desktop` presets with Godot 4.7.2 .NET, and creates a GitHub Release tagged
-`vX.Y.Z` with `Repentance-vX.Y.Z-linux-x86_64.zip` and `Repentance-vX.Y.Z-windows-x86_64.zip`. The `.exe` embeds the
-game icon. The Linux zip also carries `dist/linux/` (`Repentance.desktop`, hicolor icons, `install-desktop.sh`).
+Workflow, exports and asset names: `docs/ci-and-release.md`. Dispatch `.github/workflows/release.yml`; do not
+build or publish releases by hand.
 
 ## Inputs
 
@@ -21,20 +19,22 @@ game icon. The Linux zip also carries `dist/linux/` (`Repentance.desktop`, hicol
 
 1. Resolve the version. If the user gave none, show what blank will produce:
    ```powershell
-   git fetch --tags --quiet; git tag -l 'v*' --sort=-v:refname | Select-Object -First 1
+   git fetch --tags --quiet
+   git tag -l 'v*' --sort=-v:refname | Where-Object { $_ -match '^v\d+\.\d+\.\d+$' } | Select-Object -First 1
    ```
    Refuse a version whose tag already exists (the workflow fails on it anyway).
-2. The workflow releases the **default branch** (`main`) head. Warn the user if the changes they expect are not
+2. Without `--ref`, dispatch uses the **default branch** (`main`). Warn if expected changes are not
    pushed/merged to `main`. Only pass `--ref <branch>` when the user explicitly asks to release another branch.
 3. Trigger it (omit `-f version=...` to auto-bump):
    ```powershell
    gh workflow run release.yml -f version=0.1.0 -f prerelease=true
    ```
-4. Find the run and watch it until it finishes (exports take several minutes):
+4. Find the dispatch matching the chosen ref/time and watch it. Do not assume the newest run is yours if another
+   release was dispatched:
    ```powershell
    Start-Sleep -Seconds 5
-   $run = gh run list --workflow release.yml --event workflow_dispatch --limit 1 --json databaseId,url | ConvertFrom-Json
-   gh run watch $run[0].databaseId --exit-status
+   gh run list --workflow release.yml --event workflow_dispatch --limit 5 --json databaseId,headBranch,createdAt,url
+   gh run watch <run-id> --exit-status
    ```
 5. On success, report the release URL and assets:
    ```powershell

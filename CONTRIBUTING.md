@@ -5,7 +5,7 @@ Contributions are welcome: bug fixes, new rooms, dialogue, art, tests and docs.
 ## How to contribute
 
 1. Fork the repository and create a branch.
-2. Make your change. See `docs/testing-and-film-mode.md` for the test launchers (`tools/run/test.ps1` / `test.sh`);
+2. Make your change. See `docs/testing.md` for the test launchers (`tools/run/test.ps1` / `test.sh`);
    locally, running the suites that match your change is enough.
 3. Open a pull request describing what you changed and why. CI runs every suite and exports the game; the pull
    request can be merged once its `ci-ok` check is green.
