@@ -8,11 +8,14 @@ public partial class Speakeasy : Room
 {
     private const float BarrierX = 132;
     private static readonly Vector2 SalBlocking = new(156, 192);
-    private static readonly Vector2 SalAside = new(196, 180);
+    internal static readonly Vector2 SalAside = new(196, 180);
+
+    /// <summary>Set while the door talk runs: the talk sets "sal_passed", and Sal then walks aside instead of jumping.</summary>
+    private bool _talkingToSal;
 
     protected override void OnRefresh()
     {
-        if (FindActor("sal") is { } sal && State.HasFlag("sal_passed"))
+        if (!_talkingToSal && FindActor("sal") is { } sal && State.HasFlag("sal_passed"))
             sal.Position = SalAside;
     }
 
@@ -47,12 +50,20 @@ public partial class Speakeasy : Room
     private async Task TalkToSal()
     {
         bool wasPassed = State.HasFlag("sal_passed");
-        await Talk("sal");
         var sal = FindActor("sal");
+        _talkingToSal = true;
+        try
+        {
+            await Talk("sal");
+            if (State.HasFlag("sal_passed") && sal != null) await sal.MoveTo(SalAside, 45);
+        }
+        finally { _talkingToSal = false; }
         if (State.HasFlag("sal_passed"))
         {
-            if (sal != null) await sal.MoveTo(SalAside, 45);
-            if (!wasPassed) await Think("Ten dollars into a fist the size of a ham. Half of what I had left, and I haven't even had a drink.");
+            if (!wasPassed)
+                await Think(State.HasFlag("sal_password")
+                    ? "One word, and the vault steps aside. Ten dollars still in my pocket. Thank you, Eleanor."
+                    : "Ten dollars into a fist the size of a ham. Half of what I had left, and I haven't even had a drink.");
         }
         else if (State.HasFlag("thrown_out"))
             await ThrownOut();

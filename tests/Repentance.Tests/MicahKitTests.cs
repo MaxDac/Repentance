@@ -28,14 +28,15 @@ public class MicahKitTests
         foreach (var clue in new[] { "matchbook", "photo", "dollar", Notes.ItemId, MicahKit.LighterId })
             Assert.False(MicahKit.KeptInAct(act, clue));
         Assert.True(MicahKit.KeptInAct(act, "revolver"));
+        Assert.True(MicahKit.KeptInAct(act, "cloth"));
         Assert.True(MicahKit.KeptInAct(act, "faith_ring"));
         Assert.True(MicahKit.KeptInAct(act, "cross"));
     }
 
     [Fact]
-    public void ActThreeKeepsOnlyTheGunAndTheCommitments()
+    public void ActThreeKeepsOnlyTheGunTheClothAndTheCommitments()
     {
-        Assert.Equal(new[] { "cross", "faith_ring", "revolver" }, MicahKit.ActKeep(3).Order());
+        Assert.Equal(new[] { "cloth", "cross", "faith_ring", "revolver" }, MicahKit.ActKeep(3).Order());
         Assert.Contains("mirror", MicahKit.ActKeep(2));
         Assert.Empty(MicahKit.ActKeep(1));
     }
@@ -58,8 +59,8 @@ public class MicahKitTests
         Assert.Empty(MicahKit.DebugItems("attic"));
         Assert.Equal(new[] { "dollar", "lockpick", "photo", "revolver" }, MicahKit.DebugItems("lobby").Order());
         Assert.Contains("took_revolver", MicahKit.DebugFlags("lobby"));
-        Assert.Equal(new[] { "card", "lockpick", "mirror", "revolver" }, MicahKit.DebugItems("library").Order());
-        Assert.Equal(new[] { "revolver" }, MicahKit.DebugItems("mansion_cellar"));
+        Assert.Equal(new[] { "card", "cloth", "lockpick", "mirror", "revolver" }, MicahKit.DebugItems("library").Order());
+        Assert.Equal(new[] { "cloth", "revolver" }, MicahKit.DebugItems("mansion_cellar").Order());
         Assert.All(Notes.DebugRooms, r => Assert.DoesNotContain("matchbook", MicahKit.DebugItems(r)));
     }
 

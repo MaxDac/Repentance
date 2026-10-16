@@ -263,18 +263,22 @@ installs and uninstalls it.
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
    **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and decode the paper's references (apostles, December, the day of rest: 12, 31, 7). It gives
-   no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7.
+   open the closet and decode the paper's Celtic references (a lucky clover, the night the Veil is thin, Saint
+   Patrick's day: 4, 31, 17). It gives no directions; each right stop drops a tumbler, and the dial opens at
+   right 4 / left 31 / right 17.
    Then take the brass box.
    Open it in the satchel with the hand: a
-   calling card carrying her perfume, a matchbook from the Blue Lantern and a vial of laundry bluing.
+   calling card carrying her perfume, a matchbook from the Blue Lantern, a vial of laundry bluing and a
+   Japanese water flower with a riddle: "Give me a drink and I'll tell you the word."
 4. **Rizzo's Flowers, State Street**: the Blue Lantern hides behind a florist's cold room. The chalkboard asks
    for blue carnations only. Take a white carnation from the bucket, combine it with Eleanor's
-   bluing and show the blue carnation at the cold-room grille to be let in.
-   **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Micah doesn't know the password and can bribe Sal with $10,
-   leaving $10 after all the bribes (mock him or refuse and
+   bluing and show the blue carnation at the cold-room grille to be let in. Drop the water flower in the
+   carnations' bucket and it opens with the club's password, MOONSHINE, written on its petals (optional).
+   **Blue Lantern speakeasy**: walking past Sal or talking to him starts the door talk. Say "Moonshine." if the water flower gave you
+   the password and Sal lets you in for free; otherwise bribe him with $10, leaving $10 after all the bribes
+   (mock him or refuse and
    you're thrown straight out back). Ask Tony the bartender what he's got and Micah can order his bathtub gin for $1
-   (leaving $9) and knock it back at the bar. Tony won't talk; when you're done he decides he doesn't
+   and knock it back at the bar. Tony won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
    him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit.
@@ -282,7 +286,8 @@ installs and uninstalls it.
    click the convent door to enter. Sister Agatha questions Micah, warns him off "that Jezebel", then lets
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
    the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
-   mirror and cloth to reveal the symbol. Micah returns the cloth and won't leave before that discovery.
+   mirror and cloth to reveal the symbol. Micah means to return the cloth but can't bring himself to: he keeps
+   Eleanor's perfumed cloth until the end (ending 1 throws it away). He won't leave before that discovery.
    The cell door returns to the corridor. Talk to the sister for her farewell, or click the front door and
    she calls Micah back for the same exchange before letting him leave.
 7. **Outside the convent**: Eleanor, in black, opens with a question about his late visit. After that opening,
@@ -383,7 +388,8 @@ or he let something slip, without establishing either as fact. While still supin
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving is easy, Micah.
 Forgetting is the part you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
-Micah offers coffee with "Nothing you owe me."; the journal places renewed vows a year later.
+Micah throws Eleanor's perfumed cloth in the street before ringing, then offers coffee with "Nothing you owe me.";
+the journal places renewed vows a year later.
 His office reminder preserves the last opportunity to recover the wedding ring and visit Caleb.
 
 If Eleanor refuses to follow and Micah burns the mansion, her fate remains unknown during escape.
@@ -400,7 +406,7 @@ holding, not a documented average PI income. Historical purchasing-power context
 October 1927 weekly earnings were $24.37. The $22 reserve is about 90% of that benchmark, making the $10 door
 bribe a substantial payment (about 41% of the weekly benchmark),
 not an ordinary tip. Bribes deduct only their respective amounts; inventory inspection shows the remaining cash.
-Tony's bathtub gin costs $1, leaving $9 if Micah drinks it.
+Tony's bathtub gin costs $1: $9 left after the bribe, or $19 if Sal let him in on the password.
 
 Exact Scripture excerpts use **Douay-Rheims (Challoner)**, appropriate to the Catholic characters:
 

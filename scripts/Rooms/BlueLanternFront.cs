@@ -5,7 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Rizzo's Flowers on State Street: the florist front of the Blue Lantern. The cold-room door has a speaking grille,
 /// and the man behind it only opens for a blue carnation in the buttonhole. White carnations from the bucket,
-/// dyed with the bluing on the sidewalk shelf, do the job. Sal's password and bribe inside are unchanged.
+/// dyed with Eleanor's bluing, do the job. Eleanor's water flower, dropped in the bucket, gives Sal's password;
+/// paying Sal inside still works without it.
 /// </summary>
 public partial class BlueLanternFront : Room
 {
@@ -25,6 +26,18 @@ public partial class BlueLanternFront : Room
     {
         switch (target.Id, verb)
         {
+            case ("bucket", Verb.UseItem) when item == "water_flower":
+                State.TakeItem("water_flower");
+                State.SetFlag("knows_password");
+                await Say("Eleanor wanted it to have a drink. I slip off the thread and drop the pellet in with Rizzo's white carnations.");
+                await Say("It sinks, swells, and opens: a paper flower, pink petals spreading on the water.");
+                await Say("Written along the petals, in her hand: MOONSHINE.");
+                await Think("The word for the door. She had the password all along, and she didn't trust paper with it either.");
+                return true;
+            case (_, Verb.UseItem) when item == "water_flower":
+                await Say("\"Give me a drink and I'll tell you the word.\" Rizzo keeps plenty of water for his flowers.");
+                return true;
+
             case ("grille" or "cold_door", Verb.Walk or Verb.Hand) when State.HasFlag("grille_opened"):
                 await Say("The hatch knows my lapel now. The door swings open before I knock.");
                 await Game.ChangeRoom("speakeasy", "door");

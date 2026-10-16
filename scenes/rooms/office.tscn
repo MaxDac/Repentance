@@ -27,7 +27,7 @@ size = Vector2(10, 12)
 size = Vector2(11, 25)
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(72, 109)
+size = Vector2(52, 109)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
 size = Vector2(38, 67)
@@ -200,7 +200,7 @@ ShowIfFlags = "drawer_open"
 HideIfFlags = "took_lockpick"
 
 [node name="DoorAjar" type="Sprite2D" parent="."]
-position = Vector2(17, 43)
+position = Vector2(27, 43)
 z_index = -6
 texture = ExtResource("14_door_ajar")
 centered = false
@@ -209,7 +209,7 @@ ShowIfFlags = "office_door_ajar"
 HideIfFlags = "office_door_open"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
-position = Vector2(17, 43)
+position = Vector2(27, 43)
 z_index = -6
 texture = ExtResource("15_door_open")
 centered = false

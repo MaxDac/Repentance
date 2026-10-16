@@ -385,7 +385,8 @@ def kneeling_figure(spec, joints):
     don't read as a red streak along the side of the coat."""
     hip, shoulder = joints[0], joints[1]
     dx, dy = shoulder[0] - hip[0], shoulder[1] - hip[1]
-    return action_figure(spec, joints, chest_down=-dy < 0.55 * math.hypot(dx, dy))
+    down = -dy < 0.55 * math.hypot(dx, dy)
+    return action_figure(spec, joints, chest_down=down, toes_tucked=down)
 
 
 def aim_frame(spec, name):
@@ -445,9 +446,9 @@ SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
 UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
-# Beaten down on hands and knees: hips over the knees, shins flat behind, the back sagging down to shoulders a little
-# lower than the hips, arms braced (elbows soft) under the shoulders and the head hanging towards the ground.
-KNEEL = [(60, 71), (82, 76), (91, 79), (61, 88), (41, 91), (81, 84), (86, 90)]
+# Beaten down on hands and knees: hips over the knees, the shins rising a little behind to feet upright on tucked toes,
+# the back flat and level with the floor, arms braced (elbows soft) under the shoulders and the head hanging down.
+KNEEL = [(60, 71), (82, 71), (92, 76), (61, 88), (41, 85), (80, 81), (86, 90)]
 # Hiding behind something, facing right, down on one knee: the far knee and shin flat on the floor with the toe tucked
 # under, the near leg bent with its foot flat, the trunk a little forward but upright, the head up to listen and the
 # near hand resting on the knee. The four extra points are the far leg's knee, ankle, heel and toe.

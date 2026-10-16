@@ -196,7 +196,7 @@ public sealed class SafeScreen : PuzzleScreen
     public override string Title => "ROOM 507 - SAFE";
     public override string SubmitText => "Turn handle";
     public override string Clue => GameState.Instance.HasItem("combination")
-        ? "Eleanor's paper:\n\n1. Those who sat at His table.\n2. The days of the month He was born.\n3. The day He rested.\n\nNo directions written down. The dial turns both ways; listen for the tumblers."
+        ? "Eleanor's paper:\n\n1. Leaves on a lucky clover.\n2. The night when the Veil is thin.\n3. Saint Patrick's day in March.\n\nNo directions written down. The dial turns both ways; listen for the tumblers."
         : "The desk drawer may hold whatever opens this. Close this panel to investigate.";
 
     protected override void Build()

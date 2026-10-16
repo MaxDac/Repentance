@@ -49,7 +49,7 @@ public class PuzzleTests
     public void SafeRequiresEveryDirectionAndNumber()
     {
         var directions = new[] { 0, 1, 0 };
-        var numbers = new[] { 12, 31, 7 };
+        var numbers = new[] { 4, 31, 17 };
         Assert.True(PuzzleRules.Safe(directions, numbers));
         for (int row = 0; row < 3; row++)
         {
@@ -64,10 +64,10 @@ public class PuzzleTests
             Assert.False(PuzzleRules.Safe(wrongDirection, numbers));
         }
         Assert.Equal(3, PuzzleRules.SafeTumblers(directions, numbers));
-        Assert.Equal(1, PuzzleRules.SafeTumblers(directions, new[] { 12, 30, 7 }));
+        Assert.Equal(1, PuzzleRules.SafeTumblers(directions, new[] { 4, 30, 17 }));
         Assert.Equal(0, PuzzleRules.SafeTumblers(new[] { 1, 1, 0 }, numbers));
         Assert.False(PuzzleRules.Safe(new[] { 0, 1 }, numbers));
-        Assert.False(PuzzleRules.Safe(directions, new[] { 12, 31, 7, 0 }));
+        Assert.False(PuzzleRules.Safe(directions, new[] { 4, 31, 17, 0 }));
     }
 
     [Fact]
