@@ -254,9 +254,11 @@ public partial class AutoPlay
         await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
             new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
         Check(gs.HasFlag("bell_wedged"), "gagged the bell with the tie");
+        Check(game.Player.Character == "micah_no_tie", "Micah has left his tie on the bell");
         await Shot("mansion_exterior_wedged");
         await game.Perform(Verb.Hand, "door");
         Check(game.Room?.Name == "MansionKitchen" && !gs.HasItem("kitchen_key"), "in through the kitchen, quietly");
+        Check(game.Player.Character == "micah_no_tie", "still without his tie in the next room");
         await Shot("mansion_kitchen");
         await game.Perform(Verb.Hand, "range");
         await game.Perform(Verb.Hand, "back_door");
@@ -332,6 +334,7 @@ public partial class AutoPlay
             "Micah walks out from behind the screen to take aim (#104)");
         Check(_poseCounts.GetValueOrDefault("micah_crouch_rise") == 1 && game.Player.PoseName == "micah_aim",
             "Micah stands back up before stepping out, so the crouch is released");
+        Check(game.Player.Poses.Source == "micah_no_tie_aim", "Micah aims without his tie");
         await game.Wait(0.5);
         await Shot("mansion_bedroom_gun");
         await confront;

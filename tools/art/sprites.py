@@ -41,6 +41,10 @@ MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1
              pants="4a433b", shoes="2b1b14",
              decals=_vee(0.335, 0.036, "e3d7bf", "7b1f2a") + [("knot", 0.205, "7b1f2a", "a8384a"),
                                                                 ("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
+# Micah after the mansion's alarm bell, his tie left knotted round its hammer: the same coat and hat, the shirt collar
+# open at the throat with the top button undone.
+MICAH_NO_TIE = dict(MICAH, open_collar=True, decals=_vee(0.335, 0.036, "e3d7bf") + [("strip", 0.205, 0.27, 0.022, 0.0, "c88c66"),
+                                                                  ("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
               face_w=0.047, jaw_w=0.037,
               shoes="ddd7ca", hipw=0.094, top_hem=0.47)
@@ -584,6 +588,8 @@ def action_sequences(spec, name):
         rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12], kneeling_figure)
         action_strip("micah_kneel_rise", rise, times)
         crouch_strips(spec, scaled, standing)
+    if name == "micah_no_tie":
+        crouch_strips(spec, scaled, standing, name)
 
 
 def profile_head(spec):
@@ -606,7 +612,7 @@ def profile_head(spec):
     return head, ((min(neck) + max(neck) + 1) / 2, collar)
 
 
-def crouch_strips(spec, scaled, standing):
+def crouch_strips(spec, scaled, standing, name="micah"):
     """Micah ducking down out of sight behind something onto one knee (micah_crouch), the kneel he holds there
     (micah_crouched), and standing back up (micah_crouch_rise: the same frames reversed). All face right; the coat
     hangs with gravity and the chest shows only coat, seen low and side-on, under the walk sheet's profile head."""
@@ -616,9 +622,9 @@ def crouch_strips(spec, scaled, standing):
     keys = [upright, between(upright, HALF_KNEEL), HALF_KNEEL, between(HALF_KNEEL, HIDE_KNEEL), HIDE_KNEEL]
     head = profile_head(spec)
     frames = [standing] + [action_figure(scaled, k, coat_drape=True, plain_chest=True, head_sprite=head) for k in keys]
-    action_strip("micah_crouch", frames, [0.08, 0.07, 0.07, 0.08, 0.09, 0.14])
-    action_strip("micah_crouched", frames[-1:], [1])
-    action_strip("micah_crouch_rise", frames[::-1], [0.12, 0.09, 0.08, 0.07, 0.07, 0.1])
+    action_strip(f"{name}_crouch", frames, [0.08, 0.07, 0.07, 0.08, 0.09, 0.14])
+    action_strip(f"{name}_crouched", frames[-1:], [1])
+    action_strip(f"{name}_crouch_rise", frames[::-1], [0.12, 0.09, 0.08, 0.07, 0.07, 0.1])
 
 
 def build_drinking():
@@ -787,6 +793,7 @@ def build():
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
     door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
+    build_no_tie()
     door_strip(TEDDY, "teddy_open_door", 35)
     door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
@@ -800,6 +807,20 @@ def build():
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
     eleanor_drink_strip()
     build_act3()
+
+
+# The poses Micah strikes after he leaves his tie on the mansion's alarm bell; Player loads these instead of the
+# shared micah_* strips while he wears the micah_no_tie sheet.
+NO_TIE_POSES = ("crouch", "crouched", "crouch_rise", "aim", "aim_lower", "aim_back", "aim_self")
+
+
+def build_no_tie():
+    player_sheet(MICAH_NO_TIE, "micah_no_tie")
+    aim_frame(MICAH_NO_TIE, "micah_no_tie_aim")
+    aim_lower_strip(MICAH_NO_TIE, "micah_no_tie_aim_lower")
+    aim_back_strip(MICAH_NO_TIE, "micah_no_tie_aim_back")
+    aim_self_frame(MICAH_NO_TIE, "micah_no_tie_aim_self")
+    action_sequences(MICAH_NO_TIE, "micah_no_tie")
 
 
 def build_act3():

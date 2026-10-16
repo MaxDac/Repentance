@@ -56,12 +56,18 @@ public partial class Room : Node2D
 
     /// <summary>
     /// The sheet the player actually wears here: Eleanor during the interludes and her coda (see
-    /// <see cref="Story.Interlude.PlayerSheet"/>); otherwise Micah goes masked and cloaked while "masked" is set.
+    /// <see cref="Story.Interlude.PlayerSheet"/>); otherwise Micah goes masked and cloaked while "masked" is set,
+    /// and without his tie once he's left it on the Harrington mansion's alarm bell ("bell_wedged").
     /// </summary>
     public virtual string ResolvePlayerCharacter()
     {
         if (Story.Interlude.PlayerSheet(Game.RoomScene, GameState.Instance.HasFlag) is { } eleanor) return eleanor;
-        return PlayerCharacter == "micah" && GameState.Instance.HasFlag("masked") ? "micah_masked" : PlayerCharacter;
+        return PlayerCharacter switch
+        {
+            "micah" when GameState.Instance.HasFlag("masked") => "micah_masked",
+            "micah" when GameState.Instance.HasFlag("bell_wedged") => "micah_no_tie",
+            _ => PlayerCharacter,
+        };
     }
 
     public WalkArea? Walk { get; private set; }
