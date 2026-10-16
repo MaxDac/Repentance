@@ -120,6 +120,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "EleanorRoom", "across the corridor into Eleanor's room");
 
         await Shot("eleanor_room");
+        Check(game.Sfx.Ambient == Sound.Rain, "rain patters on Eleanor's window");
         await game.Perform(Verb.Hand, "desk_drawer");
         Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
@@ -326,13 +327,13 @@ public partial class AutoPlay
         }
         await WaitIdle(game);
         await game.Perform(Verb.Hand, "comb");
-        Check(gs.HasItem("mirror") && !gs.HasItem("comb") && !gs.HasItem("cloth"), "revealed mirror retained; comb and cloth left in cell");
+        Check(gs.HasItem("mirror") && !gs.HasItem("comb") && gs.HasItem("cloth"), "revealed mirror retained; comb left in cell; Micah keeps her cloth");
         var searchBedAfterCleaning = game.Perform(Verb.Hand, "bed");
         await Until(() => game.Hud.SpeechVisible);
-        Check(game.Hud.SpeechText == "Thin mattress, and the borrowed cloth back where it belongs.",
-            "bed search after cleaning keeps the returned-cloth response");
+        Check(game.Hud.SpeechText == "Thin mattress. Her rag oughta be lying here. It's in my pocket instead.",
+            "bed search after cleaning admits the cloth wasn't returned");
         await searchBedAfterCleaning;
-        Check(!gs.HasItem("cloth"), "bed search after cleaning does not borrow the cloth again");
+        Check(gs.Inventory.Count(i => i == "cloth") == 1, "bed search after cleaning does not borrow another cloth");
         await Shot("convent_cell_after");
 
         await game.Perform(Verb.Walk, "exit");

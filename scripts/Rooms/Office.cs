@@ -21,6 +21,9 @@ public partial class Office : Room
         bool dark = State.StoryAct >= 3;
         State.SetFlag("office_lamp_off", dark);
         if (dark) UseDarkArt();
+        // whoever left last opened the door; it's shut again by the time anyone comes back
+        State.SetFlag("office_door_open", false);
+        State.SetFlag("office_door_ajar", false);
         base._Ready();
         _glint = GetNodeOrNull<Godot.Sprite2D>("WeddingRing/Glint");
     }

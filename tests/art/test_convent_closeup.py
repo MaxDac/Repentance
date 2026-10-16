@@ -41,6 +41,15 @@ class ConventCloseupTests(unittest.TestCase):
         self.assertAlmostEqual(w / h, closeup.HALF / closeup.AH, delta=0.01)
         self.assertEqual(h, 768)
 
+    def test_micah_is_zoomed_so_his_face_matches_eleanors(self):
+        z = closeup.MICAH_ZOOM
+        self.assertAlmostEqual(closeup.MICAH_FACE_W * closeup.MICAH_FACE_H * z * z,
+                               closeup.ELEANOR_FACE_W * closeup.ELEANOR_FACE_H, delta=1)
+        w, h = closeup.portrait_crop(Image.open(closeup.MICAH_SRC), closeup.MICAH_FACE_X, z,
+                                     closeup.MICAH_EYES_Y, closeup.ELEANOR_EYES_Y).size
+        self.assertAlmostEqual(w / h, closeup.HALF / closeup.AH, delta=0.01)
+        self.assertEqual(h, round(768 / z))
+
     def test_frame_is_a_dark_border(self):
         a = np.asarray(self.panel.convert("L"), dtype=float)
         self.assertLess(a[0, :].mean(), 40)

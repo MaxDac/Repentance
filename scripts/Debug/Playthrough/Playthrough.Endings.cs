@@ -21,6 +21,9 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         bool keeps = Endings.KeepsJournal(ending);
         Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
+        // the final stash records what Micah still carried: only giving up on Eleanor throws her cloth away
+        Check(Gs.HasFlag("stash_cloth") == (ending != 1),
+            $"route {_route}: Eleanor's cloth {(ending == 1 ? "thrown in the street" : "still in Micah's pocket")}");
         // Choose() falls back to the first option, so a renamed or wrongly gated choice would otherwise pass silently.
         // By now the cross is taken, so Wants() names the Blue Lantern; Caleb was asked for on the first visit. Giving up
         // on the steps ends the story before Act 3's office, so that route only answers the stage.

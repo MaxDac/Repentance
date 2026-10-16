@@ -159,8 +159,10 @@ described here (other verbs, flavour lines) is left to the implementation.
   lamp explains that gentle warmth softens wax; searching the bed supplies a borrowed clean cloth.
   On the first search, Micah admits he ought to leave her bed alone but cannot quite turn away.
   After finding the cloth, he notices her perfume and realises he has lifted it to his nose without thinking.
-  Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax
-  and returns the cloth to the bed, revealing a Celtic triquetra (trinity knot).
+  Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax,
+  revealing a Celtic triquetra (trinity knot). He means to put the cloth back on the bed but can't bring himself
+  to: "I oughta put this rag back on her bed, see... but, for some reason, I just can't." He keeps Eleanor's
+  perfumed cloth until the end; only giving up on her (ending 1) makes him throw it away.
   The symbol is shown full screen with Micah's remark over it; a click ends the remark and the next click
   closes the picture. It can then be inspected again from the inventory.
 - Micah keeps the revealed mirror; the comb stays in the drawer.
@@ -200,9 +202,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
 - Micah's 1927 inventory is put aside during the present-day scenes. When the journal picks up again, each act
   starts with a reset satchel: the notepad and lighter plus only what the rest of that act needs.
-  - Act 2: revolver, lockpick, the brass box's card, the mirror, and Faith's ring and cross if he has them. The
-    photo, the cash and the matchbook stay behind; the notepad holds what they said.
-  - Act 3: the revolver, and Faith's ring and cross if he has them (the endings weigh them).
+  - Act 2: revolver, lockpick, the brass box's card, the mirror, Eleanor's cloth, and Faith's ring and cross if he
+    has them. The photo, the cash and the matchbook stay behind; the notepad holds what they said.
+  - Act 3: the revolver, Eleanor's cloth, and Faith's ring and cross if he has them (the endings weigh them).
 
 ### Micah's journal narration
 
@@ -668,6 +670,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   to shoot the bartender, or the old man.
 - The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
   progressively stricter requirements above; the other endings are unchanged.
+- Before ringing, Micah throws Eleanor's perfumed cloth into the street ("Into the gutter with it. No more chasin'
+  that dame."). In every other ending he still has it.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
 - He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
   happen later, after he has begun showing change rather than merely promising it.

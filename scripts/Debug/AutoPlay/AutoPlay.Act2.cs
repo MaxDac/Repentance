@@ -26,7 +26,7 @@ public partial class AutoPlay
         Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
         await Until(() => game.Room?.Name == "ChurchExterior");
         Check(game.Music.Current == null, "no organ out on the cathedral steps");
-        Check(gs.HasItem("mirror"), "reading again leads back to 1927 with Micah's things");
+        Check(gs.HasItem("mirror") && gs.HasItem("cloth"), "reading again leads back to 1927 with Micah's things, Eleanor's cloth too");
         Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
             gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
             !gs.HasItem("matchbook") && !gs.HasItem("photo") && !gs.HasItem("dollar"),
@@ -147,9 +147,13 @@ public partial class AutoPlay
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
         Check(game.Music.Current == null, "the strings stop out on the street");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup",
+            "Micah's close-up framed over the pavement while he lies there");
         await game.Wait(1.5);
         await Shot("street_thrown_out");
         await Until(() => game.Room?.Name == "RoseHouse");
+        Check(_insetAtStreetChoice == false, "Micah's close-up is removed before he gets up and chooses");
         await club;
         await WaitIdle(game);
         Check(gs.HasFlag("go_rose") && gs.HasFlag("club_out"), "chose to go to Rose's house");
