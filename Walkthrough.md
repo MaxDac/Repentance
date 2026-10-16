@@ -244,14 +244,13 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 The player moves **Eleanor** (new playable sheet, black dress). The narration is Micah's journal voice, in the
 third person: he is writing down what she told him during the night at the motel ("She told me she sat by that
-window..."). Eleanor speaks aloud only to people and on look/hand. She has no satchel and no puzzles: the satchel
-button is hidden and **N** does nothing while she plays; Micah's things are stashed and come back when the
-interlude ends.
+window..."). Eleanor speaks aloud only to people and on look/hand. She carries her own satchel, empty when she
+starts: she can take, join and use only what she finds in the room she is in. **N** does nothing while she plays;
+Micah's things are stashed and come back when the interlude ends, and none of hers go with him.
 
-1. **Room 507, the Aurelian, the Tuesday night.** Colour only. The room is already turned over: she did it
-   herself ("Let them think she'd been taken."). She packs the brass box at the vanity (the card, the
-   matchbook, the bluing, the water flower), locks it in the safe and the combination in the drawer, and phones
-   Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
+1. **Room 507, the Aurelian, the Tuesday night.** The room is already turned over: she did it herself ("Let
+   them think she'd been taken."). She packs the brass box (**Puzzle 17**, below), puts the combination in the
+   drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
 2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the
    sacramental wine and sends her to the convent. Sal stays out of her way: the doorman's interception is off.
@@ -262,6 +261,18 @@ interlude ends.
    - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
    - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
    Eleanor leaves the convent the next morning.
+
+- **Puzzle 17 - The brass box:** she builds the clue Micah finds later, and locks it away herself.
+  - Hand on the vanity: the open brass box (the card, the matchbook, the bluing already in it) and the bare paper
+    water flower, the word inked inside.
+  - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
+    word."
+  - Look on the clothes shows a torn red hem; hand pulls a length of red thread from it.
+  - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
+    Without the thread, it won't stay wrapped.
+  - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
+  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer, the call and the door keep
+    their order.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed) and watches from the
    window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
    on the road, where he finds her. Fade to black, then Micah's office.
@@ -542,18 +553,30 @@ interlude ends.
 
 ### Second Interlude - Eleanor
 
-The player moves Eleanor again. The narration is a neutral third voice. Same rules as the First Interlude: no
-satchel, no **N**, Micah's things stashed until the interlude ends.
+The player moves Eleanor again. The narration is a neutral third voice. Same rules as the First Interlude: her own
+satchel for what she finds there, no **N**, Micah's things stashed until the interlude ends.
 
 1. **The motel room, after Micah has gone.** Colour only. A knock at the door: Bruno and a second goon (new
    sprite). They followed "your detective" there. Her answers are colour; they take her, over black.
 2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
-   short pink gown (new playable sheet). The old man, robed, unmasked, the stag mask in his hand, talks her into
-   gin and powder, "as always". The choice is saved:
+   short pink gown (new playable sheet). First he sends her to the mirror to put her face on (**Puzzle 18**,
+   below); he won't talk, and the gin table waits, until she has. Then the old man, robed, unmasked, the stag mask
+   in his hand, talks her into gin and powder, "as always". The choice is saved:
    - **Take it**: she drinks and takes the powder (new sprite).
    - **Refuse** (`eleanor_refused_drugs`): he forces her anyway. Nothing is shown: the screen goes black and
      "Noooo!" appears over black.
    Fade to black, then the Club stage, as before.
+
+- **Puzzle 18 - The face they paid for:** the doll's face Micah sees on stage, put on by hand. Every step is a beat
+  of her conflict, and it is sad: the silk, the money and the safety she has against the rot under them and the
+  wish to run, with the old man's gentle, possessive pressure to stay.
+  - Hand on the mirror: her compact of face powder (no puff) and a lipstick.
+  - Hand on the costume rail: a swansdown puff in a member's wife's gown pocket.
+  - Hand on the painted screens: a hairpin clipped to the silk.
+  - Join the puff and the compact, then use them on the mirror, in order: the face powder, the lipstick, the
+    hairpin. Out of order, she says so ("Powder first. Then the mouth. Then the hair."). Look on the mirror
+    repeats the order. Nothing is taken from the gin table.
+  - The finished face lands on the sad note; then "Sit down, my dear. We have a few minutes", and the choice above.
 
 #### Club
 
@@ -884,7 +907,8 @@ The First Interlude is always Micah's: she told him during the night at the mote
 
 ### Puzzle pacing and saves
 
-The fifteen added/expanded puzzles are distributed **6 in Act 1, 6 in Act 2, and 3 in Act 3**. Puzzles 11-15
+Micah's fifteen added/expanded puzzles are distributed **6 in Act 1, 6 in Act 2, and 3 in Act 3**; Eleanor has one
+in each interlude (Puzzles 17 and 18, in Room 507 and backstage at the Club). Puzzles 11-15
 are collect-and-combine puzzles in five extra locations: the Aurelian linen room and Rizzo's Flowers (Act 1), the
 Tribune morgue and the Club vestibule (Act 2), and the Harrington wine cellar (Act 3). Each asks Micah to gather
 items in that location, join them in the satchel and use the result to continue. Micah's lighter is the only
@@ -895,7 +919,7 @@ an interactive infiltration beat; the optional index provides investigation befo
 Giving up or reconciling never requires completing a pursuit-route puzzle. The obsolete temporary
 motel map and burial survey are not part of the completed Act 3.
 
-All fifteen puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
+All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
 is version 9 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Eleanor interludes, the bluing moving into the
@@ -912,7 +936,7 @@ Caleb retains his original counsel, warning and contrite-heart paraphrase, witho
 His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49015.htm), not a direct quotation. Religious objects remain
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
-The adventure remains a compact, single-case indie point-and-click: fifteen puzzles, the alley encounter, optional
+The adventure remains a compact, single-case indie point-and-click: fifteen puzzles for Micah and two for Eleanor, the alley encounter, optional
 dialogue, two playable Eleanor interludes and ten ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.

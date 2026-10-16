@@ -74,4 +74,14 @@ public static class MicahKit
     /// <summary>Flags that go with <see cref="DebugItems"/>, so the office drawer isn't refilled behind Micah.</summary>
     public static IReadOnlyList<string> DebugFlags(string room) =>
         DebugAct(room) >= 1 && room != "office" ? OfficeDrawer.Select(d => d.Flag).ToList() : Array.Empty<string>();
+
+    /// <summary>
+    /// The story act a debug start inside an interlude belongs to, whatever its room: 2 for the first, 3 for the
+    /// second, 0 outside them.
+    /// </summary>
+    public static int InterludeAct(Func<string, bool> has) => has("interlude1") ? 2 : has("interlude2") ? 3 : 0;
+
+    /// <summary>Micah's kit a debug start in an interlude stashes, for him to get back when Eleanor's part ends.</summary>
+    public static IReadOnlyList<string> InterludeKit(int act) =>
+        ActKeep(act).Where(i => i is not ("faith_ring" or "cross")).ToList();
 }

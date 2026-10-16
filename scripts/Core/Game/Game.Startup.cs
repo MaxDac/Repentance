@@ -95,6 +95,17 @@ public partial class Game
             if (MicahKit.DebugAct(StartRoom) > 1) gs.SetStoryAct(MicahKit.DebugAct(StartRoom));
         }
         foreach (var flag in _startFlags) GameState.Instance.SetFlag(flag);
+        // a debug start inside an interlude (--flag=interlude1/2): Eleanor's hands are empty, and the act's kit waits
+        // in the stash for Micah when her journal hands back
+        var state = GameState.Instance;
+        int interludeAct = MicahKit.InterludeAct(state.HasFlag);
+        if (interludeAct > 0)
+        {
+            foreach (var id in state.Inventory.ToList()) state.TakeItem(id);
+            foreach (var id in MicahKit.InterludeKit(interludeAct)) state.GiveItem(id);
+            Repentance.Rooms.Attic.StashMicahItems();
+            state.SetStoryAct(interludeAct);
+        }
         await ChangeRoom(StartRoom, StartEntry == "start" && RoomTargetError(StartRoom, StartEntry) != null ? FirstEntry : StartEntry);
     }
 }

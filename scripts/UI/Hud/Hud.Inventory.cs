@@ -111,13 +111,23 @@ public partial class Hud
             _slots[s].Icon = id == null ? null : GD.Load<Texture2D>(Items.Get(id).IconPath);
         }
         _satchel.Disabled = false;
-        // Eleanor carries nothing of Micah's: no satchel while she plays
-        _satchel.Visible = !Story.Interlude.EleanorPlays(GameState.Instance.HasFlag);
+        _satchel.Visible = SatchelAllowed;
+    }
+
+    // Eleanor carries nothing of Micah's: in the interludes the satchel holds only what she finds there, and in her
+    // coda and epilogue she has none.
+    private static bool SatchelAllowed
+    {
+        get
+        {
+            var has = (Func<string, bool>)GameState.Instance.HasFlag;
+            return !Story.Interlude.EleanorPlays(has) || Story.Interlude.SatchelOpen(has);
+        }
     }
 
     public void ShowInventory(bool show)
     {
-        if (show && (Game.Instance.Busy || Story.Interlude.EleanorPlays(GameState.Instance.HasFlag))) return;
+        if (show && (Game.Instance.Busy || !SatchelAllowed)) return;
         _inventory.Visible = show;
         if (!show) ItemHovered?.Invoke(null);
     }

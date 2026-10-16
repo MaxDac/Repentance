@@ -27,7 +27,7 @@ public partial class EleanorRoom : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
-        if (Interlude) return await InterludeInteract(verb, target);
+        if (Interlude) return await InterludeInteract(verb, target, item);
         switch (target.Id, verb)
         {
             case ("desk_drawer", Verb.Hand) when !State.HasFlag("eleanor_drawer_open"):
@@ -105,41 +105,60 @@ public partial class EleanorRoom : Room
     }
 
     private bool Packed => State.HasFlag("interlude_box_packed");
+
+    private async Task LockSafe()
+    {
+        State.SetFlag("interlude_safe_locked");
+        await Say("Into the safe, and spin the dial. Halloween. Saint Patrick's. A four-leaf clover, for luck.");
+        await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
+    }
     private bool ReadyToLeave => State.HasFlag("interlude_safe_locked") && State.HasFlag("interlude_drawer_locked")
         && State.HasFlag("interlude_phoned");
 
     /// <summary>
-    /// Eleanor's last hour in Room 507: the box packed at the vanity and locked in the closet safe, the riddle in the
-    /// drawer, a call to Rizzo's from the bedside telephone, then the door, where Sal is waiting.
+    /// Eleanor's last hour in Room 507 (Puzzle 17): the brass box and a bare paper flower from the vanity, a riddle
+    /// written on desk stationery, red thread from a torn hem. The riddle tied round the flower, the flower into the
+    /// box, the box locked in the closet safe. Then the riddle in the drawer, a call to Rizzo's from the bedside
+    /// telephone, and the door, where Sal is waiting.
     /// </summary>
-    private async Task<bool> InterludeInteract(Verb verb, Hotspot target)
+    private async Task<bool> InterludeInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
         {
             case ("vanity", Verb.Look):
                 await Say("Perfume, powder, and a face I don't much like tonight.");
+                if (!State.HasFlag("interlude_took_box") && !Packed) await Say("And my brass box, open, waiting for the last of it.");
                 return true;
-            case ("vanity", Verb.Hand) when !Packed:
-                State.SetFlag("interlude_box_packed");
-                await Say("The card. The matchbook. The bluing. The little paper flower that blooms in water.");
-                await Say("Everything a clever man would need to follow me. Into the brass box with them.");
+            case ("vanity", Verb.Hand) when !State.HasFlag("interlude_took_box") && !Packed:
+                State.SetFlag("interlude_took_box");
+                State.GiveItem("eleanor_box");
+                State.GiveItem("pellet");
+                await Say("The brass box. The card, the matchbook, the bluing already inside. And the little paper flower that blooms in water.");
+                await Say("The word's inked inside it. But a bare pellet's just a sweet. It needs a riddle round it, so he knows to drown it.");
                 return true;
             case ("vanity", Verb.Hand):
-                await Say("The box is packed. Nothing else on there I'll miss.");
+                await Say("Nothing else on there I'll miss.");
                 return true;
 
             case ("closet", Verb.Look):
                 await Say("Half my dresses on the floor. The safe's at the back, behind the rest.");
                 return true;
-            case ("closet", Verb.Hand) when !Packed:
-                await Say("The safe can wait. The box isn't packed yet.");
+            case ("closet", Verb.UseItem) when item == "eleanor_box_packed" && !State.HasFlag("interlude_safe_locked"):
+                State.TakeItem("eleanor_box_packed");
+                await LockSafe();
+                return true;
+            case ("closet", Verb.UseItem) when !State.HasFlag("interlude_safe_locked"):
+                await Say(item is "eleanor_box" or "eleanor_flower" or "pellet" or "riddle_scrap" or "red_thread"
+                    ? "Not yet. Everything goes in the box first, and then the box goes in the safe."
+                    : "That doesn't go in the safe. Only the box.");
+                return true;
+            case ("closet", Verb.Hand) when Packed && !State.HasFlag("interlude_safe_locked") && !State.HasItem("eleanor_box_packed"):
+                await LockSafe();
                 return true;
             case ("closet", Verb.Hand) when !State.HasFlag("interlude_safe_locked"):
-                State.SetFlag("interlude_safe_locked");
-                await Say("Into the safe, and spin the dial. Halloween. Saint Patrick's. A four-leaf clover, for luck.");
-                await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
+                await Say(Packed ? "The safe's open and waiting. The box goes in." : "The safe can wait. The box isn't packed yet.");
                 return true;
-            case ("closet", Verb.Hand):
+            case ("closet", Verb.Hand or Verb.UseItem):
                 await Say("Locked. Twice locked, like everything else I care about.");
                 return true;
 
@@ -179,7 +198,16 @@ public partial class EleanorRoom : Room
                 await Game.ChangeRoom("speakeasy", "interlude");
                 return true;
 
-            case ("clothes", Verb.Look or Verb.Hand):
+            case ("clothes", Verb.Look):
+                await Say("I threw them down myself. Some of them deserved it.");
+                if (!State.HasFlag("interlude_took_thread")) await Say("The red one's torn at the hem. Silk thread, hanging loose.");
+                return true;
+            case ("clothes", Verb.Hand) when !State.HasFlag("interlude_took_thread"):
+                State.SetFlag("interlude_took_thread");
+                State.GiveItem("red_thread");
+                await Say("A length of red thread from the torn hem. Theodore bought me that dress. It can tie up one last thing for me.");
+                return true;
+            case ("clothes", Verb.Hand):
                 await Say("I threw them down myself. Some of them deserved it.");
                 return true;
             case ("chair", Verb.Look or Verb.Hand):
@@ -187,6 +215,12 @@ public partial class EleanorRoom : Room
                 return true;
             case ("window", Verb.Look or Verb.Hand):
                 await Say("Five floors down to the alley. The rain doesn't care who's leaving.");
+                return true;
+            case ("desk", Verb.Hand) when !State.HasFlag("interlude_took_scrap"):
+                State.SetFlag("interlude_took_scrap");
+                State.GiveItem("riddle_scrap");
+                await Say("A scrap of stationery, torn small. In my best hand: \"Give me a drink and I'll tell you the word.\"");
+                await Say("Wrapped round the flower, it'll tell him what to do with it. If whoever comes is half as clever as he'll need to be.");
                 return true;
             case ("desk", Verb.Look or Verb.Hand):
                 await Say("Hotel stationery. I've written Theodore a hundred letters on it, and sent him none.");

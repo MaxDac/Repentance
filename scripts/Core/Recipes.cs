@@ -8,6 +8,7 @@ namespace Repentance;
 /// An inventory combination. <see cref="Consumes"/> leave the satchel; <see cref="Catalysts"/> must be held and are
 /// never consumed (Micah's lighter lights the wax and the lantern alike). <see cref="Requires"/> are held tools that aren't one of
 /// the two combined items (the morgue paste pot); <see cref="Missing"/> explains what is needed when they aren't held.
+/// A required item listed in <see cref="Consumes"/> is used up too (Eleanor's red thread).
 /// </summary>
 public sealed record Recipe(string A, string B, string Result, string[] Consumes, string Line,
     string[]? Catalysts = null, string[]? Requires = null, string? Missing = null, string? Flag = null)
@@ -20,7 +21,7 @@ public sealed record Refusal(string A, string B, string Line);
 
 public sealed record CombineOutcome(string Line, string? Result, IReadOnlyList<string> Consumed, string? Flag);
 
-/// <summary>Collect-and-combine table for puzzles 11-15. Godot-free so it can be unit tested.</summary>
+/// <summary>Collect-and-combine table for puzzles 11-15, 17 and 18. Godot-free so it can be unit tested.</summary>
 public static class Recipes
 {
     public static readonly Recipe[] All =
@@ -54,6 +55,17 @@ public static class Recipes
         new("lantern_filled", MicahKit.LighterId, "lantern_lit", new[] { "lantern_filled" },
             "One flick of the lighter, a careful hand on the chimney, and the cellar finds its edges again.",
             Catalysts: new[] { MicahKit.LighterId }, Flag: "lantern_lit"),
+        // 17 - Room 507, First Interlude (Eleanor). The thread is required and used up with the pair.
+        new("pellet", "riddle_scrap", "eleanor_flower", new[] { "pellet", "riddle_scrap", "red_thread" },
+            "The riddle round the pellet, and the red thread round both, twice, in a bow. A sweet nobody would eat.",
+            Requires: new[] { "red_thread" },
+            Missing: "It won't stay wrapped. I need something to tie it with."),
+        new("eleanor_flower", "eleanor_box", "eleanor_box_packed", new[] { "eleanor_flower", "eleanor_box" },
+            "The flower in with the card, the matchbook and the bluing. Lid down. Everything a clever man would need to follow me.",
+            Flag: "interlude_box_packed"),
+        // 18 - The Club's dressing room, Second Interlude (Eleanor).
+        new("compact", "puff", "puff_powdered", new[] { "compact", "puff" },
+            "The puff into the cake, a tap on the rim. A cloud of face powder, the colour they like me best."),
     };
 
     public static readonly Refusal[] Refusals =
@@ -69,6 +81,14 @@ public static class Recipes
         // the matchbook is a clue now; an old save that still carries one is pointed at the lighter
         new("sealing_wax", "matchbook", "These matches are the Blue Lantern's calling card. My lighter will do the job."),
         new("lantern_filled", "matchbook", "I'll keep the Blue Lantern's matches. My lighter will do the job."),
+        // Eleanor's puzzles: wrap the pellet before it goes in the box; powder needs the puff
+        new("pellet", "eleanor_box", "Bare, it's a sweet in a box. It needs a word to go with it."),
+        new("riddle_scrap", "eleanor_box", "A riddle with nothing to answer it. The flower first."),
+        new("red_thread", "pellet", "Thread round a bare pellet. It needs the riddle wrapped round it first."),
+        new("red_thread", "riddle_scrap", "The thread's to tie the riddle round something. The little pellet."),
+        new("red_thread", "eleanor_box", "The box locks on its own. The thread's for the flower."),
+        new("compact", "lipstick", "Powder first, then the mouth. And I'll need the puff for the powder."),
+        new("puff", "lipstick", "The puff's for powder, not for lips."),
     };
 
     public static bool Matches(string first, string second, string a, string b) =>

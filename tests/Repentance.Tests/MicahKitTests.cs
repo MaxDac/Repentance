@@ -70,4 +70,15 @@ public class MicahKitTests
         foreach (var room in Notes.DebugRooms)
             Assert.InRange(MicahKit.DebugAct(room), 1, 3);
     }
+
+    [Fact]
+    public void DebugStartsInAnInterludeBelongToItsActWhateverTheRoom()
+    {
+        Func<string, bool> Flags(params string[] f) => f.Contains;
+        Assert.Equal(2, MicahKit.InterludeAct(Flags("interlude1")));
+        Assert.Equal(3, MicahKit.InterludeAct(Flags("interlude2")));
+        Assert.Equal(0, MicahKit.InterludeAct(Flags("eleanor_coda")));
+        Assert.Equal(new[] { "card", "cloth", "lockpick", "mirror", "revolver" }, MicahKit.InterludeKit(2).Order());
+        Assert.Equal(new[] { "cloth", "revolver" }, MicahKit.InterludeKit(3).Order());
+    }
 }

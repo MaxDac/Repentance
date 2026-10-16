@@ -25,12 +25,23 @@ public static class Interlude
     {
         "interlude_box_packed", "interlude_safe_locked", "interlude_drawer_locked", "interlude_phoned",
         "interlude_agatha_met", "interlude_agatha_sorry", "interlude_agatha_proud",
+        "interlude_took_box", "interlude_took_scrap", "interlude_took_thread",
     };
-    private static readonly string[] SecondBeats = { "interlude_goons_in" };
+    private static readonly string[] SecondBeats =
+    {
+        "interlude_goons_in", "interlude_took_makeup", "interlude_took_puff", "interlude_took_pin",
+        "interlude_powdered", "interlude_lips", "interlude_made_up",
+    };
 
     /// <summary>True while the player is Eleanor (an interlude, the coda, or her epilogue scene).</summary>
     public static bool EleanorPlays(Func<string, bool> has) =>
         has("interlude1") || has("interlude2") || has("eleanor_coda") || has("eleanor_epilogue");
+
+    /// <summary>
+    /// True while Eleanor carries her own satchel: only during the two interludes, for the things she picks up there
+    /// (puzzles 17 and 18). Her coda and epilogue keep her empty-handed.
+    /// </summary>
+    public static bool SatchelOpen(Func<string, bool> has) => has("interlude1") || has("interlude2");
 
     /// <summary>Eleanor's player sheet for <paramref name="room"/>, or null when Micah (or Daniel) plays there.</summary>
     public static string? PlayerSheet(string room, Func<string, bool> has)
@@ -52,6 +63,12 @@ public static class Interlude
         Game.Hud.ShowCaption(null);
     }
 
+    /// <summary>Nothing Eleanor picked up in an interlude goes back into Micah's satchel (his own was stashed on the way in).</summary>
+    private static void DropEleanorItems()
+    {
+        foreach (var id in System.Linq.Enumerable.ToList(State.Inventory)) State.TakeItem(id);
+    }
+
     /// <summary>Daniel opens the journal in Act 2: the story goes back to the night Eleanor left the Aurelian.</summary>
     public static async Task BeginFirst()
     {
@@ -67,6 +84,7 @@ public static class Interlude
         await Game.Hud.Fade(1, 1.5);
         State.SetFlag("interlude1", false);
         foreach (var flag in FirstBeats) State.SetFlag(flag, false);
+        DropEleanorItems();
         // pick up the 1927 story where the old lead from the Blue Lantern left it
         State.SetFlag("sal_passed");
         State.SetFlag("photo_shown");
@@ -104,6 +122,7 @@ public static class Interlude
         await Game.Hud.Fade(1, 1.5);
         State.SetFlag("interlude2", false);
         foreach (var flag in SecondBeats) State.SetFlag(flag, false);
+        DropEleanorItems();
         Attic.RestoreMicahItems(3);
         State.SetFlag("masked");
         await Game.ChangeRoom("club_stage", "act3");
@@ -124,6 +143,7 @@ public static class Interlude
             Verb.Look => pick(new[] { "Nothing I haven't seen before.", "I've seen enough of this place already." }),
             Verb.Talk => person ? "Not now." : pick(new[] { "Talking to the furniture. That's what it's come to.", "No answer. Nobody ever answers." }),
             Verb.Kick => person ? "Not with these shoes." : pick(new[] { "That wouldn't help anyone.", "A lady doesn't kick the furniture. Not where anyone can see." }),
+            Verb.UseItem => person ? "That's mine. Not theirs." : pick(new[] { "That's not where it goes.", "No. That won't do it." }),
             _ => person ? "Better not." : pick(new[] { "Leave it.", "It's not mine to touch.", "Never mind that." }),
         };
 }

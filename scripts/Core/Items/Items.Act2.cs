@@ -41,5 +41,18 @@ public static partial class Items
             "A signet ring cut with a lion. Borrowed from a cloak on the rack."),
         new("signet_stag", "stag signet", "res://assets/art/items/signet_stag.png",
             "A signet ring cut with a stag. Borrowed from a cloak on the rack."),
+        // Puzzle 17 - Room 507, First Interlude. Eleanor's own things, in her own words.
+        new("eleanor_box", "open brass box", "res://assets/art/items/eleanor_box.png",
+            "My brass box, lid up. The card, the matchbook, the bluing. Not enough yet for a clever man to follow."),
+        new("pellet", "bare paper flower", "res://assets/art/items/pellet.png",
+            "A water flower, folded tight. The word's inked inside, where only water will find it. Bare, it's just a sweet."),
+        new("riddle_scrap", "scrap of stationery", "res://assets/art/items/riddle_scrap.png",
+            "Aurelian notepaper, torn small. In my hand: \"Give me a drink and I'll tell you the word.\""),
+        new("red_thread", "red thread", "res://assets/art/items/red_thread.png",
+            "A length of red silk thread from the hem of my good dress. It was coming down anyway."),
+        new("eleanor_flower", "wrapped water flower", "res://assets/art/items/water_flower.png",
+            "The pellet with the riddle round it, tied in red. Somebody clever will know to drown it."),
+        new("eleanor_box_packed", "packed brass box", "res://assets/art/items/brass_box.png",
+            "The brass box, shut on everything. The card, the matchbook, the bluing, the flower. It belongs in the safe."),
     };
 }

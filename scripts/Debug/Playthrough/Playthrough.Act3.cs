@@ -32,6 +32,21 @@ public sealed partial class Playthrough
             await WaitIdle();
             Expect("ClubBackstage", "the Order's men take her to the Club's dressing room");
             Check(_game.Player.Character == "eleanor_gown_play", "Eleanor in the pink gown");
+            // Puzzle 18: the face they paid for, before the old man will talk
+            await Do(Verb.Hand, "mirror");
+            Check(Gs.HasItem("compact") && Gs.HasItem("lipstick"), "her compact and lipstick from the ledge");
+            await Do(Verb.Look, "rack");
+            await Do(Verb.Hand, "rack");
+            await Do(Verb.Hand, "screens");
+            Check(Gs.HasItem("puff") && Gs.HasItem("hairpin"), "a puff from a gown pocket, a pin from the screen");
+            await Pace(0.6);
+            await CombineAndWait("puff", "compact");
+            Check(Gs.HasItem("puff_powdered"), "the puff in the face powder");
+            await Do(Verb.UseItem, "mirror", "puff_powdered");
+            await Do(Verb.UseItem, "mirror", "lipstick");
+            await Do(Verb.UseItem, "mirror", "hairpin");
+            Check(Gs.HasFlag("interlude_made_up") && !new[] { "compact", "lipstick", "hairpin", "puff_powdered" }.Any(Gs.HasItem),
+                "powder, mouth and hair: the face is on");
         });
         await Beat("second_interlude_oldman", async () =>
         {
