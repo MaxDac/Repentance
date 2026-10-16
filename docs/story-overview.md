@@ -89,7 +89,7 @@ From here the story follows Walkthrough.md:
    try Harrington senior. Micah decides to look him up at the Tribune.
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
     bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
-    and pin the mended clipping on the Loop wall map. The Harrington Building replaces the Tribune on the map.
+    and Micah pins the mended clipping on the Loop wall map at once. The Harrington Building replaces the Tribune on the map.
 21. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.

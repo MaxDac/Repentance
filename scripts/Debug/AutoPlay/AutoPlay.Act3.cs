@@ -223,6 +223,8 @@ public partial class AutoPlay
         await game.Wait(1);
         await Shot("club_stage_brute");
         await Until(() => game.Room?.Name == "ChurchExterior");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("Cathedral steps.", StringComparison.Ordinal));
+        Check(!game.Hud.InsetVisible, "Micah's first line on the steps comes before his close-up");
         await Until(() => game.Hud.InsetVisible);
         Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup", "Micah's close-up framed over the cathedral steps while he lies there");
         await Until(() => game.Hud.ThoughtVisible);

@@ -87,6 +87,7 @@ public partial class AutoPlay
         await Shot("interlude_corridor");
         await game.Perform(Verb.Walk, "cell_door");
         Check(game.Room?.Name == "ConventCell", "to her cell");
+        Check(game.Room?.FindActor("nun") is { Visible: false }, "Eleanor is alone in the cell until the knock");
         var prefer = _prefer;
         _prefer = new[] { "(Indulge her.)" };
         var night = game.Perform(Verb.Hand, "bed");
@@ -279,6 +280,8 @@ public partial class AutoPlay
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
         Check(game.Music.Current == null, "the strings stop out on the street");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("The pavement on Hubbard Street", StringComparison.Ordinal));
+        Check(!game.Hud.InsetVisible, "Micah's first line on the pavement comes before his close-up");
         await Until(() => game.Hud.InsetVisible);
         Check(game.Hud.CurrentCloseUp == CloseUps.Beaten && game.Hud.InsetName == "beaten_closeup",
             "Micah's close-up framed over the pavement while he lies there");
@@ -364,11 +367,12 @@ public partial class AutoPlay
         Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
         await Shot("newspaper_morgue_taken");
         await CombineAndWait("clipping_top", "clipping_bottom");
-        Check(gs.HasItem("clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
+        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
             "pasted the halves together; the paste pot is kept");
+        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"),
+            "the mended clipping is pinned on the wall map at once: the Harrington Building on LaSalle");
         await ReloadCheckpoint("morgue_clipping");
-        await game.Perform(Verb.UseItem, "wall_map", "clipping");
-        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the clipping pins the Harrington Building on LaSalle");
+        Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"), "the pin survives a reload");
         await Shot("newspaper_morgue_pin");
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "ChicagoMap" && !gs.HasItem("paste") && !gs.HasFlag("paste_out"), "the paste pot goes back on the way out");
