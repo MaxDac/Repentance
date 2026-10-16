@@ -1,3 +1,4 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -5,11 +6,42 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Joliet, the visiting room. Micah in an inmate's jumpsuit across the table from his one visitor: Eleanor if she came
 /// away with him that night (ending 4), his brother Caleb if she didn't (ending 5), Rose if he turned himself in (ending 6).
+/// In ending 10 Micah confesses to Caleb; in ending 9 it's Eleanor in the jumpsuit, confessing to him.
 /// </summary>
 public partial class Prison : Room
 {
+    /// <summary>The inmate's seat, where Eleanor's speech anchor moves in ending 9.</summary>
+    private static readonly Vector2 InmateSpeech = new(196, 150);
+
     public override async Task OnEnter(string entry)
     {
+        if (entry == "micah_caleb")
+        {
+            await Game.Run(async () =>
+            {
+                Game.Hud.ShowCaption("Joliet Correctional Center. Six months later.");
+                await Wait(2.6);
+                Game.Hud.ShowCaption(null);
+                await Talk("prison_micah_caleb");
+                await Wait(1.0);
+                await Game.Hud.Fade(1, 1.5);
+                await Game.ChangeRoom("outskirts", "eleanor_alone");
+            });
+            return;
+        }
+        if (entry == "eleanor")
+        {
+            await Game.Run(async () =>
+            {
+                if (GetNodeOrNull<Node2D>("EleanorVoice") is { } voice) voice.Position = InmateSpeech;
+                Game.Hud.ShowCaption("Joliet Correctional Center, the women's wing. Six months later.");
+                await Wait(2.6);
+                Game.Hud.ShowCaption(null);
+                await Talk("prison_eleanor_caleb");
+                await Act3.Finish();
+            });
+            return;
+        }
         if (entry != "ending") return;
         await Game.Run(async () =>
         {

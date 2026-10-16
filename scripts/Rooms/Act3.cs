@@ -18,19 +18,40 @@ public static class Act3
         State.SetFlag("can_spare", Endings.CanSpareOldMan(State.HasFlag, State.HasItem));
     }
 
-    /// <summary>Resolves the ending, records it as <c>ending_N</c> and moves to its scene.</summary>
+    /// <summary>
+    /// Resolves the ending, records it as <c>ending_N</c> and moves to its scene. Ending 10 goes to Micah's confession in
+    /// prison, then on to Eleanor alone on the outskirts.
+    /// </summary>
     public static Task End()
     {
         int ending = Endings.Resolve(State.HasFlag);
         State.SetFlag($"ending_{ending}");
         if (ending is 2 or 3) State.SetFlag("outskirts_car");
+        if (ending is 5 or 9 or 10) State.SetFlag("caleb_visits");
+        if (ending is 8 or 10) State.SetFlag("eleanor_epilogue");
         return ending switch
         {
             1 => Game.ChangeRoom("rose_house", "coffee"),
             2 or 3 => Game.ChangeRoom("outskirts", "ending"),
             7 => Finish(nextMorning: false),
+            8 => Game.ChangeRoom("outskirts", "eleanor_alone"),
+            9 => Game.ChangeRoom("prison", "eleanor"),
+            10 => Game.ChangeRoom("prison", "micah_caleb"),
             _ => Game.ChangeRoom("prison", "ending"),
         };
+    }
+
+    /// <summary>
+    /// Endings 8 and 9 come after Micah's coffee at Rose's door (the coda already played Eleanor's night): records the
+    /// ending and moves on to Eleanor's own last scene.
+    /// </summary>
+    public static Task EleanorAfterRose()
+    {
+        int ending = Endings.Resolve(State.HasFlag);
+        State.SetFlag($"ending_{ending}");
+        if (ending == 9) State.SetFlag("caleb_visits");
+        else State.SetFlag("eleanor_epilogue");
+        return ending == 9 ? Game.ChangeRoom("prison", "eleanor") : Game.ChangeRoom("outskirts", "eleanor_alone");
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/EleanorRoom.cs" id="1_EleanorRoom"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room.png" id="2_eleanor_room"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_drawer_open.png" id="8_eleanor_room_drawer_open"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_paper.png" id="9_eleanor_room_paper"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="10_Rain"]
+[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="11_Voice"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 100)
@@ -81,6 +82,7 @@ texture = ExtResource("5_eleanor_room_closet_open")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "closet_open"
+HideIfFlags = "interlude1"
 
 [node name="SafeOpen" type="Sprite2D" parent="."]
 position = Vector2(79, 143)
@@ -89,6 +91,7 @@ texture = ExtResource("6_eleanor_room_safe_open")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "safe_open"
+HideIfFlags = "interlude1"
 
 [node name="BrassBoxSprite" type="Sprite2D" parent="."]
 position = Vector2(89, 161)
@@ -97,7 +100,7 @@ texture = ExtResource("7_eleanor_room_brass_box")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "safe_open"
-HideIfFlags = "took_brass_box"
+HideIfFlags = "took_brass_box,interlude1"
 
 [node name="DrawerOpen" type="Sprite2D" parent="."]
 position = Vector2(156, 161)
@@ -106,6 +109,7 @@ texture = ExtResource("8_eleanor_room_drawer_open")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "eleanor_drawer_open"
+HideIfFlags = "interlude1"
 
 [node name="PaperSprite" type="Sprite2D" parent="."]
 position = Vector2(163, 161)
@@ -114,7 +118,7 @@ texture = ExtResource("9_eleanor_room_paper")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "eleanor_drawer_open"
-HideIfFlags = "took_combination"
+HideIfFlags = "took_combination,interlude1"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -129,6 +133,10 @@ metadata/facing = 4
 [node name="corridor" type="Marker2D" parent="Entries"]
 position = Vector2(40, 200)
 metadata/facing = 4
+
+[node name="interlude" type="Marker2D" parent="Entries"]
+position = Vector2(300, 230)
+metadata/facing = 3
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -173,6 +181,7 @@ LookText = "A squat steel safe sunk into the back of the closet. The dial's been
 WalkTo = Vector2(134, 194)
 Face = 2
 ShowIfFlags = "closet_open"
+HideIfFlags = "interlude1"
 ClickPriority = 2
 monitoring = false
 monitorable = false
@@ -189,7 +198,7 @@ LookText = "A little brass box, sitting alone in the safe."
 WalkTo = Vector2(134, 194)
 Face = 2
 ShowIfFlags = "safe_open"
-HideIfFlags = "took_brass_box"
+HideIfFlags = "took_brass_box,interlude1"
 ClickPriority = 3
 monitoring = false
 monitorable = false
@@ -235,7 +244,7 @@ LookText = "A slip of hotel paper, folded once."
 WalkTo = Vector2(176, 198)
 Face = 2
 ShowIfFlags = "eleanor_drawer_open"
-HideIfFlags = "took_combination"
+HideIfFlags = "took_combination,interlude1"
 ClickPriority = 3
 monitoring = false
 monitorable = false
@@ -313,3 +322,15 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Chair"]
 position = Vector2(194.0, 191.0)
 shape = SubResource("Rect_12")
+
+[node name="RizzoVoice" type="Node2D" parent="."]
+position = Vector2(330, 120)
+script = ExtResource("11_Voice")
+Id = "rizzo"
+SpeechColor = Color(0.72, 0.86, 0.62, 1)
+
+[node name="SalVoice" type="Node2D" parent="."]
+position = Vector2(40, 110)
+script = ExtResource("11_Voice")
+Id = "sal"
+SpeechColor = Color(0.78, 0.74, 0.96, 1)

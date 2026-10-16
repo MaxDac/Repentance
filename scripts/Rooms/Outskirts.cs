@@ -5,7 +5,7 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Past the city limits, where the bookkeeper's drive ended in Act 2. In Act 3 it's where Micah's car stops on the way out
-/// of Chicago: with Eleanor beside him (ending 2) or alone (ending 3).
+/// of Chicago: with Eleanor beside him (ending 2) or alone (ending 3). In endings 8 and 10 it's Eleanor, on her own.
 /// </summary>
 public partial class Outskirts : Room
 {
@@ -16,9 +16,25 @@ public partial class Outskirts : Room
             await Game.Run(Ending);
             return;
         }
+        if (entry == "eleanor_alone")
+        {
+            await Game.Run(EleanorAlone);
+            return;
+        }
         if (State.HasFlag("seen_outskirts")) return;
         State.SetFlag("seen_outskirts");
         await Game.Run(() => Think("The last fence post, the last streetlight, the last place a man would go to bury something."));
+    }
+
+    /// <summary>Endings 8 and 10: Eleanor on her own at the edge of the city, on foot, leaving it. No car, no Micah.</summary>
+    private async Task EleanorAlone()
+    {
+        await Wait(1.0);
+        await Game.WalkTo(new Vector2(232, 252));
+        Player.Face(Facing.Right);
+        await Talk("ending_eleanor_alone");
+        State.SetFlag("eleanor_epilogue", false);
+        await Act3.Finish();
     }
 
     private async Task Ending()

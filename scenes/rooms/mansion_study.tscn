@@ -66,6 +66,10 @@ metadata/facing = 4
 position = Vector2(381, 228)
 metadata/facing = 3
 
+[node name="eleanor_coda" type="Marker2D" parent="Entries"]
+position = Vector2(440, 228)
+metadata/facing = 3
+
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="World" type="Node2D" parent="."]

@@ -224,8 +224,10 @@ class CharacterArtTests(unittest.TestCase):
             original = np.array(sprites.figure(dict(spec, hair_bulge=0.07), pose, sprites.NPC_W, sprites.FH))
             self.assertFalse(np.array_equal(subtle, flat), "new art must differ from the rejected flat contour")
             self.assertFalse(np.array_equal(subtle, original), "new art must differ from the original large projection")
-            self.assertLess(np.nonzero(subtle[:, :, 3] == 255)[1].max(),
-                            np.nonzero(original[:, :, 3] == 255)[1].max(),
+            def front(img):  # summed forward reach of each row, so the bust peeking past the lock still counts
+                rows = img[:, :, 3] == 255
+                return sum(int(np.nonzero(r)[0].max()) for r in rows if r.any())
+            self.assertLess(front(subtle), front(original),
                             "front silhouette should project less than the original")
 
     def test_eleanor_club_variants_have_matching_animation_layouts(self):

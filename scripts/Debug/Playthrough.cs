@@ -19,10 +19,13 @@ namespace Repentance;
 /// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
 /// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
 /// 1 (walk away from Tony), 1-oldman (spare Harrington, praying back to the door), 1-steps (give up on the church steps).
+/// Act 2's First Interlude always refuses the Mother Superior; Act 3's Second Interlude takes the old man's gin except on
+/// Eleanor's routes: 8 (after the prayer she strikes him and burns the house), 9 (strikes him only), 10 (Micah shoots,
+/// and she sends him away).
 /// </summary>
 public sealed partial class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps" };
+    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10" };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.

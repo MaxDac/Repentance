@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer.png" id="5_drawer"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
+[ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="7_Voice"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(42, 110)
@@ -52,7 +53,7 @@ texture = ExtResource("5_drawer")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "cell_drawer_open"
-HideIfFlags = "took_mirror"
+HideIfFlags = "took_mirror,interlude1"
 
 [node name="DrawerComb" type="Sprite2D" parent="."]
 z_index = -9
@@ -61,6 +62,7 @@ texture = ExtResource("6_drawer_comb")
 centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "cell_drawer_open,took_mirror"
+HideIfFlags = "interlude1"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -71,6 +73,10 @@ polygon = PackedVector2Array(20, 265, 55, 240, 95, 206, 110, 197, 266, 197, 266,
 [node name="start" type="Marker2D" parent="Entries"]
 position = Vector2(90, 232)
 metadata/facing = 4
+
+[node name="interlude" type="Marker2D" parent="Entries"]
+position = Vector2(300, 220)
+metadata/facing = 3
 
 [node name="Hotspots" type="Node2D" parent="."]
 
@@ -159,6 +165,7 @@ WalkTo = Vector2(315, 214)
 Face = 2
 ClickPriority = 2
 ShowIfFlags = "cell_drawer_open"
+HideIfFlags = "interlude1"
 monitoring = false
 monitorable = false
 
@@ -175,7 +182,7 @@ WalkTo = Vector2(315, 214)
 Face = 2
 ClickPriority = 2
 ShowIfFlags = "cell_drawer_open"
-HideIfFlags = "took_mirror"
+HideIfFlags = "took_mirror,interlude1"
 monitoring = false
 monitorable = false
 
@@ -196,3 +203,9 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
 position = Vector2(241, 90)
 shape = SubResource("Rect_8")
+
+[node name="NunVoice" type="Node2D" parent="."]
+position = Vector2(60, 150)
+script = ExtResource("7_Voice")
+Id = "nun"
+SpeechColor = Color(0.85, 0.85, 0.92, 1)

@@ -59,6 +59,10 @@ metadata/facing = 3
 position = Vector2(432, 226)
 metadata/facing = 3
 
+[node name="eleanor_coda" type="Marker2D" parent="Entries"]
+position = Vector2(432, 226)
+metadata/facing = 3
+
 [node name="cellar" type="Marker2D" parent="Entries"]
 position = Vector2(306, 248)
 metadata/facing = 1

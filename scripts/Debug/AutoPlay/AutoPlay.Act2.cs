@@ -8,6 +8,61 @@ namespace Repentance;
 /// <summary>Act 2 of the autoplay run.</summary>
 public partial class AutoPlay
 {
+    /// <summary>
+    /// The First Interlude: Eleanor's last hour at the Aurelian, the Blue Lantern, the convent (indulging Agatha this time;
+    /// the playthrough refuses her) and the motel window, then Micah's journal again.
+    /// </summary>
+    private async Task FirstInterlude(Game game, GameState gs)
+    {
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "First Interlude", 20);
+        Check(game.Hud.CaptionText == "First Interlude", "Act 2 opens on black with \"First Interlude\"");
+        await Until(() => game.Room?.Name == "EleanorRoom");
+        await WaitIdle(game);
+        Check(gs.HasFlag("interlude1") && game.Player.Character == "eleanor_play", "the player is Eleanor in Room 507");
+        Check(!game.Hud.SatchelVisible && !gs.HasItem("revolver") && !gs.HasItem("journal"),
+            "Micah's things (and Daniel's journal) are put away; no satchel while she plays");
+        await game.ItemVerb(Verb.Hand, Notes.ItemId);
+        Check(!game.Hud.Notepad.Visible, "Micah's notepad doesn't open for Eleanor");
+        await game.Wait(0.5);
+        await Shot("interlude_aurelian");
+        await game.Perform(Verb.Walk, "exit");
+        Check(game.Room?.Name == "EleanorRoom", "Eleanor won't leave before the call and the locks");
+        await game.Perform(Verb.Hand, "closet");
+        Check(!gs.HasFlag("interlude_safe_locked"), "the safe waits for the packed box");
+        await game.Perform(Verb.Hand, "vanity");
+        await game.Perform(Verb.Hand, "closet");
+        await game.Perform(Verb.Hand, "desk_drawer");
+        await game.Perform(Verb.Hand, "bed");
+        Check(gs.HasFlag("interlude_phoned") && gs.HasFlag("interlude_drawer_locked"), "the box in the safe, the riddle in the drawer, the call made");
+        await ReloadCheckpoint("first_interlude");
+        Check(game.Player.Character == "eleanor_play" && gs.HasFlag("interlude1"), "a save inside the interlude loads back as Eleanor");
+        await game.Perform(Verb.Walk, "exit");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Speakeasy", "Sal takes her down to the Blue Lantern");
+        await Shot("interlude_lantern");
+        await game.Perform(Verb.Talk, "bartender");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("interlude_agatha_met"), "Tony sends her to the convent; Agatha meets her");
+        await Shot("interlude_corridor");
+        await game.Perform(Verb.Walk, "cell_door");
+        Check(game.Room?.Name == "ConventCell", "to her cell");
+        var prefer = _prefer;
+        _prefer = new[] { "(Indulge her.)" };
+        await game.Perform(Verb.Hand, "bed");
+        await WaitIdle(game);
+        _prefer = prefer;
+        Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),
+            "the night visit offers the refusal; indulging her saves nothing");
+        Check(game.Room?.Name == "MotelNight" && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_empty.png") == true,
+            "the next morning, the motel with an empty bed");
+        await Shot("interlude_motel");
+        _ = game.Perform(Verb.Hand, "window");
+        await Until(() => game.Room?.Name == "Office");
+        Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
+            "Micah's journal takes the story back, with his things");
+        Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
+    }
+
     /// <summary>The end of Act 1 and Act 2: the cathedral, the library, the Club, the morgue and the Harrington office.</summary>
     private async Task PlayActTwo(Game game, GameState gs)
     {
@@ -15,6 +70,7 @@ public partial class AutoPlay
         Check(gs.StoryAct == 2 && gs.HasItem("journal") && game.Player.Character == "daniel", "Act 2: Daniel is back with the journal");
         await Shot("attic_act2");
         var read = game.ItemVerb(Verb.Hand, "journal");
+        await FirstInterlude(game, gs);
 
         // ---- Act 2, 1927: whiskey and the ring, then the cathedral
         await Until(() => game.Room?.Name == "Office" && gs.HasFlag("office_cup_held"));
