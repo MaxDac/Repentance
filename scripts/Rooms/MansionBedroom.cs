@@ -38,6 +38,10 @@ public partial class MansionBedroom : Room
     private bool Coda => State.HasFlag("eleanor_coda");
     private bool Struck => State.HasFlag(Endings.EleanorStruck);
 
+    // Until she strikes, the old man stands between her and the door: she stays on the bed side of him.
+    public override Vector2 ClampWalkTarget(Vector2 target) =>
+        Coda && !Struck && target.X < BehindHim.X ? new Vector2(BehindHim.X, target.Y) : target;
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         if (Coda) return await CodaInteract(verb, target);

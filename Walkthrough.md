@@ -272,8 +272,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
     Without the thread, it won't stay wrapped.
   - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
-  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer, the call and the door keep
-    their order.
+  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
+    for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
    on the road, where he finds her. Fade to black, then Micah's office.
@@ -562,9 +562,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
    They followed "your detective" there. Her answers are colour; they walk her out through the broken door, over
    black.
 2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
-   short pink gown (new playable sheet). First he sends her to the mirror to put her face on (**Puzzle 18**,
-   below); he won't talk, and the gin table waits, until she has. Then the old man, robed, unmasked, the stag mask
-   in his hand, talks her into gin and powder, "as always". The choice is saved:
+   short pink gown (new playable sheet). She is alone: she puts her face on at the mirror (**Puzzle 18**, below)
+   while the gin table waits. When the face is done, the stage door opens; Eleanor whispers "A foul odour of death
+   and ashes. He's here.", and the old man, robed, unmasked, the stag mask in his hand, walks in and the door
+   closes behind him. He talks her into gin and powder, "as always". The choice is saved:
    - **Take it**: she drinks and takes the powder (new sprite).
    - **Refuse** (`eleanor_refused_drugs`): he forces her anyway. Nothing is shown: the screen goes black and
      "Noooo!" appears over black.
@@ -579,7 +580,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - Join the puff and the compact, then use them on the mirror, in order: the face powder, the lipstick, the
     hairpin. Out of order, she says so ("Powder first. Then the mouth. Then the hair."). Look on the mirror
     repeats the order. Nothing is taken from the gin table.
-  - The finished face lands on the sad note; then "Sit down, my dear. We have a few minutes", and the choice above.
+  - The finished face lands on the sad note; then the old man comes in by the door, "Sit down, my dear. We have a
+    few minutes", and the choice above.
 
 #### Club
 

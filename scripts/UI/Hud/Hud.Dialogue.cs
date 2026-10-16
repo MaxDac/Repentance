@@ -122,13 +122,20 @@ public partial class Hud
     }
 
     /// <summary>Displays speech above a point (room coordinates == screen coordinates).</summary>
-    public void ShowSpeech(string text, ISpeaker speaker)
+    /// <param name="whisper">A hushed line: lowercase, in a faded, half-transparent shade of the speaker's colour.</param>
+    public void ShowSpeech(string text, ISpeaker speaker, bool whisper = false)
     {
         var head = speaker.HeadPosition;
         var color = speaker.SpeechColor;
+        SpeechWhispered = whisper;
+        if (whisper)
+        {
+            text = text.ToLowerInvariant();
+            color = color.Lerp(WhisperGrey, 0.45f) with { A = 0.72f };
+        }
         if (_insetShown)
         {
-            ShowSpeechOverInset(text, speaker);
+            ShowSpeechOverInset(text, speaker, color);
             return;
         }
         const int width = 280;
@@ -150,6 +157,11 @@ public partial class Hud
 
     public void HideSpeech() => _speech.Visible = false;
 
+    private static readonly Color WhisperGrey = new(0.55f, 0.55f, 0.6f);
+
+    /// <summary>True when the line on screen (or the last one shown) was whispered (tests).</summary>
+    public bool SpeechWhispered { get; private set; }
+
     /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
     public void ShowThought(string text)
     {
@@ -166,7 +178,7 @@ public partial class Hud
     public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
 
     /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
-    private void ShowSpeechOverInset(string text, ISpeaker speaker)
+    private void ShowSpeechOverInset(string text, ISpeaker speaker, Color color)
     {
         float width = 380;
         float x = (ScreenW - width) / 2f;
@@ -180,7 +192,7 @@ public partial class Hud
         }
         var size = MeasureDialogue(text, width);
         _speech.Text = text;
-        _speech.LabelSettings.FontColor = speaker.SpeechColor;
+        _speech.LabelSettings.FontColor = color;
         _speech.Size = new Vector2(width, size.Y);
         float bottom = _inset.Position.Y + _inset.Size.Y - 8;
         _speech.Position = new Vector2(x, bottom - size.Y).Round();

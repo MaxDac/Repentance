@@ -68,7 +68,7 @@ public partial class EleanorRoom : Room
                 State.SetFlag("safe_open");
                 await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
                 await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
-                await Say("Whoever tossed the room scratched the dial raw and never got the door open.");
+                await Say("Somebody's been at the dial since. Scratched it raw and never got the door open.");
                 return true;
             case ("safe", Verb.Hand):
                 await Say(State.HasFlag("took_brass_box") ? "Empty now." : "Something brass, catching the light.");
@@ -178,6 +178,9 @@ public partial class EleanorRoom : Room
             case ("bed", Verb.Look):
                 await Say("I slit the mattress myself. Let them think somebody went looking for something.");
                 return true;
+            case ("bed", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_drawer_locked"):
+                await Say("Not yet. The box in the safe, the riddle in the drawer. Then I call.");
+                return true;
             case ("bed", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_phoned"):
                 State.SetFlag("interlude_phoned");
                 await Say("The telephone on the night table. My hand's shaking. Good thing nobody can see it down a wire.");
@@ -188,8 +191,9 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("exit", Verb.Walk or Verb.Hand) when !ReadyToLeave:
-                await Say(!State.HasFlag("interlude_phoned") ? "Not yet. Nobody's coming for me unless I call."
-                    : "Not yet. Nothing of mine stays out in the open for them.");
+                await Say(!State.HasFlag("interlude_safe_locked") ? "Not yet. The box goes in the safe first."
+                    : !State.HasFlag("interlude_drawer_locked") ? "Not yet. Nothing of mine stays out in the open for them."
+                    : "Not yet. Nobody's coming for me unless I call.");
                 return true;
             case ("exit", Verb.Walk or Verb.Hand):
                 await Game.WalkTo(target.WalkTo);
@@ -220,7 +224,7 @@ public partial class EleanorRoom : Room
             case ("desk", Verb.Hand) when !State.HasFlag("interlude_took_scrap"):
                 State.SetFlag("interlude_took_scrap");
                 State.GiveItem("riddle_scrap");
-                await Say("A scrap of stationery, torn small. In my best hand: \"Give me a drink and I'll tell you the word.\"");
+                await Say("A scrap of stationery, torn small. In a hurry, in pencil: \"Give me a drink and I'll tell you the word.\"");
                 await Say("Wrapped round the flower, it'll tell him what to do with it. If whoever comes is half as clever as he'll need to be.");
                 return true;
             case ("desk", Verb.Look or Verb.Hand):

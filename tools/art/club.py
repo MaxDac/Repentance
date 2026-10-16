@@ -4,7 +4,7 @@ import os
 import random
 from PIL import Image, ImageDraw
 from .common import (W, H, TOP, FULL_H, ROOT, tall, hx, mix, mul, clamp, vgrad, noise, light, shadow, vignette,
-                     pixelize, save, floor_boards)
+                     pixelize, palette_of, save, floor_boards)
 
 FLOOR = 146
 # the hall's portrait, reduced from an original picture: antler tips down to the collar and tie
@@ -1074,13 +1074,41 @@ def backstage_wall(img):
     noise(img, (0, 0, W - 1, H - 1), 5, 3512)
 
 
-def backstage_door(img):
-    """The door back out to the stage: plain panelled, a brass knob."""
+def backstage_door(img, state="shut"):
+    """The door back out to the stage: plain panelled, a brass knob. Hinged on the left, it swings out into the
+    passage: "ajar" shows the leaf foreshortened with a gap of dim passage at the knob side, "open" the leaf edge-on
+    against the hinge jamb and the passage beyond, lit by the stage at its far end."""
     d = ImageDraw.Draw(img)
     x0, x1 = BACKSTAGE_DOOR
     y0 = 30
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, FLOOR], fill=hx("4a2a18"), outline=WOOD_DEEP)
     d.line([(x0 - 4, y0 - 4), (x1 + 4, y0 - 4)], fill=hx("7a5030"))
+    if state != "shut":
+        # the passage: black boards, a far wall warmed by the stage lights round a corner
+        vgrad(img, (x0, y0, x1, FLOOR), hx("140808"), hx("0a0405"))
+        light(img, "ellipse", [x0 + 8, y0 + 20, x1 + 10, FLOOR + 10], hx("c87a3a"), 0.32, 10)
+        d.polygon([(x0, FLOOR), (x1, FLOOR), (x1 - 8, FLOOR - 22), (x0 + 8, FLOOR - 22)], fill=hx("2a140c"))
+        for k in range(1, 4):
+            d.line([(x0 + 8 * k // 2, FLOOR - 22 + 6 * k), (x1 - 8 * k // 2, FLOOR - 22 + 6 * k)], fill=hx("1a0a06"))
+        d.rectangle([x0, y0, x1, FLOOR], outline=WOOD_DEEP)
+        if state == "ajar":
+            fx = x1 - 16
+            d.polygon([(x0, y0), (fx, y0 + 3), (fx, FLOOR - 3), (x0, FLOOR)], fill=hx("2e170e"), outline=WOOD_DEEP)
+            vgrad(img, (x0 + 1, y0 + 3, fx - 1, FLOOR - 3), hx("3e2214"), hx("26130c"))
+            for p0, p1 in ((y0 + 10, y0 + 50), (y0 + 60, FLOOR - 12)):
+                d.rectangle([x0 + 5, p0, fx - 5, p1], outline=hx("1a0c06"))
+                d.line([(x0 + 6, p0 + 1), (fx - 6, p0 + 1)], fill=hx("5a3020"))
+            d.line([(fx, y0 + 3), (fx, FLOOR - 3)], fill=hx("6a3a22"))
+            d.ellipse([fx - 7, y0 + 55, fx - 4, y0 + 59], fill=BRASS, outline=hx("4a3412"))
+            d.point((fx - 6, y0 + 56), fill=hx("fff0c0"))
+        else:
+            d.polygon([(x0, y0), (x0 + 7, y0 + 5), (x0 + 7, FLOOR - 5), (x0, FLOOR)], fill=hx("26130c"),
+                      outline=WOOD_DEEP)
+            d.line([(x0 + 7, y0 + 5), (x0 + 7, FLOOR - 5)], fill=hx("6a3a22"))
+            d.rectangle([x0 + 3, y0 + 56, x0 + 4, y0 + 59], fill=BRASS)
+        light(img, "polygon", [(x0, FLOOR), (x1, FLOOR), (x1 + 18, FLOOR + 18), (x0 - 6, FLOOR + 18)], hx("c87a3a"),
+              0.18, 4)
+        return
     d.rectangle([x0, y0, x1, FLOOR], fill=hx("3a1e12"), outline=WOOD_DEEP)
     vgrad(img, (x0 + 1, y0 + 1, x1 - 1, FLOOR - 1), hx("4a2818"), hx("2e170e"))
     for p0, p1 in ((y0 + 8, y0 + 50), (y0 + 60, FLOOR - 10)):
@@ -1361,10 +1389,13 @@ def backstage_rug(img):
     noise(img, (204, 166, 356, 198), 3, 3550)
 
 
-def backstage_scene():
+BACKSTAGE_DOOR_BOX = (BACKSTAGE_DOOR[0] - 10, 22 + TOP, BACKSTAGE_DOOR[1] + 22, FLOOR + 20 + TOP)
+
+
+def backstage_scene(door="shut"):
     img = Image.new("RGB", (W, H))
     backstage_wall(img)
-    backstage_door(img)
+    backstage_door(img, door)
     costume_rail(img)
     dressing_screen(img)
     dressing_table(img)
@@ -1392,4 +1423,8 @@ def build():
     }
     for name, img in out.items():
         save(img, "rooms", name)
+    # the stage door opening for the old man in the Second Interlude, on the room's own palette
+    pal = palette_of(backstage, 128)
+    for state in ("ajar", "open"):
+        save(pixelize(backstage_scene(state), pal).crop(BACKSTAGE_DOOR_BOX), "rooms", f"club_backstage_door_{state}.png")
     return out["club_hall.png"]

@@ -35,9 +35,9 @@ public partial class AutoPlay
         Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
             "the Order's men take her to the Club's dressing room, in the pink gown");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings behind the dressing room wall");
-        Check(game.Room?.FindActor("harrington") is { Visible: true }, "the old man is waiting, unmasked");
+        Check(game.Room?.FindActor("harrington") is { Visible: false }, "she's alone; the old man isn't in yet");
         await game.Perform(Verb.Walk, "door");
-        Check(game.Room?.Name == "ClubBackstage", "the only door leads to the stage, and he hasn't finished");
+        Check(game.Room?.Name == "ClubBackstage", "the only door leads to the stage, and Bruno's on it");
         await ReloadCheckpoint("second_interlude");
         Check(game.Player.Character == "eleanor_gown_play", "a save in the dressing room loads back in the gown");
         await game.Wait(0.5);
@@ -60,14 +60,14 @@ public partial class AutoPlay
     }
 
     /// <summary>
-    /// Puzzle 18: the old man won't talk until her face is on; the makeup goes on in order (face powder with the puff,
-    /// the lipstick, the hairpin), and a save halfway loads back halfway.
+    /// Puzzle 18: she puts her face on alone, in order (face powder with the puff, the lipstick, the hairpin), and a save
+    /// halfway loads back halfway. Only then does the stage door open: she whispers, he walks in, the door shuts.
     /// </summary>
     private async Task TheFaceTheyPaidFor(Game game, GameState gs)
     {
         Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0, "Eleanor's satchel in the dressing room, empty");
-        await game.Perform(Verb.Talk, "harrington");
-        Check(game.Room?.Name == "ClubBackstage" && !gs.HasFlag("interlude_made_up"), "the old man won't talk before her face is on");
+        Check(game.Room?.FindActor("harrington") is { Visible: false } && !gs.HasFlag("interlude_made_up"),
+            "no old man to talk to before her face is on");
         await game.Perform(Verb.Hand, "table");
         Check(game.Room?.Name == "ClubBackstage" && gs.Inventory.Count == 0, "the gin table waits too, and gives nothing");
         await game.Perform(Verb.Hand, "mirror");
@@ -94,10 +94,27 @@ public partial class AutoPlay
         await ReloadCheckpoint("second_interlude_powdered");
         Check(gs.HasFlag("interlude_powdered") && gs.HasItem("lipstick") && gs.HasItem("hairpin") && game.Hud.SatchelVisible,
             "a save with the face half on loads back half on");
-        await game.Perform(Verb.UseItem, "mirror", "hairpin");
-        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up"), "the mouth before the hair");
+        var early = await Spoken(() => game.Perform(Verb.UseItem, "mirror", "hairpin"));
+        Check(gs.HasItem("hairpin") && !gs.HasFlag("interlude_made_up") && early.Contains("Powder's on. The mouth next."),
+            "the mouth before the hair, and she says so");
         await game.Perform(Verb.UseItem, "mirror", "lipstick");
-        await game.Perform(Verb.UseItem, "mirror", "hairpin");
+        Check(game.Room?.FindActor("harrington") is { Visible: false }, "the mouth on, and still no old man");
+        var hairpin = game.Perform(Verb.UseItem, "mirror", "hairpin");
+        await Until(() => game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true || hairpin.IsCompleted, 30);
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true && game.Room?.FindActor("harrington") is { Visible: false },
+            "the face on, the stage door swings open before he shows");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechWhispered || hairpin.IsCompleted, 30);
+        Check(game.Hud.SpeechWhispered && game.Hud.SpeechText == "a foul odour of death and ashes. he's here.",
+            "Eleanor whispers that she smells him coming");
+        await Until(() => game.Room?.FindActor("harrington") is { Visible: true } || hairpin.IsCompleted, 30);
+        Check(game.Room?.FindActor("harrington") is { Visible: true } h && h.Position.X < 120, "the old man walks in by the door");
+        await Shot("club_backstage_entrance");
+        await hairpin;
+        Check(game.Room?.FindActor("harrington") is { Visible: true } o && o.Position.DistanceTo(Rooms.ClubBackstage.OldManSpot) < 1,
+            "he crosses to his place by the screens");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false
+            && game.Room?.GetNodeOrNull<Sprite2D>("DoorAjar")?.Visible == false && !gs.HasFlag("backstage_door_open"),
+            "the stage door shut behind him");
         Check(gs.HasFlag("interlude_lips") && gs.HasFlag("interlude_made_up") && gs.Inventory.Count == 0, "the face they paid for, on");
     }
 

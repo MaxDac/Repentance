@@ -90,7 +90,7 @@ From here the story follows Walkthrough.md:
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
     bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
     and pin the mended clipping on the Loop wall map. The Harrington Building replaces the Tribune on the map.
-21. **Behind the Harrington Building, at night**: set the trash can alight with the matchbook so the watchman
+21. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
 22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
@@ -99,7 +99,7 @@ From here the story follows Walkthrough.md:
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
 23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
    wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
-   matchbook (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
+   lighter (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
    Post the sealed invitation in the door slot.
    **Club, masked**: through the hall and the lounge, full of masked men and women (white Bauta masks and carved
    bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
@@ -107,7 +107,8 @@ From here the story follows Walkthrough.md:
    **End of Act Two**: back in the attic, dinner again.
 24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps; the next pages aren't in Micah's hand.
     **Second Interlude** (Eleanor): the Order's men take her from the motel. In the Club's dressing room, in a short
-    pink gown, the old man offers gin and powder "as always": take them, or refuse (saved; the screen goes black,
+    pink gown, she puts her face on alone; then the old man comes in by the stage door and offers gin and powder "as
+    always": take them, or refuse (saved; the screen goes black,
     "Noooo!"). Then Micah's journal goes on at the Club stage.
 25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
 26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
@@ -124,7 +125,7 @@ From here the story follows Walkthrough.md:
    on the bell and goes on with his collar open.
 30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
    door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
-   lantern, light it with the matchbook (kept), use the lit lantern on the dark stair, then climb the
+   lantern, light it with the lighter (kept), use the lit lantern on the dark stair, then climb the
    bootleggers' stair to the study's bar panel.
    Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
@@ -153,6 +154,81 @@ From here the story follows Walkthrough.md:
    or to the faith, or in endings 8-10, saying
    "Maybe Leo would like to read it some day." After ending 7 he respects Caleb's decision and puts it back.
    Otherwise, he puts it back in the trunk. *The End.*
+
+## Branches and endings
+
+The story branches on a handful of decisions, all but two of them in Act Three. Eleanor's two refusals are made in
+the interludes; their combined effect on ending selection begins once Micah reaches the old man's bedroom. Gates
+(`Endings.cs`):
+
+- **Church return**: Micah went back to Caleb while hunting for Eleanor (`church_before_office`,
+  `church_before_club` or `church_act3_return`).
+- **Pressed Rose**: he kept asking her for forgiveness on her doorstep (`rose_wait`).
+- **Held out**: Eleanor refused Agatha in the convent (First Interlude, `eleanor_refused_abbess`) *and* the old
+  man's gin and powder (Second Interlude, `eleanor_refused_drugs`). One refusal alone does not unlock Eleanor's alternative bedroom branches.
+
+```mermaid
+flowchart TD
+    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose"]
+    steps -- "Keep going" --> tony["Tony at gunpoint"]
+    tony -- "Lower the gun<br/>(church return + ring)" --> E1
+    tony -- "Shoot him in the shoulder" --> mansion["Mansion: optional signed evidence"]
+    mansion --> bedroom["Bedroom: old man and Eleanor"]
+    bedroom -- "Our Father<br/>(church return + pressed Rose + ring + cross)" --> prayer{"Eleanor held out?"}
+    prayer -- no --> E1
+    prayer -- yes --> coda["Coda: the player is Eleanor"]
+    coda -- "Back to bed" --> E1
+    coda -- "Candlestick" --> out{"Burn the cellar on the way out?"}
+    out -- yes --> E8["8: Rose, then Eleanor alone at the city's edge"]
+    out -- no --> E9["9: Rose, then Eleanor confesses to Caleb in prison"]
+    bedroom -- "Shoot him" --> shot{"Eleanor held out?"}
+    shot -- yes --> E10["10: she sends him away; Micah confesses, Eleanor leaves alone"]
+    shot -- no --> persuade["Persuasion: four turns"]
+    persuade -- "Turn yourself in (turn 1)" --> E6["6: prison, Rose visits"]
+    persuade -- "Shoot Eleanor (turn 4) / footsteps" --> E7["7: murder and/or suicide"]
+    persuade -- "Leave her / four right lines / footsteps: leave" --> escape["Escape: optional cellar fire"]
+    escape -- "evidence or fire" --> free{"Convinced?"}
+    escape -- "neither" --> jail{"Convinced?"}
+    free -- yes --> E2["2: out of town with Eleanor"]
+    free -- no --> E3["3: out of town alone"]
+    jail -- yes --> E4["4: prison, Eleanor visits"]
+    jail -- no --> E5["5: prison, Caleb visits"]
+```
+
+How each decision is made:
+
+- **Give up** (cathedral steps, after Bruno knocks Micah out): always offered; sets `gave_up_steps`.
+- **Lower the gun** (Tony): only with the church return and the wedding ring in his pocket; sets `walked_away`.
+- **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross; sets `spared_oldman`. If Eleanor held
+  out, she plays the coda (`eleanor_coda`): the old man stands between her and the door, and she can't walk past
+  him. She goes back to bed (ending 1), or takes the candlestick and strikes him (`eleanor_struck`), then leaves
+  through the study, down to the kitchen and out of the back door. To burn the house she goes down to the cellar
+  on the way (from the kitchen, or by the panel behind the study bar) and lights the Club's rye with Micah's lantern
+  (`eleanor_burned`).
+- **Shoot him**: if Eleanor held out, she sends Micah away (`eleanor_dismissed`): no persuasion and no escape.
+  Otherwise the persuasion: four turns, and only the four right lines in a row convince her (`eleanor_convinced`);
+  one wrong line breaks the chain for good. Turning himself in is offered on the first turn only (`repented`),
+  leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
+  on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
+- **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
+  give Micah something to bargain with and keep him out of prison.
+
+`Endings.Resolve` takes the first match, so a give-up or walk-away wins over everything that could follow it:
+
+| Ending | Condition (in priority order) | Scene |
+|---|---|---|
+| 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Micah's coffee with Rose, then Eleanor alone (8) or in prison with Caleb (9) |
+| 10 | Eleanor sent Micah away | Micah confesses to Caleb in prison, then Eleanor leaves Chicago |
+| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose |
+| 6 | Turned himself in | Prison, Rose visits |
+| 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
+| 2 / 3 | Evidence or fire; 2 if Eleanor was convinced | Out of town, with her (2) or alone (3) |
+| 4 / 5 | Neither; 4 if Eleanor was convinced | Prison, Eleanor (4) or Caleb (5) visits |
+
+The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
+motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
+the coda (endings 1, 8, 9) and in the epilogues of endings 8 and 10. Daniel keeps the journal for Leo after endings
+1, 6, 8, 9 and 10.
 
 ## Story notes
 

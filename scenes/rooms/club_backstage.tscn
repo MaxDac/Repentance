@@ -1,10 +1,13 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ClubBackstage.cs" id="1_ClubBackstage"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage.png" id="2_club_backstage"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/leader_unmasked.png" id="5_leader_unmasked"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="6_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_door_ajar.png" id="7_door_ajar"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_door_open.png" id="8_door_open"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(60, 122)
@@ -34,6 +37,23 @@ PlayerCharacter = "micah"
 z_index = -10
 texture = ExtResource("2_club_backstage")
 centered = false
+
+[node name="DoorAjar" type="Sprite2D" parent="."]
+position = Vector2(10, 52)
+z_index = -6
+texture = ExtResource("7_door_ajar")
+centered = false
+script = ExtResource("6_FlagSprite")
+ShowIfFlags = "backstage_door_ajar"
+HideIfFlags = "backstage_door_open"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+position = Vector2(10, 52)
+z_index = -6
+texture = ExtResource("8_door_open")
+centered = false
+script = ExtResource("6_FlagSprite")
+ShowIfFlags = "backstage_door_open"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -127,6 +147,7 @@ script = ExtResource("4_Actor")
 Id = "harrington"
 DisplayName = "the old man"
 LookText = "The old man, unmasked."
+ShowIfFlags = "interlude_made_up"
 WalkTo = Vector2(320, 216)
 monitoring = false
 monitorable = false

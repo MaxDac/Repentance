@@ -44,8 +44,15 @@ public class NotesTests
         Assert.Contains(after, l => l.Contains("12"));
     }
 
+    [Fact]
+    public void BackWay_RoomNumbers_SpanTheLiftMaze()
+    {
+        var text = string.Join(" ", Notes.Get("service_lift")!.Lines.Select(l => l.Text));
+        Assert.Contains("501 is by the stairs", text);
+        Assert.Contains($"{500 + LiftMaze.Width} by the fire escape", text);
+    }
+
     [Theory]
-    [InlineData("attic")]
     [InlineData("bedroom")]
     [InlineData("office")]
     [InlineData("nowhere")]
