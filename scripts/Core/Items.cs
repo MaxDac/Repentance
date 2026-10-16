@@ -38,5 +38,5 @@ public static class CashRules
         !hasFlag("took_dollar") ? 0 : StartingCash
             - (hasFlag("knows_lantern") ? BellboyBribe : 0)
             - (hasFlag("bellboy_room_paid") ? BellboyRoomBribe : 0)
-            - (hasFlag("sal_passed") ? SalBribe : 0);
+            - (hasFlag("sal_passed") && !hasFlag("sal_password") ? SalBribe : 0);
 }

@@ -8,7 +8,7 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - rose_closeup: Rose calling Micah back from her door.
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
-  in one panel split by a bar in the frame's colours.
+  in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
 """
 import os
 
@@ -33,6 +33,11 @@ HALF = (AW - BAR) // 2
 MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
 ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
+# Face boxes in the sources (brow to chin, cheek to cheek) and the eye lines. Micah's picture is zoomed so his face
+# box covers the same area as Eleanor's, with his eyes on her eye line, so both faces come out the same size.
+MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
+ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
+MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
 # One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
 # before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
 STAGE_PALETTE = [hx(c) for c in """
@@ -77,18 +82,22 @@ def beaten_closeup(src):
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
-def portrait_crop(src, cx):
-    """One half of a two-portrait panel: the full height, as wide as the half's aspect, centred on the face at cx."""
+def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
+    """One half of a two-portrait panel, as wide as the half's aspect, centred on the face at cx. At zoom 1 it is
+    the full height; zoomed in, it is 1/zoom of the height, placed so the eyes at eyes_y land where target_eyes_y
+    sits in a full-height crop."""
     img = src.convert("RGB")
     w, h = img.size
-    cw = round(h * HALF / AH)
+    ch = round(h / zoom)
+    cw = round(ch * HALF / AH)
+    y = 0 if eyes_y is None else int(np.clip(round(eyes_y - target_eyes_y / zoom), 0, h - ch))
     x = int(np.clip(cx - cw // 2, 0, w - cw))
-    return img.crop((x, 0, x + cw, h))
+    return img.crop((x, y, x + cw, y + ch))
 
 
 def convent_closeup(micah, eleanor):
-    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right."""
-    left = portrait_crop(micah, MICAH_FACE_X)
+    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size."""
+    left = portrait_crop(micah, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
     right = portrait_crop(eleanor, ELEANOR_FACE_X)
     return framed_pair(left, right)
 

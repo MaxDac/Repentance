@@ -20,10 +20,10 @@ public static class CombineScripts
                 return true;
             }
             state.TakeItem("mirror_waxed");
-            state.TakeItem("cloth");
             state.GiveItem("mirror");
             state.SetFlag("got_mirror");
-            await game.Say("The wax lifts cleanly. I put the borrowed cloth back on the bed.");
+            await game.Say("The wax lifts clean.");
+            await game.Say("I oughta put this rag back on her bed, see... but, for some reason, I just can't.");
             await game.Hud.ShowImageWithLines(GD.Load<Texture2D>("res://assets/art/ui/triquetra.png"),
                 () => game.Say("Three loops tied in one knot. No beginning, no end. Scratched deep, on purpose."));
             return true;

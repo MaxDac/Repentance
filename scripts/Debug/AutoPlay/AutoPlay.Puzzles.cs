@@ -49,7 +49,7 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "paper");
         await game.Perform(Verb.Hand, "closet");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "legacy_safe");
+            new[] { ("n0", 4), ("d1", 1), ("t1", 3), ("n1", 1), ("t2", 1), ("n2", 7) }, "legacy_safe");
         await game.Perform(Verb.Hand, "brass_box");
         await game.ItemVerb(Verb.Hand, "brass_box");
         await game.Perform(Verb.Walk, "exit");
