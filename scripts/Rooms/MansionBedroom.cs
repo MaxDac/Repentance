@@ -161,17 +161,13 @@ public partial class MansionBedroom : Room
     /// <summary>The end of the prayer Micah left the room on, over black, a line at a time, on the way to Rose's.</summary>
     public static readonly string[] Doxology =
         { "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen." };
+    public const double DoxologyFade = 3.5;
 
     private async Task PrayerEnding()
     {
         await Game.Hud.Fade(1, 1.0);
         await Wait(0.6);
-        for (int i = 1; i <= Doxology.Length; i++)
-        {
-            Game.Hud.ShowCaptionLines(Doxology, i);
-            await Wait(i < Doxology.Length ? 1.0 : 1.8);
-        }
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ShowVerses(Doxology, DoxologyFade, 1.5);
         await Wait(0.5);
     }
 

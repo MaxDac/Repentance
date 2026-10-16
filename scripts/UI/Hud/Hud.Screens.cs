@@ -58,6 +58,64 @@ public partial class Hud
             Visible = false,
         };
         root.AddChild(_caption);
+
+        VerseFont = GD.Load<Font>("res://assets/fonts/IMFellEnglish-Regular.ttf");
+        _verses = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Visible = false };
+        _verses.AddThemeConstantOverride("separation", 2);
+        root.AddChild(_verses);
+    }
+
+    private const int VerseFontSize = 22;
+    private VBoxContainer _verses = null!;
+    /// <summary>The printed-prayer-book serif of the verses over black.</summary>
+    public static Font VerseFont { get; private set; } = null!;
+    public bool VersesVisible => _verses.Visible;
+    /// <summary>The verse lines revealed so far, one per line.</summary>
+    public string VersesText => string.Join("\n", _verses.GetChildren().OfType<Label>().Select(l => l.Text));
+    public bool VersesFading => _verses.Modulate.A < 1 || _verses.GetChildren().OfType<Label>().Any(l => l.Modulate.A is > 0 and < 1);
+
+    /// <summary>
+    /// Verses over black in <see cref="VerseFont"/>, centred: each line fades in under the previous ones over
+    /// <paramref name="fadeSeconds"/>, the block holds for <paramref name="holdSeconds"/>, then fades out as one.
+    /// </summary>
+    public async Task ShowVerses(IReadOnlyList<string> lines, double fadeSeconds, double holdSeconds)
+    {
+        foreach (var child in _verses.GetChildren()) child.Free();
+        int size = VerseFontSize;
+        while (size > 8 && lines.Max(l => VerseFont.GetStringSize(l, HorizontalAlignment.Left, -1, size).X) > ScreenW - 16)
+            size -= 2;
+        float lineHeight = VerseFont.GetHeight(size);
+        float height = lineHeight * lines.Count + 2 * (lines.Count - 1);
+        _verses.Position = new Vector2(0, Mathf.Round(CaptionTop + 8 - height / 2));
+        _verses.Size = new Vector2(ScreenW, height);
+        _verses.Modulate = Colors.White;
+        _verses.Visible = true;
+        var settings = new LabelSettings { Font = VerseFont, FontSize = size, FontColor = VerbHover };
+        foreach (var line in lines)
+        {
+            var label = new Label
+            {
+                Text = line,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                LabelSettings = settings,
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+                Modulate = new Color(1, 1, 1, 0),
+            };
+            _verses.AddChild(label);
+            await TweenAlpha(label, 1, fadeSeconds);
+        }
+        await ToSignal(GetTree().CreateTimer(holdSeconds, false), SceneTreeTimer.SignalName.Timeout);
+        await TweenAlpha(_verses, 0, fadeSeconds);
+        _verses.Visible = false;
+        foreach (var child in _verses.GetChildren()) child.QueueFree();
+    }
+
+    private async Task TweenAlpha(CanvasItem item, float alpha, double seconds)
+    {
+        var tw = CreateTween();
+        tw.SetPauseMode(Tween.TweenPauseMode.Stop);
+        tw.TweenProperty(item, "modulate:a", alpha, seconds);
+        await ToSignal(tw, Tween.SignalName.Finished);
     }
 
     private void BuildPause(Control root)
@@ -102,24 +160,5 @@ public partial class Hud
         _caption.LabelSettings.FontSize = CaptionFontSize;
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
-    }
-
-    /// <summary>
-    /// The first <paramref name="shown"/> of <paramref name="lines"/>, one under the other. The block is laid out (centred,
-    /// and at a size where the widest line fits) for all of them, so revealing the next line never moves the earlier ones.
-    /// </summary>
-    public void ShowCaptionLines(IReadOnlyList<string> lines, int shown)
-    {
-        int size = CaptionFontSize;
-        while (size > 8 && lines.Max(l => Font.GetStringSize(l, HorizontalAlignment.Left, -1, size).X) > ScreenW - 16)
-            size -= 8;
-        var settings = _caption.LabelSettings;
-        settings.FontSize = size;
-        float lineHeight = Font.GetHeight(size) + settings.LineSpacing;
-        float height = lineHeight * lines.Count;
-        _caption.Position = new Vector2(0, Mathf.Round(CaptionTop + 8 - height / 2));
-        _caption.Size = new Vector2(ScreenW, height);
-        _caption.Text = string.Join("\n", lines.Take(Mathf.Clamp(shown, 0, lines.Count)));
-        _caption.Visible = true;
     }
 }

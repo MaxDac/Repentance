@@ -79,7 +79,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Leaves on a lucky clover. The night when the Veil is thin. Saint Patrick's day in March." Eleanor's Celtic
+  "Leaves on a lucky clover. The night of Samhain, when the Veil is thin. Saint Patrick's day in March." Eleanor's Celtic
   roots, in the everyday, modern form anybody knows.
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
   its graphical controls, not the safe itself. The references give **4** (the four-leaf clover), **31** (Halloween, the old Samhain) and
