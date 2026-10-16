@@ -24,6 +24,8 @@ public partial class Office : Room
         // whoever left last opened the door; it's shut again by the time anyone comes back
         State.SetFlag("office_door_open", false);
         State.SetFlag("office_door_ajar", false);
+        // once Micah has emptied the top drawer it stays shut for the rest of the story
+        if (DrawerLeft() == 0) State.SetFlag("drawer_open", false);
         base._Ready();
         _glint = GetNodeOrNull<Godot.Sprite2D>("WeddingRing/Glint");
     }
@@ -186,6 +188,14 @@ public partial class Office : Room
     /// <summary>How many of the drawer's things (revolver, dollar, lockpicks) Micah hasn't taken yet.</summary>
     private int DrawerLeft() => DrawerFlags.Count(f => !State.HasFlag(f));
 
+    /// <summary>With the last of his things in his pockets, Micah pushes the top drawer shut.</summary>
+    private async Task ShutEmptyDrawer()
+    {
+        if (DrawerLeft() > 0 || !State.HasFlag("drawer_open")) return;
+        await Wait(0.2);
+        State.SetFlag("drawer_open", false);
+    }
+
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
@@ -227,10 +237,14 @@ public partial class Office : Room
                     State.SetFlag("drawer_open", false);
                     return true;
                 }
+                if (DrawerLeft() == 0)
+                {
+                    await Say("Empty. The story of my life. It can stay shut.");
+                    return true;
+                }
                 State.SetFlag("drawer_open");
                 await Say(DrawerLeft() switch
                 {
-                    0 => "Empty. The story of my life.",
                     3 => "My revolver, twenty-two dollars for the case, and my picks.",
                     _ => "What's left of the important things.",
                 });
@@ -246,16 +260,19 @@ public partial class Office : Room
                 State.GiveItem("dollar");
                 State.SetFlag("took_dollar");
                 await Say("Twenty-two dollars. A day's fee, and two dollars left from the last job. Better make it count.");
+                await ShutEmptyDrawer();
                 return true;
             case ("revolver", Verb.Hand):
                 State.GiveItem("revolver");
                 State.SetFlag("took_revolver");
                 await Say("Last time I carried it, I shot a mailbox. Let's hope the mailboxes behave tonight.");
+                await ShutEmptyDrawer();
                 return true;
             case ("lockpick", Verb.Hand):
                 State.GiveItem("lockpick");
                 State.SetFlag("took_lockpick");
                 await Say("My picks. A locked door is just a question nobody's asked politely yet.");
+                await ShutEmptyDrawer();
                 return true;
 
             case ("bottle", Verb.Hand) when State.HasFlag("office_lamp_off"):

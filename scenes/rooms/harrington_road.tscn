@@ -83,7 +83,7 @@ script = ExtResource("5_FlagSprite")
 ShowIfFlags = "crates_stacked"
 
 [node name="WedgeSprite" type="Sprite2D" parent="."]
-position = Vector2(427, 182)
+position = Vector2(424, 189)
 z_index = -8
 texture = ExtResource("9_Wedge")
 centered = false
@@ -144,7 +144,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/PackingWedge"]
-position = Vector2(439, 191)
+position = Vector2(436, 198)
 shape = SubResource("WedgeShape")
 
 [node name="LadderCatch" type="Area2D" parent="Hotspots"]
