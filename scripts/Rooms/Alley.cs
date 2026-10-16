@@ -211,6 +211,7 @@ public partial class Alley : Room
         State.SetFlag("alley3_tony_inside", false);
         await tony.MoveTo(TonyOut, 40);
         tony.FaceLeft(true);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         Act3.UpdateGates();
         await Talk("bartender_gun");

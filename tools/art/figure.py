@@ -434,6 +434,8 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.02), 0.40, min(0.15, 0.04 + o * 0.55)])
             hand = body([s * 0.02, f, o])
             wr = hand + np.array([s * 0.015, 0.035, 0.018])
+        elif kind == "pts":  # explicit elbow, wrist and hand positions in the body frame (f, o, e)
+            el, wr, hand = (body(list(v)) for v in (f, o, e))
         elif kind == "temple":  # hand raised beside the head, a held gun pointing back into the temple
             el = body([s * (sw + 0.11), 0.12, -0.03])
             hand = body([s * 0.08, 0.09, 0.0])
@@ -460,7 +462,8 @@ def figure(spec, ps, fw=56, fh=80):
             c.put(c.capsule(P(el), P(wr), H * 0.031 * BULK * k, H * 0.027 * BULK * k), fore, part)
             if col.get("cuff") and fore != skin:
                 c.put(c.capsule(P(wr), P(wr), H * 0.026 * hk, H * 0.026 * hk), col["cuff"], part)
-            if hand is not None:
+            # ps["hand_in_coat"]: the hand of that arm is slipped inside the coat front, out of sight
+            if hand is not None and ps.get("hand_in_coat") != s:
                 c.put(c.capsule(P(wr), P(hand), H * 0.025 * hk, H * 0.021 * hk), skin, f"hand{s}", dither=False)
         # a hand held up to the head goes in front of it
         add(2.9 if kind == "temple" else 2.0 + Ds + 0.05 * abs(cp), arm)
@@ -514,10 +517,11 @@ def figure(spec, ps, fw=56, fh=80):
             c.dot(tip[0] + 1, tip[1], "+e8e4e0")
         add(3.1, powder)
 
-    if ps.get("gun"):  # a revolver in the hand of arm ps["gun"], barrel along the forearm
+    if ps.get("gun"):  # a revolver in the hand of arm ps["gun"], barrel along the forearm (or ps["gun_dir"])
         def gun(s=ps["gun"]):
             _, el, wr, hand = arm_pts[s]
-            d = (hand - el) / max(np.linalg.norm(hand - el), 1e-6)
+            d = np.array(ps["gun_dir"], float) if ps.get("gun_dir") else hand - el
+            d = d / max(np.linalg.norm(d), 1e-6)
             up = np.array([0, -1.0, 0]) - d * (-d[1])
             up /= max(np.linalg.norm(up), 1e-6)
             steel, wood = "4a4c58", "5a3a24"

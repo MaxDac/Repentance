@@ -196,6 +196,7 @@ public partial class MansionBedroom : Room
         await Game.WalkTo(PastScreenFront);
         await Game.WalkTo(MicahAims);
         Player.Face(Facing.Right);
+        if (!await Player.PlayPose("micah_draw")) return;
         Player.SetPose("micah_aim");
         await Wait(0.4);
         harrington?.FaceLeft(true);

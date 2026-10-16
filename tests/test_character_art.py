@@ -275,6 +275,19 @@ class CharacterArtTests(unittest.TestCase):
                       for i in range(len(clip["frames"]))]
             self.assertEqual(len(frames), len(set(frames)), name)
 
+    def test_draw_ends_on_the_held_aim(self):
+        for prefix in ("micah", "micah_no_tie"):
+            with self.subTest(prefix=prefix):
+                clip = json.loads((ART / "sprites" / f"{prefix}_draw.json").read_text())
+                strip = Image.open(ART / "sprites" / f"{prefix}_draw.png").convert("RGBA")
+                aim = Image.open(ART / "sprites" / f"{prefix}_aim.png").convert("RGBA")
+                width, height = clip["width"], clip["height"]
+                self.assertEqual((width, height), aim.size)
+                frames = [strip.crop((i * width, 0, (i + 1) * width, height)).tobytes()
+                          for i in range(len(clip["frames"]))]
+                self.assertEqual(frames[-1], aim.tobytes(), "the draw lands on the held aim")
+                self.assertEqual(len(frames), len(set(frames)), "every step of the draw is its own frame")
+
     def test_aim_back_steps_blend_between_aim_levels(self):
         back = json.loads((ART / "sprites" / "micah_aim_back.json").read_text())
         lower = json.loads((ART / "sprites" / "micah_aim_lower.json").read_text())
@@ -451,7 +464,7 @@ class CharacterArtTests(unittest.TestCase):
             return (np.abs(pixels - red).sum(axis=1) < 40).any()
 
         self.assertTrue(has_tie(ART / "sprites" / "micah.png"))
-        self.assertTrue(has_tie(ART / "sprites" / "micah_aim.png"))
+        self.assertTrue(has_tie(ART / "sprites" / "micah_draw.png"))
         for name in ("micah_no_tie",) + tuple(f"micah_no_tie_{pose}" for pose in sprites.NO_TIE_POSES):
             with self.subTest(sprite=name):
                 self.assertTrue((ART / "sprites" / f"{name}.png").is_file())
