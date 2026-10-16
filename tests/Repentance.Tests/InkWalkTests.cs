@@ -174,7 +174,7 @@ public class InkWalkTests
             return;
         }
         walk.Offered.UnionWith(choices);
-        string key = $"{repeats}|{story.state.currentPathString}|{string.Join("|", choices)}|{string.Join(",", walk.World.Flags.Order())}|{string.Join(",", walk.World.Items.Order())}|{story.variablesState["pushes"]}";
+        string key = $"{repeats}|{story.state.currentPathString}|{string.Join("|", choices)}|{string.Join(",", walk.World.Flags.Order())}|{string.Join(",", walk.World.Items.Order())}|{story.variablesState["pushes"]}|{story.variablesState["persuade_ok"]}";
         if (!seen.Add(key)) return;
         string state = story.state.ToJson();
         var world = walk.World;

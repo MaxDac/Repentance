@@ -20,7 +20,7 @@ public partial class AutoPlay
 
         // 5: no visits to Caleb, so no walking away; shoot, Eleanor stays, nothing to bargain with
         var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club" or "church_act3_return")).Append("rose_wait");
-        Seed(noChurch, act3Items, "Shoot him", "You can't stay", "Nobody's coming");
+        Seed(noChurch, act3Items, Refuses.Append("(Leave her to them.)").Prepend("Shoot him").ToArray());
         await game.ChangeRoom("alley", "act3");
         await game.Perform(Verb.Talk, "back_door");
         Check(!Offered("bartender_gun", "Lower the gun") && gs.HasFlag("shot_bartender"), "without Caleb, Micah can't walk away from Tony");
@@ -33,6 +33,7 @@ public partial class AutoPlay
         await game.Perform(Verb.Walk, "door_right");
         Check(!Offered("oldman_taunt", "Our Father") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
         Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
+        CheckPersuasionTurns();
         // Seeded endings follow the permanent epilogue lock; exercise the recipe without reopening its blocked HUD.
         await game.Run(() => Story.StoryPuzzles.TryReadAccounts(game));
         Check(!game.Hud.Puzzle.IsOpen && !gs.HasFlag(Endings.TookDocuments), "escape kitchen cannot decode skipped evidence after confrontation");
@@ -54,9 +55,10 @@ public partial class AutoPlay
         await TheEnd("ending_5");
 
         // 4: Eleanor comes, but no ledgers and no fire
-        Seed(act3Flags, act3Items, "Shoot him", "I didn't come all this way");
+        Seed(act3Flags, act3Items, Convinces.Prepend("Shoot him").ToArray());
         await game.ChangeRoom("mansion_bedroom", "start");
-        Check(gs.HasFlag("eleanor_convinced"), "Eleanor convinced at the first try");
+        Check(gs.HasFlag("eleanor_convinced") && !Offered("eleanor_footsteps", "Leave her to them"),
+            "Eleanor convinced by the four right lines, before any footsteps");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_4"), "ending 4: prison, Eleanor visits");
@@ -65,9 +67,11 @@ public partial class AutoPlay
         await TheEnd("ending_4");
 
         // 3: the house burns, Eleanor stays behind
-        Seed(act3Flags.Append("cellar_lit"), act3Items, "Shoot him", "He had it coming", "I'll go to the police");
+        Seed(act3Flags.Append("cellar_lit"), act3Items,
+            Convinces.Take(3).Prepend("Shoot him").Append("I love you").Append("(Leave her to them.)").ToArray());
         await game.ChangeRoom("mansion_bedroom", "start");
-        Check(!gs.HasFlag("eleanor_convinced"), "Eleanor stays");
+        Check(!gs.HasFlag("eleanor_convinced") && Offered("eleanor_footsteps", "Leave her to them"),
+            "three right lines and a wrong fourth aren't enough: Eleanor stays, and the footsteps come");
         await game.Perform(Verb.Walk, "cellar_door");
         await game.Perform(Verb.Hand, "barrel");
         await game.Perform(Verb.Hand, "hung_lantern");
@@ -87,10 +91,13 @@ public partial class AutoPlay
         // Signed evidence alone preserves both outskirts outcomes without a fire.
         foreach (bool convinced in new[] { false, true })
         {
+            // not convinced: one wrong first line, then the right ones; the chain stays broken
+            var lines = convinced ? Convinces : Convinces.Skip(1).Prepend("They'll pin it on you");
             Seed(act3Flags.Append(Endings.TookDocuments), act3Items.Append("documents"),
-                "Shoot him", convinced ? "I didn't come all this way" : "He had it coming", "I'll go to the police");
+                lines.Prepend("Shoot him").Append("(Leave her to them.)").ToArray());
             await game.ChangeRoom("mansion_bedroom", "start");
-            Check(gs.HasFlag(Endings.EleanorConvinced) == convinced, "documents-only route preserves Eleanor's decision");
+            Check(gs.HasFlag(Endings.EleanorConvinced) == convinced,
+                convinced ? "documents-only route preserves Eleanor's decision" : "one wrong line breaks the chain for good");
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts");
             string ending = convinced ? "ending_2" : "ending_3";
@@ -102,7 +109,7 @@ public partial class AutoPlay
         // Verify the actual Ink choices for each missing commitment, not only the helper predicates.
         foreach (string missing in new[] { "faith_ring", "cross" })
         {
-            Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "He had it coming", "I'll go to the police");
+            Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "(Leave her.)");
             await game.ChangeRoom("mansion_bedroom", "start");
             Check(!Offered("oldman_taunt", "Our Father"), $"without {missing}, the final return is unavailable");
         }
@@ -174,27 +181,45 @@ public partial class AutoPlay
         await Shot("ending_prison_rose");
         await TheEnd("ending_6");
 
-        // 7: Eleanor won't come; Micah shoots her, then himself
-        Seed(act3Flags, act3Items, "Shoot him", "He had it coming", "Shoot Eleanor");
-        int shots = game.Sfx.Count(Sound.Gunshot);
-        bool eleanorDown = false, aimSelf = false, morning = false;
-        _ = game.ChangeRoom("mansion_bedroom", "start");
-        await Until(() =>
+        // 7: Eleanor won't come; on the fourth turn Micah shoots her, then himself. Then the other ending 7: four
+        // turns without her, the footsteps, and he turns the gun on himself alone.
+        foreach (bool murder in new[] { true, false })
         {
-            if (game.Room is Rooms.MansionBedroom bedroom)
+            string label = murder ? "ending_7 (murder)" : "ending_7 (alone)";
+            var prefer = murder
+                ? Refuses.Take(3).Prepend("Shoot him").Append("(Shoot Eleanor.)")
+                : Refuses.Prepend("Shoot him").Append("(Pull the trigger on myself.)");
+            Seed(act3Flags, act3Items, prefer.ToArray());
+            int shots = game.Sfx.Count(Sound.Gunshot);
+            bool eleanorDown = false, aimSelf = false, morning = false, lastWords = false, facedAway = false;
+            _ = game.ChangeRoom("mansion_bedroom", "start");
+            await Until(() =>
             {
-                eleanorDown |= bedroom.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("eleanor_shot.png") == true;
-                aimSelf |= game.Player.PoseName == "micah_aim_self";
-            }
-            morning |= game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
-            return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
-        }, 180, 0.05);
-        Check(gs.HasFlag(Endings.ShotEleanor) && gs.HasFlag("ending_7"), "ending 7: Micah shoots Eleanor");
-        Check(eleanorDown, "ending 7: Eleanor falls like the old man, shot in the stomach");
-        Check(aimSelf, "ending 7: Micah puts the revolver to his temple");
-        Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, "ending 7: the last shot is heard over black");
-        await TheEnd("ending_7");
-        Check(!morning && !gs.HasFlag("escaping"), "ending 7: no escape and no \"The next morning\"");
+                if (game.Room is Rooms.MansionBedroom bedroom)
+                {
+                    eleanorDown |= bedroom.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("eleanor_shot.png") == true;
+                    aimSelf |= game.Player.PoseName == "micah_aim_self";
+                    if (game.Hud.SpeechVisible && game.Hud.SpeechText == Rooms.MansionBedroom.LastWords)
+                    {
+                        lastWords = true;
+                        facedAway |= game.Player.Facing == Facing.Left;
+                    }
+                }
+                morning |= game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
+                return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
+            }, 180, 0.05);
+            Check(gs.HasFlag("ending_7") && gs.HasFlag(Endings.ShotEleanor) == murder && gs.HasFlag(Endings.ShotHimself) == !murder,
+                murder ? "ending 7: Micah shoots Eleanor" : "ending 7: Micah shoots himself and leaves Eleanor alive");
+            Check(Offered("eleanor_footsteps", "Pull the trigger") == !murder,
+                murder ? $"{label}: shot on the fourth turn, before the footsteps" : $"{label}: the footsteps come after four turns");
+            if (!murder) CheckPersuasionTurns();
+            Check(eleanorDown == murder, murder ? "ending 7: Eleanor falls like the old man, shot in the stomach" : $"{label}: Eleanor stays standing");
+            Check(lastWords && facedAway, $"{label}: \"{Rooms.MansionBedroom.LastWords}\", looking away at an empty corner");
+            Check(aimSelf, $"{label}: Micah puts the revolver to his temple");
+            Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, $"{label}: the last shot is heard over black");
+            await TheEnd(label);
+            Check(!morning && !gs.HasFlag("escaping"), $"{label}: no escape and no \"The next morning\"");
+        }
 
         // 1: giving up on the church steps
         Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
@@ -359,8 +384,38 @@ public partial class AutoPlay
         }
     }
 
+    /// <summary>The only way to convince Eleanor: these four lines, one per turn, in a row.</summary>
+    private static readonly string[] Convinces =
+        { "we don't stay in this city", "lend you out again", "walk through that door", "decide it yourself" };
+
+    /// <summary>A wrong line on each of Eleanor's four turns.</summary>
+    private static readonly string[] Refuses =
+        { "I didn't come all this way", "Theodore's a coward", "A singer", "I love you" };
+
+    private int _seedLog;
+
+    /// <summary>
+    /// Eleanor's four turns as offered since the last <see cref="Seed"/>: turning himself in only on the first,
+    /// leaving her from the third, shooting her only on the fourth; then the footsteps' three ways out.
+    /// </summary>
+    private void CheckPersuasionTurns()
+    {
+        var turns = _offerLog.Skip(_seedLog).Where(o => o.Knot == "eleanor_persuade").Select(o => o.Options).ToList();
+        Check(turns.Count == 4, $"Eleanor gets four turns ({turns.Count})");
+        bool Has(int turn, string option) => turn < turns.Count && turns[turn].Any(o => o.Contains(option));
+        bool On(string option, params int[] at) => Enumerable.Range(0, 4).All(i => Has(i, option) == at.Contains(i));
+        Check(On("turn yourself in", 0), "turning himself in is offered on the first turn only");
+        Check(On("(Leave her.)", 2, 3), "leaving her is offered after two turns");
+        Check(On("(Shoot Eleanor.)", 3), "shooting her is offered only after three turns");
+        var footsteps = _offerLog.Skip(_seedLog).LastOrDefault(o => o.Knot == "eleanor_footsteps").Options ?? Array.Empty<string>();
+        Check(footsteps.Length == 3 && footsteps.Any(o => o.Contains("Pull the trigger on myself")) &&
+              footsteps.Any(o => o.Contains("Shoot Eleanor")) && footsteps.Any(o => o.Contains("Leave her to them")),
+            "after four turns, the footsteps: himself, Eleanor, or leave");
+    }
+
     private void Seed(IEnumerable<string> flags, IEnumerable<string> items, params string[] prefer)
     {
+        _seedLog = _offerLog.Count;
         _game.Hud.ShowCaption(null);
         GameState.Instance.Restore(flags.ToArray(), items.ToArray(), 3);
         DialogueManager.Instance.LoadInk(_act3Ink);

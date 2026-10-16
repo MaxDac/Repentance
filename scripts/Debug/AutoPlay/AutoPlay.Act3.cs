@@ -184,7 +184,7 @@ public partial class AutoPlay
         Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
             !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
         await Shot("alley_sal_down");
-        _prefer = new[] { "Shoot him", "You can't stay", "Every time" };
+        _prefer = Convinces.Prepend("Shoot him").ToArray();
         var tonyTalk = game.Perform(Verb.Talk, "back_door");
         await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
             t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
@@ -298,7 +298,7 @@ public partial class AutoPlay
         await confront;
         await WaitIdle(game);
         Check(Offered("oldman_taunt", "Our Father") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
-        Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along at the second try");
+        Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along after the four right lines");
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");
         Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door during the escape");

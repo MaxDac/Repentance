@@ -49,6 +49,13 @@ public class EndingsTests
         Assert.Equal(7, Endings.Resolve(Flags("shot_eleanor", "mansion_exploded", "took_documents")));
     }
 
+    [Fact]
+    public void ShootingHimselfWithEleanorAliveIsEndingSeven()
+    {
+        Assert.Equal(7, Endings.Resolve(Flags("shot_himself")));
+        Assert.Equal(7, Endings.Resolve(Flags("shot_himself", "eleanor_refused", "took_documents")));
+    }
+
     [Theory]
     [InlineData(1, true)]
     [InlineData(2, false)]

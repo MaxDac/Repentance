@@ -114,21 +114,25 @@ public partial class MansionBedroom : Room
             await Act3.End();
             return;
         }
+        if (State.HasFlag("eleanor_refused") && !State.HasFlag(Endings.ShotEleanor))
+        {
+            // four turns and she still won't come: the Club's men on the stairs, and the last choice
+            await Say("*Footsteps on the landing, behind the other door. A man's voice. Then two.*");
+            await Talk("eleanor_footsteps");
+        }
         if (State.HasFlag(Endings.ShotEleanor))
         {
             await MurderSuicide(eleanor);
             return;
         }
+        if (State.HasFlag(Endings.ShotHimself))
+        {
+            await Suicide();
+            return;
+        }
 
-        if (State.HasFlag(Endings.EleanorConvinced))
-        {
-            if (eleanor != null) await eleanor.MoveTo(MicahAims + new Vector2(36, 2), EleanorHurry);
-        }
-        else
-        {
-            await Say("*Footsteps on the landing, behind the other door. A man's voice. Then two.*");
-            await Say("That's my cue. Goodbye, Eleanor.");
-        }
+        if (State.HasFlag(Endings.EleanorConvinced) && eleanor != null)
+            await eleanor.MoveTo(MicahAims + new Vector2(36, 2), EleanorHurry);
         State.SetFlag("escaping");
         await Game.WalkTo(Door);
         await Game.ChangeRoom("mansion_kitchen", "escape");
@@ -189,10 +193,32 @@ public partial class MansionBedroom : Room
         await Wait(1.2);
         await Think("She goes down on her knees, then onto her face, next to him. Like she's praying. She never prayed in her life.");
         await Think("Two of them on the carpet now. And the only one left in this room who deserves it is holding the gun.");
+        await LastShot();
+    }
+
+    /// <summary>Ending 7 with Eleanor left alive: the men on the stairs, and Micah turns the gun on himself.</summary>
+    private async Task Suicide()
+    {
+        Player.Face(Facing.Right);
+        Player.SetPose("micah_aim");
+        await Wait(0.6);
+        await LastShot();
+    }
+
+    public const string LastWords = "Forgive me... all of you...";
+
+    /// <summary>
+    /// Micah lowers the gun and looks away from the bed, at an empty corner of the room, and asks it to forgive him.
+    /// Then the revolver comes up to his temple; the screen cuts to black and the shot is heard over it.
+    /// </summary>
+    private async Task LastShot()
+    {
+        Player.SetPose(null);
+        Player.Face(Facing.Left);
+        await Wait(1.0);
+        await Say(LastWords);
         Player.SetPose("micah_aim_self");
         await Wait(1.4);
-        await Think("Our Father, who art in heaven, hallowed be Thy name...");
-        await Wait(0.8);
         await Game.Hud.Fade(1, 0.08);
         await Wait(1.2);
         Game.Sfx.Play(Sound.Gunshot);

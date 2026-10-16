@@ -633,12 +633,30 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
-    - Micah has 2 turns to convince her, otherwise Micah would run away because he hear rumors from the other door.
+    - Eleanor always gets four turns, each with three lines for Micah. Only one line per turn is right, and only
+      the four right lines in a row convince her. A wrong line silently breaks the chain: the conversation goes on,
+      but she slips away (Micah's thoughts hint at it), and a right line after a wrong one no longer reaches her.
+      The only way to convince her:
+      1. "Then we don't stay in this city. We're out of it tonight."
+      2. "He'll take you back like he always does. And lend you out again on Thursdays."
+      3. "You don't have to know tonight. You only have to walk through that door."
+      4. "Nothing. Come or stay, it's yours to decide. But decide it yourself, for once."
+    - The wrong lines: "I didn't come all this way to leave you here, Eleanor." / "You can't stay here. Not now.
+      They'll pin it on you." (turn 1); "Forget Theodore. You've got me now." / "Theodore's a coward. I'll handle
+      him." (turn 2); "You'll be with me. I'll look after you." / "You can be anything you like. A singer. A nurse.
+      Anything." (turn 3); "I love you, Eleanor." / "Every time I've seen you, you've said you can't go back there.
+      Now you don't have to." (turn 4).
     - On the first turn he can instead lower the gun, leave her and walk out to turn himself in (ending 6), whatever
       evidence he carries.
-    - On the second turn, if she still refuses, he can shoot Eleanor (ending 7): she drops to her knees under the
-      sheet and falls face-down, blood spreading from her stomach. Micah puts the revolver to his temple; the screen
-      cuts to black and the shot is heard over black.
+    - After two turns, "(Leave her.)" is offered (turns 3 and 4): Eleanor lets him go and he escapes alone.
+    - After three turns, "(Shoot Eleanor.)" is offered (turn 4 only), ending 7: she drops to her knees under the
+      sheet and falls face-down, blood spreading from her stomach.
+    - If all four turns fail, Micah hears footsteps on the landing behind the other door, men coming up the stairs.
+      He has three choices: pull the trigger on himself (ending 7, Eleanor lives), shoot Eleanor and then himself
+      (ending 7), or leave her to them and escape alone.
+    - Whenever Micah turns the gun on himself, he doesn't pray. He looks away at an empty corner of the room and says
+      "Forgive me... all of you..."; then he puts the revolver to his temple, the screen cuts to black and the shot
+      is heard over black.
     - If Micah manages to convince her, they both are in the kitchen: here, Micah has the possibility to set the
       mansion on fire. Eleanor waits for him in the kitchen while he goes back down to the bootleggers' wine cellar.
     - If he doesn't manage, he's alone in the kitchen, and can set the mansion on fire either way.
@@ -736,10 +754,13 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Option 7 - The bedroom - Murder and suicide
 
-- Accessible if Micah shoots the old man, fails to convince Eleanor, and then shoots her.
-- Eleanor falls like the old man (new sprites: kneeling, then face-down under the sheet, the stain growing into a
-  pool). Micah raises the revolver to his temple; cut to black, then the shot.
+- Accessible if Micah shoots the old man, fails to convince Eleanor, and then shoots her (on the fourth turn, or at
+  the footsteps), or shoots himself at the footsteps.
+- If he shoots her, Eleanor falls like the old man (new sprites: kneeling, then face-down under the sheet, the stain
+  growing into a pool). Either way, Micah looks away at an empty corner, says "Forgive me... all of you...", raises
+  the revolver to his temple; cut to black, then the shot.
 - *End of Act Three* follows straight away; the present-day attic scene has no "The next morning" caption.
+- If Micah shot only himself, Eleanor survives; Caleb's entry says so.
 - The last entry is written by Caleb, from the police reports and the newspapers: he couldn't make Micah repent,
   finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
   brother's footsteps.
