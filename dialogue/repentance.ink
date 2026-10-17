@@ -586,6 +586,9 @@ ELEANOR: I can't go back there...
 MICAH: Then stay. Right here.
 CUE: closer
 ELEANOR: You're walking into the rain, Mr. Jones. Not out of it.
+CUE: kiss
+THOUGHT: I'd have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him.
+THOUGHT: And somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway.
 -> END
 
 // ---------------------------------------------------------------- MOTEL, NIGHT

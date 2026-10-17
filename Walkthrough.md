@@ -235,9 +235,11 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
   The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
 - After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
-  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." The
-  screen fades to black before he reaches her, and holds a moment on black before the attic fades in (End of
-  Act 1). Their night in her room follows the First Interlude (see *Motel room, night* in Act 2).
+  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." As the
+  line ends he reaches her and kisses her on the lips, and they hold the kiss while his narration says "I'd
+  have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him." and "And
+  somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway." Only then
+  does the screen fade to black, holding a moment on black before the attic fades in (End of Act 1). Their night in her room follows the First Interlude (see *Motel room, night* in Act 2).
 
 ### End of Act 1 - Present day
 
