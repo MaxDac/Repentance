@@ -1297,15 +1297,17 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
                 if i % 2 == 0 or abs(cp) > 0.7:
                     c.dot(px, py, colour)
         elif kind == "strand" and cp > -0.25:
-            # a strand of pearls round the base of the neck: (strand, y_back, y_front, w, colour, shade?). It lies on
-            # the shoulders either side of the neck and dips to y_front on the chest; only the half facing us shows.
+            # a strand of pearls round the base of the neck: (strand, y_back, y_front, w, colour, shade?, depth?). It lies
+            # on the shoulders either side of the neck and dips to y_front on the chest, depth forward of the neck's
+            # axis (so it reaches the chest's surface in profile); only the half facing us shows.
             _, y0, y1, w, colour = d[:5]
             shade = d[5] if len(d) > 5 else colour
+            depth = d[6] if len(d) > 6 else w * 0.85
             on = c.parts_mask("torso", "coat", "neck")
             last, n = None, 0
             for a in np.linspace(-math.pi, math.pi, 97):
                 front = (1 + math.cos(a)) / 2
-                px, py, pd = P(body([w * math.sin(a), y0 + (y1 - y0) * front ** 2, w * 0.85 * math.cos(a)]))
+                px, py, pd = P(body([w * math.sin(a), y0 + (y1 - y0) * front ** 2, depth * math.cos(a)]))
                 pos = (math.floor(px), math.floor(py))
                 if pos == last:
                     continue

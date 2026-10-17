@@ -90,7 +90,7 @@ _CURVES = dict(bust_hi=0, bust=ELEANOR_FIGURE["bust"], rear=ELEANOR_FIGURE["rear
 ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035, 0.044, 0.52), "torso": "1c1a20",
            "high_neck": 0.19, "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034), "stockings": "5e4a46", "shoes": "120e10",
            "decals": [("belt", 0.465, "4a3c48"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "4a3c48"), ("pleats", 0.53),
-                      ("strand", 0.212, 0.25, 0.036, "f2eee4", "b8b0a4")]}
+                      ("strand", 0.212, 0.25, 0.036, "f2eee4", "b8b0a4", 0.058)]}
 # Rose, as in her close-up: long wavy blonde hair over the shoulders, blue-green eyes, a cream knit cardigan open
 # over a white collared blouse, and her navy skirt.
 ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c89c4a",
