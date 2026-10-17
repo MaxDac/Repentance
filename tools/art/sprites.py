@@ -83,13 +83,18 @@ ELEANOR_FIGURE = dict(h=62, sw=0.1, hw=0.044, waist=0.054, hipw=0.09, leg_r=0.78
                       profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.029, 0.029), (0.232, 0.085, -0.036, 0.04),
                                (0.25, 0.1, -0.048, 0.059), (0.31, 0.095, -0.052, 0.07), (0.40, 0.054, -0.048, 0.059),
                                (0.47, 0.09, -0.07, 0.046), (0.53, 0.0774, -0.06, 0.044)], flat_front=True)
+# Her hips, seat and stance are a tenth fuller than the levels above; every outfit inherits them.
+_HIPS = 1.1
+ELEANOR_FIGURE.update(hw=ELEANOR_FIGURE["hw"] * _HIPS, hipw=ELEANOR_FIGURE["hipw"] * _HIPS,
+                      rear=tuple(v * _HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
+                      profile=[(y, w * (_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]])
 # A 1920s widow's black: the high-necked, long-sleeved black bodice of her portrait, a dropped waist with a sash at
 # the hip, a pleated skirt to mid-calf, sheer dark stockings, black heels and a short strand of white pearls.
 # Her outfits keep these curves; the black dress, of heavier cloth, softens bust and seat a little.
 _CURVES = dict(bust_hi=0, bust=ELEANOR_FIGURE["bust"], rear=ELEANOR_FIGURE["rear"])
 # Her skirts follow her legs to the hem rather than hanging from the hip width.
 _HEM_LEGS = dict(hem_legs=True, hem_pad=0.025)
-ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035, 0.044, 0.52), "torso": "1c1a20",
+ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035 * _HIPS, 0.044 * _HIPS, 0.52), "torso": "1c1a20",
            "high_neck": 0.19, "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034, **_HEM_LEGS), "stockings": "5e4a46", "shoes": "120e10",
            "decals": [("belt", 0.465, "4a3c48"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "4a3c48"), ("pleats", 0.53),
                       ("strand", 0.212, 0.25, 0.036, "f2eee4", "b8b0a4", 0.058)]}
