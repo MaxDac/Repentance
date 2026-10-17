@@ -61,7 +61,11 @@ public sealed partial class Playthrough
         });
         await Beat("act_two_opening", async () =>
         {
-            await Do(Verb.Walk, "window");
+            var window = Do(Verb.Walk, "window");
+            await Until(() => _game.Room?.Name == "MotelNight" && _game.Player.Character == "micah_dressing", 600);
+            Check(!Gs.HasFlag("interlude1") && Gs.HasItem("revolver"),
+                "after the interlude, the night in her motel room: Micah getting dressed, with his things");
+            await window;
             await Until(() => _game.Room?.Name == "ChicagoMap", 600);
             await WaitIdle();
             Check(!Story.Interlude.EleanorPlays(Gs.HasFlag) && !_game.Player.Character.StartsWith("eleanor"), "Micah's journal again");

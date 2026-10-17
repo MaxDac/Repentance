@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 namespace Repentance.Rooms;
 
 /// <summary>
-/// A motel room, that same night. Micah gets dressed. Eleanor stays against the pillows under the white sheet.
-/// They agree never to see each other again. End of the first act of the journal.
+/// A motel room, the night Micah found Eleanor on the fire escape. Micah gets dressed. Eleanor stays against the
+/// pillows under the white sheet. They agree never to see each other again. It plays after the First Interlude,
+/// then Micah's journal goes on at his office.
 /// In the interludes the room is Eleanor's: in the First she watches the convent from the window until Micah comes;
 /// in the Second, after he has gone, two of the Order's men knock at the door, kick it in and walk her out.
 /// </summary>
@@ -54,19 +55,17 @@ public partial class MotelNight : Room
                 });
             return;
         }
-        if (State.HasFlag("motel_night_done")) return;
+        if (entry != "start") return;
         await Game.Run(async () =>
         {
             await Wait(1.0);
             await Think("Her room, up the fire escape. A buzzing sign, a cracked basin, her stockings over the chair.");
             await Think("I'm buttoning my shirt in the dark like a thief. Rose's face keeps turning up behind my eyes.");
             await Talk("motel_night");
-            State.SetFlag("motel_night_done");
             await Think("I close the door on her softly. Rose, the boy, and now Eleanor. I'm getting good at doors.");
             await Wait(0.6);
             await Game.Hud.Fade(1, 1.5);
-            State.SetFlag("attic_night");
-            await Game.ChangeRoom("attic", "night");
+            await Game.ChangeRoom("office", "act2");
         });
     }
 

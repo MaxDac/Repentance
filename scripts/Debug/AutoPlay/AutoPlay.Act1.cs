@@ -464,18 +464,29 @@ public partial class AutoPlay
             "the compensation answer rejoins the existing conversation on the fire escape");
         Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
         Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
-        int jazzStarts = game.Music.Count(Track.OfficeJazz);
         await Shot("motel_fire_escape");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
         Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
             "the rest of Eleanor's conversation stays on the fire escape without the panel");
-        await Until(() => game.Room?.Name == "MotelNight");
-        Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
-        Check(game.Music.Current == Track.OfficeJazz && game.Music.Count(Track.OfficeJazz) == jazzStarts,
-            "the office jazz carries on, uninterrupted, into Eleanor's room");
-        await game.Wait(2);
-        await Shot("motel_night");
-        await Until(() => game.Room?.Name == "Attic");
+        var her = game.Room!.FindActor("eleanor")!.Position;
+        float talkingX = game.Player.Position.X;
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Then stay. Right here.");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("You're walking into the rain"));
+        Check(game.Player.Position.X > talkingX + 8 && !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+            "Micah takes a couple of steps towards Eleanor, with no portrait panel, as she answers him");
+        await Shot("fire_escape_closer");
+        await Until(() => !game.Hud.SpeechVisible && game.Hud.FadeAlpha > 0.3f);
+        Check(game.Player.IsWalking, "Micah is still walking towards her as the scene fades");
+        await Until(() => game.Hud.FadeAlpha >= 1f);
+        Check(game.Room is Rooms.MotelFireEscape && game.Player.Position.X < her.X - 4,
+            "the fade to black stops him before he reaches Eleanor");
+        bool sawMotelNight = false;
+        await Until(() =>
+        {
+            sawMotelNight |= game.Room?.Name == "MotelNight";
+            return game.Room?.Name == "Attic";
+        });
+        Check(!sawMotelNight, "Act 1 ends on the fire escape; the motel night waits for the First Interlude");
         await game.Wait(2.5);
         await Shot("attic_night");
         await leave;

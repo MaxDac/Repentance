@@ -59,17 +59,19 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    with the umbrella (Puzzle 19). On the first-floor landing Eleanor, in black, opens with a question about his
    climb. After that opening, a framed close-up shows Micah on the left and Eleanor on the right, each speaking
    beneath their own portrait. It disappears before the compensation choice; the rest takes place on the landing.
-9. **Motel, that night**: in her room, Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
-   and Micah drops the case.
-10. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
-11. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
+   "Then stay. Right here." Micah starts towards her, and the fade to black takes him before he reaches her.
+9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
+10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel). Over black,
+    "Chicago, 1927.", then "First Interlude" under it.
     **First Interlude** (the player is Eleanor, in Micah's journal voice: what she told him that night at the motel):
     pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
     "another Jezebel from that hideous Club"; that night in the cell Agatha comes to her: refuse (saved) or indulge
     (Agatha turns back at the last moment, cursing her as a demon). From the motel window, four days on, she watches Micah reach
-    the convent, smoke in the road and come asking at the desk; she waits for him on the fire escape, and the
-    journal goes back to his office.
+    the convent, smoke in the road and come asking at the desk; she waits for him on the fire escape. "Later that night"
+    over black, and the journal goes back to Micah.
+11. **Motel, that night**: in her room, Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet
+    again, and Micah drops the case. The journal goes on at his office.
 12. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
     it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
     unable to think of anything but Eleanor.

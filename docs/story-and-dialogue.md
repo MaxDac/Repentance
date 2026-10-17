@@ -138,7 +138,7 @@ send the story the wrong way.
 |---|---|---|
 | Prologue -> Act 1 | `Attic` (journal read) | Daniel reads; play moves to the 1927 office |
 | Act 1 -> 2 | `Attic.EndOfActOne` | Stash items, `attic_night`, dinner call, "End of Act One", `StoryAct = 2` |
-| First interlude | `Interlude.BeginFirst` / `EndFirst` | Flag `interlude1`, play Eleanor from her hotel room; restores the Act 2 kit, back to the office |
+| First interlude | `Interlude.BeginFirst` / `EndFirst` | Flag `interlude1`, play Eleanor from her hotel room; restores the Act 2 kit, then Micah's night in `motel_night` and the office |
 | Act 2 -> 3 | `Attic.EndOfActTwo` | Stash, clear `masked`, `StoryAct = 3`, present-day bedroom |
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |

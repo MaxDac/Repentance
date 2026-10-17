@@ -48,6 +48,7 @@ public partial class Hud : CanvasLayer
     private ColorRect _thoughtBg = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
+    private Label _captionSub = null!;
     private TextureRect _image = null!;
     private TaskCompletionSource? _imageTcs;
     private TextureRect _inset = null!;
@@ -69,6 +70,8 @@ public partial class Hud : CanvasLayer
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
     public string CaptionText => _caption.Text;
+    public bool CaptionSubVisible => _captionSub.Visible;
+    public string CaptionSubText => _captionSub.Text;
     public bool InventoryOpen => _inventory.Visible;
     public bool InterfaceVisible => _interface.Visible;
     public Rect2 HoverRect => _hover.Visible && _hoverLayer.Visible ? _hover.GetGlobalRect() : new Rect2();
