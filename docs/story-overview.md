@@ -95,7 +95,8 @@ From here the story follows Walkthrough.md:
    safe, and where she belongs". A brute shows Micah out.
 18. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
    forward.
-19. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
+19. **Rose's house** (optional): the rain stops at her street (Micah remarks on it). Ring the bell. Push for
+   forgiveness up to five times, or leave; push at least
    three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
 20. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
@@ -108,7 +109,7 @@ From here the story follows Walkthrough.md:
 22. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
-23. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
+23. **Harrington's office**: pick the locked right drawer for an invitation to the club, for Sunday night; behind the closet's false
    back are a white Bauta mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
    (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
@@ -227,7 +228,8 @@ How each decision is made:
   on the way (from the kitchen, or by the panel behind the study bar) and lights the Club's rye with Micah's lantern
   (`eleanor_burned`).
 - **Shoot him**: if Eleanor held out, she is too worn out to argue: "Let's get out of here, quick." (`eleanor_weary`).
-  No persuasion: she follows him to the kitchen, and the escape decides between endings 10 and 11.
+  No persuasion: she follows him to the kitchen in silence, and the escape decides between endings 10 and 11.
+  On the road to ending 10 she has changed back into the black dress from the Club's car at the gate.
   Otherwise the persuasion: four turns, and only the four right lines in a row convince her (`eleanor_convinced`);
   one wrong line breaks the chain for good. Turning himself in is offered on the first turn only (`repented`),
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
@@ -252,9 +254,17 @@ motel window), the Second at the start of Act Three (the motel, the Club's dress
 the coda (endings 1, 8, 9) and in the epilogue of ending 8. Daniel keeps the journal for Leo after endings
 1, 6, 8, 9, 10 and 11.
 
+### Weather
+
+It rains on every 1927 exterior and behind every window, building from a steady rain in Act One to a downpour in
+Act Three (`RainWeather`). The present day (attic, bedroom) and the library's sunny midday are dry, and so are the
+saving moments: Rose's street (always), the convent cell once Eleanor refuses Agatha, the prison when Micah turned
+himself in (6) or Eleanor confesses (9), and the city's edge where Eleanor walks free (8). Rooms opt out with
+`Room.RainStopped`; `RainTests` lists every dry room with its reason.
+
 ## Story notes
 
-The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The sixteen puzzles include five collect-and-combine locations and the motel fire escape; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
+The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The seventeen puzzles include five collect-and-combine locations and the motel fire escape; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
@@ -290,7 +300,7 @@ Caleb's counsel retains its original wording rather than added exact quotations.
 [Luke 15:17-20](https://drbo.org/chapter/49015.htm); it is not marked as a direct quotation. Ring and cross remain
 reminders, not a bargain with God. Antagonists' threats and the tragic endings are not theological verdicts.
 
-**Scope and length:** Repentance is a compact, single-case adventure: six puzzles in each of the first two acts,
+**Scope and length:** Repentance is a compact, single-case adventure: eight puzzles in Act One and six in Act Two,
 then an alley encounter, an alarm puzzle, the wine-cellar lantern and optional evidence in Act Three. Its mostly linear investigation is
 closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/) than
 [Kathy Rain (2016)](https://store.steampowered.com/app/370910/), whose published scope includes 40+ environments

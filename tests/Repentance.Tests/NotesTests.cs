@@ -52,6 +52,14 @@ public class NotesTests
         Assert.Contains($"{500 + LiftMaze.Width} by the fire escape", text);
     }
 
+    [Fact]
+    public void ClubCard_IsForSundayNight()
+    {
+        var text = string.Join(" ", Notes.Get("crests")!.Lines.Select(l => l.Text));
+        Assert.Contains("The Club. Sunday, at the turning of the night.", text);
+        Assert.DoesNotContain("Saturday", text);
+    }
+
     [Theory]
     [InlineData("bedroom")]
     [InlineData("office")]

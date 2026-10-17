@@ -7,8 +7,8 @@ drawn over the top. The alley's states (the crate by the cans or under the ladde
 crops of the state variant pixelized with the base palette, placed at the printed crop origins."""
 import math
 import random
-from PIL import Image, ImageDraw, ImageChops, ImageFilter
-from .common import (W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text,
+from PIL import Image, ImageDraw, ImageChops, ImageFilter, ImageFont
+from .common import (FONT, W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text,
                      cut, _mask)
 from .street import bricks
 from .act2_rooms import crate as fruit_crate
@@ -64,29 +64,43 @@ def sky(img):
 
 
 def main_road(img):
-    """The main road through the alley mouth: the block across the street with a lit lunch-room and a few lit
-    windows upstairs, a lamp on the far kerb, and the wet road between."""
+    """The main road through the alley mouth: the block across the street with an all-night lunch-room at street
+    level (signboard, scalloped awning, a counter and stools behind plate glass), sash windows upstairs, a lamp on
+    the far kerb, and the wet road between."""
     d = ImageDraw.Draw(img)
     d.rectangle([0, 34, MOUTH, 186], fill=hx("2a2228"))
     d.polygon([(0, 34), (40, 34), (40, 28), (MOUTH, 28), (MOUTH, 40), (0, 40)], fill=hx("221c22"))
     bricks(img, (0, 40, MOUTH, 150), hx("4a2e2e"), hx("3a2426"), hx("1e1618"), 7, 4, 9)
     rnd = random.Random(8)
     for x in range(4, MOUTH - 8, 16):
-        for y in (50, 76, 102, 128):
+        for y in (50, 76, 102):
             lit = rnd.random() < 0.35
+            # a stone lintel, a sash with its meeting rail and a sill under each upstairs window
+            d.rectangle([x - 1, y - 2, x + 9, y - 1], fill=hx("6a5a50"))
             d.rectangle([x, y, x + 8, y + 14], fill=hx("e0a050") if lit else hx("141820"))
             if lit:
-                d.rectangle([x, y, x + 8, y + 5], fill=hx("a86a30"))
+                d.rectangle([x, y, x + 8, y + 5], fill=hx("a86a30"))  # the blind half down
+                d.line([(x + 4, y + 5), (x + 4, y + 6)], fill=hx("6a4020"))
+            else:
+                d.line([(x + 1, y + 2), (x + 3, y)], fill=hx("2a3040"))  # a glint on the dark pane
+            d.line([(x, y + 7), (x + 8, y + 7)], fill=hx("3a2a24"))
+            d.line([(x + 4, y), (x + 4, y + 14)], fill=hx("3a2a24"))
             d.line([(x - 1, y + 15), (x + 9, y + 15)], fill=hx("6a5a50"))
-    # the lunch-room: plate glass, a striped awning, a counter seen through the window
+    # the lunch-room's signboard across the fascia (lettered once the light is on, in lunch_room_lit)
+    d.rectangle([0, 134, MOUTH, 149], fill=hx("1a1416"))
+    d.rectangle([2, 136, 72, 147], fill=hx("1c3a2c"))
+    d.rectangle([2, 136, 72, 147], outline=hx("8a7a50"))
+    # the lunch-room: plate glass, a scalloped awning, a counter seen through the window
     d.rectangle([0, 150, MOUTH, 186], fill=hx("1a1416"))
     d.rectangle([4, 160, MOUTH - 4, 182], fill=hx("e8b060"))
     d.rectangle([4, 172, MOUTH - 4, 182], fill=hx("8a5a30"))
-    for x in range(10, MOUTH - 4, 14):
-        d.rectangle([x, 166, x + 3, 172], fill=hx("4a2a18"))
     for x in range(0, MOUTH, 6):
-        d.polygon([(x, 150), (x + 6, 150), (x + 8, 158), (x + 2, 158)],
-                  fill=hx("a83a30") if (x // 6) % 2 else hx("d8c8b0"))
+        stripe = hx("a83a30") if (x // 6) % 2 else hx("d8c8b0")
+        d.polygon([(x, 150), (x + 6, 150), (x + 8, 157), (x + 2, 157)], fill=stripe)
+        d.pieslice([x + 2, 155, x + 8, 161], 0, 180, fill=stripe)  # the valance's scallops
+    d.line([(0, 150), (MOUTH, 150)], fill=hx("3a2420"))
+    for x in range(0, MOUTH, 12):  # the awning's iron arms
+        d.point((x + 1, 151), fill=hx("16161c"))
     # the far kerb, the road, and a lamp on the far side
     d.rectangle([0, 186, MOUTH, 189], fill=hx("6a6660"))
     d.rectangle([0, 190, MOUTH, BASE + 4], fill=hx("2a2a32"))
@@ -94,6 +108,68 @@ def main_road(img):
     d.line([(lx, 112), (lx, 186)], fill=hx("1a1a20"), width=2)
     d.rectangle([lx - 3, 106, lx + 3, 113], fill=hx("1a1a20"))
     return (0, 150, MOUTH, 196)
+
+
+def lunch_room_lit(img):
+    """The lunch-room's lit interior and its signboard, painted over the lit picture: a door on the left, a
+    coffee urn and a pie case on the back counter, the counterman in his white jacket, a lone customer hunched
+    over a cup on one of the stools, and the window's mullions and gilt lettering over it all."""
+    d = ImageDraw.Draw(img)
+    wall, wall_d = hx("f0c070"), hx("c88a48")
+    d.rectangle([4, 161, MOUTH - 4, 171], fill=wall)
+    d.line([(4, 165), (MOUTH - 4, 165)], fill=wall_d)                    # the back shelf
+    for x in range(20, 70, 6):                                           # cups and plates on it
+        d.rectangle([x, 163, x + 2, 164], fill=hx("fff0d0"))
+    # the coffee urn: a chrome cylinder with a domed lid and a tap
+    d.rectangle([22, 166, 27, 171], fill=hx("b8b0a0"))
+    d.line([(22, 166), (22, 171)], fill=hx("fff0d0"))
+    d.line([(27, 166), (27, 171)], fill=hx("6a6050"))
+    d.rectangle([23, 165, 26, 165], fill=hx("8a8070"))
+    d.point((28, 169), fill=hx("4a4030"))
+    # a glass pie case with a wedge gone
+    d.rectangle([36, 167, 44, 171], fill=hx("ffe8b0"))
+    d.rectangle([36, 167, 44, 171], outline=hx("a87a40"))
+    d.chord([37, 168, 43, 172], 180, 360, fill=hx("c07a38"))
+    d.point((40, 169), fill=hx("ffe8b0"))
+    # the counterman behind the counter, white jacket and paper cap
+    d.rectangle([58, 166, 63, 171], fill=hx("fff8e8"))
+    d.rectangle([59, 162, 62, 165], fill=hx("c88a60"))
+    d.rectangle([58, 161, 63, 161], fill=hx("ffffff"))
+    d.line([(57, 168), (55, 170)], fill=hx("fff8e8"))
+    # the counter top and the counter front
+    d.rectangle([4, 172, MOUTH - 4, 173], fill=hx("d8c8a8"))
+    d.rectangle([4, 174, MOUTH - 4, 182], fill=hx("6a4020"))
+    for x in range(8, MOUTH - 4, 8):
+        d.line([(x, 175), (x, 181)], fill=hx("4a2a14"))
+    # stools: round seats on chrome posts, one taken
+    for x in range(14, MOUTH - 8, 12):
+        d.rectangle([x - 2, 175, x + 2, 176], fill=hx("a83a30"))
+        d.line([(x - 2, 175), (x + 2, 175)], fill=hx("e06050"))
+        d.line([(x, 177), (x, 181)], fill=hx("b8b0a0"))
+        d.line([(x - 2, 182), (x + 2, 182)], fill=hx("8a8070"))
+    cx = 50  # the customer, coat and hat, hunched on his stool
+    d.polygon([(cx - 4, 175), (cx - 3, 168), (cx + 1, 166), (cx + 3, 168), (cx + 3, 175)], fill=hx("2a1c18"))
+    d.rectangle([cx - 1, 163, cx + 2, 165], fill=hx("2a1c18"))
+    d.line([(cx - 3, 163), (cx + 4, 163)], fill=hx("1a1210"))
+    d.line([(cx + 3, 170), (cx + 6, 171)], fill=hx("2a1c18"))
+    d.point((cx + 6, 171), fill=hx("ffffff"))
+    # the door at the left end, its glass lit, and the window's mullions
+    d.rectangle([4, 160, 13, 182], fill=hx("3a2418"))
+    d.rectangle([6, 162, 11, 172], fill=hx("ffd890"))
+    d.line([(6, 167), (11, 167)], fill=hx("3a2418"))
+    d.point((11, 176), fill=hx("e0b060"))
+    d.rectangle([4, 159, MOUTH - 4, 159], fill=hx("2a1a14"))
+    for x in (34, 60):
+        d.line([(x, 160), (x, 182)], fill=hx("2a1a14"))
+    # gilt lettering on the glass
+    text(img, (47, 178), "EATS", hx("ffe8b0"), 8)
+    # the signboard
+    text(img, (37, 142), "LUNCH ROOM", hx("f0e0b0"), 8)
+    for x in range(4, 72, 4):
+        d.point((x, 148), fill=hx("fff0c0") if (x // 4) % 3 else hx("6a4020"))
+    light(img, "rect", [0, 134, 76, 150], hx("ffd890"), 0.18, 4)
+    d.line([(78, 150), (78, 186)], fill=hx("1a1a20"), width=2)  # the far lamp's post stands in front of it all
+    d.line([(77, 150), (77, 186)], fill=hx("4a3a30"))
 
 
 def motel_wall(img):
@@ -393,9 +469,7 @@ def lighting(img, far_box, lowered):
     d.rectangle([DOOR[0], DOOR[1] - 13, DOOR[2], DOOR[1] - 3], fill=hx("d89a50"))
     for x in range(DOOR[0] + 3, DOOR[2], 5):  # the wire mesh in the transom
         d.line([(x, DOOR[1] - 13), (x + 4, DOOR[1] - 3)], fill=hx("8a5a30"))
-    d.rectangle([4, 160, MOUTH - 4, 171], fill=hx("f0c070"))
-    for x in range(10, MOUTH - 4, 14):
-        d.rectangle([x, 166, x + 3, 171], fill=hx("6a4020"))
+    lunch_room_lit(img)
     d.rectangle([57, 106, 63, 112], fill=hx("fff0c0"))
     light(img, "ellipse", [44, 94, 76, 124], hx("ffd890"), 0.5, 6)
     blade_sign(img)
@@ -417,25 +491,60 @@ def lighting(img, far_box, lowered):
 
 
 def blade_sign(img):
-    """The motel's big sign, bolted to the front corner and hanging out over the main road: a sheet-iron box with a
-    red neon MOTEL running down it, an amber border tube chasing round the edge."""
+    """The motel's big sign, bolted to the front corner and hanging out over the main road: a riveted sheet-iron
+    box with a cornice and a finial, red neon MOTEL letters on their dark cans, a chaser of amber bulbs round the
+    edge (some dead), the conduit feeding it and a little VACANCY board hung underneath on chains."""
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = BLADE
-    for by in (y0 + 10, y1 - 10):  # the brackets back to the corner
+    for by in (y0 + 10, y1 - 10):  # the brackets back to the corner, with a tie rod and its turnbuckle
         d.line([(x1, by), (MOUTH + 2, by)], fill=IRON, width=2)
         d.line([(x1 + 4, by), (MOUTH + 2, by - 10)], fill=IRON)
+        d.line([(x1 + 1, by - 1), (MOUTH + 2, by - 1)], fill=IRON_M)
+        d.rectangle([x1 + 14, by - 6, x1 + 16, by - 4], fill=IRON_E)
+    d.line([(x1 - 6, y0 - 3), (x1 - 6, y0 - 8), (MOUTH + 2, y0 - 8)], fill=hx("26242a"))  # the conduit
+    # the box: a shadowed side face for depth, the front panel, a cornice and a finial on top
+    d.rectangle([x0 - 3, y0 + 1, x0, y1 - 1], fill=hx("120a0c"))
     d.rectangle([x0, y0, x1, y1], fill=hx("1c1012"), outline=hx("3a2024"))
-    d.rectangle([x0 + 2, y0 + 2, x1 - 2, y1 - 2], outline=AMBER)
-    for k in range(0, (x1 - x0) * 2 + (y1 - y0) * 2, 6):  # dead bulbs in the chaser
-        if k < x1 - x0:
-            d.point((x0 + 2 + k, y0 + 2), fill=hx("6a4020"))
+    d.rectangle([x0 - 4, y0 - 3, x1 + 1, y0 - 1], fill=hx("2a1a1c"))
+    d.line([(x0 - 4, y0 - 3), (x1 + 1, y0 - 3)], fill=hx("5a3a3c"))
+    d.rectangle([x0 - 2, y1 + 1, x1 - 1, y1 + 2], fill=hx("2a1a1c"))
     cx = (x0 + x1) // 2 + 1
+    d.line([(cx, y0 - 4), (cx, y0 - 7)], fill=IRON_M)
+    d.ellipse([cx - 2, y0 - 11, cx + 2, y0 - 7], fill=hx("3a2a2c"), outline=hx("5a3a3c"))
+    for y in range(y0 + 4, y1 - 2, 6):  # rivet rows down both edges, rust bleeding from them
+        for x in (x0 + 1, x1 - 1):
+            d.point((x, y), fill=hx("5a3a3c"))
+            d.point((x, y + 2), fill=hx("3a1a14"))
+    d.rectangle([x0 + 2, y0 + 2, x1 - 2, y1 - 2], outline=hx("6a4020"))
+    # the letters' sheet-metal cans, a shade darker than the panel, behind the tubes
     for i, ch in enumerate("MOTEL"):
         cy = y0 + 14 + i * 18
+        d.rectangle([cx - 8, cy - 8, cx + 6, cy + 7], fill=hx("140a0c"), outline=hx("2e1a1e"))
+        text(img, (cx + 1, cy + 1), ch, hx("3a0e14"), 16)
         text(img, (cx, cy), ch, NEON, 16)
+        if i < 4:  # the blacked-out jumper tube down to the next letter
+            d.line([(cx - 1, cy + 8), (cx - 1, cy + 10)], fill=hx("4a1a20"))
     light(img, "rect", [x0 - 4, y0 - 4, x1 + 4, y1 + 4], hx("ff2a40"), 0.35, 8)
     for i, ch in enumerate("MOTEL"):
         text(img, (cx, y0 + 14 + i * 18), ch, NEON_HOT, 8)
+    # the chaser: bulbs every 4px round the border, every third one dead
+    k = 0
+    border = ([(x, y0 + 2) for x in range(x0 + 2, x1 - 1, 4)] + [(x1 - 2, y) for y in range(y0 + 2, y1 - 1, 4)] +
+              [(x, y1 - 2) for x in range(x1 - 2, x0 + 1, -4)] + [(x0 + 2, y) for y in range(y1 - 2, y0 + 1, -4)])
+    for p in border:
+        d.point(p, fill=hx("6a4020") if k % 3 == 2 else AMBER_HOT)
+        k += 1
+    # the VACANCY board, hung on two chains under the box, as wide as its lettering needs
+    tl, _, tr, _ = ImageFont.truetype(FONT, 8).getbbox("VACANCY")
+    cx = (x0 + x1) // 2
+    vx0, vy0, vx1, vy1 = cx - (tr - tl) // 2 - 3, y1 + 4, cx + (tr - tl + 1) // 2 + 3, y1 + 11
+    for x in (x0 + 4, x1 - 4):  # the chains hang from the box and fan out to the board's ends
+        for y in range(y1 + 1, vy0):
+            t = (y - y1) / (vy0 - y1)
+            d.point((round(x + (vx0 + 3 - x if x < cx else vx1 - 3 - x) * t), y), fill=IRON_E)
+    d.rectangle([vx0, vy0, vx1, vy1], fill=hx("101a14"), outline=hx("2a3a30"))
+    text(img, (cx + 1, (vy0 + vy1) // 2 + 1), "VACANCY", hx("70ff98"), 8)
+    light(img, "rect", [vx0 - 3, vy0 - 3, vx1 + 3, vy1 + 3], hx("40c070"), 0.25, 4)
     light(img, "ellipse", [x0 - 30, y0 - 20, x1 + 30, y1 + 20], hx("c01830"), 0.22, 18)
 
 
@@ -531,7 +640,8 @@ def alley_palette(base, *variants):
     for v in variants:
         blend = Image.blend(blend, v, 0.35)
     return palette_of(blend, 116) + [NEON, NEON_HOT, NEON_DIM, AMBER, AMBER_HOT, hx("f0c070"), hx("d89a50"),
-                                     hx("e09a48"), hx("fff0c0"), hx("c01830"), hx("5a1420"), hx("2a1418")]
+                                     hx("e09a48"), hx("fff0c0"), hx("c01830"), hx("5a1420"), hx("2a1418"),
+                                     hx("70ff98"), hx("101a14")]
 
 
 def overlay(variant, before, pal, box, name):
@@ -797,8 +907,9 @@ def lit_glass(img):
 
 
 def fe_door(img):
-    """The door off the landing into the first floor: a riveted iron frame, a sheet-steel leaf with a wired-glass
-    light in the top half (dark corridor behind), a lever handle, a stencilled FIRE EXIT."""
+    """The door off the landing into the first floor: a riveted iron frame on three strap hinges, a sheet-steel leaf
+    with a bevelled panel, a wired-glass light in the top half (dark corridor behind), a stencilled FIRE EXIT and a
+    riveted kick plate. The lever handle is drawn after the lighting, in fe_door_lit."""
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = FE_DOOR
     d.rectangle([x0 - 6, y0 - 8, x1 + 6, y1], fill=IRON)
@@ -809,33 +920,137 @@ def fe_door(img):
             d.point((x, y), fill=IRON_E)
     vgrad(img, (x0, y0, x1, y1), hx("4a4c50"), hx("34363a"))
     d.line([(x0, y0), (x0, y1)], fill=hx("6a6c70"))
+    d.line([(x1, y0), (x1, y1)], fill=hx("1e2024"))
+    # a pressed panel round the whole leaf: lit top and left edges, shadowed bottom and right
+    d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 21], outline=hx("2a2c30"))
+    d.line([(x0 + 4, y0 + 4), (x1 - 4, y0 + 4)], fill=hx("5e6064"))
+    d.line([(x0 + 4, y0 + 4), (x0 + 4, y1 - 22)], fill=hx("5e6064"))
+    # strap hinges on the frame side
+    for hy in (y0 + 8, (y0 + y1) // 2, y1 - 26):
+        d.rectangle([x0 - 2, hy, x0 + 6, hy + 2], fill=hx("2a2c30"))
+        d.line([(x0 - 2, hy), (x0 + 6, hy)], fill=hx("6a6c70"))
+        d.point((x0 + 4, hy + 1), fill=hx("8a8c90"))
+        d.rectangle([x0 - 2, hy - 1, x0, hy + 3], fill=hx("1e2024"))
     gx0, gy0, gx1, gy1 = x0 + 7, y0 + 8, x1 - 7, y0 + 46
     d.rectangle([gx0 - 2, gy0 - 2, gx1 + 2, gy1 + 2], fill=hx("1a1c20"))
     vgrad(img, (gx0, gy0, gx1, gy1), hx("2a2e3a"), hx("181a22"))
-    for k in range(gx0, gx1 + 30, 5):
-        d.line([(k, gy0), (k - 30, gy0 + 30)], fill=hx("30343e"))
+    glass = img.crop((gx0, gy0, gx1 + 1, gy1 + 1))
+    gd = ImageDraw.Draw(glass)
+    for k in range(0, gx1 - gx0 + 40, 4):  # the wire mesh, both ways
+        gd.line([(k, 0), (k - 40, 40)], fill=hx("30343e"))
+        gd.line([(k - 40, 0), (k, 40)], fill=hx("2c303a"))
+    img.paste(glass, (gx0, gy0))
+    d.line([(gx1 - 8, gy0 + 2), (gx1 - 2, gy0 + 2), (gx1 - 2, gy0 + 10)], fill=hx("4a5060"))  # a glint
     d.rectangle([gx0 - 2, gy0 - 2, gx1 + 2, gy1 + 2], outline=hx("5a5c62"))
-    text(img, ((x0 + x1) // 2 + 1, y0 + 60), "FIRE EXIT", hx("8a3a30"), 8)
-    d.rectangle([x1 - 9, y0 + 74, x1 - 3, y0 + 76], fill=hx("8a8a84"))
-    d.rectangle([x1 - 4, y0 + 72, x1 - 2, y0 + 78], fill=hx("5a5a54"))
+    for x in range(gx0 - 1, gx1 + 2, 6):  # the glazing bead's screws
+        d.point((x, gy0 - 2), fill=hx("7a7c80"))
+        d.point((x, gy1 + 2), fill=hx("7a7c80"))
+    # the kick plate, riveted, scuffed bright where boots have hit it
     d.rectangle([x0, y1 - 18, x1, y1], fill=hx("2e3034"))
     d.line([(x0, y1 - 18), (x1, y1 - 18)], fill=hx("5a5c60"))
     for x in range(x0 + 3, x1, 6):
         d.point((x, y1 - 15), fill=hx("6a6c70"))
+        d.point((x, y1 - 3), fill=hx("6a6c70"))
+    for x, y in ((x0 + 10, y1 - 10), (x0 + 22, y1 - 8), (x0 + 30, y1 - 11)):
+        d.line([(x, y), (x + 3, y - 1)], fill=hx("5a5c60"))
+    # rust round the bottom corners
+    d.point((x0 + 1, y1 - 19), fill=hx("5a3020"))
+    d.point((x1 - 1, y1 - 20), fill=hx("5a3020"))
+
+
+FE_HANDLE = (FE_DOOR[2] - 6, FE_DOOR[1] + 74)  # the lever's spindle
+
+
+def fe_door_lit(img):
+    """Over the lit picture: the stencilled FIRE EXIT, chipped, and the lever handle catching the window's light
+    from the right - a backplate with its screws, the lock cylinder above the spindle, a rose and the lever itself."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = FE_DOOR
+    tx, ty = (x0 + x1) // 2 + 1, y0 + 58
+    text(img, (tx, ty), "FIRE EXIT", hx("7a2a24"), 8)
+    px = img.load()
+    for x in range(x0 + 4, x1 - 3):  # stencil bridges and flaked paint
+        for y in range(ty - 4, ty + 4):
+            if px[x, y] == hx("7a2a24") and ((x - x0) % 5 == 0 and y == ty or (x * 7 + y * 3) % 23 == 0):
+                px[x, y] = hx("2e3034")
+    d.line([(x0 + 6, ty - 6), (x1 - 6, ty - 6)], fill=hx("4a2420"))   # the stencil's guide lines
+    d.line([(x0 + 6, ty + 5), (x1 - 6, ty + 5)], fill=hx("3a2420"))
+    # rim light from the window on the hinges' knuckles and straps, the kick plate's edge and rivets
+    for hy in (y0 + 8, (y0 + y1) // 2, y1 - 26):
+        d.line([(x0 - 1, hy), (x0 + 6, hy)], fill=hx("4a4a50"))
+        d.point((x0 - 1, hy + 1), fill=hx("5a5a60"))
+        d.point((x0 + 4, hy + 1), fill=hx("6a6a70"))
+    d.line([(x0 + 1, y1 - 18), (x1 - 1, y1 - 18)], fill=hx("3e3e44"))
+    for x in range(x0 + 3, x1, 6):
+        d.point((x, y1 - 15), fill=hx("4e4e54"))
+        d.point((x, y1 - 3), fill=hx("4e4e54"))
+    for x, y in ((x0 + 10, y1 - 10), (x0 + 22, y1 - 8), (x0 + 30, y1 - 11)):
+        d.line([(x, y), (x + 3, y - 1)], fill=hx("3e3e44"))
+    hx_, hy = FE_HANDLE
+    # backplate
+    d.rectangle([hx_ - 3, hy - 9, hx_ + 2, hy + 6], fill=hx("26282e"))
+    d.rectangle([hx_ - 2, hy - 8, hx_ + 1, hy + 5], fill=hx("4a4c54"))
+    d.line([(hx_ + 1, hy - 8), (hx_ + 1, hy + 5)], fill=hx("8a8478"))
+    d.point((hx_ - 1, hy - 7), fill=hx("9a9a9a"))
+    d.point((hx_ - 1, hy + 4), fill=hx("9a9a9a"))
+    # the lock cylinder and its keyhole
+    d.ellipse([hx_ - 2, hy - 6, hx_ + 1, hy - 3], fill=hx("8a7a50"))
+    d.point((hx_ - 1, hy - 5), fill=hx("16161a"))
+    d.point((hx_ - 1, hy - 4), fill=hx("16161a"))
+    # the rose and the lever reaching back towards the hinges
+    d.ellipse([hx_ - 2, hy - 1, hx_ + 1, hy + 2], fill=hx("6a6c70"))
+    d.rectangle([hx_ - 11, hy, hx_ - 1, hy + 1], fill=hx("5a5c62"))
+    d.line([(hx_ - 11, hy), (hx_ - 1, hy)], fill=hx("b8b0a0"))
+    d.rectangle([hx_ - 12, hy, hx_ - 11, hy + 2], fill=hx("4a4c54"))
+    d.point((hx_ - 3, hy), fill=hx("f0e0c0"))
+    d.line([(hx_ - 11, hy + 2), (hx_ - 2, hy + 2)], fill=hx("16161a"))  # its shadow on the leaf
+    # the coffee can by the drainpipe catches the window on its right side and rim
+    cx, cy = 262, FOOT + 2
+    d.line([(cx + 7, cy - 10), (cx + 7, cy - 1)], fill=hx("a84a38"))
+    d.line([(cx + 6, cy - 9), (cx + 6, cy - 2)], fill=hx("7a3428"))
+    d.line([(cx + 1, cy - 11), (cx + 8, cy - 11)], fill=hx("c8a070"))
+    d.line([(cx + 4, cy - 6), (cx + 7, cy - 6)], fill=hx("c84a3a"))
+    d.line([(cx + 4, cy - 8), (cx + 7, cy - 8)], fill=hx("b8a078"))
 
 
 def fe_props(img):
     """A coffee can of cigarette ends and a milk bottle by the drainpipe; a dead geranium on the sill."""
     d = ImageDraw.Draw(img)
-    x, y = 262, 186
-    d.rectangle([x, y - 10, x + 8, y], fill=hx("8a3a30"))
-    d.line([(x, y - 10), (x + 8, y - 10)], fill=hx("c8a070"))
-    d.rectangle([x + 1, y - 7, x + 7, y - 4], fill=hx("c8b080"))
-    for k in range(3):
-        d.line([(x + 2 + 2 * k, y - 12), (x + 3 + 2 * k, y - 10)], fill=hx("e0d8c8"))
-    d.rectangle([x + 12, y - 12, x + 16, y], fill=hx("c8ccd0"))
-    d.rectangle([x + 13, y - 15, x + 15, y - 12], fill=hx("c8ccd0"))
-    d.line([(x + 12, y - 12), (x + 12, y)], fill=hx("eef0f2"))
+    x, y = 262, FOOT + 2  # against the wall, so they show over the top rail
+    # the coffee can: rolled rims, a paper label band with a red-and-cream brand, butts sticking out of the top
+    can, can_d, can_l = hx("8a3a30"), hx("4a1e18"), hx("c86a50")
+    d.rectangle([x, y - 11, x + 8, y], fill=can)
+    d.line([(x, y - 11), (x, y)], fill=can_l)
+    d.line([(x + 7, y - 11), (x + 7, y)], fill=can_d)
+    d.line([(x + 8, y - 11), (x + 8, y)], fill=hx("2a1210"))
+    for ry in (y - 11, y - 1):
+        d.line([(x, ry), (x + 8, ry)], fill=hx("c8a070"))
+    d.rectangle([x + 1, y - 8, x + 7, y - 4], fill=hx("d8c090"))
+    d.line([(x + 1, y - 6), (x + 7, y - 6)], fill=hx("a83a30"))
+    d.point((x + 3, y - 7), fill=hx("4a2a18"))
+    d.point((x + 5, y - 5), fill=hx("4a2a18"))
+    d.ellipse([x, y - 13, x + 8, y - 10], fill=hx("2a1a14"))
+    for k, (bx, by) in enumerate(((x + 2, y - 14), (x + 4, y - 15), (x + 6, y - 14), (x + 3, y - 13))):
+        d.line([(bx, by), (bx + (1 if k % 2 else -1), by + 2)], fill=hx("e0d8c8"))
+        d.point((bx, by), fill=hx("c88a50") if k != 1 else hx("4a4040"))
+    d.point((x + 9, y - 1), fill=hx("e0d8c8"))  # one that missed
+    # the milk bottle: shoulders, a long neck, a foil cap, the dairy's name on the glass and an inch of milk left
+    bx = x + 13
+    glass, glass_l, glass_d = hx("a8b0b8"), hx("eef0f2"), hx("5a6068")
+    d.rectangle([bx, y - 12, bx + 6, y], fill=glass)
+    d.polygon([(bx, y - 12), (bx + 6, y - 12), (bx + 5, y - 15), (bx + 1, y - 15)], fill=glass)
+    d.rectangle([bx + 2, y - 18, bx + 4, y - 15], fill=glass)
+    d.rectangle([bx + 1, y - 20, bx + 5, y - 18], fill=hx("c8a040"))
+    d.line([(bx + 1, y - 20), (bx + 5, y - 20)], fill=hx("f0d890"))
+    d.rectangle([bx + 1, y - 3, bx + 5, y - 1], fill=hx("f4f2ea"))
+    d.line([(bx + 1, y - 3), (bx + 5, y - 3)], fill=hx("ffffff"))
+    d.line([(bx + 1, y - 9), (bx + 5, y - 9)], fill=hx("a83a30"))
+    d.line([(bx + 2, y - 7), (bx + 4, y - 7)], fill=hx("a83a30"))
+    d.line([(bx, y - 12), (bx, y)], fill=glass_l)
+    d.line([(bx + 2, y - 17), (bx + 2, y - 15)], fill=glass_l)
+    d.line([(bx + 6, y - 12), (bx + 6, y)], fill=glass_d)
+    d.line([(bx, y), (bx + 6, y)], fill=glass_d)
+    shadow(img, "rect", [x - 1, y, bx + 9, y + 2], 0.5, 1)
     sx0, sy0, sx1, sy1 = FE_LIT
     d.polygon([(sx1 - 16, sy1), (sx1 - 4, sy1), (sx1 - 6, sy1 - 8), (sx1 - 14, sy1 - 8)], fill=hx("8a4a2a"))
     for k in range(4):
@@ -864,6 +1079,7 @@ def paint_fire_escape():
     img = illuminate(img, (44, 44, 76), lights)
     shadow(img, "rect", [-20, 0, W + 20, 30], 0.35, 12)
     lit_glass(img)
+    fe_door_lit(img)
     light(img, "ellipse", [wx0 - 12, wy0 - 10, wx1 + 12, wy1 + 12], hx("ffc070"), 0.22, 10)
     d = ImageDraw.Draw(img)
     fe_ladder(d)
@@ -886,7 +1102,8 @@ def paint_fire_escape():
 def build_fire_escape():
     img = paint_fire_escape()
     pal = palette_of(img, 116) + [hx("f4cc80"), hx("ffe0a0"), hx("d89a50"), hx("c8843a"), hx("8a5a30"),
-                                  hx("3a2414"), hx("ff3048"), hx("12151c")]
+                                  hx("3a2414"), hx("ff3048"), hx("12151c"), hx("a84a38"), hx("7a3428"), hx("c8a070"),
+                                  hx("b8a078")]
     save(pixelize(img, pal), "rooms", "motel_fire_escape.png")
     save(fire_escape_front(pixelize(img, pal)), "rooms", "motel_fire_escape_fg.png")
 

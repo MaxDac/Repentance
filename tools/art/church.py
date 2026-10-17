@@ -1,4 +1,5 @@
-"""Gothic-revival cathedral after Chicago's Holy Name: the rain-soaked facade at night and the candlelit nave."""
+"""Gothic-revival cathedral after Chicago's Holy Name: the rain-soaked facade at night (the rain itself falls in the
+scene, Rain node) and the candlelit nave."""
 from PIL import Image, ImageDraw
 import math
 import random
@@ -67,20 +68,6 @@ def stone(img, polys, base, seed, holes=(), **kw):
     img.paste(ashlar(img.size, box, base, seed, **kw), (0, 0), mask_of(img.size, polys, holes))
 
 
-def blend_px(img, x, y, col, k):
-    if 0 <= x < img.width and 0 <= y < img.height:
-        img.putpixel((x, y), mix(img.getpixel((x, y)), col, k))
-
-
-def rain(img, seed, n=700, box=(0, 0, W, H), col=hx("8fa4c8"), k=0.32):
-    rnd = random.Random(seed)
-    for _ in range(n):
-        x, y = rnd.randint(box[0], box[2]), rnd.randint(box[1], box[3])
-        ln = rnd.randint(3, 7)
-        for i in range(ln):
-            blend_px(img, x - i // 3, y + i, col, k * (1 - i / (ln + 1)))
-
-
 def glass_cells(d, poly_fn, u0, u1, v0, v1, nu, nv, cols, rnd, lead):
     """Fills a (u, v) window panel with jewel-coloured cells separated by leading."""
     for i in range(nu):
@@ -141,7 +128,7 @@ def tenement(img, x0, x1, top, seed, ground):
 
 
 def sky_and_street_back(img):
-    city(img, (0, 0, W - 1, 130), seed=19, lit=0.2, haze=hx("3a3450"))
+    city(img, (0, 0, W - 1, 130), seed=19, lit=0.2, haze=hx("3a3450"), rain=False)
     rnd = random.Random(5)
     for _ in range(12):
         x, y = rnd.randint(-40, 520), rnd.randint(-10, 60)
@@ -704,7 +691,6 @@ def paint_exterior():
     shade(img, 0, 150, 0.55, 1.0, tint=(14, 16, 34))
     shade(img, 150, 200, 1.0, 0.92, tint=(14, 16, 34))
     light(img, "ellipse", [0, -60, W, 130], hx("3a3a70"), 0.12, 40)
-    rain(img, 77, 900)
     vignette(img, 0.45, tint=(20, 22, 44), blur=40)
     return img
 

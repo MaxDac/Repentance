@@ -14,6 +14,9 @@ public partial class ConventCell : Room
     /// <summary>The First Interlude: Eleanor's first night in the cell, and Mother Agatha's visit.</summary>
     private bool Interlude => State.HasFlag("interlude1");
 
+    /// <summary>The rain stops the moment Eleanor refuses Agatha.</summary>
+    protected override bool RainStopped => Interlude && State.HasFlag(Endings.RefusedAbbess);
+
     private static readonly Color Night = new(0.5f, 0.56f, 0.78f);
 
     /// <summary>Agatha's night visit: she comes in at the door and stops a step short of Eleanor at the bed.</summary>

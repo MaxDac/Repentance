@@ -49,6 +49,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
+        Check(RainsHere(), "ending 5: it still rains past the prison window");
         Check(gs.HasItem("cloth"), "ending 5: Eleanor's cloth is still in Micah's pocket");
         await game.Wait(4);
         await Shot("ending_prison_caleb");
@@ -81,6 +82,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded), "ending 3: out of town, alone");
+        Check(RainsHere(), "ending 3: rain on the road out of town");
         await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning", 10);
         bool nextMorning = game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
         Check(nextMorning, "alone fire escape opens with the next-morning caption");
@@ -174,6 +176,7 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "Prison", 180);
         Check(gs.HasFlag(Endings.Repented) && gs.HasFlag("ending_6") && !gs.HasFlag("escaping"),
             "ending 6: straight to jail, even with the signed evidence");
+        Check(DryHere(), "ending 6: Micah repented, and the rain has stopped outside the prison window");
         Check(game.Room?.GetNodeOrNull<CanvasItem>("Rose")?.Visible == true &&
               game.Room?.GetNodeOrNull<CanvasItem>("Caleb")?.Visible != true &&
               game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible != true, "ending 6: Rose sits across the table");
@@ -274,34 +277,61 @@ public partial class AutoPlay
     {
         var heldOut = act3Flags.Append(Endings.RefusedAbbess).Append(Endings.RefusedDrugs).ToArray();
 
-        // 10 and 11: Micah shoots the old man; Eleanor, worn out, skips the persuasion and follows him out. With the
-        // documents taken she leaves him at the edge of the city (10); with nothing, she visits him in prison (11).
-        foreach (bool documents in new[] { true, false })
+        // 10 and 11: Micah shoots the old man; Eleanor, worn out, skips the persuasion and follows him out in silence.
+        // With the documents taken or the house burnt she leaves him at the edge of the city (10); with neither, she
+        // visits him in prison (11).
+        foreach (string way in new[] { "documents", "fire", "none" })
         {
-            string label = documents ? "ending_10" : "ending_11";
-            Seed(documents ? heldOut.Append(Endings.TookDocuments) : heldOut, act3Items, "Shoot him");
+            bool documents = way == "documents", fire = way == "fire", free = way != "none";
+            string label = free ? $"ending_10 ({way})" : "ending_11";
+            string ending = free ? "ending_10" : "ending_11";
+            var flags = documents ? heldOut.Append(Endings.TookDocuments) : fire ? heldOut.Append("cellar_lit") : heldOut;
+            Seed(flags.ToArray(), act3Items, "Shoot him");
             HeardLog = new List<string>();
             _ = game.ChangeRoom("mansion_bedroom", "start");
             await Until(() => game.Room?.Name == "MansionKitchen", 120);
-            await WaitIdle(game);
+            await game.Wait(0.2);
+            await Until(() => !game.Busy, 30);
             Check(gs.HasFlag(Endings.EleanorWeary) && !gs.HasFlag(Endings.EleanorConvinced) && gs.HasItem("revolver"),
                 $"{label}: Eleanor follows, worn out, and Micah keeps the revolver");
             Check(!_offered.ContainsKey("eleanor_persuade"), $"{label}: no persuasion turns");
             Check(HeardLog.Any(l => l.Contains("Let's get out of here, quick.")), $"{label}: \"Let's get out of here, quick.\"");
             Check(game.Room?.FindActor("eleanor")?.Visible == true, $"{label}: Eleanor waits in the kitchen");
+            if (fire)
+            {
+                HeardLog.AddRange(await Spoken(() => game.Perform(Verb.Walk, "cellar_door")));
+                await game.Perform(Verb.Hand, "barrel");
+                await game.Perform(Verb.Hand, "hung_lantern");
+                HeardLog.AddRange(await Spoken(() => game.Perform(Verb.UseItem, "barrel", "lantern_lit")));
+                await game.Wait(0.2);
+                await Until(() => game.Room?.Name == "MansionKitchen" && !game.Busy, 60);
+                Check(gs.HasFlag("cellar_fire") && game.Room?.FindActor("eleanor")?.Visible == true,
+                    $"{label}: the cellar set alight, Eleanor still by the door");
+                Check(HeardLog.Any(l => l.Contains("She smells the smoke. She doesn't ask.")), $"{label}: she smells the smoke and doesn't ask");
+            }
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts" || game.Room?.Name == "Prison", 120);
-            Check(gs.HasFlag(label) && game.Room?.Name == (documents ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
-                documents ? "ending 10: Micah and Eleanor out of town" : "ending 11: Micah in prison");
+            Check(gs.HasFlag(ending) && game.Room?.Name == (free ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
+                free ? $"{label}: Micah and Eleanor out of town" : "ending 11: Micah in prison");
+            Check(gs.HasFlag(Endings.MansionExploded) == fire, $"{label}: the house goes up only when the cellar burns");
             Check(game.Room?.FindActor("eleanor")?.Visible == true || game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible == true,
                 $"{label}: Eleanor is there");
-            string line = documents ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
+            string line = free ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
                 : "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the Lord...";
             await Until(() => HeardLog.Any(l => l.Contains(line)), 60);
             if (documents) await Shot("ending_weary_road");
             await TheEnd(label);
             Check(HeardLog.Any(l => l.Contains(line)), $"{label}: Eleanor's last words to Micah");
             Check(!HeardLog.Any(l => l.Contains("That's enough of you")), $"{label}: Micah writes the last entries himself");
+            Check(HeardLog.Any(l => l.Contains("Not one more word in this house.")) &&
+                  HeardLog.Any(l => l.Contains("She doesn't say a word. She said she wouldn't, not in this house.")),
+                $"{label}: she swears off words in the house, and keeps to it");
+            foreach (var spoken in new[] { "The back door, Micah", "The door's that way.", "What did you do?", "Oh my God, Micah." })
+                Check(!HeardLog.Any(l => l.Contains(spoken)), $"{label}: weary Eleanor doesn't say \"{spoken}\"");
+            Check(HeardLog.Any(l => l.Contains("She watches the windows go. She doesn't make a sound.")) == fire,
+                $"{label}: she watches the house go without a sound only when it burns");
+            Check(HeardLog.Any(l => l.Contains("changed in mine on the way")) == free,
+                $"{label}: the black dress from the Club's car explained only on the road out");
             HeardLog = null;
         }
         // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.
@@ -393,6 +423,7 @@ public partial class AutoPlay
             }, 240, 0.05);
             Check(sawRose && !gs.HasItem("cloth"), $"{label}: Micah's journal goes on to Rose's door, without the cloth");
             Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
+            Check(DryHere(), $"{label}: no rain where Eleanor ends up");
             if (fire)
                 Check(game.Player.Character == "eleanor_play" && !gs.HasFlag(Endings.MansionExploded), "ending 8: Eleanor alone, out of the city");
             else
