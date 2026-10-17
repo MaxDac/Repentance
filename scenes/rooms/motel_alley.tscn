@@ -55,7 +55,7 @@ centered = false
 
 [node name="Crate" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(377, 174)
+position = Vector2(376, 174)
 texture = ExtResource("5_Crate")
 centered = false
 script = ExtResource("4_FlagSprite")
