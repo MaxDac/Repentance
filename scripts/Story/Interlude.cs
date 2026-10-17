@@ -8,7 +8,7 @@ namespace Repentance.Story;
 /// The two Eleanor interludes (the start of Act 2 and of Act 3) and her coda in the mansion: who the player is, the
 /// hand-offs in and out of Micah's journal, and the lines she says where a room has nothing special for her.
 /// Flags: "interlude1" / "interlude2" while an interlude plays, "eleanor_coda" in the mansion after the prayer,
-/// "eleanor_epilogue" for her last scene in endings 8 and 10.
+/// "eleanor_epilogue" for her last scene in ending 8.
 /// </summary>
 public static class Interlude
 {

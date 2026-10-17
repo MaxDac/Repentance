@@ -13,7 +13,7 @@
 #>
 param(
     [ValidateSet('1', '2', '4', '8', '16', '60', 'hyper')][string]$Speed = '1',
-    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1-oldman', '1-steps')][string]$Ending = '2',
+    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '1-oldman', '1-steps')][string]$Ending = '2',
     [ValidateSet('act1', 'interlude1', 'act2', 'interlude2', 'act3', 'ending')][string]$From = 'act1',
     [switch]$NoClean,
     [string]$Godot

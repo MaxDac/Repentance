@@ -14,6 +14,12 @@ public partial class MansionExterior : Room
     private bool Moved => State.HasFlag("bin_moved");
     private bool Wedged => State.HasFlag("bell_wedged");
 
+    /// <summary>Eleanor waits out here on the escape only if she came: convinced, or worn out after the shot.</summary>
+    protected override void OnRefresh()
+    {
+        if (FindActor("eleanor") is { } eleanor && !Endings.EleanorFollows(State.HasFlag)) eleanor.Visible = false;
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "eleanor_coda")

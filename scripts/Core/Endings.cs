@@ -13,7 +13,8 @@ namespace Repentance;
 ///   7  Mansion     - Micah shot the old man, then himself (after Eleanor, or with her left alive): Caleb finishes the journal.
 ///   8  Outskirts   - Eleanor (both refusals, Micah prayed) struck the old man and burned the house: she leaves alone.
 ///   9  Prison      - Eleanor struck the old man and left the house standing: she confesses to Caleb.
-///  10  Prison      - Eleanor (both refusals) sent Micah away after he shot: he confesses to Caleb, she leaves alone.
+///  10  Outskirts   - Eleanor (both refusals), worn out, followed Micah after he shot; fire or documents: she leaves him for her peace.
+///  11  Prison      - The same, but nothing to bargain with: Eleanor visits once, wishing him his peace.
 /// Eleanor's own endings need both interlude refusals; the refusals alone change nothing (a give-up is still 1).
 /// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
 /// </summary>
@@ -38,14 +39,17 @@ public static class Endings
     public const string EleanorStruck = "eleanor_struck";
     /// <summary>Eleanor's coda: she burned the house on her way out.</summary>
     public const string EleanorBurned = "eleanor_burned";
-    /// <summary>Micah shot the old man and Eleanor sent him away.</summary>
-    public const string EleanorDismissed = "eleanor_dismissed";
+    /// <summary>Micah shot the old man and Eleanor (both refusals), too worn out to argue, followed him without persuasion.</summary>
+    public const string EleanorWeary = "eleanor_weary";
 
     /// <summary>Endings in which Daniel keeps the journal for Leo.</summary>
-    public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10;
+    public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10 or 11;
 
     /// <summary>Eleanor refused both the Mother Superior and the old man: her own endings open up.</summary>
     public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
+
+    /// <summary>Eleanor came away with Micah: convinced, or worn out after the shot.</summary>
+    public static bool EleanorFollows(Func<string, bool> has) => has(EleanorConvinced) || has(EleanorWeary);
 
     /// <summary>Micah went back to Caleb at least once while hunting for Eleanor.</summary>
     public static bool ChurchReturned(Func<string, bool> has) =>
@@ -71,8 +75,8 @@ public static class Endings
     {
         if (has(EleanorStruck))
             return has(EleanorBurned) ? 8 : 9;
-        if (has(EleanorDismissed))
-            return 10;
+        if (has(EleanorWeary))
+            return StaysFree(has) ? 10 : 11;
         if (has(GaveUpSteps) || has(WalkedAway) || has(SparedOldMan))
             return 1;
         if (has(Repented))

@@ -1251,18 +1251,49 @@ ROSE: I'll try. That's all I can promise. I'll try.
 THOUGHT: She doesn't touch the glass between us. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
 -> END
 
-// ---------------------------------------------------------------- ELEANOR'S OWN WAY (endings 8, 9 and 10)
+// ---------------------------------------------------------------- ELEANOR'S OWN WAY (endings 8 to 11)
 // Only when she refused both Agatha and the old man (Endings.EleanorHeldOut).
 
-// Ending 10: Micah has shot the old man; instead of the persuasion, Eleanor sends him away.
-=== eleanor_dismiss ===
+// Endings 10 and 11: Micah has shot the old man; instead of the persuasion, Eleanor, worn out, just wants to leave.
+=== eleanor_weary ===
 ELEANOR: ...
-ELEANOR: Enough. I'm done with all of you. Go, just go, return to your life, Micah Jones. Leave the pistol here, and go.
-MICAH: Eleanor, they'll be up those stairs any minute--
-ELEANOR: Let them come. They're my problem. They always were. Go home, Micah.
-~ set_flag("eleanor_dismissed")
-THOUGHT: I put the revolver on the carpet, butt towards her. She doesn't look at it. She doesn't look at me.
-THOUGHT: I walk out the front door and down the drive, and I keep walking until I find a precinct with its lights on.
+THOUGHT: She looks at him on the carpet for a long time. No scream. No tears. Just tired, tired all the way down, like somebody who's been carrying a trunk up the stairs for years and has finally set it down.
+ELEANOR: Let's get out of here, quick.
+MICAH: Eleanor--
+ELEANOR: Not now, Micah. Not one more word in this house. I haven't got anything left to say in it.
+~ set_flag("eleanor_weary")
+THOUGHT: She doesn't take my hand. She just comes, holding the sheet round her like it weighs a ton.
+-> END
+
+// Ending 10: the edge of the city, the car, and Eleanor walking away from it.
+=== ending_weary_road ===
+MICAH: West, then. Until the money runs out, or the road does.
+ELEANOR: ...
+ELEANOR: I told you all of it in the car, Micah. The motel, after you'd gone. The old man's gin. You know everything now.
+MICAH: I know enough.
+{has_flag("mansion_exploded"):
+    ELEANOR: The whole house. I watched it in the mirror the whole way, until it was only a glow.
+}
+ELEANOR: Then you know why. I can't go on like this, Micah, I can't be with you. I need ... peace.
+MICAH: Peace. Out here? There's nothing out here but stubble and wind.
+ELEANOR: That's why. Nobody out here wants anything from me.
+ELEANOR: Go home, Micah. Find yours.
+-> END
+
+// Ending 11: Joliet; Eleanor visits once, and only to say goodbye.
+=== prison_eleanor_peace ===
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. No hat, a plain grey coat, like a woman on her way to early Mass.
+ELEANOR: Hello, Micah.
+MICAH: Eleanor. I didn't think you'd come.
+ELEANOR: Neither did I. I nearly turned round at the gate.
+MICAH: You were never in that courtroom. Not your name, not your face. I made sure of that much.
+ELEANOR: I know. Thank you.
+MICAH: Are you going back to him? To Theodore?
+ELEANOR: No. Not to Theodore, not to the Club, not to anybody. I'm so tired, Micah. I've been tired since I was nineteen.
+ELEANOR: I came to tell you the rest of it. The motel, after you left. The old man's gin. You ought to know what you shot him for.
+THOUGHT: She told me. Quietly, across the table, while the guard watched the clock.
+ELEANOR: I hope you find your peace, Micah. I'm going to try to find mine, with the help of the Lord...
+THOUGHT: She gets up and goes, and doesn't look back. It doesn't feel like a door closing. It feels like one opening, somewhere I can't see yet.
 -> END
 
 // Endings 1, 8 and 9: after Micah's prayer, the player is Eleanor in the sheet, and the old man has his back to her.
@@ -1323,37 +1354,12 @@ ELEANOR: Amen.
 THOUGHT: She said it was the first time anybody had touched her forehead without wanting something for it.
 -> END
 
-// Ending 10: Joliet, Micah in a jumpsuit, confessing to his brother.
-=== prison_micah_caleb ===
-THOUGHT: Six months of grey walls and grey soup. Today, my brother, in his collar, with his stole in his pocket. I asked him to bring it.
-CALEB: Micah. The guard says you want a priest, not a brother.
-MICAH: I want both. I'll take whichever one's cheaper.
-CALEB: They're the same price. Go on.
-MICAH: Bless me, Father, for I have sinned. It's been... God knows. Since France.
-MICAH: I killed a man in his bedroom. I'd have killed him twice if I could. I broke my wife's heart and my boy's, and I'd do that over too, if I'm honest. I'm trying to be honest.
-MICAH: And there was a woman. She sent me away, at the end. She was right to.
-CALEB: Are you sorry, Micah?
-MICAH: I'm sorry I'm the man who did it. I don't know if that's the same thing.
-CALEB: It's where it starts. For your penance, the Our Father. All of it, this time. Every word.
-CALEB: Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti.
-MICAH: Amen.
-THOUGHT: Our Father, who art in heaven. I get to the end of it. Caleb doesn't say anything. He doesn't have to.
--> END
-
-// Endings 8 and 10: Eleanor alone at the edge of the city, leaving it.
+// Ending 8: Eleanor alone at the edge of the city, leaving it.
 === ending_eleanor_alone ===
-{has_flag("eleanor_burned"):
-    THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
-    THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
-- else:
-    THOUGHT: The morning she left Chicago, after the trial. A cardboard suitcase and a bus ticket west, and nobody to see her off.
-}
+THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
+THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
-{has_flag("ending_8"):
-    ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
-- else:
-    ELEANOR: No more Thursdays. No more mirrors. No more good girl.
-}
+ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
 ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
 -> END
@@ -1404,7 +1410,7 @@ THOUGHT: They didn't touch her. They didn't have to. She knew the way to the car
 -> END
 
 // The old man's dressing-room offer. "Take it" plays her drink-and-powder strip (CUE drink); refusing is saved
-// (eleanor_refused_drugs, the other refusal endings 8-10 need), and ClubBackstage cuts to black on "Noooo!".
+// (eleanor_refused_drugs, the other refusal endings 8-11 need), and ClubBackstage cuts to black on "Noooo!".
 === interlude_oldman ===
 HARRINGTON: There she is. My songbird, home from the woods.
 HARRINGTON: The nuns. A motel. A drunk who calls himself a detective. You've had quite a holiday, my dear.
@@ -1448,11 +1454,16 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: ...So that's whose hand it was. Caleb's.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_10"):
-    DANIEL: Wait. It's not Micah's handwriting. It's signed... Father Caleb Jones.
-    DANIEL: "My brother confessed to me in Joliet, and asked me to finish his journal, since he could not bring himself to. What happened to her before that night, she told me herself, after the trial, before she left Chicago."
-    DANIEL: "She sent him away from that room, and it saved what was left of him. He serves his time. He says the Our Father every morning, start to finish, and he writes to Rose on Sundays."
-    DANIEL: "She left on a westbound bus, with one suitcase. She didn't say where, and I didn't ask. Some people have earned the right not to be followed."
-    DANIEL: ...So that's whose hand it was. Caleb's.
+    DANIEL: "A year, near enough, since the prairie road. I haven't had a drink since that night. Some days that's the only thing I've done right. Some days it's enough."
+    DANIEL: "She told me the rest of it in the car that night, the motel and the old man's gin, before she got out and walked off down the road. I wrote it in the way she said it. She went looking for her peace. I hope she found it."
+    DANIEL: "I'm looking for mine. I write to Rose every Sunday, and every Sunday I sit at the back of Caleb's church. She hasn't written back yet. I'll keep writing."
+    DANIEL: ...So that's whose hand it was. Micah's, from what she told him on the road.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_11"):
+    DANIEL: "She came once, and never again. I didn't expect her to. She told me the rest of it across the parlour table, the motel and the old man's gin, and I wrote it in that same night, so I wouldn't lose a word."
+    DANIEL: "She said she hoped I'd find my peace. I'm trying. The Our Father every morning, start to finish. Caleb on the first Sunday of the month. A letter to Rose every week. Two came back. The third one, she kept."
+    DANIEL: "Peace isn't a place you get to, Caleb says. It's a direction. I'm facing it, at least."
+    DANIEL: ...So that's whose hand it was. Micah's, from across a prison table.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_1"):
     DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
@@ -1514,7 +1525,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END
