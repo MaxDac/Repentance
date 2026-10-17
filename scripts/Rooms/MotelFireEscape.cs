@@ -6,6 +6,9 @@ namespace Repentance.Rooms;
 /// <summary>Act 1: the motel fire escape, one floor up. Eleanor is waiting for Micah in the rain.</summary>
 public partial class MotelFireEscape : Room
 {
+    /// <summary>Micah and Eleanor share the office's slow jazz; it carries on into her room.</summary>
+    public override Track? Music => Track.OfficeJazz;
+
     public override async Task OnEnter(string entry)
     {
         await Game.Run(async () =>

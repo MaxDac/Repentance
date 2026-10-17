@@ -460,12 +460,16 @@ public partial class AutoPlay
         Check(game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves." && !game.Hud.InsetDrawn,
             "the compensation answer rejoins the existing conversation on the fire escape");
         Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
+        Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
+        int jazzStarts = game.Music.Count(Track.OfficeJazz);
         await Shot("motel_fire_escape");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
         Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
             "the rest of Eleanor's conversation stays on the fire escape without the panel");
         await Until(() => game.Room?.Name == "MotelNight");
         Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
+        Check(game.Music.Current == Track.OfficeJazz && game.Music.Count(Track.OfficeJazz) == jazzStarts,
+            "the office jazz carries on, uninterrupted, into Eleanor's room");
         await game.Wait(2);
         await Shot("motel_night");
         await Until(() => game.Room?.Name == "Attic");

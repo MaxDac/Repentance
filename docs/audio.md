@@ -48,7 +48,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ClubStrings` | Club vestibule, hall, lounge, stage, backstage | Dark string bolero in 3/4 |
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
-| `OfficeJazz` | Office | Slow D-minor ballad, muted trumpet, piano, bass |
+| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
