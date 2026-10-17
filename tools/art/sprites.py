@@ -232,6 +232,20 @@ ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"],
 ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
                       coat=None, stockings=None, shoes="2a2a2e",
                       decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
+
+
+def _fuller(spec, k=1.1):
+    """Eleanor in her NPC, action and seated strips: hips, seat and stance a tenth fuller, and any skirt following
+    her legs to the hem rather than hanging from the hip width. Her player sheets keep the base specs."""
+    rear = spec["rear"]
+    out = dict(spec, hw=spec["hw"] * k, hipw=spec["hipw"] * k, rear=(rear[0] * k, rear[1] * k) + tuple(rear[2:]),
+               profile=[(y, w * (k if y > 0.45 else 1), zb, zf) for y, w, zb, zf in spec["profile"]])
+    if spec.get("coat"):
+        out["coat"] = dict(spec["coat"], hem_legs=True, hem_pad=0.025)
+    return out
+
+
+ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC = map(_fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE))
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
 GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
             pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
@@ -290,7 +304,7 @@ def npc_strip(spec, name, arms, phi=35, **extra):
 
 NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold")),
         ("bellboy", BELLBOY, _arms("down")), ("sal", SAL, _arms("pocket")),
-        ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR, _arms("down")),
+        ("bartender", BARTENDER, _arms("down")), ("eleanor", ELEANOR_NPC, _arms("down")),
         ("rose", ROSE, _arms("fold")), ("caleb", CALEB, _arms("fold")),
         ("harrington", HARRINGTON, _arms("down", "pocket")), ("nun", NUN, _arms("fold")),
         ("librarian", LIBRARIAN, _arms("fold"), dict(lean=9.0, nod=0.006)),
@@ -302,7 +316,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("leader_unmasked", LEADER_UNMASKED, _arms("fold")),
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
-        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("clutch")),
+        ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET_NPC, _arms("clutch")),
         ("goon", GOON, _arms("fold")), ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
 
 
@@ -786,15 +800,15 @@ def build_smoke():
 
 
 def eleanor_drink_strip():
-    frames, seconds = [(figure(ELEANOR_GOWN, pose(90), FW, FH), (FW / 2, 18))], [0.3]
+    frames, seconds = [(figure(ELEANOR_GOWN_NPC, pose(90), FW, FH), (FW / 2, 18))], [0.3]
     for height, reach, tip, full, duration in GIN_KEYS:
         ps = pose(90, arms={1: ("hold", height, reach, tip), -1: ("side", 0, 0, 0)}, cup=1, glass="gin", full=full)
-        frames.append((figure(ELEANOR_GOWN, ps, FW, FH), (FW / 2, 18)))
+        frames.append((figure(ELEANOR_GOWN_NPC, ps, FW, FH), (FW / 2, 18)))
         seconds.append(duration)
     for height, reach, powder, nod, duration in POWDER_KEYS:
         ps = pose(90, arms={1: ("hold", height, reach, 0), -1: ("side", 0, 0, 0)}, nod=nod,
                   **({"powder": 1} if powder else {}))
-        frames.append((figure(ELEANOR_GOWN, ps, FW, FH), (FW / 2, 18)))
+        frames.append((figure(ELEANOR_GOWN_NPC, ps, FW, FH), (FW / 2, 18)))
         seconds.append(duration)
     frames.append(frames[0])
     seconds.append(0.4)
@@ -823,7 +837,7 @@ def eleanor_strike_strip():
             kw["legs"] = legs
         if arm[0] != "clutch":
             kw["candlestick"] = (1, way) if way else 1
-        frames.append((figure(ELEANOR_SHEET, pose(90, **kw), fw, FH), (fw / 2, 18)))
+        frames.append((figure(ELEANOR_SHEET_NPC, pose(90, **kw), fw, FH), (fw / 2, 18)))
         seconds.append(duration)
     action_strip("eleanor_strike", frames, seconds, anchor=(fw / 2, FH - 3))
 
@@ -950,12 +964,12 @@ def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
     shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
-    fall_strip(dict(ELEANOR_SHEET, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
+    fall_strip(dict(ELEANOR_SHEET_NPC, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
     struck_strip(HARRINGTON_GOWN, "harrington_struck", "harrington_struck_down", _arms("down", "pocket"))
     eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
-    inmate_seated_strip(ELEANOR_INMATE, "eleanor_inmate_seated")
-    seated_frame(ELEANOR, "eleanor_seated", flip=True)
+    inmate_seated_strip(ELEANOR_INMATE_NPC, "eleanor_inmate_seated")
+    seated_frame(ELEANOR_NPC, "eleanor_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)

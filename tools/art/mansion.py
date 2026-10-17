@@ -2776,7 +2776,7 @@ def eleanor_rise_strip(occupied, empty):
     wrapped in it, slides down onto her feet and turns, the last frame being eleanor_sheet's idle frame. Drawn facing
     left in room pixels, then mirrored so the actor (facing left, so flipped) shows it the right way round."""
     from PIL import ImageOps
-    from .sprites import ELEANOR_SHEET, figure, pose, _arms, NPC_W, FH, action_strip
+    from .sprites import ELEANOR_SHEET_NPC, figure, pose, _arms, NPC_W, FH, action_strip
     x0, y0, x1, y1 = ELEANOR_RISE_BOX
     w, h = x1 - x0, y1 - y0
     px, py = ELEANOR_RISE_AT
@@ -2795,11 +2795,11 @@ def eleanor_rise_strip(occupied, empty):
 
     head_in_bed = (376 - x0, 150 - y0)
     arms = _arms("clutch")
-    sheet_col = tuple(int(c, 16) for c in (ELEANOR_SHEET["torso"][i:i + 2] for i in (0, 2, 4)))
+    sheet_col = tuple(int(c, 16) for c in (ELEANOR_SHEET_NPC["torso"][i:i + 2] for i in (0, 2, 4)))
 
     def standing(ps, lift=0, wrap=False):
         img = Image.new("RGBA", (w, h))
-        fig = ImageOps.mirror(figure(ELEANOR_SHEET, ps, NPC_W, FH))
+        fig = ImageOps.mirror(figure(ELEANOR_SHEET_NPC, ps, NPC_W, FH))
         if lift:  # sitting up on the mattress: no floor shadow under her
             fa = np.asarray(fig).copy()
             fa[fa[..., 3] < 255] = 0
