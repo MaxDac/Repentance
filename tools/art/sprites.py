@@ -32,7 +32,8 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
     return d
 
 
-MICAH_HEAD = dict(skin="d09670", hair="3a2a1e", hair_style="cropped", brow="2a1c14", stubble="8e6c52",
+# black hair, so the brown fedora stands out against it
+MICAH_HEAD = dict(skin="d09670", hair="141010", hair_style="cropped", brow="100c0c", stubble="8e6c52",
                   face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2",
                   clean_jaw=True)
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
