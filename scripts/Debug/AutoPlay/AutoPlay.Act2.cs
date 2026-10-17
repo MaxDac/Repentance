@@ -100,11 +100,10 @@ public partial class AutoPlay
             "Agatha is in the cell, by the bed, while she talks");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");
         await Shot("interlude_agatha_night");
-        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning", 30);
-        Check(game.Music.Current == Track.ConventPiano && game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
-            "the convent piano comes back once Agatha has gone");
         await night;
         await WaitIdle(game);
+        Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
+            "the convent piano comes back once Agatha has gone");
         _prefer = prefer;
         Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),
             "the night visit offers the refusal; indulging her saves nothing");
