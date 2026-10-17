@@ -193,7 +193,7 @@ class CharacterArtTests(unittest.TestCase):
         self.assertLessEqual(bottoms[1] - bottoms[0], 3, "extend the back only slightly")
         self.assertEqual(sprites.ELEANOR_STAGE["hair_front"], 0.34)
         self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.0, "no stray hair proud of the chest")
-        self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.4, "thin front locks over the chest")
+        self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.7, "slim but continuous front locks over the chest")
 
     def test_eleanor_front_locks_remain_in_all_animation_frames(self):
         original = painter._hair_front
