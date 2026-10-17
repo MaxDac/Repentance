@@ -142,11 +142,23 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+      - name: Checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum -- * > SHA256SUMS
+          cat SHA256SUMS
+      # Build provenance for every asset: gh attestation verify <file> --repo <owner/repo>.
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/*
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -156,10 +168,21 @@ jobs:
           set -euo pipefail
           flags=()
           if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); else flags+=(--latest); fi
+          notes="$(cat <<EOF
+          Verify a download with \`sha256sum -c SHA256SUMS --ignore-missing\`, or check it was built by this repository:
+
+          \`\`\`
+          gh attestation verify <file> --repo $GITHUB_REPOSITORY
+          \`\`\`
+
+          The Windows installer is not code-signed, so SmartScreen may warn: choose "More info", then "Run anyway".
+          EOF
+          )"
           gh release create "$TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Repentance $TAG" \
+            --notes "$notes" \
             --generate-notes \
             "${flags[@]}"
           echo "Release: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"

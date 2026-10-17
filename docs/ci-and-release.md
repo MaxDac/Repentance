@@ -45,6 +45,10 @@ Packaging scripts (also run by CI's `export` job): `tools/package/windows-instal
 (NSIS script `dist/windows/Repentance.nsi`; needs `makensis`) and `tools/package/appimage.sh <export dir> <out>`
 (downloads a pinned `appimagetool`). The uninstaller deletes only the files it installed.
 
+The release also attaches `SHA256SUMS` and creates a build-provenance attestation for every asset
+(`actions/attest-build-provenance`); the release notes tell players how to verify:
+`sha256sum -c SHA256SUMS --ignore-missing` or `gh attestation verify <file> --repo MaxDac/Repentance`.
+
 ```powershell
 gh workflow run release.yml -f version=0.2.0 -f prerelease=false
 ```
