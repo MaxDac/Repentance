@@ -56,7 +56,9 @@ Automated play and film mode: [Testing](docs/testing.md).
   stay frozen until you resume; clicks do nothing while paused. Space is inactive on the title screen
   and inside the Esc menu.
 - Puzzle close-ups have their own controls, **Reset**, and **Close / Esc**. They are untimed and allow
-  unlimited retries. Unsubmitted settings reset when closed; collected clues remain available.
+  unlimited retries. Unsubmitted settings reset when closed; collected clues remain available. Puzzles with an
+  arrow pad (the staff lift, the auditor's index) also move with the **arrow keys** or by **dragging/swiping**
+  across the diagram, one step per cell.
 - Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be
   combined with an item on another page.
 - **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers

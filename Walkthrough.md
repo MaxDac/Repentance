@@ -50,8 +50,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   shafts and laundry chutes behind the walls, that every floor has an identical linen room, that he wants the
   fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (13, by the fire escape).
   The close-up is a dense 13x8 maze: columns are the room positions along a floor, rows the floors from the basement
-  loading bay (B, bottom left, where the cage starts) to the seventh floor. The arrow buttons move the cage one
-  cell; walls stop it. Linen rooms (L) sit on the 7th floor by 701, the 5th floor by 503 and 511, the 6th floor
+  loading bay (B, bottom left, where the cage starts) to the seventh floor. The arrow buttons, the arrow keys or a
+  drag across the maze move the cage one cell at a time; walls stop it. Linen rooms (L) sit on the 7th floor by 701, the 5th floor by 503 and 511, the 6th floor
   by 607 and the 4th floor by 407 (directly above and below the right one), and the 5th floor by 507: only the
   last is right. The shortest way is 54 moves, winds through the whole hotel and passes many dead ends; the
   decoys next to the target are far away through the shafts. Dispatching anywhere else stays in the lobby and
