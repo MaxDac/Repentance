@@ -12,7 +12,7 @@ namespace Repentance;
 public sealed class SaveData
 {
     /// <summary>Bump when saved decisions, identifiers or room flow change incompatibly.</summary>
-    public const int CurrentVersion = 9;
+    public const int CurrentVersion = 10;
 
     public int Version { get; set; } = CurrentVersion;
     public DateTime SavedAtUtc { get; set; }

@@ -26,6 +26,13 @@ public partial class AutoPlay
             "the player is Eleanor at the motel, with nothing of Micah's");
         Check(game.Music.Current == null, "no office jazz in the motel once Micah has gone");
         await Shot("interlude_motel_goons");
+        var bedLines = await Spoken(() => game.Perform(Verb.Hand, "bed"));
+        var windowLines = await Spoken(() => game.Perform(Verb.Look, "window"));
+        Check(bedLines.Contains("Cold on his side now. I won't think about that.") && !bedLines.Any(l => l.Contains("Still warm")),
+            "the night after, his side of the bed has gone cold");
+        Check(windowLines.Contains("He's gone from the alley. A car's pulled in below, lights off.") && !windowLines.Any(l => l.Contains("His car")),
+            "Micah came on foot: no car of his in the lot");
+        Check(game.Room?.Name == "MotelNight" && !gs.HasFlag("interlude_goons_in"), "the bed and the window don't bring the knock forward");
         var taken = game.Perform(Verb.Hand, "door");
         await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
             || game.Room?.Name != "MotelNight", 30);
@@ -486,14 +493,21 @@ public partial class AutoPlay
             "a save in the kitchen after the fire restores the fire and Eleanor waiting by the door");
         await game.Perform(Verb.Walk, "cellar_door");
         Check(game.Room?.Name == "MansionKitchen", "no going back down into the fire");
+        HeardLog = new List<string>();
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => gs.HasFlag(Endings.MansionExploded));
         await game.Wait(1.5);
         await Shot("mansion_fire");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
+        Check(HeardLog.Any(l => l.Contains("Oh my God, Micah.")) && !HeardLog.Any(l => l.Contains("She watches the windows go.")),
+            "ending 2: convinced Eleanor cries out when the house goes");
         await game.Wait(3);
         await Shot("ending_together");
         await TheEnd("ending_2");
+        Check(HeardLog.Any(l => l.Contains("She told me the rest of it in the car that night")) &&
+              !HeardLog.Any(l => l.Contains("motel on the road")) && !HeardLog.Any(l => l.Contains("changed in mine on the way")),
+            "ending 2: Daniel's journal puts the telling in the car, not a motel on the road; no weary-road dress beat");
+        HeardLog = null;
     }
 }
