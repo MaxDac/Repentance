@@ -1,38 +1,49 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Repentance;
 
 /// <summary>
 /// Walkable floor of a room, defined by a (possibly concave) polygon. Draw it in the editor as a
-/// Polygon2D named "WalkArea" (it's hidden at runtime). Paths are found with a visibility graph
-/// over the polygon's concave corners, which is plenty for adventure-game rooms.
+/// Polygon2D named "WalkArea" (it's hidden at runtime), with optional holes for furniture standing out in the room.
+/// Paths are found with a visibility graph over the floor's concave corners (and the holes' corners), which is plenty
+/// for adventure-game rooms.
 /// </summary>
 public sealed class WalkArea
 {
     private readonly Vector2[] _poly;
+    private readonly Vector2[][] _holes;
     private readonly List<Vector2> _nodes = new();
 
-    public WalkArea(Vector2[] polygon)
+    public WalkArea(Vector2[] polygon, IEnumerable<Vector2[]>? holes = null)
     {
         _poly = polygon;
-        int n = _poly.Length;
-        for (int i = 0; i < n; i++)
+        _holes = holes?.ToArray() ?? System.Array.Empty<Vector2[]>();
+        foreach (var ring in Rings)
         {
-            Vector2 prev = _poly[(i + n - 1) % n], cur = _poly[i], next = _poly[(i + 1) % n];
-            var bis = (prev - cur).Normalized() + (next - cur).Normalized();
-            if (bis.LengthSquared() < 0.0001f) continue;
-            bis = bis.Normalized();
-            // Reflex (inward-pointing) corners are the only places a shortest path bends around.
-            if (!Contains(cur + bis * 1.5f))
+            int n = ring.Length;
+            for (int i = 0; i < n; i++)
             {
-                var p = cur - bis * 1.5f;
-                if (Contains(p)) _nodes.Add(p);
+                Vector2 prev = ring[(i + n - 1) % n], cur = ring[i], next = ring[(i + 1) % n];
+                var bis = (prev - cur).Normalized() + (next - cur).Normalized();
+                if (bis.LengthSquared() < 0.0001f) continue;
+                bis = bis.Normalized();
+                // Reflex (inward-pointing) corners are the only places a shortest path bends around; the convex
+                // corners of a hole are reflex corners of the floor around it.
+                if (!Contains(cur + bis * 1.5f))
+                {
+                    var p = cur - bis * 1.5f;
+                    if (Contains(p)) _nodes.Add(p);
+                }
             }
         }
     }
 
-    public bool Contains(Vector2 p) => Geometry2D.IsPointInPolygon(p, _poly);
+    private IEnumerable<Vector2[]> Rings => _holes.Prepend(_poly);
+
+    public bool Contains(Vector2 p) =>
+        Geometry2D.IsPointInPolygon(p, _poly) && !_holes.Any(h => Geometry2D.IsPointInPolygon(p, h));
 
     /// <summary>Closest walkable point to <paramref name="p"/>.</summary>
     public Vector2 Clamp(Vector2 p)
@@ -40,12 +51,13 @@ public sealed class WalkArea
         if (Contains(p)) return p;
         Vector2 best = _poly[0];
         float bestD = float.MaxValue;
-        for (int i = 0; i < _poly.Length; i++)
-        {
-            var c = Geometry2D.GetClosestPointToSegment(p, _poly[i], _poly[(i + 1) % _poly.Length]);
-            float d = c.DistanceSquaredTo(p);
-            if (d < bestD) { bestD = d; best = c; }
-        }
+        foreach (var ring in Rings)
+            for (int i = 0; i < ring.Length; i++)
+            {
+                var c = Geometry2D.GetClosestPointToSegment(p, ring[i], ring[(i + 1) % ring.Length]);
+                float d = c.DistanceSquaredTo(p);
+                if (d < bestD && (ring == _poly || Geometry2D.IsPointInPolygon(c, _poly))) { bestD = d; best = c; }
+            }
         // nudge inside
         foreach (var dir in new[] { Vector2.Up, Vector2.Down, Vector2.Left, Vector2.Right,
                      new Vector2(1, 1), new Vector2(-1, 1), new Vector2(1, -1), new Vector2(-1, -1) })
@@ -62,16 +74,17 @@ public sealed class WalkArea
     private bool Visible(Vector2 a, Vector2 b)
     {
         if (a.DistanceSquaredTo(b) < 0.01f) return true;
-        for (int i = 0; i < _poly.Length; i++)
-        {
-            Vector2 c = _poly[i], d = _poly[(i + 1) % _poly.Length];
-            var hit = Geometry2D.SegmentIntersectsSegment(a, b, c, d);
-            if (hit.VariantType != Variant.Type.Nil)
+        foreach (var ring in Rings)
+            for (int i = 0; i < ring.Length; i++)
             {
-                var h = hit.AsVector2();
-                if (h.DistanceSquaredTo(a) > 0.25f && h.DistanceSquaredTo(b) > 0.25f) return false;
+                Vector2 c = ring[i], d = ring[(i + 1) % ring.Length];
+                var hit = Geometry2D.SegmentIntersectsSegment(a, b, c, d);
+                if (hit.VariantType != Variant.Type.Nil)
+                {
+                    var h = hit.AsVector2();
+                    if (h.DistanceSquaredTo(a) > 0.25f && h.DistanceSquaredTo(b) > 0.25f) return false;
+                }
             }
-        }
         // sample along the segment to catch grazing a reflex corner
         for (int s = 1; s < 8; s++)
             if (!Contains(a.Lerp(b, s / 8f))) return false;

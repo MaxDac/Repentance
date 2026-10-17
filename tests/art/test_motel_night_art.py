@@ -1,4 +1,4 @@
-"""Micah lighting a cigarette, the motel night clerk and the umbrella icon: generated art contracts."""
+"""Micah lighting a cigarette and taking a drag, the motel night clerk and the umbrella icon: generated art contracts."""
 import contextlib
 import io
 import json
@@ -39,19 +39,21 @@ class MotelNightArtTests(unittest.TestCase):
             common.save(items._icon(items.umbrella), "items", "umbrella.png")
 
     def test_committed_assets_match_generators(self):
-        for folder, name in (("sprites", "micah_smoke"), ("sprites", "clerk"), ("items", "umbrella")):
+        for folder, name in (("sprites", "micah_smoke"), ("sprites", "micah_smoke_drag"), ("sprites", "clerk"),
+                             ("items", "umbrella")):
             with self.subTest(asset=name), Image.open(self.generated / folder / f"{name}.png") as generated, \
                     Image.open(ART / folder / f"{name}.png") as committed:
                 self.assertEqual(generated.size, committed.size)
                 difference = ImageChops.difference(generated.convert("RGBA"), committed.convert("RGBA"))
                 self.assertTrue(all(channel.getbbox() is None for channel in difference.split()))
-        self.assertEqual(json.loads((self.generated / "sprites" / "micah_smoke.json").read_text()),
-                         json.loads((ART / "sprites" / "micah_smoke.json").read_text()))
+        for name in ("micah_smoke", "micah_smoke_drag"):
+            self.assertEqual(json.loads((self.generated / "sprites" / f"{name}.json").read_text()),
+                             json.loads((ART / "sprites" / f"{name}.json").read_text()))
 
     def test_smoke_strip_lights_up_and_holds_the_lit_cigarette_last(self):
         meta = json.loads((ART / "sprites" / "micah_smoke.json").read_text())
         frames = meta["frames"]
-        self.assertTrue(6 <= len(frames) <= 9)
+        self.assertTrue(6 <= len(frames) <= 12)
         self.assertTrue(1.5 <= sum(f["seconds"] for f in frames) <= 4.0)
         self.assertEqual(max(f["seconds"] for f in frames), frames[-1]["seconds"], "the held pose lingers")
         with Image.open(ART / "sprites" / "micah_smoke.png") as strip:
@@ -64,6 +66,22 @@ class MotelNightArtTests(unittest.TestCase):
         self.assertTrue(any(colours(cell) & flame for cell in cells[1:-1]), "the lighter's flame")
         self.assertTrue(lit[-1], "the ember glows in the held pose")
         self.assertFalse(colours(cells[-1]) & set(sprites.BRASS), "the lighter is put away")
+
+    def test_drag_strip_flares_the_ember_and_ends_on_the_held_pose(self):
+        meta = json.loads((ART / "sprites" / "micah_smoke_drag.json").read_text())
+        held = json.loads((ART / "sprites" / "micah_smoke.json").read_text())
+        frames = meta["frames"]
+        self.assertEqual((meta["width"], meta["height"]), (held["width"], held["height"]))
+        self.assertLess(sum(f["seconds"] for f in frames), 4.0, "a drag fits between two 5-second drags")
+        with Image.open(ART / "sprites" / "micah_smoke_drag.png") as strip, \
+                Image.open(ART / "sprites" / "micah_smoke.png") as smoke:
+            strip, smoke = strip.convert("RGBA"), smoke.convert("RGBA")
+            w, h = meta["width"], meta["height"]
+            cells = [strip.crop((i * w, 0, (i + 1) * w, h)) for i in range(len(frames))]
+            last_held = smoke.crop(((len(held["frames"]) - 1) * w, 0, len(held["frames"]) * w, h))
+        self.assertTrue(all(colours(cell) & set(sprites.EMBER[1:]) for cell in cells), "the cigarette stays lit")
+        self.assertTrue(any(sprites.EMBER[0] in colours(cell) for cell in cells), "the ember flares on the drag")
+        self.assertIsNone(ImageChops.difference(cells[-1], last_held).getbbox(), "it ends on the held pose")
 
     def test_clerk_strip_has_the_npc_layout_and_a_green_eyeshade(self):
         with Image.open(ART / "sprites" / "clerk.png") as strip:

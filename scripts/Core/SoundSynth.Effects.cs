@@ -183,19 +183,22 @@ public static partial class SoundSynth
         return buf;
     }
 
-    /// <summary>An electric doorbell: a striker rattling against a gong for a second.</summary>
+    /// <summary>A two-tone door chime: a hammer strikes a high bar ("ding"), then a lower one a major third down ("dong").</summary>
     private static float[] Bell(Random rng)
     {
-        var buf = Buffer(1.8);
-        double[] hz = { 1180, 2960, 4120 }, amp = { 1, 0.45, 0.25 };
-        double t = 0;
-        while (t < 0.9)
-        {
-            for (int k = 0; k < hz.Length; k++) Tone(buf, t, hz[k], hz[k], 0.3 / (k + 1), amp[k] * 0.35, attack: 0.0005);
-            Burst(buf, rng, t, 0.002, 0.08, Biquad.HighPass(3000));
-            t += 1 / Vary(rng, 19, 0.04);
-        }
+        var buf = Buffer(2.6);
+        Chime(buf, rng, 0, 659.3, 1.0);
+        Chime(buf, rng, 0.55, 523.3, 1.1);
         return buf;
+    }
+
+    /// <summary>One struck tone bar: a ringing fundamental, a few fading partials and the soft tap of the felt hammer.</summary>
+    private static void Chime(float[] buf, Random rng, double start, double hz, double amp)
+    {
+        double[] ratio = { 1, 2.0, 3.0, 4.16 }, level = { 1, 0.3, 0.12, 0.06 }, tau = { 0.38, 0.2, 0.1, 0.05 };
+        for (int k = 0; k < ratio.Length; k++)
+            Tone(buf, start, hz * ratio[k], hz * ratio[k], tau[k], amp * level[k] * 0.5, attack: 0.003);
+        Burst(buf, rng, start, 0.006, amp * 0.05, Biquad.BandPass(hz * 2, 2));
     }
 
     /// <summary>Steady rain with scattered drops, crossfaded onto itself so it loops without a seam.</summary>

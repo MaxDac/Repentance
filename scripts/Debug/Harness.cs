@@ -264,6 +264,32 @@ public abstract class Harness
         Click(point, MouseButton.Left);
     }
 
+    /// <summary>One direction-pad step through the arrow keys.</summary>
+    protected void PuzzleKey(string step) => PressKey(step switch
+    {
+        "up" => Key.Up, "down" => Key.Down, "left" => Key.Left, "right" => Key.Right,
+        _ => throw new ArgumentException($"No arrow for '{step}'.", nameof(step)),
+    });
+
+    /// <summary>A left-button drag from <paramref name="from"/> along the steps, one cell each, in half-cell motions.</summary>
+    protected void PuzzleDrag(Vector2 from, IEnumerable<string> steps, float cell = 14)
+    {
+        Move(from);
+        Push(new InputEventMouseButton { Position = from, GlobalPosition = from, ButtonIndex = MouseButton.Left, Pressed = true, ButtonMask = MouseButtonMask.Left });
+        var at = from;
+        foreach (var step in steps)
+        {
+            var (dx, dy) = LiftMaze.Step(step);
+            for (int half = 0; half < 2; half++)
+            {
+                var delta = new Vector2(dx, dy) * cell / 2;
+                at += delta;
+                Push(new InputEventMouseMotion { Position = at, GlobalPosition = at, Relative = delta, ButtonMask = MouseButtonMask.Left });
+            }
+        }
+        Push(new InputEventMouseButton { Position = at, GlobalPosition = at, ButtonIndex = MouseButton.Left, Pressed = false });
+    }
+
     protected async Task SelectInventoryItem(string item)
     {
         await WaitIdle(_game);

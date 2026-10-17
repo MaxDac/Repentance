@@ -222,8 +222,9 @@ ELEANOR_SHEET = dict(ELEANOR, **_CURVES, torso="e8e4dc", sleeves=ELEANOR["skin"]
 MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a", sleeves="b8743a",
                     cuff="b8743a", pants="b8743a", shoes="2b1b14",
                     decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
-# Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls.
-ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
+# Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls. The silk
+# lies a little flatter over the seat than her bare curves.
+ELEANOR_GOWN = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.051, 0.52)), torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
                     far_arm_behind=True,
                     coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03, hem_legs=True, hem_pad=0.025),
                     stockings="e4c4ae", shoes="7a3448",
@@ -722,40 +723,104 @@ POWDER_KEYS = [
 
 
 SMOKE_YAW = 30
-# Micah lights up, turned three-quarters to the viewer: (near arm, far arm, cigarette, lighter, seconds). Arms are
-# explicit (elbow, wrist, hand) body-frame points; the near (right) hand carries the cigarette, the far one the lighter.
-# cigarette: None, "hand" (unlit, in the fingers), "lips" (unlit), "lit" (lit, in the lips) or "held" (lit, lowered).
-# lighter: None, "shut", "flame" (lid flipped, the flame up) or "light" (flame drawn into the cigarette's tip).
+# Micah lights up in the wind, turned three-quarters to the viewer: (near arm, far arm, cigarette, lighter, nod, puff,
+# seconds). Arms are explicit (elbow, wrist, hand) body-frame points; the near (right) hand carries the cigarette, the
+# far one the lighter, and for the light both hands close round the flame in front of his face, his head bowed into it.
+# cigarette: None, "hand" (unlit, in the fingers), "lips" (unlit), "lit" (lit, in the lips), "held" (lit, lowered) or
+# "drag" (lit, at the lips, the ember glowing as he draws on it).
+# lighter: None, "shut", "flame"/"gust" (lid flipped, the flame up or bent by the wind) or "light" (flame drawn into
+# the cigarette's tip). puff: how far a breath of smoke has drifted from his mouth (0 = none).
 _SIDE = ("side", 0, 0, 0)
 _TO_LIPS = ("pts", (0.17, 0.33, 0.1), (0.075, 0.2, 0.12), (0.03, 0.165, 0.11))
 _AT_LIPS = ("pts", (0.17, 0.34, 0.1), (0.07, 0.2, 0.11), (0.025, 0.16, 0.1))
-_CUP = ("pts", (-0.15, 0.33, 0.12), (-0.05, 0.18, 0.16), (-0.02, 0.15, 0.15))
-_CUP_NEAR = ("pts", (0.16, 0.33, 0.1), (0.06, 0.18, 0.15), (0.03, 0.15, 0.14))
+_CUP = ("pts", (-0.15, 0.33, 0.12), (-0.04, 0.19, 0.17), (-0.01, 0.165, 0.16))
+_CUP_NEAR = ("pts", (0.16, 0.33, 0.1), (0.07, 0.19, 0.16), (0.035, 0.165, 0.15))
 _LIFT = ("pts", (-0.15, 0.38, 0.08), (-0.08, 0.3, 0.14), (-0.05, 0.27, 0.14))
+_LOWER = ("pts", (0.16, 0.38, 0.08), (0.1, 0.32, 0.15), (0.075, 0.3, 0.17))
 _HOLD = ("pts", (0.15, 0.40, 0.05), (0.1, 0.39, 0.15), (0.085, 0.37, 0.18))
+_RAISE = ("pts", (0.17, 0.36, 0.08), (0.09, 0.26, 0.14), (0.05, 0.21, 0.14))
+_BOW = 0.007
 SMOKE_KEYS = [
-    (_SIDE, _SIDE, None, None, 0.3),
-    (_TO_LIPS, _SIDE, "hand", None, 0.22),
-    (_AT_LIPS, _LIFT, "lips", "shut", 0.2),
-    (_CUP_NEAR, _CUP, "lips", "flame", 0.28),
-    (_CUP_NEAR, _CUP, "lit", "light", 0.38),
-    (_AT_LIPS, _LIFT, "lit", "shut", 0.22),
-    (("pts", (0.16, 0.38, 0.08), (0.1, 0.32, 0.15), (0.075, 0.3, 0.17)), _SIDE, "held", None, 0.22),
-    (_HOLD, _SIDE, "held", None, 1.0),
+    (_SIDE, _SIDE, None, None, 0, 0, 0.3),
+    (_TO_LIPS, _SIDE, "hand", None, 0, 0, 0.22),
+    (_AT_LIPS, _LIFT, "lips", "shut", 0, 0, 0.22),
+    (_CUP_NEAR, _CUP, "lips", "shut", _BOW, 0, 0.2),
+    (_CUP_NEAR, _CUP, "lips", "gust", _BOW, 0, 0.22),
+    (_CUP_NEAR, _CUP, "lips", "flame", _BOW, 0, 0.3),
+    (_CUP_NEAR, _CUP, "lit", "light", _BOW, 0, 0.45),
+    (_AT_LIPS, _LIFT, "lit", "shut", 0, 0, 0.22),
+    (_LOWER, _SIDE, "held", None, 0, 1, 0.24),
+    (_HOLD, _SIDE, "held", None, 0, 2, 0.4),
+    (_HOLD, _SIDE, "held", None, 0, 0, 0.8),
 ]
-EMBER = ((255, 236, 150, 255), (240, 120, 40, 255), (176, 44, 24, 255))
+# A drag on it, every few seconds while he talks: hand to the lips, the ember flaring, the hand down, the smoke out.
+SMOKE_DRAG_KEYS = [
+    (_LOWER, _SIDE, "held", None, 0, 0, 0.14),
+    (_RAISE, _SIDE, "held", None, 0, 0, 0.12),
+    (_AT_LIPS, _SIDE, "drag", None, 0, 0, 0.6),
+    (_AT_LIPS, _SIDE, "lit", None, 0, 0, 0.18),
+    (_RAISE, _SIDE, "held", None, 0, 0, 0.12),
+    (_LOWER, _SIDE, "held", None, 0, 1, 0.24),
+    (_HOLD, _SIDE, "held", None, 0, 2, 0.36),
+    (_HOLD, _SIDE, "held", None, 0, 3, 0.4),
+    (_HOLD, _SIDE, "held", None, 0, 0, 0.2),
+]
+EMBER = ((255, 244, 190, 255), (255, 150, 50, 255), (196, 54, 28, 255))
 PAPER = ((240, 236, 222, 255), (196, 188, 170, 255))
 BRASS = ((224, 184, 96, 255), (168, 124, 52, 255))
+FIRE = (255, 196, 96)
 
 
-def _smoke_props(img, marks, cig, lighter, t):
-    """The cigarette, the lighter and its flame, the ember and a wisp of smoke, painted over the figure at the marked
-    hands (hand1: the cigarette hand, hand-1: the lighter hand) and mouth."""
+def _glow(img, cx, cy, radius, strength):
+    """Warm firelight on whatever the figure has round (cx, cy) - cupped hands, the face bent over them - and a
+    faint halo in the air, so the flame reads at a distance."""
+    px = img.load()
+    for y in range(max(0, cy - radius), min(img.height, cy + radius + 1)):
+        for x in range(max(0, cx - radius), min(img.width, cx + radius + 1)):
+            f = 1 - math.hypot(x - cx, y - cy) / (radius + 0.5)
+            if f <= 0:
+                continue
+            r, g, b, a = px[x, y]
+            k = strength * f
+            if a:
+                px[x, y] = (round(r + (FIRE[0] - r) * k), round(g + (FIRE[1] - g) * k), round(b + (FIRE[2] - b) * k), a)
+            else:
+                px[x, y] = FIRE + (round(110 * k * f),)
+
+
+def _puff(img, x, y, drift, t):
+    """A breath of smoke out of the corner of his mouth, a soft cloud that rises and spreads as it drifts off to the
+    viewer's right, thinning as it goes."""
+    px = img.load()
+    cx, cy = x + 2 + drift * 3, y - drift * 3
+    alpha = (0, 200, 160, 110)[drift]
+    blobs = [(cx, cy, 1.4 + drift * 1.2), (cx - 1 - drift * 0.6, cy + 1, 1 + drift * 0.7),
+             (cx + 1 + drift * 0.8, cy - 0.5 - drift * 0.4, 1 + drift * 0.8)]
+    for yy in range(math.floor(cy - 6), math.ceil(cy + 6)):
+        for xx in range(math.floor(cx - 8), math.ceil(cx + 9)):
+            if not (0 <= xx < img.width and 0 <= yy < img.height):
+                continue
+            d = min(math.hypot(xx - bx, (yy - by) * 1.25) / r for bx, by, r in blobs)
+            if d > 1:
+                continue
+            a = round(alpha * (1 - 0.5 * d))
+            shade = (222, 224, 228) if yy < cy - 0.5 else (182, 186, 196)
+            r, g, b, a0 = px[xx, yy]
+            if a0:  # thin smoke over the coat or the face
+                k = a / 255 * 0.75
+                px[xx, yy] = tuple(round(c + (sv - c) * k) for c, sv in zip((r, g, b), shade)) + (a0,)
+            else:
+                px[xx, yy] = shade + (a,)
+
+
+def _smoke_props(img, marks, cig, lighter, puff, t):
+    """The cigarette, the lighter and its flame, the ember and the smoke, painted over the figure at the marked hands
+    (hand1: the cigarette hand, hand-1: the lighter hand) and mouth."""
     from PIL import ImageDraw
     d = ImageDraw.Draw(img)
     mx, my = (math.floor(v) for v in marks["mouth"])
     tip = None
-    if cig in ("lips", "lit"):  # out of the corner of the mouth, drooping down and out towards the viewer's right
+    if cig in ("lips", "lit", "drag"):  # out of the corner of the mouth, drooping down and out towards the viewer's right
         for i, (dx, dy) in enumerate(((1, 0), (2, 0), (3, 1))):
             d.point((mx + dx, my + dy), fill=PAPER[0] if i < 2 else PAPER[1])
         tip = (mx + 4, my + 1)
@@ -764,39 +829,57 @@ def _smoke_props(img, marks, cig, lighter, t):
         for i, (dx, dy) in enumerate(((1, 0), (2, -1), (3, -1))):
             d.point((hx_ + dx, hy_ + dy), fill=PAPER[0] if i else PAPER[1])
         tip = (hx_ + 4, hy_ - 2)
-    if cig in ("lit", "held"):
+    if cig == "drag":  # the ember flares as he draws on it
+        _glow(img, tip[0], tip[1], 3, 0.45)
+        d.point(tip, fill=EMBER[0])
+        d.point((tip[0] + 1, tip[1]), fill=EMBER[1])
+    elif cig in ("lit", "held"):
         d.point(tip, fill=EMBER[1])
-    if lighter:  # the lighter's brass case held upright in the far hand, the lid flipped open when it's lit
+    if lighter:  # the lighter's brass case in the far hand, the lid flipped open when it's lit
         lx, ly = (math.floor(v) for v in marks["hand-1"])
-        d.rectangle([lx, ly - 1, lx + 1, ly + 1], fill=BRASS[1])
-        d.point((lx, ly - 1), fill=BRASS[0])
-        if lighter != "shut":
-            d.point((lx + 2, ly - 2), fill=BRASS[1])
-            fx, fy = lx + (1 if lighter == "flame" else 2), ly - 2
-            if lighter == "light" and tip:
-                fx, fy = tip[0], tip[1] + 1
-            d.point((fx, fy), fill=EMBER[1])
-            d.point((fx, fy - 1), fill=EMBER[0])
-            if lighter == "flame":
-                d.point((fx, fy - 2), fill=EMBER[0])
+        if lighter == "shut" or not tip:
+            d.rectangle([lx, ly - 1, lx + 1, ly + 1], fill=BRASS[1])
+            d.point((lx, ly - 1), fill=BRASS[0])
+        else:  # cupped hands: the case shows just under the cigarette's tip, the flame between the palms
+            fx, fy = tip[0] - 1, tip[1] + 2
+            d.rectangle([fx - 1, fy + 1, fx, fy + 2], fill=BRASS[1])
+            d.point((fx - 1, fy + 1), fill=BRASS[0])
+            _glow(img, fx, fy - 1, 8 if lighter == "light" else 7, 0.8 if lighter == "flame" else 0.65)
+            # (dx, dy, hot core): a tall flame, one the wind bends over, one drawn into the tip
+            flame = {"gust": ((0, 0, 0), (1, 0, 1), (1, -1, 1), (2, -1, 0), (3, -1, 0)),
+                     "flame": ((0, 0, 0), (1, 0, 0), (0, -1, 1), (1, -1, 1), (0, -2, 1), (1, -3, 0)),
+                     "light": ((0, 0, 0), (1, 0, 1), (1, -1, 1), (2, -2, 0))}[lighter]
+            for dx, dy, hot in flame:
+                d.point((fx + dx, fy + dy), fill=EMBER[0] if hot else EMBER[1])
+            if lighter == "light":
+                d.point(tip, fill=EMBER[0])
     if cig in ("lit", "held"):  # a thin wisp curling up off the ember, half-transparent so it reads as smoke
         x, y = tip
         for k in range(1, 9 if cig == "held" else 5):
             x += (0, 1, 1, 0, -1, -1, 0, 1)[(k + t) % 8]
-            img.putpixel((x, y - k), (226, 224, 220, max(70, 210 - k * 18)))
+            if 0 <= y - k < img.height and 0 <= x < img.width:
+                img.putpixel((x, y - k), (226, 224, 220, max(70, 210 - k * 18)))
+    if puff:
+        _puff(img, mx + 1, my, puff, t)
     return img
 
 
-def build_smoke():
+def _smoke_strip(name, keys):
     frames, seconds = [], []
-    for i, (near, far, cig, lighter, duration) in enumerate(SMOKE_KEYS):
+    # the wisp's phase is counted back from the last frame, so every strip ends on the same held pose
+    for i, (near, far, cig, lighter, nod, puff, duration) in enumerate(keys, len(SMOKE_KEYS) - len(keys)):
         marks = {}
         front = tuple(s for s, a in ((1, near), (-1, far)) if a[0] == "pts" and a[3][1] < 0.24)
-        ps = pose(SMOKE_YAW, arms={1: near, -1: far}, front_arms=front, marks=marks)
-        img = _smoke_props(figure(MICAH, ps, FW, FH), marks, cig, lighter, i)
+        ps = pose(SMOKE_YAW, arms={1: near, -1: far}, front_arms=front, marks=marks, nod=nod)
+        img = _smoke_props(figure(MICAH, ps, FW, FH), marks, cig, lighter, puff, i)
         frames.append((img, (FW / 2, 18)))
         seconds.append(duration)
-    action_strip("micah_smoke", frames, seconds, anchor=(FW / 2, FH - 3))
+    action_strip(name, frames, seconds, anchor=(FW / 2, FH - 3))
+
+
+def build_smoke():
+    _smoke_strip("micah_smoke", SMOKE_KEYS)
+    _smoke_strip("micah_smoke_drag", SMOKE_DRAG_KEYS)
 
 
 def eleanor_drink_strip():

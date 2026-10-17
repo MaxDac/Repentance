@@ -84,6 +84,8 @@ DANIEL: Wait. These first pages aren't about him at all. "What follows, she told
 === interlude_aurelian ===
 THOUGHT: Tuesday night, the Aurelian. Room 507. The bed turned down, the dresses on their hangers, the chair squared to the desk.
 THOUGHT: She left it neater than she ever kept that marriage. The mess came after, when Theodore's men came looking for what she'd hidden.
+THOUGHT: She didn't pack a bag. She packed insurance: if the Club ever dragged her back, the Club would go into the morning paper with her.
+THOUGHT: Not on her; they'd search her first. In the room, in her name, behind a dial Theodore's men couldn't count to.
 ELEANOR: The box. The safe. The drawer. Then a telephone call, and the door. Don't look back, Ellie.
 -> END
 
@@ -134,6 +136,14 @@ BARTENDER: Only for people I like. What do you want?
 BARTENDER: The Mother Superior owes me. Nobody from that Club goes near those nuns. Not even them.
 ELEANOR: A convent. Me.
 BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you.
+ELEANOR: One more thing, Tony. If the Club ever gets me back, you'll hear. You hear everything.
+BARTENDER: And?
+ELEANOR: Then you pick up a telephone. Not the cops; half of them drink here. The Tribune city desk.
+ELEANOR: You say: Room 507, the Aurelian. The drawer, then the safe. You don't give your name.
+BARTENDER: What's in the safe?
+ELEANOR: Their Club. Enough to get a reporter as far as your bar, and you as far as the old man's throat.
+BARTENDER: A dead lady's insurance. ...Fine. I hope I never have to make that call.
+THOUGHT: She told me all of it that night at the motel. She didn't know the safe was already empty. I'd emptied it myself.
 THOUGHT: She said Tony wouldn't take her money. That frightened her more than anything else he said.
 -> END
 
@@ -188,8 +198,8 @@ THOUGHT: She told me she knew that look. She'd seen it on every man at the Club.
 - -> END
 
 === interlude_motel_window ===
-THOUGHT: She took a room at the flophouse down the hill from the convent, the one with the sign that buzzes. From the first floor window you can see the convent door. She watched it for three days.
-THOUGHT: On the third night, a man with a split lip came up that road in the dark and rang the bell. Me.
+THOUGHT: She took a room at the flophouse down the hill from the convent, the one with the sign that buzzes. From the first floor window you can see the convent door. She watched it for four days.
+THOUGHT: On the fourth evening, a man with a split lip and a day-old limp came up that road in the rain and rang the bell. Me.
 ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
 THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
 THOUGHT: She watched me come out again, alone, and stand in the middle of the road and light a cigarette like a man at the end of a rope.
@@ -454,7 +464,7 @@ SAL: Come back here again and we bury you. Capisce?
 
 === nun ===
 {has_flag("nun_talked"): -> nun.again}
-NUN: This is a house of God, not a waiting room. What are you doing here, young man?
+NUN: This is a house of God, not a waiting room, and Vespers are long over. What are you doing here at this hour, young man?
 MICAH: Looking for someone. Eleanor Harrington.
 NUN: And what would you want with her?
 * [Her husband hired me to find her.]
@@ -489,7 +499,7 @@ NUN: Then go with God. And remember that finding a thing is not the same as know
 
 === convent_dead_end ===
 THOUGHT: The road was empty. No Eleanor under the trees, no taxi pulling away, no footprints in the wet. Just me and the rain and the convent bell.
-THOUGHT: Three days she'd been gone from that cell. Three days is a long head start in a town this size. I'd hit a dead end, and I knew it.
+THOUGHT: Going on four days she'd been gone from that cell. Four days is a long head start in a town this size. I'd hit a dead end, and I knew it.
 - (leads)
 * [Go back to the Blue Lantern and lean on Tony.]
     MICAH: Sure. And Sal finishes the job he started in the alley.

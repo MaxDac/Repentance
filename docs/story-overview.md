@@ -39,8 +39,9 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    and knock it back at the bar. Tony won't talk; when you're done he decides he doesn't
    like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
-   him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit.
-6. **The convent** (exterior → corridor → cell → corridor): Micah remarks on the architecture outside;
+   him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit;
+   "The next evening", the convent.
+6. **The convent** (exterior → corridor → cell → corridor), the evening after the beating, in the rain: Micah remarks on the architecture outside;
    click the convent door to enter. Sister Agatha questions Micah, warns him off "that Jezebel", then lets
    him see Eleanor's cell. The nightstand drawer holds a comb and a little mirror with a strange symbol on
    the    back, hidden under wax. Borrow the cloth from the bed, warm the mirror at the lamp, and combine
@@ -48,7 +49,8 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    Eleanor's perfumed cloth until the end (ending 1 throws it away). He won't leave before that discovery.
    The cell door returns to the corridor. Talk to the sister for her farewell, or click the front door and
    she calls Micah back for the same exchange before letting him leave.
-7. **Outside the convent**: no Eleanor. Micah lights a cigarette in the middle of the road: a dead end. He turns
+7. **Outside the convent**: no Eleanor, only the rain. Micah lights a cigarette in the middle of the road, hands cupped
+   against the wind, and drags on it as he thinks: a dead end. He turns
    down three leads (the mob would kill him; he won't face Harrington until the job's done; the cops are bought).
    The fourth, the office, is cut short when he spots a motel sign down the road, shown in a close-up.
 8. **Behind the motel, the lobby, the fire escape**: in the rain, Micah goes in by the side door. The nervous desk
@@ -65,7 +67,7 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
     pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
     "another Jezebel from that hideous Club"; that night in the cell Agatha comes to her: refuse (saved) or indulge
-    (Agatha turns back at the last moment, cursing her as a demon). From the motel window she watches Micah reach
+    (Agatha turns back at the last moment, cursing her as a demon). From the motel window, four days on, she watches Micah reach
     the convent, smoke in the road and come asking at the desk; she waits for him on the fire escape, and the
     journal goes back to his office.
 12. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
