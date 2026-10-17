@@ -74,7 +74,15 @@ public partial class AutoPlay
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nothing of mine stays out in the open for them."),
             "with the safe locked, the exit points to the drawer");
+        var drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(!gs.HasFlag("interlude_drawer_locked") && !gs.HasFlag("interlude_phoned") &&
+              drawerLook.Contains("The safe's locked. Now the riddle goes in this drawer, and I turn the key.") &&
+              !drawerLook.Contains("Locked, with the riddle inside."),
+            "looking at the empty drawer after the safe asks for the riddle, not claims it's inside");
         await game.Perform(Verb.Hand, "desk_drawer");
+        drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(gs.HasFlag("interlude_drawer_locked") && drawerLook.Contains("Locked, with the riddle inside."),
+            "once the riddle is in, the drawer says so");
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nobody's coming for me unless I call."),
             "with the drawer locked, the exit points to the call");

@@ -12,7 +12,7 @@ public static partial class Items
         new("address", "address", "res://assets/art/items/address.png",
             "The deciphered calling-card address, copied onto a slip: \"The Club, 18 W. Hubbard.\""),
         new("invitation", "invitation", "res://assets/art/items/invitation.png",
-            "Black card, gold edges. \"The Club. Saturday, at the turning of the night.\" Procession crests, left to right: raven, lion, stag."),
+            "Black card, gold edges. \"The Club. Sunday, at the turning of the night.\" Procession crests, left to right: raven, lion, stag."),
         new("mask", "white Bauta mask", "res://assets/art/items/mask.png",
             "A white Venetian Bauta: heavy brow, empty eyes, a long nose, and nothing below it but shadow. It looks like everybody and nobody."),
         new("cloak", "black cloak", "res://assets/art/items/cloak.png",

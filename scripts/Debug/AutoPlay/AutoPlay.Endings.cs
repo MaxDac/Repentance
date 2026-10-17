@@ -274,34 +274,61 @@ public partial class AutoPlay
     {
         var heldOut = act3Flags.Append(Endings.RefusedAbbess).Append(Endings.RefusedDrugs).ToArray();
 
-        // 10 and 11: Micah shoots the old man; Eleanor, worn out, skips the persuasion and follows him out. With the
-        // documents taken she leaves him at the edge of the city (10); with nothing, she visits him in prison (11).
-        foreach (bool documents in new[] { true, false })
+        // 10 and 11: Micah shoots the old man; Eleanor, worn out, skips the persuasion and follows him out in silence.
+        // With the documents taken or the house burnt she leaves him at the edge of the city (10); with neither, she
+        // visits him in prison (11).
+        foreach (string way in new[] { "documents", "fire", "none" })
         {
-            string label = documents ? "ending_10" : "ending_11";
-            Seed(documents ? heldOut.Append(Endings.TookDocuments) : heldOut, act3Items, "Shoot him");
+            bool documents = way == "documents", fire = way == "fire", free = way != "none";
+            string label = free ? $"ending_10 ({way})" : "ending_11";
+            string ending = free ? "ending_10" : "ending_11";
+            var flags = documents ? heldOut.Append(Endings.TookDocuments) : fire ? heldOut.Append("cellar_lit") : heldOut;
+            Seed(flags.ToArray(), act3Items, "Shoot him");
             HeardLog = new List<string>();
             _ = game.ChangeRoom("mansion_bedroom", "start");
             await Until(() => game.Room?.Name == "MansionKitchen", 120);
-            await WaitIdle(game);
+            await game.Wait(0.2);
+            await Until(() => !game.Busy, 30);
             Check(gs.HasFlag(Endings.EleanorWeary) && !gs.HasFlag(Endings.EleanorConvinced) && gs.HasItem("revolver"),
                 $"{label}: Eleanor follows, worn out, and Micah keeps the revolver");
             Check(!_offered.ContainsKey("eleanor_persuade"), $"{label}: no persuasion turns");
             Check(HeardLog.Any(l => l.Contains("Let's get out of here, quick.")), $"{label}: \"Let's get out of here, quick.\"");
             Check(game.Room?.FindActor("eleanor")?.Visible == true, $"{label}: Eleanor waits in the kitchen");
+            if (fire)
+            {
+                HeardLog.AddRange(await Spoken(() => game.Perform(Verb.Walk, "cellar_door")));
+                await game.Perform(Verb.Hand, "barrel");
+                await game.Perform(Verb.Hand, "hung_lantern");
+                HeardLog.AddRange(await Spoken(() => game.Perform(Verb.UseItem, "barrel", "lantern_lit")));
+                await game.Wait(0.2);
+                await Until(() => game.Room?.Name == "MansionKitchen" && !game.Busy, 60);
+                Check(gs.HasFlag("cellar_fire") && game.Room?.FindActor("eleanor")?.Visible == true,
+                    $"{label}: the cellar set alight, Eleanor still by the door");
+                Check(HeardLog.Any(l => l.Contains("She smells the smoke. She doesn't ask.")), $"{label}: she smells the smoke and doesn't ask");
+            }
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts" || game.Room?.Name == "Prison", 120);
-            Check(gs.HasFlag(label) && game.Room?.Name == (documents ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
-                documents ? "ending 10: Micah and Eleanor out of town" : "ending 11: Micah in prison");
+            Check(gs.HasFlag(ending) && game.Room?.Name == (free ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
+                free ? $"{label}: Micah and Eleanor out of town" : "ending 11: Micah in prison");
+            Check(gs.HasFlag(Endings.MansionExploded) == fire, $"{label}: the house goes up only when the cellar burns");
             Check(game.Room?.FindActor("eleanor")?.Visible == true || game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible == true,
                 $"{label}: Eleanor is there");
-            string line = documents ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
+            string line = free ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
                 : "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the Lord...";
             await Until(() => HeardLog.Any(l => l.Contains(line)), 60);
             if (documents) await Shot("ending_weary_road");
             await TheEnd(label);
             Check(HeardLog.Any(l => l.Contains(line)), $"{label}: Eleanor's last words to Micah");
             Check(!HeardLog.Any(l => l.Contains("That's enough of you")), $"{label}: Micah writes the last entries himself");
+            Check(HeardLog.Any(l => l.Contains("Not one more word in this house.")) &&
+                  HeardLog.Any(l => l.Contains("She doesn't say a word. She said she wouldn't, not in this house.")),
+                $"{label}: she swears off words in the house, and keeps to it");
+            foreach (var spoken in new[] { "The back door, Micah", "The door's that way.", "What did you do?", "Oh my God, Micah." })
+                Check(!HeardLog.Any(l => l.Contains(spoken)), $"{label}: weary Eleanor doesn't say \"{spoken}\"");
+            Check(HeardLog.Any(l => l.Contains("She watches the windows go. She doesn't make a sound.")) == fire,
+                $"{label}: she watches the house go without a sound only when it burns");
+            Check(HeardLog.Any(l => l.Contains("changed in mine on the way")) == free,
+                $"{label}: the black dress from the Club's car explained only on the road out");
             HeardLog = null;
         }
         // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.

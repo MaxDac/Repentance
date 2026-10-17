@@ -19,7 +19,7 @@ public partial class Street : Room
         await Think("The pavement on Hubbard Street is cold under my back, and it doesn't ask questions. I like that in a pavement.");
         // after his first line, his face from above, flat on the pavement, while he argues with himself; gone before he gets up
         Game.Hud.ShowCloseUp(CloseUps.Beaten);
-        await Think("What am I doing, lying in the gutter for a woman I met four days ago?");
+        await Think("What am I doing, lying in the gutter for a woman I met last night?");
         await Think("I have a wife. On paper, anyway. And a boy who's eleven now, if I've counted right. Tommy.");
         await Think("I walked out on them because the bottle was easier to talk to. Now I walk into the night for a stranger.");
         await Think("At the library I thanked God Rose wasn't at her desk. She's been in my head every minute since.");

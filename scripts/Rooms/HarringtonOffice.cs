@@ -45,7 +45,7 @@ public partial class HarringtonOffice : Room
                 State.SetFlag("drawer_right_open");
                 State.GiveItem("invitation");
                 await Say("Under a stack of bank drafts: a black card with gold edges. The same knot as the mirror.");
-                await Say("\"The Club. Saturday, at the turning of the night.\" Saturday is tonight.");
+                await Say("\"The Club. Sunday, at the turning of the night.\" Sunday is tonight.");
                 return true;
             case ("drawer_right", Verb.Hand):
                 await Say("Bank drafts. Thousands of dollars, paid to nobody in particular. Not my business tonight.");
@@ -108,7 +108,7 @@ public partial class HarringtonOffice : Room
                 return true;
             case ("window", Verb.Walk or Verb.Hand):
                 State.SetFlag("harrington_done");
-                await Think("Back out the window, down the fire escape, and away before the fire trucks come. Saturday is tonight.");
+                await Think("Back out the window, down the fire escape, and away before the fire trucks come. Sunday is tonight.");
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
         }

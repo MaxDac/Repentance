@@ -149,6 +149,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
   "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).
+  The investigation resumes on Sunday; the Club invitation is for Sunday night.
 
 #### Convent
 
@@ -803,7 +804,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     - **Exception (endings 10 and 11).** If Eleanor refused both the Mother Superior and the old man's gin and
       powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
       "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
-      the gun, no leaving her, no shooting her. The kitchen escape runs as on the convinced route (the fire, the
+      the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
       documents), and Micah keeps the revolver. The fire or the documents give ending 10, neither gives ending 11.
     - Eleanor always gets four turns, each with three lines for Micah. Only one line per turn is right, and only
       the four right lines in a row convince her. A wrong line silently breaks the chain: the conversation goes on,
@@ -1021,9 +1022,9 @@ The First Interlude is always Micah's: she told him during the night at the mote
 
 ### Puzzle pacing and saves
 
-Micah's sixteen added/expanded puzzles are distributed **7 in Act 1, 6 in Act 2, and 3 in Act 3**; Eleanor has one
-in each interlude (Puzzles 17 and 18, in Room 507 and backstage at the Club). Puzzle 19 (the motel fire escape)
-takes an item from the motel lobby to use in its back alley. Puzzles 11-15
+Micah's seventeen added/expanded puzzles are distributed **8 in Act 1, 6 in Act 2, and 3 in Act 3**; Eleanor has one
+in each interlude (Puzzles 17 and 18, in Room 507 and backstage at the Club). Puzzle 19 (the motel fire escape),
+Micah's eighth in Act 1, takes an item from the motel lobby to use in its back alley. Puzzles 11-15
 are collect-and-combine puzzles in five extra locations: the Aurelian linen room and Rizzo's Flowers (Act 1), the
 Tribune morgue and the Club vestibule (Act 2), and the Harrington wine cellar (Act 3). Each asks Micah to gather
 items in that location, join them in the satchel and use the result to continue. Micah's lighter is the only
@@ -1037,7 +1038,8 @@ motel map and burial survey are not part of the completed Act 3.
 All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 9 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Eleanor interludes, the bluing moving into the
+is version 10 (`SaveData.CurrentVersion`); earlier versions are incompatible with Eleanor's weary follow in endings
+10 and 11, the motel detour and storm-office room flow, the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in
 compatible saves remain completed, using independent markers
@@ -1051,7 +1053,7 @@ Caleb retains his original counsel, warning and contrite-heart paraphrase, witho
 His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49015.htm), not a direct quotation. Religious objects remain
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
-The adventure remains a compact, single-case indie point-and-click: sixteen puzzles for Micah and two for Eleanor, the alley encounter, optional
+The adventure remains a compact, single-case indie point-and-click: seventeen puzzles for Micah and two for Eleanor, the alley encounter, optional
 dialogue, two playable Eleanor interludes and eleven ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.

@@ -114,7 +114,7 @@ public static class Notes
             L("Round the back: a watchman with a stick and a telephone inside."),
             L("The fire-escape ladder is up, held by a spring catch. The office window is lit.")),
         N("crests", "The procession", "drawer_right_open",
-            L("In the old man's locked drawer, a black card: \"The Club. Saturday, at the turning of the night.\""),
+            L("In the old man's locked drawer, a black card: \"The Club. Sunday, at the turning of the night.\""),
             L("Procession crests, left to right: raven, lion, stag."),
             L("The portrait's key: raven = star, lion = sun, stag = moon.", "portrait_key_seen")),
         N("vestibule", "The vestibule", "seen_vestibule",
