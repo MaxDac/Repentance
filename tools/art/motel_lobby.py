@@ -65,6 +65,8 @@ GLYPHS = {
     "2": ("111", "001", "111", "100", "111"),
     "7": ("111", "001", "010", "010", "010"),
     "$": ("010", "111", "110", "011", "111"),
+    "H": ("101", "101", "111", "101", "101"),
+    "F": ("111", "100", "110", "100", "100"),
     " ": ("0", "0", "0", "0", "0"),
 }
 
@@ -243,12 +245,30 @@ def floor(img):
 def front_door(img):
     d = ImageDraw.Draw(img)
     x0, x1, top = DOOR
+    # the casing: fluted side boards on plinth blocks and a head with a little cornice
     d.rectangle([x0 - 5, top - 6, x1 + 5, FLOOR], fill=WOOD_D)
     d.rectangle([x0 - 3, top - 4, x1 + 3, FLOOR], fill=hx("4e3a26"))
+    d.rectangle([x0 - 7, top - 10, x1 + 7, top - 6], fill=hx("4e3a26"))
+    d.line([(x0 - 7, top - 10), (x1 + 7, top - 10)], fill=hx("8a6c4c"))
+    d.line([(x0 - 7, top - 6), (x1 + 7, top - 6)], fill=hx("1e140a"))
     d.line([(x0 - 3, top - 4), (x1 + 3, top - 4)], fill=hx("7a5e3e"))
+    for x in (x0 - 3, x1 + 1):
+        d.line([(x + 1, top - 2), (x + 1, FLOOR - 10)], fill=hx("6a5038"))
+        d.line([(x, top - 2), (x, FLOOR - 10)], fill=hx("2e2014"))
+        d.rectangle([x - 2, FLOOR - 9, x + 3, FLOOR], fill=hx("3e2c1c"))
+        d.line([(x - 2, FLOOR - 9), (x + 3, FLOOR - 9)], fill=hx("7a5e3e"))
     vgrad(img, (x0, top, x1, FLOOR - 1), hx("4a3828"), hx("2e2218"))
+    # stiles and rails: a bead where they meet the panels, lit from the bulb on the right
+    d.line([(x0, top), (x0, FLOOR - 1)], fill=hx("5e4834"))
+    d.line([(x1, top), (x1, FLOOR - 1)], fill=hx("1e160e"))
+    for y in range(top + 3, FLOOR - 2, 7):  # the grain
+        d.line([(x0 + 2, y), (x0 + 4, y + 3)], fill=hx("3a2a1c"))
+        d.line([(x1 - 3, y + 2), (x1 - 2, y + 5)], fill=hx("3a2a1c"))
     # pebbled glass in the top half: the alley's rain and darkness behind it
     gx0, gy0, gx1, gy1 = x0 + 6, top + 6, x1 - 6, top + 38
+    d.rectangle([gx0 - 2, gy0 - 2, gx1 + 2, gy1 + 2], fill=hx("6a5038"))
+    d.line([(gx0 - 2, gy1 + 2), (gx1 + 2, gy1 + 2)], fill=hx("8a6c4c"))
+    d.line([(gx1 + 2, gy0 - 2), (gx1 + 2, gy1 + 2)], fill=hx("7a5e3e"))
     d.rectangle([gx0 - 1, gy0 - 1, gx1 + 1, gy1 + 1], fill=hx("1a120a"))
     vgrad(img, (gx0, gy0, gx1, gy1), hx("26323e"), hx("161e28"))
     rnd = random.Random(740)
@@ -258,20 +278,90 @@ def front_door(img):
     for _ in range(6):
         x, y = rnd.randint(gx0 + 2, gx1 - 2), rnd.randint(gy0, gy1 - 10)
         d.line([(x, y), (x, y + rnd.randint(4, 9))], fill=hx("5a6a7a"))
+    # OFFICE in flaking gilt, read backwards from in here
+    tx = gx0 + 7
+    for ch in "OFFICE"[::-1]:
+        g = GLYPHS[ch]
+        for r, row in enumerate(g):
+            for c, bit in enumerate(row[::-1]):
+                if bit == "1" and (tx + c + r) % 7:
+                    d.point((tx + c, gy1 - 8 + r), fill=hx("a8884a"))
+        tx += len(g[0]) + 1
     # a crack taped over
     d.line([(gx0 + 4, gy0 + 3), (gx0 + 14, gy0 + 16), (gx0 + 11, gy0 + 26)], fill=hx("8a9aa8"))
     d.rectangle([gx0 + 8, gy0 + 8, gx0 + 16, gy0 + 11], fill=hx("a89a70"))
-    # lower panels, kicked in the past
-    d.rectangle([x0 + 6, top + 46, x1 - 6, FLOOR - 8], outline=hx("1e160e"))
-    d.line([(x0 + 7, top + 47), (x1 - 7, top + 47)], fill=hx("5e4834"))
-    d.line([(x0 + 14, FLOOR - 20), (x0 + 22, FLOOR - 14)], fill=hx("6a5440"))
-    d.line([(x0 + 22, FLOOR - 14), (x0 + 30, FLOOR - 17)], fill=hx("1a120a"))
-    # knob, bolt and a chain lock
-    d.ellipse([x1 - 9, top + 44, x1 - 4, top + 49], fill=BRASS)
-    d.point((x1 - 8, top + 45), fill=hx("f0d890"))
-    d.rectangle([x1 - 8, top + 30, x1 - 3, top + 33], fill=hx("6a6a6a"))
-    for i in range(5):
-        d.point((x1 - 6 - i, top + 34 + (i * i) // 4), fill=hx("8a8a8a"))
+    d.line([(gx0 + 8, gy0 + 11), (gx0 + 16, gy0 + 11)], fill=hx("6a5a3a"))
+    d.point((gx0 + 16, gy0 + 8), fill=hx("c8bc90"))
+    # the lock rail, with a brass letter slot
+    ly = top + 42
+    d.line([(x0 + 2, ly), (x1 - 2, ly)], fill=hx("5e4834"))
+    d.rectangle([x0 + 14, ly + 1, x0 + 28, ly + 4], fill=BRASS_D)
+    d.rectangle([x0 + 15, ly + 2, x0 + 27, ly + 3], fill=hx("140c06"))
+    d.line([(x0 + 14, ly + 1), (x0 + 28, ly + 1)], fill=hx("d8b460"))
+    d.point((x0 + 13, ly + 2), fill=BRASS)
+    d.point((x0 + 29, ly + 2), fill=BRASS)
+    # two raised lower panels with bevelled fields, one kicked in the past
+    for px0, px1 in ((x0 + 6, (x0 + x1) // 2 - 2), ((x0 + x1) // 2 + 2, x1 - 6)):
+        py0, py1 = top + 48, FLOOR - 16
+        d.rectangle([px0, py0, px1, py1], fill=hx("3a2a1c"))
+        d.line([(px0, py0), (px1, py0)], fill=hx("1e160e"))
+        d.line([(px0, py0), (px0, py1)], fill=hx("1e160e"))
+        d.line([(px0, py1), (px1, py1)], fill=hx("6a5440"))
+        d.line([(px1, py0), (px1, py1)], fill=hx("5e4834"))
+        d.rectangle([px0 + 3, py0 + 3, px1 - 3, py1 - 3], fill=hx("42301f"))
+        d.line([(px0 + 3, py0 + 3), (px1 - 3, py0 + 3)], fill=hx("5e4834"))
+        d.line([(px0 + 3, py0 + 3), (px0 + 3, py1 - 3)], fill=hx("5e4834"))
+        d.line([(px1 - 3, py0 + 3), (px1 - 3, py1 - 3)], fill=hx("2a1e12"))
+        d.line([(px0 + 3, py1 - 3), (px1 - 3, py1 - 3)], fill=hx("2a1e12"))
+    d.line([(x0 + 10, FLOOR - 26), (x0 + 15, FLOOR - 21)], fill=hx("6a5440"))
+    d.line([(x0 + 15, FLOOR - 21), (x0 + 19, FLOOR - 24)], fill=hx("1a120a"))
+    d.line([(x0 + 11, FLOOR - 27), (x0 + 16, FLOOR - 22)], fill=hx("1a120a"))
+    # a scuffed brass kick plate on four screws
+    d.rectangle([x0 + 2, FLOOR - 12, x1 - 2, FLOOR - 2], fill=hx("7a5a24"))
+    vgrad(img, (x0 + 2, FLOOR - 11, x1 - 2, FLOOR - 3), hx("8a6a30"), hx("4a3414"))
+    d.line([(x0 + 2, FLOOR - 12), (x1 - 2, FLOOR - 12)], fill=hx("d8b460"))
+    for x in (x0 + 4, x1 - 4):
+        for y in (FLOOR - 10, FLOOR - 4):
+            d.point((x, y), fill=hx("e8c870"))
+    for x in range(x0 + 8, x1 - 8, 7):
+        d.line([(x, FLOOR - 7), (x + 3, FLOOR - 8)], fill=hx("a88a48"))
+    # three butt hinges on the left stile, their knuckles and pins
+    for hy in (top + 8, top + 40, FLOOR - 22):
+        d.rectangle([x0 - 2, hy, x0 + 2, hy + 7], fill=BRASS_D)
+        d.line([(x0 - 1, hy), (x0 - 1, hy + 7)], fill=BRASS)
+        d.point((x0 - 1, hy - 1), fill=hx("d8b460"))
+        d.point((x0 - 1, hy + 8), fill=hx("3a2810"))
+        d.line([(x0 - 2, hy + 3), (x0 + 2, hy + 3)], fill=hx("3a2810"))
+        d.point((x0 + 1, hy + 1), fill=hx("2a1a0a"))
+        d.point((x0 + 1, hy + 6), fill=hx("2a1a0a"))
+    # knob on a long escutcheon with its keyhole
+    ex = x1 - 7
+    ey = top + 44
+    d.rectangle([ex - 3, ey - 9, ex + 2, ey + 9], fill=BRASS_D)
+    d.rectangle([ex - 2, ey - 8, ex + 1, ey + 8], fill=hx("8a6a30"))
+    d.line([(ex - 2, ey - 8), (ex - 2, ey + 8)], fill=hx("d8b460"))
+    d.point((ex - 1, ey - 8), fill=hx("f0d890"))
+    d.point((ex - 1, ey + 7), fill=hx("f0d890"))
+    d.point((ex - 1, ey + 4), fill=hx("140c06"))
+    d.line([(ex - 1, ey + 5), (ex - 1, ey + 6)], fill=hx("140c06"))
+    d.ellipse([ex - 4, ey - 3, ex + 2, ey + 2], fill=hx("3a2810"))
+    d.ellipse([ex - 4, ey - 3, ex + 1, ey + 1], fill=BRASS)
+    d.point((ex - 3, ey - 2), fill=hx("fff0b0"))
+    d.point((ex - 2, ey - 2), fill=hx("f0d890"))
+    d.line([(ex - 3, ey + 2), (ex + 1, ey + 2)], fill=hx("1a1008"))
+    # the chain lock: a slide plate on the door, a keeper on the frame and the chain hanging in a loop between
+    cy0 = top + 30
+    d.rectangle([x1 - 9, cy0, x1 - 2, cy0 + 2], fill=hx("5a5a5a"))
+    d.line([(x1 - 9, cy0), (x1 - 2, cy0)], fill=hx("9a9a9a"))
+    d.point((x1 - 8, cy0 + 1), fill=hx("2a2a2a"))
+    d.point((x1 - 3, cy0 + 1), fill=hx("2a2a2a"))
+    d.rectangle([x1 + 2, cy0 - 1, x1 + 4, cy0 + 4], fill=hx("6a6a6a"))
+    d.point((x1 + 3, cy0), fill=hx("aaaaaa"))
+    for i in range(9):
+        cx = x1 + 3 - i
+        cy = cy0 + 2 + round(6 * math.sin(math.pi * i / 8))
+        d.point((cx, cy), fill=hx("b0b0b0") if i % 2 else hx("5a5a5a"))
+    d.rectangle([x1 - 6, cy0 + 1, x1 - 5, cy0 + 2], fill=hx("c8c8c8"))
     # cold alley light leaks round the frame
     light(img, "rect", [x0 - 2, FLOOR - 2, x1 + 2, FLOOR + 3], hx("6080a0"), 0.35, 2)
     light(img, "rect", [x0, top, x0 + 2, FLOOR], hx("6080a0"), 0.25, 1)
@@ -347,6 +437,11 @@ def window(img):
     sx0, sx1 = x1 - 20, x1 - 6
     d.rectangle([sx0 - 1, y0, sx1 + 1, y1 - 6], fill=hx("1a0808"))
     d.rectangle([sx0, y0, sx1, y1 - 7], fill=hx("2a0e0e"))
+    d.line([(sx0, y0), (sx0, y1 - 7)], fill=hx("4a1a14"))
+    for y in range(y0 + 6, y1 - 8, 14):  # the can's seams and the bolts holding the tubes
+        d.line([(sx0, y), (sx1, y)], fill=hx("160606"))
+        d.point((sx0 + 1, y + 2), fill=hx("6a3a2a"))
+        d.point((sx1 - 1, y + 2), fill=hx("6a3a2a"))
     tube = NEON
     ly = by + 4
     for ch in "MOTEL":
@@ -354,10 +449,16 @@ def window(img):
         gw = len(g[0])
         scale = 2
         lx = (sx0 + sx1) // 2 - (gw * scale) // 2 + 1
+        for r, row in enumerate(g):  # the tubes' shadows on the can, then the glass with a white-hot core
+            for c, bit in enumerate(row):
+                if bit == "1":
+                    d.rectangle([lx + c * scale + 1, ly + r * scale + 1, lx + c * scale + 2, ly + r * scale + 2],
+                                fill=hx("120404"))
         for r, row in enumerate(g):
             for c, bit in enumerate(row):
                 if bit == "1":
                     d.rectangle([lx + c * scale, ly + r * scale, lx + c * scale + 1, ly + r * scale + 1], fill=tube)
+                    d.point((lx + c * scale, ly + r * scale), fill=NEON_HI)
         ly += 5 * scale + 2
     light(img, "rect", [sx0 - 14, y0, sx1 + 14, y1], NEON, 0.35, 6)
     # its letters again, smeared in the wet street at the bottom of the pane
@@ -372,17 +473,44 @@ def window(img):
         d.line(pts, fill=rnd.choice([hx("5a6878"), hx("7a8898"), hx("a05050")]))
     for _ in range(30):
         d.point((rnd.randint(x0, x1), rnd.randint(y0, y1)), fill=hx("8a98a8"))
-    # sash bar and muntin
-    d.rectangle([x0, (y0 + y1) // 2 - 1, x1, (y0 + y1) // 2 + 1], fill=hx("4a3828"))
+    # sash bar and muntin; the meeting rail's brass catch
+    my = (y0 + y1) // 2
+    d.rectangle([x0, my - 1, x1, my + 1], fill=hx("4a3828"))
+    d.line([(x0, my - 1), (x1, my - 1)], fill=hx("7a5e3e"))
+    d.line([(x0, my + 2), (x1, my + 2)], fill=hx("1e140a"))
     d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=hx("4a3828"), width=2)
+    d.line([((x0 + x1) // 2 - 1, y0), ((x0 + x1) // 2 - 1, y1)], fill=hx("6a5038"))
+    cx = (x0 + x1) // 2
+    d.rectangle([cx - 3, my - 2, cx + 3, my], fill=BRASS_D)
+    d.line([(cx - 3, my - 2), (cx + 3, my - 2)], fill=hx("d8b460"))
+    d.point((cx + 2, my - 3), fill=BRASS)
+    # the casing's mitred corners and the apron under the sill
+    for x in (x0 - 4, x1 + 1):
+        d.line([(x, y0 - 4), (x + 3, y0 - 1)], fill=hx("2e2014"))
+    d.rectangle([x0 - 2, y1 + 7, x1 + 2, y1 + 10], fill=hx("4a3828"))
+    d.line([(x0 - 2, y1 + 10), (x1 + 2, y1 + 10)], fill=WOOD_D)
+    shadow(img, "rect", [x0 - 6, y1 + 7, x1 + 6, y1 + 9], 0.4, 1)
     # a yellowed roller blind, torn, rolled most of the way up
     d.rectangle([x0 - 2, y0 - 3, x1 + 2, y0], fill=hx("2a2016"))
+    d.rectangle([x0 - 4, y0 - 3, x0 - 2, y0], fill=hx("5a5a5a"))
+    d.rectangle([x1 + 2, y0 - 3, x1 + 4, y0], fill=hx("5a5a5a"))
     d.polygon([(x0, y0), (x1, y0), (x1, by + 2), (x1 - 12, by), (x1 - 16, by + 6), (x1 - 20, by + 1), (x0, by)],
               fill=hx("a8945a"))
     vgrad(img, (x0, y0 + 1, x1, y0 + 4), hx("6a5a34"), hx("a8945a"))
-    d.line([(x0, by), (x1 - 20, by + 1)], fill=hx("5a4a2a"))
+    for x in range(x0 + 3, x1 - 2, 7):  # creases where it has been rolled too tight
+        d.line([(x, y0 + 4), (x + 1, by - 1)], fill=hx("8a7848"))
+    # the wooden batten along its hem
+    d.rectangle([x0, by - 1, x1 - 21, by + 1], fill=hx("5a4428"))
+    d.line([(x0, by - 1), (x1 - 21, by - 1)], fill=hx("8a6c40"))
     d.line([(x0 + 18, y0 + 3), (x0 + 21, y0 + 8)], fill=hx("6a5a34"))
-    d.ellipse([(x0 + x1) // 2 - 2, by + 1, (x0 + x1) // 2 + 2, by + 5], outline=hx("3a3020"))
+    # the pull ring on its cord, the cord's tassel
+    rx = (x0 + x1) // 2 - 10
+    d.line([(rx, by + 1), (rx, by + 6)], fill=hx("c8b88a"))
+    d.ellipse([rx - 2, by + 6, rx + 2, by + 10], outline=hx("c8a040"))
+    d.point((rx - 1, by + 7), fill=hx("f0d890"))
+    d.line([(rx, by + 10), (rx, by + 14)], fill=hx("a8945a"))
+    d.point((rx - 1, by + 15), fill=hx("a8945a"))
+    d.point((rx + 1, by + 15), fill=hx("a8945a"))
     shadow(img, "rect", [x0, y0, x1, by], 0.2, 1, hx("ff8060"))
 
 
@@ -438,6 +566,63 @@ def armchair(img):
     for ax in (x0 + 3, x1 - 4):
         p = P(ax, 26, z1 - 8)
         d.line([(p[0] - 1, p[1]), (p[0] + 2, p[1])], fill=hx("8a5a3a"))
+    pipe, crease, sheen = hx("a85a44"), mul(velvet, 0.7), hx("8a3a30")
+    # piping along the back's rounded crest
+    d.arc([bt[0] - 1, bt[1] - 6, btr[0] + 1, bt[1] + 6], 180, 360, fill=pipe)
+    # diamond tufting: creases running between the buttons, each button a dimple with a glint
+    rows = (22, 30, 38)
+    for j, y in enumerate(rows):
+        for x in range(x0 + 8 + (4 if j % 2 else 0), x1 - 6, 9):
+            p = P(x, y, z0 + 7)
+            if j + 1 < len(rows):
+                for dx in (-4, 4):
+                    q = P(x + dx, rows[j + 1], z0 + 7)
+                    d.line([p, q], fill=crease)
+            d.point((p[0], p[1] + 1), fill=crease)
+            d.point(p, fill=hx("1e0806"))
+            d.point((p[0] - 1, p[1] - 1), fill=sheen)
+    # the doily again over the creases, its scalloped hem
+    d.polygon([(dl[0], dl[1] - 2), (dr[0], dr[1] - 2), (dr[0] - 2, dr[1] + 9), ((dl[0] + dr[0]) // 2, dr[1] + 12),
+               (dl[0] + 2, dl[1] + 9)], fill=hx("c8b88a"))
+    for k in range(0, 5):
+        d.point((dl[0] + 3 + k * 3, dl[1] + 3), fill=hx("e0d4a8"))
+        d.point((dl[0] + 4 + k * 3, dl[1] + 6), fill=hx("8a7a54"))
+    for x in range(dl[0] + 2, dr[0] - 1, 3):
+        d.point((x, dl[1] + 8), fill=hx("8a7a54"))
+    # the seat cushion: piped front edge, a seam down the middle of its boxing
+    sl, sr = P(x0 + 6, 18, z1 - 2), P(x1 - 6, 18, z1 - 2)
+    d.line([sl, sr], fill=pipe)
+    fl_, fr_ = P(x0 + 6, 10, z1 - 2), P(x1 - 6, 10, z1 - 2)
+    d.line([fl_, fr_], fill=crease)
+    d.line([(fl_[0], fl_[1] + 1), (fr_[0], fr_[1] + 1)], fill=pipe)
+    # arms: rolled fronts with a scroll each, piping along their tops
+    for ax0, ax1 in ((x0, x0 + 7), (x1 - 7, x1)):
+        f, g = P(ax0, 26, z1), P(ax1, 26, z1)
+        d.arc([f[0] - 1, f[1] - 3, g[0] + 1, f[1] + 3], 180, 360, fill=pipe)
+        c = ((f[0] + g[0]) // 2, f[1] + 3)
+        d.ellipse([c[0] - 3, c[1] - 3, c[0] + 3, c[1] + 3], fill=mul(velvet, 0.8), outline=pipe)
+        d.arc([c[0] - 2, c[1] - 2, c[0] + 1, c[1] + 1], 0, 270, fill=crease)
+        d.point(c, fill=hx("1e0806"))
+        lo = P(ax0, 6, z1)
+        d.line([(f[0], f[1] + 6), (lo[0], lo[1])], fill=sheen)
+        d.line([(g[0], g[1] + 6), (P(ax1, 6, z1)[0], lo[1])], fill=crease)
+    # a pleated skirt hiding the frame, its hem dragging
+    kl, kr = P(x0, 6, z1), P(x1, 6, z1)
+    kb = P(x0, 3, z1)[1]
+    d.rectangle([kl[0], kl[1], kr[0], kb], fill=mul(velvet, 0.75))
+    d.line([kl, kr], fill=pipe)
+    for x in range(kl[0] + 3, kr[0] - 1, 4):
+        d.line([(x, kl[1] + 1), (x, kb)], fill=crease)
+        d.point((x + 1, kl[1] + 2), fill=sheen)
+    d.line([(kl[0], kb), (kr[0], kb)], fill=velvet_d)
+    d.point((kl[0] + 10, kb + 1), fill=hx("c8b88a"))  # a loose thread
+    # turned legs on brass casters peeping out under the skirt
+    for x in (x0 + 2, x1 - 4):
+        p = P(x, 0, z1)
+        d.rectangle([p[0], kb + 1, p[0] + 2, max(kb + 1, p[1] - 1)], fill=hx("2a1a0e"))
+        d.point((p[0], kb + 1), fill=hx("6a4a2a"))
+        d.rectangle([p[0], p[1] - 1, p[0] + 2, p[1]], fill=BRASS_D)
+        d.point((p[0], p[1] - 1), fill=BRASS)
     noise(img, (a[0], P(x0, 46, z0)[1] - 6, b[0], a[1]), 6, 760)
 
 
@@ -495,12 +680,33 @@ def notices(img):
         for c in range(5):
             d.point((cx0 + 3 + c * 3, cy0 + 21 + r * 3), fill=hx("5a5040"))
     d.line([(cx0 + 20, cy0 + 1), (cx0 + 20, cy0 + 30)], fill=hx("6a604a"))
-    # hand-lettered card, crooked
+    # hand-lettered card on a drawing pin, crooked, its corner curling and torn where it was once pulled down
     nx0, ny0 = 210, 68
     w = tiny_width("NO CREDIT") + 6
-    d.polygon([(nx0, ny0), (nx0 + w, ny0 + 2), (nx0 + w - 1, ny0 + 14), (nx0 - 1, ny0 + 12)], fill=hx("d8ccaa"))
+    card = [(nx0, ny0), (nx0 + w, ny0 + 2), (nx0 + w - 1, ny0 + 22), (nx0 + 6, ny0 + 21), (nx0 + 4, ny0 + 19),
+            (nx0 + 2, ny0 + 21), (nx0 - 1, ny0 + 20)]
+    shadow(img, "polygon", [(x + 2, y + 2) for x, y in card], 0.45, 1)
+    d.polygon(card, fill=hx("d8ccaa"))
+    d.line([(nx0, ny0), (nx0 + w, ny0 + 2)], fill=hx("ece2c4"))
+    d.line([(nx0 + w, ny0 + 2), (nx0 + w - 1, ny0 + 22)], fill=hx("a89a74"))
+    # foxing and a ring where a cup was put down on it
+    for x, y in ((nx0 + 3, ny0 + 3), (nx0 + 26, ny0 + 19), (nx0 + 30, ny0 + 5), (nx0 + 8, ny0 + 14)):
+        d.point((x, y), fill=hx("b0a07a"))
+    d.arc([nx0 + 22, ny0 + 11, nx0 + 31, ny0 + 20], 200, 340, fill=hx("b8a47c"))
+    # the curled-over corner, its back side darker
+    cx, cy = nx0 + w - 1, ny0 + 22
+    d.polygon([(cx - 6, cy), (cx, cy - 6), (cx - 4, cy - 4)], fill=hx("a89a74"))
+    d.polygon([(cx - 6, cy + 1), (cx + 1, cy - 6), (cx + 1, cy + 1)], fill=hx("4a4230"))
+    d.line([(cx - 6, cy), (cx, cy - 6)], fill=hx("f0e6c8"))
+    # brush lettering, red and a second line in pencil
     tiny_text(d, nx0 + 3, ny0 + 4, "NO CREDIT", hx("8a1a14"))
-    d.point((nx0 + w // 2, ny0 + 1), fill=hx("4a4a4a"))
+    d.line([(nx0 + 3, ny0 + 10), (nx0 + w - 4, ny0 + 11)], fill=hx("a83a30"))
+    tiny_text(d, nx0 + 2, ny0 + 12, "CASH ONLY", hx("4a4038"))
+    # the pin: a red head with its glint and shadow
+    px_, py_ = nx0 + w // 2, ny0 + 1
+    d.point((px_ + 1, py_ + 2), fill=hx("3a3020"))
+    d.rectangle([px_ - 1, py_ - 1, px_ + 1, py_ + 1], fill=hx("a82a24"))
+    d.point((px_ - 1, py_ - 1), fill=hx("ff9a80"))
     # rates, chalked on a slate by the desk
     sx0, sy0 = 254, 84
     d.rectangle([sx0, sy0, sx0 + 34, sy0 + 20], fill=hx("4a3220"))
