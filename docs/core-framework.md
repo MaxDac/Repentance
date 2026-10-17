@@ -56,7 +56,7 @@ await Game.Run(async () =>
 | `Hotspot` | `Area2D` | Clickable thing. Exports `Id`, `DisplayName`, `LookText`, `WalkTo` (zero = auto), `Face`, `ExitTo`, `ExitEntry`, `ShowIfFlags`, `HideIfFlags`, `ClickPriority`. Area = child `CollisionShape2D`/`CollisionPolygon2D` |
 | `Actor` | `Hotspot`, `ISpeaker` | NPC. Exports `Texture`, `Frames` (11), `FlipH`, `Baseline`, `DepthScale`, `SpeechColor`. No collision shape = sprite rectangle; opaque pixels win clicks. `MoveTo` (straight line), `FaceLeft`, `SetPose`, `PlayPose`, `SetTexture` |
 | `Player` | `Node2D`, `ISpeaker` | Created once, reparented into each room's `World`. Position = feet. `SetCharacter("micah"\|"daniel"\|...)`, `WalkPath`, `Stop`, `Face`, `FaceTowards`, `Teleport`, `SetPose`, `PlayPose`, `SetPoseFrame`, `BackstepTo`. Speed 90 |
-| `Voice` | `Node2D`, `ISpeaker` | Off-screen speaker placed where its text shows (`Id`, `SpeechColor`) |
+| `Voice` | `Node2D`, `ISpeaker` | Speaker placed where its text shows (`Id`, `SpeechColor`); an optional `Mouth` 3-frame sprite moves its painted lips while it talks |
 | `WalkArea` | - | Visibility-graph pathfinder over the `WalkArea` polygon: `Contains`, `Clamp`, `FindPath` |
 | `FlagSprite` | `Sprite2D` | Shown/hidden by `ShowIfFlags`/`HideIfFlags` |
 | `LoopStrip` | `FlagSprite` | Flag-driven looping strip (`FrameSeconds`) |

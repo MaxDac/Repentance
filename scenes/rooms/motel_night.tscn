@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/goon.png" id="8_goon"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_door_kicked.png" id="9_door_kicked"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="10_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_eleanor_talk.png" id="11_eleanor_talk"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 64)
@@ -74,6 +75,16 @@ position = Vector2(125, 108)
 script = ExtResource("4_Voice")
 Id = "eleanor"
 SpeechColor = Color(0.96, 0.78, 0.62, 1)
+Mouth = NodePath("../EleanorMouth")
+
+[node name="EleanorMouth" type="Sprite2D" parent="."]
+position = Vector2(124, 126)
+z_index = -6
+texture = ExtResource("11_eleanor_talk")
+centered = false
+hframes = 3
+script = ExtResource("10_FlagSprite")
+HideIfFlags = "interlude1,interlude2"
 
 [node name="EleanorFigure" type="Sprite2D" parent="."]
 position = Vector2(110, 194)
