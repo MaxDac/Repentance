@@ -1144,11 +1144,23 @@ def build():
 ELEANOR_TALK_PAD = 1  # pixels of untouched face kept round the moving lips
 
 
+def _bigger_lips(idle, frame, rows):
+    """At bed scale the figure's two-pixel mouth barely moves: open it one pixel further, the open mouth one row
+    deeper (rows=0) and the half-open one with a red lower lip (rows=1), leaving the closed lips as painted."""
+    box = ImageChops.difference(idle, frame).getbbox()
+    out = frame.copy()
+    px, top = out.load(), idle.load()
+    y = box[1]
+    for x in range(box[0], box[2]):
+        px[x, y + 1] = px[x, y] if rows == 0 else top[x, y - 1]
+    return out
+
+
 def eleanor_talk(night, palette):
     """Eleanor's lips as she talks from the bed: closed, open, half open, cut from the painted room so frame 0 is
     the room itself; placed over motel_night.png at its printed box."""
     idle = pixelize(night, palette)
-    frames = [idle] + [pixelize(paint_night(mouth=m), palette) for m in (1, 2)]
+    frames = [idle] + [_bigger_lips(idle, pixelize(paint_night(mouth=m), palette), m - 1) for m in (1, 2)]
     box = None
     for f in frames[1:]:
         b = ImageChops.difference(idle, f).getbbox()

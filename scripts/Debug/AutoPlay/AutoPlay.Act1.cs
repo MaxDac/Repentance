@@ -464,11 +464,13 @@ public partial class AutoPlay
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
         Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
             "the rest of Eleanor's conversation stays on the fire escape without the panel");
-        await Until(() => game.Room?.Name == "MotelNight");
-        Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
-        await game.Wait(2);
-        await Shot("motel_night");
-        await Until(() => game.Room?.Name == "Attic");
+        bool sawMotelNight = false;
+        await Until(() =>
+        {
+            sawMotelNight |= game.Room?.Name == "MotelNight";
+            return game.Room?.Name == "Attic";
+        });
+        Check(!sawMotelNight, "Act 1 ends on the fire escape; the motel night waits for the First Interlude");
         await game.Wait(2.5);
         await Shot("attic_night");
         await leave;

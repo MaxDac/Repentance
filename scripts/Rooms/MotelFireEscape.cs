@@ -3,7 +3,10 @@ using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>Act 1: the motel fire escape, one floor up. Eleanor is waiting for Micah in the rain.</summary>
+/// <summary>
+/// Act 1: the motel fire escape, one floor up. Eleanor is waiting for Micah in the rain. Their talk ends Act 1;
+/// the night in her room follows the First Interlude (<see cref="MotelNight"/>).
+/// </summary>
 public partial class MotelFireEscape : Room
 {
     public override async Task OnEnter(string entry)
@@ -22,7 +25,8 @@ public partial class MotelFireEscape : Room
                 await Wait(0.8);
             }
             await Game.Hud.Fade(1, 1.5);
-            await Game.ChangeRoom("motel_night", "start", fadeInSeconds: 1.5);
+            State.SetFlag("attic_night");
+            await Game.ChangeRoom("attic", "night");
         });
     }
 

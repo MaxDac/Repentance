@@ -143,7 +143,7 @@ public sealed partial class Playthrough
         {
             await Do(Verb.Hand, "ladder");
             await WaitIdle();
-            Check(Gs.StoryAct == 2 && _game.Room?.Name == "Attic", "up the fire escape to Eleanor, the motel, and back to the attic in Act 2");
+            Check(Gs.StoryAct == 2 && _game.Room?.Name == "Attic", "up the fire escape to Eleanor, and back to the attic in Act 2");
         });
     }
 }

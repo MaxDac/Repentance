@@ -106,6 +106,13 @@ public partial class AutoPlay
             "the next morning, the motel with an empty bed");
         await Shot("interlude_motel");
         _ = game.Perform(Verb.Hand, "window");
+        await Until(() => game.Room?.Name == "MotelNight" && game.Player.Character == "micah_dressing");
+        Check(!gs.HasFlag("interlude1") && gs.HasItem("revolver"),
+            "after the interlude, Micah's journal takes the story back at the motel night, with his things");
+        Check(game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_night.png") == true,
+            "Eleanor is in the bed again");
+        await game.Wait(2);
+        await Shot("motel_night");
         await Until(() => game.Room?.Name == "Office");
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");

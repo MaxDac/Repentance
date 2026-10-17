@@ -79,7 +79,10 @@ public static class Interlude
         await Game.ChangeRoom("eleanor_room", "interlude");
     }
 
-    /// <summary>Micah reaches the convent: his journal takes over again, at his office the morning of Act 2.</summary>
+    /// <summary>
+    /// Micah reaches the convent and Eleanor steps out on the fire escape: his journal takes over again with their
+    /// night in her motel room, then his office the morning of Act 2.
+    /// </summary>
     public static async Task EndFirst()
     {
         await Game.Hud.Fade(1, 1.5);
@@ -97,7 +100,7 @@ public static class Interlude
         Game.Hud.ShowCaption("Chicago, 1927.");
         await Game.Wait(2.8);
         Game.Hud.ShowCaption(null);
-        await Game.ChangeRoom("office", "act2");
+        await Game.ChangeRoom("motel_night", "start");
     }
 
     /// <summary>Daniel reads on in bed: the pages turn to the motel, the night after Micah left Eleanor there.</summary>
