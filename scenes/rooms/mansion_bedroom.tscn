@@ -42,7 +42,7 @@ centered = false
 [node name="Rain" type="Node2D" parent="."]
 z_index = -9
 script = ExtResource("90_Rain")
-Areas = Array[Rect2]([Rect2(248, 44, 36, 24), Rect2(248, 72, 36, 31), Rect2(248, 108, 36, 32)])
+Areas = Array[Rect2]([Rect2(248, 44, 16, 24), Rect2(267, 44, 17, 24), Rect2(248, 72, 16, 31), Rect2(267, 72, 17, 31), Rect2(248, 108, 16, 32), Rect2(267, 108, 17, 32)])
 Density = 9.0
 Speed = 170.0
 Slant = -0.3
