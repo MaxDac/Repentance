@@ -201,6 +201,36 @@ public static partial class SoundSynth
         Burst(buf, rng, start, 0.006, amp * 0.05, Biquad.BandPass(hz * 2, 2));
     }
 
+    /// <summary>
+    /// A storm overhead: the sharp crack of the strike, then a long low rumble that rolls in waves and dies away.
+    /// </summary>
+    private static float[] Thunder(Random rng)
+    {
+        const double seconds = 4.2;
+        var buf = Buffer(seconds);
+        Burst(buf, rng, 0, 0.012, 0.7, Biquad.HighPass(900));
+        Burst(buf, rng, 0.004, 0.09, 0.8, Biquad.LowPass(1600));
+        Tone(buf, 0, 70, 38, 0.6, 0.6, attack: 0.01);
+        var lp = Biquad.LowPass(220);
+        var lp2 = Biquad.LowPass(220);
+        var rolls = Biquad.LowPass(2.2);
+        double brown = 0;
+        for (int i = 0; i < buf.Length; i++)
+        {
+            double t = (double)i / SampleRate;
+            brown = Math.Clamp(brown * 0.995 + 0.08 * Noise(rng), -1, 1);
+            double roll = Math.Clamp(0.55 + 9 * rolls.Next(Noise(rng)), 0.15, 1.4);
+            double env = Math.Min(1, t / 0.08) * Math.Exp(-t / 1.3) * Math.Clamp((seconds - t) / 0.6, 0, 1);
+            buf[i] += (float)(1.6 * env * roll * lp2.Next(lp.Next(brown)));
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            double start = 0.15 + rng.NextDouble() * 1.6;
+            Burst(buf, rng, start, 0.05 + rng.NextDouble() * 0.12, 0.25 * (1 - start / 2.2), Biquad.LowPass(500));
+        }
+        return buf;
+    }
+
     /// <summary>Steady rain with scattered drops, crossfaded onto itself so it loops without a seam.</summary>
     private static float[] Rain(Random rng)
     {

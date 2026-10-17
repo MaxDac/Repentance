@@ -18,7 +18,7 @@ when diagnosing audio; a clean launcher exit alone does not prove sound played.
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
-`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `Bell`, `Rain`.
+`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `Bell`, `Rain`, `Thunder`.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`).
 - **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)).
@@ -34,6 +34,7 @@ when diagnosing audio; a clean launcher exit alone does not prove sound played.
 | `scrape` / `scraaape` | `Scrape` |
 | `whoosh`, `fwoosh` (any length) | `Whoosh` |
 | `ring` | `Bell` |
+| `thunder` | `Thunder` |
 
 From C#: `Game.Sfx.Play(Sound.X)`. Delayed cues use game-time timers, so they pause with the game.
 

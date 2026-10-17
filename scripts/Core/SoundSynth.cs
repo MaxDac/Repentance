@@ -8,7 +8,7 @@ public enum Sound
 {
     StepWood, StepStone, StepCarpet,
     Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, Bell,
-    Rain,
+    Rain, Thunder,
 }
 
 /// <summary>What the floor of a room is made of; picks the footstep sound.</summary>
@@ -43,7 +43,7 @@ public static partial class SoundSynth
         Sound.StepCarpet => -11f,
         Sound.Rustle or Sound.Click => -6f,
         Sound.Rain => -14f,
-        Sound.Gunshot or Sound.Whoosh => 0f,
+        Sound.Gunshot or Sound.Whoosh or Sound.Thunder => 0f,
         _ => -3f,
     };
 
@@ -72,6 +72,7 @@ public static partial class SoundSynth
             Sound.DoorSlam => DoorSlam(rng),
             Sound.Bell => Bell(rng),
             Sound.Rain => Rain(rng),
+            Sound.Thunder => Thunder(rng),
             _ => throw new ArgumentOutOfRangeException(nameof(sound)),
         };
         Normalize(buf);
@@ -92,6 +93,7 @@ public static partial class SoundSynth
         (new(@"\bscra+pe\b"), Sound.Scrape),
         (new(@"\b(?:fw|wh|fwh)o{2,}sh\b"), Sound.Whoosh),
         (new(@"\bring\b"), Sound.Bell),
+        (new(@"\bthunder\b"), Sound.Thunder),
     };
 
     /// <summary>

@@ -176,7 +176,7 @@ public static class Notes
         (new[] { "harrington_office" }, new[] { "seen_harrington_road" }),
         (new[] { "club_vestibule" }, new[] { "drawer_right_open", "portrait_key_seen" }),
         (new[] { "club_lounge", "club_stage" }, new[] { "seen_vestibule" }),
-        (new[] { "mansion_exterior" }, new[] { "beaten", "shot_bartender" }),
+        (new[] { "office_storm", "mansion_exterior" }, new[] { "beaten", "shot_bartender" }),
         (new[] { "mansion_kitchen" }, new[] { "alarm_noticed" }),
         (new[] { "mansion_cellar" }, new[] { "seen_mansion_kitchen" }),
         (new[] { "mansion_study", "mansion_bedroom", "outskirts", "prison" }, new[] { "cellar_lit" }),

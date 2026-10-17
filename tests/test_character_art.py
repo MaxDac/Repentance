@@ -577,7 +577,8 @@ def artifacts(destination):
     contact = Image.new("RGB", (350, len(models) * 108), "#282834")
     draw = ImageDraw.Draw(contact)
     for row, path in enumerate(models):
-        width = 64 if path.stem in ("micah", "daniel", "micah_dressing", "micah_masked", "micah_no_tie") else 56
+        width = 64 if path.stem in ("micah", "daniel", "micah_dressing", "micah_masked", "micah_no_tie",
+                                    "micah_hatless_bottle") else 56
         draw.text((4, row * 108 + 8), path.stem, fill="#e4ddcc")
         for x, source in ((150, before / path.name), (250, path)):
             if source.exists():

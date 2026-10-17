@@ -242,6 +242,7 @@ public partial class Alley : Room
         await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
         await Think("I shot a man tonight. My hand doesn't shake. That's what scares me.");
         await Game.WalkTo(StreetMouth);
-        await Game.ChangeRoom("mansion_exterior", "start");
+        // first the office, in the storm, alone with the bottle; then the Gold Coast
+        await Game.ChangeRoom("office_storm", "window");
     }
 }
