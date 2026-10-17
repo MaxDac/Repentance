@@ -810,10 +810,10 @@ def white_bed_linen(img, empty=False):
     shadow(img, "ellipse", [120, 145, 138, 157], 0.25, 2)
 
 
-def sleeper(img):
+def sleeper(img, mouth=0):
     from PIL import ImageOps
     from .mansion import _eleanor_in_bed
-    eleanor = ImageOps.mirror(_eleanor_in_bed())
+    eleanor = ImageOps.mirror(_eleanor_in_bed(mouth=mouth))
     # Trim the lap sheet's spill past the near head post so the iron frame stays clean.
     alpha = eleanor.getchannel("A")
     ImageDraw.Draw(alpha).rectangle([HEAD_POST_X - ELEANOR_ORIGIN[0], 20, eleanor.width, eleanor.height], fill=0)
@@ -988,7 +988,7 @@ def relight_night(img):
     return out
 
 
-def paint_night(rails=False, empty=False, kicked=False):
+def paint_night(rails=False, empty=False, kicked=False, mouth=0):
     img = Image.new("RGB", (W, H))
     shell(img, night=True)
     floor(img)
@@ -1015,7 +1015,7 @@ def paint_night(rails=False, empty=False, kicked=False):
     white_bed_linen(img, empty=empty)
     if not rails:
         if not empty:
-            sleeper(img)
+            sleeper(img, mouth)
     else:
         rail_mask = Image.new("RGBA", (W, H))
         bed_rails_night(rail_mask)
@@ -1136,8 +1136,31 @@ def build():
     out.putalpha(diff)
     save(out.crop(box), "rooms", "motel_night_door_kicked.png")
     print(f"  motel_night_door_kicked.png at {box[:2]}")
+    eleanor_talk(night, palette)
     eleanor_rise(palette)
     return night
+
+
+ELEANOR_TALK_PAD = 1  # pixels of untouched face kept round the moving lips
+
+
+def eleanor_talk(night, palette):
+    """Eleanor's lips as she talks from the bed: closed, open, half open, cut from the painted room so frame 0 is
+    the room itself; placed over motel_night.png at its printed box."""
+    idle = pixelize(night, palette)
+    frames = [idle] + [pixelize(paint_night(mouth=m), palette) for m in (1, 2)]
+    box = None
+    for f in frames[1:]:
+        b = ImageChops.difference(idle, f).getbbox()
+        box = b if box is None else (min(box[0], b[0]), min(box[1], b[1]), max(box[2], b[2]), max(box[3], b[3]))
+    p = ELEANOR_TALK_PAD
+    box = (box[0] - p, box[1] - p, box[2] + p, box[3] + p)
+    w, h = box[2] - box[0], box[3] - box[1]
+    strip = Image.new("RGB", (w * len(frames), h))
+    for k, f in enumerate(frames):
+        strip.paste(f.crop(box), (k * w, 0))
+    save(strip, "rooms", "motel_eleanor_talk.png")
+    print(f"  motel_eleanor_talk.png at {box[:2]}")
 
 
 def eleanor_rise(palette):

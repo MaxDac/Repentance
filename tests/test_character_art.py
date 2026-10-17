@@ -494,6 +494,54 @@ class CharacterArtTests(unittest.TestCase):
         pillow = np.abs(night[140:175, 90:150].astype(int) - rails[140:175, 90:150].astype(int)).sum()
         self.assertGreater(pillow, 400, "the painted sleeper is missing from the pillow")
 
+    def test_motel_sleeper_talks_with_her_lips_in_place(self):
+        strip = Image.open(ART / "rooms" / "motel_eleanor_talk.png").convert("RGB")
+        night = Image.open(ART / "rooms" / "motel_night.png").convert("RGB")
+        scene = (ROOT / "scenes" / "rooms" / "motel_night.tscn").read_text(encoding="utf-8")
+        self.assertIn('Mouth = NodePath("../EleanorMouth")', scene)
+        self.assertIn("res://assets/art/rooms/motel_eleanor_talk.png", scene)
+        node = scene.split('[node name="EleanorMouth"', 1)[1].split("[node", 1)[0]
+        self.assertIn("hframes = 3", node)
+        self.assertIn('HideIfFlags = "interlude1,interlude2"', node)
+        x, y = (int(v) for v in node.split("position = Vector2(", 1)[1].split(")", 1)[0].split(", "))
+        self.assertEqual(strip.width % 3, 0)
+        w, h = strip.width // 3, strip.height
+        self.assertLessEqual(w * h, 64, "only the lips move, not the whole face")
+        frames = [strip.crop((k * w, 0, (k + 1) * w, h)).tobytes() for k in range(3)]
+        self.assertEqual(frames[0], night.crop((x, y, x + w, y + h)).tobytes(), "frame 0 is the painted room")
+        self.assertEqual(len(set(frames)), 3, "closed, open and half-open lips are all distinct")
+
+    def test_eleanor_talking_only_opens_her_lips_in_place(self):
+        image = np.array(Image.open(ART / "sprites" / "eleanor_play.png").convert("RGBA"))
+        frame = lambda row, col: image[row * 96:(row + 1) * 96, col * 64:(col + 1) * 64]
+        columns = []
+        for row, talk in ((0, 9), (1, 7), (1, 8)):
+            with self.subTest(row=row, talk=talk):
+                ys, xs = np.nonzero((frame(row, 0) != frame(row, talk)).any(axis=2))
+                self.assertGreater(len(xs), 0)
+                self.assertLessEqual(xs.max() - xs.min(), 1, "the open mouth stays as narrow as the closed lips")
+                self.assertLessEqual(ys.max() - ys.min(), 2, "no nod, tilt or squash of the head")
+                if row == 1:
+                    columns.append(set(xs.tolist()))
+        self.assertEqual(columns[0], columns[1], "both talk frames open the same lips, not a shifted mouth")
+
+    def test_eleanor_nape_is_covered_and_pearls_follow_the_neck(self):
+        image = np.array(Image.open(ART / "sprites" / "eleanor_play.png").convert("RGBA")).astype(int)
+        frame = lambda row, col: image[row * 96:(row + 1) * 96, col * 64:(col + 1) * 64]
+        skin = np.array([int(sprites.ELEANOR["skin"][i:i + 2], 16) for i in (0, 2, 4)])
+        pearl, shade = np.array([0xf2, 0xee, 0xe4]), np.array([0xb8, 0xb0, 0xa4])
+        near = lambda f, col, tol=40: (np.abs(f[..., :3] - col).sum(axis=2) < tol) & (f[..., 3] == 255)
+        for col in range(1, 9):
+            with self.subTest(walk=col):
+                f = frame(0, col)
+                bare = near(f, skin, 120) & ~near(f, pearl) & ~near(f, shade)
+                self.assertFalse(bare[34:46, :34].any(), "no bare nape behind the high-necked bodice")
+                self.assertTrue(near(f, pearl)[33:46].any(), "the strand shows over her near shoulder")
+        front = near(frame(1, 0), pearl)[33:46]
+        xs = np.nonzero(front)[1]
+        self.assertTrue((xs <= 30).any() and (xs >= 34).any(), "the strand rounds both sides of the neck")
+        self.assertFalse(near(frame(2, 0), pearl).any(), "no pearls seen from behind")
+
     def test_motel_foreground_is_a_transparent_rail_layer(self):
         rails = Image.open(ART / "rooms" / "motel_night_rails.png")
         self.assertEqual(rails.size, (480, 270))

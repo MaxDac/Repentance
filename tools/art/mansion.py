@@ -2162,13 +2162,13 @@ def linen_surface(size, outline, folds, fill=SHEET, falloff=0.35, loft=None):
     return cloth
 
 
-def _bare_eleanor():
+def _bare_eleanor(mouth=0):
     from .sprites import ELEANOR, SHEET_BODY, figure, pose, _arms, FW, FH
     skin = ELEANOR["skin"]
     spec = dict(ELEANOR, **SHEET_BODY)
-    spec.update(torso=skin, pelvis=skin, sleeves=skin, coat=None, neckline=None, collar=None,
+    spec.update(torso=skin, pelvis=skin, sleeves=skin, coat=None, neckline=None, collar=None, high_neck=None,
                 bust=None, decals=[])
-    f = figure(spec, pose(16, arms=_arms("side")), FW, FH).convert("RGBA")
+    f = figure(spec, pose(16, arms=_arms("side"), mouth=mouth), FW, FH).convert("RGBA")
     f.putalpha(f.getchannel("A").point(lambda v: 255 if v >= 250 else 0))
     bb = f.getbbox()
     body = f.crop((bb[0], bb[1], bb[2], bb[1] + 44))
@@ -2195,9 +2195,9 @@ def _sheet_on(figure, fill, hem, side=SHEET_SIDE):
     return sheet
 
 
-def _eleanor_in_bed(fill=SHEET, hem=SHEET_LIT, side=SHEET_SIDE):
+def _eleanor_in_bed(fill=SHEET, hem=SHEET_LIT, side=SHEET_SIDE, mouth=0):
     """Eleanor sitting up against the pillows, bare shoulders; the sheet covers her from the chest down."""
-    figure = _bare_eleanor()
+    figure = _bare_eleanor(mouth)
     return Image.alpha_composite(figure, _sheet_on(figure, fill, hem, side))
 
 
