@@ -59,7 +59,8 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    with the umbrella (Puzzle 19). On the first-floor landing Eleanor, in black, opens with a question about his
    climb. After that opening, a framed close-up shows Micah on the left and Eleanor on the right, each speaking
    beneath their own portrait. It disappears before the compensation choice; the rest takes place on the landing.
-   "Then stay. Right here." Micah starts towards her, and the fade to black takes him before he reaches her.
+   "Then stay. Right here." Micah walks slowly to her and, as her line about the rain ends, kisses her. His
+   narration admits the pull he can't resist and the guilt over Rose; only then the fade to black.
 9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
 10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel). Over black,
     "Chicago, 1927.", then "First Interlude" under it.

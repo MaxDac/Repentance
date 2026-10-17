@@ -5,8 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Act 1: the motel fire escape, one floor up. Eleanor is waiting for Micah in the rain. Their talk ends Act 1:
-/// Micah starts towards her and the fade takes him before he gets there. The night in her room follows the First
-/// Interlude (<see cref="MotelNight"/>).
+/// Micah walks slowly to her while she answers him, kisses her, and only after his narration does the fade take
+/// them. The night in her room follows the First Interlude (<see cref="MotelNight"/>).
 /// </summary>
 public partial class MotelFireEscape : Room
 {
@@ -15,12 +15,16 @@ public partial class MotelFireEscape : Room
 
     /// <summary>How far from Eleanor Micah stands while they talk.</summary>
     private static readonly Vector2 TalkingDistance = new(-44, 4);
-    /// <summary>Where his first two steps towards her stop, while she answers.</summary>
-    private static readonly Vector2 FirstSteps = new(-28, 4);
-    private const float SlowSteps = 26f;
-    /// <summary>Slow enough that the fade to black beats him to her.</summary>
-    private const float LastSteps = 16f;
+    /// <summary>
+    /// Where he stops in front of her for the kiss: KISS_GAP pixels short of her, KISS_RISE nearer the railing, as the
+    /// micah_kiss strip (tools/art/sprites.py) draws them both.
+    /// </summary>
+    public static readonly Vector2 KissSpot = new(-22, 2);
+    /// <summary>Slow, so she says her last line while he walks to her.</summary>
+    private const float SlowSteps = 16f;
     private const double FadeOut = 1.2;
+
+    private Task? _approach;
 
     public override async Task OnEnter(string entry)
     {
@@ -38,11 +42,6 @@ public partial class MotelFireEscape : Room
                     Player.Face(Facing.Right);
                     await Talk("eleanor_fire_escape");
                     State.SetFlag("eleanor_found");
-                    if (FindActor("eleanor") is { } her)
-                    {
-                        Player.Speed = LastSteps;
-                        _ = Game.WalkTo(her.Position + new Vector2(-2, 4));
-                    }
                 }
                 await Game.Hud.Fade(1, FadeOut);
                 Player.Stop();
@@ -54,15 +53,25 @@ public partial class MotelFireEscape : Room
         });
     }
 
-    /// <summary>"closer": Micah takes two slow steps towards Eleanor before she answers him.</summary>
     public override async Task OnCue(string cue)
     {
-        if (cue != "closer" || FindActor("eleanor") is not { } eleanor) return;
-        float speed = Player.Speed;
-        Player.Speed = SlowSteps;
-        try { await Game.WalkTo(eleanor.Position + FirstSteps); }
-        finally { Player.Speed = speed; }
-        Player.Face(Facing.Right);
+        if (FindActor("eleanor") is not { } eleanor) return;
+        switch (cue)
+        {
+            // "closer": Micah starts walking slowly to her; she answers him while he walks
+            case "closer":
+                Player.Speed = SlowSteps;
+                _approach = Game.WalkTo(eleanor.Position + KissSpot);
+                break;
+            // "kiss": he reaches her and kisses her, and holds it through his narration until the fade
+            case "kiss":
+                if (_approach != null) await _approach;
+                _approach = null;
+                Player.Teleport(eleanor.Position + KissSpot, Facing.Right);
+                eleanor.Visible = false;
+                await Player.PlayPose("micah_kiss");
+                break;
+        }
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
