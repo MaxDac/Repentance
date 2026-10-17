@@ -445,6 +445,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 #### Outside Micah's wife house
 
 - Micah is outside the house. The player can choose whether to get out of the location, or ring the bell.
+- It never rains on Rose's street, not even on the first visit. On arrival Micah notes it: "Funny. It's rained on me
+  all week, and it stops at Rose's street."
 - Leaving before ringing must be an active choice: using the exit opens a dialogue choice between
   "(Walk away without a word.)" and "(Not yet.)". "(Not yet.)" keeps Micah at the door. Walking away has the same
   outcome as leaving without insisting three times (no callback, the bell is closed to him), except that Micah never

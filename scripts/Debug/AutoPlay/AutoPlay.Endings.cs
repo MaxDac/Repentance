@@ -49,6 +49,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
+        Check(RainsHere(), "ending 5: it still rains past the prison window");
         Check(gs.HasItem("cloth"), "ending 5: Eleanor's cloth is still in Micah's pocket");
         await game.Wait(4);
         await Shot("ending_prison_caleb");
@@ -81,6 +82,7 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded), "ending 3: out of town, alone");
+        Check(RainsHere(), "ending 3: rain on the road out of town");
         await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning", 10);
         bool nextMorning = game.Hud.CaptionVisible && game.Hud.CaptionText == "The next morning";
         Check(nextMorning, "alone fire escape opens with the next-morning caption");
@@ -174,6 +176,7 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "Prison", 180);
         Check(gs.HasFlag(Endings.Repented) && gs.HasFlag("ending_6") && !gs.HasFlag("escaping"),
             "ending 6: straight to jail, even with the signed evidence");
+        Check(DryHere(), "ending 6: Micah repented, and the rain has stopped outside the prison window");
         Check(game.Room?.GetNodeOrNull<CanvasItem>("Rose")?.Visible == true &&
               game.Room?.GetNodeOrNull<CanvasItem>("Caleb")?.Visible != true &&
               game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible != true, "ending 6: Rose sits across the table");
@@ -393,6 +396,7 @@ public partial class AutoPlay
             }, 240, 0.05);
             Check(sawRose && !gs.HasItem("cloth"), $"{label}: Micah's journal goes on to Rose's door, without the cloth");
             Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
+            Check(DryHere(), $"{label}: no rain where Eleanor ends up");
             if (fire)
                 Check(game.Player.Character == "eleanor_play" && !gs.HasFlag(Endings.MansionExploded), "ending 8: Eleanor alone, out of the city");
             else

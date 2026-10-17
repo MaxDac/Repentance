@@ -35,6 +35,7 @@ public partial class Hud
             SplashAreas = new() { new Rect2(0, 210, ScreenW, ScreenH - 210) },
             SplashRate = 4f,
             Seed = 1927,
+            FollowsStory = false,
         });
         _title.AddChild(new TextureRect
         {

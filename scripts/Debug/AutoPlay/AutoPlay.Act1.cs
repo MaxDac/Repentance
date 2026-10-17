@@ -231,6 +231,7 @@ public partial class AutoPlay
             CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
         await game.Wait(2.5);
+        Check(RainsHere(), "it rains in the alley");
         await Shot("alley");
         await bar;
 

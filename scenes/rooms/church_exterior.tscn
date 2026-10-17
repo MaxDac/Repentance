@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ChurchExterior.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/church_exterior.png" id="2_church_exterior"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(54, 54)
@@ -33,6 +34,17 @@ PlayerCharacter = "micah"
 z_index = -10
 texture = ExtResource("2_church_exterior")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = 20
+script = ExtResource("90_Rain")
+Density = 1.16
+Speed = 240.0
+Layers = 1
+Length = 4
+Tint = Color(0.62, 0.7, 0.86, 0.42)
+SplashAreas = Array[Rect2]([Rect2(2, 200, 476, 62)])
+Seed = 79
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
