@@ -45,7 +45,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 
 | `Track` | Rooms | Piece |
 |---|---|---|
-| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage | Dark string bolero in 3/4 |
+| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4 |
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office | Slow D-minor ballad, muted trumpet, piano, bass |
