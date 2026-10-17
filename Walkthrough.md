@@ -50,8 +50,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   shafts and laundry chutes behind the walls, that every floor has an identical linen room, that he wants the
   fifth-floor one right next to 507, and that rooms count up west (01, by the stairs) to east (13, by the fire escape).
   The close-up is a dense 13x8 maze: columns are the room positions along a floor, rows the floors from the basement
-  loading bay (B, bottom left, where the cage starts) to the seventh floor. The arrow buttons move the cage one
-  cell; walls stop it. Linen rooms (L) sit on the 7th floor by 701, the 5th floor by 503 and 511, the 6th floor
+  loading bay (B, bottom left, where the cage starts) to the seventh floor. The arrow buttons, the arrow keys or a
+  drag across the maze move the cage one cell at a time; walls stop it. Linen rooms (L) sit on the 7th floor by 701, the 5th floor by 503 and 511, the 6th floor
   by 607 and the 4th floor by 407 (directly above and below the right one), and the 5th floor by 507: only the
   last is right. The shortest way is 54 moves, winds through the whole hotel and passes many dead ends; the
   decoys next to the target are far away through the shafts. Dispatching anywhere else stays in the lobby and
@@ -146,11 +146,13 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
-- The player regains control in the alley and clicks the street exit to travel to the convent.
+- The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
+  "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).
 
 #### Convent
 
-- Micah arrives outside the neo-gothic convent, with Eleanor absent. He comments on its pointed arches, iron
+- Micah arrives outside the neo-gothic convent at dusk, in the rain (the sidewalk and road wet and shining under the
+  lamps, rain falling with its sound), with Eleanor absent. He thinks the beating is a day old and comments on its pointed arches, iron
   spikes and saints in the windows. The player must click the convent door to enter the corridor.
 - Inside are the convent corridor and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
@@ -182,7 +184,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Road outside the convent
 
 - When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
-  with his own lighter (new smoking strip; he holds the lit cigarette while he thinks). The narration says he has
+  with his own lighter (new smoking strip: head bowed, both hands cupped round the flame against the wind, a gust
+  first blows it out). He holds the lit cigarette while he thinks and, every 5 seconds while he talks, takes a drag
+  (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
 - A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
   - back to the Blue Lantern and the mob: they would kill him;
@@ -288,7 +292,9 @@ starts: she can take, join and use only what she finds in the room she is in. **
 Micah's things are stashed and come back when the interlude ends, and none of hers go with him.
 
 1. **Room 507, the Aurelian, the Tuesday night.** The room is still in order (its own tidy background,
-   `eleanor_room_interlude.png`): Theodore's men only turn it over after she has gone. She packs the brass box
+   `eleanor_room_interlude.png`): Theodore's men only turn it over after she has gone. The bench under the red
+   dress is a separate object (`eleanor_room_interlude_bench.png`) and a hole in the walk area: Eleanor walks
+   round it, and reaches the dress from in front of it. She packs the brass box
    (**Puzzle 17**, below), puts the combination in the
    drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
@@ -316,7 +322,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
     for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
-   window. She sees Micah arrive at the convent door, come out again and light a cigarette in the road, then
+   window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
    hears him arguing with the clerk downstairs; she steps out onto the fire escape to wait for him, where he
    finds her. Fade to black, then Micah's office.
 

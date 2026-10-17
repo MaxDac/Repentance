@@ -154,10 +154,17 @@ public partial class AutoPlay
             PuzzleClick("submit");
             PuzzleClick("reset");
             PuzzleClick("down");
+            var open = new[] { "up", "down", "left", "right" }.First(s =>
+            {
+                var (dx, dy) = LiftMaze.Step(s);
+                return LiftMaze.CanMove(LiftMaze.Target, dx, dy);
+            });
+            PuzzleKey(open);
+            PuzzleDrag(LiftMazeScreen.Center(LiftMaze.Target), new[] { open });
             PressKey(Key.Escape);
             await Observe(0.1);
             Check(game.IsPaused && game.Hud.Puzzle.IsOpen && !puzzle.IsCompleted,
-                "Space pause blocks puzzle submission, reset, controls, and Esc");
+                "Space pause blocks puzzle submission, reset, controls, arrow keys, swipes, and Esc");
             PressKey(Key.Space);
             PuzzleClick("submit");
             await AwaitTest(puzzle, "puzzle resumes with its settings preserved");

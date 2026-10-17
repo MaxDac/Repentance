@@ -1,6 +1,6 @@
-"""A quiet road outside the Sisters' convent at dusk: a neo-gothic stone house filling the whole view, with its
-entrance gable, chapel and cloister wing, a tall arched oak door behind a wrought-iron fence, empty sidewalk and
-road, gas lamps just lit under a sliver of cold blue-violet sky.
+"""A quiet road outside the Sisters' convent on a rainy evening: a neo-gothic stone house filling the whole view, with
+its entrance gable, chapel and cloister wing, a tall arched oak door behind a wrought-iron fence, the sidewalk and road
+wet and shining under the gas lamps, low rain clouds over the roofs. The rain itself falls in the scene (Rain node).
 
 The buildings are painted as albedo over a magenta key and lit (ambient dusk x albedo + light pools); the sky is
 painted separately and shows through wherever the key survives."""
@@ -54,18 +54,15 @@ def jx(xb, y):
 
 def sky():
     img = Image.new("RGB", (W, FULL_H))
-    vgrad(img, (0, 0, W - 1, 90), hx("141634"), hx("3a3466"))
-    vgrad(img, (0, 90, W - 1, 190), hx("3a3466"), hx("7a5e86"))
+    vgrad(img, (0, 0, W - 1, 90), hx("10121e"), hx("2a2a40"))
+    vgrad(img, (0, 90, W - 1, 190), hx("2a2a40"), hx("4a4256"))
     rnd = random.Random(3)
-    d = ImageDraw.Draw(img)
-    for _ in range(36):
-        x, y = rnd.randint(0, W - 1), rnd.randint(0, 50)
-        d.point((x, y), fill=mix(hx("8890c0"), hx("e8ecff"), rnd.random() * (1 - y / 60)))
-    # long thin clouds catching the last light
-    for _ in range(10):
-        x, y = rnd.randint(-40, 520), rnd.randint(30, 120)
-        light(img, "ellipse", [x - 90, y - 3, x + 90, y + 4], hx("9a7aa8"), 0.3, 4)
-        shadow(img, "ellipse", [x - 70, y + 2, x + 60, y + 7], 0.15, 3, hx("3a3466"))
+    # low rain clouds, heavy and ragged, their bellies lit faintly by the city
+    for _ in range(16):
+        x, y = rnd.randint(-40, 520), rnd.randint(4, 120)
+        shadow(img, "ellipse", [x - 100, y - 8, x + 100, y + 10], 0.3, 6, hx("0c0c18"))
+        light(img, "ellipse", [x - 80, y + 6, x + 70, y + 12], hx("6a5a70"), 0.18, 4)
+    noise(img, (0, 0, W - 1, 190), 3, 4)
     return img
 
 
@@ -540,7 +537,7 @@ def yard_and_fence(img):
 def ground(img):
     d = ImageDraw.Draw(img)
     rows = [FENCE, 200, 210, 222, CURB]
-    vgrad(img, (0, FENCE, W - 1, CURB), hx("8a8690"), hx("9a96a0"))
+    vgrad(img, (0, FENCE, W - 1, CURB), hx("6e6a78"), hx("7c7886"))  # wet flags, darker than dry
     rnd = random.Random(81)
     for r in range(len(rows) - 1):
         for xb in range(-200, W + 240, 44):
@@ -548,7 +545,7 @@ def ground(img):
             xa, xb2 = xb + off, xb + off + 44
             poly = [(jx(xa, rows[r]), rows[r]), (jx(xb2, rows[r]), rows[r]),
                     (jx(xb2, rows[r + 1]), rows[r + 1]), (jx(xa, rows[r + 1]), rows[r + 1])]
-            d.polygon(poly, fill=mul(mix(hx("86828c"), hx("9a96a0"), rnd.random()), 1.0))
+            d.polygon(poly, fill=mul(mix(hx("86828c"), hx("9a96a0"), rnd.random()), 0.8))
             d.line([poly[0], poly[3]], fill=hx("5a5662"))
         d.line([(0, rows[r]), (W, rows[r])], fill=hx("5a5662"))
     noise(img, (0, FENCE, W - 1, CURB), 5, 82)
@@ -576,13 +573,22 @@ def ground(img):
             x += w
         y += h + 1
         h = min(6, h + 1)
-    # dry leaves blown against the railings and the curb
+    # sodden leaves stuck to the flags along the railings and the curb
     for _ in range(70):
         x = rnd.randint(0, W - 1)
         y = rnd.choice((FENCE + rnd.randint(0, 6), CURB - rnd.randint(1, 5), rnd.randint(FENCE, CURB)))
-        c = rnd.choice([hx("8a5a2a"), hx("a0702e"), hx("6a3a1e"), hx("b08a40")])
+        c = rnd.choice([hx("6a4422"), hx("7a5426"), hx("4a2a16"), hx("806432")])
         d.point((x, y), fill=c)
         d.point((x + 1, y), fill=mul(c, 0.8))
+    # rainwater: dark puddles in the hollows of the flags, a stream along the gutter
+    for _ in range(14):
+        x, y = rnd.randint(0, W), rnd.randint(FENCE + 6, CURB - 4)
+        w, h = rnd.randint(10, 26), rnd.randint(2, 3)
+        d.ellipse([x - w, y - h, x + w, y + h], fill=hx("5a5868"))
+        d.line([(x - w + 4, y - h + 1), (x + w // 3, y - h + 1)], fill=hx("8a8aa0"))
+    d.rectangle([0, GUTTER - 2, W, GUTTER], fill=hx("4c4c5e"))
+    for x in range(rnd.randint(0, 9), W, 13):
+        d.line([(x, GUTTER - 1), (x + 4, GUTTER - 1)], fill=hx("7a7a92"))
 
 
 def gas_lamp(d, x):
@@ -656,6 +662,13 @@ def paint():
     for lx in (DOOR[0] - 22, DOOR[1] + 22):
         light(out, "ellipse", [lx - 20, 84, lx + 20, 128], hx("ffd890"), 0.45, 10)
     light(out, "rect", [GREAT[0], 50, GREAT[1], 162], hx("c080a0"), 0.12, 8)
+    # the wet pavement and road mirror every light: long streaks under the lamps, the lanterns and the great window
+    for x in LAMPS:
+        light(out, "rect", [x - 5, FENCE + 4, x + 5, FULL_H], hx("ffd890"), 0.3, 5)
+        light(out, "rect", [x - 2, FENCE + 10, x + 2, CURB - 2], hx("fff0c0"), 0.35, 2)
+    for lx in (DOOR[0] - 22, DOOR[1] + 22):
+        light(out, "rect", [lx - 3, FENCE + 4, lx + 3, CURB - 4], hx("ffd890"), 0.22, 4)
+    light(out, "rect", [GREAT[0] + 8, FENCE + 4, GREAT[1] - 8, CURB], hx("c06a90"), 0.14, 6)
     # dusk gloom: shade the bottom of the facade and the near road, cold rim on the roofs
     shadow(out, "rect", [-20, FOOT - 30, W + 20, FENCE], 0.2, 14, hx("4a4a80"))
     shadow(out, "rect", [-20, GUTTER, W + 20, FULL_H + 20], 0.35, 10, hx("3a3a6a"))
