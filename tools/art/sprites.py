@@ -222,6 +222,7 @@ MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a",
                     decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
 # Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls.
 ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
+                    far_arm_behind=True,
                     coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03), stockings="e4c4ae", shoes="7a3448",
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.42, "b85a78")])
 # Eleanor in Joliet: a grey prison jumpsuit buttoned to the throat, cut like Micah's coverall.

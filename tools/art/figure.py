@@ -470,8 +470,10 @@ def figure(spec, ps, fw=56, fh=80):
             # ps["hand_in_coat"]: the hand of that arm is slipped inside the coat front, out of sight
             if hand is not None and ps.get("hand_in_coat") != s:
                 c.put(c.capsule(P(wr), P(hand), H * 0.025 * hk, H * 0.021 * hk), skin, f"hand{s}", dither=False)
-        # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face)
-        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + 0.05 * abs(cp), arm)
+        # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face);
+        # col["far_arm_behind"]: the far arm stays behind a bare-armed dress in near-front and near-back views
+        bias = 0.0 if col.get("far_arm_behind") and Ds < 0 else 0.05 * abs(cp)
+        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + bias, arm)
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
