@@ -281,7 +281,7 @@ def revolving_door(img):
     text(img, (cx, y0 - 2), "STATE ST", GOLD, size=8)
     for x in (x0 + 2, x1 - 4):
         d.polygon([(x - 2, y0 - 2), (x, y0 - 5), (x + 2, y0 - 2), (x, y0 + 1)], fill=GOLD)
-    # night street through the glass: rain, a far building, a lamp and a passing cab's lights
+    # night street through the glass: a far building, a lamp and a passing cab's lights (the rain falls in the scene)
     g0, g1 = y0 + 8, y1 - 4
     vgrad(img, (x0, g0, x1, g1), hx("16203a"), hx("2a2a3a"))
     d.rectangle([x0 + 30, g0 + 10, x0 + 70, g1 - 30], fill=hx("1a1a28"))
@@ -298,10 +298,6 @@ def revolving_door(img):
     d.line([(x0 + 21, 58), (x0 + 27, 58)], fill=hx("2a2a30"))
     d.ellipse([x0 + 21, 52, x0 + 27, 58], fill=hx("f0d890"))
     light(img, "ellipse", [x0 + 12, 42, x0 + 36, 66], hx("f0c060"), 0.4, 4)
-    for k in range(24):
-        x = x0 + 4 + (k * 37) % (x1 - x0 - 8)
-        y = g0 + 6 + (k * 53) % (g1 - g0 - 12)
-        d.line([(x, y), (x - 1, y + 3)], fill=hx("4a5a7a"))
     # fixed side lights in brass frames
     for sx0, sx1 in ((x0, x0 + 12), (x1 - 12, x1)):
         d.rectangle([sx0, g0, sx1, g1], outline=GOLD, width=2)

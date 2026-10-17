@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCorridor.cs" id="1_ConventCorridor"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_corridor.png" id="2_convent_corridor"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="5_nun"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(42, 90)
@@ -35,6 +36,18 @@ PlayerCharacter = "micah"
 z_index = -10
 texture = ExtResource("2_convent_corridor")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("90_Rain")
+Areas = Array[Rect2]([Rect2(111, 50, 19, 75), Rect2(251, 50, 19, 75), Rect2(321, 50, 19, 75)])
+Density = 9.0
+Speed = 170.0
+Slant = -0.3
+Length = 4
+Tint = Color(0.6, 0.66, 0.84, 0.5)
+Drips = 5
+Seed = 131
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)

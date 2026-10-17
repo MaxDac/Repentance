@@ -10,6 +10,9 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Outskirts : Room
 {
+    /// <summary>Eleanor walks out of the city free in ending 8: the rain has stopped.</summary>
+    protected override bool RainStopped => State.HasFlag("ending_8");
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "ending")

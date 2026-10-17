@@ -7,8 +7,8 @@ drawn over the top. The alley's states (the crate by the cans or under the ladde
 crops of the state variant pixelized with the base palette, placed at the printed crop origins."""
 import math
 import random
-from PIL import Image, ImageDraw, ImageChops, ImageFilter
-from .common import (W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text,
+from PIL import Image, ImageDraw, ImageChops, ImageFilter, ImageFont
+from .common import (FONT, W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text,
                      cut, _mask)
 from .street import bricks
 from .act2_rooms import crate as fruit_crate
@@ -534,13 +534,16 @@ def blade_sign(img):
     for p in border:
         d.point(p, fill=hx("6a4020") if k % 3 == 2 else AMBER_HOT)
         k += 1
-    # the VACANCY board, hung on two chains under the box
-    vx0, vy0, vx1, vy1 = x0 + 1, y1 + 4, x1 - 1, y1 + 11
-    for x in (vx0 + 3, vx1 - 3):
-        for y in range(y1 + 3, vy0, 2):
-            d.point((x, y), fill=IRON_E)
+    # the VACANCY board, hung on two chains under the box, as wide as its lettering needs
+    tl, _, tr, _ = ImageFont.truetype(FONT, 8).getbbox("VACANCY")
+    cx = (x0 + x1) // 2
+    vx0, vy0, vx1, vy1 = cx - (tr - tl) // 2 - 3, y1 + 4, cx + (tr - tl + 1) // 2 + 3, y1 + 11
+    for x in (x0 + 4, x1 - 4):  # the chains hang from the box and fan out to the board's ends
+        for y in range(y1 + 1, vy0):
+            t = (y - y1) / (vy0 - y1)
+            d.point((round(x + (vx0 + 3 - x if x < cx else vx1 - 3 - x) * t), y), fill=IRON_E)
     d.rectangle([vx0, vy0, vx1, vy1], fill=hx("101a14"), outline=hx("2a3a30"))
-    text(img, ((vx0 + vx1) // 2 + 1, (vy0 + vy1) // 2 + 1), "VACANCY", hx("70ff98"), 8)
+    text(img, (cx + 1, (vy0 + vy1) // 2 + 1), "VACANCY", hx("70ff98"), 8)
     light(img, "rect", [vx0 - 3, vy0 - 3, vx1 + 3, vy1 + 3], hx("40c070"), 0.25, 4)
     light(img, "ellipse", [x0 - 30, y0 - 20, x1 + 30, y1 + 20], hx("c01830"), 0.22, 18)
 

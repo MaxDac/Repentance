@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/HarringtonRoad.cs" id="1_HarringtonRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road.png" id="2_harrington_road"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_ladder.png" id="12_Ladder"]
 [ext_resource type="Script" path="res://scripts/Core/LoopStrip.cs" id="13_LoopStrip"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/harrington_road_flames.png" id="14_Flames"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="WedgeShape"]
 size = Vector2(24, 18)
@@ -55,6 +56,17 @@ NearScale = 1.0
 z_index = -10
 texture = ExtResource("2_harrington_road")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = 20
+script = ExtResource("90_Rain")
+Density = 1.16
+Speed = 240.0
+Layers = 1
+Length = 4
+Tint = Color(0.62, 0.7, 0.86, 0.42)
+SplashAreas = Array[Rect2]([Rect2(0, 204, 480, 58)])
+Seed = 83
 
 [node name="Fire" type="Sprite2D" parent="."]
 z_index = -9

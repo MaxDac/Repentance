@@ -13,6 +13,9 @@ public partial class Prison : Room
     /// <summary>The inmate's seat, where Eleanor's speech anchor moves in ending 9.</summary>
     private static readonly Vector2 InmateSpeech = new(196, 150);
 
+    /// <summary>No rain outside the window when Micah turned himself in (ending 6) or Eleanor confesses (ending 9).</summary>
+    protected override bool RainStopped => State.HasFlag("ending_6") || State.HasFlag("ending_9");
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "eleanor")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="8_nun"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(42, 110)
@@ -46,6 +47,18 @@ PlayerCharacter = "micah"
 z_index = -10
 texture = ExtResource("2_convent_cell")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("90_Rain")
+Areas = Array[Rect2]([Rect2(234, 78, 2, 16), Rect2(237, 78, 3, 16), Rect2(241, 78, 2, 16), Rect2(244, 78, 2, 16), Rect2(234, 95, 2, 12), Rect2(237, 95, 3, 12), Rect2(241, 95, 2, 12), Rect2(244, 95, 2, 12)])
+Density = 9.0
+Speed = 170.0
+Slant = -0.3
+Length = 4
+Tint = Color(0.6, 0.66, 0.84, 0.5)
+Drips = 2
+Seed = 137
 
 [node name="Drawer" type="Sprite2D" parent="."]
 z_index = -9

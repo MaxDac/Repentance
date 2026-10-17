@@ -23,6 +23,7 @@ public partial class RoseHouse : Room
             await Wait(0.5);
             await Think("Number 14. I used to come home to this door. Mostly at three in the morning, mostly drunk.");
             await Think("Rose kept the house. Rose kept Tommy. I kept the bottle. It seemed fair at the time.");
+            await Think("Funny. It's rained on me all week, and it stops at Rose's street.");
         });
     }
 

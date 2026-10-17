@@ -58,6 +58,14 @@ public abstract class Harness
     /// <summary><see cref="Game.Run"/> logs and swallows exceptions so the game survives; a test must not.</summary>
     private void OnSequenceFailed(Exception ex) => _failures.Add("scripted sequence threw: " + ex.Message);
 
+    /// <summary>The current room draws its rain and plays its patter.</summary>
+    protected bool RainsHere() =>
+        _game.Room?.GetNodeOrNull<Rain>("Rain") is { Visible: true } && _game.Sfx.Ambient == Sound.Rain;
+
+    /// <summary>No rain drawn in the current room, and no patter.</summary>
+    protected bool DryHere() =>
+        _game.Room?.GetNodeOrNull<Rain>("Rain") is not { Visible: true } && _game.Sfx.Ambient == null;
+
     /// <summary>
     /// <c>--clock=fast</c> (default) uncapped 60×, or <c>--clock=normal</c> for the previous 8× clock.
     /// Pause assertions still force 1×. Fast also disables vsync so an unfocused run is not stuck at the refresh rate.

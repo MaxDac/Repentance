@@ -311,6 +311,9 @@ public partial class AutoPlay
         await Shot("street_thrown_out");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(_insetAtStreetChoice == false, "Micah's close-up is removed before he gets up and chooses");
+        Check(DryHere(), "the rain stops at Rose's street");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("it stops at Rose's street"));
+        Check(game.Hud.ThoughtText.Contains("it stops at Rose's street"), "Micah notices the rain stop at Rose's street");
         await club;
         await WaitIdle(game);
         Check(gs.HasFlag("go_rose") && gs.HasFlag("club_out"), "chose to go to Rose's house");
