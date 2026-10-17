@@ -222,8 +222,9 @@ ELEANOR_SHEET = dict(ELEANOR, **_CURVES, torso="e8e4dc", sleeves=ELEANOR["skin"]
 MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a", sleeves="b8743a",
                     cuff="b8743a", pants="b8743a", shoes="2b1b14",
                     decals=[("buttons", 0.24, 0.42, 4, "6a4020", True), ("belt", 0.43, "9a5e2c")])
-# Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls.
-ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
+# Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls. The silk
+# lies a little flatter over the seat than her bare curves.
+ELEANOR_GOWN = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.051, 0.52)), torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
                     far_arm_behind=True,
                     coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03, hem_legs=True, hem_pad=0.025),
                     stockings="e4c4ae", shoes="7a3448",
