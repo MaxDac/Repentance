@@ -79,8 +79,8 @@ ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair
 ELEANOR_FIGURE = dict(h=62, sw=0.1, hw=0.044, waist=0.054, hipw=0.09, leg_r=0.78, foot=0.056, arm_r=0.64, cap_r=0.6,
                       cap_y=0.258, shoulder_y=0.262, bust=0.062, bust_y=0.295, waist_z=0.038,
                       rear=(0.035, 0.058, 0.52), fitted=True, neck_r=0.022, neck_lean=0.005, talk_nod=0.0,
-                      profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.026, 0.026), (0.232, 0.085, -0.032, 0.036),
-                               (0.25, 0.1, -0.036, 0.044), (0.31, 0.095, -0.038, 0.052), (0.40, 0.054, -0.036, 0.044),
+                      profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.029, 0.029), (0.232, 0.085, -0.036, 0.04),
+                               (0.25, 0.1, -0.04, 0.049), (0.31, 0.095, -0.043, 0.058), (0.40, 0.054, -0.04, 0.049),
                                (0.47, 0.09, -0.07, 0.046), (0.53, 0.0774, -0.06, 0.044)], flat_front=True)
 # A 1920s widow's black: the high-necked, long-sleeved black bodice of her portrait, a dropped waist with a sash at
 # the hip, a pleated skirt to mid-calf, sheer dark stockings, black heels and a short strand of white pearls.
@@ -190,10 +190,15 @@ ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": M
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
 # The implied-nude variant: front locks define a subtle chest contour, one
-# hand lowered over her lap, the other arm hanging at her side.
+# hand lowered over her lap, the other arm hanging at her side. Unclothed, her hips, seat and stance are a tenth
+# narrower than the figure's, keeping their proportions.
 _SKIN = "e4b898"
+_STAGE_HIPS = 0.9
 ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
                  "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
+                 "hipw": ELEANOR_FIGURE["hipw"] * _STAGE_HIPS, "hw": ELEANOR_FIGURE["hw"] * _STAGE_HIPS,
+                 "rear": tuple(v * _STAGE_HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
+                 "profile": [(y, w * (_STAGE_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]],
                  "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.03,
                  "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
