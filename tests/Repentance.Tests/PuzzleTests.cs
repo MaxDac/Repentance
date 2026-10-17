@@ -46,6 +46,26 @@ public class PuzzleTests
     }
 
     [Fact]
+    public void SwipeGestureStepsOncePerCellAlongTheDominantAxis()
+    {
+        var swipe = new SwipeGesture(100, 100, 14);
+        Assert.Null(swipe.Next(113, 105));
+        Assert.Null(swipe.Next(90, 112));
+        Assert.Equal(new GridPoint(1, 0), swipe.Next(114, 104));
+        Assert.Null(swipe.Next(120, 104));
+        Assert.Equal(new GridPoint(1, 0), swipe.Next(128, 104));
+        Assert.Equal(new GridPoint(0, 1), swipe.Next(130, 120));
+        Assert.Equal(new GridPoint(0, -1), new SwipeGesture(0, 0, 14).Next(3, -20));
+        Assert.Equal(new GridPoint(-1, 0), new SwipeGesture(0, 0, 14).Next(-20, 3));
+
+        var fast = new SwipeGesture(0, 0, 14);
+        var steps = new List<GridPoint>();
+        while (fast.Next(-45, 2) is { } step) steps.Add(step);
+        Assert.Equal(new[] { new GridPoint(-1, 0), new GridPoint(-1, 0), new GridPoint(-1, 0) }, steps);
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SwipeGesture(0, 0, 0));
+    }
+
+    [Fact]
     public void SafeRequiresEveryDirectionAndNumber()
     {
         var directions = new[] { 0, 1, 0 };
