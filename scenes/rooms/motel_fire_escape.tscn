@@ -6,9 +6,10 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="5_eleanor"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="6_Rain"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_fire_escape_fg.png" id="7_motel_fire_escape_fg"]
 
 [sub_resource type="RectangleShape2D" id="LadderShape"]
-size = Vector2(44, 88)
+size = Vector2(44, 96)
 
 [sub_resource type="RectangleShape2D" id="WindowShape"]
 size = Vector2(52, 90)
@@ -17,10 +18,10 @@ size = Vector2(52, 90)
 size = Vector2(46, 106)
 
 [sub_resource type="RectangleShape2D" id="FrontRailShape"]
-size = Vector2(480, 18)
+size = Vector2(480, 10)
 
 [sub_resource type="RectangleShape2D" id="SideRailShape"]
-size = Vector2(30, 96)
+size = Vector2(20, 80)
 
 [node name="MotelFireEscape" type="Node2D"]
 script = ExtResource("1_MotelFireEscape")
@@ -28,8 +29,8 @@ RoomName = "Fire Escape"
 Floor = 1
 FarY = 184
 FarScale = 0.96
-NearY = 248
-NearScale = 1.04
+NearY = 210
+NearScale = 1.0
 
 [node name="Background" type="Sprite2D" parent="."]
 z_index = -10
@@ -38,12 +39,12 @@ centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
-polygon = PackedVector2Array(58, 184, 448, 184, 448, 246, 58, 246)
+polygon = PackedVector2Array(58, 184, 448, 184, 448, 210, 58, 210)
 
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
-position = Vector2(76, 226)
+position = Vector2(76, 204)
 metadata/facing = 4
 
 [node name="Hotspots" type="Node2D" parent="."]
@@ -53,14 +54,14 @@ script = ExtResource("3_Hotspot")
 Id = "ladder"
 DisplayName = "ladder"
 LookText = "The drop ladder, back down to the alley and the rain."
-WalkTo = Vector2(62, 226)
+WalkTo = Vector2(62, 204)
 Face = 3
 ClickPriority = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Ladder"]
-position = Vector2(39, 226)
+position = Vector2(39, 222)
 shape = SubResource("LadderShape")
 
 [node name="Window" type="Area2D" parent="Hotspots"]
@@ -96,35 +97,41 @@ script = ExtResource("3_Hotspot")
 Id = "railing"
 DisplayName = "railing"
 LookText = "An iron railing, slick with rain. One storey down, the alley shines like a wet knife."
-WalkTo = Vector2(240, 244)
+WalkTo = Vector2(240, 208)
 Face = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Railing"]
-position = Vector2(240, 261)
+position = Vector2(240, 213)
 shape = SubResource("FrontRailShape")
 
 [node name="Side" type="CollisionShape2D" parent="Hotspots/Railing"]
-position = Vector2(455, 200)
+position = Vector2(458, 176)
 shape = SubResource("SideRailShape")
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
 
 [node name="Eleanor" type="Area2D" parent="World"]
-position = Vector2(412, 228)
+position = Vector2(412, 202)
 script = ExtResource("4_Actor")
 Id = "eleanor"
 DisplayName = "Eleanor"
 LookText = "Eleanor Harrington, all in black, like she's already been to her own funeral."
-WalkTo = Vector2(368, 228)
+WalkTo = Vector2(368, 204)
 Face = 4
 monitoring = false
 monitorable = false
 Texture = ExtResource("5_eleanor")
 FlipH = true
 SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="RailFront" type="Sprite2D" parent="World"]
+position = Vector2(0, 214)
+texture = ExtResource("7_motel_fire_escape_fg")
+centered = false
+offset = Vector2(0, -44)
 
 [node name="Rain" type="Node2D" parent="."]
 z_index = 20
@@ -134,5 +141,5 @@ Speed = 240.0
 Layers = 1
 Length = 4
 Tint = Color(0.62, 0.7, 0.86, 0.42)
-SplashAreas = Array[Rect2]([Rect2(60, 186, 386, 60)])
+SplashAreas = Array[Rect2]([Rect2(60, 186, 386, 24)])
 SplashRate = 2.0

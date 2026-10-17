@@ -9,7 +9,7 @@ import math
 import random
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import (W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text,
-                     _mask)
+                     cut, _mask)
 from .street import bricks
 from .act2_rooms import crate as fruit_crate
 
@@ -569,9 +569,15 @@ def build_alley():
 # ------------------------------------------------------------------------------------------------ the landing
 
 FOOT = 176                       # where the landing's grating meets the wall
-EDGE = 250                       # the landing's front edge
+EDGE = 214                       # the landing's front edge: a shallow strip of grating, the alley open below it
+FE_RAIL_H = 40                   # the safety rail's height at the front edge, about a man's hip
+FE_TOP, FE_MID = EDGE - FE_RAIL_H, EDGE - FE_RAIL_H // 2
+FE_RAIL_END = 466                # the right-hand end of the landing, where the rail turns back to the wall
+FE_RAIL_RUNS = ((0, 18, (16,)), (64, FE_RAIL_END, (64, 160, 262, 364, FE_RAIL_END)))  # (x0, x1, posts) either side of the hatch
+FE_FG_Y = FE_TOP - 4             # the top of the foreground layer holding the front rail
 FE_VP = (240, -420)              # the grating's long bars converge very gently on this point
 HATCH = (22, 56)                 # the opening the drop ladder comes up through, at the front left
+HATCH_TOP = 192                  # the hatch's back edge on the grating
 FE_DOOR = (212, 70, 256, FOOT)
 FE_WINDOWS = ((108, 62, 158, 150), (314, 62, 364, 150))
 FE_LIT = FE_WINDOWS[1]           # Eleanor's room
@@ -618,7 +624,7 @@ def landing(img):
         d.line([(fe_x(xb, FOOT), FOOT), (xb, EDGE)], fill=IRON, width=2)
         d.line([(fe_x(xb, FOOT) - 1, FOOT), (xb - 1, EDGE)], fill=IRON_M)
     # the hatch the drop ladder comes up through: a frame round a hole straight down to the alley
-    top = 206
+    top = HATCH_TOP
     hole = [(fe_x(h0, top), top), (fe_x(h1, top), top), (h1, EDGE), (h0, EDGE)]
     img2 = Image.new("RGB", img.size)
     below(img2)
@@ -645,44 +651,60 @@ def fe_ladder(d):
     over the lit picture, rimmed red by the big sign round the corner."""
     h0, h1 = HATCH
     l0, l1 = h0 + 6, h1 - 6
+    t = HATCH_TOP - 24           # the top of the goosenecks
     body, rim, hot = hx("161a22"), hx("b04858"), hx("ff8a98")
     for x in (l0, l1):
-        d.line([(x, 194), (x, H)], fill=body, width=4)
-        d.line([(x - 2, 196), (x - 2, H)], fill=rim)
-        d.arc([x - 2, 182, x + 12, 208], 180, 360, fill=body, width=4)
-        d.arc([x - 2, 182, x + 12, 208], 190, 250, fill=rim)
-        d.line([(x + 11, 194), (x + 11, 212)], fill=body, width=3)
-        d.point((x + 2, 183), fill=hot)
-        d.rectangle([x - 3, 222, x + 3, 226], fill=hx("3a3e48"))
-        d.line([(x - 3, 222), (x + 3, 222)], fill=rim)
-    for ry in range(214, H, 9):
+        d.line([(x, t + 12), (x, H)], fill=body, width=4)
+        d.line([(x - 2, t + 14), (x - 2, H)], fill=rim)
+        d.arc([x - 2, t, x + 12, t + 26], 180, 360, fill=body, width=4)
+        d.arc([x - 2, t, x + 12, t + 26], 190, 250, fill=rim)
+        d.line([(x + 11, t + 12), (x + 11, t + 30)], fill=body, width=3)
+        d.point((x + 2, t + 1), fill=hot)
+        d.rectangle([x - 3, t + 40, x + 3, t + 44], fill=hx("3a3e48"))
+        d.line([(x - 3, t + 40), (x + 3, t + 40)], fill=rim)
+    for ry in range(t + 32, H, 9):
         d.line([(l0 + 2, ry), (l1 - 2, ry)], fill=body, width=3)
         d.line([(l0 + 2, ry - 1), (l1 - 2, ry - 1)], fill=rim)
 
 
 def fe_rails(d):
-    """The low rail along the front in the foreground and the railing up the right-hand end, back to the wall."""
+    """The safety railing up the right-hand end, back to the wall, and the one along the front edge."""
     # the right-hand end: a post at the front and one against the wall, rails between them in perspective
-    fx, wx = 466, int(fe_x(466, FOOT))
-    for (x, yb, yt) in ((fx, EDGE, 150), (wx, FOOT, 104)):
+    fx, wx = FE_RAIL_END, int(fe_x(FE_RAIL_END, FOOT))
+    k = (FOOT - FE_VP[1]) / (EDGE - FE_VP[1])  # how much smaller the rail stands back at the wall
+    wall_top, wall_mid = round(FOOT - FE_RAIL_H * k), round(FOOT - FE_RAIL_H * k / 2)
+    for (x, yb, yt) in ((wx, FOOT, wall_top),):
         d.line([(x, yb), (x, yt)], fill=IRON, width=3)
         d.line([(x - 1, yb), (x - 1, yt)], fill=IRON_E)
-    for k, (fy, wy) in enumerate(((150, 104), (198, 140))):
+    for fy, wy in ((FE_TOP, wall_top), (FE_MID, wall_mid)):
         d.line([(fx, fy), (wx, wy)], fill=IRON, width=2)
         d.line([(fx, fy - 1), (wx, wy - 1)], fill=IRON_E)
-    for i in range(1, 12):
-        t = i / 12
+    for i in range(1, 4):
+        t = i / 4
         x = round(fx + (wx - fx) * t)
-        d.line([(x, EDGE + (FOOT - EDGE) * t), (x, 150 + (104 - 150) * t)], fill=IRON)
-    # the front rail: we look over it; balusters run down out of the picture
-    d.line([(0, 258), (W - 1, 258)], fill=IRON, width=3)
-    d.line([(0, 257), (W - 1, 257)], fill=IRON_H)
-    for x in range(2, W, 9):
-        d.line([(x, 260), (x, H)], fill=IRON, width=2)
-        d.point((x - 1, 261), fill=IRON_E)
-    for px in (0, 160, 320, 476):
-        d.rectangle([px, 254, px + 3, H], fill=IRON)
-        d.line([(px, 254), (px, H)], fill=IRON_E)
+        d.line([(x, EDGE + (FOOT - EDGE) * t), (x, FE_TOP + (wall_top - FE_TOP) * t)], fill=IRON)
+    fe_front_rail(d)
+
+
+def fe_front_rail(d, mask=False):
+    """The safety rail standing on the front edge, between the characters and the drop: square posts bolted to the
+    edge channel, a top rail and a mid rail of flat bar, close-set pickets and a toe plate. It breaks at the hatch,
+    where the drop ladder's goosenecks are the handhold. With mask=True every part is drawn in white, giving the
+    foreground layer's cut-out."""
+    body, edge, hi, toe = (255,) * 4 if mask else (IRON, IRON_E, IRON_H, hx("1c2028"))
+    for x0, x1, posts in FE_RAIL_RUNS:
+        d.rectangle([x0, EDGE - 5, x1, EDGE], fill=toe)
+        d.line([(x0, EDGE - 5), (x1, EDGE - 5)], fill=edge)
+        for x in range(x0 + 3, x1 - 1, 5):
+            d.line([(x, FE_TOP + 2), (x, EDGE - 6)], fill=body)
+        d.rectangle([x0, FE_MID - 1, x1, FE_MID], fill=body)
+        d.line([(x0, FE_MID - 1), (x1, FE_MID - 1)], fill=edge)
+        d.rectangle([x0, FE_TOP - 1, x1, FE_TOP + 1], fill=body)
+        d.line([(x0, FE_TOP - 1), (x1, FE_TOP - 1)], fill=hi)
+        for px in posts:
+            d.rectangle([px - 1, FE_TOP - 3, px + 2, EDGE + 4], fill=body)
+            d.line([(px - 1, FE_TOP - 3), (px - 1, EDGE + 4)], fill=edge)
+            d.rectangle([px - 2, FE_TOP - 4, px + 3, FE_TOP - 3], fill=body)
 
 
 def fe_wall(img):
@@ -844,11 +866,9 @@ def paint_fire_escape():
     lit_glass(img)
     light(img, "ellipse", [wx0 - 12, wy0 - 10, wx1 + 12, wy1 + 12], hx("ffc070"), 0.22, 10)
     d = ImageDraw.Draw(img)
-    band = img.crop((0, 255, 80, 261))  # the front rail passes in front of the ladder
     fe_ladder(d)
-    img.paste(band, (0, 255))
-    # the railing catches the neon from the left
-    for y in (257,):
+    # the top rail catches the neon from the left
+    for y in (FE_TOP - 1,):
         for x in range(0, 200, 2):
             d.point((x, y), fill=mix(img.getpixel((x, y)), (255, 90, 110), 0.5 * (1 - x / 200)))
     rnd = random.Random(70)
@@ -868,6 +888,15 @@ def build_fire_escape():
     pal = palette_of(img, 116) + [hx("f4cc80"), hx("ffe0a0"), hx("d89a50"), hx("c8843a"), hx("8a5a30"),
                                   hx("3a2414"), hx("ff3048"), hx("12151c")]
     save(pixelize(img, pal), "rooms", "motel_fire_escape.png")
+    save(fire_escape_front(pixelize(img, pal)), "rooms", "motel_fire_escape_fg.png")
+
+
+def fire_escape_front(px):
+    """The front safety rail cut out of the finished background, for the scene to y-sort in front of the characters
+    standing on the landing. Cropped to the rail's rows; the scene places it at (0, FE_FG_Y)."""
+    mask = Image.new("L", (W, H), 0)
+    fe_front_rail(ImageDraw.Draw(mask), mask=True)
+    return cut(px, mask).crop((0, FE_FG_Y, W, EDGE + 5))
 
 
 def build():
