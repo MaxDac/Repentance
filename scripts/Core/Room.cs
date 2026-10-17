@@ -10,7 +10,8 @@ namespace Repentance;
 /// <code>
 /// Room (this script or a subclass)
 ///   Background   Sprite2D (480x270, Centered off)
-///   WalkArea     Polygon2D - walkable floor (hidden at runtime)
+///   WalkArea     Polygon2D - walkable floor (hidden at runtime); Polygon2D children are holes (furniture standing
+///                out in the room), each kept only while its "show_if_flags"/"hide_if_flags" metadata allow
 ///   Entries      Node2D with Marker2D children (entry names)
 ///   Hotspots     Node2D with Hotspot children (each with CollisionShape2D/Polygon2D)
 ///   World        Node2D, y-sorted: Actors, foreground props, and the player get placed here
@@ -92,12 +93,8 @@ public partial class Room : Node2D
 
     public override void _Ready()
     {
-        if (GetNodeOrNull<Polygon2D>("WalkArea") is { } wa)
-        {
-            var pts = wa.Polygon.Select(p => wa.Transform * p).ToArray();
-            Walk = new WalkArea(pts);
-            wa.Visible = false;
-        }
+        if (GetNodeOrNull<Polygon2D>("WalkArea") is { } wa) wa.Visible = false;
+        RebuildWalk();
         World = GetNodeOrNull<Node2D>("World") ?? this;
         World.YSortEnabled = true;
         GameState.Instance.Changed += Refresh;
@@ -107,6 +104,22 @@ public partial class Room : Node2D
     public override void _ExitTree()
     {
         if (GameState.Instance != null) GameState.Instance.Changed -= Refresh;
+    }
+
+    private string? _walkHoles;
+
+    /// <summary>Rebuilds <see cref="Walk"/> when the set of holes the flags allow has changed.</summary>
+    private void RebuildWalk()
+    {
+        if (GetNodeOrNull<Polygon2D>("WalkArea") is not { } wa) return;
+        var holes = wa.GetChildren().OfType<Polygon2D>()
+            .Where(h => FlagRules.Evaluate((string)h.GetMeta("show_if_flags", ""), (string)h.GetMeta("hide_if_flags", "")))
+            .ToList();
+        var key = string.Join(",", holes.Select(h => h.Name));
+        if (Walk != null && key == _walkHoles) return;
+        _walkHoles = key;
+        Walk = new WalkArea(wa.Polygon.Select(p => wa.Transform * p).ToArray(),
+            holes.Select(h => h.Polygon.Select(p => wa.Transform * (h.Transform * p)).ToArray()));
     }
 
     public float ScaleAt(float y) =>
@@ -147,6 +160,7 @@ public partial class Room : Node2D
     {
         foreach (var h in Hotspots) h.Visible = FlagRules.Evaluate(h.ShowIfFlags, h.HideIfFlags);
         foreach (var s in FindAll<FlagSprite>(this)) s.Refresh();
+        RebuildWalk();
         OnRefresh();
     }
 

@@ -256,6 +256,7 @@ public partial class AutoPlay
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
             "arrival waits outside for the player to open the convent door");
         Check(game.Music.Current == null, "no piano outside the convent");
+        Check(game.Sfx.Ambient == Sound.Rain, "it rains on the road outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");
         Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor") == null &&
@@ -400,6 +401,7 @@ public partial class AutoPlay
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("long shot"));
         Check(game.Hud.InsetVisible && game.Hud.CurrentCloseUp == CloseUps.Motel,
             "the close-up stays up while Micah talks himself into the long shot");
+        Check(game.Room is Rooms.ConventRoad { Drags: > 0 }, "Micah draws on the cigarette while he talks");
         await Shot("motel_closeup");
         Check(_offered.TryGetValue("convent_dead_end", out var deadEnd) && deadEnd.Length == 1 && deadEnd[0].Contains("office"),
             "the mob, Harrington and the cops are refused before the office");
