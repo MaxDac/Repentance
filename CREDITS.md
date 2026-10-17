@@ -1,7 +1,7 @@
 # Credits
 
 - **Game design, code and generated art**: Repentance project, by Massimiliano D'Acunzo. Code under
-  PolyForm Noncommercial 1.0.0 (`LICENSE`), content under CC BY-NC-SA 4.0 (`LICENSE-ASSETS.md`).
+  PolyForm Strict 1.0.0 (`LICENSE`), content under CC BY-NC-ND 4.0 (`LICENSE-ASSETS.md`).
 - **Silkscreen** font by Jason Kottke, licensed under the SIL Open Font License 1.1 (`assets/fonts/OFL-Silkscreen.txt`).
 - **Departure Mono** font (dialogue text) by Helena Zhang, licensed under the SIL Open Font License 1.1
   (`assets/fonts/OFL-DepartureMono.txt`).
