@@ -61,7 +61,7 @@ public static class Recipes
             Requires: new[] { "red_thread" },
             Missing: "It won't stay wrapped. I need something to tie it with."),
         new("eleanor_flower", "eleanor_box", "eleanor_box_packed", new[] { "eleanor_flower", "eleanor_box" },
-            "The flower in with the card, the matchbook and the bluing. Lid down. Everything a clever man would need to follow me.",
+            "The flower in with the card, the matchbook and the bluing. Lid down. Everything the Tribune would need to find their Club, if they ever drag me back.",
             Flag: "interlude_box_packed"),
         // 18 - The Club's dressing room, Second Interlude (Eleanor).
         new("compact", "puff", "puff_powdered", new[] { "compact", "puff" },

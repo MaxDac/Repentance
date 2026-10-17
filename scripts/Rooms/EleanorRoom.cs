@@ -155,7 +155,7 @@ public partial class EleanorRoom : Room
                 State.GiveItem("eleanor_box");
                 State.GiveItem("pellet");
                 await Say("The brass box. The card, the matchbook, the bluing already inside. And the little paper flower that blooms in water.");
-                await Say("The word's inked inside it. But a bare pellet's just a sweet. It needs a riddle round it, so he knows to drown it.");
+                await Say("The word's inked inside it. But a bare pellet's just a sweet. It needs a riddle round it, so whoever the paper sends knows to drown it.");
                 return true;
             case ("vanity", Verb.Hand):
                 await Say("Nothing else on there I'll miss.");
@@ -189,7 +189,7 @@ public partial class EleanorRoom : Room
             case ("desk_drawer", Verb.Hand) when !State.HasFlag("interlude_drawer_locked"):
                 State.SetFlag("interlude_drawer_locked");
                 await Say("Three lines of Sunday school on hotel paper. My grandmother would be proud.");
-                await Say("Into the drawer, and turn the key. Whoever opens this one, I want him to have earned it.");
+                await Say("Into the drawer, and turn the key. Theodore's men will kick it and give up. A reporter with a whole night won't.");
                 return true;
             case ("desk_drawer", _):
                 await Say("Locked, with the riddle inside.");
@@ -245,7 +245,7 @@ public partial class EleanorRoom : Room
                 State.SetFlag("interlude_took_scrap");
                 State.GiveItem("riddle_scrap");
                 await Say("A scrap of stationery, torn small. In a hurry, in pencil: \"Give me a drink and I'll tell you the word.\"");
-                await Say("Wrapped round the flower, it'll tell him what to do with it. If whoever comes is half as clever as he'll need to be.");
+                await Say("Wrapped round the flower, it tells a newspaperman what to do with it. Theodore's men would toss it with the rest.");
                 return true;
             case ("desk", Verb.Look or Verb.Hand):
                 await Say("Hotel stationery. I've written Theodore a hundred letters on it, and sent him none.");

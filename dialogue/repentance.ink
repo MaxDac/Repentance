@@ -84,6 +84,8 @@ DANIEL: Wait. These first pages aren't about him at all. "What follows, she told
 === interlude_aurelian ===
 THOUGHT: Tuesday night, the Aurelian. Room 507. The bed turned down, the dresses on their hangers, the chair squared to the desk.
 THOUGHT: She left it neater than she ever kept that marriage. The mess came after, when Theodore's men came looking for what she'd hidden.
+THOUGHT: She didn't pack a bag. She packed insurance: if the Club ever dragged her back, the Club would go into the morning paper with her.
+THOUGHT: Not on her; they'd search her first. In the room, in her name, behind a dial Theodore's men couldn't count to.
 ELEANOR: The box. The safe. The drawer. Then a telephone call, and the door. Don't look back, Ellie.
 -> END
 
@@ -134,6 +136,14 @@ BARTENDER: Only for people I like. What do you want?
 BARTENDER: The Mother Superior owes me. Nobody from that Club goes near those nuns. Not even them.
 ELEANOR: A convent. Me.
 BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you.
+ELEANOR: One more thing, Tony. If the Club ever gets me back, you'll hear. You hear everything.
+BARTENDER: And?
+ELEANOR: Then you pick up a telephone. Not the cops; half of them drink here. The Tribune city desk.
+ELEANOR: You say: Room 507, the Aurelian. The drawer, then the safe. You don't give your name.
+BARTENDER: What's in the safe?
+ELEANOR: Their Club. Enough to get a reporter as far as your bar, and you as far as the old man's throat.
+BARTENDER: A dead lady's insurance. ...Fine. I hope I never have to make that call.
+THOUGHT: She told me all of it that night at the motel. She didn't know the safe was already empty. I'd emptied it myself.
 THOUGHT: She said Tony wouldn't take her money. That frightened her more than anything else he said.
 -> END
 
