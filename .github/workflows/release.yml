@@ -69,8 +69,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      # Same as CI: the Ink compiler InkWalkTests needs is only referenced in Debug (GodotInk.props).
       - name: Unit tests
-        run: dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --configuration Release
+        run: tools/run/test.sh unit --no-clean
 
   export:
     needs: [version, test]
