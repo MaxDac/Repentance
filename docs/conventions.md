@@ -14,6 +14,7 @@
 | Canonical story steps | `scripts/Debug/Playthrough/Playthrough.<Act>.cs` |
 | Regressions | `scripts/Debug/AutoPlay/AutoPlay.<Area>.cs` |
 | Dialogue | `dialogue/repentance.ink` |
+| Normal-game, film and test launchers / shared helpers | `tools/run/` |
 
 ## Partial classes
 
@@ -51,3 +52,7 @@ Exact Scripture quotations use Douay-Rheims; paraphrases are identified in the
 
 Comment only what needs clarifying. Update the matching page in `docs/` with the change, and `Walkthrough.md` for
 story changes.
+
+Launcher changes also require consistent examples throughout `docs/`, `AGENTS.md`, `CLAUDE.md` and the shared
+skills. Reuse `common.sh`/`common.ps1` for discovery, safe cleanup, build/import and logging; normal play's
+marker-free execution must not disable film/test completion checks.

@@ -18,6 +18,8 @@ Steps: `sprites`, `items`, `office`, `lobby`, `eleanor_room`, `speakeasy`, `alle
 `bedroom`, `act3`, `ui`, `puzzles`, `expansion_act1`, `expansion_act2`, `expansion_act3`, `closeup`, `icon`.
 
 After regenerating, run `godot_console --path . --headless --import` (stale imports show old textures).
+Alternatively, `tools/run/game.sh` / `tools\run\game.ps1` cleans generated caches, builds/imports and opens
+normal play for visual review. `--no-clean` / `-NoClean` preserves existing captures while still rebuilding/importing.
 
 ## Modules (`tools/art/`)
 

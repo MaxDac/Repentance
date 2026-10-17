@@ -11,7 +11,8 @@ tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, straight to the 
 
 ```bash
 tools/run/test.sh unit walk --no-clean
-tools/run/film.sh 4 --ending 5
+tools/run/film.sh --speed 4 --ending 5
+tools/run/film.sh -s hyper --from ending --ending 8
 ```
 
 Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
@@ -50,14 +51,21 @@ xvfb).
 
 ## Launchers (`tools/run/`)
 
-`test.ps1`/`test.sh`, `film.ps1`/`film.sh`, shared `common.ps1`/`common.sh`, and `check-godot.gd` (rejects
+`game.ps1`/`game.sh` (normal interactive play), `test.ps1`/`test.sh`, `film.ps1`/`film.sh`, shared
+`common.ps1`/`common.sh`, and `check-godot.gd` (rejects
 non-4.x or non-C# Godot before anything is deleted).
 
 Without `-NoClean`/`--no-clean`, they delete `.godot/`, `.mono/`, `bin/`, `obj/`, `tests/**/bin|obj`,
 `screenshots/`, `frames/`, `logs/` and the test user data (`user://autoplay_saves/`, `user://autoplay_settings.cfg`;
-never your saves or settings). **Godot suites and film always build and import**, including with `-NoClean`
+never your saves or settings). **Normal play, Godot suites and film always build and import**, including with `-NoClean`
 (log `logs/import.log`; an error stops the run). `unit` uses `dotnet test`; `art` uses Python only.
 Python discovery: `PYTHON`, `PATH`, or `%LOCALAPPDATA%\Programs\Python`.
+
+Normal play: `tools/run/game.sh` or `tools\run\game.ps1`. Both support the same cleanup opt-out and engine-path
+options as film/test (`--no-clean`, `--godot PATH` / `-NoClean`, `-Godot PATH`). They open the title screen with
+real sound and player data, without automation or a timeout, and wait for you to quit. `logs/game.log` records
+output; no test marker is required. Runtime error lines are reported as warnings (like film); nonzero exits
+fail, and build/import errors prevent launch. This is not a test-suite pass.
 
 `tests/test_run_scripts.py` tests the launchers themselves (run in CI's unit job).
 
@@ -104,7 +112,10 @@ viewer input except Space (pause), F11 / Alt+Enter, and Esc (prints `FILM STOPPE
 the test save/settings files. Log: `logs/film_<speed>x.log` (`..._from_<chapter>.log` with `--from`); `ERROR:`
 lines are warnings here (no audio device logs errors).
 
-Launchers: `film.ps1 -Speed <s> -Ending <n> -From <chapter>`; `film.sh <s> --ending <n> --from <chapter>`.
+Launchers: `film.ps1 -Speed <s> -Ending <n> -From <chapter>`;
+`film.sh --speed <s> --ending <n> --from <chapter>`. Bash also accepts `-s <s>` and `--speed=<s>`.
+Speed is optional and defaults to 1x in both launchers; Bash no longer accepts positional speed (`film.sh 4`).
+Ending/chapter options are unchanged.
 ## Unit tests (`tests/Repentance.Tests`)
 
 `net10.0` xunit project. It links the [Godot-free sources](conventions.md#godot-free-files) and imports

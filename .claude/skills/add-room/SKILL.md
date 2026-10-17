@@ -8,6 +8,9 @@ description: Add or change a Repentance room - a new scene, entry marker, exit, 
 Follow `docs/rooms-and-scenes.md`, "Adding a room" and "Invariants (checked by tests)".
 Art contracts: `docs/art-pipeline.md`.
 
+For requested interactive review, use `tools/run/game.sh` / `tools\run\game.ps1` (clean, build/import, normal
+title screen). Use direct Godot room arguments for bounded diagnostics; normal-play launchers do not forward them.
+
 ## Steps
 
 1. Edit the painter, regenerate art, and align overlay crop origins with scene positions; never hand-edit PNGs.

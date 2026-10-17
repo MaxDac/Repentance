@@ -4,28 +4,37 @@
 # Input is ignored, except Space (pause), F11 (full screen) and Esc (stop).
 # --from starts at a chapter: the earlier story still plays, unseen and muted, at 60x behind a black screen.
 #
-# Usage: tools/run/film.sh [1|2|4|8|16|60|hyper] [--ending 1-10|1-oldman|1-steps]
+# Usage: tools/run/film.sh [--speed|-s 1|2|4|8|16|60|hyper] [--ending 1-10|1-oldman|1-steps]
 #                          [--from act1|interlude1|act2|interlude2|act3|ending] [--no-clean] [--godot PATH]
 #   tools/run/film.sh            # 1x, ending 2
-#   tools/run/film.sh 4 --ending 5
-#   tools/run/film.sh hyper --from ending --ending 8
+#   tools/run/film.sh --speed 4 --ending 5
+#   tools/run/film.sh -s hyper --from ending --ending 8
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 speed=1 ending=2 from=act1 clean=1 godot_arg=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    1|2|4|8|16|60|hyper) speed="$1" ;;
-    --ending) ending="$2"; shift ;;
+    --speed|-s|--ending|--from|--godot)
+      if [ $# -lt 2 ] || [ -z "$2" ] || [[ "$2" == --* ]]; then
+        echo "$1 requires a value." >&2; exit 2
+      fi
+      case "$1" in
+        --speed|-s) speed="$2" ;;
+        --ending) ending="$2" ;;
+        --from) from="$2" ;;
+        --godot) godot_arg="$2" ;;
+      esac
+      shift ;;
+    --speed=*) speed="${1#*=}" ;;
     --ending=*) ending="${1#*=}" ;;
-    --from) from="$2"; shift ;;
     --from=*) from="${1#*=}" ;;
     --no-clean) clean=0 ;;
-    --godot) godot_arg="$2"; shift ;;
     -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
-    *) echo "Unknown argument '$1' (speed is 1, 2, 4, 8, 16, 60 or hyper)." >&2; exit 2 ;;
+    *) echo "Unknown argument '$1'. Use --speed <value> or -s <value> (default: 1); see --help." >&2; exit 2 ;;
   esac
   shift
 done
+case "$speed" in 1|2|4|8|16|60|hyper) ;; *) echo "--speed / -s must be 1, 2, 4, 8, 16, 60 or hyper." >&2; exit 2 ;; esac
 case "$ending" in 1|2|3|4|5|6|7|8|9|10|1-oldman|1-steps) ;; *) echo "--ending must be 1-10, 1-oldman or 1-steps." >&2; exit 2 ;; esac
 case "$from" in act1|interlude1|act2|interlude2|act3|ending) ;; *) echo "--from must be act1, interlude1, act2, interlude2, act3 or ending." >&2; exit 2 ;; esac
 if [ "$from" = act3 ] && [ "$ending" = 1-steps ]; then

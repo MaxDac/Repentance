@@ -11,6 +11,10 @@ No audio files; sounds and music are synthesized at startup.
 
 Buses are created at runtime and routed to Master; their volume follows `GameSettings` (0% mutes).
 
+For listening checks, `tools/run/game.sh` / `tools\run\game.ps1` uses real audio and player settings (unlike test
+suites' dummy driver). Runtime errors are printed and logged to `logs/game.log` as warnings, so inspect the log
+when diagnosing audio; a clean launcher exit alone does not prove sound played.
+
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,

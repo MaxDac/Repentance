@@ -1,4 +1,4 @@
-# Shared helpers for film.ps1 and test.ps1. Dot-source it; don't run it directly.
+# Shared helpers for game.ps1, film.ps1 and test.ps1. Dot-source it; don't run it directly.
 # Works in Windows PowerShell 5.1 and PowerShell 7.
 
 $ErrorActionPreference = 'Stop'
@@ -108,11 +108,14 @@ function Invoke-GodotRun {
     param(
         [string]$Godot, [string]$Name, [string[]]$UserArgs, [string[]]$Markers,
         [string[]]$EngineArgs = @(),
-        # Film mode: report logged errors without failing (e.g. no audio device makes the engine log WASAPI errors).
-        [switch]$ErrorsAreWarnings
+        # Film/normal play: report logged errors without failing (e.g. no audio device logs WASAPI errors).
+        [switch]$ErrorsAreWarnings,
+        # Normal interactive play has no automated completion marker.
+        [switch]$SkipMarkerCheck
     )
     New-Item -ItemType Directory -Force $LogDir | Out-Null
     $log = Join-Path $LogDir "$Name.log"
+    New-Item -ItemType File -Force $log | Out-Null
     Write-Host "== $Name ($($UserArgs -join ' '))" -ForegroundColor Cyan
     Push-Location $Root
     # Windows PowerShell 5.1 turns redirected native stderr into terminating errors under 'Stop'; success is judged
@@ -127,8 +130,10 @@ function Invoke-GodotRun {
     $text = @(Get-Content $log)
     $ok = $true
     if ($code -ne 0) { Write-Host "Godot exited with status $code" -ForegroundColor Red; $ok = $false }
-    $found = @($Markers | Where-Object { $m = $_; @($text | Where-Object { $_.Contains($m) }).Count -gt 0 })
-    if ($found.Count -eq 0) { Write-Host "None of '$($Markers -join "', '")' found in $log" -ForegroundColor Red; $ok = $false }
+    if (-not $SkipMarkerCheck) {
+        $found = @($Markers | Where-Object { $m = $_; @($text | Where-Object { $_.Contains($m) }).Count -gt 0 })
+        if ($found.Count -eq 0) { Write-Host "None of '$($Markers -join "', '")' found in $log" -ForegroundColor Red; $ok = $false }
+    }
     $errors = $text | Select-String -CaseSensitive -Pattern $ErrorPattern
     if ($errors) {
         $color = if ($ErrorsAreWarnings) { 'Yellow' } else { 'Red' }

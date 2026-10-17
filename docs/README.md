@@ -3,6 +3,10 @@
 Godot 4.7 .NET, C# (.NET 10), Ink via GodotInk; 480x270, generated art and synthesized audio.
 Player controls: [root README](../README.md).
 
+Normal play: `tools/run/game.sh` or `tools\run\game.ps1` cleans generated files, builds/imports and opens the
+game; player saves/settings are preserved. Setup and cleanup options: [Getting started](getting-started.md#first-run).
+Watch-only film: `tools/run/film.sh` (1x by default), or `--speed 4` / `-s 4`; see [Testing](testing.md).
+
 ## Reading order
 
 1. [Getting started](getting-started.md) - toolchain, build, import, run, command-line options.
