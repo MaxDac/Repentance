@@ -749,10 +749,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
-    - **Exception (ending 10).** If Eleanor refused both the Mother Superior and the old man's gin and powder in the
-      interludes, there is no persuasion: she stays where she is and says "Enough. I'm done with all of you. Go,
-      just go, return to your life, Micah Jones. Leave the pistol here, and go." Micah leaves the revolver on the
-      carpet and walks out to turn himself in: no kitchen, no fire, no shooting.
+    - **Exception (endings 10 and 11).** If Eleanor refused both the Mother Superior and the old man's gin and
+      powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
+      "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
+      the gun, no leaving her, no shooting her. The kitchen escape runs as on the convinced route (the fire, the
+      documents), and Micah keeps the revolver. The fire or the documents give ending 10, neither gives ending 11.
     - Eleanor always gets four turns, each with three lines for Micah. Only one line per turn is right, and only
       the four right lines in a row convince her. A wrong line silently breaks the chain: the conversation goes on,
       but she slips away (Micah's thoughts hint at it), and a right line after a wrong one no longer reaches her.
@@ -898,7 +899,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
   brother's footsteps.
 
-#### Endings 8, 9 and 10 - Eleanor's own way
+#### Endings 8 to 11 - Eleanor's own way
 
 These need Eleanor to have refused **both** the Mother Superior (First Interlude) and the old man's gin and powder
 (Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
@@ -922,20 +923,32 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   Caleb absolves her.
 - The last entry is Caleb's: he added her pages to his brother's journal from her confession.
 
-#### Option 10 - Prison, then Eleanor alone
+#### Option 10 - Outskirts, Eleanor leaves for her peace
 
-- The shoot route with both refusals: Eleanor sends Micah away ("Enough. I'm done with all of you...").
-- The prison parlour: Micah in the jumpsuit confesses to Caleb, who absolves him. Then the outskirts: Eleanor
-  alone, leaving Chicago.
-- The last entry is Caleb's: he heard her side from her after the trial, before she left Chicago.
+- The shoot route with both refusals ("Let's get out of here, quick."), and the mansion burned or Micah took the
+  documents.
+- The outskirts at night, the car as in ending 2: two car doors slam, and they both get out. She is tired, not
+  angry. She says "I can't go on like this, Micah, I can't be with you. I need ... peace." and walks off down the
+  road alone, out of sight. Micah stays by the car.
+- The last entry is Micah's, hopeful: he is looking for his own peace (sober, writing to Rose, back at Caleb's
+  church on Sundays). She told him the Second Interlude on the road, before she got out of the car.
+
+#### Option 11 - Prison, Eleanor visits for the last time
+
+- The shoot route with both refusals, and neither the fire nor the documents.
+- The prison parlour, Micah in the jumpsuit, Eleanor across the table, as in ending 4. She doesn't go back to
+  Theodore. She says "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the
+  Lord..." and leaves.
+- The last entry is Micah's, hopeful: he looks for his peace behind bars (the Our Father, Caleb's visits, letters to
+  Rose). She told him the Second Interlude across the parlour table.
 
 ### Present
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife (ending 1)
-or found his faith in prison (ending 6), or the journal ends on Eleanor's own way (endings 8, 9 and 10), the father
+or found his faith in prison (ending 6), or the journal ends on Eleanor's own way (endings 8 to 11), the father
 keeps the journal, saying "Maybe Leo would like to read it some day." In ending 7 he respects Caleb's decision and
 puts the journal back, maybe for Leo in a couple of years. In all other endings, he throws the journal back in the
-trunk. Endings 8, 9 and 10 keep the "The next morning" caption; only ending 7 skips it.
+trunk. Endings 8 to 11 keep the "The next morning" caption; only ending 7 skips it.
 
 Every last entry also says where the Second Interlude's pages came from, answering Daniel's "Not sure that's
 Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he never really knew."):
@@ -950,7 +963,8 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 | 7 | Caleb: what the Club's men said in court; or, if Micah shot only himself, she told him after the funeral. |
 | 8 | Micah: a letter from her, no return address, arrived at Rose's house. |
 | 9 | Caleb: from her confession. |
-| 10 | Caleb: from her after the trial, before she left Chicago. |
+| 10 | Micah: she told him on the road, before she got out of the car. |
+| 11 | Micah: she told him across the parlour table, the one time she came. |
 
 The First Interlude is always Micah's: she told him during the night at the motel.
 
@@ -987,7 +1001,7 @@ His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
 The adventure remains a compact, single-case indie point-and-click: sixteen puzzles for Micah and two for Eleanor, the alley encounter, optional
-dialogue, two playable Eleanor interludes and ten ending outcomes. The five collect-and-combine locations each sit on a route the story already
+dialogue, two playable Eleanor interludes and eleven ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)

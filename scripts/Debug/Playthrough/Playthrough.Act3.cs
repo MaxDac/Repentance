@@ -116,7 +116,7 @@ public sealed partial class Playthrough
             await Do(Verb.Walk, "stair");
             Expect("MansionStudy", "up the bootleggers' stair");
         });
-        bool free = _route is "2" or "3";
+        bool free = _route is "2" or "3" or "10";
         await Beat("mansion_study", async () =>
         {
             if (free)
@@ -137,21 +137,16 @@ public sealed partial class Playthrough
                 over = true;
                 return;
             }
-            if (_route is "6" or "7" or "10")
+            if (_route is "6" or "7")
             {
-                if (_route is "6" or "10")
+                if (_route == "6")
                 {
                     await Until(() => _game.Room?.Name == "Prison", 300);
                     Expect("Prison", "Micah turns himself in");
                 }
-                if (_route == "10")
-                {
-                    await Until(() => _game.Room?.Name == "Outskirts", 300);
-                    Check(_game.Player.Character == "eleanor_play", "Eleanor alone at the city's edge");
-                }
                 await TheEnd();
                 Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
-                string flag = _route switch { "6" => Endings.Repented, "7" => Endings.ShotEleanor, _ => Endings.EleanorDismissed };
+                string flag = _route == "6" ? Endings.Repented : Endings.ShotEleanor;
                 Check(Gs.HasFlag(flag), $"route {_route}: {flag}");
                 over = true;
                 return;
@@ -168,8 +163,10 @@ public sealed partial class Playthrough
             await WaitIdle();
             Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
             Check(Gs.HasFlag(Endings.EleanorConvinced) == (_route is "2" or "4"), "Eleanor's answer follows the route");
+            Check(Gs.HasFlag(Endings.EleanorWeary) == (_route is "10" or "11"), "worn out, Eleanor follows without persuasion only on her routes");
+            Check(Endings.EleanorFollows(Gs.HasFlag) == (_route is "2" or "4" or "10" or "11"), "Eleanor comes to the kitchen only when she follows");
             Expect("MansionKitchen", "the escape through the kitchen");
-        }, roundTrip: _route is "2" or "3" or "4" or "5" or "8" or "9");
+        }, roundTrip: _route is "2" or "3" or "4" or "5" or "8" or "9" or "10" or "11");
         if (over) return;
         if (_route is "8" or "9")
         {

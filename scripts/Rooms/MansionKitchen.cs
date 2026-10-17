@@ -13,6 +13,12 @@ public partial class MansionKitchen : Room
     private bool Escaping => State.HasFlag("escaping");
     private bool Coda => State.HasFlag("eleanor_coda");
 
+    /// <summary>Eleanor waits by the door on the escape only if she came: convinced, or worn out after the shot.</summary>
+    protected override void OnRefresh()
+    {
+        if (FindActor("eleanor") is { } eleanor && !Endings.EleanorFollows(State.HasFlag)) eleanor.Visible = false;
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (Coda)
@@ -28,7 +34,7 @@ public partial class MansionKitchen : Room
             await Game.Run(async () =>
             {
                 await Wait(0.4);
-                if (State.HasFlag(Endings.EleanorConvinced))
+                if (Endings.EleanorFollows(State.HasFlag))
                     await Say("eleanor", "The back door, Micah. Please. Let's go.");
                 else
                     await Think("Alone. She chose that house. Or the house chose her.");
@@ -41,7 +47,7 @@ public partial class MansionKitchen : Room
             await Game.Run(async () =>
             {
                 await Wait(0.3);
-                if (State.HasFlag(Endings.EleanorConvinced))
+                if (Endings.EleanorFollows(State.HasFlag))
                 {
                     await Say("eleanor", "Micah... there's smoke coming up through the floor. What did you do?");
                     await Say("Closed the Club's account. Out. Now.");
@@ -78,7 +84,7 @@ public partial class MansionKitchen : Room
                 await Say("Not back down there. It's all fire under that trapdoor.");
                 return true;
             case ("cellar_door", Verb.Hand or Verb.Walk) when Escaping:
-                if (State.HasFlag(Endings.EleanorConvinced))
+                if (Endings.EleanorFollows(State.HasFlag))
                 {
                     await Say("eleanor", "Micah? The door's that way.");
                     await Say("Wait for me by the door. One minute.");

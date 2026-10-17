@@ -65,16 +65,19 @@ public class EndingsTests
     [InlineData(8, true)]
     [InlineData(9, true)]
     [InlineData(10, true)]
+    [InlineData(11, true)]
     public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
         Assert.Equal(keeps, Endings.KeepsJournal(ending));
 
     private const string Abbess = "eleanor_refused_abbess", Drugs = "eleanor_refused_drugs";
 
     [Theory]
-    // Eleanor's coda: struck and burned, struck only; and her sending Micah away
+    // Eleanor's coda: struck and burned, struck only; and her following Micah, worn out, after the shot
     [InlineData(8, Abbess, Drugs, "spared_oldman", "eleanor_struck", "eleanor_burned")]
     [InlineData(9, Abbess, Drugs, "spared_oldman", "eleanor_struck")]
-    [InlineData(10, Abbess, Drugs, "shot_oldman", "eleanor_dismissed")]
+    [InlineData(10, Abbess, Drugs, "shot_oldman", "eleanor_weary", "mansion_exploded")]
+    [InlineData(10, Abbess, Drugs, "shot_oldman", "eleanor_weary", "took_documents")]
+    [InlineData(11, Abbess, Drugs, "shot_oldman", "eleanor_weary")]
     // the refusals alone never change an outcome
     [InlineData(1, Abbess, Drugs, "gave_up_steps")]
     [InlineData(1, Abbess, Drugs, "walked_away")]
@@ -84,7 +87,8 @@ public class EndingsTests
     [InlineData(2, Abbess, "eleanor_convinced", "mansion_exploded")]
     [InlineData(7, Drugs, "shot_eleanor")]
     // the coda's flags win over everything Micah's part could have set
-    [InlineData(10, Abbess, Drugs, "eleanor_dismissed", "eleanor_convinced", "mansion_exploded")]
+    [InlineData(10, Abbess, Drugs, "eleanor_weary", "eleanor_convinced", "mansion_exploded")]
+    [InlineData(11, Abbess, Drugs, "eleanor_weary", "eleanor_convinced")]
     [InlineData(8, Abbess, Drugs, "eleanor_struck", "eleanor_burned", "mansion_exploded", "took_documents")]
     public void EleanorsEndingsTakePrecedence(int ending, params string[] flags) =>
         Assert.Equal(ending, Endings.Resolve(Flags(flags)));
@@ -96,6 +100,14 @@ public class EndingsTests
         Assert.False(Endings.EleanorHeldOut(Flags(Abbess)));
         Assert.False(Endings.EleanorHeldOut(Flags(Drugs)));
         Assert.False(Endings.EleanorHeldOut(Flags()));
+    }
+
+    [Fact]
+    public void EleanorFollowsWhenConvincedOrWornOut()
+    {
+        Assert.True(Endings.EleanorFollows(Flags("eleanor_convinced")));
+        Assert.True(Endings.EleanorFollows(Flags("eleanor_weary")));
+        Assert.False(Endings.EleanorFollows(Flags("eleanor_refused")));
     }
 
     [Fact]

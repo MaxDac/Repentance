@@ -68,7 +68,7 @@ User options go after `--`, e.g. `godot_console --path . --quit-after 600 -- --r
 | `--settings-test` / `--pause-test` / `--walk-test` | Focused suites. Markers `SETTINGS TEST OK` / `PAUSE TEST OK` / `WALK TEST OK` |
 | `--clock=fast\|normal` | Automated runs only: 60x (default) or 8x game time |
 
-Endings: `1`-`10`, `1-oldman`, `1-steps`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.
+Endings: `1`-`11`, `1-oldman`, `1-steps`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.
 
 Useful Godot options: `--quit-after N` (frames; use it for bounded diagnostic runs, not interactive play), `--headless`,
 `--write-movie frames\f.png --fixed-fps 30` (record what the game draws, 480x270 PNGs), `--audio-driver Dummy`.

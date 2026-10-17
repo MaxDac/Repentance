@@ -246,14 +246,11 @@ public partial class MansionBedroom : Room
         await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
         if (Endings.EleanorHeldOut(State.HasFlag))
         {
-            // She sends him away: no persuasion, no kitchen, no fire. He leaves the revolver and gives himself up.
-            await Talk("eleanor_dismiss");
-            State.TakeItem("revolver");
-            await Game.WalkTo(Door);
-            await Act3.End();
-            return;
+            // Worn out, she only wants to leave: no persuasion. She follows him to the kitchen (endings 10 and 11).
+            await Talk("eleanor_weary");
         }
-        await Talk("eleanor_persuade");
+        else
+            await Talk("eleanor_persuade");
 
         if (State.HasFlag(Endings.Repented))
         {
@@ -280,7 +277,7 @@ public partial class MansionBedroom : Room
             return;
         }
 
-        if (State.HasFlag(Endings.EleanorConvinced) && eleanor != null)
+        if (Endings.EleanorFollows(State.HasFlag) && eleanor != null)
             await eleanor.MoveTo(MicahAims + new Vector2(36, 2), EleanorHurry);
         State.SetFlag("escaping");
         await Game.WalkTo(Door);

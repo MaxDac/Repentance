@@ -150,7 +150,7 @@ From here the story follows Walkthrough.md:
    If Eleanor refused both Agatha and the old man: after the Our Father the player is Eleanor in the sheet, with the
    old man's back turned. Return to bed (ending 1), or take the candlestick off the nightstand and strike him, then
    leave by the kitchen door, optionally burning the house from the cellar first (Micah's lantern, then the barrel).
-   If Micah shoots instead, she sends him away ("Enough. I'm done with all of you...") and he turns himself in.
+   If Micah shoots instead, she only says, worn out, "Let's get out of here, quick." and follows him: no persuasion.
 33. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
    whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
 34. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
@@ -158,10 +158,11 @@ From here the story follows Walkthrough.md:
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
    7 murder and/or suicide in the bedroom, the last entry written by Caleb; 8 coffee with Rose, then Eleanor alone
    at the city's edge (she struck the old man and burned the house); 9 coffee with Rose, then Eleanor in a jumpsuit
-   confessing to Caleb, who absolves her (she struck him and didn't burn it); 10 Micah confesses to Caleb in prison,
-   then Eleanor leaves Chicago alone (she sent him away). Every last entry says who wrote Eleanor's pages. Each ends
+   confessing to Caleb, who absolves her (she struck him and didn't burn it); 10 out of town, where Eleanor (worn out,
+   she followed without persuasion) leaves Micah by the car to look for her peace (signed evidence or fire); 11 prison,
+   where she visits once to wish him his peace (neither). Every last entry says who wrote Eleanor's pages. Each ends
    Act Three; the next morning (no caption after ending 7) Daniel keeps the journal for Leo if Micah returned to Rose
-   or to the faith, or in endings 8-10, saying
+   or to the faith, or in endings 8-11, saying
    "Maybe Leo would like to read it some day." After ending 7 he respects Caleb's decision and puts it back.
    Otherwise, he puts it back in the trunk. *The End.*
 
@@ -192,7 +193,10 @@ flowchart TD
     out -- yes --> E8["8: Rose, then Eleanor alone at the city's edge"]
     out -- no --> E9["9: Rose, then Eleanor confesses to Caleb in prison"]
     bedroom -- "Shoot him" --> shot{"Eleanor held out?"}
-    shot -- yes --> E10["10: she sends him away; Micah confesses, Eleanor leaves alone"]
+    shot -- yes --> weary["Let's get out of here, quick: she follows"]
+    weary --> wescape["Escape: optional cellar fire"]
+    wescape -- "evidence or fire" --> E10["10: out of town; she leaves for her peace"]
+    wescape -- "neither" --> E11["11: prison; she visits once, for his peace"]
     shot -- no --> persuade["Persuasion: four turns"]
     persuade -- "Turn yourself in (turn 1)" --> E6["6: prison, Rose visits"]
     persuade -- "Shoot Eleanor (turn 4) / footsteps" --> E7["7: murder and/or suicide"]
@@ -215,7 +219,8 @@ How each decision is made:
   through the study, down to the kitchen and out of the back door. To burn the house she goes down to the cellar
   on the way (from the kitchen, or by the panel behind the study bar) and lights the Club's rye with Micah's lantern
   (`eleanor_burned`).
-- **Shoot him**: if Eleanor held out, she sends Micah away (`eleanor_dismissed`): no persuasion and no escape.
+- **Shoot him**: if Eleanor held out, she is too worn out to argue: "Let's get out of here, quick." (`eleanor_weary`).
+  No persuasion: she follows him to the kitchen, and the escape decides between endings 10 and 11.
   Otherwise the persuasion: four turns, and only the four right lines in a row convince her (`eleanor_convinced`);
   one wrong line breaks the chain for good. Turning himself in is offered on the first turn only (`repented`),
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
@@ -228,7 +233,7 @@ How each decision is made:
 | Ending | Condition (in priority order) | Scene |
 |---|---|---|
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Micah's coffee with Rose, then Eleanor alone (8) or in prison with Caleb (9) |
-| 10 | Eleanor sent Micah away | Micah confesses to Caleb in prison, then Eleanor leaves Chicago |
+| 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose |
 | 6 | Turned himself in | Prison, Rose visits |
 | 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
@@ -237,8 +242,8 @@ How each decision is made:
 
 The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
-the coda (endings 1, 8, 9) and in the epilogues of endings 8 and 10. Daniel keeps the journal for Leo after endings
-1, 6, 8, 9 and 10.
+the coda (endings 1, 8, 9) and in the epilogue of ending 8. Daniel keeps the journal for Leo after endings
+1, 6, 8, 9, 10 and 11.
 
 ## Story notes
 

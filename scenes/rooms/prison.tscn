@@ -38,10 +38,6 @@ polygon = PackedVector2Array(0, 230, 479, 230, 479, 269, 0, 269)
 position = Vector2(196, 242)
 metadata/facing = 4
 
-[node name="micah_caleb" type="Marker2D" parent="Entries"]
-position = Vector2(196, 242)
-metadata/facing = 4
-
 [node name="eleanor" type="Marker2D" parent="Entries"]
 position = Vector2(196, 242)
 metadata/facing = 4
@@ -73,7 +69,7 @@ texture = ExtResource("11_eleanor_seated")
 centered = false
 offset = Vector2(-32, -96)
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "ending_4"
+ShowIfFlags = "eleanor_visits"
 
 [node name="Caleb" type="Sprite2D" parent="."]
 position = Vector2(284, 222)

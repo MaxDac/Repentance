@@ -366,7 +366,7 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    private int EndingNumber() => Enumerable.Range(1, 10).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
+    private int EndingNumber() => Enumerable.Range(1, 11).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
 
     /// <summary>
     /// After Act 3: Daniel reads the last entry. He keeps the journal for Leo if Micah found his way back
