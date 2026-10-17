@@ -83,19 +83,12 @@ ELEANOR_FIGURE = dict(h=62, sw=0.1, hw=0.044, waist=0.054, hipw=0.09, leg_r=0.78
                       profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.029, 0.029), (0.232, 0.085, -0.036, 0.04),
                                (0.25, 0.1, -0.048, 0.059), (0.31, 0.095, -0.052, 0.07), (0.40, 0.054, -0.048, 0.059),
                                (0.47, 0.09, -0.07, 0.046), (0.53, 0.0774, -0.06, 0.044)], flat_front=True)
-# Her hips, seat and stance are a tenth fuller than the levels above; every outfit inherits them.
-_HIPS = 1.1
-ELEANOR_FIGURE.update(hw=ELEANOR_FIGURE["hw"] * _HIPS, hipw=ELEANOR_FIGURE["hipw"] * _HIPS,
-                      rear=tuple(v * _HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
-                      profile=[(y, w * (_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]])
 # A 1920s widow's black: the high-necked, long-sleeved black bodice of her portrait, a dropped waist with a sash at
 # the hip, a pleated skirt to mid-calf, sheer dark stockings, black heels and a short strand of white pearls.
 # Her outfits keep these curves; the black dress, of heavier cloth, softens bust and seat a little.
 _CURVES = dict(bust_hi=0, bust=ELEANOR_FIGURE["bust"], rear=ELEANOR_FIGURE["rear"])
-# Her skirts follow her legs to the hem rather than hanging from the hip width.
-_HEM_LEGS = dict(hem_legs=True, hem_pad=0.025)
-ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035 * _HIPS, 0.044 * _HIPS, 0.52), "torso": "1c1a20",
-           "high_neck": 0.19, "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034, **_HEM_LEGS), "stockings": "5e4a46", "shoes": "120e10",
+ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035, 0.044, 0.52), "torso": "1c1a20",
+           "high_neck": 0.19, "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034), "stockings": "5e4a46", "shoes": "120e10",
            "decals": [("belt", 0.465, "4a3c48"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "4a3c48"), ("pleats", 0.53),
                       ("strand", 0.212, 0.25, 0.036, "f2eee4", "b8b0a4", 0.058)]}
 # Rose, as in her close-up: long wavy blonde hair over the shoulders, blue-green eyes, a cream knit cardigan open
@@ -204,7 +197,7 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
 ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": "ecc4a2",
                          "sleeves": "ecc4a2", "torso": "781f27",
-                         "coat": dict(MASKED_WOMAN["coat"], col="781f27", **_HEM_LEGS),
+                         "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
 # The implied-nude variant: thin front locks lie flat over the chest, one
 # hand lowered over her lap, the other arm hanging at her side.
@@ -223,7 +216,7 @@ HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e2
 SHEET_BODY = dict(bust_hi=0, profile=None, neck_r=0.029, neck_lean=0.0, neck_drop=0.026, bust=0.078, bust_y=0.33, rear=(0.035, 0.058, 0.52))
 # Eleanor out of Harrington's bed, wrapped in the white sheet from the armpits down, bare shoulders and arms.
 ELEANOR_SHEET = dict(ELEANOR, **_CURVES, torso="e8e4dc", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
-                     coat=dict(col="e8e4dc", top=0.40, hem=0.97, flare=0.03, **_HEM_LEGS), stockings="e8e4dc", shoes="ecc4a2",
+                     coat=dict(col="e8e4dc", top=0.40, hem=0.97, flare=0.03), stockings="e8e4dc", shoes="ecc4a2",
                      decals=[("strip", 0.30, 0.95, 0.01, 0.01, "c8c4bc")])
 # Micah in Joliet: a faded tan prison coverall buttoned to the throat.
 MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a", sleeves="b8743a",
@@ -232,7 +225,7 @@ MICAH_INMATE = dict(MICAH_HEAD, h=66, sw=0.142, torso="b8743a", collar="b8743a",
 # Eleanor at the club before she goes on: a short pink silk gown above the knee, bare shoulders, her pearls.
 ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"], neckline=0.262, collar=None,
                     far_arm_behind=True,
-                    coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03, **_HEM_LEGS),
+                    coat=dict(col="e08ca4", top=0.40, hem=0.66, flare=0.03, hem_legs=True, hem_pad=0.025),
                     stockings="e4c4ae", shoes="7a3448",
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.42, "b85a78")])
 # Eleanor in Joliet: a grey prison jumpsuit buttoned to the throat, cut like Micah's coverall.
