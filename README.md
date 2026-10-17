@@ -14,6 +14,10 @@ Built with **Godot 4.7 (.NET)** and **C#**, with dialogue written in **Ink** (vi
 
 Requires Godot 4.7.x **.NET** and the .NET 10 SDK.
 
+Normal play: `tools/run/game.sh` (Linux) or `tools\run\game.ps1` (PowerShell). The launcher cleans generated
+files, builds/imports and opens the game; player saves/settings are preserved. Use `--no-clean` / `-NoClean`
+to skip deletion. For manual steps without cleanup:
+
 ```powershell
 dotnet build                               # before the first import: the Ink importer is C#
 godot_console --path . --headless --import # after a fresh clone or art/font/Ink changes

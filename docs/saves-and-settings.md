@@ -61,5 +61,9 @@ buses, window mode and close-ups listen to it.
 
 ## Test isolation
 
+Normal-play launchers (`tools/run/game.sh` / `tools\run\game.ps1`) use the real player saves and settings.
+Their default cleanup preserves both, removing only generated files and isolated test data; `--no-clean` /
+`-NoClean` skips cleanup but still builds/imports.
+
 Test/film data paths and cleanup: [Getting started](getting-started.md#where-your-data-goes) and
 [Testing](testing.md#launchers-toolsrun). Player saves and settings are untouched; film mode can still toggle the window.

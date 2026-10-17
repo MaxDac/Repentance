@@ -8,6 +8,9 @@ description: Change Repentance's story - dialogue in dialogue/repentance.ink, ro
 Follow `docs/story-and-dialogue.md`, especially "Ink conventions" and "Checklist for a story change".
 Spec: `Walkthrough.md`. Test contracts and allowlists: `docs/testing.md`.
 
+For requested hands-on review use `tools/run/game.sh` / `tools\run\game.ps1`. Watch-only Bash film speed is
+optional (default 1x): `tools/run/film.sh --speed 4` or `-s 4`, never positional. Neither replaces story tests.
+
 ## Steps
 
 1. Update the spec before implementation.

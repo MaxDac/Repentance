@@ -20,6 +20,21 @@ Launchers find Godot through `-Godot`/`--godot`, `GODOT`, `PATH` (`godot_console
 
 ## First run
 
+For normal interactive play, use a launcher:
+
+```powershell
+tools\run\game.ps1                         # bash: tools/run/game.sh
+tools\run\game.ps1 -NoClean                # bash: tools/run/game.sh --no-clean
+```
+
+By default it removes generated caches/builds, logs, captures and test data, then builds, imports and opens the
+title screen. Player saves and settings are preserved. `-NoClean`/`--no-clean` skips deletion, not build/import.
+Use `-Godot <path>`/`--godot <path>` to choose an engine. The launcher waits until you quit; no automation or
+timeout is added. Output goes to `logs/game.log`; runtime errors are reported as warnings, but a nonzero game
+exit fails. Probe, build or import failures stop launch.
+
+For the equivalent manual build/import/run steps without cleanup:
+
 ```powershell
 dotnet build                               # 1. C# first: the Ink importer is a C# plugin
 godot_console --path . --headless --import # 2. import art, fonts, compile Ink into .godot/
@@ -55,7 +70,7 @@ User options go after `--`, e.g. `godot_console --path . --quit-after 600 -- --r
 
 Endings: `1`-`10`, `1-oldman`, `1-steps`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.
 
-Useful Godot options: `--quit-after N` (frames; always use it on manual runs), `--headless`,
+Useful Godot options: `--quit-after N` (frames; use it for bounded diagnostic runs, not interactive play), `--headless`,
 `--write-movie frames\f.png --fixed-fps 30` (record what the game draws, 480x270 PNGs), `--audio-driver Dummy`.
 
 ## Where your data goes

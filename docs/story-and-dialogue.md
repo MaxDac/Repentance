@@ -183,3 +183,7 @@ click or refusal walks her past him to the door.
 
 The unit tests that guard the story (`StoryIntegrityTests`, `InkWalkTests`) and their allowlists are described in
 [Testing](testing.md#story-tests-and-allowlists). Agents: `.claude/skills/story-change/SKILL.md`.
+
+For hands-on story review use `tools/run/game.sh` / `tools\run\game.ps1` (normal player data, no automation).
+For a requested watch-only review, `tools/run/film.sh --speed 4 --ending 5` selects speed explicitly; omit
+`--speed` for 1x or use `-s 4`. These reviews do not replace the required test suites.
