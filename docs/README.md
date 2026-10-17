@@ -1,7 +1,7 @@
 # Developer documentation
 
 Godot 4.7 .NET, C# (.NET 10), Ink via GodotInk; 480x270, generated art and synthesized audio.
-Player controls: [root README](../README.md).
+Project purpose and licence: [root README](../README.md). Player controls and settings: [Playing](playing.md).
 
 Normal play: `tools/run/game.sh` or `tools\run\game.ps1` cleans generated files, builds/imports and opens the
 game; player saves/settings are preserved. Setup and cleanup options: [Getting started](getting-started.md#first-run).
@@ -16,6 +16,7 @@ Watch-only film: `tools/run/film.sh` (1x by default), or `--speed 4` / `-s 4`; s
 
 | Page | Covers |
 |---|---|
+| [Playing](playing.md) | Player controls, verb wheel, satchel, notepad, pause menu, settings |
 | [Core framework](core-framework.md) | `Game` and its partials, `GameState`, `Player`, `Actor`, `Hotspot`, `WalkArea`, poses, helpers |
 | [Rooms and scenes](rooms-and-scenes.md) | Room scene layout, room scripts, entries/exits, adding a room, scene invariants |
 | [Story and dialogue](story-and-dialogue.md) | Ink conventions, `DialogueManager`, flags, items, acts, interludes, puzzles, endings |
