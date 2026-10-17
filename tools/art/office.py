@@ -150,16 +150,17 @@ DESK_BOTTLE = (214, 80)
 DESK_CUP = (224, 92)
 
 
-def coat_rack(img):
+def coat_rack(img, hat=True):
     d = ImageDraw.Draw(img)
     d.line([(162, 30), (162, 126)], fill=hx("2a1a10"), width=2)
     d.polygon([(154, 127), (170, 127), (162, 120)], fill=hx("2a1a10"))
     for dx in (-6, 6):
         d.line([(162, 32), (162 + dx, 28)], fill=hx("2a1a10"))
     # spare fedora and scarf
-    d.ellipse([150, 28, 172, 33], fill=hx("2a2a30"))
-    d.rectangle([155, 22, 168, 30], fill=hx("2a2a30"))
-    d.line([(155, 28), (168, 28)], fill=hx("6a1a1a"))
+    if hat:
+        d.ellipse([150, 28, 172, 33], fill=hx("2a2a30"))
+        d.rectangle([155, 22, 168, 30], fill=hx("2a2a30"))
+        d.line([(155, 28), (168, 28)], fill=hx("6a1a1a"))
     d.polygon([(158, 34), (166, 34), (168, 70), (163, 68), (160, 72), (157, 40)], fill=hx("6a2420"))
 
 
@@ -202,7 +203,7 @@ def desk(img):
     shadow(img, "rect", [176, 150, 344, 160], 0.55, 4)
 
 
-def desk_props(img, lamp_on=True):
+def desk_props(img, lamp_on=True, storm=False):
     d = ImageDraw.Draw(img)
     # banker's lamp
     d.rectangle([194, 92, 198, 101], fill=hx("b8904a"))
@@ -225,6 +226,8 @@ def desk_props(img, lamp_on=True):
     d.ellipse([318, 90, 328, 98], fill=hx("16161a"))
     d.line([(314, 88), (332, 88)], fill=hx("16161a"), width=3)
     d.ellipse([320, 93, 326, 97], fill=hx("c8c0a8"))
+    if storm:
+        return
     if not lamp_on:
         bottle(d, *DESK_BOTTLE)
         cup(d, *DESK_CUP)
@@ -250,16 +253,17 @@ def lights_out(img):
     light(img, "rect", [bx + 6, by + 8, bx + 8, by + 22], hx("ff4a4a"), 0.35, 1)
 
 
-def window(img):
+def window(img, neon=True):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 352, 16, 470, 98
     # the rain is animated in-game (Rain node in office.tscn)
-    city(img, (x0, y0, x1, y1), seed=11, lit=0.28, rain=False)
-    # red neon HOTEL sign on the building across
+    city(img, (x0, y0, x1, y1), seed=11, lit=0.28 if neon else 0.0, rain=False)
+    # red neon HOTEL sign on the building across (dead in the storm blackout)
     d.rectangle([428, 44, 438, 90], fill=hx("1a0c10"))
     for i, ch in enumerate("HOTEL"):
-        text(img, (433, 49 + i * 9), ch, hx("ff4a4a"), size=8)
-    light(img, "rect", [420, 40, 446, 94], hx("ff2a2a"), 0.35, 6)
+        text(img, (433, 49 + i * 9), ch, hx("ff4a4a" if neon else "3a2226"), size=8)
+    if neon:
+        light(img, "rect", [420, 40, 446, 94], hx("ff2a2a"), 0.35, 6)
     # frame, mullion, blinds half-drawn
     d.rectangle([x0 - 4, y0 - 4, x1 + 4, y1 + 4], outline=hx("2a1a10"), width=4)
     d.line([(411, y0), (411, y1)], fill=hx("2a1a10"), width=3)
@@ -279,7 +283,8 @@ def window(img):
         y = 150 + i * 8
         light(img, "polygon", [(330 + i * 4, y), (440 + i * 6, y), (444 + i * 6, y + 3), (334 + i * 4, y + 3)],
               hx("8090c0"), 0.22, 1)
-    light(img, "ellipse", [380, 110, 480, 200], hx("ff3030"), 0.12, 20)
+    if neon:
+        light(img, "ellipse", [380, 110, 480, 200], hx("ff3030"), 0.12, 20)
 
 
 def paint(drawer=None, door_state="closed", lamp_on=True):
@@ -303,6 +308,280 @@ def paint(drawer=None, door_state="closed", lamp_on=True):
     vignette(img, 0.55)
     return img
 
+
+# =====================================================================================================================
+# The storm after the alley: the power is out on the whole block, lamp and HOTEL sign dead. The cup and Micah's hat
+# are on the desk (the bottle is in his hand until he sets it down). Painted twice: black, and under a lightning flash.
+# =====================================================================================================================
+STORM_HAT = (240, 89)       # art coordinates of the hat's bounding box top-left (22 x 13)
+STORM_HAT_BOX = (238, 87 + TOP, 264, 103 + TOP)
+STORM_BOTTLE_BOX = (212, 78 + TOP, 225, 105 + TOP)
+# the glass below the blinds, where the lightning shows the reflection (screen coordinates)
+STORM_GLASS_BOX = (348, 46 + TOP, 474, 102 + TOP)
+
+
+def fedora(d, x, y):
+    """Micah's fedora lying on the desk, its top-left at (x, y): 22 x 13."""
+    felt, band, dark = hx("6e4a30"), hx("1a120e"), hx("4a3020")
+    d.ellipse([x, y + 7, x + 21, y + 12], fill=dark)
+    d.ellipse([x, y + 6, x + 21, y + 11], fill=felt)
+    d.rounded_rectangle([x + 5, y, x + 16, y + 9], 3, fill=felt)
+    d.line([(x + 9, y + 1), (x + 11, y + 3)], fill=dark)  # the pinch in the crown
+    d.rectangle([x + 5, y + 6, x + 16, y + 7], fill=band)
+    d.line([(x + 6, y + 1), (x + 6, y + 5)], fill=hx("8a6444"))
+
+
+def storm_desk(img, hat=True, bottle=False):
+    d = ImageDraw.Draw(img)
+    cup(d, *DESK_CUP)
+    if bottle:
+        bottle_(d, *DESK_BOTTLE)
+    if hat:
+        fedora(d, *STORM_HAT)
+
+
+bottle_ = bottle
+
+
+def _bolt(img, seed):
+    """A forked lightning bolt in the sky above the roofs, behind the window glass."""
+    import random
+    rng = random.Random(seed)
+    d = ImageDraw.Draw(img)
+    x, y = 384, 47
+    pts = [(x, y)]
+    while y < 74:
+        x += rng.randint(-4, 3)
+        y += rng.randint(3, 6)
+        pts.append((x, y))
+    d.line(pts, fill=hx("f4f6ff"), width=1)
+    fx, fy = pts[len(pts) // 2]
+    d.line([(fx, fy), (fx - 6, fy + 5), (fx - 8, fy + 11)], fill=hx("c8d4ff"))
+    light(img, "polygon", [(p[0] - 1, p[1]) for p in pts] + [(p[0] + 2, p[1]) for p in pts[::-1]], hx("c8d4ff"), 0.5, 3)
+
+
+def paint_storm(lit=False, hat=True, bottle=False, door_state="closed"):
+    img = Image.new("RGB", (W, H))
+    walls(img)
+    floor(img)
+    door(img, door_state)
+    cabinet(img, whiskey=False)
+    coat_rack(img, hat=False)
+    clock(img)
+    window(img, neon=False)
+    desk(img)
+    desk_props(img, lamp_on=False, storm=True)
+    storm_desk(img, hat, bottle)
+    x0, y0, x1, y1 = WINDOW
+    if lit:
+        # the sky flares white behind the roofs; the flash pours in cold and flat, hard on the side facing the glass
+        sky = Image.new("RGB", (x1 - x0 + 1, y1 - y0 + 1), hx("b8c4e8"))
+        glass = img.crop((x0, y0, x1 + 1, y1 + 1))
+        img.paste(Image.blend(glass, sky, 0.3), (x0, y0))
+        _bolt(img, 3)
+        window_frame(img)
+        shadow(img, "rect", [0, 0, W, H], 0.4, 0, hx("5a6a9a"))
+        # the window's shape thrown across the floor, the mullion and bar as dark crosses in it
+        light(img, "polygon", [(352, 98), (470, 98), (470, 240), (250, 240)], hx("c8d8ff"), 0.22, 6)
+        shadow(img, "polygon", [(409, 98), (413, 98), (392, 240), (384, 240)], 0.25, 2)
+        light(img, "rect", [x0 - 6, y0 - 6, x1 + 6, y1 + 6], hx("e8eeff"), 0.18, 6)
+    else:
+        window_frame(img)
+        glass = img.crop((x0, y0, x1 + 1, y1 + 1))
+        shadow(img, "rect", [0, 0, W, H], 0.9, 0, hx("2a2a4a"))
+        img.paste(Image.blend(glass, Image.new("RGB", glass.size, hx("10141e")), 0.7), (x0, y0))
+        light(img, "polygon", [(352, 16), (470, 16), (500, 200), (300, 200)], hx("3a4a78"), 0.12, 10)
+    img = tall(img, ceiling)
+    shadow(img, "rect", [0, 0, W, TOP], 0.45 if lit else 0.9, 0, hx("5a6a9a" if lit else "2a2a4a"))
+    vignette(img, 0.6)
+    return img
+
+
+def window_frame(img):
+    """The window's frame, mullion and blinds again, over a repainted glass."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = WINDOW
+    d.rectangle([x0 - 4, y0 - 4, x1 + 4, y1 + 4], outline=hx("2a1a10"), width=4)
+    d.line([(411, y0), (411, y1)], fill=hx("2a1a10"), width=3)
+    d.line([(x0, 56), (x1, 56)], fill=hx("2a1a10"), width=2)
+    for y in range(y0, 46, 3):
+        d.line([(x0, y), (x1, y)], fill=hx("8a8270"))
+        d.line([(x0, y + 1), (x1, y + 1)], fill=hx("5a5446"))
+
+
+def _bez(p0, p1, p2, n=24):
+    return [((1 - u) ** 2 * p0[0] + 2 * (1 - u) * u * p1[0] + u * u * p2[0],
+             (1 - u) ** 2 * p0[1] + 2 * (1 - u) * u * p1[1] + u * u * p2[1]) for u in (i / (n - 1) for i in range(n))]
+
+
+def _tube(d, pts, r0, r1, fill=255, S=4):
+    """Circles along a polyline (crop pixels), radius tapering r0 -> r1, drawn on a canvas S times larger."""
+    import numpy as np
+    pts = [np.array(p, float) for p in pts]
+    seg = [np.linalg.norm(b - a) for a, b in zip(pts, pts[1:])]
+    total, run = max(sum(seg), 1e-6), 0.0
+    for a, b, L in zip(pts, pts[1:], seg):
+        for i in range(max(2, int(L * S * 2))):
+            u = i / max(1, int(L * S * 2) - 1)
+            x, y = (a + (b - a) * u) * S
+            r = (r0 + (r1 - r0) * (run + L * u) / total) * S
+            d.ellipse([x - r, y - r, x + r, y + r], fill=fill)
+        run += L
+
+
+def _poly(d, pts, fill=255, S=4):
+    d.polygon([(x * S, y * S) for x, y in pts], fill=fill)
+
+
+def _ell(d, cx, cy, rx, ry, fill=255, S=4):
+    d.ellipse([(cx - rx) * S, (cy - ry) * S, (cx + rx) * S, (cy + ry) * S], fill=fill)
+
+
+def reflection(glass, stage):
+    """The lightning shows Micah in the window glass, from the waist up (the sill cuts him off), and the thing holding
+    him. stage 1: a horned shadow looms behind his reflection, one claw over his shoulder and an arm across his chest;
+    stage 2: it bows over him, a hand over his mouth, and the dark rises up him to the neck.
+    glass: the lit crop of STORM_GLASS_BOX (RGB); returns it with the reflection painted on."""
+    from .sprites import MICAH_HATLESS, FW, FH, figure, pose
+    import numpy as np
+    import random
+    S = 4
+    rng = random.Random(stage * 7)
+    base = glass.convert("RGBA")
+    w, h = base.size
+    sill = h - 5          # the glass ends on the sill (art y 98)
+    cx = 92               # centred in the right pane
+    # Micah's reflection: faced towards the room, cut off at the waist, cold and translucent
+    fig = figure(MICAH_HATLESS, pose(8), FW, FH)
+    fig = fig.crop(fig.getbbox())
+    bust = fig.crop((0, 0, fig.width, int(fig.height * 0.48)))
+    k = 31 / bust.height
+    bust = bust.resize((round(bust.width * k), 31), Image.BOX)
+    a = np.array(bust).astype(float)
+    tone = a[..., :3].mean(axis=2, keepdims=True)
+    a[..., :3] = tone * np.array([0.62, 0.68, 0.9]) + np.array([16, 20, 34])
+    a[..., 3] = np.where(a[..., 3] > 90, 225 if stage == 1 else 120, 0)
+    bust = Image.fromarray(a.clip(0, 255).astype("uint8"))
+    bx, by = cx - bust.width // 2, sill - bust.height
+    top = by  # his head's top
+
+    # --- the demon, painted 4x and brought down ---------------------------------------------------------------------
+    big = (w * S, h * S)
+    body, arms = Image.new("L", big, 0), Image.new("L", big, 0)
+    detail = Image.new("L", big, 0)   # lighter muscle and horn ridges, inside the silhouette
+    db, da, dd = ImageDraw.Draw(body), ImageDraw.Draw(arms), ImageDraw.Draw(detail)
+    hx_, hy = (cx - 9, top + 4) if stage == 1 else (cx, top - 1)  # at his ear; then over him
+    sy = top + 6 if stage == 1 else top + 5       # shoulder line, hunched up level with his chin
+    # skull: long, narrow, a pointed jaw, a heavy brow
+    _ell(db, hx_, hy, 4.6, 5.4)
+    _poly(db, [(hx_ - 4, hy + 1), (hx_ + 4, hy + 1), (hx_ + 1.6, hy + 9), (hx_ - 1.6, hy + 9)])
+    _poly(db, [(hx_ - 5.5, hy - 1), (hx_ + 5.5, hy - 1), (hx_ + 4, hy + 1.5), (hx_ - 4, hy + 1.5)])
+    for k_ in (-1, 1):  # ram-curled horns, thick at the skull, swept out and up to a point
+        curve = (_bez((hx_ + k_ * 3, hy - 3), (hx_ + k_ * 12, hy - 4), (hx_ + k_ * 11, hy - 15)) if stage == 1 else
+                 _bez((hx_ + k_ * 3, hy - 3), (hx_ + k_ * 9, hy - 9), (hx_ + k_ * 15, hy - 3)))
+        _tube(db, curve, 2.1, 0.35)
+        for i in range(3, len(curve) - 4, 3):  # ridges
+            x, y = curve[i]
+            _ell(dd, x, y, 1.3, 0.35)
+    # neck and great hunched shoulders, the trunk spreading to the sill
+    _poly(db, [(hx_ - 3, hy + 6), (hx_ + 3, hy + 6), (cx + 6, sy), (cx - 6, sy)])
+    for k_ in (-1, 1):
+        _ell(db, cx + k_ * 15, sy + 3, 9, 6.5)
+        _ell(dd, cx + k_ * 16, sy + 1, 4.5, 2, fill=255)  # the deltoid catching the light
+    spread = 27 if stage == 1 else 31
+    _poly(db, [(cx - 22, sy + 2), (cx + 22, sy + 2), (cx + spread, h), (cx - spread, h)])
+    # smoke curling off the flanks: the thing doesn't end, it frays
+    for k_ in (-1, 1):
+        for j in range(3):
+            y0 = sy + 9 + j * 8 + rng.uniform(-1, 1)
+            x0 = cx + k_ * (22 + (y0 - sy) * (spread - 22) / (h - sy))
+            end = (x0 + k_ * rng.uniform(7, 11), y0 - rng.uniform(8, 13))
+            _tube(db, _bez((x0 - k_ * 3, y0 + 2), (x0 + k_ * 7, y0), end), 2.2, 0.2)
+    # ribs and the line of the arm along the flanks
+    for k_ in (-1, 1):
+        for j in range(3):
+            y = sy + 12 + j * 4
+            _tube(dd, _bez((cx + k_ * 13, y), (cx + k_ * 18, y - 1.5), (cx + k_ * 21, y + 1)), 0.35, 0.25)
+
+    def claw(d, start, tips, r=0.75):
+        for tip in tips:
+            mid = ((start[0] + tip[0]) / 2 + (tip[1] - start[1]) * 0.15, (start[1] + tip[1]) / 2 - 1)
+            _tube(d, _bez(start, mid, tip), r, 0.15)
+
+    if stage == 1:
+        # the far arm comes round his waist and across his chest, its claws spread over his heart
+        _tube(da, [(cx - 17, sy + 4), (cx - 21, sy + 16), (cx - 13, sy + 22), (cx - 6, sy + 20)], 2.6, 1.6)
+        claw(da, (cx - 6, sy + 20), [(cx + 3, sy + 13), (cx + 4, sy + 16), (cx + 4, sy + 19), (cx + 1, sy + 22)])
+        # the near hand has come over his shoulder from behind, long fingers hooked down his collarbone
+        _ell(da, cx + 10, sy + 1, 2.4, 1.8)
+        claw(da, (cx + 10, sy + 1), [(cx + 3, sy + 7), (cx + 5, sy + 9), (cx + 8, sy + 10), (cx + 12, sy + 8)])
+    else:
+        # one hand clamped over his mouth, the other gripping the crown of his head
+        _tube(da, [(cx - 17, sy + 4), (cx - 19, sy + 14), (cx - 11, top + 11), (cx - 5, top + 9)], 2.7, 1.7)
+        claw(da, (cx - 5, top + 9), [(cx + 4, top + 7), (cx + 5, top + 9), (cx + 4, top + 11), (cx + 1, top + 13)])
+        _tube(da, [(cx + 16, sy + 2), (cx + 13, top - 2), (cx + 6, top - 3)], 2.4, 1.6)
+        claw(da, (cx + 6, top - 3), [(cx - 3, top), (cx - 1, top + 2), (cx + 1, top + 3), (cx + 4, top + 3)])
+        # the dark welling up him from the sill to the throat
+        rise = [(bx - 3, h), (bx - 3, top + 15)]
+        for i in range(0, bust.width + 7, 2):
+            rise.append((bx - 3 + i, top + 13 + rng.uniform(-1.5, 2.5)))
+        rise += [(bx + bust.width + 3, top + 15), (bx + bust.width + 3, h)]
+        _poly(da, rise)
+        for i in range(4):
+            x0 = bx + 2 + i * bust.width / 4
+            _tube(da, _bez((x0, top + 14), (x0 + rng.uniform(-3, 3), top + 11), (x0 + rng.uniform(-2, 2), top + 8)),
+                  1.2, 0.2)
+
+    def down(m, cut=110):
+        m = np.array(m.resize((w, h), Image.BOX))
+        return np.where(m > cut, 1.0, 0.0)
+
+    m_body, m_arms, m_det = down(body), down(arms), down(detail, 70)
+
+    def layer(mask, rgb, alpha=245):
+        arr = np.zeros((h, w, 4), np.uint8)
+        arr[..., :3] = rgb
+        arr[..., 3] = (mask * alpha).astype(np.uint8)
+        return Image.fromarray(arr)
+
+    def rim(mask):
+        """The flash catches the top and the window-side (left) edges of a shape."""
+        up = np.zeros_like(mask)
+        up[1:] = mask[:-1]
+        left = np.zeros_like(mask)
+        left[:, 1:] = mask[:, :-1]
+        return mask * (1 - up), mask * (1 - left) * (1 - (mask * (1 - up)))
+
+    shade = (9, 7, 14)
+    out = base.copy()
+    out.alpha_composite(layer(m_body, shade))
+    out.alpha_composite(layer(m_body * m_det, (30, 28, 44)))
+    r_top, r_side = rim(m_body)
+    out.alpha_composite(layer(r_top, (92, 102, 140), 220))
+    out.alpha_composite(layer(r_side, (58, 64, 92), 200))
+    out.alpha_composite(bust, (bx, by))
+    out.alpha_composite(layer(m_arms, shade))
+    a_top, a_side = rim(m_arms)
+    out.alpha_composite(layer(a_top, (86, 94, 130), 210))
+    out.alpha_composite(layer(a_side, (52, 58, 86), 190))
+    px = ImageDraw.Draw(out)
+    # eyes: slanted coals with a bloom; a seam of teeth in the jaw
+    for k_ in (-1, 1):
+        ex, ey = round(hx_ + k_ * 2), round(hy)
+        px.point((ex, ey), fill=(255, 92, 60, 255))
+        px.point((ex + k_, ey - 1), fill=(200, 36, 28, 255))
+        for ox, oy in ((0, 1), (-k_, 0)):
+            q = out.getpixel((ex + ox, ey + oy))
+            out.putpixel((ex + ox, ey + oy), (max(q[0], 90), q[1], q[2], 255))
+    for i in range(-2, 3):
+        px.point((round(hx_) + i, round(hy + 5 + (i % 2))), fill=(118, 110, 104, 255) if stage == 2 or i % 2 else
+                 (70, 64, 62, 255))
+    # the reflection is in the glass: the window's mullion, bar and sill stay in front of it
+    g = np.array(glass.convert("RGBA"))
+    o = np.array(out)
+    for (x0, y0, x1, y1) in ((410 - 348, 0, 413 - 348, h), (0, 55 - 46, w, 58 - 46), (0, sill, w, h)):
+        o[y0:y1, x0:x1] = g[y0:y1, x0:x1]
+    return Image.fromarray(o).convert("RGB")
 
 def ceiling(img):
     d = ImageDraw.Draw(img)
@@ -411,7 +690,32 @@ def build():
     d.point((1, 1), fill=hx("6a5020"))
     save(ring, "rooms", "office_ring.png")
     save(ring_glint(), "rooms", "office_ring_glint.png")
+    build_storm()
     sprite = Image.new("RGBA", (10, 12))
     cup(ImageDraw.Draw(sprite), 0, 0)
     save(sprite, "rooms", "office_cup.png")
     return px
+
+
+def build_storm():
+    for lit in (False, True):
+        suffix = "_lit" if lit else ""
+        base = paint_storm(lit)
+        pal = palette_of(base, 128)
+        save(pixelize(base, pal), "rooms", f"office_storm{suffix}.png")
+        # the hat taken off the desk, the bottle set down on it: each overlay crops the same spot of a repaint
+
+        save(pixelize(paint_storm(lit, hat=False, bottle=True), pal).crop(STORM_BOTTLE_BOX), "rooms",
+             f"office_storm_bottle{suffix}.png")
+        save(pixelize(paint_storm(lit, hat=False), pal).crop(STORM_HAT_BOX), "rooms",
+             f"office_storm_no_hat{suffix}.png")
+        if lit:
+            glass = pixelize(base, pal).crop(STORM_GLASS_BOX)
+            for stage in (1, 2):
+                save(reflection(glass, stage), "rooms", f"office_storm_demon_{stage}.png")
+        else:
+            for state in ("ajar", "open"):
+                save(pixelize(paint_storm(door_state=state), pal).crop(DOOR_BOX), "rooms",
+                     f"office_storm_door_{state}.png")
+    print("office_storm overlays: hat", STORM_HAT_BOX[:2], "bottle", STORM_BOTTLE_BOX[:2], "glass",
+          STORM_GLASS_BOX[:2], "door", DOOR_BOX[:2])

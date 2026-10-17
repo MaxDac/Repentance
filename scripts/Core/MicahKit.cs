@@ -42,8 +42,8 @@ public static class MicahKit
 
     private static readonly string[] Act3Rooms =
     {
-        "mansion_exterior", "mansion_kitchen", "mansion_cellar", "mansion_study", "mansion_bedroom", "outskirts",
-        "prison",
+        "office_storm", "mansion_exterior", "mansion_kitchen", "mansion_cellar", "mansion_study", "mansion_bedroom",
+        "outskirts", "prison",
     };
 
     // The top drawer in Micah's office, emptied before he can leave in Act 1.

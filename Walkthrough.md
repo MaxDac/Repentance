@@ -732,7 +732,25 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   his back, with the blood on his shoulder and pooling on the ground under it.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
   from the kitchen, because they provide them with booze.
-- Micah get out of the scene.
+- Micah gets out of the scene and goes back to his office before the mansion.
+
+#### Office, the storm
+
+- Narration only: the journal's narrating voice is the only voice in the scene. No music; rain on the glass and
+  thunder.
+- A storm has knocked the power out on the whole block: the banker's lamp and the HOTEL sign are dark and the office
+  is completely black, lit only by lightning at the window (`Thunder` follows each flash after a short delay).
+- Micah stands at the window, his back to the room, without his hat, drinking from the whiskey bottle. The hat lies
+  on the desk next to the cup.
+- The narrating voice describes his slow descent into sin: irresistible, a road he can't stop walking down even
+  though he knows abundantly well how it ends.
+- At the climax it says that sin is a beast that climbs inside a man and walks him down the road of depravity.
+  Lightning strikes twice (light, dark, light): in the first flash the window's reflection shows a black demon
+  shadow holding Micah's reflection; in the second the reflection is almost swallowed by the shadow. The real Micah
+  doesn't move.
+- The player regains control. The door refuses him while he is bareheaded.
+- Clicking the hat (hand): Micah walks to the desk, leaves the bottle there, picks up the hat and puts it on.
+- The player must then click the door to leave; the next stop is the mansion.
 
 #### Outside of the Harrington mansion, behind the kitchen
 
