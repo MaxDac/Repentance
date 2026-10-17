@@ -61,7 +61,7 @@ await Game.Run(async () =>
 | `FlagSprite` | `Sprite2D` | Shown/hidden by `ShowIfFlags`/`HideIfFlags` |
 | `LoopStrip` | `FlagSprite` | Flag-driven looping strip (`FrameSeconds`) |
 | `IdleStrip` | `Sprite2D` | Intermittent idle animation (`Sequence`, `MinRest`, `MaxRest`, `Seed`) |
-| `Rain` | `Node2D` | Procedural rain in areas; also drives the rain ambience |
+| `Rain` | `Node2D` | Procedural rain in areas, heavier each act (`RainWeather`, unless `FollowsStory = false`); also drives the rain ambience |
 | `PosePlayback` | - | Plays pose strips for `Player` and `Actor` from their JSON metadata |
 
 `Verb`: `Walk`, `Look`, `Hand` (take, open, use), `Talk`, `Kick` (also push/pull), `UseItem` (held item).

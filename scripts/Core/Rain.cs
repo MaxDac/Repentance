@@ -28,6 +28,11 @@ public partial class Rain : Node2D
     [Export] public Godot.Collections.Array<Rect2> SplashAreas = new();
     [Export] public float SplashRate = 6f;
     [Export] public int Seed = 1;
+    /// <summary>
+    /// Scales the authored (Act 1) density, speed and length to the story act's <see cref="RainWeather"/>, so it
+    /// builds to a downpour by Act 3. Off for the title screen.
+    /// </summary>
+    [Export] public bool FollowsStory = true;
 
     private struct Drop { public int Area, Layer; public float X, Y; }
     private struct Drip { public int Area; public float X, Y, Speed, Pause; }
@@ -44,6 +49,14 @@ public partial class Rain : Node2D
     public override void _Ready()
     {
         _rng.Seed = (ulong)Seed;
+        if (FollowsStory && GameState.Instance != null)
+        {
+            var weather = RainWeather.ForAct(GameState.Instance.StoryAct);
+            Density *= weather.Density;
+            Speed *= weather.Speed;
+            Length += weather.ExtraLength;
+            SplashRate *= weather.Density;
+        }
         if (Areas.Count == 0)
             Areas.Add(new Rect2(0, 0, 480, 270));
         for (int a = 0; a < Areas.Count; a++)

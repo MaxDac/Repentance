@@ -50,7 +50,8 @@ interlude bench, checked by `WalkTest.HoleTests`).
 | `Verb? LeftClickVerb(Hotspot)` | Change the left-click default for a hotspot |
 | `Vector2 ClampWalkTarget(Vector2)` | Block parts of the floor (a doorman, a curtain) |
 | `Track? Music` | Room music; the same track continues across rooms |
-| `(Sound, float)? Ambience` | Default: rain if a `Rain` node exists (0 dB outdoors when it covers >30% of the screen, else -9 dB) |
+| `(Sound, float)? Ambience` | Default: rain if a `Rain` node exists (0 dB outdoors when it covers >30% of the screen, else -9 dB), louder each act (`RainWeather`); none once `RainStopped` |
+| `bool RainStopped` | True where someone is saved: hides every `Rain` node and silences the ambience, live on state changes. Exteriors and window rooms must draw `Rain` unless listed dry in `RainTests` |
 | `bool PlayerVisibleOnLoad` | Hide the player for an entry cutscene |
 | `string ResolvePlayerCharacter()` | Outfit/character logic |
 
