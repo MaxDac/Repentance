@@ -202,15 +202,10 @@ ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": M
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27", **_HEM_LEGS),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
 # The implied-nude variant: thin front locks lie flat over the chest, one
-# hand lowered over her lap, the other arm hanging at her side. Unclothed, her hips, seat and stance are a tenth
-# narrower than the figure's, keeping their proportions.
+# hand lowered over her lap, the other arm hanging at her side.
 _SKIN = "e4b898"
-_STAGE_HIPS = 0.9
 ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
                  "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
-                 "hipw": ELEANOR_FIGURE["hipw"] * _STAGE_HIPS, "hw": ELEANOR_FIGURE["hw"] * _STAGE_HIPS,
-                 "rear": tuple(v * _STAGE_HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
-                 "profile": [(y, w * (_STAGE_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]],
                  "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.0,
                  "hair_front_w": 0.7, "hair_front_root": 0.07,  # the lock joins the hair behind the neck in profile
                  "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
