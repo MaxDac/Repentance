@@ -10,6 +10,7 @@ public partial class Hud
 {
     private const float CaptionTop = 126;
     private const int CaptionFontSize = 16;
+    private const float CaptionSubGap = 22;
 
     private void BuildTitle(Control root)
     {
@@ -58,6 +59,17 @@ public partial class Hud
             Visible = false,
         };
         root.AddChild(_caption);
+
+        _captionSub = new Label
+        {
+            Position = new Vector2(0, CaptionTop + CaptionSubGap),
+            Size = new Vector2(ScreenW, 16),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Visible = false,
+        };
+        root.AddChild(_captionSub);
 
         VerseFont = GD.Load<Font>("res://assets/fonts/IMFellEnglish-Regular.ttf");
         _verses = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Visible = false };
@@ -160,5 +172,13 @@ public partial class Hud
         _caption.LabelSettings.FontSize = CaptionFontSize;
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
+        ShowCaptionSub(null);
+    }
+
+    /// <summary>A second caption line under the one already showing, as in "Chicago, 1927." over "First Interlude".</summary>
+    public void ShowCaptionSub(string? text)
+    {
+        _captionSub.Text = text ?? "";
+        _captionSub.Visible = text != null;
     }
 }

@@ -54,13 +54,14 @@ public static class Interlude
         return null;
     }
 
+    /// <summary>Over black: "Chicago, 1927." alone, then the interlude's title under it on the same screen.</summary>
     private static async Task Captions(string title)
     {
         await Game.Hud.Fade(1, 1.5);
         Game.Hud.ShowCaption("Chicago, 1927.");
-        await Game.Wait(2.8);
-        Game.Hud.ShowCaption(title);
-        await Game.Wait(2.8);
+        await Game.Wait(2.5);
+        Game.Hud.ShowCaptionSub(title);
+        await Game.Wait(2.5);
         Game.Hud.ShowCaption(null);
     }
 
@@ -85,7 +86,7 @@ public static class Interlude
     /// </summary>
     public static async Task EndFirst()
     {
-        await Game.Hud.Fade(1, 1.5);
+        await Game.Hud.Fade(1, 3.0);
         State.SetFlag("interlude1", false);
         foreach (var flag in FirstBeats) State.SetFlag(flag, false);
         DropEleanorItems();
@@ -97,10 +98,10 @@ public static class Interlude
         State.SetFlag("act2_church");
         State.SetFlag("on_map");
         Attic.RestoreMicahItems(2);
-        Game.Hud.ShowCaption("Chicago, 1927.");
-        await Game.Wait(2.8);
+        Game.Hud.ShowCaption("Later that night");
+        await Game.Wait(2.5);
         Game.Hud.ShowCaption(null);
-        await Game.ChangeRoom("motel_night", "start");
+        await Game.ChangeRoom("motel_night", "start", fadeInSeconds: 3.0);
     }
 
     /// <summary>Daniel reads on in bed: the pages turn to the motel, the night after Micah left Eleanor there.</summary>

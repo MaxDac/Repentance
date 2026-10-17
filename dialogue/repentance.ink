@@ -583,6 +583,9 @@ MICAH: I could. I'm a lousy liar.
 ELEANOR: Then I'll teach you. It's easy. You just have to want something badly enough.
 MICAH: I want you to come away. Not back to Teddy. Anywhere.
 ELEANOR: I can't go back there...
+MICAH: Then stay. Right here.
+CUE: closer
+ELEANOR: You're walking into the rain, Mr. Jones. Not out of it.
 -> END
 
 // ---------------------------------------------------------------- MOTEL, NIGHT

@@ -51,7 +51,8 @@ Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mon
   or **I**.
 - **Verb wheel**: four 32x32 slots (Look, Hand, Talk, Kick) at radius 22 around the cursor; press-drag-release or
   click.
-- **Captions and fades**: `Fade(alpha, seconds)`, chapter captions, verse lines that fade in one by one.
+- **Captions and fades**: `Fade(alpha, seconds)`, chapter captions with an optional second line under them
+  (`ShowCaptionSub`, the interlude titles), verse lines that fade in one by one.
 - **GameMenu** (runs while paused): title (Continue, New game, Load game, Settings), pause (Resume, Save, Load,
   Settings, Quit to title), slots (autosave + 3; unreadable = *Incompatible*, missing = *Empty*), settings.
 - **NotepadView**: one page per unlocked note, newest first; arrows, mouse wheel; N/Esc/X closes.

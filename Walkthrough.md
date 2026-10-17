@@ -234,8 +234,10 @@ described here (other verbs, flavour lines) is left to the implementation.
   speaker's dialogue is shown below their own portrait half.
 - The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
   The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
-- The scene ends when Eleanor says "I can't go back there..." and fades to the attic (End of Act 1). Their night
-  in her room follows the First Interlude (see *Motel room, night* in Act 2).
+- After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
+  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." The
+  screen fades to black before he reaches her, and holds a moment on black before the attic fades in (End of
+  Act 1). Their night in her room follows the First Interlude (see *Motel room, night* in Act 2).
 
 ### End of Act 1 - Present day
 
@@ -273,7 +275,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### Present Day
 
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
-  The black captions "Chicago, 1927." and "First Interlude" lead to the First Interlude; after it, the story
+  A black screen shows "Chicago, 1927." for 2.5 seconds, then "First Interlude" below it on the same screen;
+  both disappear and the First Interlude begins. After it, the story
   picks up with Micah's night in the motel room, then his office.
 
 ### First Interlude - Eleanor
@@ -328,7 +331,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
    hears him arguing with the clerk downstairs; she steps out onto the fire escape to wait for him, where he
-   finds her. Fade to black, then Micah's journal takes over again with their night in her room.
+   finds her. A 3-second fade to black, the caption "Later that night", then a 3-second fade into the
+   motel room: Micah's journal takes over again with their night in her room.
 
 ### Chicago, 1927
 
@@ -618,7 +622,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 
 - Father in the bedroom (new location) reading with the nightstand lamp on, wife covered by the blankets, light off on her side.
 - Father keeps reading, then frowns: "These pages read differently. Not sure that's Micah's hand." Every ending's
-  last entry answers him (see *Present*). The black captions "Chicago, 1927." and "Second Interlude" follow.
+  last entry answers him (see *Present*). The black screen shows "Chicago, 1927." for 2.5 seconds, then
+  "Second Interlude" below it, as for the First Interlude.
 
 ### Second Interlude - Eleanor
 

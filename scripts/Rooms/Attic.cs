@@ -294,7 +294,7 @@ public partial class Attic : Room
         if (State.StoryAct >= 2)
         {
             await Talk("journal_act2");
-            // Eleanor's side of it first; Story.Interlude.EndFirst hands the story back to Micah's office
+            // Eleanor's side of it first; Story.Interlude.EndFirst hands the story back to Micah, in Eleanor's motel room
             await Story.Interlude.BeginFirst();
             return true;
         }

@@ -15,8 +15,11 @@ public partial class AutoPlay
     /// </summary>
     private async Task FirstInterlude(Game game, GameState gs)
     {
-        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "First Interlude", 20);
-        Check(game.Hud.CaptionText == "First Interlude", "Act 2 opens on black with \"First Interlude\"");
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Chicago, 1927.", 20);
+        Check(!game.Hud.CaptionSubVisible, "Act 2 opens on black with \"Chicago, 1927.\" alone");
+        await Until(() => game.Hud.CaptionSubVisible && game.Hud.CaptionSubText == "First Interlude", 10);
+        Check(game.Hud.CaptionVisible && game.Hud.CaptionText == "Chicago, 1927.",
+            "\"First Interlude\" appears under \"Chicago, 1927.\" on the same black screen");
         await Until(() => game.Room?.Name == "EleanorRoom");
         await WaitIdle(game);
         Check(gs.HasFlag("interlude1") && game.Player.Character == "eleanor_play", "the player is Eleanor in Room 507");
@@ -111,11 +114,16 @@ public partial class AutoPlay
             "the next morning, the motel with an empty bed");
         await Shot("interlude_motel");
         _ = game.Perform(Verb.Hand, "window");
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Later that night", 90);
+        Check(game.Hud.FadeAlpha >= 0.99f && !gs.HasFlag("interlude1"),
+            "the First Interlude ends on black with \"Later that night\"");
+        await Shot("later_that_night");
         await Until(() => game.Room?.Name == "MotelNight" && game.Player.Character == "micah_dressing");
         Check(!gs.HasFlag("interlude1") && gs.HasItem("revolver"),
             "after the interlude, Micah's journal takes the story back at the motel night, with his things");
         Check(game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_night.png") == true,
             "Eleanor is in the bed again");
+        Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays again in Eleanor's room");
         await game.Wait(2);
         await Shot("motel_night");
         await Until(() => game.Room?.Name == "Office");

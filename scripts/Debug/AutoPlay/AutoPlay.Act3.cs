@@ -15,8 +15,11 @@ public partial class AutoPlay
     /// </summary>
     private async Task SecondInterlude(Game game, GameState gs)
     {
-        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Second Interlude", 30);
-        Check(game.Hud.CaptionText == "Second Interlude", "Act 3 opens on black with \"Second Interlude\"");
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Chicago, 1927.", 30);
+        Check(!game.Hud.CaptionSubVisible, "Act 3 opens on black with \"Chicago, 1927.\" alone");
+        await Until(() => game.Hud.CaptionSubVisible && game.Hud.CaptionSubText == "Second Interlude", 10);
+        Check(game.Hud.CaptionVisible && game.Hud.CaptionText == "Chicago, 1927.",
+            "\"Second Interlude\" appears under \"Chicago, 1927.\" on the same black screen");
         await Until(() => game.Room?.Name == "MotelNight");
         await WaitIdle(game);
         Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && gs.Inventory.Count == 0 && !gs.HasItem("revolver"),
