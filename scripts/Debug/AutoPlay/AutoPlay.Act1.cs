@@ -23,6 +23,7 @@ public partial class AutoPlay
         Check(game.Music.Current == null, "no music in the attic");
         int woodSteps = game.Sfx.Count(Sound.StepWood);
         await WheelTest(game);
+        await PuzzleGestureTest(game);
         await PosePlaybackTest(game);
         await game.Perform(Verb.Talk, "hatch");
         await game.Perform(Verb.Hand, "sheet");
