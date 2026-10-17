@@ -905,7 +905,7 @@ def _hair_front(c, col, P, body, H, cp, sp, nod):
             # an optional forward swell at chest height, where the locks may stand proud of the torso outline
             bump = col.get("hair_bulge", 0.0) * math.exp(-((t - 0.62) / 0.2) ** 2)
             cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump]))
-            r = H * (0.03 - 0.014 * t)
+            r = H * (0.03 - 0.014 * t) * col.get("hair_front_w", 1.0)
             m, ex, ey, ez = c.ellipse((cx, cy), r, r * 1.2)
             proud = bump > 0 and bump >= 0.4 * col["hair_bulge"]
             # never across the face; below the shoulders it only lies on the body (save for the chest swell)

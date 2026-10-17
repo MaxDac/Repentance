@@ -189,7 +189,7 @@ ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": M
                          "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
-# The implied-nude variant: front locks define a subtle chest contour, one
+# The implied-nude variant: thin front locks define a subtle chest contour, one
 # hand lowered over her lap, the other arm hanging at her side. Unclothed, her hips, seat and stance are a tenth
 # narrower than the figure's, keeping their proportions.
 _SKIN = "e4b898"
@@ -199,7 +199,8 @@ ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WO
                  "hipw": ELEANOR_FIGURE["hipw"] * _STAGE_HIPS, "hw": ELEANOR_FIGURE["hw"] * _STAGE_HIPS,
                  "rear": tuple(v * _STAGE_HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
                  "profile": [(y, w * (_STAGE_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]],
-                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.03,
+                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.02,
+                 "hair_front_w": 0.6,
                  "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
