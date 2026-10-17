@@ -90,15 +90,20 @@ public partial class AutoPlay
         await game.Perform(Verb.Walk, "cell_door");
         Check(game.Room?.Name == "ConventCell", "to her cell");
         Check(game.Room?.FindActor("nun") is { Visible: false }, "Eleanor is alone in the cell until the knock");
+        Check(game.Music.Current == Track.ConventPiano, "the convent piano plays in the cell before the knock");
+        int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
         _prefer = new[] { "(Indulge her.)" };
         var night = game.Perform(Verb.Hand, "bed");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake"));
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
             "Agatha is in the cell, by the bed, while she talks");
+        Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");
         await Shot("interlude_agatha_night");
         await night;
         await WaitIdle(game);
+        Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
+            "the convent piano comes back once Agatha has gone");
         _prefer = prefer;
         Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),
             "the night visit offers the refusal; indulging her saves nothing");

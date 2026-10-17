@@ -307,6 +307,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    morning. The choice is saved:
    - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
    - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
+   The Club's strings replace the convent piano from the knock until Agatha walks out.
    Eleanor leaves the convent the next morning.
 
 - **Puzzle 17 - The brass box:** she builds the clue Micah finds later, and locks it away herself.
