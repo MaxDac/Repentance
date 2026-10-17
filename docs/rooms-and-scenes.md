@@ -9,6 +9,7 @@ script `scripts/Rooms/<PascalCase>.cs` deriving from `Room` (namespace `Repentan
 <Room>            Node2D, room script
   Background      Sprite2D 480x270, Centered off (assets/art/rooms/)
   WalkArea        Polygon2D: walkable floor, hidden at runtime
+    <hole>        optional Polygon2D: an obstacle cut out of the floor (metadata show_if_flags / hide_if_flags)
   Entries         Node2D
     <entry>       Marker2D, metadata/facing: 1 down, 2 up, 3 left, 4 right
   Hotspots        Node2D
@@ -20,7 +21,9 @@ Optional: `Rain`, `FlagSprite`/`LoopStrip` overlays (alternate states cropped by
 `IdleStrip`s.
 
 Foreground props the player walks behind go in `World` as `Sprite2D` with `position.y = baseline` and
-`offset.y = -baseline`, so y-sorting draws them over anyone standing above that line.
+`offset.y = -baseline`, so y-sorting draws them over anyone standing above that line. A prop the player walks round
+also gets a `WalkArea` hole under its footprint; holes follow the flags on every `Refresh` (see the Room 507
+interlude bench, checked by `WalkTest.HoleTests`).
 
 ## Room exports
 

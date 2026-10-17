@@ -16,6 +16,11 @@ public partial class EleanorRoom : Room
 
     private Texture2D? _searched;
 
+    /// <summary>In the First Interlude the bench stands out in the room; she goes round to the front of it.</summary>
+    public override Vector2 ClampWalkTarget(Vector2 target) =>
+        Interlude && Walk is { } w && !w.Contains(target) && target.X is > 50 and < 136 && target.Y is > 218 and < 240
+            ? new Vector2(target.X, 241) : target;
+
     protected override void OnRefresh()
     {
         if (GetNodeOrNull<Sprite2D>("Background") is not { } bg) return;

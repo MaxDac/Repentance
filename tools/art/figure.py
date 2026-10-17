@@ -609,6 +609,8 @@ def figure(spec, ps, fw=56, fh=80):
     if col.get("hair_style") == "long":
         # The mane falls behind the neck and shoulders unless the figure is seen from the back.
         add(1.9 if facing else 2.7, lambda: _long_hair_back(c, col, P, body, H, cp, sp, nod))
+        if not facing:  # from behind, the crown and the mane are one fall of hair, without a seam across the head
+            c.seamless = tuple(c.seamless) + ("hair", "hairback")
     if col.get("hat") in ("veil", "hood"):
         add(1.9 if facing else 2.7, lambda: _veil_back(c, col, P, body, H, cp, sp, nod))
     if col.get("hair_front") and facing:

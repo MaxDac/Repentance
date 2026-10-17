@@ -198,8 +198,8 @@ THOUGHT: She told me she knew that look. She'd seen it on every man at the Club.
 - -> END
 
 === interlude_motel_window ===
-THOUGHT: She took a room at the flophouse down the hill from the convent, the one with the sign that buzzes. From the first floor window you can see the convent door. She watched it for three days.
-THOUGHT: On the third night, a man with a split lip came up that road in the dark and rang the bell. Me.
+THOUGHT: She took a room at the flophouse down the hill from the convent, the one with the sign that buzzes. From the first floor window you can see the convent door. She watched it for four days.
+THOUGHT: On the fourth evening, a man with a split lip and a day-old limp came up that road in the rain and rang the bell. Me.
 ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
 THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
 THOUGHT: She watched me come out again, alone, and stand in the middle of the road and light a cigarette like a man at the end of a rope.
@@ -464,7 +464,7 @@ SAL: Come back here again and we bury you. Capisce?
 
 === nun ===
 {has_flag("nun_talked"): -> nun.again}
-NUN: This is a house of God, not a waiting room. What are you doing here, young man?
+NUN: This is a house of God, not a waiting room, and Vespers are long over. What are you doing here at this hour, young man?
 MICAH: Looking for someone. Eleanor Harrington.
 NUN: And what would you want with her?
 * [Her husband hired me to find her.]
@@ -499,7 +499,7 @@ NUN: Then go with God. And remember that finding a thing is not the same as know
 
 === convent_dead_end ===
 THOUGHT: The road was empty. No Eleanor under the trees, no taxi pulling away, no footprints in the wet. Just me and the rain and the convent bell.
-THOUGHT: Three days she'd been gone from that cell. Three days is a long head start in a town this size. I'd hit a dead end, and I knew it.
+THOUGHT: Going on four days she'd been gone from that cell. Four days is a long head start in a town this size. I'd hit a dead end, and I knew it.
 - (leads)
 * [Go back to the Blue Lantern and lean on Tony.]
     MICAH: Sure. And Sal finishes the job he started in the alley.

@@ -126,6 +126,8 @@ public partial class ConventCell : Room
                 await Game.Hud.Fade(0.6f, 1.0);
                 await Wait(0.6);
                 await Say("nun", "*Knock, knock*");
+                // the Club follows her to the convent: its strings play for Agatha's visit only
+                Game.Music.Play(Track.ClubStrings);
                 await Game.Hud.Fade(0, 0.6);
                 var agatha = FindActor("nun");
                 if (agatha != null)
@@ -142,6 +144,7 @@ public partial class ConventCell : Room
                     await agatha.MoveTo(AgathaDoor, 44);
                     AgathaIn(false);
                 }
+                Game.Music.Play(Music);
                 await Game.Hud.Fade(1, 1.2);
                 Game.Hud.ShowCaption("The next morning");
                 await Wait(1.6);

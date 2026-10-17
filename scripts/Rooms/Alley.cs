@@ -106,6 +106,14 @@ public partial class Alley : Room
         {
             if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand) && State.HasFlag("alley_done"))
             {
+                // Micah sleeps off the beating and goes up to the convent the evening after
+                if (!State.HasFlag("seen_convent_exterior"))
+                {
+                    await Game.Hud.Fade(1, 1.2);
+                    Game.Hud.ShowCaption("The next evening");
+                    await Wait(2.2);
+                    Game.Hud.ShowCaption(null);
+                }
                 await Game.ChangeRoom("convent_road", "street");
                 return true;
             }
