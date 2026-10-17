@@ -893,19 +893,22 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
 def _hair_front(c, col, P, body, H, cp, sp, nod):
     """Long wavy locks brought forward over the shoulders, falling down the chest to col["hair_front"] (body y)."""
     end = col["hair_front"]
-    over = c.parts_mask("torso", "hair", "hairback")
+    # an optional root (in full profile): a few blobs at the top that run back from the lock's start, across the neck,
+    # into the hair behind it, so the lock doesn't look cut off under the jaw
+    root = col.get("hair_front_root", 0.0) if abs(sp) > 0.8 else 0.0
+    over = c.parts_mask("torso", "hair", "hairback", *(("neck",) if root else ()))
     chin = P(body([0, 0.165 + nod, 0]))[1]
     lock = np.zeros_like(over)
     nx = ny = nz = None
     for s in (1, -1):
         n = 14
-        for i in range(n + 1):
-            t = i / n
+        for t in ([-k / 4 for k in range(4, 0, -1)] if root else []) + [i / n for i in range(n + 1)]:
+            back, t = max(-t, 0.0), max(t, 0.0)
             y = 0.175 + nod * (1 - t) + (end - 0.175) * t
             x = s * (0.075 - 0.035 * t) + 0.008 * math.sin(t * 7.0 + s)
             # an optional forward swell at chest height, where the locks may stand proud of the torso outline
             bump = col.get("hair_bulge", 0.0) * math.exp(-((t - 0.62) / 0.2) ** 2)
-            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump]))
+            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump - root * back]))
             r = H * (0.03 - 0.014 * t) * col.get("hair_front_w", 1.0)
             m, ex, ey, ez = c.ellipse((cx, cy), r, r * 1.2)
             proud = bump > 0 and bump >= 0.4 * col["hair_bulge"]

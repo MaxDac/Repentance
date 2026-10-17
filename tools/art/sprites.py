@@ -201,7 +201,7 @@ ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WO
                  "rear": tuple(v * _STAGE_HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
                  "profile": [(y, w * (_STAGE_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]],
                  "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.0,
-                 "hair_front_w": 0.7,
+                 "hair_front_w": 0.7, "hair_front_root": 0.07,  # the lock joins the hair behind the neck in profile
                  "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.

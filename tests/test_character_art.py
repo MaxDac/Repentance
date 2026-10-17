@@ -195,6 +195,18 @@ class CharacterArtTests(unittest.TestCase):
         self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.0, "no stray hair proud of the chest")
         self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.7, "slim but continuous front locks over the chest")
 
+    def test_eleanor_stage_lock_joins_the_back_hair_only_in_profile(self):
+        arms = sprites._arms("cover", "side")
+        bare = dict(sprites.ELEANOR_STAGE, hair_front_root=0.0)
+
+        def changed(p):
+            a = sprites.figure(sprites.ELEANOR_STAGE, p, sprites.NPC_W, sprites.FH)
+            b = sprites.figure(bare, p, sprites.NPC_W, sprites.FH)
+            return int((np.array(a) != np.array(b)).any(-1).sum())
+
+        self.assertGreater(changed(sprites.npc_walk_pose(arms, 0)), 0, "the root bridges the neck under the jaw")
+        self.assertEqual(changed(sprites.pose(35, arms=arms)), 0, "the idle and talk frames stay as they are")
+
     def test_eleanor_front_locks_remain_in_all_animation_frames(self):
         original = painter._hair_front
         checks = []
