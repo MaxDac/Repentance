@@ -1,0 +1,138 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/MotelFireEscape.cs" id="1_MotelFireEscape"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_fire_escape.png" id="2_motel_fire_escape"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="5_eleanor"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="6_Rain"]
+
+[sub_resource type="RectangleShape2D" id="LadderShape"]
+size = Vector2(44, 88)
+
+[sub_resource type="RectangleShape2D" id="WindowShape"]
+size = Vector2(52, 90)
+
+[sub_resource type="RectangleShape2D" id="DoorShape"]
+size = Vector2(46, 106)
+
+[sub_resource type="RectangleShape2D" id="FrontRailShape"]
+size = Vector2(480, 18)
+
+[sub_resource type="RectangleShape2D" id="SideRailShape"]
+size = Vector2(30, 96)
+
+[node name="MotelFireEscape" type="Node2D"]
+script = ExtResource("1_MotelFireEscape")
+RoomName = "Fire Escape"
+Floor = 1
+FarY = 184
+FarScale = 0.96
+NearY = 248
+NearScale = 1.04
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_motel_fire_escape")
+centered = false
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(58, 184, 448, 184, 448, 246, 58, 246)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(76, 226)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="Ladder" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "ladder"
+DisplayName = "ladder"
+LookText = "The drop ladder, back down to the alley and the rain."
+WalkTo = Vector2(62, 226)
+Face = 3
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Ladder"]
+position = Vector2(39, 226)
+shape = SubResource("LadderShape")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "lit window"
+LookText = "A lamp behind a thin curtain. Somebody in there is waiting up."
+WalkTo = Vector2(339, 194)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(339, 106)
+shape = SubResource("WindowShape")
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "fire door"
+LookText = "An iron fire door into the first floor. FIRE EXIT, in paint that gave up years ago."
+WalkTo = Vector2(234, 194)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(234, 123)
+shape = SubResource("DoorShape")
+
+[node name="Railing" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "railing"
+DisplayName = "railing"
+LookText = "An iron railing, slick with rain. One storey down, the alley shines like a wet knife."
+WalkTo = Vector2(240, 244)
+Face = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Railing"]
+position = Vector2(240, 261)
+shape = SubResource("FrontRailShape")
+
+[node name="Side" type="CollisionShape2D" parent="Hotspots/Railing"]
+position = Vector2(455, 200)
+shape = SubResource("SideRailShape")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Eleanor" type="Area2D" parent="World"]
+position = Vector2(412, 228)
+script = ExtResource("4_Actor")
+Id = "eleanor"
+DisplayName = "Eleanor"
+LookText = "Eleanor Harrington, all in black, like she's already been to her own funeral."
+WalkTo = Vector2(368, 228)
+Face = 4
+monitoring = false
+monitorable = false
+Texture = ExtResource("5_eleanor")
+FlipH = true
+SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = 20
+script = ExtResource("6_Rain")
+Density = 1.16
+Speed = 240.0
+Layers = 1
+Length = 4
+Tint = Color(0.62, 0.7, 0.86, 0.42)
+SplashAreas = Array[Rect2]([Rect2(60, 186, 386, 60)])
+SplashRate = 2.0

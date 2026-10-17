@@ -188,12 +188,14 @@ THOUGHT: She told me she knew that look. She'd seen it on every man at the Club.
 - -> END
 
 === interlude_motel_window ===
-THOUGHT: She took a room at the motel on the road below the convent, the one with the sign that buzzes. From the window you can see the convent door. She watched it for three days.
+THOUGHT: She took a room at the flophouse down the hill from the convent, the one with the sign that buzzes. From the first floor window you can see the convent door. She watched it for three days.
 THOUGHT: On the third night, a man with a split lip came up that road in the dark and rang the bell. Me.
 ELEANOR: Well. Theodore sent somebody after all. And he sent a sad one.
 THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I was; Theodore only ever hired one kind of man.
-ELEANOR: Coat. Gloves. And a face that's been waiting on that road all night.
-THOUGHT: When I came out of that convent, she was already on the road, under the trees, like it was the most natural place in the world to be. Now I know why. She told me Tony's boys had put her wise. That was the first lie she ever told me, and the smallest.
+THOUGHT: She watched me come out again, alone, and stand in the middle of the road and light a cigarette like a man at the end of a rope.
+ELEANOR: Coat. Gloves. And a face that's run out of places to look.
+THOUGHT: Then I came down the hill, and she heard me through the floor, leaning on the clerk. She heard him tell me nobody goes up.
+THOUGHT: So she opened the window and stepped out on the fire escape, into the rain, and waited to see how badly I wanted to find her. That was the first test she ever set me, and the easiest.
 -> END
 
 // ---------------------------------------------------------------- OFFICE
@@ -485,8 +487,66 @@ NUN: Then go with God. And remember that finding a thing is not the same as know
 ~ set_flag("nun_farewell_done")
 -> END
 
-=== eleanor_road ===
-ELEANOR: Not many people enter a convent this late, mister. Were you looking for someone?
+=== convent_dead_end ===
+THOUGHT: The road was empty. No Eleanor under the trees, no taxi pulling away, no footprints in the wet. Just me and the rain and the convent bell.
+THOUGHT: Three days she'd been gone from that cell. Three days is a long head start in a town this size. I'd hit a dead end, and I knew it.
+- (leads)
+* [Go back to the Blue Lantern and lean on Tony.]
+    MICAH: Sure. And Sal finishes the job he started in the alley.
+    MICAH: Tony said it plain: come back and they bury me. Moretti's boys don't bluff.
+    -> leads
+* [Go back to Harrington and ask what he left out.]
+    MICAH: Teddy Harrington. Hair oil and a handshake like a wet fish.
+    MICAH: No. I don't want to see that mug again until the job's done.
+    THOUGHT: If I ever wanted it done. I didn't like that thought, so I put it back where I found it.
+    -> leads
+* [Take it to the cops at the Chicago Avenue station.]
+    MICAH: And tell them what? A rich man's wife took a powder and the nuns won't talk?
+    MICAH: Half that precinct's on Moretti's payroll. The other half's on Harrington's.
+    -> leads
++ [Call it a night. Back to the office.]
+    MICAH: Nothing for it. Back to the office, a bottle, and a long think.
+    THOUGHT: Then I saw it, down the hill where the road bends: a sign buzzing pink through the rain.
+    INSET: motel
+    MICAH: A flophouse...
+    MICAH: Maybe she took a powder from Sister Agatha and holed up there. It's a long shot, but I'm fresh out of angles.
+    MICAH: Nobody looks for a dame like Eleanor in a dump like that. Which makes it just the place to look.
+    INSET: none
+    -> END
+
+=== motel_clerk ===
+{has_flag("clerk_talked"): -> motel_clerk.again}
+CLERK: Rooms are a dollar a night. Pay in advance, no visitors, no questions.
+MICAH: I'm not after a room. I'm after a woman. Dark hair, fur collar, a face you'd remember. Name of Eleanor.
+CLERK: ...
+CLERK: Never saw her.
+THOUGHT: He said it to the register. A man who never saw anybody doesn't usually sweat through his collar saying so.
+* [You're sweating, friend. It's not that warm in here.]
+    CLERK: It's the radiator. Landlord won't fix it.
+    MICAH: The landlord. Who's that, then?
+    CLERK: Fella who owns the place. He's... he's particular about who comes and goes.
+* [I'm no cop. I just want to know she's all right.]
+    CLERK: Everybody's all right here, mister. Everybody keeps quiet and everybody stays all right.
+    MICAH: That sounds like something somebody told you to say.
+    CLERK: It sounds like good sense.
+- MICAH: Who are you scared of? Me?
+CLERK: You? No. You're a fella asking questions. Fellas asking questions come and go.
+CLERK: The fellas who come round Fridays for the envelope, they don't go. They come back.
+MICAH: Moretti's crowd collect here?
+CLERK: I didn't say a name. You heard me, I didn't say a name.
+* [Then let me upstairs and I'll find her myself.]
+* [A dollar for the room key. Any room on the first floor.]
+- CLERK: No. Nobody goes up those stairs tonight. Not you, not anybody. That's the rule.
+CLERK: If you're smart, you'll walk out that door and forget this dump's here. I sure would.
+THOUGHT: Somebody upstairs, then. And somebody else had told him to keep her there, or to keep her quiet.
+~ set_flag("clerk_talked")
+-> END
+= again
+CLERK: I told you, mister. Nobody goes up. Go home.
+-> END
+
+=== eleanor_fire_escape ===
+ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
 INSET: convent
 MICAH: Eleanor Harrington. You wouldn't happen to know her?
 ELEANOR: That depends on who's asking.

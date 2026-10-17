@@ -2,7 +2,7 @@ namespace Repentance;
 
 public static partial class Items
 {
-    /// <summary>Act 1: the office, the Aurelian Hotel, the Blue Lantern and the convent.</summary>
+    /// <summary>Act 1: the office, the Aurelian Hotel, the Blue Lantern, the convent and the motel.</summary>
     private static ItemDef[] Act1Items() => new ItemDef[]
     {
         new("photo", "photograph", "res://assets/art/items/photo.png",
@@ -49,5 +49,8 @@ public static partial class Items
             "A carnation dyed blue through its own stem. A member's buttonhole, as far as a grille can tell."),
         new("water_flower", "paper pellet", "res://assets/art/items/water_flower.png",
             "A Japanese water flower from Eleanor's brass box: a pellet of pressed paper tied with red thread, wrapped in a scrap of hotel paper. Scrawled on the scrap, in a hurry: \"Give me a drink and I'll tell you the word.\""),
+        // Puzzle 19 - Motel fire escape.
+        new("umbrella", "umbrella", "res://assets/art/items/umbrella.png",
+            "The night clerk's black umbrella, with a crook handle you could hang a coat on. Or a ladder."),
     };
 }

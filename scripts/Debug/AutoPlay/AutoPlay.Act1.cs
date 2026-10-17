@@ -250,7 +250,7 @@ public partial class AutoPlay
         await Until(() => game.Room is Rooms.ConventRoad && game.Hud.SpeechVisible);
         Check(game.Hud.SpeechText.StartsWith("Gothic arches", StringComparison.Ordinal),
             "Micah comments on the architecture outside the convent");
-        Check(game.Room?.FindActor("eleanor")?.Visible == false && !game.Hud.InsetVisible,
+        Check(game.Room?.FindActor("eleanor") == null && !game.Hud.InsetVisible,
             "Eleanor and the close-up are absent on arrival");
         await Until(() => !game.Busy && gs.HasFlag("seen_convent_exterior"));
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
@@ -258,7 +258,7 @@ public partial class AutoPlay
         Check(game.Music.Current == null, "no piano outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");
-        Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor")?.Visible == false &&
+        Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor") == null &&
             !game.Hud.SpeechVisible && !gs.HasFlag("convent_departed"),
             "loading the exterior retains the arrival phase without repeating the remark");
         Click(game.Room!.FindHotspot("door")!.Bounds.GetCenter(), MouseButton.Left);
@@ -391,13 +391,61 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "ConventRoad");
         Check(game.Room?.Name == "ConventRoad" && gs.HasFlag("nun_farewell_done") && gs.HasFlag("convent_departed"),
             "the intercepted exit continues outside after the farewell");
-        Check(game.Room?.FindActor("eleanor")?.Visible == true, "Eleanor is waiting on departure");
+        Check(game.Room?.FindActor("eleanor") == null, "nobody is waiting on the road");
+        await Until(() => game.Player.PoseName == "micah_smoke" || game.Room is not Rooms.ConventRoad);
+        Check(game.Room is Rooms.ConventRoad && game.Player.PoseName == "micah_smoke", "Micah lights a cigarette in the road");
+        await Until(() => game.Hud.InsetVisible || game.Room is not Rooms.ConventRoad);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Motel && game.Hud.InsetName == "motel_closeup",
+            "the motel sign close-up appears when Micah spots it");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("long shot"));
+        Check(game.Hud.InsetVisible && game.Hud.CurrentCloseUp == CloseUps.Motel,
+            "the close-up stays up while Micah talks himself into the long shot");
+        await Shot("motel_closeup");
+        Check(_offered.TryGetValue("convent_dead_end", out var deadEnd) && deadEnd.Length == 1 && deadEnd[0].Contains("office"),
+            "the mob, Harrington and the cops are refused before the office");
+        await Until(() => game.Room is Rooms.MotelAlley && !game.Busy);
+        Check(gs.HasFlag("convent_dead_end_done") && gs.HasFlag("seen_motel_alley") && !gs.HasFlag("eleanor_found") &&
+            !game.Hud.InsetVisible && game.Player.PoseName == null, "down the hill to the motel's back alley");
+        await Shot("motel_alley");
+        await ReloadCheckpoint("motel_alley");
+        Check(game.Room is Rooms.MotelAlley && !game.Hud.SpeechVisible, "loading the alley does not replay the dead end");
+
+        await game.Perform(Verb.UseItem, "drop_ladder", "dollar");
+        await game.Perform(Verb.Hand, "drop_ladder");
+        Check(!gs.HasFlag("ladder_down"), "the drop ladder is out of reach from the ground");
+        await game.Perform(Verb.Walk, "motel_door");
+        await Until(() => game.Room is Rooms.MotelLobby && !game.Busy);
+        Check(game.Room?.FindActor("clerk")?.Visible == true, "the night clerk behind the counter");
+        await Shot("motel_lobby");
+        await game.Perform(Verb.Hand, "umbrella");
+        Check(!gs.HasItem("umbrella"), "Micah won't take the clerk's umbrella before talking to him");
+        await game.Perform(Verb.Walk, "stairs");
+        Check(game.Room is Rooms.MotelLobby, "the clerk keeps Micah off the stairs");
+        await game.Perform(Verb.Talk, "clerk");
+        Check(gs.HasFlag("clerk_talked") && game.Room is Rooms.MotelLobby, "the clerk refuses to let Micah upstairs");
+        await game.Perform(Verb.Hand, "umbrella");
+        Check(gs.HasItem("umbrella") && gs.HasFlag("took_umbrella") && game.Room?.FindHotspot("umbrella")?.Active != true,
+            "the clerk lets Micah take his umbrella");
+        await game.Perform(Verb.Walk, "door");
+        await Until(() => game.Room is Rooms.MotelAlley && !game.Busy);
+        await game.Perform(Verb.UseItem, "drop_ladder", "umbrella");
+        Check(!gs.HasFlag("ladder_down") && gs.HasItem("umbrella"), "even the umbrella can't reach the ladder from the ground");
+        await game.Perform(Verb.Hand, "crate");
+        Check(gs.HasFlag("crate_moved") && game.Room?.FindHotspot("crate_under")?.Active == true &&
+            game.Room?.FindHotspot("crate")?.Active != true, "the crate is pushed under the fire escape");
+        await game.Perform(Verb.UseItem, "drop_ladder", "umbrella");
+        Check(gs.HasFlag("ladder_down") && !gs.HasItem("umbrella") && game.Room?.FindHotspot("ladder")?.Active == true,
+            "the umbrella hooks the drop ladder down");
+        await Shot("motel_alley_ladder");
+        var climb = game.Perform(Verb.Hand, "ladder");
+        await Until(() => game.Room is Rooms.MotelFireEscape);
+        Check(game.Room?.FindActor("eleanor")?.Visible == true, "Eleanor is waiting on the fire escape");
         Check(!game.Hud.InsetVisible, "no close-up while Micah walks up to her");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText ==
-            "Not many people enter a convent this late, mister. Were you looking for someone?");
+            "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?");
         Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Hud.SpeechText ==
-            "Not many people enter a convent this late, mister. Were you looking for someone?",
-            "Eleanor's new opening is spoken on the road before the close-up");
+            "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?",
+            "Eleanor's opening is spoken on the fire escape before the close-up");
         await Until(() => game.Hud.InsetVisible);
         Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
             "the two-portrait close-up appears immediately after Eleanor's opening");
@@ -410,12 +458,12 @@ public partial class AutoPlay
         await Shot("convent_portrait_eleanor");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves.");
         Check(game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves." && !game.Hud.InsetDrawn,
-            "the compensation answer rejoins the existing conversation on the road");
+            "the compensation answer rejoins the existing conversation on the fire escape");
         Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
-        await Shot("convent_road");
+        await Shot("motel_fire_escape");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
-        Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.ConventRoad,
-            "the rest of Eleanor's conversation stays on the road without the panel");
+        Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
+            "the rest of Eleanor's conversation stays on the fire escape without the panel");
         await Until(() => game.Room?.Name == "MotelNight");
         Check(game.Player.Character == "micah_dressing", "Micah getting dressed in the motel");
         await game.Wait(2);
@@ -424,5 +472,6 @@ public partial class AutoPlay
         await game.Wait(2.5);
         await Shot("attic_night");
         await leave;
+        await climb;
     }
 }

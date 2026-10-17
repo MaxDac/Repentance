@@ -461,13 +461,18 @@ def figure(spec, ps, fw=56, fh=80):
             k, hk = col.get("arm_r", 1.0), max(col.get("arm_r", 1.0), 0.7)
             c.put(c.capsule(P(sh), P(el), H * 0.034 * BULK * k, H * 0.031 * BULK * k), sleeve, part)
             c.put(c.capsule(P(el), P(wr), H * 0.031 * BULK * k, H * 0.027 * BULK * k), fore, part)
+            if col.get("garter"):  # an elastic sleeve garter round the upper arm, a little above the elbow
+                (ax, ay, _), (bx, by, _) = P(sh), P(el)
+                ln = max(math.hypot(bx - ax, by - ay), 1e-6)
+                along = ((c.X - ax) * (bx - ax) + (c.Y - ay) * (by - ay)) / ln
+                c.recolor(c.parts_mask(part) & (np.abs(along - ln * 0.6) < 0.75), col["garter"], dither=False)
             if col.get("cuff") and fore != skin:
                 c.put(c.capsule(P(wr), P(wr), H * 0.026 * hk, H * 0.026 * hk), col["cuff"], part)
             # ps["hand_in_coat"]: the hand of that arm is slipped inside the coat front, out of sight
             if hand is not None and ps.get("hand_in_coat") != s:
                 c.put(c.capsule(P(wr), P(hand), H * 0.025 * hk, H * 0.021 * hk), skin, f"hand{s}", dither=False)
-        # a hand held up to the head goes in front of it
-        add(2.9 if kind == "temple" else 2.0 + Ds + 0.05 * abs(cp), arm)
+        # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face)
+        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + 0.05 * abs(cp), arm)
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
@@ -636,6 +641,14 @@ def figure(spec, ps, fw=56, fh=80):
             _mask(c, col, P, body, H, cp, sp, nod)
     elif col.get("mask") and col["mask"][0] == "animal":  # ears and antlers still show from behind
         _mask(c, col, P, body, H, cp, sp, nod)
+    if ps.get("front_arms"):  # the face's painted features stay behind hands raised in front of it
+        over = c.parts_mask(*(f"{k}{s}" for s in ps["front_arms"] for k in ("arm", "hand")))
+        c.ink = [(x, y, k) for x, y, k in c.ink if not (0 <= x < c.w and 0 <= y < c.h and over[y, x])]
+    if ps.get("marks") is not None:  # screen positions of the hands and the mouth, for props painted on afterwards
+        for s in arm_pts:
+            ps["marks"][f"hand{s}"] = P(arm_pts[s][3])[:2]
+            ps["marks"][f"wrist{s}"] = P(arm_pts[s][2])[:2]
+        ps["marks"]["mouth"] = P(body([0, 0.074 + nod + 0.05 * HEAD, 0.062 * HEAD]))[:2]
     shx = (P(legs[1][2])[0] + P(legs[-1][2])[0]) / 2
     return c.render(shadow_box=((shx, base + 0.6), H * 0.15, 1.7))
 
@@ -960,6 +973,9 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     if style == "bald":
         mask &= (c.Y > hy_ - hry * 0.1) & (back > 0.3 if cp > -0.25 else True)
     c.put((mask, nx, ny, nz), hair, "hair", dither=False)
+    if col.get("combover"):  # a few long strands combed sideways across the bare crown, the scalp between them
+        strands = m & (c.Y < hy_ - hry * 0.5) & (np.floor(c.Y) % 2 == 1) & (np.floor(c.X + c.Y) % 3 != 0)
+        c.put((strands, nx, ny, nz), col["combover"], "hair", dither=False, cast=False)
     if style != "bald":
         # FOTA hair has a lit crown and a darker underside rather than a flat helmet
         top = hy_ - hry - vol * 0.8
@@ -1003,6 +1019,14 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         cc = (hx_ + 0.5 * sp, hy_ - hry * 0.75)
         c.put(c.ellipse(cc, H * 0.045, H * 0.03, -0.25 * (1 if sp >= 0 else -1)), hc, "crown")
         c.recolor(c.parts_mask("crown") & (c.Y > cc[1] + 0.5), col.get("band", "e8c050"), dither=False)
+    elif hat == "visor":
+        # a desk clerk's celluloid eyeshade: a thin band round the brow and a translucent green bill jutting forward
+        by = hy_ - hry * 0.42
+        c.put(c.ellipse((hx_, by), hrx + 0.6, 1.0), col.get("band", hc), "band", dither=False, cast=False)
+        bill = P(body([0, 0.034 + nod, 0.09]))
+        brx = H * math.sqrt((0.056 * cp) ** 2 + (0.05 * sp) ** 2)
+        c.put(c.ellipse((bill[0] + 0.3 * sp, bill[1] + 0.3), brx, 1.6), hc, "bill", dither=False)
+        c.bias[c.parts_mask("head") & (c.Y > by) & (c.Y < by + 3)] -= 1
     elif hat == "cap":
         c.put(c.ellipse((hx_ - 0.3 * sp, hy_ - hry * 0.5), hrx + 1.4, hry * 0.62), hc, "crown",
               clip=c.Y < hy_ - hry * 0.2)

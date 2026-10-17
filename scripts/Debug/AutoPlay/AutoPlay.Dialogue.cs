@@ -40,12 +40,19 @@ public partial class AutoPlay
             await Until(() => game.Room is Rooms.ConventRoad || game.Hud.SpeechVisible);
             Check(game.Room is Rooms.ConventRoad && GameState.Instance.HasFlag("convent_departed"),
                 "opening the entrance after talking leaves directly without a second farewell");
+            await Until(() => game.Room is Rooms.MotelAlley && !game.Busy, timeout: 300);
+            Check(game.Room is Rooms.MotelAlley && GameState.Instance.HasFlag("convent_dead_end_done"),
+                "the direct-talk exit plays the dead end and goes down to the motel");
+            GameState.Instance.SetFlag("crate_moved");
+            GameState.Instance.SetFlag("ladder_down");
+            var climb = game.Perform(Verb.Hand, "ladder");
             await Until(() => game.Hud.SpeechVisible &&
                 game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
             Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
-                !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
-                "the alternate compensation answer also continues on the road");
+                !game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
+                "the alternate compensation answer also continues on the fire escape");
             await Until(() => game.Room is Rooms.Attic && !game.Busy, timeout: 300);
+            await climb;
             if (game.Room is not Rooms.Attic || game.Busy)
                 throw new InvalidOperationException($"Convent departure did not finish: room={game.Room?.Name}, busy={game.Busy}.");
             Check(game.Room is Rooms.Attic && !game.Busy, "the direct-talk exit completes the motel sequence");

@@ -75,8 +75,12 @@ public static class Notes
             L("Scratched deep into the back of her hand mirror: three loops tied in one knot. No beginning, no end."),
             L("Copied it down. Somebody will know what it means."),
         }, "res://assets/art/ui/triquetra.png"),
+        N("motel", "The motel", "convent_dead_end_done",
+            L("No Eleanor on the road. A dead end, and no angle left but a flophouse down the hill."),
+            L("The night clerk sweats like a man with a partner he never chose. He won't let me upstairs.", "clerk_talked"),
+            L("Round the back, a fire escape. The drop ladder is pulled up out of reach.", "seen_motel_alley")),
         N("eleanor_found", "Eleanor", "eleanor_found",
-            L("Found her outside the convent."),
+            L("Found her on a motel fire escape, down the road from the convent."),
             L("She can't go back. I promised I'd never tell where she went.")),
 
         // ---------------------------------------------------------------- Act 2
@@ -163,7 +167,8 @@ public static class Notes
         (new[] { "alley" }, new[] { "sal_passed" }),
         (new[] { "convent_road", "convent_corridor" }, new[] { "alley_done" }),
         (new[] { "convent_cell" }, new[] { "nun_talked" }),
-        (new[] { "motel_night", "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "got_mirror", "eleanor_found" }),
+        (new[] { "motel_alley", "motel_lobby", "motel_fire_escape" }, new[] { "got_mirror", "convent_dead_end_done" }),
+        (new[] { "motel_night", "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "eleanor_found" }),
         (new[] { "club_hall" }, new[] { "librarian_refused", "catalogue_identified", "read_book", "card_decoded" }),
         (new[] { "street", "rose_house" }, new[] { "club_out" }),
         (new[] { "newspaper_morgue" }, new[] { "caleb_club", "nun_threatened" }),

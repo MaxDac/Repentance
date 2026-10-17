@@ -1,8 +1,12 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
 
-/// <summary>The convent entrance on arrival; Eleanor waits outside when Micah leaves.</summary>
+/// <summary>
+/// The convent entrance on arrival. When Micah leaves, the road is empty: he lights up in the middle of it, runs out
+/// of leads, and spots the motel sign down the hill.
+/// </summary>
 public partial class ConventRoad : Room
 {
     public override async Task OnEnter(string entry)
@@ -21,17 +25,23 @@ public partial class ConventRoad : Room
         if (State.HasFlag("eleanor_found")) return;
         await Game.Run(async () =>
         {
-            await Wait(0.8);
-            await Think("A woman in black by the gate, alone on an empty road. I know the face. I've carried it in my pocket all night.");
-            if (FindActor("eleanor") is { } eleanor)
-                await Game.WalkTo(eleanor.Position + new Godot.Vector2(-44, 4));
-            Player.Face(Facing.Right);
-            await Talk("eleanor_road");
-            State.SetFlag("eleanor_found");
-            await Wait(0.8);
-            await Game.Hud.Fade(1, 1.5);
-            await Game.ChangeRoom("motel_night", "start", fadeInSeconds: 1.5);
+            if (!State.HasFlag("convent_dead_end_done")) await DeadEnd();
+            await Game.ChangeRoom("motel_alley", "start");
         });
+    }
+
+    private async Task DeadEnd()
+    {
+        await Wait(0.8);
+        await Game.WalkTo(new Vector2(240, 214));
+        Player.Face(Facing.Down);
+        await Player.PlayPose("micah_smoke");
+        await Talk("convent_dead_end");
+        State.SetFlag("convent_dead_end_done");
+        Player.SetPose(null);
+        await Say("*flick*");
+        await Think("I flicked the butt into the gutter and went down the hill.");
+        await Game.Hud.Fade(1, 1.5);
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)

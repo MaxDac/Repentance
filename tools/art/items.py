@@ -252,6 +252,38 @@ def lighter(d, im):
     d.ellipse([14, 4, 17, 8], fill=hx("fff0a0"))
 
 
+def umbrella(d, im):
+    """A gentleman's black umbrella, furled and strapped, on a curved wooden crook."""
+    ax, ay, bx, by = 5.0, 20.0, 19.0, 8.0  # canopy from the ferrule end to the rib tips by the shaft
+    ux, uy = (bx - ax) / 14.0, (by - ay) / 14.0
+    nx, ny = -uy * 0.76, ux * 0.76  # perpendicular, scaled to unit length
+    pts_l, pts_r = [], []
+    for i in range(15):
+        t = i / 14.0
+        w = 0.6 + 3.2 * t ** 0.8 if t < 0.88 else 3.4 - (t - 0.88) * 14
+        cx, cy = ax + (bx - ax) * t, ay + (by - ay) * t
+        pts_l.append((cx + nx * w, cy + ny * w))
+        pts_r.append((cx - nx * w, cy - ny * w))
+    d.polygon(pts_l + pts_r[::-1], fill=hx("23242c"))
+    # folds of the furled silk catching the light
+    d.line([(7, 18), (17, 8)], fill=hx("4a4e5e"))
+    d.line([(9, 18), (18, 11)], fill=hx("363844"))
+    d.line([(6, 18), (14, 9)], fill=hx("3a3c4a"))
+    d.point((12, 12), fill=hx("6a7084"))
+    d.point((15, 9), fill=hx("6a7084"))
+    # the strap and its button
+    d.line([(11, 11), (15, 15)], fill=hx("121218"), width=2)
+    d.point((13, 13), fill=hx("9a9aa4"))
+    # steel ferrule at the tip
+    d.line([(2, 23), (5, 20)], fill=hx("8a8c94"), width=1)
+    d.point((2, 23), fill=hx("c8cad0"))
+    # the wooden shaft and crook handle
+    d.line([(19, 8), (23, 4)], fill=hx("6a4220"), width=2)
+    d.arc([21, 0, 31, 10], 160, 400, fill=hx("8a5a2e"), width=3)
+    d.arc([21, 0, 31, 10], 190, 290, fill=hx("c08a50"))
+    d.point((29, 8), fill=hx("5a3418"))
+
+
 def build():
     for name, fn in (("photo", photo), ("dollar", dollar), ("matchbook", matchbook), ("crowbar", crowbar),
                      ("journal", journal),
@@ -260,5 +292,6 @@ def build():
                      ("card", card), ("mirror", mirror), ("book", book), ("address", address),
                      ("invitation", invitation), ("mask", mask), ("cloak", cloak),
                      ("kitchen_key", kitchen_key), ("documents", documents),
-                     ("faith_ring", faith_ring), ("cross", cross), ("notepad", notepad), ("lighter", lighter)):
+                     ("faith_ring", faith_ring), ("cross", cross), ("notepad", notepad), ("lighter", lighter),
+                     ("umbrella", umbrella)):
         save(_icon(fn), "items", f"{name}.png")
