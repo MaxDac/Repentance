@@ -58,7 +58,8 @@ Story actions (opening a door, collapsing, kneeling, drinking) are strips beside
 `Actor.PlayPose`. They return `false` if interrupted; call `SetPose(null)` after a completed action. Strips wider than
 64x96 start on the idle pose drawn at strip width, not a crop of `micah.png`. In `figure.py`, the near arm on a
 right-facing 3/4 view is `s = -1`. A spec with `far_arm_behind` (Eleanor's pink gown) keeps the far arm behind the
-dress in the front and back 3/4 rows, instead of painting it over the torso edge.
+dress in the front and back 3/4 rows, instead of painting it over the torso edge. Its coat's `hem_legs` and `hem_pad`
+make the hem follow the legs (padding past each leg) rather than the hip width.
 
 ## Visual checks
 

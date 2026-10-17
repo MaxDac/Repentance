@@ -770,14 +770,17 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
         _seated_skirt(c, coat, body, P, legs, H, flare, tc, hc, wt, wh)
         return
     xs = []
+    pad = coat.get("hem_pad", 0.045)  # hem reach past each leg at the hem line
     for s, leg in legs.items():
         p = _leg_at(leg, hem)
         if p is None:
             p = leg[2]
         q = P(p)
-        xs += [q[0] - H * (0.045 + flare), q[0] + H * (0.045 + flare)]
+        xs += [q[0] - H * (pad + flare), q[0] + H * (pad + flare)]
     hem_y = P(np.array([0, hem, 0]))[1]
-    lo, hi = min(xs + [hc[0] - wh * 1.05]), max(xs + [hc[0] + wh * 1.05])
+    # coat["hem_legs"]: the hem follows the legs alone, narrowing below the hips when they stand together
+    hips = [] if coat.get("hem_legs") else [hc[0] - wh * 1.05, hc[0] + wh * 1.05]
+    lo, hi = min(xs + hips), max(xs + hips)
     pts = [(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (lo, hem_y), (hi, hem_y), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]
     if coat.get("flat_front") and abs(sp) > 0.3:
         # a flat belly: in profile the front of the skirt hangs straight down from the waist, only the stepping
