@@ -192,8 +192,8 @@ class CharacterArtTests(unittest.TestCase):
         self.assertGreater(bottoms[1], bottoms[0])
         self.assertLessEqual(bottoms[1] - bottoms[0], 3, "extend the back only slightly")
         self.assertEqual(sprites.ELEANOR_STAGE["hair_front"], 0.34)
-        self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.02)
-        self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.6, "thin front locks over the chest")
+        self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.0, "no stray hair proud of the chest")
+        self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.4, "thin front locks over the chest")
 
     def test_eleanor_front_locks_remain_in_all_animation_frames(self):
         original = painter._hair_front
@@ -218,14 +218,13 @@ class CharacterArtTests(unittest.TestCase):
     def test_eleanor_hair_bump_is_smaller_than_the_original(self):
         spec = sprites.ELEANOR_STAGE
         self.assertEqual(spec["hair_front"], 0.34)
-        self.assertGreater(spec["hair_bulge"], 0)
-        self.assertLess(spec["hair_bulge"], 0.07)
+        self.assertEqual(spec["hair_bulge"], 0, "the locks lie on the body, no stray hair proud of the chest")
         for phi in (35, 90):
             pose = sprites.pose(phi, arms=sprites._arms("cover", "side"))
             subtle = np.array(sprites.figure(spec, pose, sprites.NPC_W, sprites.FH))
-            flat = np.array(sprites.figure(dict(spec, hair_bulge=0), pose, sprites.NPC_W, sprites.FH))
+            flat = np.array(sprites.figure(dict(spec, bust_peak=()), pose, sprites.NPC_W, sprites.FH))
             original = np.array(sprites.figure(dict(spec, hair_bulge=0.07), pose, sprites.NPC_W, sprites.FH))
-            self.assertFalse(np.array_equal(subtle, flat), "new art must differ from the rejected flat contour")
+            self.assertFalse(np.array_equal(subtle, flat), "the chest keeps its soft bust curve, not a flat contour")
             self.assertFalse(np.array_equal(subtle, original), "new art must differ from the original large projection")
             def front(img):  # summed forward reach of each row, so the bust peeking past the lock still counts
                 rows = img[:, :, 3] == 255

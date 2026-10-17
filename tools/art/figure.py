@@ -358,7 +358,8 @@ def figure(spec, ps, fw=56, fh=80):
             if near:
                 M = max(near) if f > 0 else min(near)  # the most forward point of the chest round it
                 bump = np.zeros((c.h, c.w), bool)
-                for k, d in ((-1, 1), (0, 2), (1, 2), (2, 1)):  # pixels proud of the chest: a soft peak
+                # (row offset, pixels proud of the chest's most forward point): a soft peak
+                for k, d in col.get("bust_peak", ((-1, 1), (0, 2), (1, 2), (2, 1))):
                     y, x0 = by + k, front(by + k)
                     if x0 is None:
                         continue
