@@ -19,24 +19,25 @@ public static class Act3
     }
 
     /// <summary>
-    /// Resolves the ending, records it as <c>ending_N</c> and moves to its scene. Ending 10 goes to Micah's confession in
-    /// prison, then on to Eleanor alone on the outskirts.
+    /// Resolves the ending, records it as <c>ending_N</c> and moves to its scene. Eleanor rides out with Micah in endings
+    /// 2 and 10 (<c>eleanor_rides</c>) and visits him in prison in endings 4 and 11 (<c>eleanor_visits</c>).
     /// </summary>
     public static Task End()
     {
         int ending = Endings.Resolve(State.HasFlag);
         State.SetFlag($"ending_{ending}");
-        if (ending is 2 or 3) State.SetFlag("outskirts_car");
-        if (ending is 5 or 9 or 10) State.SetFlag("caleb_visits");
-        if (ending is 8 or 10) State.SetFlag("eleanor_epilogue");
+        if (ending is 2 or 3 or 10) State.SetFlag("outskirts_car");
+        if (ending is 2 or 10) State.SetFlag("eleanor_rides");
+        if (ending is 4 or 11) State.SetFlag("eleanor_visits");
+        if (ending is 5 or 9) State.SetFlag("caleb_visits");
+        if (ending == 8) State.SetFlag("eleanor_epilogue");
         return ending switch
         {
             1 => Game.ChangeRoom("rose_house", "coffee"),
-            2 or 3 => Game.ChangeRoom("outskirts", "ending"),
+            2 or 3 or 10 => Game.ChangeRoom("outskirts", "ending"),
             7 => Finish(nextMorning: false),
             8 => Game.ChangeRoom("outskirts", "eleanor_alone"),
             9 => Game.ChangeRoom("prison", "eleanor"),
-            10 => Game.ChangeRoom("prison", "micah_caleb"),
             _ => Game.ChangeRoom("prison", "ending"),
         };
     }

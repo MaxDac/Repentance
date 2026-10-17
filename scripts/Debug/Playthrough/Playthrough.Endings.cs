@@ -17,7 +17,7 @@ public sealed partial class Playthrough
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 300);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionText == "The End", $"route {_route}: the epilogue ends on \"The End\"");
-        for (int n = 1; n <= 10; n++)
+        for (int n = 1; n <= 11; n++)
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         bool keeps = Endings.KeepsJournal(ending);
         Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
@@ -35,8 +35,8 @@ public sealed partial class Playthrough
             Check(_matchedWants.Contains(want), $"route {_route}: the choice \"{want}\" was offered and taken");
     }
 
-    /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-10.</summary>
-    private bool EleanorRoute => _route is "8" or "9" or "10";
+    /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-11.</summary>
+    private bool EleanorRoute => _route is "8" or "9" or "10" or "11";
 
     /// <summary>
     /// Eleanor's coda in the mansion, after Micah's prayer: the candlestick, then out through the study and the kitchen
@@ -112,6 +112,7 @@ public sealed partial class Playthrough
                 yield return "Our Father";
                 break;
             case "10":
+            case "11":
                 yield return "Shoot him";
                 break;
             // Eleanor's four turns: only the four right lines in a row convince her (see Walkthrough.md)

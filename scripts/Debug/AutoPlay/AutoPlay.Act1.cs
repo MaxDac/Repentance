@@ -23,6 +23,7 @@ public partial class AutoPlay
         Check(game.Music.Current == null, "no music in the attic");
         int woodSteps = game.Sfx.Count(Sound.StepWood);
         await WheelTest(game);
+        await PuzzleGestureTest(game);
         await PosePlaybackTest(game);
         await game.Perform(Verb.Talk, "hatch");
         await game.Perform(Verb.Hand, "sheet");
@@ -256,6 +257,7 @@ public partial class AutoPlay
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
             "arrival waits outside for the player to open the convent door");
         Check(game.Music.Current == null, "no piano outside the convent");
+        Check(game.Sfx.Ambient == Sound.Rain, "it rains on the road outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");
         Check(gs.HasFlag("seen_convent_exterior") && game.Room?.FindActor("eleanor") == null &&
@@ -400,6 +402,7 @@ public partial class AutoPlay
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("long shot"));
         Check(game.Hud.InsetVisible && game.Hud.CurrentCloseUp == CloseUps.Motel,
             "the close-up stays up while Micah talks himself into the long shot");
+        Check(game.Room is Rooms.ConventRoad { Drags: > 0 }, "Micah draws on the cigarette while he talks");
         await Shot("motel_closeup");
         Check(_offered.TryGetValue("convent_dead_end", out var deadEnd) && deadEnd.Length == 1 && deadEnd[0].Contains("office"),
             "the mob, Harrington and the cops are refused before the office");
@@ -460,10 +463,23 @@ public partial class AutoPlay
         Check(game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves." && !game.Hud.InsetDrawn,
             "the compensation answer rejoins the existing conversation on the fire escape");
         Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
+        Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
         await Shot("motel_fire_escape");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
         Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
             "the rest of Eleanor's conversation stays on the fire escape without the panel");
+        var her = game.Room!.FindActor("eleanor")!.Position;
+        float talkingX = game.Player.Position.X;
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Then stay. Right here.");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("You're walking into the rain"));
+        Check(game.Player.Position.X > talkingX + 8 && !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+            "Micah takes a couple of steps towards Eleanor, with no portrait panel, as she answers him");
+        await Shot("fire_escape_closer");
+        await Until(() => !game.Hud.SpeechVisible && game.Hud.FadeAlpha > 0.3f);
+        Check(game.Player.IsWalking, "Micah is still walking towards her as the scene fades");
+        await Until(() => game.Hud.FadeAlpha >= 1f);
+        Check(game.Room is Rooms.MotelFireEscape && game.Player.Position.X < her.X - 4,
+            "the fade to black stops him before he reaches Eleanor");
         bool sawMotelNight = false;
         await Until(() =>
         {

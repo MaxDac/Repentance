@@ -84,7 +84,7 @@ Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick cho
 modes, the save/load round trip and the coverage gates.
 
 - Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
-  1-oldman 1-steps 8 9 10`. No seeded state. `--ending=N` runs one route.
+  1-oldman 1-steps 8 9 10 11`. No seeded state. `--ending=N` runs one route.
 - After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
 - A beat that cannot reach what it needs times out and fails, naming the beat.
 - Coverage: every `Sound` and every `Track` must play (`UnheardSounds` exceptions, empty), and every choice a route

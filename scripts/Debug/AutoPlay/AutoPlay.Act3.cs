@@ -21,6 +21,7 @@ public partial class AutoPlay
         await WaitIdle(game);
         Check(gs.HasFlag("interlude2") && game.Player.Character == "eleanor_play" && gs.Inventory.Count == 0 && !gs.HasItem("revolver"),
             "the player is Eleanor at the motel, with nothing of Micah's");
+        Check(game.Music.Current == null, "no office jazz in the motel once Micah has gone");
         await Shot("interlude_motel_goons");
         var taken = game.Perform(Verb.Hand, "door");
         await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1

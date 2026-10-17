@@ -97,6 +97,33 @@ public partial class AutoPlay
         Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "legacy Act 3 completion survives another reload");
     }
 
+    /// <summary>Arrow keys and swipes drive the direction-pad puzzles; drags that start off the work area do nothing.</summary>
+    private async Task PuzzleGestureTest(Game game)
+    {
+        var route = LiftMaze.Route(LiftMaze.Start, LiftMaze.Target)!;
+        var lift = game.Hud.Puzzle.Open(PuzzleKind.Lift);
+        PuzzleDrag(new Vector2(380, 120), route.Take(4));
+        foreach (var step in route) PuzzleKey(step);
+        PuzzleClick("submit");
+        await AwaitTest(lift, "arrow keys steer the lift cage");
+        Check(await lift, "arrow keys solve the lift maze; a drag on the clue card moved nothing");
+
+        lift = game.Hud.Puzzle.Open(PuzzleKind.Lift);
+        PuzzleDrag(LiftMazeScreen.Center(LiftMaze.Start), route);
+        await Shot("lift_swipe");
+        PuzzleClick("submit");
+        await AwaitTest(lift, "a drag along the shafts steers the lift cage");
+        Check(await lift, "swiping cell by cell solves the lift maze");
+
+        var alignment = game.Hud.Puzzle.Open(PuzzleKind.Alignment);
+        PuzzleClick("rotate");
+        PuzzleDrag(new Vector2(110, 110), Enumerable.Repeat("right", 6));
+        for (int i = 0; i < 3; i++) PuzzleKey("down");
+        PuzzleClick("submit");
+        await AwaitTest(alignment, "swipes and arrow keys slide the tracing");
+        Check(await alignment, "swipes and arrow keys solve the auditor's index");
+    }
+
     private async Task CancelPuzzle(Func<Task> start, PuzzleKind kind, string flag, string name)
     {
         var action = start();

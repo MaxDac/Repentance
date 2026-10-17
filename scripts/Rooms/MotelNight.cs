@@ -17,6 +17,9 @@ public partial class MotelNight : Room
     private bool First => State.HasFlag("interlude1");
     private bool Second => State.HasFlag("interlude2");
 
+    /// <summary>The office jazz plays while Micah is here with Eleanor; in the interludes she is alone, in silence.</summary>
+    public override Track? Music => First || Second ? null : Track.OfficeJazz;
+
     private Texture2D? _occupied;
 
     protected override void OnRefresh()

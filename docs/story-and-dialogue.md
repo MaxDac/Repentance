@@ -156,17 +156,18 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 | Order | Condition | Ending |
 |---|---|---|
 | 1 | `eleanor_struck` | 8 if `eleanor_burned`, else 9 |
-| 2 | `eleanor_dismissed` | 10 |
+| 2 | `eleanor_weary` | 10 if `StaysFree`, else 11 |
 | 3 | `gave_up_steps`, `walked_away` or `spared_oldman` | 1 (Rose) |
 | 4 | `repented` | 6 |
 | 5 | `shot_eleanor` or `shot_himself` | 7 |
 | 6 | `StaysFree` | 2 if `eleanor_convinced`, else 3 (outskirts) |
 | 7 | otherwise | 4 if `eleanor_convinced`, else 5 (prison) |
 
-Endings 8-10 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `KeepsJournal`:
-1, 6, 8, 9, 10. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
+Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `EleanorFollows` is
+`eleanor_convinced` or `eleanor_weary` (she comes to the kitchen). `KeepsJournal`:
+1, 6, 8, 9, 10, 11. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan`, `CanOfferCross`, `ChurchReturned`, `InsistedForgiveness`.
-Every route must reach "The End" (`Playthrough` routes `1`-`10`, `1-oldman`, `1-steps`).
+Every route must reach "The End" (`Playthrough` routes `1`-`11`, `1-oldman`, `1-steps`).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
 click or refusal walks her past him to the door.
 

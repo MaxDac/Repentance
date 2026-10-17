@@ -24,7 +24,7 @@ public static class ItemScripts
             await game.Say("A business card, only two letters in it; the same perfume that permeates the whole room, only stronger... hypnotic, even.");
             await game.Say("I hold it under my nose longer than a man on a job should. Get a grip, Micah.");
             await game.Say("The matchbook: a blue lantern on the cover. The Blue Lantern, State Street.");
-            await game.Say("Laundry bluing in a lady's jewellery box. Somebody meant to dye a white flower blue. She was going there herself.");
+            await game.Say("Laundry bluing in a lady's jewellery box. Somebody meant to dye a white flower blue and follow her there.");
             await game.Say("And a Japanese water flower, the kind they sell at the dime store, in a scrap of paper: \"Give me a drink and I'll tell you the word.\" She wrote that in a hurry.");
             await game.Say("Two big fellas walked her out the back door without a soul seeing. Fellas like that drink somewhere. That's where her trail goes next.");
             return true;

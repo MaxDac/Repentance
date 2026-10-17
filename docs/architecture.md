@@ -31,7 +31,7 @@ flowchart TD
 | Layer | Folder | Godot? | Role |
 |---|---|---|---|
 | Framework | `scripts/Core/` | mostly | `Game`, `Room`, `Hotspot`, `Actor`, `Player`, state, dialogue, saves, audio |
-| Rules and data | `scripts/Core/` (`Items`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `Endings`, `SaveData`, `*Synth`, `InkScan`) | **no** | Pure C#, linked into the xunit project and unit-tested |
+| Rules and data | `scripts/Core/` (`Items`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `SwipeGesture`, `Endings`, `SaveData`, `*Synth`, `InkScan`) | **no** | Pure C#, linked into the xunit project and unit-tested |
 | Story glue | `scripts/Story/` | yes | Item verbs, combinations and puzzles valid in any room; interludes |
 | Rooms | `scripts/Rooms/` + `scenes/rooms/` | yes | One script and one scene per location (37 rooms) |
 | Dialogue | `dialogue/repentance.ink` | - | All conversations, compiled by GodotInk on import |
@@ -121,7 +121,7 @@ flowchart LR
     I1 --> A2[Act 2<br/>StoryAct 2]
     A2 --> I2[Second interlude]
     I2 --> A3[Act 3<br/>StoryAct 3]
-    A3 --> E[Endings 1-10<br/>Endings.Resolve]
+    A3 --> E[Endings 1-11<br/>Endings.Resolve]
     E --> C[Attic coda]
 ```
 

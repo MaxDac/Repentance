@@ -18,6 +18,7 @@
     <Compile Include="..\..\scripts\Core\Items\*.cs" Link="Linked\Items\%(Filename)%(Extension)" />
     <Compile Include="..\..\scripts\Core\SaveData.cs" Link="Linked\SaveData.cs" />
     <Compile Include="..\..\scripts\Core\PuzzleRules.cs" Link="Linked\PuzzleRules.cs" />
+    <Compile Include="..\..\scripts\Core\SwipeGesture.cs" Link="Linked\SwipeGesture.cs" />
     <Compile Include="..\..\scripts\Core\Endings.cs" Link="Linked\Endings.cs" />
     <Compile Include="..\..\scripts\Core\Recipes.cs" Link="Linked\Recipes.cs" />
     <Compile Include="..\..\scripts\Core\Notes.cs" Link="Linked\Notes.cs" />

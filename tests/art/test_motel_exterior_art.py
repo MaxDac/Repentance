@@ -33,7 +33,7 @@ class MotelExteriorArtTests(unittest.TestCase):
     def test_committed_art_matches_the_generator(self):
         names = sorted(path.name for path in self.generated.glob("*.png"))
         self.assertEqual(names, ["motel_alley.png", "motel_alley_crate.png", "motel_alley_crate_under.png",
-                                 "motel_alley_ladder.png", "motel_fire_escape.png"])
+                                 "motel_alley_ladder.png", "motel_fire_escape.png", "motel_fire_escape_fg.png"])
         for name in names:
             with self.subTest(asset=name), Image.open(self.generated / name) as generated, \
                     Image.open(ROOMS / name) as committed:
@@ -75,6 +75,27 @@ class MotelExteriorArtTests(unittest.TestCase):
         base = motel_exterior.paint_alley()
         home = motel_exterior.paint_alley(crate="home")
         self.assertIsNotNone(ImageChops.difference(base, home).getbbox())
+
+    def test_front_rail_is_cut_from_the_landing_and_sorted_in_front_of_the_floor(self):
+        scene = (ROOT / "scenes" / "rooms" / "motel_fire_escape.tscn").read_text()
+        node = next(block for block in re.split(r"(?=\[node )", scene) if 'name="RailFront"' in block)
+        x, y = map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", node).groups())
+        offset = int(re.search(r"offset = Vector2\(0, (-\d+)\)", node)[1])
+        walk_bottom = max(map(int, re.search(r"polygon = PackedVector2Array\(([^)]*)\)", scene)[1]
+                              .replace(" ", "").split(",")[1::2]))
+        self.assertGreater(y, walk_bottom, "everyone on the landing stands behind the rail")
+        with Image.open(ROOMS / "motel_fire_escape.png") as background, \
+                Image.open(ROOMS / "motel_fire_escape_fg.png") as front:
+            top = y + offset
+            self.assertEqual((x, top), (0, motel_exterior.FE_FG_Y))
+            alpha = front.getchannel("A")
+            self.assertEqual(alpha.getextrema(), (0, 255))
+            self.assertEqual(alpha.histogram()[1:255], [0] * 254, "the cut-out is hard-edged")
+            crop = background.convert("RGBA").crop((0, top, front.width, top + front.height))
+            crop.putalpha(alpha)
+            self.assert_images_equal(front, crop)
+            hatch = alpha.crop((motel_exterior.HATCH[0] + 6, 0, motel_exterior.HATCH[1] + 4, front.height))
+            self.assertIsNone(hatch.getbbox(), "the rail breaks at the hatch for the ladder")
 
 
 if __name__ == "__main__":

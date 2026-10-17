@@ -94,7 +94,9 @@ public sealed partial class Playthrough
         });
         await Beat("convent_road", async () =>
         {
-            await Do(Verb.Walk, "street");
+            _ = Do(Verb.Walk, "street");
+            await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The next evening", 10);
+            Check(_game.Hud.CaptionText == "The next evening", "a day passes between the beating and the convent");
             await Until(() => _game.Room is Rooms.ConventRoad && !_game.Busy && Gs.HasFlag("seen_convent_exterior"));
             Expect("ConventRoad", "from the alley to the convent");
         });

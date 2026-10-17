@@ -55,6 +55,7 @@ public partial class PuzzlePanel : Control
         _clue.AddThemeColorOverride("font_color", Parchment);
 
         _screen.Attach(this);
+        if (_screen.HasDirections) _feedback.Text = "Use the pad, the arrow keys, or drag across the diagram.";
         AddButton("reset", "Reset", new Rect2(18, 210, 70, 22), Reset);
         if (_screen.HasSubmit) AddButton("submit", _screen.SubmitText, new Rect2(186, 210, 108, 22), Submit);
         AddButton("close", "Close / Esc", new Rect2(368, 210, 96, 22), () => Finish(false));
@@ -64,9 +65,44 @@ public partial class PuzzlePanel : Control
 
     public override void _Input(InputEvent e)
     {
-        if (!IsOpen || !e.IsActionPressed("ui_cancel")) return;
-        GetViewport().SetInputAsHandled();
-        Finish(false);
+        if (!IsOpen) return;
+        if (e.IsActionPressed("ui_cancel"))
+        {
+            GetViewport().SetInputAsHandled();
+            Finish(false);
+            return;
+        }
+        if (_screen is not { HasDirections: true } || e is InputEventMouse) return;
+        foreach (var (action, dx, dy) in ArrowActions)
+            if (e.IsActionPressed(action, allowEcho: true))
+            {
+                GetViewport().SetInputAsHandled();
+                _screen.Step(dx, dy);
+                return;
+            }
+    }
+
+    private static readonly (string Action, int Dx, int Dy)[] ArrowActions =
+        { ("ui_up", 0, -1), ("ui_down", 0, 1), ("ui_left", -1, 0), ("ui_right", 1, 0) };
+
+    private SwipeGesture? _swipe;
+
+    /// <summary>Swipes: a left-button drag that starts on the work area (not a control) steps once per diagram cell.</summary>
+    public override void _GuiInput(InputEvent e)
+    {
+        if (_screen is not { HasDirections: true }) return;
+        switch (e)
+        {
+            case InputEventMouseButton { ButtonIndex: MouseButton.Left } button:
+                _swipe = button.Pressed && PuzzleScreen.WorkArea.HasPoint(button.Position)
+                    ? new SwipeGesture(button.Position.X, button.Position.Y, _screen.SwipeStep) : null;
+                AcceptEvent();
+                break;
+            case InputEventMouseMotion motion when _swipe != null:
+                while (_swipe.Next(motion.Position.X, motion.Position.Y) is { } step) _screen.Step(step.X, step.Y);
+                AcceptEvent();
+                break;
+        }
     }
 
     public Label AddLabel(string text, Rect2 rect, bool wrap = false)
@@ -183,6 +219,7 @@ public partial class PuzzlePanel : Control
     {
         var completion = _completion;
         _completion = null;
+        _swipe = null;
         Visible = false;
         completion?.TrySetResult(solved);
     }

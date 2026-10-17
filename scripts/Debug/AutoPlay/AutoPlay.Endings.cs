@@ -227,16 +227,16 @@ public partial class AutoPlay
 
         await EleanorEndings(game, gs, act3Flags, act3Items);
 
-        // One refusal isn't enough to send Micah away: with only the gin refused, the persuasion still runs.
+        // One refusal isn't enough to wear Eleanor out: with only the gin refused, the persuasion still runs.
         Seed(act3Flags.Append(Endings.RefusedDrugs), act3Items, Convinces.Prepend("Shoot him").ToArray());
         await game.ChangeRoom("mansion_bedroom", "start");
         Check(_offered.ContainsKey("eleanor_persuade") && gs.HasFlag(Endings.EleanorConvinced) &&
-              !gs.HasFlag(Endings.EleanorDismissed) && !gs.HasFlag("ending_10"),
-            "one refusal (the gin only): Micah gets his four turns, and no ending 10");
+              !gs.HasFlag(Endings.EleanorWeary),
+            "one refusal (the gin only): Micah gets his four turns, and Eleanor isn't worn out");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
-        Check(gs.HasFlag("ending_4") && !gs.HasFlag("ending_10") && !gs.HasFlag(Endings.EleanorDismissed),
-            "one refusal (the gin only): the ordinary prison ending 4, not ending 10");
+        Check(gs.HasFlag("ending_4") && !gs.HasFlag("ending_11") && !gs.HasFlag(Endings.EleanorWeary),
+            "one refusal (the gin only): the ordinary prison ending 4, not ending 11");
         await TheEnd("ending_4 (gin refused only)");
 
         // 1: giving up on the church steps
@@ -261,43 +261,49 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Talk, "back_door");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
-              !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorDismissed),
+              !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorWeary),
             "ending 1: walking away from Tony wins over both of Eleanor's refusals");
         await TheEnd("ending_1 (Tony, Eleanor held out)");
     }
 
     /// <summary>
-    /// Endings 8, 9 and 10, and ending 1 from Eleanor's coda: seeded with both of her refusals (Agatha and the old man's
+    /// Endings 8 to 11, and ending 1 from Eleanor's coda: seeded with both of her refusals (Agatha and the old man's
     /// gin), which the main run's interludes didn't make.
     /// </summary>
     private async Task EleanorEndings(Game game, GameState gs, string[] act3Flags, string[] act3Items)
     {
         var heldOut = act3Flags.Append(Endings.RefusedAbbess).Append(Endings.RefusedDrugs).ToArray();
 
-        // 10: Micah shoots the old man; Eleanor sends him away and keeps the pistol. Micah confesses to Caleb in prison,
-        // then Eleanor walks out of the city alone.
-        Seed(heldOut, act3Items, "Shoot him");
-        HeardLog = new List<string>();
-        bool prison = false;
-        _ = game.ChangeRoom("mansion_bedroom", "start");
-        await Until(() =>
+        // 10 and 11: Micah shoots the old man; Eleanor, worn out, skips the persuasion and follows him out. With the
+        // documents taken she leaves him at the edge of the city (10); with nothing, she visits him in prison (11).
+        foreach (bool documents in new[] { true, false })
         {
-            prison |= game.Room?.Name == "Prison" && game.Room.GetNodeOrNull<CanvasItem>("Caleb")?.Visible == true;
-            return game.Room?.Name == "Outskirts";
-        }, 240, 0.05);
-        Check(gs.HasFlag("ending_10") && gs.HasFlag(Endings.EleanorDismissed) && !gs.HasItem("revolver"),
-            "ending 10: Eleanor sends Micah away and keeps the pistol");
-        Check(!_offered.ContainsKey("eleanor_persuade"), "no persuasion: Eleanor has the last word");
-        Check(prison, "ending 10: Micah confesses to Caleb in prison");
-        Check(game.Player.Character == "eleanor_play" && gs.HasFlag("eleanor_epilogue"), "ending 10: Eleanor on the outskirts, alone");
-        await Until(() => HeardLog.Any(l => l.Contains("So this is where Chicago ends")), 30);
-        await Shot("ending_eleanor_alone");
-        await TheEnd("ending_10");
-        Check(HeardLog.Any(l => l.Contains("revolver on the carpet")), "ending 10: the revolver goes on the carpet, as the walkthrough has it");
-        Check(HeardLog.Any(l => l.Contains("So this is where Chicago ends")) && !HeardLog.Any(l => l.Contains("Micah said")),
-            "ending 10: the streetlights line is Eleanor's own; she never heard Micah say it");
-        HeardLog = null;
-
+            string label = documents ? "ending_10" : "ending_11";
+            Seed(documents ? heldOut.Append(Endings.TookDocuments) : heldOut, act3Items, "Shoot him");
+            HeardLog = new List<string>();
+            _ = game.ChangeRoom("mansion_bedroom", "start");
+            await Until(() => game.Room?.Name == "MansionKitchen", 120);
+            await WaitIdle(game);
+            Check(gs.HasFlag(Endings.EleanorWeary) && !gs.HasFlag(Endings.EleanorConvinced) && gs.HasItem("revolver"),
+                $"{label}: Eleanor follows, worn out, and Micah keeps the revolver");
+            Check(!_offered.ContainsKey("eleanor_persuade"), $"{label}: no persuasion turns");
+            Check(HeardLog.Any(l => l.Contains("Let's get out of here, quick.")), $"{label}: \"Let's get out of here, quick.\"");
+            Check(game.Room?.FindActor("eleanor")?.Visible == true, $"{label}: Eleanor waits in the kitchen");
+            _ = game.Perform(Verb.Walk, "back_door");
+            await Until(() => game.Room?.Name == "Outskirts" || game.Room?.Name == "Prison", 120);
+            Check(gs.HasFlag(label) && game.Room?.Name == (documents ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
+                documents ? "ending 10: Micah and Eleanor out of town" : "ending 11: Micah in prison");
+            Check(game.Room?.FindActor("eleanor")?.Visible == true || game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible == true,
+                $"{label}: Eleanor is there");
+            string line = documents ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
+                : "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the Lord...";
+            await Until(() => HeardLog.Any(l => l.Contains(line)), 60);
+            if (documents) await Shot("ending_weary_road");
+            await TheEnd(label);
+            Check(HeardLog.Any(l => l.Contains(line)), $"{label}: Eleanor's last words to Micah");
+            Check(!HeardLog.Any(l => l.Contains("That's enough of you")), $"{label}: Micah writes the last entries himself");
+            HeardLog = null;
+        }
         // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.
         // Ending 8 sets the cellar alight on the way.
         foreach (bool fire in new[] { false, true })
@@ -625,7 +631,7 @@ public partial class AutoPlay
         if (outskirts)
             Check(sawNextMorning == (gs.HasFlag("ending_3") && gs.HasFlag(Endings.MansionExploded)),
                 $"{ending}: next-morning transition only after alone escape with fire");
-        int endingNumber = Enumerable.Range(1, 10).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
+        int endingNumber = Enumerable.Range(1, 11).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
         bool keepJournal = Endings.KeepsJournal(endingNumber);
         bool dismissed = endingNumber is >= 2 and <= 5;
         await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 120);

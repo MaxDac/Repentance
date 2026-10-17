@@ -1122,9 +1122,10 @@ def vanity(img):
 RED = (hx("a81c2c"), hx("6a1018"), hx("dc4a5a"), hx("2a0a10"), hx("1e0608"))
 
 
-def tidy_floor(img):
+def tidy_floor(img, bench=True):
     """Room 507 before the searchers came: the desk chair pulled up square, and her red evening dress laid across the
-    upholstered bench at the foot of the closet, a loose thread hanging from the hem."""
+    upholstered bench at the foot of the closet, a loose thread hanging from the hem. The bench stands out in the room,
+    so it is painted on its own (bench=False leaves only its shadow) and cut out as a y-sorted sprite."""
     d = ImageDraw.Draw(img)
     # the desk chair, upright, its back to us
     a, b = R.P(182, 0, 46), R.P(204, 0, 46)
@@ -1143,6 +1144,8 @@ def tidy_floor(img):
     B0, B1, Bz0, Bz1 = 90, 140, 104, 122
     a, b = R.P(B0, 0, Bz1), R.P(B1, 0, Bz1)
     shadow(img, "rect", [a[0] - 1, a[1] - 3, b[0] + 4, a[1] + 3], 0.4, 3)
+    if not bench:
+        return
     for x in (B0 + 2, B1 - 2):
         for z in (Bz0 + 2, Bz1 - 2):
             R.line(img, (x, 0, z), (x, 9, z), WOOD_D, 2)
@@ -1159,7 +1162,7 @@ def tidy_floor(img):
     # a loose silk thread from the torn hem
     d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
 
-def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False):
+def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True):
     img = Image.new("RGB", (W, H))
     hotel.shell(img)
     crooked_painting(img, 0 if tidy else -6)
@@ -1177,7 +1180,7 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     lamp = bedside_lamp(img)
     vanity(img)
     if tidy:
-        tidy_floor(img)
+        tidy_floor(img, bench)
     else:
         mess(img)
     hotel.chandelier(img)
@@ -1229,7 +1232,15 @@ def build():
         print(f"  eleanor_room_{name}.png at {box[:2]}")
     # the First Interlude: the same room the night she left, before the old man's men turned it over
     tidy = paint(tidy=True)
-    save(pixelize(tidy, palette_of(tidy, 128) + _pinned(tidy, (296, 52, 352, 96), 16)
-                  + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10)
-                  + _pinned(tidy, (90, 205, 160, 240), 8)), "rooms", "eleanor_room_interlude.png")
+    tpal = (palette_of(tidy, 128) + _pinned(tidy, (296, 52, 352, 96), 16)
+            + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10) + _pinned(tidy, (90, 205, 160, 240), 8))
+    with_bench, room = pixelize(tidy, tpal), pixelize(paint(tidy=True, bench=False), tpal)
+    save(room, "rooms", "eleanor_room_interlude.png")
+    # the bench with the dress is a y-sorted sprite Eleanor walks around (and behind), cut out pixel by pixel
+    box = _bbox(room, with_bench)
+    mask = ImageChops.difference(room, with_bench).convert("L").point(lambda v: 255 if v else 0)
+    bench = with_bench.convert("RGBA")
+    bench.putalpha(mask)
+    save(bench.crop(box), "rooms", "eleanor_room_interlude_bench.png")
+    print(f"  eleanor_room_interlude_bench.png at {box[:2]}, size {(box[2] - box[0], box[3] - box[1])}")
     return px

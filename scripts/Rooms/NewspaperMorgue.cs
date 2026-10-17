@@ -58,12 +58,14 @@ public partial class NewspaperMorgue : Room
                 await Say("The copy spike, where dead stories go. The top sheet is half a clipping - the bottom of \"HARRINGTON BUILDS...\", torn through the address.");
                 return true;
             case ("spike", Verb.Look):
-                await Say("Spiked copy. Rejected stories, rejected lives. Nothing else with his name on it.");
+                await Say("Spiked copy, and the city desk's tip slip under it: Room 507, the Aurelian. The drawer, then the safe. The safe I emptied.");
                 return true;
             case ("spike", Verb.Hand) when !State.HasFlag("took_clipping_bottom"):
                 State.SetFlag("took_clipping_bottom");
                 State.GiveItem("clipping_bottom");
                 await Say("The bottom half. \"...Building, LaS\" and a photo caption. It ends where the top half begins.");
+                await Say("Under it, a city-desk tip slip, spiked: \"Anon. caller, man, bar noise on the line. Room 507, the Aurelian - the drawer, then the safe. Sent a boy round: room tossed, safe open, empty.\"");
+                await Say("The drawer, then the safe. Tony made her call, then. Her insurance paid out on an empty safe - I'd cleaned it out myself.");
                 return true;
             case ("spike", Verb.Hand):
                 await Say("Careful. That spike has gone through better reporters than me.");
