@@ -38,10 +38,13 @@ flowchart TD
 | UI | `scripts/UI/` | yes | `Hud` (partials), `VerbWheel`, `GameMenu`, `NotepadView`, `CloseUp`, puzzle screens |
 | Debug | `scripts/Debug/` | yes | Automated runs: `Harness`, `AutoPlay`, `Playthrough` (and film mode), `WalkTest` |
 | Assets | `assets/art/`, `assets/fonts/` | - | Generated PNGs (by `tools/`), pixel fonts |
-| Tools | `tools/art/`, `tools/run/` | - | Python art generators; test and film launchers |
+| Tools | `tools/art/`, `tools/run/` | - | Python art generators; normal-game, test and film launchers |
 | Tests | `tests/` | - | xunit (`Repentance.Tests`), Python art and launcher tests |
 
 ## Boot
+
+`tools/run/game.sh` / `tools\run\game.ps1` clean, build and import before this normal boot path, without test or
+film arguments. Shared launcher helpers handle discovery and logs; see [Getting started](getting-started.md#first-run).
 
 ```mermaid
 sequenceDiagram

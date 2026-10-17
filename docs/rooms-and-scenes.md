@@ -123,3 +123,7 @@ generic exits are closed (`Interlude.BlockedExitLine`) and held items refused: h
 7. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, walk`; add `playthrough` for story and `art` for art.
 
 Agents: `.claude/skills/add-room/SKILL.md`.
+
+For a normal interactive check after editing a room, `tools/run/game.sh` / `tools\run\game.ps1` rebuilds/imports
+and starts at the title screen. Use direct Godot [debug-room options](getting-started.md#command-line-options)
+for targeted diagnostics; the normal-play launchers do not forward debug arguments.

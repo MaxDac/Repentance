@@ -24,6 +24,10 @@ gh run download <run-id> -n godot-tests-<suite> -D ci-logs   # export jobs: expo
 
 Artifacts are uploaded on failure. Fix, push and watch again until `ci-ok` succeeds.
 
+Launcher changes are covered by the isolated Python regressions (Bash and PowerShell), including normal play's
+cleanup and marker-free exit handling. `game.sh` / `game.ps1` runs interactive source-project builds, not a CI
+suite or an exported release; normal runtime errors are warnings, not the stricter automated-suite pass rule.
+
 ## Release (`.github/workflows/release.yml`)
 
 Manual. Inputs: `version` (blank = bump the patch of the latest `v*` tag; first is `0.1.0`; must be `X.Y.Z` and a

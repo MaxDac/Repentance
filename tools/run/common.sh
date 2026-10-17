@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared helpers for film.sh and test.sh. Source it; don't run it directly.
+# Shared helpers for game.sh, film.sh and test.sh. Source it; don't run it directly.
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -80,7 +80,8 @@ build_and_import() {
 
 # godot_run <godot> <name> <markers, |-separated> [engine args...] -- <user args...>
 # Tees the output to logs/<name>.log; succeeds when the run exited cleanly, printed a marker and logged no errors.
-# With ERRORS_ARE_WARNINGS=1 (film mode), logged errors are reported but don't fail the run.
+# With ERRORS_ARE_WARNINGS=1 (film/normal play), logged errors are reported but don't fail the run.
+# REQUIRE_MARKER=0 explicitly disables marker checks for normal interactive play.
 godot_run() {
   local godot="$1" name="$2" markers="$3"; shift 3
   local engine=() user=()
@@ -91,13 +92,16 @@ godot_run() {
   local log="$LOG_DIR/$name.log" status=0 ok=0
   echo "== $name (${user[*]})"
   # shellcheck disable=SC2086
-  (cd "$ROOT" && "$godot" --path . $GODOT_FLAGS ${engine[@]+"${engine[@]}"} -- "${user[@]}" 2>&1 | tee "$log"
+  (cd "$ROOT" && "$godot" --path . $GODOT_FLAGS ${engine[@]+"${engine[@]}"} -- ${user[@]+"${user[@]}"} 2>&1 | tee "$log"
     exit "${PIPESTATUS[0]}") || status=$?
   if [ "$status" -ne 0 ]; then echo "Godot exited with status $status" >&2; ok=1; fi
-  local found=0 m
-  IFS='|' read -r -a ms <<< "$markers"
-  for m in "${ms[@]}"; do grep -qF "$m" "$log" && found=1; done
-  if [ "$found" -eq 0 ]; then echo "None of '$markers' found in $log" >&2; ok=1; fi
+  if [ "${REQUIRE_MARKER:-1}" != 0 ]; then
+    local found=0 m
+    local ms=()
+    IFS='|' read -r -a ms <<< "$markers"
+    for m in "${ms[@]}"; do grep -qF "$m" "$log" && found=1; done
+    if [ "$found" -eq 0 ]; then echo "None of '$markers' found in $log" >&2; ok=1; fi
+  fi
   if grep -nE "$ERROR_PATTERN" "$log" >&2; then
     echo "Godot logged errors (see above)" >&2
     [ "${ERRORS_ARE_WARNINGS:-0}" = 1 ] || ok=1

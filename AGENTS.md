@@ -36,6 +36,11 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 ## Running Godot
 
 - Use `godot_console.exe` on Windows. Build before the first import (Ink importer is C#); import after a fresh
-  checkout or art/font/Ink changes. Prefer launchers; their [pass rule](docs/testing.md#suites) includes log errors.
+  checkout or art/font/Ink changes. Prefer launchers; the [test-suite pass rule](docs/testing.md#suites) includes log errors.
+- Normal interactive play: `tools/run/game.sh` / `tools\run\game.ps1` cleans generated files, builds/imports and
+  opens the title screen until the player quits. Player saves/settings are preserved; `--no-clean` / `-NoClean`
+  skips deletion only. Runtime errors are warnings in `logs/game.log`; nonzero exits and build/import failures fail.
+- Bash film speed is optional, default 1x: `film.sh --speed 4` or `film.sh -s 4`, never positional `film.sh 4`.
 - Never run `--autoplay` or `--settings-test` with `--headless` (screenshots need a renderer).
-- Bound diagnostic runs with `--quit-after N`; [record frames](docs/testing.md#seeing-what-the-game-draws), not desktop screenshots.
+- Bound diagnostic runs with `--quit-after N`, not normal interactive play;
+  [record frames](docs/testing.md#seeing-what-the-game-draws), not desktop screenshots.

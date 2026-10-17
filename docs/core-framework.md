@@ -7,6 +7,9 @@ File map: [Architecture: Partial classes](architecture.md#partial-classes).
 Entry points: `Perform` (scripted world verbs; private `Execute` dispatches), `ItemVerb` (inventory), `ChangeRoom` (travel),
 `CanSave` / `CaptureSave` / `SaveToSlot` / `LoadGame` (persistence), `TogglePause` (Space pause).
 
+To exercise normal startup and player input, use `tools/run/game.sh` / `tools\run\game.ps1`; they build/import
+before opening the title screen, without enabling a debug harness. [Launch options](getting-started.md#first-run).
+
 ### Scripting API (use inside `Game.Run`)
 
 Inside a `Room` subclass:

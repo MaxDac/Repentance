@@ -3,6 +3,9 @@
 Code-built UI, accessed through `Game.Hud`; no UI scenes. `Hud` is a `CanvasLayer` (10, `ProcessMode.Always`);
 its root control is pausable, with menu/cursor handling kept active. Coordinates: 480x270.
 
+For interactive title, menu and input checks, use `tools/run/game.sh` / `tools\run\game.ps1`; these open the
+normal title screen and retain player settings. Film mode filters input, so it is not a substitute for UI testing.
+
 ## Files
 
 | File | Contents |

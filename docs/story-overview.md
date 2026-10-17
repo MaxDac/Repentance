@@ -2,6 +2,9 @@
 
 Spoiler recap. [Walkthrough](../Walkthrough.md) is the authoritative story spec.
 
+Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch it with `tools/run/film.sh`
+(default 1x), or choose `--speed 4` / `-s 4`; ending/chapter selection is described in [Testing](testing.md).
+
 ## The game, beat by beat
 
 0. **Prologue, the attic (today)**: Daniel calls his son Leo, who doesn't come. Lift the dust sheet, knock
