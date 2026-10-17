@@ -470,16 +470,31 @@ public partial class AutoPlay
             "the rest of Eleanor's conversation stays on the fire escape without the panel");
         var her = game.Room!.FindActor("eleanor")!.Position;
         float talkingX = game.Player.Position.X;
+        int kisses = _poseCounts.GetValueOrDefault("micah_kiss");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Then stay. Right here.");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("You're walking into the rain"));
-        Check(game.Player.Position.X > talkingX + 8 && !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
-            "Micah takes a couple of steps towards Eleanor, with no portrait panel, as she answers him");
+        await game.Wait(0.5);
+        Check(game.Player.IsWalking && game.Player.Position.X > talkingX && game.Player.PoseName == null &&
+            !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+            "Micah walks slowly towards Eleanor, with no portrait panel, as she answers him");
         await Shot("fire_escape_closer");
-        await Until(() => !game.Hud.SpeechVisible && game.Hud.FadeAlpha > 0.3f);
-        Check(game.Player.IsWalking, "Micah is still walking towards her as the scene fades");
+        const string attraction = "I'd have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him.";
+        const string guilt = "And somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway.";
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == attraction);
+        var eleanorActor = game.Room!.FindActor("eleanor")!;
+        Check(game.Player.PoseName == "micah_kiss" && _poseCounts.GetValueOrDefault("micah_kiss") == kisses + 1 &&
+            !eleanorActor.Visible, "Micah reaches Eleanor after her rain line and kisses her");
+        Check(game.Player.Position.DistanceTo(her + Rooms.MotelFireEscape.KissSpot) < 1f,
+            "he stands right in front of her for the kiss");
+        Check(game.Hud.FadeAlpha == 0f, "the kiss is seen before any fade");
+        await Shot("fire_escape_kiss");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == guilt);
+        Check(game.Player.PoseName == "micah_kiss" && game.Hud.FadeAlpha == 0f,
+            "the kiss holds while Micah thinks of Rose, still before the fade");
+        await Until(() => !game.Hud.ThoughtVisible && game.Hud.FadeAlpha > 0.3f);
+        Check(game.Player.PoseName == "micah_kiss", "the fade to black takes them in the kiss");
         await Until(() => game.Hud.FadeAlpha >= 1f);
-        Check(game.Room is Rooms.MotelFireEscape && game.Player.Position.X < her.X - 4,
-            "the fade to black stops him before he reaches Eleanor");
+        Check(game.Room is Rooms.MotelFireEscape, "Act 1 fades out on the fire escape");
         bool sawMotelNight = false;
         await Until(() =>
         {

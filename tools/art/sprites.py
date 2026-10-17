@@ -925,6 +925,66 @@ def eleanor_strike_strip():
     action_strip("eleanor_strike", frames, seconds, anchor=(fw / 2, FH - 3))
 
 
+# The end of Act 1 on the motel fire escape: Micah, stopped facing right KISS_GAP pixels short of Eleanor (in black,
+# facing left), steps in, turns side-on with his near arm round her waist and kisses her, while she turns to him, lifts
+# her face and reaches her near arm round his back. One strip, played on the player with the Eleanor actor hidden:
+# frame 0 is both idle sprites exactly where they stood, her feet KISS_RISE pixels higher (further back on the landing).
+# (Micah step in, his yaw, lean, nod, near arm (elbow, wrist, hand) or None, her yaw, lean, nod, her near arm or None,
+# seconds)
+KISS_GAP, KISS_RISE, KISS_W = 22, 2, 128
+KISS_KEYS = [
+    (0, PLAYER_IDLE_YAW, 0.0, 0.0, None, 35, 0.0, 0.0, None, 0.25),
+    (3, 72, 3.0, 0.008, ((0.15, 0.38, 0.05), (0.12, 0.44, 0.13), (0.1, 0.45, 0.16)), 60, -1.0, -0.002,
+     ((0.15, 0.40, 0.05), (0.13, 0.43, 0.15), (0.11, 0.43, 0.18)), 0.3),
+    (6, 85, 6.0, 0.018, ((0.15, 0.38, 0.06), (0.12, 0.43, 0.16), (0.09, 0.44, 0.19)), 80, -2.0, -0.004,
+     ((0.15, 0.36, 0.07), (0.12, 0.29, 0.19), (0.09, 0.27, 0.23)), 0.35),
+    (8, 90, 8.0, 0.025, ((0.15, 0.38, 0.06), (0.12, 0.43, 0.16), (0.09, 0.44, 0.19)), 90, -3.0, -0.005,
+     ((0.15, 0.345, 0.06), (0.12, 0.22, 0.155), (0.09, 0.195, 0.185)), 1.0),
+]
+
+
+def kiss_strip():
+    from PIL import Image
+    mx0 = 20
+    anchor_x = mx0 + FW // 2
+    ex = anchor_x + KISS_GAP - NPC_W // 2
+    frames, seconds = [], []
+    flip = Image.Transpose.FLIP_LEFT_RIGHT
+    for i, (step, yaw, lean, nod, arm, her_yaw, her_lean, her_nod, her_arm, duration) in enumerate(KISS_KEYS):
+        img = Image.new("RGBA", (KISS_W, FH))
+        lips_met = i == len(KISS_KEYS) - 1  # eyes closed in the kiss
+        her_spec = dict(ELEANOR_NPC, asleep=True) if lips_met else ELEANOR_NPC
+        his_spec = dict(MICAH, asleep=True) if lips_met else MICAH
+
+        def eleanor(near):
+            arms = _arms("down")
+            if near:
+                arms[1] = near
+            return figure(her_spec, pose(her_yaw, arms=arms, lean=her_lean, nod=her_nod), NPC_W, FH).transpose(flip)
+
+        her = eleanor(her_arm and ("pts",) + her_arm)
+        img.alpha_composite(her, (ex, -KISS_RISE))
+        ps = pose(yaw, lean=lean, nod=nod)
+        if arm:
+            ps["arms"] = {1: ("pts",) + arm, -1: ("side", 0, 0, 0)}
+        him = figure(his_spec, ps, FW, FH)
+        img.alpha_composite(him, (mx0 + step, 0))
+
+        def outside(fig, bare):  # the reaching arm, where it leaves the figure's own outline
+            layer = Image.new("RGBA", fig.size)
+            layer.paste(fig, mask=Image.eval(bare.getchannel("A"), lambda a: 255 if a == 0 else 0))
+            return layer
+
+        if her_arm:  # her reaching arm goes round his back in front of him ...
+            img.alpha_composite(outside(her, eleanor(("side", 0, 0, 0))), (ex, -KISS_RISE))
+        if arm:  # ... and his, round her waist, stays on top of hers where they cross
+            ps["arms"][1] = ("side", 0, 0, 0)
+            img.alpha_composite(outside(him, figure(his_spec, ps, FW, FH)), (mx0 + step, 0))
+        frames.append((img, (anchor_x + step, 18)))
+        seconds.append(duration)
+    action_strip("micah_kiss", frames, seconds, anchor=(anchor_x, FH - 3))
+
+
 def inmate_seated_strip(spec, name):
     """seated_frame's pose (facing right, the same seat as micah_inmate_seated) with action-strip metadata."""
     ps = pose(90, legs={1: (88, 92, 0), -1: (86, 90, 0)}, arms={1: ("swing", 36, 4, 70), -1: ("swing", 30, 4, 74)})
@@ -1025,6 +1085,7 @@ def build():
     player_sheet(ELEANOR_GOWN, "eleanor_gown_play")
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
     eleanor_drink_strip()
+    kiss_strip()
     build_act3()
 
 
