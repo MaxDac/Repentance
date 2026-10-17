@@ -164,7 +164,8 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 | 7 | otherwise | 4 if `eleanor_convinced`, else 5 (prison) |
 
 Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `EleanorFollows` is
-`eleanor_convinced` or `eleanor_weary` (she comes to the kitchen). `KeepsJournal`:
+`eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
+a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
 1, 6, 8, 9, 10, 11. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan`, `CanOfferCross`, `ChurchReturned`, `InsistedForgiveness`.
 Every route must reach "The End" (`Playthrough` routes `1`-`11`, `1-oldman`, `1-steps`).

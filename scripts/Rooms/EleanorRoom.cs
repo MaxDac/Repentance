@@ -183,13 +183,16 @@ public partial class EleanorRoom : Room
                 await Say("Locked. Twice locked, like everything else I care about.");
                 return true;
 
-            case ("desk_drawer", Verb.Look or Verb.Hand) when !State.HasFlag("interlude_safe_locked"):
+            case ("desk_drawer", _) when !State.HasFlag("interlude_safe_locked"):
                 await Say("The riddle goes in the drawer. But the box goes in the safe first.");
                 return true;
             case ("desk_drawer", Verb.Hand) when !State.HasFlag("interlude_drawer_locked"):
                 State.SetFlag("interlude_drawer_locked");
                 await Say("Three lines of Sunday school on hotel paper. My grandmother would be proud.");
                 await Say("Into the drawer, and turn the key. Theodore's men will kick it and give up. A reporter with a whole night won't.");
+                return true;
+            case ("desk_drawer", _) when !State.HasFlag("interlude_drawer_locked"):
+                await Say("The safe's locked. Now the riddle goes in this drawer, and I turn the key.");
                 return true;
             case ("desk_drawer", _):
                 await Say("Locked, with the riddle inside.");

@@ -34,7 +34,9 @@ public partial class MansionKitchen : Room
             await Game.Run(async () =>
             {
                 await Wait(0.4);
-                if (Endings.EleanorFollows(State.HasFlag))
+                if (State.HasFlag(Endings.EleanorWeary))
+                    await Think("She doesn't say a word. She said she wouldn't, not in this house.");
+                else if (Endings.EleanorFollows(State.HasFlag))
                     await Say("eleanor", "The back door, Micah. Please. Let's go.");
                 else
                     await Think("Alone. She chose that house. Or the house chose her.");
@@ -49,7 +51,10 @@ public partial class MansionKitchen : Room
                 await Wait(0.3);
                 if (Endings.EleanorFollows(State.HasFlag))
                 {
-                    await Say("eleanor", "Micah... there's smoke coming up through the floor. What did you do?");
+                    if (State.HasFlag(Endings.EleanorWeary))
+                        await Think("She smells the smoke. She doesn't ask.");
+                    else
+                        await Say("eleanor", "Micah... there's smoke coming up through the floor. What did you do?");
                     await Say("Closed the Club's account. Out. Now.");
                 }
                 else await Think("Smoke at my heels, and the floor getting warm. Time to leave. Right now.");
@@ -86,7 +91,8 @@ public partial class MansionKitchen : Room
             case ("cellar_door", Verb.Hand or Verb.Walk) when Escaping:
                 if (Endings.EleanorFollows(State.HasFlag))
                 {
-                    await Say("eleanor", "Micah? The door's that way.");
+                    if (!State.HasFlag(Endings.EleanorWeary))
+                        await Say("eleanor", "Micah? The door's that way.");
                     await Say("Wait for me by the door. One minute.");
                 }
                 await Game.ChangeRoom("mansion_cellar", "kitchen");

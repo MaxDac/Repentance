@@ -189,7 +189,10 @@ public partial class MansionExterior : Room
             await Think("The cellar goes first. Then the kitchen, then the study, and everything Harrington ever wrote down in it.");
             if (eleanor != null && eleanor.Visible)
             {
-                await Say("eleanor", "Oh my God. Oh my God, Micah.");
+                if (State.HasFlag(Endings.EleanorWeary))
+                    await Think("She watches the windows go. She doesn't make a sound.");
+                else
+                    await Say("eleanor", "Oh my God. Oh my God, Micah.");
                 await Say("Time to go. Before the whole Gold Coast comes out in its pajamas.");
             }
             else await Think("Time to go. Before the whole Gold Coast comes out in its pajamas.");

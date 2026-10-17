@@ -168,13 +168,13 @@ public partial class MotelNight : Room
                 await Say("Somebody's knocking. Micah would have used his key. He'd have left it on the dresser, anyway.");
                 return true;
             case ("bed", Verb.Look or Verb.Hand):
-                await Say("Still warm on his side. I won't think about that.");
+                await Say("Cold on his side now. I won't think about that.");
                 return true;
             case ("chair", Verb.Look or Verb.Hand):
                 await Say("His chair's empty. He took his coat and his hat, and he didn't look back.");
                 return true;
             case ("window", Verb.Look or Verb.Hand):
-                await Say("His car's gone from the lot. Another one's pulled in, lights off.");
+                await Say("He's gone from the alley. A car's pulled in below, lights off.");
                 return true;
         }
         return false;

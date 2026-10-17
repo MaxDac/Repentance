@@ -165,7 +165,7 @@ THOUGHT: She told me Agatha watched her all the way down that corridor. Not like
 -> END
 
 // The night visit: Agatha wants Eleanor to say she wants something from her. Refusing her is saved
-// (eleanor_refused_abbess, one of the two refusals the endings 8-10 need); indulging her ends with Agatha cursing her.
+// (eleanor_refused_abbess, one of the two refusals the endings 8-11 need); indulging her ends with Agatha cursing her.
 === interlude_agatha_night ===
 THOUGHT: Past midnight. A candle under the door, then the door. Agatha, in her night veil, with the candle in both hands like she was carrying it to an altar.
 NUN: You're awake. I knew you would be. Women like you don't sleep at night. You work.
@@ -1273,6 +1273,7 @@ THOUGHT: She doesn't take my hand. She just comes, holding the sheet round her l
 
 // Ending 10: the edge of the city, the car, and Eleanor walking away from it.
 === ending_weary_road ===
+THOUGHT: At the gate she took her black dress off the back seat of the Club's car, and changed in mine on the way. The sheet's somewhere behind us on the road. She still wouldn't look at me.
 MICAH: West, then. Until the money runs out, or the road does.
 ELEANOR: ...
 ELEANOR: I told you all of it in the car, Micah. The motel, after you'd gone. The old man's gin. You know everything now.
@@ -1481,7 +1482,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
 - has_flag("ending_2"):
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
     DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."
-    DANIEL: "She told me about the motel on the road that night, and the old man's gin. I wrote it down the way she said it. It's the only part of her I ever really had."
+    DANIEL: "She told me the rest of it in the car that night, the motel and the old man's gin. I wrote it down the way she said it. It's the only part of her I ever really had."
     DANIEL: He got the girl. And then the girl got him.
 - has_flag("ending_3"):
     DANIEL: "I see her every night. On the ceiling. At the bottom of the glass. The old man on the carpet, and the look on her face."
