@@ -94,8 +94,9 @@ described here (other verbs, flavour lines) is left to the implementation.
     permeates the whole room, only stronger... hypnotic, even." The line conveys an early attraction;
   - a matchbook with the name of the club, the Blue Lantern (next location). Micah connects it to the men the
     bellboy saw: fellas like that drink somewhere, and that's where her trail goes next;
-  - a little vial of Mrs. Stewart's Bluing: Eleanor meant to dye a white flower blue and go to the Blue Lantern
-    herself. The florist's puzzle needs it, so the box has to be opened before the club's front can be passed;
+  - a little vial of Mrs. Stewart's Bluing: somebody was meant to dye a white flower blue and follow her to the
+    Blue Lantern (Micah can't know who; the First Interlude answers it). The florist's puzzle needs it, so the box
+    has to be opened before the club's front can be passed;
   - a Japanese water flower (a pressed-paper pellet, a dime-store novelty), tied with red thread and wrapped in a
     scrap of hotel paper with Eleanor's hurried riddle: "Give me a drink and I'll tell you the word."
 - Leaving the room goes back across the corridor to the linen room and the staff lift; in the lobby the
@@ -292,8 +293,18 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    (**Puzzle 17**, below), puts the combination in the
    drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
+   The box is a dead man's switch, not an invitation: if the Club ever drags her back, the Club goes into the
+   morning paper. The card hides the Club's address; the matchbook, the bluing and the password get a reporter
+   past the florist's grille and Sal to Tony, the one man who will talk. She leaves it in the room, not on her:
+   the room is in her name, the hotel keeps a guest's things, a hotel safe can't be forced quietly, and if they
+   catch her they search her first. The riddles keep Theodore's men out; somebody sent there on purpose, with a
+   whole night, gets in.
 2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the
-   sacramental wine and sends her to the convent. Sal stays out of her way: the doorman's interception is off.
+   sacramental wine and sends her to the convent. Before Sal drives her, she asks Tony to hold the switch: if the
+   Club gets her back, he calls the Tribune city desk (not the cops: half of them drink at his bar) and says
+   "Room 507, the Aurelian. The drawer, then the safe." He agrees: it is leverage on the old man. Micah's
+   narration adds that she didn't know, telling him at the motel, that he had already emptied the safe (the
+   Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
 4. **Convent cell, that night.** After a knock, Agatha comes into the cell and talks round and round, trying to make Eleanor admit
@@ -303,7 +314,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
    Eleanor leaves the convent the next morning.
 
-- **Puzzle 17 - The brass box:** she builds the clue Micah finds later, and locks it away herself.
+- **Puzzle 17 - The brass box:** she builds the insurance Micah finds later, and locks it away herself. Her lines
+  name its reader as whoever the paper sends, never Micah.
   - Hand on the vanity: the open brass box (the card, the matchbook, the bluing already in it) and the bare paper
     water flower, the word inked inside.
   - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
@@ -503,6 +515,11 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
     halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
     LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.
+- Under the bottom half on the spike is the city desk's spiked tip slip: an anonymous caller, a man with bar
+  noise on the line, "Room 507, the Aurelian - the drawer, then the safe"; the boy sent round found the room
+  tossed and the safe open and empty. Micah knows from the motel night what it means: Tony made Eleanor's call
+  once the Club had her back, and her insurance paid out on the safe Micah had already emptied. Look on the spike
+  afterwards recalls the slip. Taking the bottom half shows it; there is no extra flag, item or step.
 - The door leads back to the map.
 
 #### Map of Chicago
