@@ -358,7 +358,8 @@ def figure(spec, ps, fw=56, fh=80):
             if near:
                 M = max(near) if f > 0 else min(near)  # the most forward point of the chest round it
                 bump = np.zeros((c.h, c.w), bool)
-                for k, d in ((-1, 1), (0, 2), (1, 2), (2, 1)):  # pixels proud of the chest: a soft peak
+                # (row offset, pixels proud of the chest's most forward point): a soft peak
+                for k, d in col.get("bust_peak", ((-1, 1), (0, 2), (1, 2), (2, 1))):
                     y, x0 = by + k, front(by + k)
                     if x0 is None:
                         continue
@@ -582,6 +583,14 @@ def figure(spec, ps, fw=56, fh=80):
     add(1.95, neck)
 
     def collar():
+        if col.get("high_neck") and not col.get("neckline"):
+            # a high-necked bodice: the cloth rises up the neck all round, so no bare nape shows behind it
+            top = P(body([0, col["high_neck"], 0]))[1]
+            band = c.parts_mask("neck") & (c.Y >= top)
+            if abs(sp) > 0.3:  # turned away from us, the cloth also covers the nape up to the hairline
+                ax = P(body([0, 0.16, 0]))[0]
+                band |= c.parts_mask("neck") & ((c.X - ax) * math.copysign(1, sp) < 0.5) & (c.Y >= top - H * 0.04)
+            c.recolor(band, col["torso"])
         if not col.get("collar"):
             return
         nx0, ny0, _ = P(body([0, 0.2, 0.0]))
@@ -902,20 +911,23 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
 def _hair_front(c, col, P, body, H, cp, sp, nod):
     """Long wavy locks brought forward over the shoulders, falling down the chest to col["hair_front"] (body y)."""
     end = col["hair_front"]
-    over = c.parts_mask("torso", "hair", "hairback")
+    # an optional root (in full profile): a few blobs at the top that run back from the lock's start, across the neck,
+    # into the hair behind it, so the lock doesn't look cut off under the jaw
+    root = col.get("hair_front_root", 0.0) if abs(sp) > 0.8 else 0.0
+    over = c.parts_mask("torso", "hair", "hairback", *(("neck",) if root else ()))
     chin = P(body([0, 0.165 + nod, 0]))[1]
     lock = np.zeros_like(over)
     nx = ny = nz = None
     for s in (1, -1):
         n = 14
-        for i in range(n + 1):
-            t = i / n
+        for t in ([-k / 4 for k in range(4, 0, -1)] if root else []) + [i / n for i in range(n + 1)]:
+            back, t = max(-t, 0.0), max(t, 0.0)
             y = 0.175 + nod * (1 - t) + (end - 0.175) * t
             x = s * (0.075 - 0.035 * t) + 0.008 * math.sin(t * 7.0 + s)
             # an optional forward swell at chest height, where the locks may stand proud of the torso outline
             bump = col.get("hair_bulge", 0.0) * math.exp(-((t - 0.62) / 0.2) ** 2)
-            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump]))
-            r = H * (0.03 - 0.014 * t)
+            cx, cy, _ = P(body([x, y, 0.02 + 0.05 * t + bump - root * back]))
+            r = H * (0.03 - 0.014 * t) * col.get("hair_front_w", 1.0)
             m, ex, ey, ez = c.ellipse((cx, cy), r, r * 1.2)
             proud = bump > 0 and bump >= 0.4 * col["hair_bulge"]
             # never across the face; below the shoulders it only lies on the body (save for the chest swell)
@@ -1316,20 +1328,26 @@ def _decals(c, col, P, body, H, cp, sp, legs, ps):
                 px, py, _ = P(body([u, y + 0.012 * (1 - (u / 0.03) ** 2), 0.055]))
                 if i % 2 == 0 or abs(cp) > 0.7:
                     c.dot(px, py, colour)
-        elif kind == "strand" and cp > -0.25:  # a long rope of pearls looping down the chest: (strand, y0, y1, w, colour, shade?)
+        elif kind == "strand" and cp > -0.25:
+            # a strand of pearls round the base of the neck: (strand, y_back, y_front, w, colour, shade?, depth?). It lies
+            # on the shoulders either side of the neck and dips to y_front on the chest, depth forward of the neck's
+            # axis (so it reaches the chest's surface in profile); only the half facing us shows.
             _, y0, y1, w, colour = d[:5]
             shade = d[5] if len(d) > 5 else colour
-            on = c.parts_mask("torso", "coat")
-            last = None
-            for i, t in enumerate(np.linspace(-1, 1, 41)):
-                px, py, pd = P(body([w * t, y0 + (y1 - y0) * (1 - t * t), 0.06]))
+            depth = d[6] if len(d) > 6 else w * 0.85
+            on = c.parts_mask("torso", "coat", "neck")
+            last, n = None, 0
+            for a in np.linspace(-math.pi, math.pi, 97):
+                front = (1 + math.cos(a)) / 2
+                px, py, pd = P(body([w * math.sin(a), y0 + (y1 - y0) * front ** 2, depth * math.cos(a)]))
                 pos = (math.floor(px), math.floor(py))
                 if pos == last:
                     continue
                 last = pos
                 ix, iy = pos
-                if 0 <= iy < c.h and 0 <= ix < c.w and on[iy, ix] and pd > -0.03:
-                    c.dot(px, py, colour if i % 2 == 0 else shade)
+                if 0 <= iy < c.h and 0 <= ix < c.w and on[iy, ix] and pd > -0.004 and math.cos(a) > -0.3:
+                    c.dot(px, py, colour if n % 2 == 0 else shade)
+                    n += 1
         elif kind == "pleats":  # knife pleats down the skirt below y: (pleats, y)
             _, y = d
             yb = P(body([0, y, 0]))[1]
@@ -1509,9 +1527,15 @@ def _face(c, col, P, body, H, cp, sp, nod, mouth):
     if col.get("mustache"):
         for x in xs + [xs[-1] + 1, xs[0] - 1]:
             c.dot(x, my - 1, _dark(col["hair"], 1))
-    if mouth == 0 and col.get("small_lips") and female:  # a neat closed mouth: one row, two pixels at most
-        for x in (xs[:2] if not side else xs):
+    if col.get("small_lips") and female:
+        # a neat small mouth: talking opens it downward in the closed lips' own columns, so the face stays balanced
+        cols = xs[:2] if not side else xs
+        for x in cols:
             c.dot(x, my, lip)
+            if mouth:
+                c.dot(x, my + 1, "3a1410" if mouth == 1 else "4a1a14")
+            if mouth == 2:
+                c.dot(x, my + 2, lip_lo)
     elif mouth == 0:
         for x in xs:
             c.dot(x, my, lip if female else tone(1))

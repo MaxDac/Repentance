@@ -78,18 +78,19 @@ ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair
 # neck to a small bust, a thin neck column rising a little forward. Levels: (y, half-width, back z, front z).
 ELEANOR_FIGURE = dict(h=62, sw=0.1, hw=0.044, waist=0.054, hipw=0.09, leg_r=0.78, foot=0.056, arm_r=0.64, cap_r=0.6,
                       cap_y=0.258, shoulder_y=0.262, bust=0.062, bust_y=0.295, waist_z=0.038,
-                      rear=(0.035, 0.058, 0.52), fitted=True, neck_r=0.022, neck_lean=0.005,
-                      profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.026, 0.026), (0.232, 0.085, -0.032, 0.036),
-                               (0.25, 0.1, -0.036, 0.044), (0.31, 0.095, -0.038, 0.052), (0.40, 0.054, -0.036, 0.044),
+                      bust_peak=((-1, 0), (0, 1), (1, 1), (2, 0)),  # a one-pixel swell blending into the chest line
+                      rear=(0.035, 0.058, 0.52), fitted=True, neck_r=0.022, neck_lean=0.005, talk_nod=0.0,
+                      profile=[(0.19, 0.03, -0.02, 0.016), (0.212, 0.055, -0.029, 0.029), (0.232, 0.085, -0.036, 0.04),
+                               (0.25, 0.1, -0.048, 0.059), (0.31, 0.095, -0.052, 0.07), (0.40, 0.054, -0.048, 0.059),
                                (0.47, 0.09, -0.07, 0.046), (0.53, 0.0774, -0.06, 0.044)], flat_front=True)
 # A 1920s widow's black: the high-necked, long-sleeved black bodice of her portrait, a dropped waist with a sash at
 # the hip, a pleated skirt to mid-calf, sheer dark stockings, black heels and a short strand of white pearls.
 # Her outfits keep these curves; the black dress, of heavier cloth, softens bust and seat a little.
 _CURVES = dict(bust_hi=0, bust=ELEANOR_FIGURE["bust"], rear=ELEANOR_FIGURE["rear"])
 ELEANOR = {**ELEANOR_FIGURE, **ELEANOR_HEAD, "bust": 0.052, "bust_hi": 2, "rear": (0.035, 0.044, 0.52), "torso": "1c1a20",
-           "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034), "stockings": "5e4a46", "shoes": "120e10",
+           "high_neck": 0.19, "coat": dict(col="1c1a20", top=0.46, hem=0.79, flare=0.034), "stockings": "5e4a46", "shoes": "120e10",
            "decals": [("belt", 0.465, "4a3c48"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "4a3c48"), ("pleats", 0.53),
-                      ("strand", 0.222, 0.252, 0.03, "f2eee4", "b8b0a4")]}
+                      ("strand", 0.212, 0.25, 0.036, "f2eee4", "b8b0a4", 0.058)]}
 # Rose, as in her close-up: long wavy blonde hair over the shoulders, blue-green eyes, a cream knit cardigan open
 # over a white collared blouse, and her navy skirt.
 ROSE = dict(h=60, sw=0.108, hw=0.044, waist=0.07, hipw=0.088, leg_r=0.8, foot=0.058, skin="ecc4a4", hair="c89c4a",
@@ -198,12 +199,18 @@ ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": M
                          "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
-# The implied-nude variant: front locks define a subtle chest contour, one
-# hand lowered over her lap, the other arm hanging at her side.
+# The implied-nude variant: thin front locks lie flat over the chest, one
+# hand lowered over her lap, the other arm hanging at her side. Unclothed, her hips, seat and stance are a tenth
+# narrower than the figure's, keeping their proportions.
 _SKIN = "e4b898"
+_STAGE_HIPS = 0.9
 ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
                  "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
-                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.03,
+                 "hipw": ELEANOR_FIGURE["hipw"] * _STAGE_HIPS, "hw": ELEANOR_FIGURE["hw"] * _STAGE_HIPS,
+                 "rear": tuple(v * _STAGE_HIPS for v in ELEANOR_FIGURE["rear"][:2]) + ELEANOR_FIGURE["rear"][2:],
+                 "profile": [(y, w * (_STAGE_HIPS if y > 0.45 else 1), zb, zf) for y, w, zb, zf in ELEANOR_FIGURE["profile"]],
+                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.0,
+                 "hair_front_w": 0.7, "hair_front_root": 0.07,  # the lock joins the hair behind the neck in profile
                  "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
@@ -227,7 +234,7 @@ ELEANOR_GOWN = dict(ELEANOR, **_CURVES, torso="e08ca4", sleeves=ELEANOR["skin"],
                     stockings="e4c4ae", shoes="7a3448",
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.42, "b85a78")])
 # Eleanor in Joliet: a grey prison jumpsuit buttoned to the throat, cut like Micah's coverall.
-ELEANOR_INMATE = dict(ELEANOR, **_CURVES, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
+ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
                       coat=None, stockings=None, shoes="2a2a2e",
                       decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
@@ -249,13 +256,14 @@ def player_sheet(spec, name, arms=None):
         if arms:
             ps["arms"] = {k: (ps["arms"][k] if arms[k][0] == "swing" else arms[k]) for k in (1, -1)}
         return ps
+    nod = spec.get("talk_nod", 0.004)  # how far the head dips on a talk frame
     side = [figure(spec, held(pose(PLAYER_IDLE_YAW)), FW, FH)]
     side += [figure(spec, held(walk_pose(90, i)), FW, FH) for i in range(STRIDE_FRAMES)]
-    side += [figure(spec, held(pose(PLAYER_IDLE_YAW, mouth=1, nod=0.004)), FW, FH)]
+    side += [figure(spec, held(pose(PLAYER_IDLE_YAW, mouth=1, nod=nod)), FW, FH)]
     front = [figure(spec, held(pose(16)), FW, FH)]
     front += [figure(spec, held(walk_pose(16, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
-    front += [figure(spec, held(pose(16, mouth=1)), FW, FH), figure(spec, held(pose(16, mouth=2, nod=0.004)), FW, FH)]
+    front += [figure(spec, held(pose(16, mouth=1)), FW, FH), figure(spec, held(pose(16, mouth=2, nod=nod)), FW, FH)]
     back = [figure(spec, held(pose(164)), FW, FH)]
     back += [figure(spec, held(walk_pose(164, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
@@ -278,7 +286,7 @@ def npc_strip(spec, name, arms, phi=35, **extra):
     nod = extra.pop("nod", 0.0)
     frames = [figure(spec, pose(phi, arms=arms, nod=nod, **extra), NPC_W, FH),
               figure(spec, pose(phi, arms=arms, mouth=1, nod=nod, **extra), NPC_W, FH),
-              figure(spec, pose(phi, arms=arms, mouth=2, nod=nod + 0.004, **extra), NPC_W, FH)]
+              figure(spec, pose(phi, arms=arms, mouth=2, nod=nod + spec.get("talk_nod", 0.004), **extra), NPC_W, FH)]
     frames += [figure(spec, npc_walk_pose(arms, i, nod=nod, **extra), NPC_W, FH) for i in range(STRIDE_FRAMES)]
     img = sheet([frames], NPC_W, FH)
     save(img, "sprites", f"{name}.png")
