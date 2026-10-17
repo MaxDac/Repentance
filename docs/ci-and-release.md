@@ -31,7 +31,7 @@ suite or an exported release; normal runtime errors are warnings, not the strict
 ## Release (`.github/workflows/release.yml`)
 
 Manual. Inputs: `version` (blank = bump the patch of the latest `v*` tag; first is `0.1.0`; must be `X.Y.Z` and a
-new tag) and `prerelease` (default `true`). It runs the unit tests in Release, exports both presets, and publishes a
+new tag) and `prerelease` (default `true`). It runs the unit tests as CI does (`tools/run/test.sh unit --no-clean`), exports both presets, and publishes a
 GitHub Release with `Repentance-vX.Y.Z-linux-x86_64.zip` and `Repentance-vX.Y.Z-windows-x86_64.zip`.
 
 ```powershell
