@@ -471,8 +471,10 @@ def figure(spec, ps, fw=56, fh=80):
             # ps["hand_in_coat"]: the hand of that arm is slipped inside the coat front, out of sight
             if hand is not None and ps.get("hand_in_coat") != s:
                 c.put(c.capsule(P(wr), P(hand), H * 0.025 * hk, H * 0.021 * hk), skin, f"hand{s}", dither=False)
-        # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face)
-        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + 0.05 * abs(cp), arm)
+        # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face);
+        # col["far_arm_behind"]: the far arm stays behind a bare-armed dress in near-front and near-back views
+        bias = 0.0 if col.get("far_arm_behind") and Ds < 0 else 0.05 * abs(cp)
+        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + bias, arm)
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
@@ -777,14 +779,17 @@ def _skirt(c, coat, body, P, legs, H, waist, hipw, cp, sp):
         _seated_skirt(c, coat, body, P, legs, H, flare, tc, hc, wt, wh)
         return
     xs = []
+    pad = coat.get("hem_pad", 0.045)  # hem reach past each leg at the hem line
     for s, leg in legs.items():
         p = _leg_at(leg, hem)
         if p is None:
             p = leg[2]
         q = P(p)
-        xs += [q[0] - H * (0.045 + flare), q[0] + H * (0.045 + flare)]
+        xs += [q[0] - H * (pad + flare), q[0] + H * (pad + flare)]
     hem_y = P(np.array([0, hem, 0]))[1]
-    lo, hi = min(xs + [hc[0] - wh * 1.05]), max(xs + [hc[0] + wh * 1.05])
+    # coat["hem_legs"]: the hem follows the legs alone, narrowing below the hips when they stand together
+    hips = [] if coat.get("hem_legs") else [hc[0] - wh * 1.05, hc[0] + wh * 1.05]
+    lo, hi = min(xs + hips), max(xs + hips)
     pts = [(tc[0] - wt, tc[1]), (hc[0] - wh, hc[1]), (lo, hem_y), (hi, hem_y), (hc[0] + wh, hc[1]), (tc[0] + wt, tc[1])]
     if coat.get("flat_front") and abs(sp) > 0.3:
         # a flat belly: in profile the front of the skirt hangs straight down from the waist, only the stepping
