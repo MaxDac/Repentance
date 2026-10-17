@@ -183,10 +183,34 @@ def vista(img, m, mode):
     for a in range(0, 360, 45):
         r = math.radians(a)
         d.line([(456, 80), (456 + 5 * math.cos(r), 80 + 5 * math.sin(r))], fill=mul(cath, 0.5))
-    d.polygon([(451, 126), (451, 108), (456, 100), (461, 108), (461, 126)], fill=mul(cath, 0.5))
-    if mode == "night":
+    # the west door: a pointed arch of stepped stone orders round two studded leaves under a glazed tympanum
+    night = mode == "night"
+    order_l = mix(cath, hx("8a6040"), 0.45) if night else mul(cath, 1.15)
+    order_d = mix(cath, hx("4a3020"), 0.4) if night else mul(cath, 0.8)
+    d.polygon([(448, 127), (448, 106), (456, 95), (464, 106), (464, 127)], fill=order_d)
+    d.line([(448, 106), (456, 95), (464, 106)], fill=order_l)
+    d.polygon([(450, 127), (450, 107), (456, 98), (462, 107), (462, 127)], fill=order_l)
+    d.line([(462, 107), (462, 127)], fill=order_d)
+    d.polygon([(451, 127), (451, 108), (456, 101), (461, 108), (461, 127)], fill=mul(cath, 0.5))
+    tymp = hx("ffd890") if night else mul(cath, 0.6)
+    leaf = hx("4a2c18") if night else mix(cath, hx("4a3020"), 0.5)
+    d.polygon([(452, 111), (452, 109), (456, 103), (460, 109), (460, 111)], fill=tymp)
+    d.line([(456, 104), (456, 111)], fill=mul(cath, 0.5))
+    d.line([(453, 109), (459, 109)], fill=mul(cath, 0.5))
+    d.line([(452, 112), (460, 112)], fill=order_l)   # the lintel
+    d.rectangle([452, 113, 460, 126], fill=leaf)
+    for lx0 in (452, 457):
+        d.rectangle([lx0 + 1, 115, lx0 + 2, 119], outline=mul(leaf, 0.6))
+        d.rectangle([lx0 + 1, 121, lx0 + 2, 125], outline=mul(leaf, 0.6))
+    for hy in (114, 120, 125):                          # iron strap hinges across both leaves
+        d.line([(452, hy), (454, hy)], fill=mul(leaf, 0.4))
+        d.line([(458, hy), (460, hy)], fill=mul(leaf, 0.4))
+    d.line([(456, 113), (456, 126)], fill=hx("ffe8b0") if night else mul(leaf, 0.5))  # light through the crack
+    d.point((455, 119), fill=hx("e0b060") if night else mul(leaf, 1.4))           # ring pulls
+    d.point((457, 119), fill=hx("e0b060") if night else mul(leaf, 1.4))
+    if night:
         light(img, "ellipse", [440, 64, 472, 96], hx("e08a50"), 0.35, 6)
-        d.polygon([(452, 126), (452, 109), (456, 103), (460, 109), (460, 126)], fill=hx("6a4a30"))
+        light(img, "ellipse", [446, 100, 466, 132], hx("ffb060"), 0.2, 4)
     # haze between the cathedral and the street
     light(img, "rect", [x0, 96, W, 140], m["haze"], 0.3, 10)
 
@@ -196,6 +220,12 @@ def vista(img, m, mode):
     for f in (0.2, 0.4, 0.6, 0.75):
         y = BASE + (vy - BASE) * f
         d.line([(x0, y), (W, y)], fill=mix(m["cob1"], m["joint"], 0.5))
+    # the cathedral steps, catching the light from the door
+    for i, (sx0, sx1) in enumerate(((448, 464), (446, 466))):
+        sy = 127 + i * 2
+        d.rectangle([sx0, sy, sx1, sy + 1], fill=mix(cath, hx("6a4a30"), 0.5 - 0.15 * i) if mode == "night"
+                    else mul(cath, 1.1))
+        d.line([(sx0, sy + 1), (sx1, sy + 1)], fill=mul(cath, 0.6))
 
     # the L: a riveted girder deck on lattice columns, a train rattling across
     deck_y = 70
@@ -694,15 +724,66 @@ def lamppost(d, x, m, mode):
 
 
 def hydrant(d, x, m, mode):
-    red = hx("6a1a18") if mode == "night" else hx("a8302a")
+    """A cast-iron pillar hydrant: bolted base flange, a barrel lit from the lamp on the left, a collar, a domed
+    bonnet with its pentagon nut, two hose nozzles with chained caps and the big pumper cap facing the street."""
+    red = hx("7a2220") if mode == "night" else hx("a8302a")
     g = CURB
-    d.rectangle([x - 6, g - 3, x + 6, g], fill=mul(red, 0.7))
-    d.rectangle([x - 4, g - 18, x + 4, g - 3], fill=red)
-    d.rectangle([x - 7, g - 14, x + 7, g - 10], fill=red)
-    d.chord([x - 4, g - 23, x + 4, g - 14], 180, 360, fill=red)
-    d.rectangle([x - 1, g - 25, x + 1, g - 22], fill=red)
-    d.line([(x - 3, g - 17), (x - 3, g - 4)], fill=mul(red, 1.6))
-    d.rectangle([x - 5, g - 19, x + 5, g - 18], fill=mul(red, 1.3))
+
+    def shade(t):
+        """Colour across a round casting, t from -1 (lit left edge) to 1 (shadowed right edge)."""
+        return mul(red, 1.55 - 0.5 * (t + 1) if t < -0.3 else 1.1 - 0.35 * (t + 0.3))
+
+    def column(x0, x1, y0, y1):
+        for xx in range(x0, x1 + 1):
+            d.line([(xx, y0), (xx, y1)], fill=shade((xx - (x0 + x1) / 2) / max(1, (x1 - x0) / 2)))
+
+    dark, rim = mul(red, 0.45), mul(red, 1.9)
+    # base flange with its bolts, sitting in a puddle of its own rust
+    d.rectangle([x - 8, g - 1, x + 8, g], fill=mul(red, 0.35))
+    column(x - 7, x + 7, g - 4, g - 2)
+    d.line([(x - 7, g - 4), (x + 7, g - 4)], fill=mul(red, 1.4))
+    for bx in (x - 5, x - 1, x + 3):
+        d.point((bx, g - 3), fill=rim)
+        d.point((bx + 1, g - 3), fill=dark)
+    # the barrel, a raised ring a little above the base
+    column(x - 4, x + 4, g - 19, g - 5)
+    column(x - 5, x + 5, g - 8, g - 7)
+    # upper collar flange
+    column(x - 6, x + 6, g - 21, g - 19)
+    d.line([(x - 6, g - 21), (x + 6, g - 21)], fill=mul(red, 1.6))
+    d.line([(x - 6, g - 18), (x + 6, g - 18)], fill=dark)
+    # domed bonnet and the pentagon operating nut
+    for xx in range(x - 5, x + 6):
+        h = int(round(5 * math.sqrt(max(0.0, 1 - ((xx - x) / 5.5) ** 2))))
+        d.line([(xx, g - 21 - h), (xx, g - 22)], fill=shade((xx - x) / 5))
+    d.point((x - 2, g - 25), fill=rim)
+    d.point((x - 3, g - 24), fill=rim)
+    d.rectangle([x - 1, g - 29, x + 1, g - 26], fill=mul(red, 0.8))
+    d.line([(x - 1, g - 29), (x - 1, g - 26)], fill=mul(red, 1.5))
+    d.point((x, g - 30), fill=mul(red, 0.8))
+    # side hose nozzles with their caps and the caps' chains looping back to the barrel
+    for s in (-1, 1):
+        n0 = x + s * 5
+        n1 = x + s * 7
+        d.rectangle([min(n0, n1), g - 15, max(n0, n1), g - 11], fill=shade(0.6 * s))
+        d.line([(min(n0, n1), g - 15), (max(n0, n1), g - 15)], fill=mul(red, 1.5 if s < 0 else 1.0))
+        cx = x + s * 8
+        d.rectangle([cx, g - 16, cx, g - 10], fill=mul(red, 1.4 if s < 0 else 0.7))
+        d.point((x + s * 9, g - 13), fill=rim if s < 0 else dark)
+        chain = mul(hx("9a9aa8"), 0.55 if mode == "night" else 0.8)
+        d.point((x + s * 7, g - 9), fill=chain)
+        d.point((x + s * 6, g - 8), fill=chain)
+        d.point((x + s * 5, g - 9), fill=chain)
+    # the pumper cap facing the street, its nut catching the light
+    d.ellipse([x - 3, g - 15, x + 2, g - 10], fill=mul(red, 0.7))
+    d.ellipse([x - 2, g - 14, x + 1, g - 11], fill=mul(red, 1.2))
+    d.point((x - 1, g - 13), fill=rim)
+    d.point((x, g - 12), fill=dark)
+    # lamplight along the lit edge, chipped paint showing grey iron, a wet glint on the dome
+    d.line([(x - 4, g - 18), (x - 4, g - 9)], fill=rim)
+    d.point((x + 2, g - 6), fill=hx("5a5658"))
+    d.point((x + 3, g - 17), fill=hx("5a5658"))
+    d.point((x - 3, g - 26), fill=hx("ffd8b0") if mode == "night" else hx("ffffff"))
 
 
 def fender(d, wx, wy, a0, a1, col, hi):
