@@ -54,7 +54,7 @@ public static class Notes
         {
             L("A perfumed card, blank but for two letters. Her perfume."),
             L("A matchbook: The Blue Lantern, State Street."),
-            L("A vial of laundry bluing. She meant to wear a blue flower."),
+            L("A vial of laundry bluing. Somebody was meant to wear a blue flower."),
             L("A Japanese water flower: \"Give me a drink and I'll tell you the word.\""),
         }),
         N("blue_lantern", "The Blue Lantern", "seen_blue_lantern_front",

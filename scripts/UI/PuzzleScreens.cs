@@ -65,17 +65,34 @@ public abstract class PuzzleScreen
     protected Label Label(string text, float x, float y, float width) => Panel.AddLabel(text, new Rect2(x, y, width, 14));
 
     /// <summary>Up/left/right/down pad: 16px buttons on a 3x3 grid (2px gaps, empty middle) centred on (cx, cy).</summary>
+    /// <remarks>The same moves also answer the arrow keys and swipes across the work area (see <see cref="Step"/>).</remarks>
     protected void DirectionPad(float cx, float cy, Action<int, int> move)
     {
         const float size = 16, step = size + 2;
+        _move = move;
         foreach (var (id, dx, dy) in new[] { ("up", 0, -1), ("left", -1, 0), ("right", 1, 0), ("down", 0, 1) })
             Panel.AddPadButton(id, new Vector2(dx, dy),
-                new Rect2(cx - size / 2 + dx * step, cy - size / 2 + dy * step, size, size), () =>
-                {
-                    move(dx, dy);
-                    Refresh();
-                    Panel.QueueRedraw();
-                });
+                new Rect2(cx - size / 2 + dx * step, cy - size / 2 + dy * step, size, size), () => Step(dx, dy));
+    }
+
+    private Action<int, int>? _move;
+
+    /// <summary>The work area: a drag that starts here (not on a control) steers a direction-pad puzzle.</summary>
+    public static readonly Rect2 WorkArea = new(14, 31, 258, 173);
+
+    /// <summary>True when the screen has a direction pad, so arrow keys and swipes move it.</summary>
+    public bool HasDirections => _move != null;
+
+    /// <summary>Drag distance per step: one diagram cell.</summary>
+    public virtual float SwipeStep => 14;
+
+    /// <summary>One direction-pad move, from a pad button, an arrow key or a swipe.</summary>
+    public void Step(int dx, int dy)
+    {
+        if (_move == null) return;
+        _move(dx, dy);
+        Refresh();
+        Panel.QueueRedraw();
     }
 
     protected void Say(string feedback) => Panel.SetFeedback(feedback);
@@ -156,7 +173,7 @@ public sealed class LiftMazeScreen : PuzzleScreen
     }
 
     private static Vector2 Corner(int x, int y) => new(OriginX + x * Cell, OriginY + y * Cell);
-    private static Vector2 Center(GridPoint p) => Corner(p.X, p.Y) + new Vector2(Cell / 2, Cell / 2);
+    public static Vector2 Center(GridPoint p) => Corner(p.X, p.Y) + new Vector2(Cell / 2, Cell / 2);
 
     public override void Draw(CanvasItem canvas)
     {

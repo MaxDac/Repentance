@@ -39,6 +39,7 @@ public class WalkTest : Harness
             var rooms = RoomNames();
             Check(rooms.Count > 20, $"found {rooms.Count} room scenes");
             foreach (var room in rooms) await TestRoom(room);
+            await HoleTests();
             await InputTests();
         }
         catch (Exception ex)
@@ -168,6 +169,32 @@ public class WalkTest : Harness
         Check(ok, $"{what}: arrives at {target} (at {_game.Player.Position})");
         if (!ok) _game.Player.Stop();
         return ok;
+    }
+
+    // ------------------------------------------------------------------ furniture standing out on the floor
+
+    /// <summary>In the First Interlude the bench in Room 507 is a hole in the floor: paths go round it, never through.</summary>
+    private async Task HoleTests()
+    {
+        GameState.Instance.SetFlag("interlude1");
+        try
+        {
+            await _game.ChangeRoom("eleanor_room", "interlude");
+            var room = _game.Room!;
+            var walk = room.Walk!;
+            var bench = new Vector2(93, 229);
+            Check(!walk.Contains(bench), "eleanor_room (interlude): the bench is off the floor");
+            foreach (var (from, to) in new[] { (new Vector2(30, 250), new Vector2(100, 205)), (new Vector2(160, 250), new Vector2(20, 222)) })
+                CheckPath(walk, from, walk.FindPath(from, to), to, $"eleanor_room (interlude): {from} -> {to} round the bench");
+            var clothes = Destination(room, room.FindHotspot("clothes")!);
+            Check(walk.Contains(clothes) && clothes.Y > 238, $"eleanor_room (interlude): the dress is reached from in front of the bench ({clothes})");
+            await WalkAndArrive(clothes, "eleanor_room (interlude): walk to the bench");
+        }
+        finally
+        {
+            GameState.Instance.SetFlag("interlude1", false);
+        }
+        Check(_game.Room!.Walk!.Contains(new Vector2(93, 229)), "eleanor_room: the bench hole goes with the interlude");
     }
 
     // ------------------------------------------------------------------ real mouse input
