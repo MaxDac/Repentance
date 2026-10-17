@@ -1,10 +1,8 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventRoad.cs" id="1_ConventRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_road.png" id="2_convent_road"]
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
-[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="4_Actor"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor.png" id="5_eleanor"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(56, 92)
@@ -92,18 +90,3 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
 position = Vector2(360, 102)
 shape = SubResource("Rect_3")
-
-[node name="Eleanor" type="Area2D" parent="World"]
-position = Vector2(300, 214)
-script = ExtResource("4_Actor")
-Id = "eleanor"
-DisplayName = "Eleanor"
-ShowIfFlags = "convent_departed"
-LookText = "Eleanor Harrington, all in black, like she's already been to her own funeral."
-WalkTo = Vector2(256, 218)
-Face = 4
-monitoring = false
-monitorable = false
-Texture = ExtResource("5_eleanor")
-FlipH = true
-SpeechColor = Color(0.96, 0.78, 0.62, 1)

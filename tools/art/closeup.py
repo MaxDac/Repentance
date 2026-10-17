@@ -9,6 +9,7 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
+- motel_closeup: a red neon MOTEL sign over a rain-soaked Chicago street at night.
 """
 import os
 
@@ -21,6 +22,9 @@ SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup.png")
 CLOTHED_SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup_clothed.png")
 ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
 BEATEN_SRC = os.path.join(ROOT, "tools", "art", "src", "beaten_closeup.png")
+MOTEL_SRC = os.path.join(ROOT, "tools", "art", "src", "motel_street.png")
+MOTEL_TOP = 245 / 1024  # just above the neon sign in the square source, so the wet street below stays in view
+MOTEL_SIGN, MOTEL_NEON = (138, 6, 188, 28), 6  # the sign's letters in panel art pixels, and the colours kept for them
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
 SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
 IW, IH = AW * SCALE, AH * SCALE
@@ -80,6 +84,24 @@ def beaten_closeup(src):
     """Micah flat on his back on the cathedral steps, looking up from under his hat."""
     img = crop_to_panel(src.convert("RGB"))
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+
+
+def motel_crop(src):
+    """The rainy street, trimmed to the panel's 1.95:1 from just above the MOTEL sign down into the wet street."""
+    img = src.convert("RGB")
+    w, h = img.size
+    ch = round(w * AH / AW)
+    top = min(round(h * MOTEL_TOP), h - ch)
+    return img.crop((0, top, w, top + ch))
+
+
+def motel_closeup(src):
+    """The red neon MOTEL sign over a rain-soaked street at night."""
+    img = motel_crop(src)
+    small = img.resize((AW, AH), Image.BOX)
+    # the neon is a sliver of the picture: give the sign its own reds so the reduction keeps it glowing
+    sign = small.crop(MOTEL_SIGN)
+    return framed(img, palette_of(small, COLOURS - MOTEL_NEON) + palette_of(sign, MOTEL_NEON))
 
 
 def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
@@ -166,5 +188,6 @@ def build():
     save(stage_closeup(clothed), "ui", "stage_closeup_clothed.png")
     save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
+    save(motel_closeup(Image.open(MOTEL_SRC)), "ui", "motel_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")
     save(heraldry_closeup(), "ui", "heraldry_closeup.png")

@@ -34,7 +34,10 @@ public static class CloseUps
     /// <summary>Micah flat on the cathedral steps in Act 3.</summary>
     public static readonly CloseUp Beaten = new("beaten", "beaten_closeup");
 
-    /// <summary>Outside the convent, end of Act 1: Micah on the left, Eleanor on the right.</summary>
+    /// <summary>The motel sign down the road from the convent, the long shot Micah spots in Act 1.</summary>
+    public static readonly CloseUp Motel = new("motel", "motel_closeup");
+
+    /// <summary>On the motel fire escape, end of Act 1: Micah on the left, Eleanor on the right.</summary>
     public static readonly CloseUp Convent = new("convent", "convent_closeup");
 
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,
@@ -44,6 +47,7 @@ public static class CloseUps
     private static readonly Dictionary<string, CloseUp> ById = new()
     {
         [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [Convent.Id] = Convent, [Heraldry.Id] = Heraldry,
+        [Motel.Id] = Motel,
     };
 
     public static CloseUp Get(string id) =>

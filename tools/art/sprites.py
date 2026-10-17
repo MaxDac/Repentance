@@ -125,6 +125,15 @@ LIBRARIAN = dict(h=63, sw=0.118, hw=0.044, waist=0.07, hipw=0.082, skin="dcb496"
                  pants="3e3a38", shoes="2a1e18",
                  decals=_vee(0.33, 0.034, "ece8de") + [("bow", 0.205, "7a2030"),
                                                        ("buttons", 0.34, 0.51, 3, "3a3228")])
+# The motel night clerk: fifty and soft round the middle, a few mousy strands combed over a bald crown under a
+# green celluloid eyeshade, a sweat-yellowed shirt with sleeve garters, an open brown vest and a loosened tie.
+CLERK = dict(h=63, sw=0.13, waist=0.104, hipw=0.104, skin="d2a684", hair="6e604e", hair_style="bald",
+             combover="6e604e", old=True, eye="2e2a22", brow="5e5040", hat="visor", hat_col="4e9a62",
+             band="2a3a2c", torso="5c4a32", sleeves="d6cca6", cuff="d6cca6", collar="d6cca6", garter="8a2a2a",
+             pants="4a4642", shoes="2a1e16",
+             decals=[("strip", 0.205, 0.45, 0.034, 0.05, "d6cca6"), ("strip", 0.205, 0.235, 0.044, 0.03, "e2dabc"),
+                     ("ribbon", 0.012, 0.222, 0.40, 0.007, "6a2c22"), ("patch", 0.03, 0.33, "b8a87c"),
+                     ("belt", 0.45, "2a2018")])
 # Micah getting dressed: no hat or coat, an open white shirt with the tie hanging loose round the collar, braces
 # unclipped and hanging in loops at the hips.
 MICAH_DRESSING = dict(MICAH_HEAD, h=66, sw=0.142, torso="e4ddcc", sleeves="e4ddcc",
@@ -289,7 +298,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET, _arms("clutch")),
-        ("goon", GOON, _arms("fold")))
+        ("goon", GOON, _arms("fold")), ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
 
 
 def supine_frame(spec, name, wound=None):
@@ -693,6 +702,84 @@ POWDER_KEYS = [
 ]
 
 
+SMOKE_YAW = 30
+# Micah lights up, turned three-quarters to the viewer: (near arm, far arm, cigarette, lighter, seconds). Arms are
+# explicit (elbow, wrist, hand) body-frame points; the near (right) hand carries the cigarette, the far one the lighter.
+# cigarette: None, "hand" (unlit, in the fingers), "lips" (unlit), "lit" (lit, in the lips) or "held" (lit, lowered).
+# lighter: None, "shut", "flame" (lid flipped, the flame up) or "light" (flame drawn into the cigarette's tip).
+_SIDE = ("side", 0, 0, 0)
+_TO_LIPS = ("pts", (0.17, 0.33, 0.1), (0.075, 0.2, 0.12), (0.03, 0.165, 0.11))
+_AT_LIPS = ("pts", (0.17, 0.34, 0.1), (0.07, 0.2, 0.11), (0.025, 0.16, 0.1))
+_CUP = ("pts", (-0.15, 0.33, 0.12), (-0.05, 0.18, 0.16), (-0.02, 0.15, 0.15))
+_CUP_NEAR = ("pts", (0.16, 0.33, 0.1), (0.06, 0.18, 0.15), (0.03, 0.15, 0.14))
+_LIFT = ("pts", (-0.15, 0.38, 0.08), (-0.08, 0.3, 0.14), (-0.05, 0.27, 0.14))
+_HOLD = ("pts", (0.15, 0.40, 0.05), (0.1, 0.39, 0.15), (0.085, 0.37, 0.18))
+SMOKE_KEYS = [
+    (_SIDE, _SIDE, None, None, 0.3),
+    (_TO_LIPS, _SIDE, "hand", None, 0.22),
+    (_AT_LIPS, _LIFT, "lips", "shut", 0.2),
+    (_CUP_NEAR, _CUP, "lips", "flame", 0.28),
+    (_CUP_NEAR, _CUP, "lit", "light", 0.38),
+    (_AT_LIPS, _LIFT, "lit", "shut", 0.22),
+    (("pts", (0.16, 0.38, 0.08), (0.1, 0.32, 0.15), (0.075, 0.3, 0.17)), _SIDE, "held", None, 0.22),
+    (_HOLD, _SIDE, "held", None, 1.0),
+]
+EMBER = ((255, 236, 150, 255), (240, 120, 40, 255), (176, 44, 24, 255))
+PAPER = ((240, 236, 222, 255), (196, 188, 170, 255))
+BRASS = ((224, 184, 96, 255), (168, 124, 52, 255))
+
+
+def _smoke_props(img, marks, cig, lighter, t):
+    """The cigarette, the lighter and its flame, the ember and a wisp of smoke, painted over the figure at the marked
+    hands (hand1: the cigarette hand, hand-1: the lighter hand) and mouth."""
+    from PIL import ImageDraw
+    d = ImageDraw.Draw(img)
+    mx, my = (math.floor(v) for v in marks["mouth"])
+    tip = None
+    if cig in ("lips", "lit"):  # out of the corner of the mouth, drooping down and out towards the viewer's right
+        for i, (dx, dy) in enumerate(((1, 0), (2, 0), (3, 1))):
+            d.point((mx + dx, my + dy), fill=PAPER[0] if i < 2 else PAPER[1])
+        tip = (mx + 4, my + 1)
+    elif cig in ("hand", "held"):  # between the fingers, tipped up and out
+        hx_, hy_ = (math.floor(v) for v in marks["hand1"])
+        for i, (dx, dy) in enumerate(((1, 0), (2, -1), (3, -1))):
+            d.point((hx_ + dx, hy_ + dy), fill=PAPER[0] if i else PAPER[1])
+        tip = (hx_ + 4, hy_ - 2)
+    if cig in ("lit", "held"):
+        d.point(tip, fill=EMBER[1])
+    if lighter:  # the lighter's brass case held upright in the far hand, the lid flipped open when it's lit
+        lx, ly = (math.floor(v) for v in marks["hand-1"])
+        d.rectangle([lx, ly - 1, lx + 1, ly + 1], fill=BRASS[1])
+        d.point((lx, ly - 1), fill=BRASS[0])
+        if lighter != "shut":
+            d.point((lx + 2, ly - 2), fill=BRASS[1])
+            fx, fy = lx + (1 if lighter == "flame" else 2), ly - 2
+            if lighter == "light" and tip:
+                fx, fy = tip[0], tip[1] + 1
+            d.point((fx, fy), fill=EMBER[1])
+            d.point((fx, fy - 1), fill=EMBER[0])
+            if lighter == "flame":
+                d.point((fx, fy - 2), fill=EMBER[0])
+    if cig in ("lit", "held"):  # a thin wisp curling up off the ember, half-transparent so it reads as smoke
+        x, y = tip
+        for k in range(1, 9 if cig == "held" else 5):
+            x += (0, 1, 1, 0, -1, -1, 0, 1)[(k + t) % 8]
+            img.putpixel((x, y - k), (226, 224, 220, max(70, 210 - k * 18)))
+    return img
+
+
+def build_smoke():
+    frames, seconds = [], []
+    for i, (near, far, cig, lighter, duration) in enumerate(SMOKE_KEYS):
+        marks = {}
+        front = tuple(s for s, a in ((1, near), (-1, far)) if a[0] == "pts" and a[3][1] < 0.24)
+        ps = pose(SMOKE_YAW, arms={1: near, -1: far}, front_arms=front, marks=marks)
+        img = _smoke_props(figure(MICAH, ps, FW, FH), marks, cig, lighter, i)
+        frames.append((img, (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_smoke", frames, seconds, anchor=(FW / 2, FH - 3))
+
+
 def eleanor_drink_strip():
     frames, seconds = [(figure(ELEANOR_GOWN, pose(90), FW, FH), (FW / 2, 18))], [0.3]
     for height, reach, tip, full, duration in GIN_KEYS:
@@ -827,6 +914,7 @@ def build():
     door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
     build_gin()
+    build_smoke()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
     # Rose on her doorstep, square to the camera once the door is open
