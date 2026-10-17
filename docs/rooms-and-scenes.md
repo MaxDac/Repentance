@@ -1,6 +1,6 @@
 # Rooms and scenes
 
-37 rooms. Each is `scenes/rooms/<scene>.tscn` (snake_case; the id used by `ChangeRoom` and `ExitTo`) with a
+38 rooms. Each is `scenes/rooms/<scene>.tscn` (snake_case; the id used by `ChangeRoom` and `ExitTo`) with a
 script `scripts/Rooms/<PascalCase>.cs` deriving from `Room` (namespace `Repentance.Rooms`).
 
 ## Scene layout

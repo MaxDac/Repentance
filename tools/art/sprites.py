@@ -32,7 +32,8 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
     return d
 
 
-MICAH_HEAD = dict(skin="d09670", hair="3a2a1e", hair_style="cropped", brow="2a1c14", stubble="8e6c52",
+# black hair, so the brown fedora stands out against it
+MICAH_HEAD = dict(skin="d09670", hair="141010", hair_style="cropped", brow="100c0c", stubble="8e6c52",
                   face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2",
                   clean_jaw=True)
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
@@ -45,6 +46,8 @@ MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1
 # open at the throat with the top button undone.
 MICAH_NO_TIE = dict(MICAH, open_collar=True, decals=_vee(0.335, 0.036, "e3d7bf") + [("strip", 0.205, 0.27, 0.022, 0.0, "c88c66"),
                                                                   ("belt", 0.415, "6a4e26"), ("line", 0.44, 0.74)])
+# Micah in the storm-dark office after the alley: his fedora left on the desk, the whiskey bottle in his hand.
+MICAH_HATLESS = dict(MICAH, hat=None)
 DANIEL = dict(h=64, sw=0.13, skin="e0b090", hair="5a4636", torso="476d5c", collar="d8d2c2", pants="4d6288",
               face_w=0.047, jaw_w=0.037,
               shoes="ddd7ca", hipw=0.094, top_hem=0.47)
@@ -260,11 +263,13 @@ def _arms(kind_r, kind_l=None):
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
-def player_sheet(spec, name, arms=None):
-    """arms: arms held still in every frame (e.g. both hands clutching a sheet) instead of the walk's swing."""
+def player_sheet(spec, name, arms=None, props=None):
+    """arms: arms held still in every frame (e.g. both hands clutching a sheet) instead of the walk's swing.
+    props: pose keys added to every frame (e.g. a bottle carried in one hand)."""
     def held(ps):
         if arms:
             ps["arms"] = {k: (ps["arms"][k] if arms[k][0] == "swing" else arms[k]) for k in (1, -1)}
+        ps.update(props or {})
         return ps
     nod = spec.get("talk_nod", 0.004)  # how far the head dips on a talk frame
     side = [figure(spec, held(pose(PLAYER_IDLE_YAW)), FW, FH)]
@@ -1087,6 +1092,7 @@ def build():
     eleanor_drink_strip()
     kiss_strip()
     build_act3()
+    build_storm()
 
 
 # The poses Micah strikes after he leaves his tie on the mansion's alarm bell; Player loads these instead of the
@@ -1117,3 +1123,69 @@ def build_act3():
     seated_frame(ELEANOR_NPC, "eleanor_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# The storm in the office after the alley: hatless Micah with the whiskey bottle, drinking at the window, setting the
+# bottle down on the desk, then putting his hat back on. Seen from behind (facing the window and the desk).
+# ---------------------------------------------------------------------------------------------------------------------
+STORM_BOTTLE_ARM = -1  # the bottle hand
+STORM_HAT_ARM = 1      # the hand that takes the fedora
+STORM_PHI = 164        # the back view of the player sheet
+
+
+def _storm_pose(arm_pts=None, hat_pts=None, bottle=None, hat=None, grip=0.0, **kw):
+    """A back-view frame; arm_pts/hat_pts: (elbow, wrist, hand) in the body frame for the bottle/hat arm (x is
+    mirrored to the arm's side), else that arm hangs down. bottle: the bottle's direction, or True along the forearm."""
+    arms, behind = {1: ("swing", 3, 6, 10), -1: ("swing", 3, 6, 10)}, []
+    for s, pts in ((STORM_BOTTLE_ARM, arm_pts), (STORM_HAT_ARM, hat_pts)):
+        if pts:
+            arms[s] = ("pts",) + tuple([s * x, y, z] for x, y, z in pts)
+            behind.append(s)
+    ps = pose(STORM_PHI, arms=arms, behind_arms=tuple(behind), **kw)
+    if bottle is not None:
+        ps["bottle"] = (STORM_BOTTLE_ARM, None if bottle is True else bottle)
+        if arm_pts:
+            ps["bottle_z"] = 1.4
+    if hat is not None:
+        ps["held_hat"] = (STORM_HAT_ARM, hat)
+        # over the arm (its hand hidden under the hat); in front of the head only once it's raised over it
+        ps["hat_z"] = 1.6 if hat_pts[2][1] > 0.1 else 2.95
+        ps["hat_hand_behind"] = True
+        ps["hat_grip"] = grip
+    return ps
+
+
+# Seen from behind, the raised arms are drawn behind the back: only the elbows and what sticks out past him show.
+AT_SIDE = ((0.2, 0.39, 0.04), (0.09, 0.32, 0.12), (0.06, 0.3, 0.14))
+AT_MOUTH = ((0.22, 0.22, 0.06), (0.1, 0.17, 0.1), (0.06, 0.16, 0.1))
+ON_DESK = ((0.2, 0.37, 0.08), (0.15, 0.31, 0.22), (0.13, 0.3, 0.26))
+HAT_SIDE = ((0.2, 0.39, 0.04), (0.09, 0.31, 0.1), (0.06, 0.28, 0.12))
+HAT_UP = ((0.21, 0.17, 0.0), (0.13, 0.06, 0.0), (0.1, 0.03, 0.0))
+HAT_BRIM = ((0.21, 0.22, 0.02), (0.09, 0.11, 0.03), (0.06, 0.08, 0.02))
+
+
+def build_storm():
+    player_sheet(MICAH_HATLESS, "micah_hatless_bottle", props=dict(bottle=STORM_BOTTLE_ARM))
+    head = (FW / 2, 18)
+
+    def strip(name, keys):
+        frames = [(figure(spec, ps, FW, FH), head) for spec, ps, _ in keys]
+        action_strip(name, frames, [t for *_, t in keys], anchor=(FW / 2, FH - 3))
+
+    hanging = _storm_pose(bottle=True)
+    chest = _storm_pose(AT_SIDE, bottle=(0.1, 1, 0))
+    # the neck at his lips, the bottle tipped up over his shoulder past the back of his head
+    mouth = _storm_pose(AT_MOUTH, bottle=(STORM_BOTTLE_ARM * 0.8, -0.6, 0.1), nod=-0.01)
+    strip("micah_hatless_bottle_drink", [(MICAH_HATLESS, hanging, 0.25), (MICAH_HATLESS, chest, 0.18),
+                                         (MICAH_HATLESS, mouth, 1.3), (MICAH_HATLESS, chest, 0.2),
+                                         (MICAH_HATLESS, hanging, 0.3)])
+    strip("micah_hatless_bottle_set", [(MICAH_HATLESS, hanging, 0.2), (MICAH_HATLESS, chest, 0.16),
+                                       (MICAH_HATLESS, _storm_pose(ON_DESK, bottle=(0, 1, 0)), 0.45),
+                                       (MICAH_HATLESS, _storm_pose(ON_DESK), 0.25),
+                                       (MICAH_HATLESS, _storm_pose(), 0.3)])
+    strip("micah_hatless_hat_on", [(MICAH_HATLESS, _storm_pose(hat_pts=ON_DESK, hat=(-0.01, 0.0)), 0.35),
+                                   (MICAH_HATLESS, _storm_pose(hat_pts=HAT_SIDE, hat=(-0.01, 0.0)), 0.2),
+                                   (MICAH_HATLESS, _storm_pose(hat_pts=HAT_UP, hat=(-0.01, 0.0), grip=0.09), 0.3),
+                                   (MICAH, _storm_pose(hat_pts=HAT_BRIM), 0.35),
+                                   (MICAH, pose(STORM_PHI), 0.3)])

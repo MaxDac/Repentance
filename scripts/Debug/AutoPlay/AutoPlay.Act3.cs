@@ -312,7 +312,26 @@ public partial class AutoPlay
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;
         Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
-        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "MansionExterior", "shot Tony in the shoulder, on to the Harrington mansion");
+        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm", "shot Tony in the shoulder, back to the office in the storm");
+
+        // ---- the office in the storm: the confession, the demon in the window, the hat, and out to the mansion
+        if (game.Room is Rooms.OfficeStorm storm)
+        {
+            Check(gs.HasFlag("storm_confessed") && storm.DemonFlashes == 2, "two flashes show the demon in the window");
+            Check(game.Sfx.Count(Sound.Thunder) > 0, "thunder follows the lightning");
+            Check(game.Player.Character == "micah_hatless_bottle", "hatless, the bottle in his hand");
+            Check(!storm.GetNode<Godot.CanvasItem>("Lightning/Demon1").Visible &&
+                !storm.GetNode<Godot.CanvasItem>("Lightning/Demon2").Visible, "the demon is gone once it's dark");
+        }
+        await Shot("office_storm");
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "OfficeStorm" && !gs.HasFlag("storm_door_open"), "not out of the door without the hat");
+        await game.Perform(Verb.Hand, "hat");
+        Check(gs.HasFlag("storm_bottle_down") && gs.HasFlag("storm_hat_on") && game.Player.Character == "micah",
+            "the bottle stays on the desk, the hat goes on");
+        await Shot("office_storm_hat_on");
+        await game.Perform(Verb.Walk, "door");
+        Check(game.Room?.Name == "MansionExterior", "out of the office, on to the Harrington mansion");
 
         // ---- the mansion: the alarm bell, the key, the study, the bedroom
         await Shot("mansion_exterior");

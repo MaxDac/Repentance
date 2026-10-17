@@ -33,7 +33,7 @@ flowchart TD
 | Framework | `scripts/Core/` | mostly | `Game`, `Room`, `Hotspot`, `Actor`, `Player`, state, dialogue, saves, audio |
 | Rules and data | `scripts/Core/` (`Items`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `SwipeGesture`, `Endings`, `SaveData`, `*Synth`, `InkScan`) | **no** | Pure C#, linked into the xunit project and unit-tested |
 | Story glue | `scripts/Story/` | yes | Item verbs, combinations and puzzles valid in any room; interludes |
-| Rooms | `scripts/Rooms/` + `scenes/rooms/` | yes | One script and one scene per location (37 rooms) |
+| Rooms | `scripts/Rooms/` + `scenes/rooms/` | yes | One script and one scene per location (38 rooms) |
 | Dialogue | `dialogue/repentance.ink` | - | All conversations, compiled by GodotInk on import |
 | UI | `scripts/UI/` | yes | `Hud` (partials), `VerbWheel`, `GameMenu`, `NotepadView`, `CloseUp`, puzzle screens |
 | Debug | `scripts/Debug/` | yes | Automated runs: `Harness`, `AutoPlay`, `Playthrough` (and film mode), `WalkTest` |

@@ -57,6 +57,7 @@ public class SoundSynthTests
     [InlineData("*FWOOOSH*", Sound.Whoosh)]
     [InlineData("*Whoosh*", Sound.Whoosh)]
     [InlineData("*Ring*", Sound.Bell)]
+    [InlineData("*THUNDER*", Sound.Thunder)]
     [InlineData("*A car door slams.*", Sound.DoorSlam)]
     public void SoundEffectLinesPlayTheirSound(string line, Sound expected) =>
         Assert.Equal(new[] { new SoundCue(expected, 0) }, SoundSynth.CuesFor(line));
@@ -77,6 +78,17 @@ public class SoundSynthTests
         Assert.Equal(2, SoundSynth.CuesFor("*Two car doors slam in the dark.*").Count(c => c.Sound == Sound.DoorSlam));
         Assert.True(SoundSynth.CuesFor("*Footsteps on the landing, behind the other door. A man's voice. Then two.*")
             .Count(c => c.Sound == Sound.StepWood) >= 3);
+    }
+
+    [Fact]
+    public void ThunderRumblesLongAfterItsCrack()
+    {
+        var thunder = SoundSynth.Render(Sound.Thunder);
+        Assert.True(thunder.Length > SoundSynth.SampleRate * 3, "a long roll");
+        double Rms(int from, int to) => Math.Sqrt(Enumerable.Range(from, to - from).Average(i => (double)thunder[i] * thunder[i]));
+        int sr = SoundSynth.SampleRate;
+        Assert.True(Rms(sr, sr * 2) > 0.02, "still rumbling a second in");
+        Assert.True(Rms(0, sr / 2) > Rms(sr * 3, sr * 4), "dies away");
     }
 
     [Theory]

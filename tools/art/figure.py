@@ -474,7 +474,9 @@ def figure(spec, ps, fw=56, fh=80):
         # a hand held up to the head goes in front of it (ps["front_arms"]: arms raised in front of the face);
         # col["far_arm_behind"]: the far arm stays behind a bare-armed dress in near-front and near-back views
         bias = 0.0 if col.get("far_arm_behind") and Ds < 0 else 0.05 * abs(cp)
-        add(2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + bias, arm)
+        # ps["behind_arms"]: arms reaching in front of a figure seen from behind, hidden by the back
+        add(1.5 if s in ps.get("behind_arms", ()) else
+            2.9 if kind == "temple" or s in ps.get("front_arms", ()) else 2.0 + Ds + bias, arm)
 
     if col.get("cloak"):
         add(2.4, lambda: _cloak(c, col["cloak"], body, P, legs, H, sw, cp, sp))
@@ -517,6 +519,46 @@ def figure(spec, ps, fw=56, fh=80):
             c.put(c.capsule(P(wr), P(fist), H * 0.025, H * 0.022), col["skin"], f"hand{s}", dither=False)
         add(2.0 + P(arm_pts[(ps["candlestick"][0] if isinstance(ps["candlestick"], tuple) else ps["candlestick"])][0])[2]
             + 0.08, candlestick)
+
+    if ps.get("bottle"):  # a whiskey bottle gripped by the neck in the hand of arm side, its body along way
+        def bottle(spec_=ps["bottle"]):
+            s, way = spec_ if isinstance(spec_, tuple) else (spec_, None)
+            _, el, wr, hand = arm_pts[s]
+            d = np.array(way, float) if way is not None else hand - el
+            d /= max(np.linalg.norm(d), 1e-6)
+            glass, label = "5a2e10", "c8b880"
+            fist = hand - d * 0.004
+            shoulder, base_ = fist + d * 0.035, fist + d * 0.12
+            c.put(c.capsule(P(fist - d * 0.03), P(shoulder), H * 0.009, H * 0.011), glass, "bottle", dither=False)
+            c.put(c.capsule(P(shoulder), P(base_), H * 0.021, H * 0.022), glass, "bottle", dither=False)
+            c.put(c.capsule(P(fist + d * 0.07), P(fist + d * 0.085), H * 0.018, H * 0.018), label, "bottle", dither=False)
+            c.put(c.capsule(P(fist - d * 0.03), P(fist - d * 0.036), H * 0.01, H * 0.01), "1a1a1a", "bottle",
+                  dither=False)
+            c.put(c.capsule(P(wr), P(fist), H * 0.025, H * 0.022), col["skin"], f"hand{s}", dither=False)
+        side_ = ps["bottle"][0] if isinstance(ps["bottle"], tuple) else ps["bottle"]
+        add(ps.get("bottle_z", 2.0 + P(arm_pts[side_][0])[2] + 0.08), bottle)
+
+    if ps.get("held_hat"):  # the fedora held by its crown in the hand of arm side, brim level: (side, (dy, dz))
+        def held_hat(spec_=ps["held_hat"]):
+            s, (dy, dz) = spec_ if isinstance(spec_, tuple) else (spec_, (0.0, 0.0))
+            hand = arm_pts[s][3]
+            # hat_grip: held by the brim instead, the crown that far towards the body from the hand
+            crown = hand + np.array([-s * ps.get("hat_grip", 0.0), dy, dz])
+            if ps.get("hat_hand_behind"):  # seen from behind the hat: the hand under it, drawn first
+                c.put(c.capsule(P(arm_pts[s][2]), P(hand), H * 0.025, H * 0.022), col["skin"], f"hand{s}", dither=False)
+            brim = crown + np.array([0, 0.035, 0])
+            hc, band = spec.get("hat_col", "6e4a30"), spec.get("band", "1a120e")
+            (bx, by, _), (tx, ty, _) = P(brim), P(crown)
+            rw = H * spec.get("brim_w", 0.102) * 0.95
+            c.put(c.capsule((bx - rw, by, 0), (bx + rw, by, 0), H * 0.012, H * 0.012), hc, "held_hat", dither=False)
+            c.put(c.capsule((tx, ty, 0), (tx, by - 1, 0), H * 0.06, H * 0.065), hc, "held_hat", dither=False)
+            c.recolor(c.parts_mask("held_hat") & (np.abs(c.Y - (by - 2)) < 1) & (np.abs(c.X - bx) < rw * 0.65), band,
+                      dither=False)
+            if not ps.get("hat_hand_behind"):
+                c.put(c.capsule(P(arm_pts[s][2]), P(hand), H * 0.025, H * 0.022), col["skin"], f"hand{s}",
+                      dither=False)
+        side_ = ps["held_hat"][0] if isinstance(ps["held_hat"], tuple) else ps["held_hat"]
+        add(ps.get("hat_z", 2.0 + P(arm_pts[side_][0])[2] + 0.08), held_hat)
 
     if ps.get("powder"):  # a pinch of white powder held up in the fingertips of arm ps["powder"]
         def powder(s=ps["powder"]):

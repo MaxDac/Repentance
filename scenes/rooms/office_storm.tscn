@@ -1,0 +1,265 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/OfficeStorm.cs" id="1_OfficeStorm"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="2_FlagSprite"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="4_Rain"]
+[ext_resource type="Script" path="res://scripts/Core/Lightning.cs" id="5_Lightning"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm.png" id="6_dark"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_lit.png" id="7_lit"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_bottle.png" id="8_bottle"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_bottle_lit.png" id="9_bottle_lit"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_no_hat.png" id="10_no_hat"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_no_hat_lit.png" id="11_no_hat_lit"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_door_ajar.png" id="12_door_ajar"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_door_open.png" id="13_door_open"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_demon_1.png" id="14_demon_1"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/office_storm_demon_2.png" id="15_demon_2"]
+
+[sub_resource type="RectangleShape2D" id="Rect_door"]
+size = Vector2(52, 109)
+
+[sub_resource type="RectangleShape2D" id="Rect_hat"]
+size = Vector2(24, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_bottle"]
+size = Vector2(11, 25)
+
+[sub_resource type="RectangleShape2D" id="Rect_cup"]
+size = Vector2(10, 12)
+
+[sub_resource type="RectangleShape2D" id="Rect_window"]
+size = Vector2(118, 82)
+
+[sub_resource type="RectangleShape2D" id="Rect_desk"]
+size = Vector2(180, 51)
+
+[sub_resource type="RectangleShape2D" id="Rect_lamp"]
+size = Vector2(26, 21)
+
+[sub_resource type="RectangleShape2D" id="Rect_coat"]
+size = Vector2(22, 105)
+
+[node name="OfficeStorm" type="Node2D"]
+script = ExtResource("1_OfficeStorm")
+RoomName = "Office"
+FarY = 164
+NearY = 262
+FarScale = 0.86
+NearScale = 1.1
+
+[node name="Dark" type="Node2D" parent="."]
+z_index = -10
+
+[node name="Background" type="Sprite2D" parent="Dark"]
+texture = ExtResource("6_dark")
+centered = false
+
+[node name="Bottle" type="Sprite2D" parent="Dark"]
+position = Vector2(212, 108)
+texture = ExtResource("8_bottle")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_bottle_down"
+
+[node name="NoHat" type="Sprite2D" parent="Dark"]
+position = Vector2(238, 117)
+texture = ExtResource("10_no_hat")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_hat_on"
+
+[node name="DoorAjar" type="Sprite2D" parent="Dark"]
+position = Vector2(27, 43)
+texture = ExtResource("12_door_ajar")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_door_ajar"
+HideIfFlags = "storm_door_open"
+
+[node name="DoorOpen" type="Sprite2D" parent="Dark"]
+position = Vector2(27, 43)
+texture = ExtResource("13_door_open")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_door_open"
+
+[node name="Lightning" type="Node2D" parent="."]
+visible = false
+z_index = -10
+script = ExtResource("5_Lightning")
+
+[node name="Background" type="Sprite2D" parent="Lightning"]
+texture = ExtResource("7_lit")
+centered = false
+
+[node name="Bottle" type="Sprite2D" parent="Lightning"]
+position = Vector2(212, 108)
+texture = ExtResource("9_bottle_lit")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_bottle_down"
+
+[node name="NoHat" type="Sprite2D" parent="Lightning"]
+position = Vector2(238, 117)
+texture = ExtResource("11_no_hat_lit")
+centered = false
+script = ExtResource("2_FlagSprite")
+ShowIfFlags = "storm_hat_on"
+
+[node name="Demon1" type="Sprite2D" parent="Lightning"]
+visible = false
+position = Vector2(348, 76)
+texture = ExtResource("14_demon_1")
+centered = false
+
+[node name="Demon2" type="Sprite2D" parent="Lightning"]
+visible = false
+position = Vector2(348, 76)
+texture = ExtResource("15_demon_2")
+centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("4_Rain")
+Areas = Array[Rect2]([Rect2(352, 76, 58, 10), Rect2(413, 76, 58, 10), Rect2(352, 88, 58, 41), Rect2(413, 88, 58, 41)])
+Density = 13.0
+Speed = 210.0
+Slant = -0.4
+Length = 5
+Tint = Color(0.6, 0.66, 0.84, 0.45)
+Drips = 9
+Seed = 23
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(10, 262, 470, 262, 470, 164, 346, 164, 346, 184, 170, 184, 170, 164, 10, 164)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="window" type="Marker2D" parent="Entries"]
+position = Vector2(392, 168)
+metadata/facing = 2
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "door"
+LookText = "My name on the glass, backwards from in here. The lightning makes it read like a gravestone."
+WalkTo = Vector2(58, 168)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(58, 102.5)
+shape = SubResource("Rect_door")
+
+[node name="Hat" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "hat"
+DisplayName = "hat"
+LookText = "My hat, upside down on the case files. I don't remember putting it there."
+WalkTo = Vector2(236, 186)
+Face = 2
+ClickPriority = 10
+HideIfFlags = "storm_hat_on"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Hat"]
+position = Vector2(251, 125)
+shape = SubResource("Rect_hat")
+
+[node name="Bottle" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bottle"
+DisplayName = "whiskey bottle"
+LookText = "The bottle, on the desk where I left it. It'll keep. It always does."
+WalkTo = Vector2(218, 190)
+Face = 2
+ClickPriority = 10
+ShowIfFlags = "storm_bottle_down"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bottle"]
+position = Vector2(218.5, 121.5)
+shape = SubResource("Rect_bottle")
+
+[node name="Cup" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "cup"
+DisplayName = "cup"
+LookText = "The cup. I gave up on it an hour ago. The bottle's quicker."
+WalkTo = Vector2(229, 190)
+Face = 2
+ClickPriority = 10
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cup"]
+position = Vector2(229, 127)
+shape = SubResource("Rect_cup")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "window"
+LookText = "The storm's put the whole block out. Even the HOTEL sign. Only the sky lights the street now."
+WalkTo = Vector2(392, 168)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(411, 87)
+shape = SubResource("Rect_window")
+
+[node name="Desk" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "desk"
+DisplayName = "desk"
+LookText = "Solid oak. In the dark it could be a coffin lid."
+WalkTo = Vector2(258, 190)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
+position = Vector2(258, 156.5)
+shape = SubResource("Rect_desk")
+
+[node name="Lamp" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lamp"
+DisplayName = "lamp"
+LookText = "The banker's lamp. Dead, like everything else on the block."
+WalkTo = Vector2(197, 190)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lamp"]
+position = Vector2(197, 120.5)
+shape = SubResource("Rect_lamp")
+
+[node name="Coat" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "coat"
+DisplayName = "coat rack"
+LookText = "The spare coat. The spare hat's gone from the peg. Lost it somewhere along the way, like the rest."
+WalkTo = Vector2(161, 170)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Coat"]
+position = Vector2(161, 104.5)
+shape = SubResource("Rect_coat")

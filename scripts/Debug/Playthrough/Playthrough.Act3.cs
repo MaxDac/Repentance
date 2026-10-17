@@ -92,8 +92,19 @@ public sealed partial class Playthrough
             await tony;
             await WaitIdle();
             Check(Gs.HasFlag("shot_bartender"), "Tony shot in the shoulder");
-            Expect("MansionExterior", "Tony gives up the mansion");
+            Expect("OfficeStorm", "back to the office, in the storm");
         }, roundTrip: _route != "1");
+        if (over) return;
+        await Beat("office_storm", async () =>
+        {
+            Check(Gs.HasFlag("storm_confessed"), "the journal's confession at the window");
+            await Do(Verb.Walk, "door");
+            Expect("OfficeStorm", "not out without the hat");
+            await Do(Verb.Hand, "hat");
+            Check(Gs.HasFlag("storm_bottle_down") && Gs.HasFlag("storm_hat_on"), "bottle down, hat on");
+            await Do(Verb.Walk, "door");
+            Expect("MansionExterior", "Tony gives up the mansion");
+        });
         if (over) return;
         await Beat("mansion_exterior", async () =>
         {
