@@ -54,9 +54,18 @@ public sealed partial class Playthrough
         });
         await Beat("first_interlude_night", async () =>
         {
-            await Do(Verb.Hand, "bed");
+            Check(RainsHere(), "rain on Eleanor's cell window before Agatha's visit");
+            bool dried = false;
+            var night = Do(Verb.Hand, "bed");
+            await Until(() =>
+            {
+                dried |= Gs.HasFlag(Endings.RefusedAbbess) && _game.Room is Rooms.ConventCell && DryHere();
+                return night.IsCompleted;
+            }, 600, 0.05);
+            await night;
             await WaitIdle();
             Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor refuses Agatha (saved)");
+            Check(dried, "the rain stops on the cell window when she refuses");
             Expect("MotelNight", "the next morning, the motel");
         });
         await Beat("act_two_opening", async () =>

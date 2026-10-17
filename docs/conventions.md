@@ -23,7 +23,7 @@ Use the concern-specific partial, not the main file. [File map](architecture.md#
 ## Godot-free files
 
 `Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `SoundSynth*`, `MusicSynth*`,
-`InkScan` are linked into the xunit project. They must not reference Godot types; put the Godot side in a separate
+`InkScan`, `RainWeather` are linked into the xunit project. They must not reference Godot types; put the Godot side in a separate
 class (`Sfx`, `Music`, `SaveSystem`...).
 
 ## Inheritance contracts

@@ -39,7 +39,6 @@ NIGHT = {
     "chrome": hx("9a9aa8"), "tyre": hx("0e0e12"), "spoke": hx("8a7a64"),
     "neon_red": hx("ff5048"), "neon_green": hx("60ff90"), "bulb": hx("ffe6a0"),
     "awn1": hx("6a1c20"), "awn2": hx("a89c84"),
-    "rain": (170, 190, 230),
 }
 DAY = {
     "sky0": hx("8c96a4"), "sky1": hx("c4c6c4"), "haze": hx("b8b6b0"),
@@ -60,7 +59,6 @@ DAY = {
     "chrome": hx("c8ccd0"), "tyre": hx("1a1a1c"), "spoke": hx("c8b890"),
     "neon_red": hx("a06460"), "neon_green": hx("6a8a74"), "bulb": hx("d8d0b8"),
     "awn1": hx("8a2a2a"), "awn2": hx("d8ccb0"),
-    "rain": (200, 205, 215),
 }
 
 
@@ -837,31 +835,6 @@ def car_shading(img, m, mode):
         light(img, "ellipse", [x0 - 6, g - 54, x0 + 10, g - 38], hx("ffe8b0"), 0.25, 3)
 
 
-def rain(img, m, mode, seed=3):
-    rnd = random.Random(seed)
-    lum = img.convert("L").filter(ImageFilter.GaussianBlur(10))
-    lp = lum.load()
-    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    n, base = (750, 12) if mode == "night" else (260, 10)
-    for _ in range(n):
-        x, y = rnd.randint(0, W + 20), rnd.randint(-10, FULL_H)
-        ln = rnd.randint(5, 10)
-        a = base + int(lp[min(W - 1, max(0, x)), min(FULL_H - 1, max(0, y))] * (0.5 if mode == "night" else 0.15))
-        d.line([(x, y), (x - ln // 4, y + ln)], fill=m["rain"] + (min(140, a),))
-    for _ in range(150 if mode == "night" else 50):  # splashes on the paving and cobbles
-        x, y = rnd.randint(0, W), rnd.randint(BASE + 4, FULL_H - 1)
-        c = m["rain"] + (60 + int(lp[x if x < W else W - 1, y] * 0.3),)
-        d.point((x - 1, y), fill=c)
-        d.point((x + 1, y), fill=c)
-        d.point((x, y - 1), fill=c)
-    for x in range(210, 284, 6):  # drips off the awning and the canopy
-        d.line([(x + 3, 98), (x + 3, 104 + (x % 5))], fill=m["rain"] + (120,))
-    for x in range(40, 118, 7):
-        d.line([(x, 82), (x, 88 + (x % 4))], fill=m["rain"] + (110,))
-    img.paste(Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB"))
-
-
 def paint(mode):
     m = NIGHT if mode == "night" else DAY
     img = Image.new("RGB", (W, FULL_H))
@@ -882,7 +855,6 @@ def paint(mode):
     img.paste(near, (0, 0), near)
     car_shading(img, m, mode)
     halos(img, mode)
-    rain(img, m, mode)
     if mode == "day":
         vignette(img, 0.25, tint=(150, 150, 160), blur=44)
     else:

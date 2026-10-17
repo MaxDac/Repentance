@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Lobby.cs" id="1_Lobby"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/lobby.png" id="2_lobby"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/concierge.png" id="6_concierge"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/bellboy.png" id="7_bellboy"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 16)
@@ -57,6 +58,18 @@ NearScale = 1.1
 z_index = -10
 texture = ExtResource("2_lobby")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("90_Rain")
+Areas = Array[Rect2]([Rect2(396, 72, 8, 62), Rect2(410, 72, 56, 62), Rect2(467, 72, 9, 62)])
+Density = 9.0
+Speed = 170.0
+Slant = -0.3
+Length = 4
+Tint = Color(0.6, 0.66, 0.84, 0.5)
+Drips = 4
+Seed = 101
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)

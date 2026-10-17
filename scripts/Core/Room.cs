@@ -36,18 +36,26 @@ public partial class Room : Node2D
 
     /// <summary>
     /// The looping ambience and its level in dB: rain wherever it is drawn, loud when the room is out in it, muffled
-    /// when it only runs down a window.
+    /// when it only runs down a window, and heavier as the story goes on (<see cref="RainWeather"/>). Silent once
+    /// <see cref="RainStopped"/>.
     /// </summary>
     public virtual (Sound Sound, float VolumeDb)? Ambience
     {
         get
         {
+            if (RainStopped) return null;
             var rain = FindAll<Rain>(this).ToList();
             if (rain.Count == 0) return null;
             bool outside = rain.Any(r => r.Areas.Count == 0 || r.Areas.Sum(a => a.Area) > 480 * 270 * 0.3f);
-            return (Sound.Rain, outside ? 0f : -9f);
+            return (Sound.Rain, (outside ? 0f : -9f) + RainWeather.ForAct(GameState.Instance.StoryAct).VolumeDb);
         }
     }
+
+    /// <summary>
+    /// True where someone has just been saved: the rain stops there, on screen and in the ambience. Re-evaluated
+    /// whenever the game state changes, so it can stop in the middle of a scene.
+    /// </summary>
+    protected virtual bool RainStopped => false;
 
     /// <summary>The background music that loops here; the same track carries on uninterrupted between rooms that share it.</summary>
     public virtual Track? Music => null;
@@ -160,8 +168,30 @@ public partial class Room : Node2D
     {
         foreach (var h in Hotspots) h.Visible = FlagRules.Evaluate(h.ShowIfFlags, h.HideIfFlags);
         foreach (var s in FindAll<FlagSprite>(this)) s.Refresh();
+        RefreshRain();
         RebuildWalk();
         OnRefresh();
+    }
+
+    private bool? _rainStopped;
+
+    /// <summary>Hides the rain where it has stopped and, in the current room, silences its ambience at that moment.</summary>
+    private void RefreshRain()
+    {
+        bool stopped = RainStopped;
+        if (_rainStopped == stopped) return;
+        bool changed = _rainStopped != null;
+        _rainStopped = stopped;
+        foreach (var r in FindAll<Rain>(this))
+        {
+            r.Visible = !stopped;
+            r.ProcessMode = stopped ? ProcessModeEnum.Disabled : ProcessModeEnum.Inherit;
+        }
+        if (changed && Game.Instance is { } game && game.Room == this)
+        {
+            if (Ambience is { } ambience) game.Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
+            else game.Sfx.SetAmbient(null);
+        }
     }
 
     /// <summary>Lets a room restrict where the player may walk (e.g. a doorman blocking the way).</summary>

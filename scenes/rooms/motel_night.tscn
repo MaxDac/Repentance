@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_door_kicked.png" id="9_door_kicked"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="10_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_eleanor_talk.png" id="11_eleanor_talk"]
+[ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(100, 64)
@@ -38,6 +39,18 @@ PlayerCharacter = "micah_dressing"
 z_index = -10
 texture = ExtResource("2_motel_night")
 centered = false
+
+[node name="Rain" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("90_Rain")
+Areas = Array[Rect2]([Rect2(318, 56, 64, 66)])
+Density = 9.0
+Speed = 170.0
+Slant = -0.3
+Length = 4
+Tint = Color(0.6, 0.66, 0.84, 0.5)
+Drips = 4
+Seed = 107
 
 [node name="DoorKicked" type="Sprite2D" parent="."]
 position = Vector2(0, 56)
