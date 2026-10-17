@@ -57,7 +57,7 @@ public partial class AutoPlay : Harness
             if (knot == "club_caught") _insetAtCaughtChoice = game.Hud.InsetVisible;
             if (knot == "beaten_choice") _insetAtBeatenChoice = game.Hud.InsetVisible;
             if (knot == "street_choice") _insetAtStreetChoice = game.Hud.InsetVisible;
-            if (knot == "eleanor_road")
+            if (knot == "eleanor_fire_escape")
             {
                 _closeUpAtRoadChoice = game.Hud.CurrentCloseUp;
                 Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn,

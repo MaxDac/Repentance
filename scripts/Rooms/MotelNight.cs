@@ -35,7 +35,7 @@ public partial class MotelNight : Room
             if (entry == "interlude1")
                 await Game.Run(async () =>
                 {
-                    await Think("A motel on the road below the convent. From the window she could see the gate, and anyone who rang at it.");
+                    await Think("Her room in the flophouse down the hill from the convent. From the window she could see the gate, and anyone who rang at it.");
                     await Think("Agatha would have said she was waiting for a sign. She was waiting for a man. It was usually the same thing.");
                 });
             return;
@@ -55,7 +55,7 @@ public partial class MotelNight : Room
         await Game.Run(async () =>
         {
             await Wait(1.0);
-            await Think("A motel at the edge of town. A buzzing sign, a cracked basin, her stockings over the chair.");
+            await Think("Her room, up the fire escape. A buzzing sign, a cracked basin, her stockings over the chair.");
             await Think("I'm buttoning my shirt in the dark like a thief. Rose's face keeps turning up behind my eyes.");
             await Talk("motel_night");
             State.SetFlag("motel_night_done");

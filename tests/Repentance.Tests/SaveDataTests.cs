@@ -89,6 +89,9 @@ public class SaveDataTests
     [InlineData("convent_corridor", "got_mirror")]
     [InlineData("convent_corridor", "nun_farewell_done")]
     [InlineData("convent_road", "convent_departed")]
+    [InlineData("motel_lobby", "clerk_talked")]
+    [InlineData("motel_alley", "crate_moved")]
+    [InlineData("motel_alley", "ladder_down")]
     public void ConventProgressRoundTrips(string room, string flag)
     {
         var data = Sample();

@@ -1,0 +1,244 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/Rooms/MotelLobby.cs" id="1_MotelLobby"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_lobby.png" id="2_motel_lobby"]
+[ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="3_Hotspot"]
+[ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_lobby_umbrella.png" id="5_umbrella"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/motel_lobby_counter.png" id="6_counter"]
+[ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/clerk.png" id="8_clerk"]
+
+[sub_resource type="RectangleShape2D" id="Rect_door"]
+size = Vector2(58, 90)
+
+[sub_resource type="RectangleShape2D" id="Rect_counter"]
+size = Vector2(164, 50)
+
+[sub_resource type="RectangleShape2D" id="Rect_bell"]
+size = Vector2(14, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_register"]
+size = Vector2(44, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_keys"]
+size = Vector2(68, 44)
+
+[sub_resource type="RectangleShape2D" id="Rect_stairs"]
+size = Vector2(60, 126)
+
+[sub_resource type="RectangleShape2D" id="Rect_umbrella"]
+size = Vector2(14, 32)
+
+[sub_resource type="RectangleShape2D" id="Rect_stand"]
+size = Vector2(16, 28)
+
+[sub_resource type="RectangleShape2D" id="Rect_window"]
+size = Vector2(72, 76)
+
+[sub_resource type="RectangleShape2D" id="Rect_armchair"]
+size = Vector2(58, 64)
+
+[node name="MotelLobby" type="Node2D"]
+script = ExtResource("1_MotelLobby")
+RoomName = "Motel Lobby"
+FarY = 186
+NearY = 262
+FarScale = 0.86
+NearScale = 1.08
+Floor = 0
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("2_motel_lobby")
+centered = false
+
+[node name="Umbrella" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(61, 129)
+texture = ExtResource("5_umbrella")
+centered = false
+script = ExtResource("4_FlagSprite")
+HideIfFlags = "took_umbrella"
+
+[node name="WalkArea" type="Polygon2D" parent="."]
+color = Color(0.3, 0.9, 0.4, 0.35)
+polygon = PackedVector2Array(4, 186, 88, 186, 88, 198, 174, 198, 174, 190, 240, 190, 240, 203, 414, 203, 414, 190, 476, 190, 476, 266, 4, 266)
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="start" type="Marker2D" parent="Entries"]
+position = Vector2(44, 204)
+metadata/facing = 4
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="Door" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "door"
+DisplayName = "front door"
+LookText = "The door to the alley. Somebody taped the crack in the glass and called it fixed."
+WalkTo = Vector2(38, 192)
+Face = 2
+ExitTo = "motel_alley"
+ExitEntry = "lobby"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
+position = Vector2(36, 131)
+shape = SubResource("Rect_door")
+
+[node name="Counter" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "counter"
+DisplayName = "front desk"
+LookText = "A front desk with the veneer coming off in strips. Ringed by a thousand coffee cups and a few things stronger."
+WalkTo = Vector2(330, 210)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Counter"]
+position = Vector2(328, 171)
+shape = SubResource("Rect_counter")
+
+[node name="Bell" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bell"
+DisplayName = "desk bell"
+LookText = "A desk bell. The brass is worn through where a lot of impatient palms have come down on it."
+WalkTo = Vector2(270, 210)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bell"]
+position = Vector2(269, 150)
+shape = SubResource("Rect_bell")
+
+[node name="Register" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "register"
+DisplayName = "guest register"
+LookText = "The guest book, lying open. The ink on the last line still looks wet."
+WalkTo = Vector2(356, 210)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Register"]
+position = Vector2(361, 153)
+shape = SubResource("Rect_register")
+
+[node name="KeyBoard" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "key_board"
+DisplayName = "key board"
+LookText = "Pigeonholes and room keys on fat wooden tags. One hook is empty."
+WalkTo = Vector2(380, 210)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/KeyBoard"]
+position = Vector2(355, 117)
+shape = SubResource("Rect_keys")
+
+[node name="Stairs" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "stairs"
+DisplayName = "stairs"
+LookText = "Narrow stairs up into the dark, a chain across the bottom. GUESTS ONLY."
+WalkTo = Vector2(440, 206)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Stairs"]
+position = Vector2(438, 124)
+shape = SubResource("Rect_stairs")
+
+[node name="Umbrella" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "umbrella"
+DisplayName = "umbrella"
+LookText = "A black umbrella with a crook handle, left in the pail by the door. Still dripping. The clerk came in out of the rain not long ago."
+WalkTo = Vector2(80, 192)
+Face = 2
+HideIfFlags = "took_umbrella"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Umbrella"]
+position = Vector2(67, 145)
+shape = SubResource("Rect_umbrella")
+
+[node name="UmbrellaStand" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "umbrella_stand"
+DisplayName = "umbrella stand"
+LookText = "A dented zinc pail doing duty as an umbrella stand."
+WalkTo = Vector2(80, 192)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/UmbrellaStand"]
+position = Vector2(70, 168)
+shape = SubResource("Rect_stand")
+
+[node name="Window" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "window"
+DisplayName = "window"
+LookText = "Rain on the glass and the MOTEL sign bleeding red through it. The whole room looks like a wound."
+WalkTo = Vector2(124, 202)
+Face = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
+position = Vector2(125, 88)
+shape = SubResource("Rect_window")
+
+[node name="Armchair" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "armchair"
+DisplayName = "armchair"
+LookText = "An armchair that gave up years ago. There's a doily on it, as if that helps."
+WalkTo = Vector2(124, 202)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Armchair"]
+position = Vector2(121, 160)
+shape = SubResource("Rect_armchair")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Clerk" type="Area2D" parent="World"]
+position = Vector2(286, 185)
+script = ExtResource("7_Actor")
+Id = "clerk"
+DisplayName = "desk clerk"
+LookText = "Fifty, sweaty collar, eyes that keep going to the door."
+WalkTo = Vector2(292, 210)
+Face = 2
+monitoring = false
+monitorable = false
+Texture = ExtResource("8_clerk")
+FlipH = true
+SpeechColor = Color(0.88, 0.86, 0.5, 1)
+
+[node name="CounterFront" type="Sprite2D" parent="World"]
+position = Vector2(246, 196)
+texture = ExtResource("6_counter")
+centered = false
+offset = Vector2(0, -50)

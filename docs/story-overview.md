@@ -45,59 +45,66 @@ Spoiler recap. [Walkthrough](../Walkthrough.md) is the authoritative story spec.
    Eleanor's perfumed cloth until the end (ending 1 throws it away). He won't leave before that discovery.
    The cell door returns to the corridor. Talk to the sister for her farewell, or click the front door and
    she calls Micah back for the same exchange before letting him leave.
-7. **Outside the convent**: Eleanor, in black, opens with a question about his late visit. After that opening,
-   a framed close-up shows Micah on the left and Eleanor on the right, each speaking beneath their own portrait.
-   It disappears before the compensation choice; the remaining conversation takes place on the road.
-8. **Motel, that night**: Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
+7. **Outside the convent**: no Eleanor. Micah lights a cigarette in the middle of the road: a dead end. He turns
+   down three leads (the mob would kill him; he won't face Harrington until the job's done; the cops are bought).
+   The fourth, the office, is cut short when he spots a motel sign down the road, shown in a close-up.
+8. **Behind the motel, the lobby, the fire escape**: in the rain, Micah goes in by the side door. The nervous desk
+   clerk, plainly in the mob's pocket though he never says so, won't let him upstairs, but lets him walk off with
+   the umbrella from the stand. In the alley, push the crate under the fire escape and hook the drop ladder down
+   with the umbrella (Puzzle 19). On the first-floor landing Eleanor, in black, opens with a question about his
+   climb. After that opening, a framed close-up shows Micah on the left and Eleanor on the right, each speaking
+   beneath their own portrait. It disappears before the compensation choice; the rest takes place on the landing.
+9. **Motel, that night**: in her room, Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet again,
    and Micah drops the case.
-9. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
-10. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
+10. **End of Act One**: back in the attic at night, lamp on. Daniel is called down to dinner.
+11. **Act Two, the next day**: Daniel picks the journal up again (hand on it in the satchel).
     **First Interlude** (the player is Eleanor, in Micah's journal voice: what she told him that night at the motel):
     pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
     "another Jezebel from that hideous Club"; that night in the cell Agatha comes to her: refuse (saved) or indulge
     (Agatha turns back at the last moment, cursing her as a demon). From the motel window she watches Micah reach
-    the convent, and the journal goes back to his office.
-11. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
+    the convent, smoke in the road and come asking at the desk; she waits for him on the fire escape, and the
+    journal goes back to his office.
+12. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
     it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
     unable to think of anything but Eleanor.
-12. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
+13. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
    Devil's work. Micah admits he can't get past "hallowed be Thy name" in the Our Father; "Then start there. He
    remembers the rest." "I'll think about that." Coming was a mistake, and Micah walks out.
-13. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
-14. **Library, by day**: ask the librarian about the knot (shown full screen). He wants to know where
+14. **Map of Chicago**: "I have to find her again." Pick the library, the cathedral or the office.
+15. **Library, by day**: ask the librarian about the knot (shown full screen). He wants to know where
    the mirror came from; Micah won't say, so neither will he. Consult the desk catalogue: match the
    Celtic triquetra and select Bell's *Rites of the Old Isles*, C-17. The restricted shelves are locked.
    Micah uses the revolver on the librarian to obtain that book. He hands
    over a book of Celtic rituals, and the library is off limits from then on.
-15. **Office**: read the book's concealed-ink instructions, warm the hotel card on the radiator and combine
+16. **Office**: read the book's concealed-ink instructions, warm the hotel card on the radiator and combine
    it with the mirror. Order the reflected fragments lily, leaf, feather to obtain the Club address.
    The steps can be discovered in a different order; all three clues remain available.
 
 From here the story follows Walkthrough.md:
 
-16. **Club** (hall): the Master of Ceremonies knows exactly why Micah is asking: Eleanor is "already with us,
+17. **Club** (hall): the Master of Ceremonies knows exactly why Micah is asking: Eleanor is "already with us,
    safe, and where she belongs". A brute shows Micah out.
-17. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
+18. **The street**: Micah on the pavement, asking himself why he left his wife and son. Go find his wife, or push
    forward.
-18. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
+19. **Rose's house** (optional): ring the bell. Push for forgiveness up to five times, or leave; push at least
    three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
-19. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
+20. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
-20. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
+21. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
    try Harrington senior. Micah decides to look him up at the Tribune.
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
     bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
     and Micah pins the mended clipping on the Loop wall map at once. The Harrington Building replaces the Tribune on the map.
-21. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
+22. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
-22. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
+23. **Harrington's office**: pick the locked right drawer for an invitation to the club; behind the closet's false
    back are a white Bauta mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
    (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."
-23. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
+24. **Club vestibule, masked**: the street door is closed to Micah tonight; the map leads to the front. The plaque
    wants the summons sealed by the first of the procession. Soften the cloakroom's sealing wax with the
    lighter (kept), press it on the invitation, then take the raven signet from the first cloak and seal it.
    Post the sealed invitation in the door slot.
@@ -105,25 +112,25 @@ From here the story follows Walkthrough.md:
    bear, raven and hare faces), to the stage, where Eleanor stands among three masked men: stag, boar and wolf. A framed close-up
    of Eleanor's face, masked men behind her, pops up over the stage until the fade.
    **End of Act Two**: back in the attic, dinner again.
-24. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps; the next pages aren't in Micah's hand.
+25. **Act Three, the bedroom**: Daniel reads in bed while his wife sleeps; the next pages aren't in Micah's hand.
     **Second Interlude** (Eleanor): the Order's men take her from the motel. In the Club's dressing room, in a short
     pink gown, she puts her face on alone; then the old man comes in by the stage door and offers gin and powder "as
     always": take them, or refuse (saved; the screen goes black,
     "Noooo!"). Then Micah's journal goes on at the Club stage.
-25. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
-26. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
+26. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
+27. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
     he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
-27. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
+28. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
     After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
     office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
-28. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
+29. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
    the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the shoulder, or (only if Micah went
    back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house.
-29. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
+30. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
    the door to spot it, take the key and push the coal bin under the bell. In the close-up, plan hold hammer,
    tie hammer, release hand; cutting the wire would release the spring. Then open the door. Micah leaves his tie
    on the bell and goes on with his collar open.
-30. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
+31. **Kitchen, cellar and study**: the baize door to the house is bolted from the other side. Go down the cellar
    door: in the dark, take the storm lantern from its hook and the kerosene can from the crates, fill the
    lantern, light it with the lighter (kept), use the lit lantern on the dark stair, then climb the
    bootleggers' stair to the study's bar panel.
@@ -131,7 +138,7 @@ From here the story follows Walkthrough.md:
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
    to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
-31. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
+32. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
    a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving: four turns, and only
    the four right lines in a row convince her (see `Walkthrough.md`). On the first turn he can lower the gun and
@@ -141,9 +148,9 @@ From here the story follows Walkthrough.md:
    old man's back turned. Return to bed (ending 1), or take the candlestick off the nightstand and strike him, then
    leave by the kitchen door, optionally burning the house from the cellar first (Micah's lantern, then the barrel).
    If Micah shoots instead, she sends him away ("Enough. I'm done with all of you...") and he turns himself in.
-32. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
+33. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
    whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
-33. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
+34. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
    alone (not convinced, signed evidence or fire); 4 prison, Eleanor visits (convinced, neither signed evidence nor fire);
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
    7 murder and/or suicide in the bedroom, the last entry written by Caleb; 8 coffee with Rose, then Eleanor alone
@@ -232,7 +239,7 @@ the coda (endings 1, 8, 9) and in the epilogues of endings 8 and 10. Daniel keep
 
 ## Story notes
 
-The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The fifteen puzzles include five collect-and-combine locations; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
+The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The sixteen puzzles include five collect-and-combine locations and the motel fire escape; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
 or he let something slip, without establishing either as fact. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.

@@ -14,7 +14,7 @@ py -3.14 tests\test_character_art.py
 ```
 
 Steps: `sprites`, `items`, `office`, `lobby`, `eleanor_room`, `speakeasy`, `alley`, `convent`, `convent_road`,
-`chicago_map`, `street`, `attic`, `club`, `library`, `motel`, `outskirts`, `church`, `rose_house`, `harrington`,
+`chicago_map`, `street`, `attic`, `club`, `library`, `motel`, `motel_exterior`, `motel_lobby`, `outskirts`, `church`, `rose_house`, `harrington`,
 `bedroom`, `act3`, `ui`, `puzzles`, `expansion_act1`, `expansion_act2`, `expansion_act3`, `closeup`, `icon`.
 
 After regenerating, run `godot_console --path . --headless --import` (stale imports show old textures).
@@ -32,7 +32,7 @@ After regenerating, run `godot_console --path . --headless --import` (stale impo
 | `puzzles.py` | Puzzle props, clue plates, screen art |
 | `closeup.py` | Close-up panels from `tools/art/src/` pictures |
 | `icon.py`, `iconfx.py` | Game icon (`assets/art/ui/icon.png`, `icon.ico`, `dist/linux/icons/hicolor`) |
-| `office.py`, `lobby.py`, `hotel.py`, `hotel_mess.py`, `speakeasy.py`, `alley.py`, `attic.py`, `street.py`, `chicago_map.py`, `convent.py`, `convent_road.py`, `club.py`, `library.py`, `motel.py`, `outskirts.py`, `church.py`, `mansion.py`, `act2_rooms.py`, `act3_rooms.py`, `act3_extra.py`, `expansion_act1..3.py` | Rooms, their state overlays and foreground layers |
+| `office.py`, `lobby.py`, `hotel.py`, `hotel_mess.py`, `speakeasy.py`, `alley.py`, `attic.py`, `street.py`, `chicago_map.py`, `convent.py`, `convent_road.py`, `club.py`, `library.py`, `motel.py`, `motel_exterior.py`, `motel_lobby.py`, `outskirts.py`, `church.py`, `mansion.py`, `act2_rooms.py`, `act3_rooms.py`, `act3_extra.py`, `expansion_act1..3.py` | Rooms, their state overlays and foreground layers |
 
 `tools/art/src/` holds the source pictures reduced into close-ups and the club's stag portrait.
 

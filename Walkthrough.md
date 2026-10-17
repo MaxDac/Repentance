@@ -181,20 +181,59 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Road outside the convent
 
-- When Micah gets out, he finds Eleanor there, outside, dressed in black. No one is passing.
-- She opens on the road: "Not many people enter a convent this late, mister. Were you looking for someone?"
+- When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
+  with his own lighter (new smoking strip; he holds the lit cigarette while he thinks). The narration says he has
+  hit a dead end.
+- A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
+  - back to the Blue Lantern and the mob: they would kill him;
+  - more questions for Harrington: Micah doesn't like the man and, for a reason he can't name, doesn't want to see
+    him until the job's done, if he ever wants it done;
+  - the cops: they're on somebody's payroll.
+- The last lead is the office. Before he goes, Micah spots a motel sign down the road: "A flophouse... Maybe she
+  took a powder from Sister Agatha and holed up there. It's a long shot, but I'm fresh out of angles." The street
+  with the motel sign appears in a framed close-up for a couple of his lines, then goes. He drops the cigarette
+  and the scene moves to the motel's back alley.
+- Leaving the convent road after this, or reloading there, goes straight to the motel's back alley.
+
+#### Behind the motel (back alley)
+
+- New location: a back alley off the main road, in the rain, with the motel's side entrance under a buzzing sign,
+  trash cans, a wooden crate, and an iron fire escape whose drop ladder is pulled up out of reach. A light burns
+  in a first-floor window.
+- Micah has to go in through the motel door first: the alley mouth only leads back to an empty road, and the fire
+  escape is out of reach until he has a reason (and a way) to use it.
+
+#### Motel lobby
+
+- New location: a cheap, dirty lobby, a long way from the Aurelian: peeling paper, a bare bulb, a counter with a
+  bell and a register, a key board, a sagging armchair, a roped-off staircase and an umbrella stand by the door.
+- Micah asks the desk clerk whether he has seen Eleanor. The clerk doesn't answer, but he's visibly worried.
+  A couple of questions show that the motel belongs to the mob without anyone saying so (friends who own the
+  building, men who come by on Fridays, a clerk who doesn't want trouble with them). He won't let Micah upstairs.
+- **Puzzle 19 - Fire escape:** take the crook-handled umbrella from the stand; the clerk lets him take it,
+  just to see him gone. In the alley, push the crate under the fire escape, then use the umbrella on the drop
+  ladder: standing on the crate, Micah hooks the bottom rung and pulls the ladder down. Without the crate the
+  umbrella is too short; without the umbrella the crate alone doesn't reach. The umbrella stays hooked on the
+  ladder. Climbing the ladder leads to the first-floor landing.
+
+#### Motel fire escape (first floor)
+
+- New location: the iron landing on the first floor, sooty masonry behind it, iron grating, windows and a door
+  into the floor, rain.
+- Eleanor is there, outside, dressed in black.
+- She opens: "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?"
   Micah asks about Eleanor Harrington, introduces himself, and the conversation joins the existing exchange.
 - She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
 - While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
   same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
   speaker's dialogue is shown below their own portrait half.
 - The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
-  The compensation choices and the remaining conversation take place on the road with normal overhead speech.
+  The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
 - The scene ends when Eleanor says "I can't go back there..."
 
 #### Motel room, night
 
-- Inside the motel room, Micah is getting dressed (new dressing sprite for the character) while Eleanor is in the
+- Inside her room at the same motel, Micah is getting dressed (new dressing sprite for the character) while Eleanor is in the
   bed, under the sheet.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
@@ -276,8 +315,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
     for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
-   window. She sees Micah arrive at the convent door; while he is inside, she puts on her coat and goes to wait
-   on the road, where he finds her. Fade to black, then Micah's office.
+   window. She sees Micah arrive at the convent door, come out again and light a cigarette in the road, then
+   hears him arguing with the clerk downstairs; she steps out onto the fire escape to wait for him, where he
+   finds her. Fade to black, then Micah's office.
 
 ### Chicago, 1927
 
@@ -916,8 +956,9 @@ The First Interlude is always Micah's: she told him during the night at the mote
 
 ### Puzzle pacing and saves
 
-Micah's fifteen added/expanded puzzles are distributed **6 in Act 1, 6 in Act 2, and 3 in Act 3**; Eleanor has one
-in each interlude (Puzzles 17 and 18, in Room 507 and backstage at the Club). Puzzles 11-15
+Micah's sixteen added/expanded puzzles are distributed **7 in Act 1, 6 in Act 2, and 3 in Act 3**; Eleanor has one
+in each interlude (Puzzles 17 and 18, in Room 507 and backstage at the Club). Puzzle 19 (the motel fire escape)
+takes an item from the motel lobby to use in its back alley. Puzzles 11-15
 are collect-and-combine puzzles in five extra locations: the Aurelian linen room and Rizzo's Flowers (Act 1), the
 Tribune morgue and the Club vestibule (Act 2), and the Harrington wine cellar (Act 3). Each asks Micah to gather
 items in that location, join them in the satchel and use the result to continue. Micah's lighter is the only
@@ -945,7 +986,7 @@ Caleb retains his original counsel, warning and contrite-heart paraphrase, witho
 His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49015.htm), not a direct quotation. Religious objects remain
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
-The adventure remains a compact, single-case indie point-and-click: fifteen puzzles for Micah and two for Eleanor, the alley encounter, optional
+The adventure remains a compact, single-case indie point-and-click: sixteen puzzles for Micah and two for Eleanor, the alley encounter, optional
 dialogue, two playable Eleanor interludes and ten ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.

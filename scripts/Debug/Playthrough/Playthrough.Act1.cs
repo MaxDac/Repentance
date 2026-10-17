@@ -116,11 +116,34 @@ public sealed partial class Playthrough
             await Do(Verb.Walk, "exit");
             Expect("ConventCorridor", "back to the corridor");
         });
-        await Beat("end_of_act_one", async () =>
+        await Beat("convent_dead_end", async () =>
         {
             await Do(Verb.Walk, "entrance");
+            await Until(() => _game.Room is Rooms.MotelAlley && !_game.Busy && Gs.HasFlag("seen_motel_alley"));
+            Check(Gs.HasFlag("convent_dead_end_done") && !Gs.HasFlag("eleanor_found"),
+                "the farewell, an empty road, a dead end, and the motel sign down the hill");
+            Expect("MotelAlley", "down the hill to the motel's back alley");
+        });
+        await Beat("motel", async () =>
+        {
+            await Do(Verb.Hand, "drop_ladder");
+            await Do(Verb.Walk, "motel_door");
+            Expect("MotelLobby", "in at the motel's front door");
+            await Do(Verb.Talk, "clerk");
+            Check(Gs.HasFlag("clerk_talked"), "the clerk won't let Micah upstairs");
+            await Do(Verb.Hand, "umbrella");
+            Check(Gs.HasItem("umbrella"), "the clerk hands over his umbrella to see Micah gone");
+            await Do(Verb.Walk, "door");
+            Expect("MotelAlley", "back out to the alley");
+            await Do(Verb.Hand, "crate");
+            await Do(Verb.UseItem, "drop_ladder", "umbrella");
+            Check(Gs.HasFlag("ladder_down") && !Gs.HasItem("umbrella"), "the umbrella hooks the drop ladder down");
+        });
+        await Beat("end_of_act_one", async () =>
+        {
+            await Do(Verb.Hand, "ladder");
             await WaitIdle();
-            Check(Gs.StoryAct == 2 && _game.Room?.Name == "Attic", "the farewell, Eleanor on the road, the motel, and back to the attic in Act 2");
+            Check(Gs.StoryAct == 2 && _game.Room?.Name == "Attic", "up the fire escape to Eleanor, the motel, and back to the attic in Act 2");
         });
     }
 }
