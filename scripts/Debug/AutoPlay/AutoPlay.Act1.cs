@@ -405,7 +405,7 @@ public partial class AutoPlay
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Eleanor Harrington. You wouldn't happen to know her?");
         CheckPortraitSpeech(game, right: false);
         await Shot("convent_portrait_micah");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Sister Agatha"));
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Tony's boys"));
         CheckPortraitSpeech(game, right: true);
         await Shot("convent_portrait_eleanor");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves.");

@@ -233,14 +233,17 @@ def mix_(a, b, t):
     return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
 
 
-def window_night(img):
+def window_night(img, tidy=False):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = 156, 28, 230, 100
     # the rain is animated in-game (Rain node in eleanor_room.tscn)
     city(img, (x0, y0, x1, y1), seed=507, lit=0.3, rain=False)
     # lace sheers behind the drapes: the right one hanging true, the left one half torn from its hooks
     _sheer(img, [(x1 - 22, y0), (x1, y0), (x1, y1), (x1 - 18, y1)], 71)
-    _sheer(img, [(x0, y0), (x0 + 8, y0), (x0 + 20, y1 - 18), (x0 + 12, y1 - 6), (x0, y1 - 10)], 72)
+    if tidy:
+        _sheer(img, [(x0, y0), (x0 + 22, y0), (x0 + 18, y1), (x0, y1)], 72)
+    else:
+        _sheer(img, [(x0, y0), (x0 + 8, y0), (x0 + 20, y1 - 18), (x0 + 12, y1 - 6), (x0, y1 - 10)], 72)
     # frame: outer casing with a lit inner bead, the sash bars, a brass sash lock on the meeting rail
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 5], outline=WOOD_D, width=4)
     d.rectangle([x0 - 6, y0 - 6, x1 + 6, y1 + 6], outline=mul(WOOD_D, 0.7))
@@ -273,9 +276,16 @@ def window_night(img):
     d.line([(x0 + 18, ry), (x1 + 19, ry)], fill=GOLD, width=2)
     d.line([(x0 + 18, ry + 2), (x1 + 19, ry + 2)], fill=GOLD_D)
     d.line([(x0 + 18, ry - 1), (x1 + 19, ry - 1)], fill=hx("f0d890"))
-    d.line([(x0 + 19, ry), (x0 - 8, ry + 14)], fill=GOLD, width=2)
-    d.line([(x0 + 19, ry + 2), (x0 - 8, ry + 16)], fill=GOLD_D)
-    for (fx, fy) in ((x1 + 21, ry + 1), (x0 - 10, ry + 16)):
+    if tidy:
+        d.line([(x0 - 19, ry), (x0 + 19, ry)], fill=GOLD, width=2)
+        d.line([(x0 - 19, ry + 2), (x0 + 19, ry + 2)], fill=GOLD_D)
+        d.line([(x0 - 19, ry - 1), (x0 + 19, ry - 1)], fill=hx("f0d890"))
+        ends = ((x1 + 21, ry + 1), (x0 - 21, ry + 1))
+    else:
+        d.line([(x0 + 19, ry), (x0 - 8, ry + 14)], fill=GOLD, width=2)
+        d.line([(x0 + 19, ry + 2), (x0 - 8, ry + 16)], fill=GOLD_D)
+        ends = ((x1 + 21, ry + 1), (x0 - 10, ry + 16))
+    for (fx, fy) in ends:
         d.ellipse([fx - 3, fy - 3, fx + 3, fy + 3], fill=GOLD_D)
         d.ellipse([fx - 3, fy - 3, fx + 2, fy + 2], fill=GOLD)
         d.point((fx - 1, fy - 2), fill=hx("fff0c0"))
@@ -283,20 +293,39 @@ def window_night(img):
     # rings on the pole, a couple slid down the sagging end
     for rx in range(x1 - 4, x1 + 14, 4):
         d.ellipse([rx - 1, ry - 2, rx + 2, ry + 3], outline=GOLD_D)
-    for t in (0.3, 0.55, 0.8):
-        rx, rry = x0 + 19 + (-27) * t, ry + 14 * t + 1
-        d.ellipse([rx - 1, rry - 2, rx + 2, rry + 3], outline=GOLD_D)
+    if tidy:
+        for rx in range(x0 - 16, x0 + 4, 4):
+            d.ellipse([rx - 1, ry - 2, rx + 2, ry + 3], outline=GOLD_D)
+        # both drapes hanging, gathered under their rings and tied back with tasselled cords
+        def left(x, y):
+            if y < ry + 3 or y > y1 + 30 or x < x0 - 16:
+                return False
+            if y < y0 + 40:
+                return x <= x0 + 6
+            if y < y0 + 50:
+                return x <= x0 + 6 - (y - y0 - 40) * 0.7
+            k = (y - y0 - 50) / (y1 + 30 - y0 - 50)
+            return x <= x0 - 1 + 9 * k ** 0.8
+        _drape(img, (x0 - 16, ry + 3, x0 + 9, y1 + 30), left, 81, tie=y0 + 47)
+        for x in range(x0 - 15, x0 + 6, 3):
+            d.line([(x, ry + 3), (x, ry + 6)], fill=mul(BURGUNDY, 0.5))
+            d.point((x + 1, ry + 4), fill=BURGUNDY_L)
+    else:
+        for t in (0.3, 0.55, 0.8):
+            rx, rry = x0 + 19 + (-27) * t, ry + 14 * t + 1
+            d.ellipse([rx - 1, rry - 2, rx + 2, rry + 3], outline=GOLD_D)
     # the left drape torn half off: still hooked on the sagging pole, ripped diagonally and hanging in a rag
     def pole(x):
         return ry + 1 + 14 * min(1.0, max(0.0, (x0 + 19 - x) / 27))
     rag = random.Random(82)
     tear = {x: rag.randint(-2, 2) for x in range(x0 - 20, x0 + 20)}
-    def left(x, y):
+    def torn(x, y):
         if not x0 - 9 <= x <= x0 + 12:
             return False
         bottom = y0 + 62 - (x - (x0 - 9)) * 1.9 + tear[x]
         return pole(x) + 2 <= y <= bottom
-    _drape(img, (x0 - 9, ry, x0 + 12, y0 + 66), left, 81, fringe=False)
+    if not tidy:
+        _drape(img, (x0 - 9, ry, x0 + 12, y0 + 66), torn, 81, fringe=False)
     # the right drape still hanging, gathered under its rings and tied back with a tasselled cord
     def right(x, y):
         if y < ry + 3 or y > y1 + 30 or x > x1 + 16:
@@ -466,16 +495,18 @@ def _gilt_frame(cw, ch):
     return im, (m + b, m + b)
 
 
-def crooked_painting(img):
-    """The landscape above the bed, knocked askew so a paler patch of wallpaper shows where it used to hang."""
+def crooked_painting(img, tilt=-6):
+    """The landscape above the bed, knocked askew so a paler patch of wallpaper shows where it used to hang (or,
+    with tilt=0, hanging straight over its own shadow)."""
     d = ImageDraw.Draw(img)
-    d.rectangle([294, 28, 354, 64], fill=hotel.CREAM)
+    if tilt:
+        d.rectangle([294, 28, 354, 64], fill=hotel.CREAM)
     cw, ch = 42, 20
     frame, (ox, oy) = _gilt_frame(cw, ch)
     frame.paste(_landscape(cw, ch), (ox, oy))
     # drawn at 4x and turned, then brought back down so the tilt stays crisp without stair-stepping
     k = 4
-    big = frame.resize((frame.width * k, frame.height * k), Image.NEAREST).rotate(-6, Image.BICUBIC, expand=True)
+    big = frame.resize((frame.width * k, frame.height * k), Image.NEAREST).rotate(tilt, Image.BICUBIC, expand=True)
     tilted = big.resize((big.width // k, big.height // k), Image.BOX)
     a = tilted.getchannel("A").point(lambda v: 255 if v > 110 else 0)
     px_, py_ = 324 - tilted.width // 2, 49 - tilted.height // 2
@@ -626,7 +657,7 @@ def _closet_carcass(img):
         d.line([(fx - 2, fy - 2), (fx + 1, fy - 2)], fill=hx("6b4428"))
 
 
-def closet(img, opened=False, safe_open=False, box=False):
+def closet(img, opened=False, safe_open=False, box=False, tidy=False):
     X0, X1, Z0, Z1 = CL_X0, CL_X1, CL_Z0, CL_Z1
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
     shadow(img, "rect", [a[0] - 2, a[1] - 3, b[0] + 10, a[1] + 3], 0.4, 3)
@@ -662,6 +693,8 @@ def closet(img, opened=False, safe_open=False, box=False):
         d.ellipse([px_ - 1, py_ - 3, px_ + 1, py_ - 1], fill=GOLD_D)
         d.line([(px_, py_ - 1), (px_, py_ + 3)], fill=GOLD)
         d.ellipse([px_ - 1, py_ + 3, px_ + 1, py_ + 5], fill=GOLD)
+        if tidy:
+            return
         # a sleeve of her silk caught in the doors when they were slammed
         sx, sy = R.P(xm, 38, Z1)
         body, fold, lit, _, line = LILAC
@@ -723,7 +756,7 @@ def closet(img, opened=False, safe_open=False, box=False):
         R.line(img, (x, 52, Z1 + 21), (x, 57, Z1 + 21), GOLD, 2)
 
 
-def desk(img, drawer_open=False, paper=False):
+def desk(img, drawer_open=False, paper=False, tidy=False):
     X0, X1, Z0, Z1 = DESK_X0, DESK_X1, DESK_Z0, DESK_Z1
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
     shadow(img, "rect", [a[0], a[1] - 4, b[0] + 6, a[1] + 3], 0.35, 3)
@@ -738,6 +771,21 @@ def desk(img, drawer_open=False, paper=False):
     R.quad(img, [(c, 21, Z1), (c + 24, 21, Z1), (c + 24, 25, Z1), (c, 25, Z1)], None, WOOD_D)
     R.line(img, (c + 11, 23, Z1), (c + 13, 23, Z1), GOLD)
     c2 = X1 - 30
+    if tidy:
+        # both drawers shut; on top a squared stack of stationery, a sealed envelope, the pen laid by an upright inkwell
+        R.quad(img, [(c2, 21, Z1), (c2 + 24, 21, Z1), (c2 + 24, 25, Z1), (c2, 25, Z1)], None, WOOD_D)
+        R.line(img, (c2 + 11, 23, Z1), (c2 + 13, 23, Z1), GOLD)
+        d = ImageDraw.Draw(img)
+        sheet(img, 166, 120, 14, 6, lines=0, seed=3)
+        sheet(img, 167, 119, 14, 6, lines=3, seed=4)
+        sheet(img, 184, 121, 10, 5, envelope=True, seal=hx("a02828"))
+        d.line([(197, 126), (205, 124)], fill=hx("101014"))
+        d.point((205, 124), fill=GOLD)
+        R.box(img, 202, 210, 28, 32, 10, 14, hx("2e4646"), top=hx("5a7a7a"))
+        ix, iy = R.P(206, 32, 12)
+        d.rectangle([ix - 1, iy - 1, ix + 1, iy], fill=GOLD_D)
+        d.point((ix - 2, iy + 1), fill=hx("a8c8c8"))
+        return
     R.quad(img, [(c2, 21, Z1), (c2 + 24, 21, Z1), (c2 + 24, 25, Z1), (c2, 25, Z1)], hx("120a06"))
     R.box(img, c2 + 6, c2 + 30, 0, 4, Z1 + 14, Z1 + 26, WOOD, top=hx("2a1a10"), side=WOOD_D)
     # stationery scattered, inkwell tipped over and bleeding across a letter to the edge
@@ -1071,21 +1119,67 @@ def vanity(img):
     R.box(img, S0, S1, 13, 17, Sz0, Sz1, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
 
 
-def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False):
+RED = (hx("a81c2c"), hx("6a1018"), hx("dc4a5a"), hx("2a0a10"), hx("1e0608"))
+
+
+def tidy_floor(img):
+    """Room 507 before the searchers came: the desk chair pulled up square, and her red evening dress laid across the
+    upholstered bench at the foot of the closet, a loose thread hanging from the hem."""
+    d = ImageDraw.Draw(img)
+    # the desk chair, upright, its back to us
+    a, b = R.P(182, 0, 46), R.P(204, 0, 46)
+    shadow(img, "rect", [a[0] - 1, a[1] - 3, b[0] + 3, a[1] + 2], 0.35, 2)
+    for x in (183, 203):
+        for z in (32, 44):
+            R.line(img, (x, 0, z), (x, 13, z), WOOD_D, 2)
+    R.box(img, 181, 205, 13, 16, 30, 45, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
+    R.box(img, 181, 205, 16, 36, 44, 46, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    R.quad(img, [(184, 19, 46.1), (202, 19, 46.1), (202, 33, 46.1), (184, 33, 46.1)], BURGUNDY, mul(BURGUNDY, 0.55))
+    R.line(img, (185, 32, 46.2), (201, 32, 46.2), BURGUNDY_L)
+    for x in (181, 205):
+        px, py = R.P(x, 37, 46)
+        d.point((px, py), fill=GOLD)
+    # the bench, and the dress laid out across it
+    B0, B1, Bz0, Bz1 = 90, 140, 104, 122
+    a, b = R.P(B0, 0, Bz1), R.P(B1, 0, Bz1)
+    shadow(img, "rect", [a[0] - 1, a[1] - 3, b[0] + 4, a[1] + 3], 0.4, 3)
+    for x in (B0 + 2, B1 - 2):
+        for z in (Bz0 + 2, Bz1 - 2):
+            R.line(img, (x, 0, z), (x, 9, z), WOOD_D, 2)
+    R.box(img, B0, B1, 9, 13, Bz0, Bz1, hx("d8c8a0"), top=hx("ece0c4"), side=hx("a89870"))
+    R.line(img, (B0, 9, Bz1), (B1, 9, Bz1), GOLD_D)
+    # lying flat along the seat, seen from above at a slant, the hem falling over the far end
+    spr = dress(22, 46, RED, folds=3).rotate(90, expand=True)
+    spr = _crumple(spr.resize((spr.width, max(1, spr.height * 4 // 5)), Image.NEAREST), 0.6, 14, 0.4)
+    sx, sy = R.P(B0 + 3, 13, (Bz0 + Bz1) / 2)
+    _stamp(img, spr, sx, sy - spr.height / 2)
+    ex, ey = sx + spr.width - 3, sy - spr.height / 2 + 1
+    d.polygon([(ex, ey), (ex + 3, ey + 1), (ex + 4, ey + spr.height + 3), (ex + 1, ey + spr.height + 2)],
+              fill=RED[1], outline=RED[4])
+    # a loose silk thread from the torn hem
+    d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
+
+def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False):
     img = Image.new("RGB", (W, H))
     hotel.shell(img)
-    crooked_painting(img)
+    crooked_painting(img, 0 if tidy else -6)
     hotel.floor(img)
     hotel.door(img)
-    window_night(img)
+    window_night(img, tidy)
     sconces(img)
-    closet(img, closet_open, safe_open, box)
-    desk(img, drawer_open, paper)
-    bed(img)
+    closet(img, closet_open, safe_open, box, tidy)
+    desk(img, drawer_open, paper, tidy)
+    if tidy:
+        hotel.bed(img)
+    else:
+        bed(img)
     hotel.nightstand(img, lamp=False)
     lamp = bedside_lamp(img)
     vanity(img)
-    mess(img)
+    if tidy:
+        tidy_floor(img)
+    else:
+        mess(img)
     hotel.chandelier(img)
     img = tall(img, hotel.ceiling)
     # night: the only light comes from the sconces, the bedside lamp and the city outside
@@ -1133,4 +1227,9 @@ def build():
         box = _bbox(under, states[over])
         save(states[over].crop(box), "rooms", f"eleanor_room_{name}.png")
         print(f"  eleanor_room_{name}.png at {box[:2]}")
+    # the First Interlude: the same room the night she left, before the old man's men turned it over
+    tidy = paint(tidy=True)
+    save(pixelize(tidy, palette_of(tidy, 128) + _pinned(tidy, (296, 52, 352, 96), 16)
+                  + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10)
+                  + _pinned(tidy, (90, 205, 160, 240), 8)), "rooms", "eleanor_room_interlude.png")
     return px

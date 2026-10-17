@@ -545,9 +545,10 @@ SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
 UPRIGHT = [(64, 56), (64, 33), (64, 18), (65, 74), (66, 91), (67, 46), (69, 59)]
-# Beaten down on hands and knees: hips over the knees, the shins rising a little behind to feet upright on tucked toes,
-# the back flat and level with the floor, arms braced (elbows soft) under the shoulders and the head hanging down.
-KNEEL = [(60, 71), (82, 71), (92, 76), (61, 88), (41, 85), (80, 81), (86, 90)]
+# Beaten down on his knees and forearms: hips over the knees, the shins rising a little behind to feet upright on
+# tucked toes, the back sloping a little down to shoulders propped on the elbows, the forearms flat on the cobbles reaching
+# forward, and the head lifted clear of them.
+KNEEL = [(60, 72), (82, 76), (92, 72), (61, 88), (41, 85), (82, 90), (96, 90)]
 # Hiding behind something, facing right, down on one knee: the far knee and shin flat on the floor with the toe tucked
 # under, the near leg bent with its foot flat, the trunk a little forward but upright, the head up to listen and the
 # near hand resting on the knee. The four extra points are the far leg's knee, ankle, heel and toe.
