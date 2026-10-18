@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Library.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library.png" id="2_library"]
@@ -33,6 +33,9 @@ size = Vector2(50, 160)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
 size = Vector2(56, 128)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(44, 50)
 
 [node name="Library" type="Node2D"]
 script = ExtResource("1_Room")
@@ -156,6 +159,21 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Globe"]
 position = Vector2(276.0, 182.0)
 shape = SubResource("Rect_6")
+
+[node name="SideTable" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "side_table"
+DisplayName = "side table"
+LookText = "Cut crystal, good Scotch and two books for show. Prohibition never made it past the front desk."
+WalkTo = Vector2(164, 250)
+Face = 2
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/SideTable"]
+position = Vector2(164, 221)
+shape = SubResource("Rect_10")
 
 [node name="ShelvesRight" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
