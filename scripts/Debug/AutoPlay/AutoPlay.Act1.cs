@@ -130,6 +130,11 @@ public partial class AutoPlay
 
         await Shot("eleanor_room");
         Check(game.Sfx.Ambient == Sound.Rain, "rain patters on Eleanor's window");
+        Check(game.Room?.FindHotspot("fallen_telephone")?.Visible == true && game.Room?.FindHotspot("telephone")?.Visible == false
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeTelephone")?.Visible == false,
+            "the searched room's telephone lies on the floor, off the vanity");
+        var deadAir = await Spoken(() => game.Perform(Verb.Hand, "fallen_telephone"));
+        Check(deadAir.Any(l => l.StartsWith("Dead air.")), "the fallen telephone is dead air");
         await game.Perform(Verb.Hand, "desk_drawer");
         Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");

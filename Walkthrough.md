@@ -291,7 +291,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    dress is a separate object (`eleanor_room_interlude_bench.png`) and a hole in the walk area: Eleanor walks
    round it, and reaches the dress from in front of it. She packs the brass box
    (**Puzzle 17**, below), puts the combination in the
-   drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
+   drawer, and phones Rizzo's Flowers on the candlestick telephone on the vanity (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
    The box is a dead man's switch, not an invitation: if the Club ever drags her back, the Club goes into the
    morning paper. The card hides the Club's address; the matchbook, the bluing and the password get a reporter

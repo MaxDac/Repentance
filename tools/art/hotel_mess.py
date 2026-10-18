@@ -579,6 +579,135 @@ def bedside_lamp(img):
     return x, (ty + by) // 2
 
 
+PHONE, PHONE_M, PHONE_L, NICKEL = hx("121016"), hx("2c2a34"), hx("5a5664"), hx("c4c4cc")
+NICKEL_D, CORD, CORD_L, CARD = hx("7c7c88"), hx("2a1e18"), hx("5a4434"), hx("e8dcc0")
+PHONE_AT = (461, 30, 13)  # the candlestick's foot at the right end of the vanity, by the wall
+RINGER = (469, 477, 44, 57)  # the bell box on the wall over the vanity's right end: x0, x1, bottom, top
+
+
+def _cord(d, pts, step=2):
+    """A cloth-braided cord: dark brown, flecked lighter every few pixels along its length."""
+    d.line(pts, fill=CORD)
+    n = 0
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        k = max(abs(x1 - x0), abs(y1 - y0), 1)
+        for i in range(int(k)):
+            if n % step == 0:
+                d.point((round(x0 + (x1 - x0) * i / k), round(y0 + (y1 - y0) * i / k)), fill=CORD_L)
+            n += 1
+
+
+def ringer(img, tidy=True):
+    """The subscriber set the candlestick needs: a walnut bell box screwed to the wall, two nickel gongs on its face,
+    the line running down the wall behind the vanity. In the searched room the desk cord is still plugged in and runs
+    over the vanity's front corner to where the telephone was dragged down."""
+    d = ImageDraw.Draw(img)
+    X0, X1, B, T = RINGER
+    R.box(img, X0, X1, B, T, 0, 3, hx("5a3820"), top=hx("7a5232"), side=hx("2e1c10"))
+    R.quad(img, [(X0 + 1, B + 1, 3.05), (X1 - 1, B + 1, 3.05), (X1 - 1, B + 6, 3.05), (X0 + 1, B + 6, 3.05)],
+           None, hx("2e1c10"))
+    for gx in (X0 + 2.5, X1 - 2.5):
+        cx, cy = R.P(gx, T - 3.5, 3.1)
+        d.ellipse([cx - 2, cy - 2, cx + 1, cy + 1], fill=NICKEL_D)
+        d.point((cx - 1, cy - 1), fill=NICKEL)
+        d.point((cx, cy), fill=hx("ffffff"))
+    cx, cy = R.P((X0 + X1) / 2, T - 3.5, 3.1)
+    d.line([(cx, cy - 1), (cx, cy + 2)], fill=NICKEL_D)
+    d.point((cx, cy - 1), fill=NICKEL)
+    a = R.P(X0 + 4, B, 1)
+    b = R.P(X0 + 4, 30, 1)
+    _cord(d, [a, b], 3)
+    x, y = (int(v) for v in R.P(*PHONE_AT))
+    if tidy:
+        # the desk cord lies along the top from the wall to the foot
+        _cord(d, [b, R.P(X0 + 1, 30, 6), (x + 6, y - 1)])
+    else:
+        _cord(d, [b, R.P(X0 - 2, 30, 10), R.P(468, 30, 21)])
+
+
+def telephone(img):
+    """The hotel extension on the vanity: a black Western Electric candlestick with no dial (lifting the receiver
+    rings the switchboard downstairs). A flared, stepped foot with the room's number card, a column ringed in nickel,
+    the mouthpiece trumpet turned to the room with its nickel rim and dark throat, and the receiver hanging by its bell
+    on the nickel switchhook, its braided cord looping down to the foot."""
+    d = ImageDraw.Draw(img)
+    x, y = (int(v) for v in R.P(*PHONE_AT))
+    shadow(img, "ellipse", [x - 7, y - 2, x + 7, y + 2], 0.45, 1)
+    # the receiver cord, from the end of the receiver down and round into the foot
+    _cord(d, [(x + 7, y - 6), (x + 8, y - 3), (x + 7, y), (x + 4, y)])
+    # flared foot, stepped dome, the number card on its face
+    d.ellipse([x - 5, y - 3, x + 5, y + 1], fill=PHONE)
+    d.line([(x - 4, y - 3), (x + 1, y - 3)], fill=PHONE_L)
+    d.point((x - 5, y - 1), fill=PHONE_M)
+    d.ellipse([x - 3, y - 5, x + 3, y - 2], fill=PHONE)
+    d.line([(x - 2, y - 5), (x, y - 5)], fill=PHONE_M)
+    d.line([(x - 1, y), (x + 1, y)], fill=CARD)
+    d.point((x, y), fill=hx("8a2020"))
+    # column with a nickel collar at the foot and another under the mouthpiece
+    d.rectangle([x, y - 17, x + 1, y - 6], fill=PHONE)
+    d.line([(x, y - 16), (x, y - 7)], fill=PHONE_L)
+    d.line([(x - 1, y - 6), (x + 2, y - 6)], fill=NICKEL_D)
+    d.point((x - 1, y - 6), fill=NICKEL)
+    d.line([(x, y - 17), (x + 1, y - 17)], fill=NICKEL)
+    # the mouthpiece: a short neck, the trumpet flaring to the room, nickel rim round a dark throat
+    d.polygon([(x - 1, y - 18), (x + 2, y - 18), (x + 3, y - 20), (x - 2, y - 20)], fill=PHONE)
+    d.point((x - 1, y - 19), fill=PHONE_L)
+    d.ellipse([x - 3, y - 23, x + 4, y - 19], fill=NICKEL_D)
+    d.line([(x - 2, y - 23), (x + 1, y - 23)], fill=NICKEL)
+    d.ellipse([x - 2, y - 22, x + 3, y - 20], fill=hx("060608"))
+    d.point((x - 1, y - 21), fill=PHONE_M)
+    # the nickel switchhook out of the column's side, its fork cradling the receiver
+    d.line([(x + 2, y - 14), (x + 4, y - 14)], fill=NICKEL)
+    d.point((x + 4, y - 15), fill=NICKEL)
+    d.point((x + 7, y - 15), fill=NICKEL_D)
+    # the receiver hanging from the fork by its bell: earpiece cup at the top, ribbed handle below
+    d.ellipse([x + 3, y - 17, x + 8, y - 14], fill=PHONE)
+    d.line([(x + 4, y - 17), (x + 6, y - 17)], fill=PHONE_L)
+    d.rectangle([x + 5, y - 14, x + 6, y - 6], fill=PHONE)
+    d.line([(x + 5, y - 13), (x + 5, y - 7)], fill=PHONE_L)
+    for ry in (y - 12, y - 10, y - 8):
+        d.point((x + 6, ry), fill=PHONE_M)
+    d.line([(x + 5, y - 14), (x + 6, y - 14)], fill=NICKEL_D)
+    d.line([(x + 5, y - 5), (x + 6, y - 5)], fill=PHONE_M)
+
+
+def telephone_down(img):
+    """The searched room: the telephone dragged off the vanity by its cord and dropped by the stool, lying on its
+    side, the mouthpiece rim knocked askew, the receiver jerked off the hook and lying face down at the end of its
+    cord; the desk cord still hangs over the vanity's corner from the bell box on the wall."""
+    d = ImageDraw.Draw(img)
+    x, y = (int(v) for v in R.P(463, 0, 40))
+    top = R.P(468, 30, 21)
+    shadow(img, "ellipse", [x - 11, y - 2, x + 8, y + 4], 0.45, 2)
+    # the desk cord hanging off the corner, down to the foot
+    _cord(d, [top, (top[0] + 1, top[1] + 8), (top[0], y - 14), (x + 6, y - 5)])
+    # foot, on its edge
+    d.ellipse([x + 3, y - 7, x + 7, y + 1], fill=PHONE)
+    d.line([(x + 4, y - 6), (x + 4, y - 1)], fill=PHONE_L)
+    d.point((x + 5, y - 3), fill=CARD)
+    # column along the floor with its nickel collars
+    d.rectangle([x - 7, y - 3, x + 3, y - 2], fill=PHONE)
+    d.line([(x - 7, y - 3), (x + 2, y - 3)], fill=PHONE_L)
+    d.point((x + 2, y - 3), fill=NICKEL)
+    d.point((x - 6, y - 3), fill=NICKEL)
+    # the switchhook sticking up, empty
+    d.line([(x - 3, y - 4), (x - 3, y - 6)], fill=NICKEL)
+    d.point((x - 2, y - 6), fill=NICKEL_D)
+    # the trumpet at the far end, rim turned up
+    d.polygon([(x - 8, y - 4), (x - 8, y - 1), (x - 10, y), (x - 10, y - 5)], fill=PHONE)
+    d.ellipse([x - 12, y - 6, x - 9, y + 1], fill=NICKEL_D)
+    d.line([(x - 11, y - 5), (x - 11, y - 1)], fill=hx("060608"))
+    d.point((x - 12, y - 4), fill=NICKEL)
+    # the receiver flung forward, face down, its braided cord trailing back to the foot
+    rx, ry = x - 6, y + 7
+    _cord(d, [(x + 4, y), (x + 2, y + 4), (x - 1, y + 4), (rx + 4, ry - 1)])
+    d.rectangle([rx - 2, ry - 1, rx + 4, ry], fill=PHONE)
+    d.line([(rx - 2, ry - 1), (rx + 3, ry - 1)], fill=PHONE_L)
+    d.ellipse([rx - 6, ry - 2, rx - 2, ry + 1], fill=PHONE)
+    d.point((rx - 5, ry - 2), fill=PHONE_L)
+    d.point((rx - 4, ry), fill=NICKEL_D)
+
+
 DOOR_WOOD, DOOR_PANEL, DOOR_LINE, DOOR_HI = hx("75492b"), hx("7e5232"), hx("3e2615"), hx("9a6c48")
 
 
@@ -1098,7 +1227,7 @@ def _mirror(img):
 
 
 def vanity(img):
-    """hotel.vanity with a far more ornate mirror; the dressing table and stool are unchanged."""
+    """hotel.vanity with a far more ornate mirror; the card box shifted left to leave the right end for the telephone."""
     X0, X1, Z0, Z1 = 418, 470, 2, 22
     _mirror(img)
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
@@ -1111,7 +1240,7 @@ def vanity(img):
         R.line(img, (c + 7, 25, Z1), (c + 11, 25, Z1), GOLD)
     for (x, h, col) in ((X0 + 8, 6, hx("c9a0b8")), (X0 + 14, 9, hx("e2c27a")), (X0 + 20, 5, hx("9fc0c8"))):
         R.box(img, x, x + 3, 30, 30 + h, 8, 11, col, top=mul(col, 1.15))
-    R.box(img, X1 - 18, X1 - 8, 30, 31.5, 8, 16, hx("e6d8c0"), top=hx("f2e8d6"))
+    R.box(img, X0 + 25, X0 + 34, 30, 31.5, 9, 16, hx("e6d8c0"), top=hx("f2e8d6"))
     S0, S1, Sz0, Sz1 = 432, 452, 30, 42
     for x in (S0 + 2, S1 - 2):
         for z in (Sz0 + 2, Sz1 - 2):
@@ -1162,7 +1291,8 @@ def tidy_floor(img, bench=True):
     # a loose silk thread from the torn hem
     d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
 
-def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True):
+def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True,
+          phone=True):
     img = Image.new("RGB", (W, H))
     hotel.shell(img)
     crooked_painting(img, 0 if tidy else -6)
@@ -1179,10 +1309,14 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     hotel.nightstand(img, lamp=False)
     lamp = bedside_lamp(img)
     vanity(img)
+    ringer(img, tidy)
+    if tidy and phone:
+        telephone(img)
     if tidy:
         tidy_floor(img, bench)
     else:
         mess(img)
+        telephone_down(img)
     hotel.chandelier(img)
     img = tall(img, hotel.ceiling)
     # night: the only light comes from the sconces, the bedside lamp and the city outside
@@ -1234,7 +1368,8 @@ def build():
     tidy = paint(tidy=True)
     tpal = (palette_of(tidy, 128) + _pinned(tidy, (296, 52, 352, 96), 16)
             + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10) + _pinned(tidy, (90, 205, 160, 240), 8))
-    with_bench, room = pixelize(tidy, tpal), pixelize(paint(tidy=True, bench=False), tpal)
+    with_bench = pixelize(paint(tidy=True, phone=False), tpal)
+    room = pixelize(paint(tidy=True, bench=False, phone=False), tpal)
     save(room, "rooms", "eleanor_room_interlude.png")
     # the bench with the dress is a y-sorted sprite Eleanor walks around (and behind), cut out pixel by pixel
     box = _bbox(room, with_bench)
@@ -1243,4 +1378,12 @@ def build():
     bench.putalpha(mask)
     save(bench.crop(box), "rooms", "eleanor_room_interlude_bench.png")
     print(f"  eleanor_room_interlude_bench.png at {box[:2]}, size {(box[2] - box[0], box[3] - box[1])}")
+    # the telephone on the vanity is its own sprite too, so it can go when she lifts it for the call
+    with_phone = pixelize(paint(tidy=True, bench=False), tpal)
+    box = _bbox(room, with_phone)
+    mask = ImageChops.difference(room, with_phone).convert("L").point(lambda v: 255 if v else 0)
+    phone = with_phone.convert("RGBA")
+    phone.putalpha(mask)
+    save(phone.crop(box), "rooms", "eleanor_room_interlude_telephone.png")
+    print(f"  eleanor_room_interlude_telephone.png at {box[:2]}, size {(box[2] - box[0], box[3] - box[1])}")
     return px
