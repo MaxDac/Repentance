@@ -232,20 +232,11 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: the iron landing on the first floor, sooty masonry behind it, iron grating, windows and a door
   into the floor, rain.
 - Eleanor is there, outside, dressed in black.
-- She opens: "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?"
-  Micah asks about Eleanor Harrington, introduces himself, and the conversation joins the existing exchange.
-- She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
-- While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
-  same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
-  speaker's dialogue is shown below their own portrait half.
-- The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
-  The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
-- After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
-  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." As the
-  line ends he reaches her and kisses her on the lips, and they hold the kiss while his narration says "I'd
-  have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him." and "And
-  somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway." Only then
-  does the screen fade to black, holding a moment on black before the attic fades in (End of Act 1). Their night in her room follows the First Interlude (see *Motel room, night* in Act 2).
+- Micah's arrival thought, then he walks to a talking distance from her. She opens: "Not many fellas climb a fire
+  escape in the rain, mister. Were you looking for someone?"
+- Act 1 cuts there: the screen fades to black on her question, holding a moment on black before the attic fades in
+  (End of Act 1). The rest of their talk, the kiss and their night in her room follow the First Interlude (see
+  *Motel fire escape, again* in Act 2).
 
 ### End of Act 1 - Present day
 
@@ -285,7 +276,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
   A black screen shows "Chicago, 1927." for 2.5 seconds, then "First Interlude" below it on the same screen;
   both disappear and the First Interlude begins. After it, the story
-  picks up with Micah's night in the motel room, then his office.
+  picks up with Micah on the motel fire escape, in front of Eleanor, then their night in her room, then his office.
 
 ### First Interlude - Eleanor
 
@@ -343,15 +334,36 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
-   hears him arguing with the clerk downstairs; she steps out onto the fire escape to wait for him, where he
-   finds her. A 3-second fade to black, the caption "Later that night", then a 3-second fade into the
-   motel room: Micah's journal takes over again with their night in her room.
+   hears him arguing with the clerk downstairs. From the window she sees him in the alley below, on a fruit crate,
+   hooking the fire-escape ladder down with the clerk's umbrella and climbing it; she steps out onto the fire escape
+   to wait for him. A 3-second fade to black, a short hold on black with no caption, then the fire escape fades in:
+   Micah's journal takes over again (*Motel fire escape, again*).
 
 ### Chicago, 1927
 
+#### Motel fire escape, again
+
+- Right after the First Interlude, over black, the journal is Micah's again: the landing fades in with Micah already
+  standing in front of Eleanor, where Act 1 left them, his Act 2 satchel back. The office jazz plays.
+- Eleanor repeats her opening, word for word: "Not many fellas climb a fire escape in the rain, mister. Were you
+  looking for someone?" Micah asks about Eleanor Harrington, introduces himself, and the conversation goes on.
+- She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
+- While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
+  same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
+  speaker's dialogue is shown below their own portrait half.
+- The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
+  The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
+- After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
+  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." As the
+  line ends he reaches her and kisses her on the lips, and they hold the kiss while his narration says "I'd
+  have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him." and "And
+  somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway." Only then
+  does the screen fade to black, over 3 seconds. "Later that night" stays alone on the black screen for 3 seconds,
+  then a 3-second fade brings in *Motel room, night*.
+
 #### Motel room, night
 
-- Right after the First Interlude, inside her room at the same motel, Micah is getting dressed (new dressing sprite
+- After the kiss on the fire escape and "Later that night", inside her room at the same motel, Micah is getting dressed (new dressing sprite
   for the character) while Eleanor is in the bed, under the sheet. Micah's Act 2 satchel is already back.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
