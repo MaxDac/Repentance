@@ -19,6 +19,8 @@ public enum Track
     BlueLanternJazz,
     /// <summary>The same rehearsal heard from the alley, through the open back door and down a passage.</summary>
     BlueLanternAlley,
+    /// <summary>The streets outside: no music at all, only 1920s Chicago traffic going by on a wet road.</summary>
+    StreetTraffic,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
@@ -58,6 +60,15 @@ public enum Instrument
     Banjo,
     /// <summary>A brass bass horn, the band's two-beat bottom.</summary>
     Tuba,
+    /// <summary>The city's distant roar, a noise bed for the whole loop.</summary>
+    CityHum,
+    /// <summary>A motorcar driving past, from the part's side to the other; the pitch is the engine's firing note,
+    /// and an accented car passes close.</summary>
+    Motorcar,
+    /// <summary>A streetcar rolling past with its bell, rail joints and motor whine at the note's pitch.</summary>
+    Streetcar,
+    /// <summary>A car horn at the note's pitch: a bulb horn's double honk, or, accented, an "ah-oo-gah" klaxon.</summary>
+    Horn,
     /// <summary>Plucked string chords, pizzicato, on cello and viola strings.</summary>
     Pizzicato,
     /// <summary>An open trumpet, unmuted, hard-tongued and piercing.</summary>
@@ -70,7 +81,8 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
 /// strings, pizzicato, pipe organ, piano, muted and open trumpet, plucked bass, brushed drums, a hot band's horns, banjo
-/// and tuba) in a reverberant room, sometimes heard from a distance. Each track renders exactly
+/// and tuba) in a reverberant room, sometimes heard from a distance, plus the street's traffic, scored the same way
+/// for engines, horns and a streetcar. Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -118,6 +130,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => -15f,
         Track.BlueLanternJazz => -13f,
         Track.BlueLanternAlley => -27f,
+        Track.StreetTraffic => -13f,
         Track.LobbyPiano => -12f,
         Track.MansionDread => -8.5f,
         _ => -6f,
@@ -192,20 +205,27 @@ public static partial class MusicSynth
             var part = piece.Parts[voice];
             // one period of the part, wrapped: a note held over the end of the loop sounds again at its start
             var raw = new float[length];
+            // a moving source pans itself, note by note, so it is rendered in stereo from the start
+            var rawRight = Moves(part.Instrument) ? new float[length] : null;
             foreach (var note in score.Where(n => n.Voice == voice))
-                Sound(raw, rng, note, spb, part.Velocity);
+                Sound(raw, rawRight, rng, note, spb, part.Velocity, part.Pan);
 
             // run the body twice round the loop and keep the second lap, so the filters start in their looping state
-            var body = BodyOf(part.Instrument);
             double pan = (part.Pan + 1) * Math.PI / 4;
-            float gl = (float)Math.Cos(pan), gr = (float)Math.Sin(pan);
-            for (int i = 0; i < 2 * length; i++)
+            var channels = rawRight == null
+                ? new[] { (raw, (float)Math.Cos(pan), (float)Math.Sin(pan)) }
+                : new[] { (raw, 1f, 0f), (rawRight, 0f, 1f) };
+            foreach (var (source, gl, gr) in channels)
             {
-                double x = raw[i % length] + Dither(i);
-                for (int k = 0; k < body.Length; k++) x = body[k].Next(x);
-                if (i < length) continue;
-                left[i - length] += (float)(x * gl);
-                right[i - length] += (float)(x * gr);
+                var body = BodyOf(part.Instrument);
+                for (int i = 0; i < 2 * length; i++)
+                {
+                    double x = source[i % length] + Dither(i);
+                    for (int k = 0; k < body.Length; k++) x = body[k].Next(x);
+                    if (i < length) continue;
+                    left[i - length] += (float)(x * gl);
+                    right[i - length] += (float)(x * gr);
+                }
             }
         }
 

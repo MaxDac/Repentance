@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class BlueLanternFront : Room
 {
+    public override Track? Music => Track.StreetTraffic;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_blue_lantern_front")) return;

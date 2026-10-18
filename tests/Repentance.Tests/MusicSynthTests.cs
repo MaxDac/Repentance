@@ -252,6 +252,30 @@ public class MusicSynthTests
     }
 
     [Fact]
+    public void StreetTrafficIsTrafficNotMusic()
+    {
+        var score = MusicSynth.Score(Track.StreetTraffic);
+        Assert.Equal(60, MusicSynth.LengthBeats(Track.StreetTraffic));
+        Assert.Equal(1, MusicSynth.SecondsPerBeat(Track.StreetTraffic));
+        var traffic = new[] { Instrument.CityHum, Instrument.Motorcar, Instrument.Streetcar, Instrument.Horn }.ToHashSet();
+        Assert.Equal(traffic, score.Select(n => n.Instrument).ToHashSet());
+        // background, like the music: no accents, so no car passes close and no klaxon blares
+        Assert.DoesNotContain(score, n => n.Strident);
+        // the city roars under everything, all the way round the loop
+        var hum = Assert.Single(score, n => n.Instrument == Instrument.CityHum);
+        Assert.Equal((0.0, 60.0), (hum.Beat, hum.Beats));
+        // cars go by both ways, and one crosses the seam so the loop has no quiet start
+        var cars = score.Where(n => n.Instrument == Instrument.Motorcar).ToList();
+        Assert.True(cars.Count >= 8, $"{cars.Count} cars");
+        Assert.Equal(2, cars.Select(n => n.Voice).Distinct().Count());
+        Assert.Contains(cars, n => n.Beat + n.Beats > 60);
+        Assert.Single(score, n => n.Instrument == Instrument.Streetcar);
+        // a bulb horn now and then, never a tune
+        var horns = score.Where(n => n.Instrument == Instrument.Horn).ToList();
+        Assert.InRange(horns.Count, 1, 3);
+    }
+
+    [Fact]
     public void LobbyPianoIsASoftLoungeBallad()
     {
         var score = MusicSynth.Score(Track.LobbyPiano);
@@ -341,6 +365,8 @@ public class MusicSynthTests
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
             [Instrument.Cornet] = ("E3", "C6"), [Instrument.Clarinet] = ("D3", "Bb6"), [Instrument.Trombone] = ("E2", "F5"),
             [Instrument.Banjo] = ("C3", "A5"), [Instrument.Tuba] = ("D1", "F4"),
+            [Instrument.CityHum] = ("C1", "C3"), [Instrument.Motorcar] = ("C1", "C3"), [Instrument.Streetcar] = ("C2", "C5"),
+            [Instrument.Horn] = ("C3", "C6"),
             [Instrument.RecordedPiano] = ("A0", "C8"),
             [Instrument.Pizzicato] = ("C2", "C5"), [Instrument.OpenTrumpet] = ("F#3", "D6"),
         };

@@ -13,6 +13,7 @@ public static partial class MusicSynth
         Track.ChurchOrgan => Church,
         Track.ConventPiano => Convent,
         Track.OfficeJazz => Office,
+        Track.StreetTraffic => Traffic,
         Track.LobbyPiano => Lobby,
         Track.BlueLanternJazz => Lantern,
         Track.BlueLanternAlley => LanternAlley,
@@ -176,6 +177,21 @@ public static partial class MusicSynth
         return sb.ToString();
     }
 
+    // ------------------------------------------------------------------ the street
+
+    // Not music: a minute of Chicago traffic in the rain, one beat a second, kept in the background. The city roars far
+    // off the whole time; motorcars go by both ways down the street; a streetcar rolls past with its bell; now and
+    // then a bulb horn down the block. No accents: no car passes close and no klaxon blares. Cars cross the end of the
+    // loop, so nothing marks where it starts again.
+    private static readonly Piece Traffic = new(60, new Hall(0.7, 0.72, 0.5, 0.14), new Part[]
+    {
+        new(Instrument.CityHum, 0.5, 0, "C2:60"),
+        new(Instrument.Motorcar, 0.55, -1, "G1:6 r:5 C2:6 r:9 A1:8 r:6 E2:5 r:3 F#1:7 r:5"),
+        new(Instrument.Motorcar, 0.5, 1, "r:4 D2:7 r:11 F1:9 r:4 Bb1:6 r:15 B1:4>7"),
+        new(Instrument.Streetcar, 0.6, 1, "r:24 E3:16 r:20"),
+        new(Instrument.Horn, 0.1, -0.5, "r:16 A4:1 r:43"),
+        new(Instrument.Horn, 0.08, 0.6, "r:39 E4:1 r:20"),
+    });
     // ------------------------------------------------------------------ the Aurelian lobby
 
     // The house pianist in the Aurelian's marble lobby, playing for nobody in particular: a slow 1920s ballad in C
