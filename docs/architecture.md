@@ -37,8 +37,8 @@ flowchart TD
 | Dialogue | `dialogue/repentance.ink` | - | All conversations, compiled by GodotInk on import |
 | UI | `scripts/UI/` | yes | `Hud` (partials), `VerbWheel`, `GameMenu`, `NotepadView`, `CloseUp`, puzzle screens |
 | Debug | `scripts/Debug/` | yes | Automated runs: `Harness`, `AutoPlay`, `Playthrough` (and film mode), `WalkTest` |
-| Assets | `assets/art/`, `assets/fonts/` | - | Generated PNGs (by `tools/`), pixel fonts |
-| Tools | `tools/art/`, `tools/run/` | - | Python art generators; normal-game, test and film launchers |
+| Assets | `assets/art/`, `assets/fonts/`, `assets/audio/piano/` | - | Generated PNGs (by `tools/`), pixel fonts, recorded piano notes |
+| Tools | `tools/art/`, `tools/run/`, `tools/music/` | - | Python art generators; normal-game, test and film launchers; C# music tool (piano recordings, WAV renders) |
 | Tests | `tests/` | - | xunit (`Repentance.Tests`), Python art and launcher tests |
 
 ## Boot

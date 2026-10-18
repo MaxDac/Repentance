@@ -5,6 +5,9 @@
 - **Silkscreen** font by Jason Kottke, licensed under the SIL Open Font License 1.1 (`assets/fonts/OFL-Silkscreen.txt`).
 - **Departure Mono** font (dialogue text) by Helena Zhang, licensed under the SIL Open Font License 1.1
   (`assets/fonts/OFL-DepartureMono.txt`).
+- **Piano recordings** (`assets/audio/piano/`, the Aurelian Hotel lobby music): University of Iowa Musical Instrument
+  Samples, Electronic Music Studios, recorded by Lawrence Fritts; freely available and usable for any project without
+  restrictions (https://theremin.music.uiowa.edu/MIS.html). Trimmed, downmixed and resampled by `tools/music`.
 - **GodotInk** by Paul Joannon, MIT License (`addons/GodotInk/LICENSE`).
 - **Ink** narrative scripting language by inkle Ltd, MIT License.
 - **Godot Engine**, MIT License.
