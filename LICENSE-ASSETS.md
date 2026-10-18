@@ -6,7 +6,7 @@ The creative content of Repentance is licensed under the **Creative Commons
 Attribution-NonCommercial-NoDerivatives 4.0 International** licence (CC BY-NC-ND 4.0),
 https://creativecommons.org/licenses/by-nc-nd/4.0/. This covers:
 
-- `assets/`: art, sprites, backgrounds, audio (except `assets/fonts/` and `assets/audio/piano/`, see CREDITS.md)
+- `assets/`: art, sprites, backgrounds, audio (except `assets/fonts/` and `assets/audio/piano/`, `assets/audio/sax/` and `assets/audio/bass/`, see CREDITS.md)
 - `dialogue/`: the Ink story and dialogue
 - `docs/`, `Walkthrough.md`: story and design documentation
 

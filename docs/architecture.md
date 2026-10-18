@@ -34,13 +34,13 @@ flowchart TD
 |---|---|---|---|
 | Framework | `scripts/Core/` | yes | `Game`, `Room`, `Hotspot`, `Actor`, `Player`, state, dialogue, saves, audio playback |
 | Rules and data | `src/Repentance.Rules/` (`Items`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `SwipeGesture`, `Endings`, `SaveData`, `InkScan`, `RainWeather`) | **no** | Pure C# class library, unit-tested |
-| Synthesis | `src/Repentance.Audio/` (`SoundSynth`, `MusicSynth`, `PianoRecordings`) | **no** | Pure C# class library, shared with `tools/music` and unit-tested |
+| Synthesis | `src/Repentance.Audio/` (`SoundSynth`, `MusicSynth`, `Recordings`) | **no** | Pure C# class library, shared with `tools/music` and unit-tested |
 | Story glue | `scripts/Story/` | yes | Item verbs, combinations and puzzles valid in any room; interludes |
 | Rooms | `scripts/Rooms/` + `scenes/rooms/` | yes | One script and one scene per location (38 rooms) |
 | Dialogue | `dialogue/repentance.ink` | - | All conversations, compiled by GodotInk on import |
 | UI | `scripts/UI/` | yes | `Hud` (partials), `VerbWheel`, `GameMenu`, `NotepadView`, `CloseUp`, puzzle screens |
 | Debug | `scripts/Debug/` | yes | Automated runs: `Harness`, `AutoPlay`, `Playthrough` (and film mode), `WalkTest` |
-| Assets | `assets/art/`, `assets/fonts/`, `assets/audio/piano/` | - | Generated PNGs (by `tools/`), pixel fonts, recorded piano notes |
+| Assets | `assets/art/`, `assets/fonts/`, `assets/audio/{piano,sax,bass}/` | - | Generated PNGs (by `tools/`), pixel fonts, recorded instrument notes |
 | Tools | `tools/art/`, `tools/run/`, `tools/music/` | - | Python art generators; normal-game, test and film launchers; C# music tool (piano recordings, WAV renders) |
 | Tests | `tests/` | - | xunit (`Repentance.Tests`), Python art and launcher tests |
 
@@ -142,7 +142,7 @@ Add code to the partial for its concern:
 | `AutoPlay` | `AutoPlay.cs` + `AutoPlay/AutoPlay.{Act1,Act2,Act3,Endings,Dialogue,Interface,Pause,Presentation,Puzzles,Inheritance}.cs` |
 | `Playthrough` | `Playthrough.cs` + `Playthrough/Playthrough.{Act1,Act2,Act3,Endings}.cs` |
 | `Items` | `src/Repentance.Rules/`: `Items.cs` + `Items/Items.{Micah,Act1,Act2,Act3}.cs` |
-| `SoundSynth`, `MusicSynth` | `src/Repentance.Audio/`: `SoundSynth.Effects.cs`; `MusicSynth.{Instruments,Scores}.cs` |
+| `SoundSynth`, `MusicSynth` | `src/Repentance.Audio/`: `SoundSynth.Effects.cs`; `MusicSynth.{Instruments,Scores,Traffic,Street,Foley}.cs` |
 
 ## Third-party code
 

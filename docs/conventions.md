@@ -16,7 +16,7 @@
 | Regressions | `scripts/Debug/AutoPlay/AutoPlay.<Area>.cs` |
 | Dialogue | `dialogue/repentance.ink` |
 | Normal-game, film and test launchers / shared helpers | `tools/run/` |
-| Recorded piano notes and track renders (C#) | `tools/music/` |
+| Recorded instrument notes and track renders (C#) | `tools/music/` |
 
 ## Partial classes
 
@@ -30,7 +30,7 @@ The solution splits by concern; all projects share `Directory.Build.props` (null
 |---|---|---|
 | `Repentance.csproj` | The Godot game: `scripts/` (framework, rooms, story, UI, debug) | Rules, Audio, Godot, Ink |
 | `src/Repentance.Rules` | `Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather` | - |
-| `src/Repentance.Audio` | `SoundSynth*`, `MusicSynth*`, `PianoRecordings` | - |
+| `src/Repentance.Audio` | `SoundSynth*`, `MusicSynth*`, `Recordings` | - |
 | `tests/Repentance.Tests` | xunit | Rules, Audio, Ink |
 | `tools/music` | Music tool | Audio |
 

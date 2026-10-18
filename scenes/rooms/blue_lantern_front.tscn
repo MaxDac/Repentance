@@ -76,8 +76,8 @@ centered = false
 hframes = 6
 script = ExtResource("9_IdleStrip")
 Sequence = "1:0.18,2:0.22,3:1.1,2:0.25,4:0.3,5:0.9"
-MinRest = 4.0
-MaxRest = 7.0
+MinRest = 7.05
+MaxRest = 7.05
 Seed = 12
 
 [node name="WalkArea" type="Polygon2D" parent="."]

@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class HotelLinen : Room
 {
+    public override Track? Music => Track.Investigation;
+
     public override async Task OnEnter(string entry)
     {
         // Coming back from the corridor side the bolt is within reach, which also covers saves made before this room existed.

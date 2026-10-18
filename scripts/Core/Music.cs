@@ -43,9 +43,10 @@ public partial class Music : Node
     {
         _player = new AudioStreamPlayer { Name = "Player", Bus = BusName, ProcessMode = ProcessModeEnum.Always };
         AddChild(_player);
-        // the renders run on worker threads, so the piano recordings are read here, on the main thread
-        PianoRecordings.Use(name => FileAccess.GetFileAsBytes($"res://{PianoRecordings.Folder}/{name}"));
-        foreach (var midi in PianoRecordings.Needed().Keys) PianoRecordings.Get(midi);
+        // the renders run on worker threads, so the instrument recordings are read here, on the main thread
+        Recordings.Use(path => FileAccess.GetFileAsBytes($"res://{path}"));
+        foreach (var instrument in Recordings.Instruments)
+            foreach (var midi in Recordings.Needed(instrument).Keys) Recordings.Get(instrument, midi);
         foreach (var track in System.Enum.GetValues<Track>()) RenderAsync(track);
     }
 
@@ -77,10 +78,13 @@ public partial class Music : Node
         return task;
     }
 
-    /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.</summary>
+    /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.
+    /// A track sharing the score of the one playing (the same band heard from elsewhere) picks up where it was.</summary>
     public async void Play(Track? track)
     {
         if (track == Current) return;
+        float from = Current is { } previous && track is { } next && _player.Playing && MusicSynth.SharesScore(previous, next)
+            ? _player.GetPlaybackPosition() : 0;
         Current = track;
         _player.Stop();
         if (track is not { } t) return;
@@ -94,7 +98,7 @@ public partial class Music : Node
         if (Current != t || _player.Playing) return;
         _player.Stream = stream;
         _player.VolumeDb = MusicSynth.BaseVolumeDb(t);
-        _player.Play();
+        _player.Play(from);
     }
 
     /// <summary>Whether a track has finished rendering and is actually sounding.</summary>

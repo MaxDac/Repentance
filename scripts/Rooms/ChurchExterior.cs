@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ChurchExterior : Room
 {
+    public override Track? Music => Track.StreetTraffic;
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "beaten")
