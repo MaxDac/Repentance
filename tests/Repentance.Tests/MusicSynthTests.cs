@@ -313,6 +313,25 @@ public class MusicSynthTests
     }
 
     [Fact]
+    public void PrisonParlourIsTheRoomNotMusic()
+    {
+        var score = MusicSynth.Score(Track.PrisonParlour);
+        Assert.All(score, n => Assert.Equal(Instrument.Foley, n.Instrument));
+        Assert.Equal(60, MusicSynth.LengthBeats(Track.PrisonParlour), 6);
+        Assert.DoesNotContain(score, n => n.Strident);
+        // near silence: a faint room tone under the whole loop, and only a handful of sounds over it
+        Assert.Contains(score, n => n.Midi == MusicSynth.Midi("C2") && n.Beat == 0 && n.Beats == 60);
+        Assert.InRange(score.Count(n => n.Midi != MusicSynth.Midi("C2")), 4, 16);
+        // a couple of short walks, each step close behind the last, and a chair moved
+        var steps = score.Where(n => n.Midi == MusicSynth.Midi("D2")).OrderBy(n => n.Beat).ToList();
+        Assert.InRange(steps.Count, 4, 12);
+        Assert.All(steps, s => Assert.Contains(steps, o => o != s && Math.Abs(o.Beat - s.Beat) <= 0.75 + 1e-9));
+        Assert.Contains(score, n => n.Midi == MusicSynth.Midi("E2"));
+        Assert.Contains(score, n => n.Midi == MusicSynth.Midi("F2"));
+        Assert.True(MusicSynth.BaseVolumeDb(Track.PrisonParlour) < MusicSynth.BaseVolumeDb(Track.ConventPiano));
+    }
+
+    [Fact]
     public void InvestigationIsAQuietReflectivePiano()
     {
         var score = MusicSynth.Score(Track.Investigation);
@@ -391,6 +410,7 @@ public class MusicSynthTests
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
+            [Instrument.Foley] = ("C2", "F2"),
             [Instrument.Cornet] = ("E3", "C6"), [Instrument.Clarinet] = ("D3", "Bb6"), [Instrument.Trombone] = ("E2", "F5"),
             [Instrument.Banjo] = ("C3", "A5"), [Instrument.Tuba] = ("D1", "F4"),
             [Instrument.CityHum] = ("C1", "C3"), [Instrument.Motorcar] = ("C1", "C3"), [Instrument.Streetcar] = ("C2", "C5"),

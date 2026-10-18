@@ -23,6 +23,8 @@ public enum Track
     StreetTraffic,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
+    /// <summary>Joliet's visiting room: no music, near silence - a few footsteps, a chair moved.</summary>
+    PrisonParlour,
     /// <summary>Investigation: a slow, reflective D-minor piano, pianissimo and barely audible, to think by.</summary>
     Investigation,
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
@@ -52,6 +54,9 @@ public enum Instrument
     /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, C#2 sticks clicked together,
     /// D2 brush tap, E2 brush sweep, F#2 hi-hat, Eb3 ride.</summary>
     Drums,
+    /// <summary>The noises of a room, one per pitch like <see cref="Drums"/>: C2 room tone (held), D2 a boot on
+    /// concrete, E2 a chair dragged (held), F2 a chair set down.</summary>
+    Foley,
     /// <summary>An open cornet, played hot.</summary>
     Cornet,
     /// <summary>A Bb clarinet in the old Albert-system style: woody, with a wide vibrato.</summary>
@@ -84,7 +89,7 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
 /// strings, pizzicato, pipe organ, piano, muted and open trumpet, plucked bass, brushed drums, a hot band's horns, banjo
 /// and tuba) in a reverberant room, sometimes heard from a distance, plus the street's traffic, scored the same way
-/// for engines, horns and a streetcar. Each track renders exactly
+/// for engines, horns and a streetcar, and one room's noises (<see cref="Instrument.Foley"/>). Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -134,6 +139,7 @@ public static partial class MusicSynth
         Track.BlueLanternAlley => -27f,
         Track.StreetTraffic => -13f,
         Track.LobbyPiano => -12f,
+        Track.PrisonParlour => -12f,
         Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
         _ => -6f,

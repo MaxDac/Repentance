@@ -45,6 +45,9 @@ public static partial class MusicSynth
             case Instrument.Drums:
                 Drum(buf, rng, note, spb, velocity);
                 break;
+            case Instrument.Foley:
+                Foley(buf, rng, note, spb, velocity);
+                break;
             case Instrument.Cornet or Instrument.Trombone or Instrument.Tuba:
                 HotBrass(buf, rng, note, spb, velocity);
                 break;
@@ -73,7 +76,7 @@ public static partial class MusicSynth
         Instrument.OrganPlenum => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
         Instrument.OrganPedal => new[] { SoundSynth.Biquad.HighPass(25), SoundSynth.Biquad.LowPass(4000) },
         Instrument.Piano => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
-        Instrument.RecordedPiano => new[] { SoundSynth.Biquad.HighPass(30) },
+        Instrument.RecordedPiano or Instrument.Foley => new[] { SoundSynth.Biquad.HighPass(30) },
         // the Harmon mute: thin in the low end, a soft nasal colour around 1.4 kHz, the top rolled well off
         Instrument.Trumpet => new[]
         {
