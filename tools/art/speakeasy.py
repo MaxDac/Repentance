@@ -401,7 +401,7 @@ def build():
     return px
 
 
-GIN_GLASS_AT = (398, 124)  # top-left in the room: on the counter where micah_gin picks the glass up and sets it down
+GIN_GLASS_AT = (398, 120)  # top-left in the room: on the counter beside the painted glasses, where micah_gin picks it up and sets it down
 
 
 def gin_glass(full):

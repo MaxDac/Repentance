@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Music tool: regenerates the recorded piano notes and renders tracks to WAV (see Program.cs) -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Repentance.Tools</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\scripts\Core\SoundSynth*.cs" LinkBase="Linked" />
+    <Compile Include="..\..\scripts\Core\MusicSynth*.cs" LinkBase="Linked" />
+    <Compile Include="..\..\scripts\Core\PianoRecordings.cs" Link="Linked\PianoRecordings.cs" />
+  </ItemGroup>
+</Project>

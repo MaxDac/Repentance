@@ -8,6 +8,7 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 | Run the game or tests | `run-tests` | `docs/testing.md` |
 | Story, dialogue, items, endings | `story-change` | `docs/story-and-dialogue.md` |
 | New room, entry, exit, hotspot | `add-room` | `docs/rooms-and-scenes.md` |
+| Music, sound, recorded piano | `music-change` | `docs/audio.md` |
 | Finish work: commit, PR, CI | `pr-and-ci` | `docs/ci-and-release.md` |
 | Publish a build | `release` | `docs/ci-and-release.md` |
 
