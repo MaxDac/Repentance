@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionKitchen : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private bool Escaping => State.HasFlag("escaping");
     private bool Coda => State.HasFlag("eleanor_coda");
 

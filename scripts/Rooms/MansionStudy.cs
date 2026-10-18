@@ -8,6 +8,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionStudy : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private bool Coda => State.HasFlag("eleanor_coda");
 
     public override async Task OnEnter(string entry)

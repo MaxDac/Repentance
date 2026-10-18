@@ -339,6 +339,8 @@ public partial class AutoPlay
         await Shot("office_storm_hat_on");
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "MansionExterior", "out of the office, on to the Harrington mansion");
+        Check(game.Music.Current == Track.MansionDread, "the mansion's dread starts outside the house");
+        int dreadStarts = game.Music.Count(Track.MansionDread);
 
         // ---- the mansion: the alarm bell, the key, the study, the bedroom
         await Shot("mansion_exterior");
@@ -395,6 +397,8 @@ public partial class AutoPlay
             "the whiskey and the hung lantern wait for the escape");
         await game.Perform(Verb.Walk, "stair");
         Check(game.Room?.Name == "MansionStudy", "up the bootleggers' stair into the study");
+        Check(game.Music.Current == Track.MansionDread && game.Music.Count(Track.MansionDread) == dreadStarts,
+            "the dread plays on unbroken through the kitchen, the cellar and the study");
         await Shot("mansion_study_hatch");
         await game.Perform(Verb.Walk, "door_left");
         Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("baize_unbolted"), "unbolted the baize door from the study side");
@@ -500,6 +504,8 @@ public partial class AutoPlay
         await Shot("mansion_fire");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
+        Check(game.Music.Current != Track.MansionDread && game.Music.Count(Track.MansionDread) == dreadStarts,
+            "the dread played through the whole mansion, bedroom included, and stops once out of it");
         Check(HeardLog.Any(l => l.Contains("Oh my God, Micah.")) && !HeardLog.Any(l => l.Contains("She watches the windows go.")),
             "ending 2: convinced Eleanor cries out when the house goes");
         await game.Wait(3);
