@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/EleanorRoom.cs" id="1_EleanorRoom"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room.png" id="2_eleanor_room"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="10_Rain"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="11_Voice"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_interlude_bench.png" id="12_eleanor_room_interlude_bench"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_interlude_telephone.png" id="13_eleanor_room_interlude_telephone"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 100)
@@ -48,6 +49,12 @@ size = Vector2(56, 18)
 
 [sub_resource type="RectangleShape2D" id="Rect_12"]
 size = Vector2(28, 14)
+
+[sub_resource type="RectangleShape2D" id="Rect_13"]
+size = Vector2(20, 30)
+
+[sub_resource type="RectangleShape2D" id="Rect_14"]
+size = Vector2(28, 16)
 
 [node name="EleanorRoom" type="Node2D"]
 script = ExtResource("1_EleanorRoom")
@@ -120,6 +127,14 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "eleanor_drawer_open"
 HideIfFlags = "took_combination,interlude1"
+
+[node name="InterludeTelephone" type="Sprite2D" parent="."]
+position = Vector2(455, 127)
+z_index = -3
+texture = ExtResource("13_eleanor_room_interlude_telephone")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "interlude1"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -337,8 +352,40 @@ monitorable = false
 position = Vector2(194.0, 191.0)
 shape = SubResource("Rect_12")
 
+[node name="Telephone" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "telephone"
+DisplayName = "telephone"
+LookText = "The hotel extension on the vanity. No dial: lift the receiver and the switchboard downstairs asks who you want."
+WalkTo = Vector2(450, 206)
+Face = 4
+ShowIfFlags = "interlude1"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Telephone"]
+position = Vector2(465.0, 141.0)
+shape = SubResource("Rect_13")
+
+[node name="FallenTelephone" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "fallen_telephone"
+DisplayName = "telephone"
+LookText = "The room's telephone, dragged off the vanity by its cord. The receiver's lying face down on the floor, off the hook."
+WalkTo = Vector2(450, 206)
+Face = 4
+HideIfFlags = "interlude1"
+ClickPriority = 1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/FallenTelephone"]
+position = Vector2(466.0, 194.0)
+shape = SubResource("Rect_14")
+
 [node name="RizzoVoice" type="Node2D" parent="."]
-position = Vector2(330, 120)
+position = Vector2(466, 118)
 script = ExtResource("11_Voice")
 Id = "rizzo"
 SpeechColor = Color(0.72, 0.86, 0.62, 1)

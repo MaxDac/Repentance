@@ -62,7 +62,7 @@ LEO: DAD! DINNER!
 DANIEL: ...Dinner? It's dark out already.
 LEO: Mom says if you're not down in two minutes, your plate goes to the dog!
 DANIEL: Coming! I'm coming.
-DANIEL: "I won't tell anyone where they can find you." Then why write it all down, Micah?
+DANIEL: "Were you looking for someone?" ...You found her, Micah. Now what?
 -> END
 
 === attic_act2 ===
@@ -1010,7 +1010,7 @@ MICAH: Yeah. You can say that, sister. Where's Eleanor? What goes on at that clu
 - has_flag("eleanor_refused_abbess"):
     NUN: Put that thing down. Please. I'll tell you. God knows I owe her that much.
     NUN: She's a performer. That's what they call them, at that Club. She told me so herself, in her cell. All of it, what they made her do, what she did.
-    NUN: And I'd gone to that cell past midnight, with a candle, and called it charity. When she stopped me, I called her a whore and put her out at first light.
+    NUN: And I'd gone to that cell past midnight, with a candle, and called it charity. When she stopped me, I turned it round on her and put her out at first light.
     NUN: It was my fault, Mr. Jones. All of it. She came to this house for shelter, and I failed her.
 - else:
     NUN: You belong with that Jezebel. Burn with her, then. I am done with you.
@@ -1230,6 +1230,7 @@ THOUGHT: Her hand is cold and small in mine. For the first time in years I know 
 // ---------------------------------------------------------------- ACT 3: ENDINGS
 
 === ending_together ===
+THOUGHT: At the gate she fetched her black dress from the Club's car. She changed in mine while I drove, and left the sheet somewhere on the road behind us.
 ELEANOR: So this is where Chicago ends.
 MICAH: It doesn't end. It just runs out of streetlights.
 ELEANOR: Where are we going?
@@ -1375,7 +1376,6 @@ THOUGHT: Brass, heavy as a sin. He never turned round. He never heard her bare f
 THOUGHT: He went down onto his own rug without a word, the first time in his life he had nothing to say.
 ELEANOR: Good girl.
 THOUGHT: She didn't look at him twice. The door Micah had used stood open on the dark of the study.
-THOUGHT: On her way through she took a slim black ledger from the shelf behind his desk, filed between two annual reports. The Thursday book: names, stations, prices, in his own neat hand. She had always known where he kept it. She put it under her arm.
 -> END
 
 === coda_fire ===
@@ -1455,7 +1455,7 @@ DANIEL: Five more minutes.
 // epilogue. The goons are colour; the old man's offer (interlude_oldman) is saved when she refuses it.
 
 === interlude_motel ===
-THOUGHT: The motel, the night after. His side of the bed still warm, then not. She lay awake and listened to the sign buzz.
+THOUGHT: The motel, the same night. His side of the bed still warm, then not. She lay awake and listened to the sign buzz.
 THOUGHT: She had told him never to come back. She had meant it. She kept looking at the door anyway.
 -> END
 

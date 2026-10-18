@@ -68,7 +68,7 @@ public partial class AutoPlay
         Check(gs.HasItem("eleanor_box_packed") && !gs.HasFlag("interlude_safe_locked"), "a save holding the packed box loads back");
         await game.Perform(Verb.UseItem, "closet", "eleanor_box_packed");
         Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 0, "the packed box locked in the closet safe");
-        var early = await Spoken(() => game.Perform(Verb.Hand, "bed"));
+        var early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
         Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The box in the safe, the riddle in the drawer. Then I call."),
             "no call before the riddle is locked in the drawer");
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
@@ -86,8 +86,15 @@ public partial class AutoPlay
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nobody's coming for me unless I call."),
             "with the drawer locked, the exit points to the call");
-        await game.Perform(Verb.Hand, "bed");
+        Check(game.Room?.FindHotspot("telephone")?.Visible == true && game.Room?.FindHotspot("fallen_telephone")?.Visible == false
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeTelephone")?.Visible == true,
+            "the candlestick telephone stands on the vanity, not on the floor");
+        int calls = _poseCounts.GetValueOrDefault("eleanor_phone"), hangups = _poseCounts.GetValueOrDefault("eleanor_phone_down");
+        await game.Perform(Verb.Hand, "telephone");
         Check(gs.HasFlag("interlude_phoned") && gs.HasFlag("interlude_drawer_locked"), "the box in the safe, the riddle in the drawer, the call made");
+        Check(_poseCounts.GetValueOrDefault("eleanor_phone") == calls + 1 && _poseCounts.GetValueOrDefault("eleanor_phone_down") == hangups + 1
+              && game.Player.PoseName == null && game.Room?.GetNodeOrNull<Sprite2D>("InterludeTelephone")?.Visible == true,
+            "Eleanor lifts the telephone for the call and hangs it back on the vanity");
         await ReloadCheckpoint("first_interlude");
         Check(game.Player.Character == "eleanor_play" && gs.HasFlag("interlude1"), "a save inside the interlude loads back as Eleanor");
         await game.Perform(Verb.Walk, "exit");
