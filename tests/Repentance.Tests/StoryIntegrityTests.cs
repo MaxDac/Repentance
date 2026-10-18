@@ -264,7 +264,10 @@ public class StoryIntegrityTests
     [InlineData("Saturday, at the turning of the night", "the Club card is for Sunday night, the day after the motel")]
     [InlineData("Saturday is tonight", "Act Two is Sunday")]
     [InlineData("a woman I met four days ago", "Micah met Eleanor on the fire escape the night before")]
-    [InlineData("Still warm on his side", "the Second Interlude is the night after he left her")]
+    [InlineData("Still warm on his side", "the Second Interlude is later the same night, after he left her")]
+    [InlineData("The motel, the night after.", "the Order takes Eleanor the same night Micah leaves her")]
+    [InlineData("Then why write it all down, Micah?", "Act One stops before Micah's promise in her room")]
+    [InlineData("I called her a whore", "in the truth arm Agatha never says the word in the cell")]
     [InlineData("His car's gone from the lot", "Micah came to the motel on foot")]
     [InlineData("the motel on the road", "the motel is down the hill from the convent")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
@@ -272,6 +275,25 @@ public class StoryIntegrityTests
         var sources = Code.Value.Append(new KeyValuePair<string, string>("dialogue/repentance.ink", InkText));
         var hits = sources.Where(kv => kv.Value.Contains(stale)).Select(kv => kv.Key).ToList();
         Assert.True(hits.Count == 0, $"\"{stale}\" in {string.Join(", ", hits)}: {reason}");
+    }
+
+    [Fact]
+    public void FirstInterludeDocsHandBackToTheFireEscape()
+    {
+        var row = File.ReadAllLines(Path.Combine(Root.Value, "docs/story-and-dialogue.md"))
+            .Single(l => l.StartsWith("| First interlude |"));
+        Assert.Contains("`motel_fire_escape` entry `interlude1`", row);
+        Assert.True(row.IndexOf("motel_fire_escape", StringComparison.Ordinal) < row.IndexOf("motel_night", StringComparison.Ordinal),
+            "EndFirst resumes Micah on the fire escape before his night in motel_night");
+    }
+
+    [Fact]
+    public void EleanorTakesTheThursdayBookInTheStudy()
+    {
+        var strike = InkText[InkText.IndexOf("=== coda_strike ===", StringComparison.Ordinal)..];
+        strike = strike[..strike.IndexOf("-> END", StringComparison.Ordinal)];
+        Assert.DoesNotContain("Thursday book", strike);
+        Assert.Contains("The Thursday book", Code.Value.Single(kv => kv.Key.EndsWith("MansionStudy.cs")).Value);
     }
 
     [Theory]
