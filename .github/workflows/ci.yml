@@ -75,6 +75,15 @@ jobs:
           GODOT_FLAGS: --rendering-driver opengl3
         run: timeout 30m xvfb-run -a -s "-screen 0 1280x720x24" tools/run/test.sh ${{ matrix.suite }}
 
+      # Fresh launches: each run loads a checkpoint the playthrough just kept (end of Act One, Club vestibule) and
+      # plays a route to "The End", so state a save forgets cannot survive in memory as it does in-process.
+      - name: Resume from saves in fresh launches
+        if: matrix.suite == 'playthrough'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          GODOT_FLAGS: --rendering-driver opengl3
+        run: timeout 20m xvfb-run -a -s "-screen 0 1280x720x24" tools/run/test.sh resume-act2 resume-act3 --no-clean
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
