@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionBedroom : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private static readonly Texture2D Shot = GD.Load<Texture2D>("res://assets/art/sprites/harrington_shot.png");
     private static readonly Texture2D EleanorShot = GD.Load<Texture2D>("res://assets/art/sprites/eleanor_shot.png");
     private static readonly Texture2D StruckDown = GD.Load<Texture2D>("res://assets/art/sprites/harrington_struck_down.png");

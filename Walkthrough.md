@@ -788,6 +788,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Outside of the Harrington mansion, behind the kitchen
 
+- Music: from here to the last mansion room, one unbroken dissonant thriller loop (double bass, pizzicato clusters,
+  bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
 - Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
   the taut wire; move the coal bin under the bell to reach its hammer.
 - **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
