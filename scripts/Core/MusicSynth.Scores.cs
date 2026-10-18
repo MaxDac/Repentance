@@ -14,6 +14,7 @@ public static partial class MusicSynth
         Track.ConventPiano => Convent,
         Track.OfficeJazz => Office,
         Track.LobbyPiano => Lobby,
+        Track.Investigation => Investigation,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -233,4 +234,25 @@ public static partial class MusicSynth
         }
         return sb.ToString();
     }
+    // ------------------------------------------------------------------ investigation
+
+    // Barely there, for poking around: twenty bars of 4/4 in E-flat minor that should melt into the room's silence. A
+    // double bass plucks one soft, low note every two beats and lets it ring into the next, never resting, in a
+    // wide, dark, damped room that blurs each pluck into a hum: two bars of E-flat minor, two falling to the dominant.
+    // Once round, a violin draws one slow, faint phrase at the very bottom of its register, whole bars to a note, and
+    // fades away. The last note is a low B-flat, so the loop falls back home to E-flat. Nothing tied to any place or
+    // scene. Both parts sit a little below their instruments' usual lowest notes, for a darker, quieter colour.
+    private const string InvestigationAsk = "Eb1:2 Bb1:2 Gb1:2 Db1:2 ";
+    private const string InvestigationAskAgain = "Eb1:2 Bb1:2 B0:2 Gb1:2 ";
+    private const string InvestigationReply = "Ab1:2 Eb1:2 Bb1:2 F1:2 ";
+    private const string InvestigationSettle = "Ab1:2 Eb1:2 F1:2 Bb0:2 ";
+
+    private static readonly Piece Investigation = new(80, new Hall(1.3, 0.88, 0.7, 0.4), new Part[]
+    {
+        new(Instrument.UprightBass, 0.5, 0.05,
+            InvestigationAsk + InvestigationReply + InvestigationAskAgain + InvestigationReply +
+            InvestigationAsk + InvestigationSettle + InvestigationAskAgain + InvestigationReply +
+            InvestigationAsk + InvestigationSettle),
+        new(Instrument.Violin, 0.12, -0.25, "r:40 Bb3:4 Gb3:4 Ab3:4 F3:4 Eb3:4"),
+    });
 }

@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Alley : Room
 {
+    public override Track? Music => InAct3 ? Track.Investigation : null;
+
     private static readonly Texture2D SalOut = GD.Load<Texture2D>("res://assets/art/sprites/sal_out.png");
     private static readonly Texture2D BartenderShot = GD.Load<Texture2D>("res://assets/art/sprites/bartender_shot.png");
 

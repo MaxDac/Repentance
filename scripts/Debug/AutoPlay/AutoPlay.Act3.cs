@@ -288,6 +288,7 @@ public partial class AutoPlay
 
         // ---- the alley: break the lamp, lure Sal out, knock him down, and bring Tony out
         await Shot("alley_act3");
+        Check(game.Music.Current == Track.Investigation, "the investigation music plays in the alley in Act 3");
         int stoneSteps = game.Sfx.Count(Sound.StepStone), knocks = game.Sfx.Count(Sound.Knock);
         int gunshots = game.Sfx.Count(Sound.Gunshot);
         await game.Perform(Verb.Talk, "back_door");

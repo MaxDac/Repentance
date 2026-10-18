@@ -17,6 +17,8 @@ public enum Track
     OfficeJazz,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
+    /// <summary>Investigation: soft pizzicato double bass in E-flat minor, with one violin phrase each time round.</summary>
+    Investigation,
 }
 
 public enum Instrument
@@ -87,6 +89,7 @@ public static partial class MusicSynth
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
         Track.LobbyPiano => -12f,
+        Track.Investigation => -20f,
         _ => -6f,
     };
 
