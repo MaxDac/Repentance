@@ -913,8 +913,8 @@ REGULAR_X = 442
 SMOKE_POSES = (
     {"elbow": (11, 136), "hand": (10, 150), "ember": 0, "puff": None},
     {"elbow": (13, 136), "hand": (9, 126), "ember": 0, "puff": None},
-    {"elbow": (11, 129), "hand": (3, 112), "ember": 1, "puff": None},
-    {"elbow": (11, 129), "hand": (3, 112), "ember": 2, "puff": None},
+    {"elbow": (11, 128), "hand": (3, 110), "ember": 1, "puff": None},
+    {"elbow": (11, 128), "hand": (3, 110), "ember": 2, "puff": None},
     {"elbow": (13, 136), "hand": (9, 126), "ember": 1, "puff": ((-3, 113, 2), (-6, 110, 2))},
     {"elbow": (11, 136), "hand": (10, 150), "ember": 0, "puff": ((-12, 101, 3), (-15, 96, 2), (-8, 106, 2))},
 )
@@ -954,30 +954,30 @@ def regular(img, pose=0):
     # head and neck under the brim: the street lamp on the left lights the cheek, nose and chin, the far side of
     # the face falls into shadow, and the brim throws a band of shade over the brow and eyes
     face, face_d, face_l, face_dd = SKIN
-    d.rectangle([cx - 2, 113, cx + 2, 118], fill=face_dd)
-    d.ellipse([cx - 4, 103, cx + 4, 115], fill=face)
-    d.chord([cx - 4, 103, cx + 4, 115], 270, 90, fill=face_d)
-    d.line([(cx - 3, 110), (cx - 3, 112)], fill=face_l)
-    d.line([(cx - 2, 113), (cx - 1, 114)], fill=face_l)
-    d.line([(cx + 3, 110), (cx + 1, 114)], fill=face_dd)
+    d.rectangle([cx - 2, 111, cx + 2, 117], fill=face_dd)
+    d.ellipse([cx - 4, 103, cx + 4, 113], fill=face)
+    d.chord([cx - 4, 103, cx + 4, 113], 270, 90, fill=face_d)
+    d.line([(cx - 3, 109), (cx - 3, 110)], fill=face_l)
+    d.point((cx - 2, 112), fill=face_l)
+    d.line([(cx + 3, 109), (cx + 3, 111)], fill=face_dd)
     # ear on the lit side
-    d.point((cx - 5, 109), fill=face)
-    d.point((cx - 5, 110), fill=face_d)
+    d.point((cx - 5, 108), fill=face)
+    d.point((cx - 5, 109), fill=face_d)
     # brim shadow, then brow ridge and eyes glinting out of it
-    d.rectangle([cx - 4, 106, cx + 4, 108], fill=face_dd)
-    d.line([(cx - 3, 108), (cx - 1, 108)], fill=hx("2a1a14"))
-    d.line([(cx + 1, 108), (cx + 3, 108)], fill=hx("2a1a14"))
-    d.point((cx - 3, 109), fill=hx("1a1210"))
-    d.point((cx - 2, 109), fill=hx("c8bcae"))
-    d.point((cx + 2, 109), fill=hx("1a1210"))
+    d.rectangle([cx - 4, 105, cx + 4, 107], fill=face_dd)
+    d.line([(cx - 3, 107), (cx - 1, 107)], fill=hx("2a1a14"))
+    d.line([(cx + 1, 107), (cx + 3, 107)], fill=hx("2a1a14"))
+    d.point((cx - 3, 108), fill=hx("1a1210"))
+    d.point((cx - 2, 108), fill=hx("c8bcae"))
+    d.point((cx + 2, 108), fill=hx("1a1210"))
     # nose: a lit ridge, a shadowed side and the nostril
-    d.line([(cx - 1, 109), (cx - 1, 111)], fill=face_l)
-    d.line([(cx, 110), (cx, 111)], fill=face_d)
-    d.point((cx, 112), fill=face_dd)
-    # mouth and the underside of the lower lip, then a lit chin
-    d.line([(cx - 2, 113), (cx + 1, 113)], fill=hx("5a3028"))
-    d.point((cx - 1, 114), fill=face_l)
-    d.point((cx - 1, 114), fill=face)
+    d.point((cx - 1, 108), fill=face_l)
+    d.point((cx - 1, 109), fill=face_l)
+    d.point((cx, 109), fill=face_d)
+    d.point((cx, 110), fill=face_dd)
+    # a flat, closed mouth, then a lit chin
+    d.line([(cx - 1, 111), (cx + 1, 111)], fill=hx("4a3028"))
+    d.point((cx - 1, 112), fill=face_l)
     # overcoat: hunched shoulders, a modest flare, belt, the lamp catching its left edge
     d.polygon([(cx - 8, 116), (cx + 8, 116), (cx + 8, 123), (cx + 9, 164), (cx - 9, 164), (cx - 8, 123)],
               fill=coat)
@@ -1046,20 +1046,32 @@ def regular(img, pose=0):
         d.point((hx_ - 3, hy + 1), fill=ember)
     # fedora, tipped forward and seen from above: a wide brim, the pinched crown sitting at its back, and the front
     # lip dipping low over the brow so the eyes look out of its shadow
-    hy0, by0 = -3, -6
-    d.ellipse([cx - 8, 101 + by0, cx + 8, 111 + by0], fill=hat_d)
-    d.arc([cx - 8, 101 + by0, cx + 8, 111 + by0], 160, 300, fill=hat_l)
-    d.polygon([(cx - 5, 102 + by0), (cx - 5, 98 + hy0), (cx - 4, 95 + hy0), (cx + 4, 95 + hy0), (cx + 5, 98 + hy0),
-               (cx + 5, 102 + by0)], fill=hat)
-    d.polygon([(cx - 5, 102 + by0), (cx - 5, 98 + hy0), (cx - 4, 95 + hy0), (cx - 2, 95 + hy0), (cx - 3, 98 + hy0),
-               (cx - 3, 102 + by0)], fill=mix(hat, hat_l, 0.45))
-    d.ellipse([cx - 4, 95 + hy0, cx + 4, 100 + hy0], fill=mix(hat, hat_l, 0.3))
-    d.line([(cx, 95 + hy0), (cx, 99 + hy0)], fill=hat_d)
-    d.point((cx - 1, 96 + hy0), fill=hat_l)
-    d.rectangle([cx - 5, 102 + by0 - 2, cx + 5, 102 + by0], fill=band)
-    d.chord([cx - 8, 101 + by0, cx + 8, 112 + by0], 0, 180, fill=hat_d)
-    d.arc([cx - 8, 101 + by0, cx + 8, 112 + by0], 25, 155, fill=hx("34302c"))
-    d.line([(cx - 7, 107 + by0), (cx - 4, 109 + by0)], fill=mix(hat_d, hat_l, 0.5))
+    rim, crease, ribbon = hx("a89a88"), hx("141214"), hx("4a3a34")
+    # a dark silhouette first so the hat reads against the night street
+    d.ellipse([cx - 10, 97, cx + 10, 106], fill=outline)
+    d.polygon([(cx - 6, 100), (cx - 6, 94), (cx - 4, 92), (cx + 4, 92), (cx + 6, 94), (cx + 6, 100)], fill=outline)
+    # a flat brim seen slightly from above, its back edge catching the lamp
+    d.ellipse([cx - 9, 98, cx + 9, 104], fill=hat_d)
+    d.arc([cx - 9, 98, cx + 9, 104], 180, 270, fill=hat_l)
+    # crown: lit left flank, shaded right flank, and the centre crease with its two front pinches
+    d.polygon([(cx - 5, 100), (cx - 5, 94), (cx - 3, 93), (cx + 3, 93), (cx + 5, 94), (cx + 5, 100)], fill=hat)
+    d.polygon([(cx - 5, 100), (cx - 5, 94), (cx - 3, 93), (cx - 2, 93), (cx - 3, 94), (cx - 3, 100)], fill=hat_l)
+    d.line([(cx + 4, 94), (cx + 4, 97)], fill=hat_d)
+    d.line([(cx, 93), (cx, 95)], fill=crease)
+    d.point((cx - 2, 95), fill=hat_d)
+    d.point((cx + 2, 95), fill=hat_d)
+    d.point((cx - 4, 94), fill=rim)
+    d.point((cx - 3, 93), fill=rim)
+    # band: a dark ribbon edged by a lit top line, its bow on the left
+    d.rectangle([cx - 5, 97, cx + 5, 99], fill=band)
+    d.line([(cx - 5, 97), (cx + 4, 97)], fill=ribbon)
+    d.point((cx - 4, 98), fill=ribbon)
+    d.point((cx - 4, 99), fill=ribbon)
+    # front brim tipped low over the brow, its lip lit along the edge
+    d.chord([cx - 9, 98, cx + 9, 106], 0, 180, fill=hat_d)
+    d.line([(cx - 8, 102), (cx - 4, 104)], fill=rim)
+    d.line([(cx - 3, 105), (cx + 3, 105)], fill=hat)
+    d.line([(cx + 4, 104), (cx + 7, 102)], fill=hat)
     if p["puff"]:
         for px_, py_, r in p["puff"]:
             _puff(d, cx + px_, py_, r)
@@ -1238,8 +1250,11 @@ def build_florist():
     src = Image.blend(variants["base"], variants["grille"], 0.5)
     src.paste(frames[0][0].crop(box), box[:2])
     cx = REGULAR_X
-    face = frames[0][0].crop((cx - 6, 106, cx + 6, 117)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    face = frames[0][0].crop((cx - 6, 104, cx + 6, 114)).quantize(6, method=Image.Quantize.MEDIANCUT)
     skin = [tuple(face.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
+    # likewise the fedora's few greys, so its lit flank, rim and crease survive as separate tones
+    hat = frames[0][0].crop((cx - 10, 91, cx + 11, 107)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    skin += [tuple(hat.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
     pal = (palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45),
                                                                     hx("ccc3a0")] + skin)
     px = {k: pixelize(v, pal) for k, v in variants.items()}
