@@ -64,8 +64,8 @@ public sealed partial class Playthrough
             }, 600, 0.05);
             await night;
             await WaitIdle();
-            Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor refuses Agatha (saved)");
-            Check(dried, "the rain stops on the cell window when she refuses");
+            Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor tells Agatha the truth (saved)");
+            Check(dried, "the rain stops on the cell window when she tells the truth");
             Expect("MotelNight", "the next morning, the motel");
         });
         await Beat("act_two_opening", async () =>
@@ -129,9 +129,11 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("caleb_club"), "Caleb on the Club");
             await Do(Verb.Walk, "convent");
             Check(Gs.HasFlag("nun_club_asked"), "the sister knows nothing");
-            await Do(Verb.UseItem, "nun", "revolver");
+            var confession = await Spoken(() => Do(Verb.UseItem, "nun", "revolver"));
             await WaitIdle();
             Check(Gs.HasFlag("nun_threatened"), "the sister names Harrington");
+            Check(confession.Any(l => l.Contains("I failed her")) && !confession.Any(l => l.Contains("Jezebel")),
+                "told the truth, Agatha confesses she failed her and never calls her a Jezebel");
             await Do(Verb.Walk, "church");
             Check(Gs.HasFlag("church_before_office"), "Caleb's warning");
             Expect("ChicagoMap", "back to the map");

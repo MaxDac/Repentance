@@ -138,6 +138,26 @@ jobs:
           # Linux ships the desktop entry, its icons and the installer next to the binary (as release.yml does).
           if [ "${{ matrix.platform }}" = linux ]; then cp -r dist/linux/. build/linux/; fi
 
+      # The same packages release.yml publishes next to the zips.
+      - name: Build the AppImage
+        if: matrix.platform == 'linux'
+        run: tools/package/appimage.sh build/linux build/Repentance-ci-linux-x86_64.AppImage
+
+      - name: Build the Windows installer
+        if: matrix.platform == 'windows'
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nsis > /dev/null
+          tools/package/windows-installer.sh build/windows 0.0.0 build/Repentance-ci-windows-x86_64-setup.exe
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.platform == 'windows'
+        with:
+          name: windows-installer
+          path: build/Repentance-ci-windows-x86_64-setup.exe
+          if-no-files-found: error
+
       - name: Windows icon is embedded in the .exe
         if: matrix.platform == 'windows'
         shell: python
@@ -181,15 +201,17 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
 
+      # Runs the exported build through the AppImage (extract-and-run: runners have no FUSE).
       - name: Walk test on the exported build
         if: matrix.platform == 'linux'
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
+          APPIMAGE_EXTRACT_AND_RUN: '1'
         run: |
           set -uo pipefail
           mkdir -p logs
           log=logs/export-walk.log
-          timeout 15m xvfb-run -a -s "-screen 0 1280x720x24" build/linux/Repentance.x86_64 \
+          timeout 15m xvfb-run -a -s "-screen 0 1280x720x24" build/Repentance-ci-linux-x86_64.AppImage \
             --rendering-driver opengl3 --audio-driver Dummy -- --walk-test 2>&1 | tee "$log"
           status=${PIPESTATUS[0]}
           ok=0
@@ -207,10 +229,40 @@ jobs:
           path: logs/
           if-no-files-found: ignore
 
+  windows-installer:
+    needs: export
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+      - name: Install, check and uninstall silently
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = "$env:LOCALAPPDATA\Programs\Repentance"
+          $menu = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Repentance.lnk"
+          $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Repentance'
+          $p = Start-Process .\Repentance-ci-windows-x86_64-setup.exe -ArgumentList '/S' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "installer exited with $($p.ExitCode)" }
+          foreach ($f in "$dir\Repentance.exe", "$dir\Uninstall.exe", $menu) {
+            if (-not (Test-Path $f)) { throw "missing after install: $f" }
+          }
+          if (-not (Get-ChildItem $dir -Directory -Filter 'data_Repentance_*')) { throw 'missing the .NET data folder' }
+          if ((Get-ItemProperty $key).DisplayVersion -ne '0.0.0') { throw 'uninstall entry missing or wrong version' }
+          Start-Process "$dir\Uninstall.exe" -ArgumentList '/S' -Wait
+          # The uninstaller re-launches itself from %TEMP%; wait for it to finish.
+          for ($i = 0; $i -lt 60 -and (Test-Path $dir); $i++) { Start-Sleep 1 }
+          foreach ($f in $dir, $menu, $key) {
+            if (Test-Path $f) { throw "left behind after uninstall: $f" }
+          }
+          Write-Output 'install and uninstall OK'
+
   # The single check to require on main (branch protection / ruleset): green only when every job above passed.
   ci-ok:
     if: always()
-    needs: [unit-tests, art-tests, godot-tests, export]
+    needs: [unit-tests, art-tests, godot-tests, export, windows-installer]
     runs-on: ubuntu-latest
     steps:
       - name: All CI jobs passed
