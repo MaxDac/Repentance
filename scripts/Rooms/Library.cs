@@ -62,6 +62,9 @@ public partial class Library : Room
             case ("globe", Verb.Hand):
                 await Say("I spun it. It stopped on the Pacific. Story of my life: lots of water, no direction.");
                 return true;
+            case ("side_table", Verb.Hand):
+                await Say("One glass would steady my hands. Then it'd be two, and I'd forget why I came.");
+                return true;
             case ("desk", Verb.Hand or Verb.Look):
                 if (!State.HasFlag("librarian_refused"))
                 {

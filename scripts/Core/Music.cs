@@ -43,9 +43,10 @@ public partial class Music : Node
     {
         _player = new AudioStreamPlayer { Name = "Player", Bus = BusName, ProcessMode = ProcessModeEnum.Always };
         AddChild(_player);
-        // the renders run on worker threads, so the piano recordings are read here, on the main thread
-        PianoRecordings.Use(name => FileAccess.GetFileAsBytes($"res://{PianoRecordings.Folder}/{name}"));
-        foreach (var midi in PianoRecordings.Needed().Keys) PianoRecordings.Get(midi);
+        // the renders run on worker threads, so the instrument recordings are read here, on the main thread
+        Recordings.Use(path => FileAccess.GetFileAsBytes($"res://{path}"));
+        foreach (var instrument in Recordings.Instruments)
+            foreach (var midi in Recordings.Needed(instrument).Keys) Recordings.Get(instrument, midi);
         foreach (var track in System.Enum.GetValues<Track>()) RenderAsync(track);
     }
 
