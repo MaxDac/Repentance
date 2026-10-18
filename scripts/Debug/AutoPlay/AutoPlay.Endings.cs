@@ -665,9 +665,32 @@ public partial class AutoPlay
         int endingNumber = Enumerable.Range(1, 11).FirstOrDefault(n => gs.HasFlag($"ending_{n}"));
         bool keepJournal = Endings.KeepsJournal(endingNumber);
         bool dismissed = endingNumber is >= 2 and <= 5;
-        await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 120);
+        bool sawVows = false, vowsBesideSpeech = false;
+        bool TheEndOrVows()
+        {
+            if (_game.Hud.CurrentCloseUp == CloseUps.Vows && _game.Hud.InsetName == "vows_photo" && _game.Hud.InsetDrawn)
+            {
+                sawVows = true;
+                var photo = _game.Hud.InsetRect;
+                if (_game.Hud.SpeechVisible && photo.End.X < 480 / 2 && !photo.Intersects(_game.Hud.SpeechRect)
+                    && _game.Hud.SpeechRect.Position.X > photo.End.X)
+                    vowsBesideSpeech = true;
+            }
+            return _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End";
+        }
+        await Until(() => TheEndOrVows() || vowsBesideSpeech, 120);
+        if (vowsBesideSpeech && !_vowsShot)
+        {
+            _vowsShot = true;
+            await Shot("vows_photo");
+        }
+        await Until(TheEndOrVows, 120);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End",
             $"{ending}: final attic caption");
+        Check(sawVows == (endingNumber == 1), $"{ending}: the vow-renewal photo only pops up in ending 1's epilogue");
+        if (endingNumber == 1)
+            Check(vowsBesideSpeech, $"{ending}: the photo sits on the left with Daniel's lines beside it");
+        Check(!_game.Hud.InsetVisible, $"{ending}: no close-up left over on \"The End\"");
         Check(gs.HasItem("journal") == keepJournal,
             $"{ending}: Daniel {(keepJournal ? "keeps the journal for Leo" : "puts the journal back")}");
         var story = GD.Load<GodotInk.InkStory>(DialogueManager.StoryPath);
