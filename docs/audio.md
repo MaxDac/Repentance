@@ -75,7 +75,9 @@ background. It plays on the Music bus, so it follows the music volume; rain ambi
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
 moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries
 on from the same moment. Tracks are
-about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
+about a minute, rendered one at a time on a single background worker queued in `Music._Ready` (a track a room asks
+for moves to the front of the queue; `--no-music` skips rendering and playback); rendering runs the loop twice and
+keeps the second
 pass so filters and reverb have no seam.
 
 A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening
