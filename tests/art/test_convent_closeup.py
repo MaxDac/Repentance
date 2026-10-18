@@ -74,20 +74,24 @@ class ConventCloseupTests(unittest.TestCase):
         colours = {tuple(c) for c in np.concatenate([left.reshape(-1, 3), right.reshape(-1, 3)])}
         self.assertLessEqual(len(colours), closeup.COLOURS)
 
-    def test_a_small_scar_crosses_micahs_bottom_lip(self):
-        source = Image.open(closeup.MICAH_SRC).convert("RGB")
-        scarred = np.asarray(closeup.lip_scar(source, *closeup.MICAH_SCAR)).astype(int)
-        changed = np.argwhere((scarred != np.asarray(source)).any(axis=2))
-        (top, left), (bottom, right) = changed.min(axis=0), changed.max(axis=0)
-        self.assertLessEqual(bottom - top, 40, "a short scar, not a gash")
+    def test_a_small_red_cut_crosses_micahs_bottom_lip(self):
+        source = Image.open(closeup.MICAH_SRC)
+        cut, _ = closeup.lip_cut(source.size, *closeup.MICAH_CUT)
+        (top, left), (bottom, right) = (lambda p: (p.min(axis=0), p.max(axis=0)))(np.argwhere(np.asarray(cut)))
+        self.assertLessEqual(bottom - top, 40, "a short cut, not a gash")
         self.assertLessEqual(right - left, 25, "a thin line")
         self.assertTrue(abs(top - 400) <= 6 and closeup.MICAH_FACE_X - 40 < left < closeup.MICAH_FACE_X,
                         "from the mouth line, just off centre")
-        with unittest.mock.patch.object(closeup, "lip_scar", lambda img, *_: img):
+        with unittest.mock.patch.object(closeup, "stamp_cut", lambda art, _: art):
             plain = closeup.convent_closeup(source, Image.open(closeup.ELEANOR_SRC))
-        diff = (np.asarray(self.panel) != np.asarray(plain)).any(axis=2)
-        self.assertTrue(diff[:, :BAR_X].any(), "the scar survives the reduction")
-        self.assertLess(diff[:, :BAR_X].sum(), 200, "and stays small in the panel")
+        a, p = np.asarray(self.panel), np.asarray(plain)
+        diff = (a != p).any(axis=2)
+        self.assertFalse(diff[:, BAR_X:].any(), "Eleanor is untouched")
+        self.assertTrue(diff.any(), "the cut survives the reduction")
+        self.assertLess(diff.sum(), 200, "and stays small in the panel")
+        reds = {tuple(c) for c in a[diff]}
+        self.assertLessEqual(reds, {closeup.CUT, closeup.CUT_EDGE}, "only the cut's own reds change")
+        self.assertIn(closeup.CUT, reds, "fresh red, not a pale line")
 
     def test_micah_on_the_left_in_his_yellow_coat(self):
         left, _ = halves(self.panel)

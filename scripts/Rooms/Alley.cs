@@ -21,9 +21,10 @@ public partial class Alley : Room
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
 
-    /// <summary>Act 1: Sal's place by Micah's head, and the spot a step further on that he kicks from.</summary>
+    /// <summary>Act 1: Sal's place by Micah's head, and the spot he kicks from: behind Micah, half turned to the
+    /// screen, so his right foot goes into Micah's belly out of sight behind Micah's body.</summary>
     private static readonly Vector2 SalStands = new(242, 224);
-    private static readonly Vector2 SalKicks = new(272, 228);
+    private static readonly Vector2 SalKicks = new(250, 220);
 
     /// <summary>Seconds into sal_kick when his toe lands: the idle and wind-up frames.</summary>
     private const double KickLands = 0.45;
@@ -95,7 +96,7 @@ public partial class Alley : Room
             await Wait(0.8);
             if (FindActor("sal") is { } bouncer)
             {
-                // so it's clear what happened out here: two in the gut for the road, then Sal steps back
+                // so it's clear what happened out here: from behind Micah, two in the gut, then Sal steps back
                 await bouncer.MoveTo(SalKicks, 50);
                 bouncer.FaceLeft(true);
                 for (int kick = 0; kick < 2; kick++)
@@ -192,7 +193,8 @@ public partial class Alley : Room
         return false;
     }
 
-    /// <summary>One kick: Sal swings his foot under Micah's chest, and Micah doubles up and sags back onto his forearms.</summary>
+    /// <summary>One kick: from behind Micah, facing the screen, Sal drives his foot into Micah's belly, and Micah
+    /// doubles up and sags back onto his forearms.</summary>
     private async Task<bool> Kick(Actor sal)
     {
         var swing = sal.PlayPose("sal_kick");

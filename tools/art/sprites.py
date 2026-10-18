@@ -460,13 +460,13 @@ def kneeling_figure(spec, joints):
     return action_figure(spec, joints, chest_down=down, toes_tucked=down)
 
 
-# Sal's kick, facing right (the alley flips him): (yaw, legs, lean) after his idle frame. He turns side-on and draws
-# the near leg back, drives the toe forward and low under a kneeling man's chest, then lets the leg drop back.
-# Hands stay in his pockets throughout.
+# Sal's kick, standing behind a kneeling man and half turned to the screen, facing right (the alley flips him so the
+# kicking leg is his right): (yaw, legs, lean) after his idle frame. He draws the leg back, drives the toe forward and
+# down into the man's belly (the man's body hides the foot), then lets the leg drop back. Hands stay in his pockets.
 SAL_KICK = [
-    (70, {1: (2, 4, 0), -1: (-28, 50, -20)}, 4.0),
-    (80, {1: (4, 6, 0), -1: (50, 22, 4)}, -8.0),
-    (80, {1: (4, 6, 0), -1: (14, 30, -4)}, -3.0),
+    (30, {1: (2, 4, 0), -1: (-28, 50, -20)}, 4.0),
+    (30, {1: (4, 6, 0), -1: (50, 22, 4)}, -8.0),
+    (30, {1: (4, 6, 0), -1: (14, 30, -4)}, -3.0),
 ]
 # Micah on his knees taking the kick: the back hunches up, the head tucks in and the near hand comes off the cobbles
 # to clutch his stomach, then he sags back down onto his forearms.

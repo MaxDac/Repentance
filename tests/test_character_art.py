@@ -404,7 +404,7 @@ class CharacterArtTests(unittest.TestCase):
             self.assertEqual(standing.tobytes(), idle.tobytes(), "start and end on Sal's idle pose")
         self.assertEqual(len({frame.tobytes() for frame in frames[1:4]}), 3, "wind-up, strike and recoil differ")
         strike = np.array(frames[2])[..., 3]
-        self.assertGreater(np.nonzero(strike.any(axis=0))[0].max(), width // 2 + 24, "the foot swings well out front")
+        self.assertGreater(np.nonzero(strike.any(axis=0))[0].max(), width // 2 + 16, "the foot drives out in front")
         self.assertAlmostEqual(sum(f["seconds"] for f in clip["frames"][:2]), 0.45, msg="the toe lands 0.45 s in")
 
     def test_kicked_micah_doubles_up_and_settles_back_on_his_knees(self):
