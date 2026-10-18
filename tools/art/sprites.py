@@ -737,6 +737,16 @@ def build_drinking():
 
 # Micah takes Tony's bathtub gin from the bar, facing right: (hand height, reach forward, tip, gin left, seconds). He picks the glass up off the counter, raises it, tips it back at his lips, and sets the empty glass down.
 GIN_KEYS = [
+    (0.21, 0.25, 0.0, True, 0.3),
+    (0.2, 0.18, 0.0, True, 0.16),
+    (0.185, 0.12, 0.4, True, 0.14),
+    (0.17, 0.1, 1.0, True, 1.1),
+    (0.185, 0.12, 0.4, False, 0.16),
+    (0.2, 0.18, 0.0, False, 0.16),
+    (0.21, 0.25, 0.0, False, 0.35),
+]
+# Eleanor's drink keeps the pick-up height that matches her dressing-table glass.
+ELEANOR_GIN_KEYS = [
     (0.27, 0.25, 0.0, True, 0.3),
     (0.26, 0.18, 0.0, True, 0.16),
     (0.2, 0.12, 0.4, True, 0.14),
@@ -928,7 +938,7 @@ def build_smoke():
 
 def eleanor_drink_strip():
     frames, seconds = [(figure(ELEANOR_GOWN_NPC, pose(90), FW, FH), (FW / 2, 18))], [0.3]
-    for height, reach, tip, full, duration in GIN_KEYS:
+    for height, reach, tip, full, duration in ELEANOR_GIN_KEYS:
         ps = pose(90, arms={1: ("hold", height, reach, tip), -1: ("side", 0, 0, 0)}, cup=1, glass="gin", full=full)
         frames.append((figure(ELEANOR_GOWN_NPC, ps, FW, FH), (FW / 2, 18)))
         seconds.append(duration)
