@@ -279,7 +279,7 @@ public partial class AutoPlay
             "Act 2 opens with whiskey and the recorded take-ring choice");
         Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
         await Until(() => game.Room?.Name == "ChurchExterior");
-        Check(game.Music.Current == null, "no organ out on the cathedral steps");
+        Check(game.Music.Current == Track.StreetTraffic, "traffic, not the organ, out on the cathedral steps");
         Check(gs.HasItem("mirror") && gs.HasItem("cloth"), "reading again leads back to 1927 with Micah's things, Eleanor's cloth too");
         Check(gs.Inventory.Take(2).SequenceEqual(MicahKit.Pinned) &&
             gs.Inventory.Skip(2).All(i => MicahKit.KeptInAct(2, i)) &&
@@ -320,6 +320,7 @@ public partial class AutoPlay
 
         var libraryLines = await Listen(game, game.Perform(Verb.Walk, "library"));
         Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+        Check(game.Music.Current == Track.Investigation, "the investigation music plays in the library");
         Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
             "Micah is relieved Rose isn't on duty, but she's back on his mind");
         Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");
@@ -402,7 +403,7 @@ public partial class AutoPlay
         await game.Wait(1);
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
-        Check(game.Music.Current == null, "the strings stop out on the street");
+        Check(game.Music.Current == Track.StreetTraffic, "the strings give way to traffic out on the street");
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("The pavement on Hubbard Street", StringComparison.Ordinal));
         Check(!game.Hud.InsetVisible, "Micah's first line on the pavement comes before his close-up");
         await Until(() => game.Hud.InsetVisible);

@@ -13,6 +13,8 @@ public partial class Speakeasy : Room
     /// <summary>Set while the door talk runs: the talk sets "sal_passed", and Sal then walks aside instead of jumping.</summary>
     private bool _talkingToSal;
 
+    public override Track? Music => Track.BlueLanternJazz;
+
     protected override void OnRefresh()
     {
         if (!_talkingToSal && FindActor("sal") is { } sal && (State.HasFlag("sal_passed") || Interlude))
@@ -98,7 +100,7 @@ public partial class Speakeasy : Room
         State.SetFlag("seen_lantern");
         await Game.Run(async () =>
         {
-            await Think("Past the iced roses, a steel door, then smoke and a muted trumpet. The Blue Lantern.");
+            await Think("Past the iced roses, a steel door, then smoke and a hot cornet somewhere behind a curtain. The Blue Lantern.");
             await Say("sal", "Members only, pal.");
             await Think("Gin, jazz, and a bouncer built like a bank vault.");
         });

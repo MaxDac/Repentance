@@ -16,6 +16,9 @@ public partial class Prison : Room
     /// <summary>No rain outside the window when Micah turned himself in (ending 6) or Eleanor confesses (ending 9).</summary>
     protected override bool RainStopped => State.HasFlag("ending_6") || State.HasFlag("ending_9");
 
+    /// <summary>No music in the visiting room, only near silence: a guard's few steps, a chair moved.</summary>
+    public override Track? Music => Track.PrisonParlour;
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "eleanor")

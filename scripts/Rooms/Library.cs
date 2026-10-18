@@ -5,6 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>The public library, where Rose Jones works.</summary>
 public partial class Library : Room
 {
+    public override Track? Music => Track.Investigation;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_library_night")) return;
