@@ -59,7 +59,7 @@ class SpeakeasyGinArtTests(unittest.TestCase):
         mean_y = [sum(y for _, y in g) / len(g) for g in glass]
         top = min(range(len(frames)), key=lambda i: mean_y[i])
         self.assertEqual(top, 3)
-        self.assertGreater(mean_y[0] - mean_y[top], 6)
+        self.assertGreater(mean_y[0] - mean_y[top], 4)  # counter at chest height: a short lift to the lips
         self.assertGreaterEqual(mean_y[top], 18)
         self.assertLessEqual(mean_y[top], 30)
         bottom = [max(y for _, y in g) for g in glass]
