@@ -45,7 +45,7 @@ public partial class ConventRoad : Room
     }
 
     /// <summary>Seconds between drags on the cigarette while he talks.</summary>
-    public const double DragEvery = 5;
+    public const double DragEvery = 10;
 
     /// <summary>Drags Micah has taken on his cigarette since the room loaded.</summary>
     public int Drags { get; private set; }

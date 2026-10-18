@@ -137,7 +137,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
-  the entrance), and on to the next scene.
+  the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
+  beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
+  the same blackout.
 
 #### Street behind the club (the alley)
 
@@ -187,7 +189,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
   with his own lighter (new smoking strip: head bowed, both hands cupped round the flame against the wind, a gust
-  first blows it out). He holds the lit cigarette while he thinks and, every 5 seconds while he talks, takes a drag
+  first blows it out). He holds the lit cigarette while he thinks and, every 10 seconds while he talks, takes a drag
   (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
 - A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:

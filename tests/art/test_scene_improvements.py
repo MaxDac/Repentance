@@ -164,9 +164,9 @@ class SceneImprovementsTests(unittest.TestCase):
         image = Image.new("RGB", (480, 240))
         library.ladder(image)
         for y in range(38, 175, 11):
-            x = int(420 - 29 * (y - 26) / 155) + 8
+            x = int(library.LADDER_X - 29 * (y - 26) / 155) + 8
             self.assertEqual(image.getpixel((x, y)), common.hx("b8945e"))
-        for x in (391, 409):
+        for x in (library.LADDER_X - 29, library.LADDER_X - 11):
             self.assertNotEqual(image.getpixel((x, 185)), (0, 0, 0))
 
     def test_eleanor_sheet_covers_lower_torso_not_neck(self):
