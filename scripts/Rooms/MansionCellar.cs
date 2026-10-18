@@ -12,6 +12,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionCellar : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private const string EscapeRefusal = "Not back in there. Somebody's on the stairs by now.";
 
     private bool Lit => State.HasFlag("cellar_lit");

@@ -390,8 +390,11 @@ public partial class AutoPlay
                     "a save in the coda loads back as Eleanor, with the old man down");
                 await Shot("eleanor_struck");
             }
-            await game.Perform(Verb.Walk, "door");
+            var intoStudy = await Spoken(async () => { await game.Perform(Verb.Walk, "door"); await WaitIdle(game); });
             Check(game.Room?.Name == "MansionStudy", $"{label}: through his study");
+            Check(intoStudy.Any(l => l.Contains("only ever seen it from the doorway")) &&
+                  intoStudy.Any(l => l.Contains("The Thursday book: names, stations, prices")),
+                $"{label}: she takes the Thursday book once she's in the study, not from the bedroom");
             if (fire)
             {
                 // the other way down: the panel behind his bar, open since Micah came up the bootleggers' stair

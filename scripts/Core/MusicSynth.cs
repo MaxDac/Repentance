@@ -19,6 +19,9 @@ public enum Track
     LobbyPiano,
     /// <summary>Joliet's visiting room: no music, near silence - a few footsteps, a chair moved.</summary>
     PrisonParlour,
+    /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
+    /// and one brief, piercing trumpet stab.</summary>
+    MansionDread,
 }
 
 public enum Instrument
@@ -46,6 +49,10 @@ public enum Instrument
     /// <summary>The noises of a room, one per pitch like <see cref="Drums"/>: C2 room tone (held), D2 a boot on
     /// concrete, E2 a chair dragged (held), F2 a chair set down.</summary>
     Foley,
+    /// <summary>Plucked string chords, pizzicato, on cello and viola strings.</summary>
+    Pizzicato,
+    /// <summary>An open trumpet, unmuted, hard-tongued and piercing.</summary>
+    OpenTrumpet,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -53,8 +60,8 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
-/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room, and one room's noises
-/// scored the same way (<see cref="Instrument.Foley"/>). Each track renders exactly
+/// strings, pizzicato, pipe organ, piano, muted and open trumpet, plucked bass, brushed drums) in a reverberant room,
+/// and one room's noises scored the same way (<see cref="Instrument.Foley"/>). Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -94,6 +101,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => -15f,
         Track.LobbyPiano => -12f,
         Track.PrisonParlour => -12f,
+        Track.MansionDread => -8.5f,
         _ => -6f,
     };
 

@@ -15,6 +15,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => Office,
         Track.LobbyPiano => Lobby,
         Track.PrisonParlour => Parlour,
+        Track.MansionDread => Mansion,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -248,5 +249,36 @@ public static partial class MusicSynth
         new(Instrument.Foley, 0.16, 0, "C2:60"),
         new(Instrument.Foley, 0.45, 0.55, "r:8 " + Steps("D2", 0.6, 5) + "r:27 " + Steps("D2", 0.6, 5)),
         new(Instrument.Foley, 0.5, -0.2, "r:18 E2:1.2 F2:2 r:26 E2:0.8 F2:2"),
+    });
+
+    // ------------------------------------------------------------------ the mansion
+
+    // A dark, dissonant thriller loop for the Harrington house at night, fourteen slow bars of 4/4 with no key to stand
+    // on, kept low and in the background. The double bass bows a grinding semitone, E against F, with tritone lurches
+    // to Bb and B, never letting go, so something sounds on every beat; it quickens in bars 9 and 10 like a pulse.
+    // Over it, pizzicato chords made of minor seconds and tritones fall on the beat but at uneven gaps, an irregular
+    // heartbeat that stutters into every beat before the hush. The cello bows long low arcs above them, creeping by
+    // semitones. Then, once and only once, as the hush begins, an open trumpet stabs a high cluster, F5 B5 C6, gone in
+    // a quarter of a beat.
+    private const string ToneRow = "E2+Bb2+F3";
+    private const string Fist = "F2+B2+E3";
+    private const string Claw = "G2+C#3+Ab3";
+    private const string Needle = "D#3+E3+A3";
+
+    private static readonly Piece Mansion = new(56, new Hall(1.5, 0.93, 0.5, 0.42), new Part[]
+    {
+        new(Instrument.DoubleBass, 0.95, 0.1,
+            "E1:4 F1:4 E1:4 F1:2 E1:2 Bb1:6 A1:2 E1:4 F1:4 E1:2 F1:2 E1:2 F1:2 Bb1:4 B1:4 E1:4 F1:4"),
+        new(Instrument.Pizzicato, 0.7, -0.35,
+            $"r:1 {ToneRow}:2 {Fist}:1 r:2 {ToneRow}:2 " +
+            $"{ToneRow}:1 {Claw}:3 r:1 {ToneRow}:1 {ToneRow}:2 " +
+            $"{Fist}:2 r:1 {ToneRow}:1 {Needle}:3 r:1 " +
+            $"r:2 {ToneRow}:1 {Fist}:1 {ToneRow}:3 r:1 " +
+            $"{Claw}:2 {ToneRow}:1 {ToneRow}:1 {ToneRow}:2 r:2 " +
+            $"{ToneRow}:1 {Fist}:1 {ToneRow}:1 {Fist}:1 {ToneRow}:1 {Fist}:1 r:2 " +
+            $"r:3 {Needle}:2 r:3"),
+        new(Instrument.Cello, 0.65, 0.3,
+            "r:4 Bb2:6 A2:4 r:2 C3:4 B2:4 F3:6 E3:4 r:2 F3:4 Bb3:6 A3:4 r:2 E3:4"),
+        new(Instrument.OpenTrumpet, 0.6, -0.1, "r:50 F5+B5+C6:1/4 r:5.75"),
     });
 }

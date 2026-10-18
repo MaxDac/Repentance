@@ -21,9 +21,10 @@ CFL = 200  # where the cellar's back wall meets the floor
 LANTERN_HOOK = (179, 108)
 STAIR_NAIL = (388, 140)
 CAN = (305, 26, 46)  # world position of the kerosene can on the crates
-BARREL = (324, 372, 224, 13)  # the lying barrel of whiskey: left end, right end, axis row and radius
-BARREL_FEET = 239  # the floor row under its chocks, its y-sort point
-POOL = (372, 246)  # centre of the whiskey pool in front of its spigot
+# the lying barrel of whiskey, in cellar (Room3D) world units: centre of its footprint on the floor (x, z), length,
+# head and belly radii, the chocks' lift, and its axis heading at 45 degrees, from the tail at the back left to the
+# head and spigot turned out to the room at the front right
+BARREL = (318.0, 236.0, 44.0, 11.0, 13.0, 2.0, 45.0)
 CELLAR_FIRE_FRAMES = 8
 
 
@@ -64,63 +65,147 @@ def _kerosene_can(d, x, y):
 WHISKEY_D, WHISKEY, WHISKEY_L = hx("6a3410"), hx("b06a1c"), hx("f0c060")
 
 
-def _lying_barrel(img, xl, xr, cy, r, open=False):
-    """An oak barrel on its side, axis running left-right: bulging staves shaded round the belly, iron hoops, and the
-    head (with its planks, chime and a brass spigot) showing as an ellipse at the right end. Opened, the spigot is
-    turned along the pipe and the old man's whiskey runs out of it in a thin amber rope."""
-    shadow(img, "ellipse", [xl - 2, cy + r - 4, xr + 6, cy + r + 5], 0.6, 3)
+class _Barrel:
+    """The barrel's geometry in the cellar's perspective: its frame, the bulge of the staves and the spigot."""
+
+    def __init__(self, x, z, length, r_end, r_mid, lift, heading):
+        a = math.radians(heading)
+        self.R = Room3D(CFL, 240, 100)
+        self.len, self.r_end, self.r_mid = length, r_end, r_mid
+        self.A = np.array([math.cos(a), 0.0, math.sin(a)])  # along the axis, tail to head
+        self.N = np.array([math.sin(a), 0.0, -math.cos(a)])  # level, across the axis
+        self.UP = np.array([0.0, 1.0, 0.0])
+        self.C = np.array([x, lift + r_mid, z])
+
+    def proj(self, p):
+        p = np.asarray(p, float)
+        s = self.R.s(p[..., 2])
+        return np.stack([self.R.vx + (p[..., 0] - self.R.vx) * s, self.R.vy + (self.R.floor - self.R.vy) * s
+                         - p[..., 1] * s], -1)
+
+    def radius(self, u):
+        t = 2 * u / self.len
+        return self.r_end + (self.r_mid - self.r_end) * (1 - t * t)
+
+    def top(self, u):
+        """Screen point on the crown of the staves at u along the axis."""
+        return self.proj(self.C + self.A * u + self.UP * self.radius(u) * 0.97)
+
+    def spigot(self):
+        base = self.C + self.A * self.len / 2 - self.UP * self.r_end * 0.5
+        return base, base + self.A * 4.5
+
+    def floor_under(self, p):
+        return self.proj(np.array([p[0], 0.0, p[2]]))
+
+    def footprint(self, pad=2.0):
+        return [self.floor_under(self.C + s1 * self.A * (self.len / 2 + pad) + s2 * self.N * (self.r_mid + pad))
+                for s1, s2 in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+
+GEO = _Barrel(*BARREL)
+BARREL_FEET = int(round(max(p[1] for p in GEO.footprint(0)))) - 2  # the floor row at its front, its y-sort point
+_t = GEO.floor_under(GEO.spigot()[1])
+POOL = (int(round(_t[0])) + 8, int(round(_t[1])) + 2)  # centre of the whiskey pool, spreading out under the tap
+LIGHT = np.array([-0.45, 0.75, 0.5]) / np.linalg.norm([-0.45, 0.75, 0.5])
+
+
+def _zsplat(zbuf, col, pts, rgb, g):
+    """Projects surface samples into the frame, keeping the nearest (largest z) sample at every pixel."""
+    h, w = zbuf.shape
+    xy = np.rint(g.proj(pts)).astype(int)
+    z = pts[:, 2]
+    ok = (xy[:, 0] >= 0) & (xy[:, 0] < w) & (xy[:, 1] >= 0) & (xy[:, 1] < h)
+    xy, z, rgb = xy[ok], z[ok], rgb[ok]
+    idx = xy[:, 1] * w + xy[:, 0]
+    order = np.lexsort((z, idx))
+    idx, z, rgb = idx[order], z[order], rgb[order]
+    last = np.r_[idx[1:] != idx[:-1], True]
+    idx, z, rgb = idx[last], z[last], rgb[last]
+    zf, cf = zbuf.reshape(-1), col.reshape(-1, 3)
+    near = z >= zf[idx]
+    zf[idx[near]] = z[near]
+    cf[idx[near]] = rgb[near]
+
+
+def _lying_barrel(img, open=False, g=GEO):
+    """An oak barrel on its side on two chocks, modelled in the cellar's own perspective with its axis at 45 degrees
+    across the floor: bulging staves shaded round the belly, iron hoops, the bung on top, and the head (boards, the
+    chime's shadow and a brass spigot) turned out to the room. Opened, the spigot is turned along the pipe and the old
+    man's whiskey runs out of it in a thin amber rope."""
+    w, h = img.size
+    zbuf = np.full((h, w), -1e9)
+    col = np.zeros((h, w, 3))
+    oak_l, oak_d = np.array(hx("b07e4e"), float), np.array(hx("2e1c10"), float)
+    iron, iron_l = np.array(hx("26262a"), float), np.array(hx("7a7a84"), float)
+    tone = 1 + 0.07 * np.random.default_rng(7).standard_normal(20)
+    # ---- the staves ----
+    U, T = np.meshgrid(np.arange(-g.len / 2, g.len / 2 + 0.01, 0.2), np.arange(0, 2 * math.pi, 0.012))
+    U, T = U.ravel(), T.ravel()
+    nrm = np.cos(T)[:, None] * g.N + np.sin(T)[:, None] * g.UP
+    pts = g.C + U[:, None] * g.A + g.radius(U)[:, None] * nrm
+    lam = np.clip(nrm @ LIGHT, 0, 1)
+    sv = T * 20 / (2 * math.pi)
+    k = np.clip((0.18 + 0.95 * lam) * tone[sv.astype(int) % 20], 0, 1)
+    rgb = oak_d + (oak_l - oak_d) * k[:, None]
+    rgb[sv % 1 < 0.1] *= 0.55  # the joints between the staves
+    au = np.abs(U)
+    hoop = ((au > g.len / 2 - 3.6) & (au < g.len / 2 - 1.6)) | ((au > g.len / 2 - 10.5) & (au < g.len / 2 - 8.5))
+    rgb[hoop] = (iron + (iron_l - iron) * (lam ** 3)[:, None])[hoop]
+    rgb[(au < 1.4) & (np.abs(T - math.radians(100)) < 0.12)] = hx("2a180c")  # the bung
+    _zsplat(zbuf, col, pts, rgb, g)
+    # ---- the head, set a little inside the chime ----
+    Rh, Th = np.meshgrid(np.arange(0, g.r_end, 0.15), np.arange(0, 2 * math.pi, 0.01))
+    Rh, Th = Rh.ravel(), Th.ravel()
+    lx, ly = Rh * np.cos(Th), Rh * np.sin(Th)
+    pts = g.C + g.A * (g.len / 2 - 0.8) + lx[:, None] * g.N + ly[:, None] * g.UP
+    kh = min(1.0, 0.43 + 0.95 * max(0.0, float(g.A @ LIGHT)))
+    rgb = np.tile(np.array(mix(hx("2e1c10"), hx("9a6c40"), kh), float), (len(Rh), 1))
+    rgb[np.abs((lx / g.r_end * 2.5) % 1 - 0.5) > 0.42] *= 0.55  # the boards of the head
+    rgb[Rh > g.r_end - 1.6] *= 0.6  # the chime's shadow
+    rgb *= (1 - 0.18 * ly / g.r_end)[:, None]
+    _zsplat(zbuf, col, pts, rgb, g)
+    # ---- its shadow, and the chocks under it ----
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).polygon([tuple(p) for p in g.footprint()], fill=170)
+    m = m.filter(ImageFilter.GaussianBlur(3))
+    img.paste(Image.composite(ImageChops.multiply(img, Image.new("RGB", img.size, (0, 0, 0))), img, m))
     d = ImageDraw.Draw(img)
-    for cx in (xl + 8, xr - 10):  # wooden chocks
-        d.polygon([(cx - 5, cy + r + 2), (cx + 5, cy + r + 2), (cx + 3, cy + r - 3), (cx - 3, cy + r - 3)],
-                  fill=hx("5a4228"), outline=hx("2a1a0c"))
-    hw = 5  # half-width of the head ellipse
-    body_r = xr - hw
-    xc, half = (xl + body_r) / 2, (body_r - xl) / 2
-    oak_l, oak, oak_d = hx("a8784a"), hx("7a5432"), hx("3a2414")
-    for x in range(xl, body_r + 1):
-        u = (x - xc) / half
-        h = r * (1 - 0.16 * u * u)
-        for y in range(int(cy - h), int(cy + h) + 1):
-            v = (y - cy) / h  # -1 top .. 1 bottom
-            k = 1.15 - 0.55 * (v + 1) / 2 - 0.25 * max(0.0, v) ** 2
-            c = mix(oak_d, oak_l, max(0.0, min(1.0, k - 0.25)))
-            d.point((x, y), fill=c)
-    for s in (-0.66, -0.3, 0.05, 0.4, 0.74):  # stave joints follow the bulge
+    faces = ((0, 2, 6, 4), (1, 3, 7, 5), (0, 1, 5, 4), (2, 3, 7, 6), (0, 1, 3, 2), (4, 5, 7, 6))
+    fcol = [hx(c) for c in ("4a3420", "6a4a2c", "5a4026", "3a2818", "5a4026", "7a5834")]
+    for uc in (-g.len * 0.3, g.len * 0.3):
         pts = []
-        for x in range(xl, body_r + 1):
-            u = (x - xc) / half
-            pts.append((x, cy + s * r * (1 - 0.16 * u * u)))
-        d.line(pts, fill=mul(oak_d, 1.2))
-    d.line([(x, cy - r * (1 - 0.16 * ((x - xc) / half) ** 2) + 2) for x in range(xl + 3, body_r - 2)],
-           fill=hx("c89a64"))  # the sheen along the top
-    for hxp in (xl + 2, xl + 9, body_r - 9, body_r - 2):  # iron hoops
-        u = (hxp - xc) / half
-        h = r * (1 - 0.16 * u * u)
-        d.line([(hxp, cy - h), (hxp, cy + h)], fill=hx("2a2a2e"), width=2)
-        d.point((hxp, int(cy - h) + 1), fill=hx("7a7a84"))
-        d.point((hxp - 1, int(cy - h) + 3), fill=hx("5a5a62"))
-    # the left end turns away into shadow; the right end is the head
-    hr = r * 0.84
-    d.ellipse([xl - 3, cy - hr, xl + 3, cy + hr], fill=mul(oak_d, 0.8))
-    d.ellipse([body_r - hw, cy - hr, body_r + hw, cy + hr], fill=hx("8a6038"), outline=oak_d)
-    for k in (-0.5, 0, 0.5):  # head planks
-        yy = cy + k * hr
-        d.line([(body_r - hw + 1, yy), (body_r + hw - 1, yy)], fill=hx("5a3a20"))
-    d.arc([body_r - hw + 1, cy - hr + 2, body_r + hw - 1, cy + hr - 2], 260, 100, fill=hx("b08a5a"))
-    d.rectangle([body_r + hw - 1, cy + 2, body_r + hw + 3, cy + 4], fill=hx("b08a3a"))  # brass spigot
-    tx = body_r + hw + 3
-    d.line([(tx, cy + 4), (tx, cy + 7)], fill=hx("806020"))
+        for s1 in (-1, 1):
+            for s2 in (-1, 1):
+                q = g.C + g.A * (uc + 2.5 * s1) + g.N * (g.r_mid * 0.95 * s2)
+                pts += [np.array([q[0], 0.0, q[2]]), np.array([q[0], 4.0, q[2]])]
+        for fi in sorted(range(6), key=lambda i: np.mean([pts[j][2] for j in faces[i]])):
+            d.polygon([tuple(g.proj(pts[j])) for j in faces[fi]], fill=fcol[fi], outline=hx("22160a"))
+    arr = np.asarray(img).copy()
+    hit = zbuf > -1e8
+    arr[hit] = np.clip(col[hit], 0, 255).astype(np.uint8)
+    img.paste(Image.fromarray(arr))
+    # ---- the brass spigot ----
+    d = ImageDraw.Draw(img)
+    b0, t0 = g.spigot()
+    pb, pt = g.proj(b0), g.proj(t0)
+    d.line([tuple(pb), tuple(pt)], fill=hx("c89a40"), width=3)
+    d.line([(pb[0], pb[1] - 1), (pt[0], pt[1] - 1)], fill=hx("f0d080"))
+    d.ellipse([pb[0] - 2, pb[1] - 2, pb[0] + 2, pb[1] + 2], outline=hx("5a3a1a"))  # its flange on the head
+    tap = g.proj(t0 - g.UP * 2.5)
+    d.line([tuple(pt), tuple(tap)], fill=hx("806020"))
     if open:
-        d.line([(tx - 1, cy + 1), (tx + 1, cy + 1)], fill=hx("d8b060"))  # the handle, turned along the pipe
-        for y in range(cy + 8, cy + r + 9):  # the whiskey, falling and fanning out as it nears the flags
-            f = (y - cy - 8) / (r + 1)
-            x = tx + 2.5 * f * f
-            d.line([(x - 0.5 * f, y), (x + 0.5 + 0.8 * f, y)], fill=WHISKEY)
+        hp = g.proj(t0 + g.UP * 2 - g.A * 1.2)
+        d.line([tuple(hp), (hp[0] + 2, hp[1])], fill=hx("d8b060"))  # the handle, turned along the pipe
+        y0, y1 = int(tap[1]) + 1, int(g.floor_under(t0)[1])
+        for y in range(y0, y1 + 1):  # the whiskey, falling and fanning out as it nears the flags
+            f = (y - y0) / max(1, y1 - y0)
+            x = tap[0] + 1.5 * f * f
+            d.line([(x - 0.4 * f, y), (x + 0.5 + 0.8 * f, y)], fill=WHISKEY)
             if y % 3 == 0:
                 d.point((int(x), y), fill=WHISKEY_L)
     else:
-        d.point((tx, cy + 9), fill=WHISKEY)  # a drip of the old man's whiskey
-    d.ellipse([xc - 2, cy - r + 2, xc + 2, cy - r + 5], fill=hx("4a2c16"))  # the bung on top
+        d.point((tap[0], tap[1] + 2), fill=WHISKEY)  # a drip of the old man's whiskey
 
 
 def _whiskey_pool(img, cx, cy):
@@ -138,10 +223,12 @@ def _whiskey_pool(img, cx, cy):
 
 def _cellar_fire(img, em, cx, cy, t):
     """The whiskey alight at phase t (looping on 1): a blue skin of flame over the pool, orange tongues over it
-    and up the barrel, smoke rolling up into the vault. The flames are marked emissive in em."""
+    along the top of the barrel and up its head, smoke rolling up into the vault. The flames are marked emissive in
+    em."""
     tau = 2 * math.pi
+    top = [GEO.top(u) for u in (-14, -4, 6, 15)]
     layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    for i, (sx, sy) in enumerate(((cx - 14, cy - 50), (cx - 36, cy - 44))):
+    for i, (sx, sy) in enumerate(((cx - 10, cy - 50), (top[1][0], top[1][1] - 30))):
         _smoke(layer, sx, sy, 130, -40 + 30 * i, 12, (t + i * 0.5) % 1.0, 7, 1520 + i)
     layer.putalpha(layer.getchannel("A").point(lambda a: a * 3 // 5))
     fl = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -149,14 +236,19 @@ def _cellar_fire(img, em, cx, cy, t):
     d.ellipse([cx - 31, cy - 5, cx + 19, cy + 6], fill=hx("3a5ac8"))
     d.ellipse([cx - 26, cy - 3, cx + 14, cy + 3], fill=hx("7a9af0"))
     d.line([(cx - 55, cy + 4), (cx - 30, cy + 2)], fill=hx("4a6ad8"), width=2)
-    tongues = ((-38, -12, 40, 5, 0.71), (-26, -16, 52, 6, 0.05), (-14, -15, 30, 4, 0.53),  # along the barrel
-               (-48, 4, 12, 3, 0.45), (-24, 2, 30, 5, 0.0), (-12, 3, 48, 6, 0.31), (0, 2, 56, 7, 0.62),
-               (10, 3, 36, 5, 0.17), (17, 1, 18, 3, 0.83))  # (dx, dy, height, half-width, phase), back to front
+    d.polygon([(cx + 10, cy + 3), (cx + 24, cy + 12), (cx + 22, cy + 13), (cx + 6, cy + 5)], fill=hx("3a5ac8"))
+    # along the crown of the staves the tongues stay low, so the barrel shows between them
+    for (x, y), h, w, ph in zip(top, (16, 24, 20, 28), (3, 4, 3, 4), (0.71, 0.05, 0.53, 0.38)):
+        _flame(d, x, y + 2, h, w, t, ph, lean=0.4 * math.sin(tau * (t + ph)))
+    sp = GEO.proj(GEO.spigot()[1])
+    _flame(d, sp[0] - 1, sp[1] + 3, 22, 4, t, 0.9, lean=0.3)  # up the head from the spigot
+    tongues = ((-44, 4, 10, 2, 0.27), (-28, 1, 14, 3, 0.45), (-18, 2, 26, 4, 0.0), (-8, 3, 40, 6, 0.31),
+               (2, 2, 48, 6, 0.62), (10, 3, 30, 5, 0.17), (17, 1, 16, 3, 0.83))  # (dx, dy, height, half-width, phase)
     for dx, dy, h, w, ph in tongues:
         _flame(d, cx + dx, cy + dy, h, w, t, ph, lean=0.4 * math.sin(tau * (t + ph)))
     for k in range(6):  # sparks spiralling up off the barrel
         q = (t * 2 + k / 6) % 1.0
-        x = cx - 30 + k * 9 + 4 * math.sin(tau * (q + k * 0.21))
+        x = cx - 34 + k * 9 + 4 * math.sin(tau * (q + k * 0.21))
         d.point((x, cy - 20 - q * 80), fill=hx("ffc060") if q < 0.6 else hx("a85a2a"))
     em.paste(255, mask=fl.getchannel("A"))
     out = Image.alpha_composite(Image.alpha_composite(img.convert("RGBA"), layer), fl).convert("RGB")
@@ -280,7 +372,7 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
         _kerosene_can(d, int(p[0]), int(p[1]))
     # a barrel of whiskey lying on its side out on the floor, on chocks, its head and tap turned to the room
     if barrel:
-        _lying_barrel(img, *BARREL, open=barrel_open)
+        _lying_barrel(img, open=barrel_open)
     if pool:
         _whiskey_pool(img, *POOL)
     if fire:
@@ -352,9 +444,8 @@ def build_cellar():
     # the escape: cut against the lit cellar, since they sit on top of it
     nx, ny = STAIR_NAIL
     overlay(v["lantern_down"], lit_px, pal, (nx - 12, ny - 2, nx + 12, ny + 36), "mansion_cellar_lantern_down")
-    bx0, bx1, by, br = BARREL
     cx, cy = POOL
-    overlay(v["whiskey"], lit_px, pal, (bx0 - 40, by - br - 2, cx + 30, cy + 16), "mansion_cellar_whiskey")
+    overlay(v["whiskey"], lit_px, pal, (cx - 60, cy - 8, cx + 30, cy + 16), "mansion_cellar_whiskey")
     fire = [paint_cellar(**lit, fire_t=i / CELLAR_FIRE_FRAMES) for i in range(CELLAR_FIRE_FRAMES)]
     fpal = palette_of(Image.blend(fire[0], fire[CELLAR_FIRE_FRAMES // 2], 0.5), 160)
     strip = Image.new("RGB", (W * CELLAR_FIRE_FRAMES, H))

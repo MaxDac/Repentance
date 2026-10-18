@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionExterior : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private bool Noticed => State.HasFlag("alarm_noticed");
     private bool Moved => State.HasFlag("bin_moved");
     private bool Wedged => State.HasFlag("bell_wedged");
