@@ -26,8 +26,8 @@ public static partial class MusicSynth
     // minor third. The double bass bows one slow four-bar ostinato in long swelling strokes for all 24 bars;
     // every note is bowed, at least a beat long, one stroke flowing into the next.
     // A four-bar theme comes round again and again: the cello alone, then over a second cello droning the tritones
-    // beneath it, the viola an octave up, and at the very end two strident violins a tritone apart, before everything
-    // falls away down to the bass, which leads home.
+    // beneath it, the viola an octave up, and at the very end two violins a tritone apart, still soft and low (it is
+    // background in a club, not a concert), before everything falls away down to the bass, which leads home.
     private const string ClubTheme = "D3:2 Eb3:1 G#3:3 A3:2 F#3:1 C3:1 D3:2 ";
 
     private static readonly Piece Club = new(72, Concert, new Part[]
@@ -39,30 +39,30 @@ public static partial class MusicSynth
             "r:24 " + Repeat("G#2:3 D3:3 C3:3 A2:3 ", 3)),
         new(Instrument.Viola, 0.6, -0.3,
             "r:45 A3:3 " + ClubTheme.Replace("3:", "4:") + "C4:2 A3:1"),
-        new(Instrument.Violin, 0.5, -0.45,
-            "r:48 D5:2! Eb5:1! G#5:3! A5:2! F#5:1! C6:2! G#5:1!"),
-        new(Instrument.Violin, 0.4, 0.45,
-            "r:48 G#4:3! D5:3! C5:3! A4:3!"),
+        new(Instrument.Violin, 0.32, -0.45,
+            "r:48 D4:2 Eb4:1 G#4:3 A4:2 F#4:1 C5:2 G#4:1"),
+        new(Instrument.Violin, 0.25, 0.45,
+            "r:48 G#3:3 D4:3 C4:3 A3:3"),
     });
 
     // ------------------------------------------------------------------ the church
 
     // Sixteen bars of 4/4 in a stone nave. The organist tries the instrument: a few pedal notes, a flute pipe and a
-    // run up the D Dorian scale, a full-organ chord stabbed and let go. Then the mass: a plain, chant-like chorale,
-    // its first phrase on the soft flutes and its second on the full chorus, closing bright on D major. Then back to
-    // testing: one high pipe tapped again and again, a last low note, and the loop begins again with the pedals.
+    // run up the D Dorian scale over a held pedal, a full-organ chord stabbed and let go. Then the mass: a plain,
+    // chant-like chorale, its first phrase on the soft flutes and its second on the full chorus, closing on D major.
+    // Then back to testing: one pipe tapped again and again over a low pedal drone, and the loop begins again with
+    // the pedals. Something always sounds on the beat, and nothing reaches up into the shrill top pipes.
     private static readonly Piece Church = new(64, new Hall(1.6, 0.94, 0.25, 0.55), new Part[]
     {
         new(Instrument.OrganPedal, 0.9, 0.05,
-            "D2:1 r:1 D2:1 r:1 A1:1 r:1 F2:1.5 r:0.5 r:8 D2:3 r:1 " +
+            "D2:1 r:1 D2:1 r:1 A1:1 r:1 F2:1.5 r:0.5 D2:4 A1:4 D2:4 " +
             "D2:2 F2:2 G2:2 C2:2 A1:2 G1:2 F2:2 A1:2 " +
-            "F2:2 G1:2 A1:2 C2:2 G2:2 E2:2 A1:2 D2:4 r:10"),
+            "F2:2 G1:2 A1:2 C2:2 G2:2 E2:2 A1:2 D2:4 D2:4 A1:4 D2:2"),
         new(Instrument.OrganFlute, 0.8, -0.3,
             "r:1 A4:0.5 r:1.5 A4:0.5 r:1.5 D5:2 r:1 " +
-            "D4:0.25 E4:0.25 F4:0.25 G4:0.25 A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 F5:0.25 G5:0.25 A5:0.25 " +
-            "B5:0.25 C6:0.25 D6:1.5 r:3 r:4 " +
+            "D4:0.5 E4:0.5 F4:0.5 G4:0.5 A4:0.5 B4:0.5 C5:0.5 D5:2.5 r:6 " +
             "D4+F4+A4:2 F4+A4+C5:2 G4+B4+D5:2 E4+G4+C5:2 C4+E4+A4:2 B3+D4+G4:2 D4+F4+A4:2 C#4+E4+A4:2 r:18 " +
-            "D6:0.5 r:1 D6:0.5 r:1 D6:1.5 r:1 A4:3 r:1.5"),
+            "D5:1 r:1 D5:1 r:1 D5:2 r:1 A4:3"),
         new(Instrument.OrganPlenum, 0.75, 0.25,
             "r:13 D4+F4+A4+D5:1.5 r:1.5 D4+A4+D5:2 r:2 r:16 " +
             "A3+C4+F4:2 B3+D4+G4:2 C4+E4+A4:2 E4+G4+C5:2 G4+B4+D5:2 E4+G4+C5:2 E4+A4+C#5:2 F#4+A4+D5:4 r:10"),
@@ -70,16 +70,17 @@ public static partial class MusicSynth
 
     // ------------------------------------------------------------------ the convent
 
-    // A prelude in Eb major, 3/4: the left hand rolls pedalled arpeggios bar after bar, the right hand sings a slow
-    // hymn-like line above them. Twenty-two bars, ending on the dominant so the loop falls back home to Eb.
+    // A prelude in Eb major, 3/4, on the real grand piano: the left hand rolls pedalled arpeggios bar after bar, the
+    // right hand sings a slow hymn-like line above them, both hushed. Twenty-two bars, ending on the dominant so the
+    // loop falls back home to Eb.
     private static readonly Piece Convent = new(66, new Hall(1.1, 0.86, 0.4, 0.28), new Part[]
     {
-        new(Instrument.Piano, 0.45, -0.2, Arpeggios(
+        new(Instrument.RecordedPiano, 0.3, -0.2, Arpeggios(
             "Eb2 Bb2 Eb3 G3|Eb2 Ab2 C3 Eb3|D2 Ab2 Bb2 F3|Eb2 Bb2 Eb3 G3|C2 G2 C3 Eb3|Ab1 Eb2 Ab2 C3|" +
             "F1 C2 Ab2 Eb3|Bb1 F2 Ab2 D3|G1 D2 G2 Bb2|C2 G2 C3 Eb3|Ab1 Eb2 Ab2 C3|Bb1 F2 Bb2 D3|" +
             "G1 Eb2 G2 Bb2|Ab1 Eb2 Ab2 C3|F1 C2 F2 Ab2|Bb1 F2 Bb2 Eb3|Bb1 F2 Ab2 D3|Eb2 Bb2 Eb3 G3|" +
             "Ab1 Eb2 Ab2 C3|Bb1 Eb2 G2 Bb2|F1 C2 Ab2 Eb3|Bb1 F2 Ab2 D3")),
-        new(Instrument.Piano, 0.7, 0.2,
+        new(Instrument.RecordedPiano, 0.42, 0.2,
             "Bb4:2 G4:1 Ab4:2 C5:1 Bb4:1.5 Ab4:0.5 F4:1 G4:3 " +
             "G4:2 C5:1 Eb5:2 C5:1 Ab4:1.5 C5:0.5 Eb5:1 D5:3 " +
             "D5:2 Bb4:1 Eb5:2 C5:1 C5:1.5 Ab4:0.5 Eb5:1 F5:2 D5:1 " +
@@ -139,7 +140,7 @@ public static partial class MusicSynth
             BalladOpening + "D4:2 r:2/3 F#4:1/3 A4:1 " +
             BalladBridge +
             BalladOpening + "F4:2/3 E4:1/3 C#4:2 r:1"),
-        new(Instrument.Piano, 0.3, 0.25, Rolled(
+        new(Instrument.RecordedPiano, 0.22, 0.25, Rolled(
             "Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm7 D7b9|" +
             "Gm9|C9|Fmaj9|Em7b5 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9")),
         new(Instrument.UprightBass, 0.8, 0.05,

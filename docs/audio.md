@@ -48,10 +48,10 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 
 | `Track` | Rooms | Piece |
 |---|---|---|
-| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4 |
-| `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
-| `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
-| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
+| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4, kept soft: no accents, the violins' climax stays at or below C5 |
+| `ChurchOrgan` | Church interior | Organist trying the pipes over held pedal notes, then a chorale; a pipe sounds on every beat, nothing above D5 |
+| `ConventPiano` | Convent corridor, cell | Hymn-like prelude in E-flat on the recorded piano, pedalled arpeggios under a slow tune |
+| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, rolled chords on the recorded piano, bass |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 
