@@ -254,15 +254,102 @@ def bookcase(img, x0, x1, shelf_top=14, seed=0):
 def shelves(img):
     bookcase(img, 16, 128, 10, 2)
     bookcase(img, *RIGHT_CASE, 10, 7)
+
+
+def gilt_frame(img, box):
+    """A gilt picture frame with a lit top/left and shaded bottom/right, hung by two cords from a rail hook."""
     d = ImageDraw.Draw(img)
-    # middle upper shelves flanking the fireplace
-    for x0, x1, seed in ((132, 166, 13), (312, 346, 17)):
-        d.rectangle([x0, 20, x1, 108], fill=MAHOGANY)
-        d.rectangle([x0 + 4, 24, x1 - 4, 104], fill=hx("27130d"))
-        for sy in (44, 68, 92):
-            d.rectangle([x0 + 4, sy, x1 - 4, sy + 3], fill=MAHOGANY_L)
-            book_rows(d, x0 + 6, sy - 16, x1 - 6, sy, seed + sy)
-        d.rectangle([x0, 20, x1, 108], outline=hx("160906"))
+    x0, y0, x1, y1 = box
+    cx = (x0 + x1) // 2
+    shadow(img, "rect", [x0 + 2, y0 + 3, x1 + 3, y1 + 4], 0.4, 2)
+    d.line([(cx, 2), (x0 + 4, y0)], fill=hx("6a5030"))
+    d.line([(cx, 2), (x1 - 4, y0)], fill=hx("6a5030"))
+    d.rectangle([cx - 1, 1, cx + 1, 3], fill=GOLD)
+    d.rectangle(box, fill=hx("9a7838"), outline=hx("3a2410"))
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=hx("e8c870"))
+    d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("d8b462"))
+    d.line([(x0 + 1, y1 - 1), (x1 - 1, y1 - 1)], fill=hx("6a4e22"))
+    d.line([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1)], fill=hx("6a4e22"))
+    d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 3], outline=hx("4a3416"))
+    for x, y in ((x0 + 1, y0 + 1), (x1 - 1, y0 + 1), (x0 + 1, y1 - 1), (x1 - 1, y1 - 1)):
+        d.point((x, y), fill=hx("fff0b0"))
+    return x0 + 4, y0 + 4, x1 - 4, y1 - 4
+
+
+def ancestor_portrait(img, box):
+    """A stern Harrington forebear in oils: dark ground, black coat, white collar, a pale lined face, grey whiskers."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = gilt_frame(img, box)
+    vgrad(img, (x0, y0, x1, y1), hx("3e3220"), hx("1e1810"))
+    cx = (x0 + x1) // 2
+    d.polygon([(x0, y1), (x0 + 2, y1 - 8), (cx - 3, y1 - 12), (cx + 3, y1 - 12), (x1 - 2, y1 - 8), (x1, y1)],
+              fill=hx("16141a"))
+    d.line([(x1 - 3, y1 - 8), (x1 - 1, y1)], fill=hx("34303a"))
+    d.polygon([(cx - 3, y1 - 12), (cx + 3, y1 - 12), (cx, y1 - 7)], fill=hx("e8e2d0"))
+    d.line([(cx, y1 - 7), (cx, y1 - 3)], fill=hx("6a2020"))
+    d.ellipse([cx - 4, y0 + 4, cx + 4, y1 - 11], fill=hx("c8a080"))
+    d.chord([cx - 4, y0 + 4, cx + 4, y1 - 11], 90, 270, fill=hx("a07858"))
+    d.chord([cx - 5, y0 + 2, cx + 5, y0 + 10], 180, 360, fill=hx("8a8478"))
+    for side in (-1, 1):
+        d.line([(cx + side * 4, y0 + 7), (cx + side * 4, y0 + 13)], fill=hx("9a9488"))
+        d.point((cx + side * 2, y0 + 9), fill=hx("24180e"))
+    d.line([(cx - 2, y0 + 7), (cx - 1, y0 + 7)], fill=hx("6a5a48"))
+    d.line([(cx + 1, y0 + 7), (cx + 2, y0 + 7)], fill=hx("6a5a48"))
+    d.line([(cx - 1, y0 + 13), (cx + 1, y0 + 13)], fill=hx("6a3a2a"))
+    d.point((cx + 2, y0 + 6), fill=hx("ecd0b0"))
+
+
+def lake_painting(img, box):
+    """A Lake Michigan seascape: pale sky, a cloud, a wooded headland, blue water and a single white sail."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = gilt_frame(img, box)
+    horizon = y0 + (y1 - y0) * 5 // 9
+    vgrad(img, (x0, y0, x1, horizon), hx("8ab0c4"), hx("d8dcc8"))
+    vgrad(img, (x0, horizon, x1, y1), hx("4a7890"), hx("26485a"))
+    d.ellipse([x0 + 12, y0 + 2, x0 + 22, y0 + 6], fill=hx("f0ece0"))
+    d.ellipse([x0 + 17, y0 + 1, x0 + 25, y0 + 5], fill=hx("fcf8ec"))
+    d.polygon([(x0, horizon - 5), (x0 + 4, horizon - 7), (x0 + 9, horizon - 4), (x0 + 12, horizon), (x0, horizon)],
+              fill=hx("2e4428"))
+    d.line([(x0 + 1, horizon - 6), (x0 + 5, horizon - 7)], fill=hx("4e6a3a"))
+    d.line([(x0 + 12, horizon), (x1, horizon)], fill=hx("9ab8c0"))
+    for i, y in enumerate(range(horizon + 3, y1, 3)):
+        d.line([(x0 + 4 + i * 3, y), (x0 + 9 + i * 3, y)], fill=hx("8ab4c8"))
+    sx = x1 - 9
+    d.polygon([(sx, horizon - 7), (sx, horizon - 1), (sx + 4, horizon - 1)], fill=hx("f8f4e8"))
+    d.polygon([(sx - 1, horizon - 5), (sx - 1, horizon - 1), (sx - 3, horizon - 1)], fill=hx("d8d0c0"))
+    d.line([(sx - 3, horizon), (sx + 4, horizon)], fill=hx("3a2a20"))
+
+
+def sconce(img, x, y):
+    """An unlit brass wall sconce: a backplate, a curled arm, a drip pan and a white candle."""
+    d = ImageDraw.Draw(img)
+    shadow(img, "ellipse", [x - 3, y - 1, x + 5, y + 17], 0.3, 2)
+    d.ellipse([x - 2, y + 4, x + 2, y + 14], fill=hx("8a6a30"), outline=hx("4a3418"))
+    d.point((x - 1, y + 6), fill=hx("e8c870"))
+    d.arc([x - 1, y + 8, x + 5, y + 14], 0, 180, fill=hx("a8823e"))
+    d.line([(x + 5, y + 11), (x + 5, y + 6)], fill=hx("a8823e"))
+    d.ellipse([x + 2, y + 4, x + 8, y + 7], fill=hx("b89a5a"), outline=hx("5a4020"))
+    d.rectangle([x + 4, y - 4, x + 6, y + 4], fill=hx("ded4b8"))
+    d.line([(x + 4, y - 4), (x + 4, y + 4)], fill=hx("f4ecd8"))
+    d.point((x + 5, y - 5), fill=hx("342820"))
+
+
+def wall_dressing(img):
+    """The wall either side of the chimney breast: a picture rail with a gilt-framed ancestor and a lake view hung
+    over the mantel, raised panels in the narrow bays beside the fireplace and an unlit sconce in each."""
+    d = ImageDraw.Draw(img)
+    d.line([(128, 2), (342, 2)], fill=MAHOGANY_L)
+    d.line([(128, 3), (342, 3)], fill=hx("1e0d08"))
+    for x0, x1 in ((132, 144), (332, 338)):
+        d.rectangle([x0, 48, x1, 104], fill=hx("442a1e"), outline=hx("26140e"))
+        d.line([(x0 + 1, 49), (x1 - 1, 49)], fill=hx("6a4630"))
+        d.line([(x0 + 1, 49), (x0 + 1, 103)], fill=hx("5e3e2a"))
+        if x1 - x0 > 8:
+            d.rectangle([x0 + 3, 52, x1 - 3, 100], outline=hx("2e1a12"))
+    ancestor_portrait(img, (146, 6, 174, 37))
+    lake_painting(img, (300, 9, 338, 35))
+    sconce(img, 136, 64)
+    sconce(img, 332, 64)
 
 
 # The writing desk is a real prop: build() cuts it out of the painting into library_desk.png, drawn by a
@@ -351,16 +438,29 @@ def desk_props(img):
     d.ellipse([256, 160, 263, 165], outline=hx("c89a54"))
     d.point((258, 161), fill=hx("e8f0f0"))
     d.line([(262, 164), (266, 166)], fill=hx("5a2a18"))
-    # globe on a brass meridian stand
-    d.ellipse([271, 161, 281, 164], fill=hx("5a3a1a"))
-    d.line([(276, 155), (276, 162)], fill=hx("7b572e"))
-    d.arc([268, 142, 284, 158], 120, 420, fill=hx("c8a25a"))
-    d.ellipse([270, 143, 282, 155], fill=hx("4a6a7a"))
-    d.polygon([(272, 146), (276, 145), (277, 149), (274, 151), (272, 149)], fill=hx("7a9a5a"))
-    d.polygon([(278, 148), (281, 149), (280, 153), (278, 152)], fill=hx("8aa860"))
-    d.line([(276, 143), (276, 155)], fill=hx("a0c29a"))
-    d.line([(270, 149), (282, 149)], fill=hx("a0c29a"))
-    d.point((273, 145), fill=hx("e8f4f0"))
+    # desk globe: a turned walnut foot and stem, an ocean sphere lit from the window on the right with two
+    # continents, a curved equator and meridian, and a brass meridian half-ring pivoting at the poles
+    d.ellipse([269, 160, 283, 165], fill=hx("3a1a10"))
+    d.ellipse([270, 159, 282, 163], fill=hx("6e3c22"), outline=hx("2a120b"))
+    d.line([(272, 160), (279, 160)], fill=hx("a0643e"))
+    d.rectangle([275, 155, 277, 160], fill=hx("5a3018"))
+    d.ellipse([273, 156, 279, 159], fill=hx("8a5232"))
+    d.point((276, 156), fill=hx("c08a5a"))
+    d.ellipse([269, 141, 283, 155], fill=hx("2c4a5e"))
+    d.ellipse([271, 141, 283, 154], fill=hx("3e6680"))
+    d.ellipse([274, 142, 283, 152], fill=hx("5a8aa2"))
+    d.polygon([(272, 144), (275, 143), (277, 146), (276, 149), (274, 152), (272, 149)], fill=hx("7a8a4a"))
+    d.polygon([(278, 145), (281, 146), (282, 149), (280, 151), (278, 149)], fill=hx("b0a060"))
+    d.point((273, 146), fill=hx("98a85a"))
+    d.point((280, 147), fill=hx("d8c88a"))
+    d.arc([269, 145, 283, 151], 0, 180, fill=hx("c8b88a"))
+    d.arc([273, 141, 280, 155], 270, 90, fill=hx("8ab0b8"))
+    d.point((280, 143), fill=hx("ffffff"))
+    d.point((281, 144), fill=hx("e8f4f8"))
+    d.arc([266, 138, 286, 158], 95, 265, fill=hx("c8a25a"))
+    d.arc([267, 139, 285, 157], 100, 260, fill=hx("6a4a1e"))
+    d.ellipse([275, 137, 278, 140], fill=GOLD)
+    d.point((276, 157), fill=GOLD)
 
 
 def desk_mask():
@@ -395,12 +495,36 @@ def chairs(img):
         for x in (x0, x1 - 5):
             d.rounded_rectangle([x, seat - 10, x + 5, seat + 8], 2, fill=hx("54281e"), outline=hx("2c160e"))
             d.line([(x + 1, seat - 9), (x + 4, seat - 9)], fill=hx("9a5840"))
-    # small side table
-    d.ellipse([144, 176, 182, 184], fill=hx("744128"))
-    d.line([(152, 180), (148, 214)], fill=hx("3a190f"), width=2)
-    d.line([(174, 180), (178, 214)], fill=hx("3a190f"), width=2)
-    d.ellipse([156, 166, 170, 176], fill=hx("6c8a52"))
-    d.line([(162, 166), (162, 176)], fill=hx("8cb47a"))
+    # small walnut side table by the armchair: a crystal whisky decanter, a tumbler and two books laid flat
+    shadow(img, "ellipse", [140, 208, 188, 218], 0.35, 3)
+    for (ax, ay), (bx, by) in (((150, 183), (145, 213)), ((176, 183), (181, 213)), ((163, 186), (163, 215))):
+        d.line([(ax, ay), (bx, by)], fill=hx("2a120b"), width=3)
+        d.line([(ax, ay + 1), (bx, by - 1)], fill=hx("8a5232"))
+        d.ellipse([bx - 2, by - 1, bx + 2, by + 2], fill=hx("3a1a10"))
+    d.ellipse([142, 177, 184, 188], fill=hx("2a120b"))
+    d.ellipse([142, 176, 184, 186], fill=hx("5a2c18"))
+    d.ellipse([143, 174, 183, 184], fill=hx("8a5232"), outline=hx("3a1a10"))
+    d.arc([146, 175, 180, 183], 200, 340, fill=hx("c08a5a"))
+    # books
+    d.rectangle([146, 175, 160, 179], fill=hx("7a2c22"), outline=hx("2a0e0a"))
+    d.line([(147, 177), (159, 177)], fill=hx("ece2c8"))
+    d.line([(147, 176), (159, 176)], fill=hx("a64a3a"))
+    d.rectangle([148, 171, 159, 175], fill=hx("33441f"), outline=hx("16200c"))
+    d.line([(149, 173), (158, 173)], fill=hx("e0d4b4"))
+    d.line([(149, 172), (158, 172)], fill=GOLD)
+    # decanter: square-shouldered cut crystal, amber whisky in the lower half, a ball stopper
+    d.polygon([(164, 169), (174, 169), (175, 179), (163, 179)], fill=hx("b8c8c8"), outline=hx("4a5a5a"))
+    d.rectangle([164, 173, 174, 178], fill=hx("b06a20"))
+    d.line([(164, 173), (174, 173)], fill=hx("e8a848"))
+    d.line([(165, 170), (165, 178)], fill=hx("ffffff"))
+    d.line([(169, 170), (169, 178)], fill=hx("8a9a9a"))
+    d.rectangle([168, 165, 170, 168], fill=hx("c8d8d8"), outline=hx("4a5a5a"))
+    d.ellipse([167, 161, 171, 165], fill=hx("dce8e8"), outline=hx("4a5a5a"))
+    d.point((168, 162), fill=hx("ffffff"))
+    # tumbler with a finger of whisky
+    d.rectangle([176, 174, 181, 180], fill=hx("c0d0d0"), outline=hx("4a5a5a"))
+    d.rectangle([177, 177, 180, 179], fill=hx("b06a20"))
+    d.line([(177, 175), (177, 179)], fill=hx("ffffff"))
 
 
 def ladder(img):
@@ -431,6 +555,7 @@ def paint(include_desk=True):
     arched_window(img)
     fireplace(img)
     shelves(img)
+    wall_dressing(img)
     mantle_items(img)
     parquet_floor(img)
     chairs(img)
