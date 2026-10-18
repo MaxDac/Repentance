@@ -273,7 +273,8 @@ he admits that his pursuit is driven by lust for Eleanor, in conflict with retur
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving is easy, Micah.
 Forgetting is the part you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
 Micah throws Eleanor's perfumed cloth in the street before ringing, then offers coffee with "Nothing you owe me.";
-the journal places renewed vows a year later.
+the journal places renewed vows a year later, and Daniel sees their photograph from that day (a sepia print on a
+cream card).
 His office reminder preserves the last opportunity to recover the wedding ring and visit Caleb.
 
 If Eleanor refuses to follow and Micah burns the mansion, her fate remains unknown during escape.

@@ -18,6 +18,9 @@ public sealed record CloseUp(string Id, Func<GameSettings?, string> Texture, dou
     public CloseUp(string id, string texture, double fadeIn = 0.4, double fadeOut = 0.3)
         : this(id, _ => texture, fadeIn, fadeOut) { }
 
+    /// <summary>A photograph: a small print on the left of the screen, with speech in a column to its right.</summary>
+    public bool Photo { get; init; }
+
     public string TexturePath(GameSettings? settings) => $"res://assets/art/ui/{Texture(settings)}.png";
 }
 
@@ -44,10 +47,14 @@ public static class CloseUps
     /// stag and moon.</summary>
     public static readonly CloseUp Heraldry = new("heraldry", "heraldry_closeup");
 
+    /// <summary>Micah and Rose the day they renewed their vows, a sepia print on a cream card, in Daniel's epilogue
+    /// to ending 1.</summary>
+    public static readonly CloseUp Vows = new("vows", "vows_photo", 0.8, 0.6) { Photo = true };
+
     private static readonly Dictionary<string, CloseUp> ById = new()
     {
         [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [Convent.Id] = Convent, [Heraldry.Id] = Heraldry,
-        [Motel.Id] = Motel,
+        [Motel.Id] = Motel, [Vows.Id] = Vows,
     };
 
     public static CloseUp Get(string id) =>

@@ -1496,8 +1496,10 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: ...So that's whose hand it was. Micah's, from across a prison table.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_1"):
+    INSET: vows
     DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
+    INSET: none
     DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's, to his confessional. What he could tell me without breaking the seal, I wrote in, and the rest I guessed."
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
