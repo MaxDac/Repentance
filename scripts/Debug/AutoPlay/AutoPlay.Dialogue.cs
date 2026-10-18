@@ -127,6 +127,7 @@ public partial class AutoPlay
                 ("caleb_club", "You're a hypocrite, Caleb."),
                 ("harrington_unmask", "A new face on that stage every Thursday"),
                 ("bartender_gun", "They bring girls in off the trains like crates of oranges"),
+                ("dinner_call", "\"Were you looking for someone?\" ...You found her, Micah. Now what?"),
             })
             {
                 await game.LoadGame(original);
@@ -157,6 +158,21 @@ public partial class AutoPlay
                     "responsibility and secret lines accompany only the death report");
                 Check(!lines.Contains("The sky over the Gold Coast is still orange.", StringComparison.Ordinal),
                     "next-morning dialogue does not retain the same-night sky");
+                Check(lines.Contains("At the gate she fetched her black dress from the Club's car.", StringComparison.Ordinal) == together,
+                    $"the sheet-to-dress line plays only when Eleanor rides along: together={together}");
+            }
+            // Agatha's gunpoint confession quotes only what the played night scene had her say.
+            foreach (bool truth in new[] { false, true })
+            {
+                await game.LoadGame(original);
+                GameState.Instance.SetFlag(Endings.RefusedAbbess, truth);
+                story.ChoosePathString("nun_threat2");
+                string lines = story.ContinueMaximally();
+                Check(truth
+                        ? lines.Contains("I turned it round on her and put her out at first light.", StringComparison.Ordinal) &&
+                          !lines.Contains("whore", StringComparison.Ordinal) && !lines.Contains("Jezebel", StringComparison.Ordinal)
+                        : lines.Contains("the whore.", StringComparison.Ordinal) && lines.Contains("Jezebel she is.", StringComparison.Ordinal),
+                    $"nun_threat2: Agatha's confession matches Eleanor's night choice (truth={truth})");
             }
             // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10), Eleanor's Thursday
             // book (8) or her testimony (9). Endings 2 and 3 keep the papers private.

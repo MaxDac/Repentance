@@ -29,7 +29,7 @@ public partial class AutoPlay
         var bedLines = await Spoken(() => game.Perform(Verb.Hand, "bed"));
         var windowLines = await Spoken(() => game.Perform(Verb.Look, "window"));
         Check(bedLines.Contains("Cold on his side now. I won't think about that.") && !bedLines.Any(l => l.Contains("Still warm")),
-            "the night after, his side of the bed has gone cold");
+            "after he has gone, his side of the bed has gone cold");
         Check(windowLines.Contains("He's gone from the alley. A car's pulled in below, lights off.") && !windowLines.Any(l => l.Contains("His car")),
             "Micah came on foot: no car of his in the lot");
         Check(game.Room?.Name == "MotelNight" && !gs.HasFlag("interlude_goons_in"), "the bed and the window don't bring the knock forward");
@@ -514,6 +514,8 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("She told me the rest of it in the car that night")) &&
               !HeardLog.Any(l => l.Contains("motel on the road")) && !HeardLog.Any(l => l.Contains("changed in mine on the way")),
             "ending 2: Daniel's journal puts the telling in the car, not a motel on the road; no weary-road dress beat");
+        Check(HeardLog.Any(l => l.Contains("At the gate she fetched her black dress from the Club's car.")),
+            "ending 2: Micah says how Eleanor got from the sheet back into her black dress");
         HeardLog = null;
     }
 }
