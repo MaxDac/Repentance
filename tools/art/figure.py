@@ -520,6 +520,45 @@ def figure(spec, ps, fw=56, fh=80):
         add(2.0 + P(arm_pts[(ps["candlestick"][0] if isinstance(ps["candlestick"], tuple) else ps["candlestick"])][0])[2]
             + 0.08, candlestick)
 
+    if ps.get("telephone"):  # a candlestick telephone: (stand hand, receiver hand or None while it hangs on the hook)
+        def telephone(spec_=ps["telephone"]):
+            s, r = spec_
+            grip = arm_pts[s][3]
+            black, sheen, nickel, cord = "141218", "3a3842", "c4c4cc", "5a4434"
+            up = np.array([0, -1.0, 0])
+            foot, top = grip - up * 0.07, grip + up * 0.075
+            c.put(c.capsule(P(foot), P(top), H * 0.009, H * 0.009), black, "telephone", dither=False)
+            c.put(c.capsule(P(foot), P(foot + up * 0.008), H * 0.03, H * 0.03), black, "telephone", dither=False)
+            c.put(c.capsule(P(foot + up * 0.012), P(foot + up * 0.012), H * 0.012, H * 0.012), nickel, "telephone",
+                  dither=False)
+            # the mouthpiece trumpet at the top of the column, turned back towards her mouth, its rim nickel
+            mouth = top + np.array([0, -0.004, -0.02])
+            c.put(c.capsule(P(top), P(mouth), H * 0.012, H * 0.024), black, "telephone", dither=False)
+            c.put(c.capsule(P(mouth), P(mouth), H * 0.014, H * 0.014), nickel, "telephone", dither=False)
+            c.put(c.capsule(P(mouth), P(mouth), H * 0.007, H * 0.007), black, "telephone", dither=False)
+            hook = top + np.array([0, 0.02, 0.022])
+            c.put(c.capsule(P(top + np.array([0, 0.02, 0])), P(hook), H * 0.005, H * 0.005), nickel, "telephone",
+                  dither=False)
+            if r is None:  # hanging on its hook, earpiece up
+                rec_top, rec_bot = hook + np.array([0, -0.004, 0.006]), hook + np.array([0, 0.06, 0.006])
+            else:  # held up to her ear in the other hand
+                held = arm_pts[r][3]
+                rec_top, rec_bot = held + np.array([0, -0.035, -0.008]), held + np.array([0, 0.03, 0.006])
+            # the braided cord, sagging from the bottom of the receiver to the foot of the stand
+            sag = (rec_bot + foot) / 2 + np.array([0, 0.05, 0])
+            for a, b in ((rec_bot, sag), (sag, foot)):
+                c.put(c.capsule(P(a), P(b), H * 0.004, H * 0.004), cord, "telephone", dither=False)
+            c.put(c.capsule(P(rec_top), P(rec_bot), H * 0.011, H * 0.011), black, "receiver", dither=False)
+            c.put(c.capsule(P(rec_top), P(rec_top), H * 0.02, H * 0.02), black, "receiver", dither=False)
+            c.put(c.capsule(P(rec_top + (rec_bot - rec_top) * 0.22), P(rec_top + (rec_bot - rec_top) * 0.22),
+                            H * 0.012, H * 0.012), nickel, "receiver", dither=False)
+            c.put(c.capsule(P(grip + up * 0.012), P(grip - up * 0.012), H * 0.022, H * 0.022), col["skin"], f"hand{s}",
+                  dither=False)
+            if r is not None:
+                c.put(c.capsule(P(arm_pts[r][3]), P(arm_pts[r][3]), H * 0.022, H * 0.022), col["skin"], f"hand{r}",
+                      dither=False)
+        add(ps.get("telephone_z", 2.9), telephone)
+
     if ps.get("bottle"):  # a whiskey bottle gripped by the neck in the hand of arm side, its body along way
         def bottle(spec_=ps["bottle"]):
             s, way = spec_ if isinstance(spec_, tuple) else (spec_, None)
