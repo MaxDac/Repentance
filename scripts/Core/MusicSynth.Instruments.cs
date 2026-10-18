@@ -21,7 +21,7 @@ public static partial class MusicSynth
             case Instrument.Piano:
                 Hammer(buf, rng, note, spb, velocity);
                 break;
-            case Instrument.RecordedPiano:
+            case Instrument.RecordedPiano or Instrument.RecordedSax or Instrument.RecordedBass:
                 Recorded(buf, rng, note, spb, velocity);
                 break;
             case Instrument.Trumpet:
@@ -80,6 +80,10 @@ public static partial class MusicSynth
         Instrument.OrganPedal => new[] { SoundSynth.Biquad.HighPass(25), SoundSynth.Biquad.LowPass(4000) },
         Instrument.Piano => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
         Instrument.RecordedPiano or Instrument.Foley => new[] { SoundSynth.Biquad.HighPass(30) },
+
+        // a breathy sax heard through the wall of a smoky room: the reed's edge rolled off
+        Instrument.RecordedSax => new[] { SoundSynth.Biquad.HighPass(90), SoundSynth.Biquad.LowPass(3500) },
+        Instrument.RecordedBass => new[] { SoundSynth.Biquad.HighPass(35), SoundSynth.Biquad.LowPass(2500) },
         // the Harmon mute: thin in the low end, a soft nasal colour around 1.4 kHz, the top rolled well off
         Instrument.Trumpet => new[]
         {
@@ -346,20 +350,20 @@ public static partial class MusicSynth
         }
     }
 
-    // ------------------------------------------------------------------ recorded piano
+    // ------------------------------------------------------------------ recorded instruments
 
     /// <summary>
-    /// A note of the real piano: its recording played from the hammer's strike, as soft as the part asks, until the
-    /// key is let go and the damper falls on the string.
+    /// A note of a real instrument: its recording played from the onset (the hammer's strike, the breath, the pluck), as
+    /// soft as the part asks, until the note is let go and dies away (<see cref="Recordings.ReleaseSeconds"/>).
     /// </summary>
     private static void Recorded(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
     {
-        var rec = PianoRecordings.Get(note.Midi);
+        var rec = Recordings.Get(note.Instrument, note.Midi);
         int held = (int)Math.Round(note.Beats * spb * SampleRate);
         int start = (int)Math.Round(note.Beat * spb * SampleRate);
-        int n = Math.Min(rec.Length, held + (int)(PianoRecordings.TailSeconds * SampleRate));
+        int n = Math.Min(rec.Length, held + (int)(Recordings.TailSeconds(note.Instrument) * SampleRate));
         double amp = velocity * (0.95 + 0.1 * rng.NextDouble());
-        double damper = 1, step = Math.Exp(-1 / (PianoRecordings.DamperSeconds * SampleRate));
+        double damper = 1, step = Math.Exp(-1 / (Recordings.ReleaseSeconds(note.Instrument) * SampleRate));
         for (int i = 0; i < n; i++)
         {
             if (i > held) damper *= step;

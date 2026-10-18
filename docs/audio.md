@@ -1,14 +1,14 @@
 # Audio
 
-Sounds and music are synthesized at startup; the one exception is a real grand piano, recorded note by note
-(see [Recorded piano](#recorded-piano)).
+Sounds and music are synthesized at startup; the exceptions are a real grand piano, alto sax and double bass, recorded note by note
+(see [Recorded instruments](#recorded-instruments)).
 
 | Part | Godot-free | Role |
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
 | `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Traffic.cs`, `.Foley.cs`, `.Street.cs`) | yes | Renders scored tracks to seamless stereo loops |
-| `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
+| `Recordings` | yes | Loads the recorded notes for `RecordedPiano`, `RecordedSax` and `RecordedBass` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
 Buses are created at runtime and routed to Master; their volume follows `GameSettings` (0% mutes).
@@ -51,7 +51,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4, kept soft: no accents, the violins' climax stays at or below C5 |
 | `ChurchOrgan` | Church interior | Organist trying the pipes over held pedal notes, then a chorale; a pipe sounds on every beat, nothing above D5 |
 | `ConventPiano` | Convent corridor, cell | Hymn-like prelude in E-flat on the recorded piano, pedalled arpeggios under a slow tune |
-| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, rolled chords on the recorded piano, bass |
+| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Very slow, very soft D-minor blues (48 bpm): recorded piano, a few alto sax phrases, plucked double bass |
 | `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing in the next room, muffled through the wall: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
 | `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: almost muted, a dull mono thud and echo |
 | `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road, kept distant |
@@ -93,32 +93,34 @@ down; room tone and chair drags last as long as their note.
 **Add a track**: `Track` -> score in `MusicSynth.Scores.cs` (parts, instruments, tempo, hall) -> `Room.Music` ->
 `BaseVolumeDb` if needed. Validate with `MusicSynthTests` and playthrough.
 
-### Recorded piano
+### Recorded instruments
 
-`Instrument.RecordedPiano` plays real pianissimo grand piano notes from the University of Iowa Musical Instrument
-Samples (free to use without restrictions, see [CREDITS.md](../CREDITS.md)) instead of synthesizing them. Each
-pitch is a file in `assets/audio/piano/` (`C4.pcm`, `Db4.pcm`...): mono, 22050 Hz, raw 16-bit little-endian PCM
-starting at the hammer's strike. They are not Godot resources, so the export presets list them in `include_filter`.
-`Music._Ready` reads them on the main thread before rendering; a missing file fails the render.
+`Instrument.RecordedPiano`, `RecordedSax` and `RecordedBass` play real pianissimo notes (grand piano, alto saxophone
+with vibrato, double bass pizzicato) from the University of Iowa Musical Instrument Samples (free to use without
+restrictions, see [CREDITS.md](../CREDITS.md)) instead of synthesizing them. Each pitch is a file in the instrument's
+folder, `assets/audio/piano/`, `assets/audio/sax/` or `assets/audio/bass/` (`C4.pcm`, `Db4.pcm`...): mono, 22050 Hz,
+raw 16-bit little-endian PCM starting at the note's onset. Piano notes come one per file; sax and bass notes are cut
+from Iowa's chromatic scales, and the tool checks every cut's pitch. They are not Godot resources, so the export
+presets list them in `include_filter`. `Music._Ready` reads them on the main thread before rendering; a missing file
+fails the render.
 
-The files hold only the pitches the scores use, each as long as its longest hold plus the damper's fall. After
-changing a `RecordedPiano` part, regenerate them (downloads are cached in the temp folder; stale files are removed):
+The files hold only the pitches the scores use, each as long as its longest hold plus the release. After changing a
+recorded part, regenerate them (downloads are cached in the temp folder; stale files are removed):
 
 ```sh
-dotnet run --project tools/music -- piano
+dotnet run --project tools/music -- recordings
 ```
 
-`MusicSynthTests.EveryRecordedPianoNoteHasARecordingLongEnough` fails until they match the scores.
-Prefer `RecordedPiano` over the synthesized `Piano` for new piano parts.
-
+`MusicSynthTests.EveryRecordedNoteHasARecordingLongEnough` fails until they match the scores.
+Prefer the recorded instruments over the synthesized `Piano`, `Trumpet` and `UprightBass` for new parts.
 ### Music tool
 
 `tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that links the Godot-free
-`SoundSynth*`, `MusicSynth*` and `PianoRecordings` sources:
+`SoundSynth*`, `MusicSynth*` and `Recordings` sources:
 
 | Command | Does |
 |---|---|
-| `dotnet run --project tools/music -- piano` | Downloads, trims and resamples the recorded piano notes the scores need; deletes unused ones |
+| `dotnet run --project tools/music -- recordings` | Downloads, cuts, pitch-checks, trims and resamples the recorded notes the scores need; deletes unused ones |
 | `dotnet run --project tools/music -- render <Track> [out.wav] [loops]` | Renders a track exactly as the game does to a 16-bit stereo WAV, twice round by default so the seam can be heard |
 
 Use `render` to listen to a score change in seconds, without building or importing the game; write the WAV outside
