@@ -460,6 +460,45 @@ def kneeling_figure(spec, joints):
     return action_figure(spec, joints, chest_down=down, toes_tucked=down)
 
 
+# Sal's kick, standing behind a kneeling man and half turned to the screen, facing right (the alley flips him so the
+# kicking leg is his right): (yaw, legs, lean) after his idle frame. He draws the leg back, drives the toe forward and
+# down into the man's belly (the man's body hides the foot), then lets the leg drop back. Hands stay in his pockets.
+SAL_KICK = [
+    (30, {1: (2, 4, 0), -1: (-28, 50, -20)}, 4.0),
+    (30, {1: (4, 6, 0), -1: (50, 22, 4)}, -8.0),
+    (30, {1: (4, 6, 0), -1: (14, 30, -4)}, -3.0),
+]
+# Micah on his knees taking the kick: the back hunches up, the head tucks in and the near hand comes off the cobbles
+# to clutch his stomach, then he sags back down onto his forearms.
+KICKED = [
+    [(57, 66), (76, 66), (81, 77), (61, 88), (41, 85), (77, 79), (70, 82)],
+    [(59, 70), (80, 73), (89, 75), (61, 88), (41, 85), (82, 87), (90, 90)],
+]
+
+
+def kick_strip(spec, name, arms):
+    """An NPC's kick, from and back to the idle frame (so the strip starts and ends without a pose jump). The frame
+    after the idle one is the wind-up and the next is the strike; the scene times the victim's reaction to it."""
+    from PIL import Image
+    standing = npc_standing(spec, arms)
+    frames = [standing]
+    for phi, legs, lean in SAL_KICK:
+        img = Image.new("RGBA", (192, FH))
+        img.alpha_composite(figure(spec, pose(phi, arms=arms, legs=legs, lean=lean), 96, FH), (48, 0))
+        frames.append((img, (96, 18)))
+    frames.append(standing)
+    action_strip(name, frames, [0.2, 0.25, 0.25, 0.2, 0.2])
+    return frames
+
+
+def kicked_strip(spec, name):
+    """Micah on his hands and knees doubling up under a kick, ending back on the kneeling frame."""
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [kneeling_figure(scaled, joints) for joints in KICKED] + [kneeling_figure(scaled, KNEEL)]
+    action_strip(name, frames, [0.3, 0.3, 0.2])
+    return frames
+
+
 def aim_frame(spec, name):
     """Single 96x96 frame of a character in profile facing right, revolver held out one-handed the old-picture way:
     upper arm tucked against the side, forearm level at the target, the free hand hanging."""
@@ -1066,6 +1105,8 @@ def build():
     player_sheet(DANIEL, "daniel")
     player_sheet(MICAH_DRESSING, "micah_dressing")
     kneel_frame(MICAH, "micah_kneel")
+    kicked_strip(MICAH, "micah_kicked")
+    kick_strip(SAL, "sal_kick", _arms("pocket"))
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")

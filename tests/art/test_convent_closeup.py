@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 import unittest
-
+import unittest.mock
 import numpy as np
 from PIL import Image
 
@@ -73,6 +73,24 @@ class ConventCloseupTests(unittest.TestCase):
         left, right = halves(self.panel)
         colours = {tuple(c) for c in np.concatenate([left.reshape(-1, 3), right.reshape(-1, 3)])}
         self.assertLessEqual(len(colours), closeup.COLOURS)
+
+    def test_a_small_cut_crosses_micahs_bottom_lip(self):
+        source = Image.open(closeup.MICAH_SRC).convert("RGB")
+        cut = np.asarray(closeup.lip_cut(source, *closeup.MICAH_CUT)).astype(int)
+        (top, left), (bottom, right) = (lambda p: (p.min(axis=0), p.max(axis=0)))(
+            np.argwhere((cut != np.asarray(source)).any(axis=2)))
+        self.assertLessEqual(bottom - top, 40, "a short cut, not a gash")
+        self.assertLessEqual(right - left, 25, "a thin line")
+        self.assertTrue(abs(top - 400) <= 6 and closeup.MICAH_FACE_X - 40 < left < closeup.MICAH_FACE_X,
+                        "from the mouth line, just off centre")
+        with unittest.mock.patch.object(closeup, "lip_cut", lambda img, *_: img):
+            plain = closeup.convent_closeup(source, Image.open(closeup.ELEANOR_SRC))
+        a, p = np.asarray(self.panel).astype(int), np.asarray(plain).astype(int)
+        diff = (a != p).any(axis=2)
+        self.assertFalse(diff[:, BAR_X:].any(), "Eleanor is untouched")
+        self.assertTrue(diff.any(), "the cut survives the reduction")
+        self.assertLess(diff.sum(), 400, "and stays small in the panel")
+        self.assertLess(a[diff].sum(axis=1).mean(), p[diff].sum(axis=1).mean(), "a dark line across the lip")
 
     def test_micah_on_the_left_in_his_yellow_coat(self):
         left, _ = halves(self.panel)

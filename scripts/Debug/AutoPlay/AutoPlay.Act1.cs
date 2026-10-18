@@ -226,10 +226,19 @@ public partial class AutoPlay
         Check(barLog.Count > 0 && ginAt > 0 && barLog[ginAt - 1].Options[0] == "What've you got?" &&
             !barLog[0].Options.Any(l => l.StartsWith("Bathtub?")),
             "the gin is offered only after Tony names the bathtub gin");
+        int thunks = game.Sfx.Count(Sound.Thunk);
         await Until(() => game.Room?.Name == "Alley");
         Check(_offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").Count(o => o.Options.Any(l => l.StartsWith("Bathtub?"))) == 1 &&
             CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
+        Check(_poseCounts.GetValueOrDefault("sal_kick") == 0, "no beating on screen: the club cuts to black");
+        await Until(() => game.Player.PoseName == "micah_kicked");
+        await Shot("alley_kick");
+        await Until(() => game.Hud.SpeechVisible);
+        Check(_poseCounts.GetValueOrDefault("sal_kick") == 2 && _poseCounts.GetValueOrDefault("micah_kicked") == 2 &&
+            game.Sfx.Count(Sound.Thunk) - thunks == 2, "Sal kicks Micah in the belly twice, a thud each time");
+        Check(game.Player.PoseName == "micah_kneel" && game.Room?.FindActor("sal")?.Poses?.Active == false,
+            "then Micah stays on his knees and Sal stands back for the talk");
         await game.Wait(2.5);
         Check(RainsHere(), "it rains in the alley");
         await Shot("alley");

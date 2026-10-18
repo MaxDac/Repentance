@@ -145,7 +145,10 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - New location: the road behind the club, dirty and in the shadow, with only one intermittent street lamp.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
-  Tony behind Sal.
+  Tony behind Sal. So the player understands what happened, Sal steps up behind Micah, half turned to the screen,
+  and kicks him in the belly twice with his right foot, the foot hidden behind Micah's body (new kicking sprite for
+  Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue starts. The beating splits Micah's bottom lip: from here on his close-ups (the convent two-portrait panel
+  and the beaten panel) show a small dark-red cut across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
