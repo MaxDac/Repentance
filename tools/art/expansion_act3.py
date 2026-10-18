@@ -31,24 +31,66 @@ CELLAR_FIRE_FRAMES = 8
 # ------------------------------------------------------------------------------------------------ CELLAR
 
 def _storm_lantern(d, x, y, lit=False):
-    """A tin hurricane lantern hanging by its bail from (x, y)."""
-    tin, tin_d = hx("6a7468"), hx("3a4038")
-    d.arc([x - 6, y, x + 6, y + 12], 180, 360, fill=hx("4a4a50"))
-    d.rectangle([x - 5, y + 6, x + 5, y + 9], fill=tin)
-    d.line([(x - 5, y + 6), (x + 5, y + 6)], fill=mul(tin, 1.3))
-    glass = hx("ffd070") if lit else hx("8a9a9a")
-    d.ellipse([x - 7, y + 9, x + 7, y + 25], fill=glass, outline=tin_d)
+    """A tin hurricane lantern hanging by its wire bail from (x, y): vented cap, the two air tubes down its sides,
+    a sooted glass globe in a wire guard with the burner and wick inside, and the fuel font with its filler cap and
+    wick-raiser knob. Lit, a flame stands on the wick and the tin catches it; the lit lantern is painted after the
+    room's grade (see paint_cellar), so these are its final colours."""
     if lit:
-        d.ellipse([x - 3, y + 13, x + 3, y + 21], fill=hx("fff0b0"))
-        d.line([(x, y + 14), (x, y + 19)], fill=hx("fffce8"))
+        tin, tin_l, tin_d, edge = hx("8a6a44"), hx("e0a860"), hx("4a3020"), hx("24160e")
+        wire, brass, rust = hx("3a2618"), hx("f0c070"), hx("6a3a1c")
     else:
-        d.line([(x - 4, y + 12), (x - 4, y + 18)], fill=hx("c8d4d0"))
-    for gx in (x - 7, x, x + 7):  # wire guards
-        d.line([(gx, y + 9), (gx, y + 25)], fill=tin_d)
-    d.rectangle([x - 8, y + 25, x + 8, y + 32], fill=tin, outline=tin_d)
-    d.line([(x - 8, y + 28), (x + 8, y + 28)], fill=tin_d)
-    d.line([(x - 9, y + 11), (x - 9, y + 27)], fill=tin_d)  # side tubes
-    d.line([(x + 9, y + 11), (x + 9, y + 27)], fill=tin_d)
+        tin, tin_l, tin_d, edge = hx("6a7468"), hx("a8b4a4"), hx("3a4038"), hx("1a1e1a")
+        wire, brass, rust = hx("4a4a50"), hx("b08a40"), hx("6a3a24")
+    # the wire bail, its loop round the hook, and the ears it pivots in on the cap
+    d.arc([x - 8, y + 1, x + 8, y + 19], 200, 340, fill=wire)
+    d.ellipse([x - 1, y - 1, x + 1, y + 2], outline=wire)
+    for s in (-1, 1):
+        d.point((x + s * 8, y + 9), fill=edge)
+    # the cap: a stepped dome with a row of vent holes and a lip over the globe
+    d.polygon([(x - 2, y + 4), (x + 2, y + 4), (x + 5, y + 7), (x - 5, y + 7)], fill=tin, outline=edge)
+    d.line([(x - 1, y + 5), (x + 1, y + 5)], fill=tin_l)
+    d.rectangle([x - 7, y + 8, x + 7, y + 10], fill=tin, outline=edge)
+    d.line([(x - 6, y + 8), (x + 5, y + 8)], fill=tin_l)
+    for vx in (x - 4, x - 1, x + 2, x + 5):
+        d.point((vx, y + 6), fill=hx("ffe8a0") if lit else edge)
+    # the globe, and what is inside it
+    if lit:
+        d.ellipse([x - 6, y + 11, x + 6, y + 25], fill=hx("a85a1c"), outline=edge)
+        d.ellipse([x - 5, y + 12, x + 5, y + 24], fill=hx("d88a30"))
+        d.ellipse([x - 3, y + 14, x + 3, y + 23], fill=hx("f0b050"))
+        d.arc([x - 5, y + 11, x + 5, y + 17], 200, 340, fill=hx("5a2a10"))  # soot on the inside of the dome
+        d.polygon([(x, y + 13), (x + 2, y + 18), (x + 1, y + 21), (x - 1, y + 21), (x - 2, y + 18)],
+                  fill=hx("fff4c0"))  # the flame
+        d.line([(x, y + 15), (x, y + 20)], fill=hx("ffffff"))
+        d.point((x, y + 13), fill=hx("ff8a30"))
+        d.point((x, y + 21), fill=hx("4a8ad8"))  # the blue root on the wick
+    else:
+        d.ellipse([x - 6, y + 11, x + 6, y + 25], fill=hx("6a7a7a"), outline=edge)
+        d.ellipse([x - 4, y + 13, x + 4, y + 24], fill=hx("4e5c5e"))
+        d.arc([x - 5, y + 11, x + 5, y + 17], 200, 340, fill=hx("2a2a28"))  # old soot
+        d.line([(x, y + 20), (x, y + 21)], fill=hx("1a1a18"))  # the cold wick, charred at the tip
+    d.line([(x - 3, y + 13), (x - 4, y + 18)], fill=hx("fff8e0") if lit else hx("d8e4e0"))  # the glass's gleam
+    d.point((x + 3, y + 22), fill=hx("ffe8b0") if lit else hx("a8b8b4"))
+    d.rectangle([x - 3, y + 22, x + 3, y + 24], fill=brass, outline=edge)  # the burner collar
+    # the wire guard: two stays and a hoop round the globe's belly
+    for gx in (x - 4, x + 4):
+        d.line([(gx, y + 11), (gx, y + 25)], fill=edge)
+    d.line([(x - 6, y + 18), (x + 6, y + 18)], fill=edge)
+    # the air tubes, bent in from the cap and down into the font
+    for s in (-1, 1):
+        d.line([(x + s * 7, y + 10), (x + s * 9, y + 12), (x + s * 9, y + 25)], fill=tin_d, width=2)
+    d.line([(x - 9, y + 13), (x - 9, y + 24)], fill=tin_l)
+    # the fuel font: a rolled top, a seam, a dent of rust, the filler cap and the wick-raiser knob
+    d.rectangle([x - 9, y + 25, x + 9, y + 33], fill=tin, outline=edge)
+    d.line([(x - 8, y + 26), (x + 8, y + 26)], fill=tin_l)
+    d.line([(x - 8, y + 30), (x + 8, y + 30)], fill=tin_d)
+    d.line([(x - 8, y + 27), (x - 8, y + 32)], fill=tin_l)
+    d.line([(x + 8, y + 27), (x + 8, y + 32)], fill=tin_d)
+    d.point((x + 5, y + 32), fill=rust)
+    d.point((x - 3, y + 31), fill=rust)
+    d.rectangle([x + 4, y + 23, x + 6, y + 24], fill=brass, outline=edge)  # filler cap
+    d.line([(x - 11, y + 27), (x - 10, y + 27)], fill=brass)  # wick-raiser knob
+    d.point((x - 11, y + 26), fill=edge)
 
 
 def _kerosene_can(d, x, y):
@@ -378,10 +420,7 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
     if fire:
         _cellar_fire(img, em, *POOL, fire_t)
     d = ImageDraw.Draw(img)
-    # ---- the lantern hung at the stair foot, once it is lit ----
-    if lit and not lantern_down:
-        _storm_lantern(d, nx, ny, lit=True)
-        ed.ellipse([nx - 7, ny + 9, nx + 7, ny + 25], fill=255)
+    hang = lit and not lantern_down
     # ---- light ----
     hatch = (60, 30, 80, 90, (0.55, 0.62, 0.95), 0.9)
     if fire:
@@ -396,8 +435,10 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
         img = grade(img, (0.2, 0.2, 0.28), pools, em)
         light(img, "ellipse", [nx - 26, ny - 6, nx + 26, ny + 46], hx("f0b060"), 0.4, 10)
         vignette(img, 0.45, (8, 6, 12), 40)
+        if hang:  # the lantern hung at the stair foot, painted over its own light so the tin and flame stay crisp
+            _storm_lantern(ImageDraw.Draw(img), nx, ny, lit=True)
     else:
-        pools = [hatch, (hx0, hy0 + 18, 26, 30, (0.42, 0.42, 0.55), 0.7),
+        pools = [hatch, (hx0, hy0 + 18, 26, 30, (0.55, 0.55, 0.7), 0.8),
                  (276, 172, 70, 36, (0.3, 0.3, 0.4), 0.6)]
         img = grade(img, (0.07, 0.07, 0.11), pools, em)
         shadow(img, "rect", [sx0, 0, W, CFL + 20], 0.6, 10)  # the service stair stays black
