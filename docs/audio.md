@@ -84,8 +84,8 @@ Prefer `RecordedPiano` over the synthesized `Piano` for new piano parts.
 
 ### Music tool
 
-`tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that links the Godot-free
-`SoundSynth*`, `MusicSynth*` and `PianoRecordings` sources:
+`tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that references the Godot-free
+`src/Repentance.Audio` library (`SoundSynth*`, `MusicSynth*`, `PianoRecordings`):
 
 | Command | Does |
 |---|---|

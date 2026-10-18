@@ -7,8 +7,9 @@
 | Room behavior | `scripts/Rooms/<Room>.cs` (one class per scene) |
 | Inventory verbs and combinations valid in any room | `scripts/Story/` |
 | Story puzzles shared by rooms | `scripts/Story/` (`StoryPuzzles`) |
-| New items | the act file in `scripts/Core/Items/` that introduces them |
-| Pure rules (puzzles, endings, recipes, notes, kits, save data) | Godot-free files in `scripts/Core/` |
+| New items | the act file in `src/Repentance.Rules/Items/` that introduces them |
+| Pure rules (puzzles, endings, recipes, notes, kits, save data, Ink scan) | `src/Repentance.Rules/` |
+| Sound and music synthesis | `src/Repentance.Audio/` |
 | UI | `scripts/UI/` (code-built, no scenes) |
 | Test helpers shared by suites | `scripts/Debug/Harness.cs` |
 | Canonical story steps | `scripts/Debug/Playthrough/Playthrough.<Act>.cs` |
@@ -21,11 +22,24 @@
 
 Use the concern-specific partial, not the main file. [File map](architecture.md#partial-classes).
 
-## Godot-free files
+## Godot-free libraries
 
-`Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `SoundSynth*`, `MusicSynth*`, `PianoRecordings`,
-`InkScan`, `RainWeather` are linked into the xunit project. They must not reference Godot types; put the Godot side in a separate
-class (`Sfx`, `Music`, `SaveSystem`...).
+The solution splits by concern; all projects share `Directory.Build.props` (nullable, CS0108/CS0114 as errors).
+
+| Project | Contents | References |
+|---|---|---|
+| `Repentance.csproj` | The Godot game: `scripts/` (framework, rooms, story, UI, debug) | Rules, Audio, Godot, Ink |
+| `src/Repentance.Rules` | `Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather` | - |
+| `src/Repentance.Audio` | `SoundSynth*`, `MusicSynth*`, `PianoRecordings` | - |
+| `tests/Repentance.Tests` | xunit | Rules, Audio, Ink |
+| `tools/music` | Music tool | Audio |
+
+The libraries have no Godot reference, so Godot types do not compile there; put the Godot side in a game class
+(`Sfx`, `Music`, `SaveSystem`...). Godot only registers script classes (nodes, resources) from the game
+assembly, so anything Godot-facing stays in `scripts/`. Everything keeps the `Repentance` namespace; members the
+tests need but the game must not see are `internal` (the libraries grant `InternalsVisibleTo` to the tests).
+`src/` has a `.gdignore` and `Repentance.csproj` excludes `src/**` from its own compile items. Add new projects
+to `Repentance.sln`, which Godot needs for export.
 
 ## Inheritance contracts
 

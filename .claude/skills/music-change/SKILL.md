@@ -20,7 +20,7 @@ Follow `docs/audio.md` ("Music", "Recorded piano", "Music tool"). Always use the
 
 ## Steps
 
-1. Edit the score in `scripts/Core/MusicSynth.Scores.cs` (tempo, `Hall`, parts) and, for a new track, the `Track`
+1. Edit the score in `src/Repentance.Audio/MusicSynth.Scores.cs` (tempo, `Hall`, parts) and, for a new track, the `Track`
    enum, `BaseVolumeDb` and the room's `Music` override.
 2. If any `RecordedPiano` note or hold changed, regenerate the recordings and commit the changed
    `assets/audio/piano/*.pcm` files (never hand-edit them):

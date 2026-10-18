@@ -5,7 +5,7 @@
 | Tool | Version | Used for |
 |---|---|---|
 | Godot **.NET** edition | 4.7.x (CI: 4.7.2) | Editor, import, running the game. The standard edition cannot load C# |
-| .NET SDK | 10.x | Building `Repentance.csproj` and the xunit tests |
+| .NET SDK | 10.x | Building `Repentance.csproj` (with its `src/` libraries), the xunit tests and `tools/music` |
 | Python + Pillow + NumPy | 3.14 | Art generators and art tests only |
 | `gh` | any | PRs, CI logs, releases |
 

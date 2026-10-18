@@ -126,7 +126,7 @@ Speed is optional and defaults to 1x in both launchers; Bash no longer accepts p
 Ending/chapter options are unchanged.
 ## Unit tests (`tests/Repentance.Tests`)
 
-`net10.0` xunit project. It links the [Godot-free sources](conventions.md#godot-free-files) and imports
+`net10.0` xunit project. It references the [Godot-free libraries](conventions.md#godot-free-libraries) and imports
 `GodotInk.props` to compile the same Ink story.
 
 | Class | Checks |

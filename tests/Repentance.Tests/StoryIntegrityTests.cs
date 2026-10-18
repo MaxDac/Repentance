@@ -22,10 +22,9 @@ public class StoryIntegrityTests
     private static string InkText => File.ReadAllText(Path.Combine(Root.Value, "dialogue", "repentance.ink"));
     private static readonly Lazy<InkScan> Ink = new(() => InkScan.Parse(InkText));
 
-    /// <summary>Game code: everything under scripts/ except the debug runners, which seed state on purpose.</summary>
+    /// <summary>Game code: scripts/ and the src/ libraries, except the debug runners, which seed state on purpose.</summary>
     private static readonly Lazy<Dictionary<string, string>> Code = new(() =>
-        Directory.GetFiles(Path.Combine(Root.Value, "scripts"), "*.cs", SearchOption.AllDirectories)
-            .Where(f => !f.Replace('\\', '/').Contains("/scripts/Debug/"))
+        SourceFiles.Game(Root.Value)
             .ToDictionary(f => Path.GetRelativePath(Root.Value, f).Replace('\\', '/'), File.ReadAllText));
 
     /// <summary>Knots that are one-time cutscenes: all their choices are <c>*</c> with no fallback, so the game must never run them twice.</summary>

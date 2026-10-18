@@ -120,7 +120,7 @@ generic exits are closed (`Interlude.BlockedExitLine`) and held items refused: h
    `metadata/facing`, hotspots (with `Id`, `DisplayName`, `LookText`) and exits.
 3. Script: `scripts/Rooms/<Name>.cs`, `public partial class <Name> : Room`; attach it to the root.
 4. Link it: an exit hotspot elsewhere with `ExitTo`/`ExitEntry`, or a literal `ChangeRoom`, so it is reachable.
-5. Story: dialogue in `dialogue/repentance.ink`, items in `scripts/Core/Items/`, a beat in
+5. Story: dialogue in `dialogue/repentance.ink`, items in `src/Repentance.Rules/Items/`, a beat in
    `scripts/Debug/Playthrough/` (see [Story and dialogue](story-and-dialogue.md)). If a debug start there needs
    items or notes, update `MicahKit.DebugItems` / `Notes.DebugStartFlags`.
 6. Check [save compatibility](saves-and-settings.md#changing-the-format) if saved room/entry identifiers change.

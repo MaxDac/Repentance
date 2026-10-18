@@ -1,11 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <RootNamespace>Repentance.Tests</RootNamespace>
-    <WarningsAsErrors>$(WarningsAsErrors);CS0108;CS0114</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
@@ -13,21 +11,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.*" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Godot-free logic is linked directly so tests don't need the Godot SDK. -->
-    <Compile Include="..\..\scripts\Core\Items.cs" Link="Linked\Items.cs" />
-    <Compile Include="..\..\scripts\Core\Items\*.cs" Link="Linked\Items\%(Filename)%(Extension)" />
-    <Compile Include="..\..\scripts\Core\SaveData.cs" Link="Linked\SaveData.cs" />
-    <Compile Include="..\..\scripts\Core\PuzzleRules.cs" Link="Linked\PuzzleRules.cs" />
-    <Compile Include="..\..\scripts\Core\SwipeGesture.cs" Link="Linked\SwipeGesture.cs" />
-    <Compile Include="..\..\scripts\Core\Endings.cs" Link="Linked\Endings.cs" />
-    <Compile Include="..\..\scripts\Core\Recipes.cs" Link="Linked\Recipes.cs" />
-    <Compile Include="..\..\scripts\Core\Notes.cs" Link="Linked\Notes.cs" />
-    <Compile Include="..\..\scripts\Core\MicahKit.cs" Link="Linked\MicahKit.cs" />
-    <Compile Include="..\..\scripts\Core\RainWeather.cs" Link="Linked\RainWeather.cs" />
-    <Compile Include="..\..\scripts\Core\SoundSynth*.cs" LinkBase="Linked" />
-    <Compile Include="..\..\scripts\Core\InkScan.cs" Link="Linked\InkScan.cs" />
-    <Compile Include="..\..\scripts\Core\MusicSynth*.cs" LinkBase="Linked" />
-    <Compile Include="..\..\scripts\Core\PianoRecordings.cs" LinkBase="Linked" />
+    <!-- Godot-free libraries, so tests don't need the Godot SDK. -->
+    <ProjectReference Include="..\..\src\Repentance.Rules\Repentance.Rules.csproj" />
+    <ProjectReference Include="..\..\src\Repentance.Audio\Repentance.Audio.csproj" />
   </ItemGroup>
   <!-- The same ink compiler and runtime as the game (downloaded on first build), so StoryIntegrityTests can walk the real story. -->
   <PropertyGroup>

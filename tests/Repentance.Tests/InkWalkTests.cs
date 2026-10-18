@@ -202,9 +202,8 @@ public class InkWalkTests
         var talk = new Regex(@"\bTalk\(([^;]*?)\)\s*;");
         var literal = new Regex(@"""([a-z_][\w.]*)""");
         var knots = new HashSet<string>();
-        foreach (var file in Directory.GetFiles(Path.Combine(Root.Value, "scripts"), "*.cs", SearchOption.AllDirectories))
+        foreach (var file in SourceFiles.Game(Root.Value))
         {
-            if (file.Replace('\\', '/').Contains("/scripts/Debug/")) continue;
             foreach (Match call in talk.Matches(File.ReadAllText(file)))
                 foreach (Match lit in literal.Matches(Regex.Replace(call.Groups[1].Value, @"\w+\(""[^""]*""\)", "")))
                     if (scan.Knots.Contains(lit.Groups[1].Value)) knots.Add(lit.Groups[1].Value);
