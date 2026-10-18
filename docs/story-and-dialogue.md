@@ -66,7 +66,7 @@ Start a conversation from C# with `await Talk("knot")`. It runs inside `Game.Run
 - 1927 noir, first person. Thoughts are journal entries; speech to objects or people stays speech.
 - Biblical lines are paraphrases or thematic applications, not quotations, unless marked; keep them to two sentences
   inside the conversation, not sermons. Repentance is turning back and receiving grace, not earning it. Caleb
-  carries the invitation (central line in `caleb_act2`); Agatha's condemnation is the contrast; Rose stays cautious
+  carries the invitation (central line in `caleb_act2`); Agatha's condemnation is the contrast, until she confesses her own failure at gunpoint (`nun_threat2`); Rose stays cautious
   (forgiveness is not restored trust). The placements are listed in [Story overview](story-overview.md#scripture).
 
 ## Flags
