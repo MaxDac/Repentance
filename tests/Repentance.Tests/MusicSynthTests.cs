@@ -241,7 +241,7 @@ public class MusicSynthTests
         }
         var room = Renders[Track.BlueLanternJazz].Value;
         var alley = Renders[Track.BlueLanternAlley].Value;
-        Assert.True(Bright(alley) < Bright(room) / 2, $"alley {Bright(alley)} vs room {Bright(room)}");
+        Assert.True(Bright(alley) < Bright(room) * 2 / 3, $"alley {Bright(alley)} vs room {Bright(room)}");
         Assert.True(Width(alley) < Width(room), $"alley {Width(alley)} vs room {Width(room)}");
     }
 

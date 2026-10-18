@@ -52,7 +52,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
-| `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing behind a curtain: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
+| `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing in the next room, muffled through the wall: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
 | `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: dark, narrow and echoing |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
 

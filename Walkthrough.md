@@ -122,7 +122,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club (the Blue Lantern speakeasy)
 
-- Music: a hot band rehearsing somewhere behind the curtain (`BlueLanternJazz`), on every visit including the
+- Music: a hot band rehearsing in a back room, muffled through the wall (`BlueLanternJazz`), on every visit including the
   interlude. It plays through two choruses, breaks down on a wrong trombone note, noodles, and the drummer counts
   it back in.
 - Inside the cold-room entrance, Sal the guard still asks for the password; the blue carnation only got Micah

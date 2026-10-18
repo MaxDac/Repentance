@@ -358,13 +358,13 @@ public static partial class MusicSynth
             Comp((_, beats, stop) => stop ? "r:4 " : Repeat("r:1 D2+F#2:1 ", beats / 2)) + Bars("r:1 D2+F#2:1 r:2")),
         // the count-in
         new(Instrument.Drums, 0.8, 0.05, Bars(Rests(46) + "|C#2:2 C#2:2|C#2:1 C#2:1 C#2:1 C#2:1")),
-    }, Distance: new Distance(180, 4200, 0.6, 0.27, 0.3, 0.3));
+    }, Distance: new Distance(70, 650, 0.3, 0.27, 0.3, 0.3));
 
     /// <summary>The same rehearsal from the alley: through the open back door and down a brick passage, far, dark,
     /// almost mono and full of echoes.</summary>
     private static readonly Piece LanternAlley = Lantern with
     {
         Hall = new Hall(1.5, 0.9, 0.5, 0.7),
-        Distance = new Distance(250, 1100, 0.15, 0.39, 0.4, 0.5),
+        Distance = new Distance(150, 300, 0.1, 0.39, 0.4, 0.5),
     };
 }
