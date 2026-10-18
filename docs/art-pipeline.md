@@ -48,6 +48,7 @@ normal play for visual review. `--no-clean` / `-NoClean` preserves existing capt
 | Item icon | 32x24 (`assets/art/items/`) |
 | Action strip | PNG + JSON: `width`, `height`, `frames[{anchor, head, seconds, bounds}]` (frame pixels) |
 | Close-up | 220x113 art area doubled, 32 colors, ordered dither, in a frame |
+| Photo close-up | 72x113 art area doubled, 32 sepia colors, ordered dither, on a 9 px cream card mount (RGBA, worn corners) |
 | Overlays / foreground | Own crop size and scene position |
 
 Club rooms use separate 128-color palettes. Replacement art must preserve these contracts and be incorporated into

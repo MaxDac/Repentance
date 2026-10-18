@@ -15,8 +15,14 @@ public sealed partial class Playthrough
         int ending = _route is "1" or "1-oldman" or "1-steps" ? 1 : int.Parse(_route);
         await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", 300);
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
-        await Until(() => _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End", 300);
+        bool sawVows = false;
+        await Until(() =>
+        {
+            sawVows |= _game.Hud.CurrentCloseUp == CloseUps.Vows && _game.Hud.InsetName == "vows_photo";
+            return _game.Room?.Name == "Attic" && _game.Hud.CaptionVisible && _game.Hud.CaptionText == "The End";
+        }, 300);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionText == "The End", $"route {_route}: the epilogue ends on \"The End\"");
+        Check(sawVows == (ending == 1), $"route {_route}: the vow-renewal photo {(ending == 1 ? "shown" : "not shown")} in the epilogue");
         for (int n = 1; n <= 11; n++)
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         bool keeps = Endings.KeepsJournal(ending);

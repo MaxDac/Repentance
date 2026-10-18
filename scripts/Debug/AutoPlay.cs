@@ -21,6 +21,7 @@ public partial class AutoPlay : Harness
     private readonly Dictionary<string, string[]> _offered = new();
     private readonly List<(string Knot, string[] Options)> _offerLog = new();
     private bool _theEndShot;
+    private bool _vowsShot;
     private string _act3Ink = "";
     private int _crossOffers;
     private bool? _insetAtCaughtChoice;

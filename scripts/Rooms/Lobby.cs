@@ -5,6 +5,8 @@ namespace Repentance.Rooms;
 /// <summary>The Aurelian Hotel lobby: marble, brass and people who have seen nothing.</summary>
 public partial class Lobby : Room
 {
+    public override Track? Music => Track.LobbyPiano;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_lobby")) return;
