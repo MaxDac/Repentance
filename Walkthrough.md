@@ -291,7 +291,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    dress is a separate object (`eleanor_room_interlude_bench.png`) and a hole in the walk area: Eleanor walks
    round it, and reaches the dress from in front of it. She packs the brass box
    (**Puzzle 17**, below), puts the combination in the
-   drawer, and phones Rizzo's Flowers from the bedside (the answers are colour). At the door, Sal and a second hood take her down
+   drawer, and phones Rizzo's Flowers on the candlestick telephone on the vanity (the answers are colour). At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
    The box is a dead man's switch, not an invitation: if the Club ever drags her back, the Club goes into the
    morning paper. The card hides the Club's address; the matchbook, the bluing and the password get a reporter
@@ -543,7 +543,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - If Eleanor seduced her, Agatha still calls Eleanor a Jezebel ("She nearly had me fooled, the whore." before
     she breaks, then "Jezebel she is. But it was my fault.").
   - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits she
-    called her a whore and put her out because Eleanor stopped her.
+    turned it round on Eleanor and put her out at first light, because Eleanor stopped her.
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
   On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
   name - I'd start there."
@@ -800,6 +800,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Outside of the Harrington mansion, behind the kitchen
 
+- Music: from here to the last mansion room, one unbroken dissonant thriller loop (double bass, pizzicato clusters,
+  bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
 - Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
   the taut wire; move the coal bin under the bell to reach its hammer.
 - **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
@@ -903,7 +905,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     - **Return to bed** (her rise played backwards): ending 1, as above.
     - **The candlestick** on the nightstand, a step from where she stands: she takes it while he mutters at the door
       ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
-      sprites: her swing, his fall forward, no wound). She leaves through the study, taking from his desk the old man's
+      sprites: her swing, his fall forward, no wound). She leaves through the study (she had only ever seen it from the doorway), taking the old man's
       "Thursday book" (the Club's ledger of the girls: she always knew where he kept it), and the kitchen; the doors back to the bedroom
       refuse her. The cellar is optional: the lantern hangs on its nail (Micah came in that way), she takes it
       and opens the whiskey barrel over it, and the house burns. No satchel: two hand actions. The kitchen door
@@ -942,6 +944,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to set it on fire
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
+- At the gate Eleanor retrieves her black dress from the Club's car and changes in Micah's car during the drive.
 - In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
 
 #### Option 3 - Outskirts, without Eleanor
@@ -1098,7 +1101,7 @@ motel map and burial survey are not part of the completed Act 3.
 All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 10 (`SaveData.CurrentVersion`); earlier versions are incompatible with Eleanor's weary follow in endings
+is version 11 (`SaveData.CurrentVersion`); earlier versions are incompatible with the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
 10 and 11, the motel detour and storm-office room flow, the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in

@@ -109,7 +109,7 @@ alarm bell instead validate their ordered settings in their puzzle screens throu
 
 | Puzzle | Steps and flags | Out of order |
 |---|---|---|
-| 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> safe (`interlude_safe_locked`) -> riddle in the drawer (`interlude_drawer_locked`) -> call from the bed (`interlude_phoned`) | the drawer and the bed say what comes first; the door names the first missing step |
+| 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> safe (`interlude_safe_locked`) -> riddle in the drawer (`interlude_drawer_locked`) -> call on the vanity telephone (`interlude_phoned`) | the drawer and the telephone say what comes first; the door names the first missing step |
 | 18, dressing room (`ClubBackstage`) | powder (`interlude_powdered`) -> lipstick (`interlude_lips`) -> hairpin (`interlude_made_up`) | lipstick on a bare face, or the hairpin before the mouth, is refused and kept |
 | Safe, Room 507 (`PuzzleKind.Safe`) | directions right, left, right; numbers 12, 31, 7 (`PuzzleRules.Safe`) | the handle says how many tumblers fell; nothing is used up |
 | Alarm bell (`MansionExterior`, `PuzzleKind.Bell`) | plan: hold the hammer, tie it, release the hand (`PuzzleRules.Bell`) | any other plan (cutting the wire would ring the gong) stops before he touches it |
@@ -138,7 +138,7 @@ send the story the wrong way.
 |---|---|---|
 | Prologue -> Act 1 | `Attic` (journal read) | Daniel reads; play moves to the 1927 office |
 | Act 1 -> 2 | `Attic.EndOfActOne` | Stash items, `attic_night`, dinner call, "End of Act One", `StoryAct = 2` |
-| First interlude | `Interlude.BeginFirst` / `EndFirst` | Flag `interlude1`, play Eleanor from her hotel room; restores the Act 2 kit, then Micah's night in `motel_night` and the office |
+| First interlude | `Interlude.BeginFirst` / `EndFirst` | Flag `interlude1`, play Eleanor from her hotel room; `EndFirst` restores the Act 2 kit and resumes Micah on `motel_fire_escape` entry `interlude1` (the talk and the kiss), then `motel_night` and the office |
 | Act 2 -> 3 | `Attic.EndOfActTwo` | Stash, clear `masked`, `StoryAct = 3`, present-day bedroom |
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |

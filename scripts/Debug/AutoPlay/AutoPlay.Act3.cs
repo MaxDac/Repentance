@@ -29,7 +29,7 @@ public partial class AutoPlay
         var bedLines = await Spoken(() => game.Perform(Verb.Hand, "bed"));
         var windowLines = await Spoken(() => game.Perform(Verb.Look, "window"));
         Check(bedLines.Contains("Cold on his side now. I won't think about that.") && !bedLines.Any(l => l.Contains("Still warm")),
-            "the night after, his side of the bed has gone cold");
+            "after he has gone, his side of the bed has gone cold");
         Check(windowLines.Contains("He's gone from the alley. A car's pulled in below, lights off.") && !windowLines.Any(l => l.Contains("His car")),
             "Micah came on foot: no car of his in the lot");
         Check(game.Room?.Name == "MotelNight" && !gs.HasFlag("interlude_goons_in"), "the bed and the window don't bring the knock forward");
@@ -339,6 +339,8 @@ public partial class AutoPlay
         await Shot("office_storm_hat_on");
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "MansionExterior", "out of the office, on to the Harrington mansion");
+        Check(game.Music.Current == Track.MansionDread, "the mansion's dread starts outside the house");
+        int dreadStarts = game.Music.Count(Track.MansionDread);
 
         // ---- the mansion: the alarm bell, the key, the study, the bedroom
         await Shot("mansion_exterior");
@@ -395,6 +397,8 @@ public partial class AutoPlay
             "the whiskey and the hung lantern wait for the escape");
         await game.Perform(Verb.Walk, "stair");
         Check(game.Room?.Name == "MansionStudy", "up the bootleggers' stair into the study");
+        Check(game.Music.Current == Track.MansionDread && game.Music.Count(Track.MansionDread) == dreadStarts,
+            "the dread plays on unbroken through the kitchen, the cellar and the study");
         await Shot("mansion_study_hatch");
         await game.Perform(Verb.Walk, "door_left");
         Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("baize_unbolted"), "unbolted the baize door from the study side");
@@ -500,6 +504,8 @@ public partial class AutoPlay
         await Shot("mansion_fire");
         await Until(() => game.Room?.Name == "Outskirts");
         Check(gs.HasFlag("ending_2"), "ending 2: out of town, together");
+        Check(game.Music.Current != Track.MansionDread && game.Music.Count(Track.MansionDread) == dreadStarts,
+            "the dread played through the whole mansion, bedroom included, and stops once out of it");
         Check(HeardLog.Any(l => l.Contains("Oh my God, Micah.")) && !HeardLog.Any(l => l.Contains("She watches the windows go.")),
             "ending 2: convinced Eleanor cries out when the house goes");
         await game.Wait(3);
@@ -508,6 +514,8 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("She told me the rest of it in the car that night")) &&
               !HeardLog.Any(l => l.Contains("motel on the road")) && !HeardLog.Any(l => l.Contains("changed in mine on the way")),
             "ending 2: Daniel's journal puts the telling in the car, not a motel on the road; no weary-road dress beat");
+        Check(HeardLog.Any(l => l.Contains("At the gate she fetched her black dress from the Club's car.")),
+            "ending 2: Micah says how Eleanor got from the sheet back into her black dress");
         HeardLog = null;
     }
 }

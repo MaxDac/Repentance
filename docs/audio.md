@@ -53,6 +53,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 | `RoseStreet` | Rose's house (Act 2 visit, Act 3 coffee) | Not music: a quiet evening street, silent but for two 1920s cars driving past across the stereo field |
 
 `RoseStreet` is scored like the others but played by the `Car` in `MusicSynth.Street.cs`: a note is one whole pass,
