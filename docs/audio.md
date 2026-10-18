@@ -53,7 +53,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
-| `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Almost silent E-flat-minor pizzicato double bass, a low note every two beats blurred by a dark room; one faint, low violin phrase per loop |
+| `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second

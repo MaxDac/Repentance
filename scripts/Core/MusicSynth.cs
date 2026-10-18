@@ -17,7 +17,7 @@ public enum Track
     OfficeJazz,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
-    /// <summary>Investigation: soft pizzicato double bass in E-flat minor, with one violin phrase each time round.</summary>
+    /// <summary>Investigation: a slow, reflective D-minor piano, pianissimo and barely audible, to think by.</summary>
     Investigation,
 }
 

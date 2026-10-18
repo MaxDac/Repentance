@@ -211,36 +211,31 @@ public class MusicSynthTests
     }
 
     [Fact]
-    public void InvestigationIsPluckedBassWithASingleViolinPhrase()
+    public void InvestigationIsAQuietReflectivePiano()
     {
         var score = MusicSynth.Score(Track.Investigation);
-        Assert.Equal(80, MusicSynth.LengthBeats(Track.Investigation));
-        Assert.Equal(
-            new[] { Instrument.UprightBass, Instrument.Violin }.ToHashSet(),
-            score.Select(n => n.Instrument).ToHashSet());
-        // background: nothing accented, every note on the beat
-        Assert.DoesNotContain(score, n => n.Strident);
-        Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
-        // barely there: the quietest track, the bass plucking one low note every two beats and ringing into the next,
-        // in E-flat minor, opening on E-flat and leading home from a low B-flat
+        Assert.All(score, n => Assert.Equal(Instrument.RecordedPiano, n.Instrument));
+        Assert.Equal(64, MusicSynth.LengthBeats(Track.Investigation), 6);
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.Investigation), 50, 66);
+        // barely there: the quietest track, nothing accented, every note on the beat and a note starting on every beat
         Assert.All(Enum.GetValues<Track>().Where(t => t != Track.Investigation),
             t => Assert.True(MusicSynth.BaseVolumeDb(Track.Investigation) < MusicSynth.BaseVolumeDb(t), $"{t}"));
-        var bass = score.Where(n => n.Instrument == Instrument.UprightBass).ToList();
-        Assert.Equal(Enumerable.Range(0, 40).Select(b => 2.0 * b), bass.Select(n => n.Beat));
-        Assert.All(bass, n => Assert.Equal(2, n.Beats));
-        Assert.All(bass, n => Assert.True(n.Midi <= MusicSynth.Midi("Bb1"), $"{n}"));
-        Assert.Equal(MusicSynth.Midi("Eb1"), bass[0].Midi);
-        Assert.Equal(MusicSynth.Midi("Bb0"), bass[^1].Midi);
-        int[] eFlatMinor = { 3, 5, 6, 8, 10, 11, 1, 2 };
-        Assert.All(score, n => Assert.Contains(n.Midi % 12, eFlatMinor));
-        // the violin sings once: one slow, unbroken phrase in its low register, a bar to a note, well inside the loop
-        var violin = score.Where(n => n.Instrument == Instrument.Violin).ToList();
-        Assert.All(violin.Zip(violin.Skip(1)), p => Assert.Equal(p.First.Beat + p.First.Beats, p.Second.Beat));
-        Assert.All(violin, n => Assert.True(n.Midi <= MusicSynth.Midi("Bb3") && n.Beats == 4, $"{n}"));
-        Assert.InRange(violin[0].Beat, 16, 48);
-        Assert.True(violin[^1].Beat + violin[^1].Beats <= 72);
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
+        Assert.Equal(Enumerable.Range(0, 64).Select(b => (double)b), score.Select(n => n.Beat).Distinct().Order());
+        // low and dark: nothing above A4; the bass a whole bar to a note, opening on D
+        Assert.All(score, n => Assert.True(n.Midi <= MusicSynth.Midi("A4"), $"{n}"));
+        var bass = score.Where(n => n.Voice == 0).ToList();
+        Assert.Equal(Enumerable.Range(0, 16).Select(b => 4.0 * b), bass.Select(n => n.Beat));
+        Assert.Equal(MusicSynth.Midi("D2"), bass[0].Midi);
+        // the right hand thinks rather than sings: few, long notes, the first phrase left to the left hand alone,
+        // and the last note the leading tone, C-sharp, falling home to D
+        var tune = score.Where(n => n.Voice == 2).ToList();
+        Assert.All(tune, n => Assert.True(n.Beats >= 2, $"{n}"));
+        Assert.True(tune.Count <= 16);
+        Assert.True(tune[0].Beat >= 16);
+        Assert.Equal(MusicSynth.Midi("C#4"), tune[^1].Midi);
     }
-
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)
@@ -248,9 +243,9 @@ public class MusicSynthTests
         var range = new Dictionary<Instrument, (string Low, string High)>
         {
             [Instrument.DoubleBass] = ("E1", "G4"), [Instrument.Cello] = ("C2", "A5"), [Instrument.Viola] = ("C3", "E6"),
-            [Instrument.Violin] = ("Eb3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
+            [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
-            [Instrument.UprightBass] = ("Bb0", "G4"), [Instrument.Drums] = ("C2", "B3"),
+            [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
             [Instrument.RecordedPiano] = ("A0", "C8"),
         };
         Assert.All(MusicSynth.Score(track), n =>
