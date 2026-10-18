@@ -19,6 +19,8 @@ public enum Track
     BlueLanternJazz,
     /// <summary>The same rehearsal heard from the alley, through the open back door and down a passage.</summary>
     BlueLanternAlley,
+    /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
+    LobbyPiano,
 }
 
 public enum Instrument
@@ -34,6 +36,8 @@ public enum Instrument
     /// <summary>Organ pedal, 16' and 8'.</summary>
     OrganPedal,
     Piano,
+    /// <summary>A real grand piano, played pianissimo: recordings of each note (<see cref="PianoRecordings"/>).</summary>
+    RecordedPiano,
     /// <summary>A trumpet played soft through a Harmon mute.</summary>
     Trumpet,
     /// <summary>A plucked upright bass.</summary>
@@ -107,6 +111,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => -15f,
         Track.BlueLanternJazz => -13f,
         Track.BlueLanternAlley => -21f,
+        Track.LobbyPiano => -12f,
         _ => -6f,
     };
 

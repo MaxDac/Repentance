@@ -17,6 +17,9 @@ public static partial class MusicSynth
             case Instrument.Piano:
                 Hammer(buf, rng, note, spb, velocity);
                 break;
+            case Instrument.RecordedPiano:
+                Recorded(buf, rng, note, spb, velocity);
+                break;
             case Instrument.Trumpet:
                 Brass(buf, rng, note, spb, velocity);
                 break;
@@ -47,6 +50,7 @@ public static partial class MusicSynth
         Instrument.OrganPlenum => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
         Instrument.OrganPedal => new[] { SoundSynth.Biquad.HighPass(25), SoundSynth.Biquad.LowPass(4000) },
         Instrument.Piano => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
+        Instrument.RecordedPiano => new[] { SoundSynth.Biquad.HighPass(30) },
         // the Harmon mute: thin in the low end, a soft nasal colour around 1.4 kHz, the top rolled well off
         Instrument.Trumpet => new[]
         {
@@ -289,6 +293,29 @@ public static partial class MusicSynth
             s *= Math.Min(1, t / 0.002);
             if (t < 0.03) s += 0.3 * Math.Exp(-t / 0.008) * thump.Next(rng.NextDouble() * 2 - 1);
             buf[(start + i) % buf.Length] += (float)(amp * damper * s);
+        }
+    }
+
+    // ------------------------------------------------------------------ recorded piano
+
+    /// <summary>
+    /// A note of the real piano: its recording played from the hammer's strike, as soft as the part asks, until the
+    /// key is let go and the damper falls on the string.
+    /// </summary>
+    private static void Recorded(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    {
+        var rec = PianoRecordings.Get(note.Midi);
+        int held = (int)Math.Round(note.Beats * spb * SampleRate);
+        int start = (int)Math.Round(note.Beat * spb * SampleRate);
+        int n = Math.Min(rec.Length, held + (int)(PianoRecordings.TailSeconds * SampleRate));
+        double amp = velocity * (0.95 + 0.1 * rng.NextDouble());
+        double damper = 1, step = Math.Exp(-1 / (PianoRecordings.DamperSeconds * SampleRate));
+        for (int i = 0; i < n; i++)
+        {
+            if (i > held) damper *= step;
+            // should a recording run short, it fades rather than clicks
+            double end = Math.Min(1, (n - i) / (0.01 * SampleRate));
+            buf[(start + i) % buf.Length] += (float)(amp * damper * end * rec[i]);
         }
     }
 
