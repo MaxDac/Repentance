@@ -15,6 +15,8 @@ public static partial class MusicSynth
         Track.OfficeJazz => Office,
         Track.StreetTraffic => Traffic,
         Track.LobbyPiano => Lobby,
+        Track.BlueLanternJazz => Lantern,
+        Track.BlueLanternAlley => LanternAlley,
         Track.MansionDread => Mansion,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
@@ -251,6 +253,138 @@ public static partial class MusicSynth
         }
         return sb.ToString();
     }
+
+    // ------------------------------------------------------------------ the Blue Lantern
+
+    // A Chicago hot band rehearsing behind the curtain, Hot Five fashion, in an original sixteen-bar strain in Bb at a
+    // fast two-beat: the cornet leads, the clarinet weaves low beneath it, the trombone plays tailgate lines below, the
+    // banjo chunks four to the bar, the tuba blows on one and three, the piano comps on two and four over kick and
+    // snare, all background-quiet (no accents). One chorus; the second has a stop-time break for the cornet; the third
+    // falls apart in its fifth bar. Then the rehearsal: the clarinet noodles on low through it all, the piano runs up
+    // the scale, the cornet tries the break, fluffs it, the tuba and banjo check a note, the cornet gets the break
+    // right, the trombone warms up, and the drummer clicks his sticks, "one... two... one, two, three, four", into the top of the loop.
+    private static readonly string[] LanternStrain =
+        { "Bb", "Bb", "F7", "F7", "Bb", "Bb7", "Eb", "Eb", "Bb", "G7", "C7", "F7", "Bb", "G7", "C7 F7", "Bb" };
+
+    /// <summary>Choruses one and two, the second with its stop-time break (bars 7-8, marked <c>*</c>), and the first
+    /// four bars of the third: the bars the whole band plays together.</summary>
+    private static readonly string[] LanternChart = LanternStrain
+        .Concat(LanternStrain.Select((c, i) => i is 6 or 7 ? c + "*" : c))
+        .Concat(LanternStrain.Take(4)).ToArray();
+
+    /// <summary>Per chord: the tuba's root and fifth, the banjo's voicing and the piano's.</summary>
+    private static readonly Dictionary<string, (string Root, string Fifth, string Banjo, string Piano)> LanternChords = new()
+    {
+        ["Bb"] = ("Bb1", "F2", "D4+F4+Bb4", "F3+Bb3+D4"),
+        ["F7"] = ("F1", "C2", "C4+Eb4+F4+A4", "Eb3+A3+C4"),
+        ["Bb7"] = ("Bb1", "F2", "D4+F4+Ab4", "Ab3+D4+F4"),
+        ["Eb"] = ("Eb2", "Bb1", "Eb4+G4+Bb4", "G3+Bb3+Eb4"),
+        ["G7"] = ("G1", "D2", "D4+F4+G4+B4", "F3+B3+D4"),
+        ["C7"] = ("C2", "G1", "C4+E4+G4+Bb4", "E3+Bb3+C4"),
+    };
+
+    private const string CornetBreak = "G4:2/3 Bb4:1/3 Eb5:2/3 G5:1/3 F5:2/3 Eb5:1/3 D5:2/3 Db5:1/3|C5:2/3 Bb4:1/3 G4:2/3 Bb4:1/3 Eb5:2";
+
+    private static readonly string[] CornetLead =
+    {
+        "r:2/3 F4:1/3 Bb4:1 D5:1 Bb4:2/3 C5:1/3", "D5:2 r:1 Bb4:2/3 C5:1/3", "C5:1 A4:2/3 C5:1/3 Eb5:1.5 r:0.5",
+        "D5:2/3 C5:1/3 A4:1 F4:2", "r:1 F4:2/3 Bb4:1/3 D5:1 F5:1", "F5:2/3 Eb5:1/3 D5:1 Ab4:2",
+        "G4:1 Bb4:1 Eb5:1 r:2/3 G4:1/3", "Bb4:3 r:1", "D5:1 D5:2/3 Eb5:1/3 D5:1 Bb4:1", "B4:1 D5:1 F5:1.5 r:0.5",
+        "E5:2/3 D5:1/3 C5:1 Bb4:1 G4:1", "A4:1 C5:1 Eb5:1 r:2/3 C5:1/3", "D5:2 Bb4:1 r:1",
+        "B4:2/3 D5:1/3 F5:1 D5:1 B4:1", "C5:1 E5:1 Eb5:1 A4:1", "Bb4:2 r:1 F4:2/3 A4:1/3",
+    };
+
+    private static readonly string[] ClarinetObbligato =
+    {
+        "F5:2 D5:2/3 F5:1/3 Bb5:1", "A5:2/3 Bb5:1/3 F5:1 D5:1 Bb4:1", "A4:2/3 C5:1/3 Eb5:2/3 F5:1/3 A5:2",
+        "G5:2/3 F5:1/3 Eb5:2/3 C5:1/3 A4:1 C5:1", "D5:2/3 F5:1/3 Bb5:3", "Ab5:2/3 F5:1/3 D5:2/3 F5:1/3 Ab5:2",
+        "G5:2 Eb5:2/3 G5:1/3 Bb5:1", "G5:2/3 Eb5:1/3 Bb4:2/3 G4:1/3 Bb4:2", "F5:2/3 D5:1/3 F5:2/3 D5:1/3 Bb5:2",
+        "B5:2 G5:2/3 F5:1/3 D5:1", "E5:2/3 G5:1/3 Bb5:2 G5:1", "A5:2/3 F5:1/3 Eb5:2/3 C5:1/3 A4:2",
+        "Bb4:2/3 D5:1/3 F5:2/3 Bb5:1/3 D6:2", "B5:2/3 G5:1/3 F5:2/3 D5:1/3 B4:2",
+        "Bb4:2/3 C5:1/3 E5:1 Eb5:2/3 F5:1/3 A5:1", "Bb5:3 r:1",
+    };
+
+    private static readonly string[] TromboneTailgate =
+    {
+        "Bb2:2 F2:1 D3:1", "r:1 Bb2:1 D3:2", "A2:2 C3:1 Eb3:1", "F2:3 r:1", "D3:2 F3:1 D3:1", "Ab2:2 F2:2",
+        "G2:2 Bb2:2", "Eb3:3 r:1", "F3:2 D3:2", "B2:2 G2:2", "Bb2:2 G2:1 E2:1", "A2:2 Eb3:2", "D3:2 Bb2:2",
+        "F3:2 D3:1 B2:1", "E3:2 Eb3:2", "D3:2 r:2",
+    };
+
+    /// <summary>A horn's part: its sixteen bars twice, the second time with <paramref name="stopTime"/> in bars 7-8
+    /// (the break), then the third chorus's first four bars and the rest of the loop.</summary>
+    private static string HornPart(string[] chorus, string stopTime, string rest) =>
+        Bars(string.Join("|", chorus)) + Bars(string.Join("|", chorus.Take(6))) + Bars(stopTime)
+        + Bars(string.Join("|", chorus.Skip(8))) + Bars(string.Join("|", chorus.Take(4))) + Bars(rest);
+
+    /// <summary>The rhythm section through <see cref="LanternChart"/>, one bar at a time: <paramref name="play"/>
+    /// gives a chord's notes for its beats (4 or 2), or its stop-time hit and rests.</summary>
+    private static string Comp(Func<(string Root, string Fifth, string Banjo, string Piano), int, bool, string> play) =>
+        Bars(string.Join("|", LanternChart.Select(bar =>
+        {
+            var chords = bar.Split(' ');
+            return string.Concat(chords.Select(c =>
+                play(LanternChords[c.TrimEnd('*')], 4 / chords.Length, c.EndsWith('*'))));
+        })));
+
+    /// <summary>Checks that every 4/4 bar (separated by <c>|</c>) adds up to four beats, and joins them.</summary>
+    private static string Bars(string bars)
+    {
+        var sb = new StringBuilder();
+        foreach (var bar in bars.Split('|'))
+        {
+            double beats = bar.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Sum(token => Beats(token[(token.LastIndexOf(':') + 1)..].TrimEnd('!').Split('>')[0]));
+            if (Math.Abs(beats - 4) > 1e-9) throw new FormatException($"Bar \"{bar}\" lasts {beats} beats, not 4");
+            sb.Append(bar.Trim()).Append(' ');
+        }
+        return sb.ToString();
+    }
+
+    private static string OctaveDown(string bar) =>
+        System.Text.RegularExpressions.Regex.Replace(bar, @"([A-G][#b]?)(\d)", m => m.Groups[1].Value + (int.Parse(m.Groups[2].Value) - 1));
+
+    private static string Rests(int bars) => string.Join("|", Enumerable.Repeat("r:4", bars));
+
+    private static readonly Piece Lantern = new(192, new Hall(1.1, 0.85, 0.45, 0.4), new Part[]
+    {
+        new(Instrument.Cornet, 0.8, 0,
+            HornPart(CornetLead, CornetBreak,
+                "r:2/3 F4:1/3 Bb4:1 r:2|" + Rests(2) + "|" + CornetBreak.Split('|')[0] +
+                "|r:1 G4:2/3 Bb4:1/3 Eb5:2/3 G5:1/3 F5:1|" + Rests(2) + "|" + CornetBreak)),
+        new(Instrument.Clarinet, 0.6, -0.35,
+            HornPart(ClarinetObbligato.Select(OctaveDown).ToArray(), "Bb4:1 r:3|G4:1 r:3",
+                "D4:2/3 F4:1/3 Bb4:1 F4:2/3 D4:1/3 C4:1|D4:2/3 F4:1/3 G4:1 F4:2|D4:2 Bb3:2|C4:2 Eb4:2|" +
+                "D4:1 F4:1 Eb4:1 C4:1|Bb3:2 D4:2|F4:1 G4:1 F4:1 D4:1|Eb4:2 G4:2|Eb4:2 Bb3:2|D4:2 F4:2|Bb3:4")),
+        new(Instrument.Trombone, 0.7, 0.35,
+            HornPart(TromboneTailgate, "G2:1 r:3|Eb3:1 r:3", "E3:2 r:2|" + Rests(8) + "|F2:1 Bb2:1 D3:2>4")),
+        new(Instrument.Banjo, 0.55, -0.2,
+            Comp((c, beats, stop) => stop ? $"{c.Banjo}:1>0.5 r:3 " : Repeat($"{c.Banjo}:1>0.6 ", beats)) +
+            Bars("D4+F4+Bb4:1>0.6 D4+F4+Bb4:1>0.4 r:2|" + Rests(5) + "|G3:1 r:1 G3:1 G3:1")),
+        new(Instrument.Tuba, 0.8, 0.15,
+            Comp((c, beats, stop) => stop ? $"{c.Root}:1 r:3 " : beats == 4 ? $"{c.Root}:2 {c.Fifth}:2 " : $"{c.Root}:2 ") +
+            Bars("Bb1:1 r:3|" + Rests(4) + "|Bb1:1 F1:1 Bb1:2")),
+        new(Instrument.RecordedPiano, 0.45, 0.3,
+            Comp((c, beats, stop) => stop ? $"{c.Piano}:1>0.6 r:3 " : Repeat($"r:1 {c.Piano}:1>0.7 ", beats / 2)) +
+            Bars("r:1 F3+Bb3+D4:1>0.7 r:2|r:4|Bb2:1/3 C3:1/3 D3:1/3 F3:1/3 G3:1/3 A3:1/3 Bb3:1 D4+F4:1>2|" +
+                 Rests(2) + "|F4:2/3 D4:1/3 Bb3:1>2 r:2|r:2 Bb3+D4+F4:2")),
+        // kick on one and three
+        new(Instrument.Drums, 0.6, 0,
+            Comp((_, beats, stop) => stop ? "C2:1 r:3 " : Repeat("C2:1 r:1 ", beats / 2)) + Bars("C2:1 r:3")),
+        // snare and hi-hat on two and four
+        new(Instrument.Drums, 0.5, -0.1,
+            Comp((_, beats, stop) => stop ? "r:4 " : Repeat("r:1 D2+F#2:1 ", beats / 2)) + Bars("r:1 D2+F#2:1 r:2")),
+        // the count-in
+        new(Instrument.Drums, 0.8, 0.05, Bars(Rests(46) + "|C#2:2 C#2:2|C#2:1 C#2:1 C#2:1 C#2:1")),
+    }, Distance: new Distance(70, 650, 0.3, 0.27, 0.3, 0.3));
+
+    /// <summary>The same rehearsal from the alley: through the open back door and down a brick passage, far, dark,
+    /// almost mono and full of echoes.</summary>
+    private static readonly Piece LanternAlley = Lantern with
+    {
+        Hall = new Hall(1.5, 0.9, 0.5, 0.7),
+        Distance = new Distance(60, 150, 0.05, 0.39, 0.4, 0.5),
+    };
 
     // ------------------------------------------------------------------ the mansion
 

@@ -36,10 +36,16 @@ public partial class Alley : Room
     private bool InAct3 => State.HasFlag("alley3");
     private bool Dark => State.HasFlag("alley3_dark");
 
+    /// <summary>Act 1: the band rehearsing inside, far off through the open back door. Act 3: the door is shut.</summary>
+    public override Track? Music => InAct3 ? null : Track.BlueLanternAlley;
+
     public override void _Ready()
     {
         base._Ready();
         _lamp = GetNodeOrNull<Sprite2D>("Lamp");
+        // the propped back door has one overlay under the lamp and one on it, so it reads whichever way the lamp flickers
+        foreach (var door in new[] { "DoorOpen", "Lamp/DoorOpenLit" })
+            if (GetNodeOrNull<Sprite2D>(door) is { } open) open.Visible = !InAct3;
         if (!InAct3) return;
         // a reload mid-puzzle puts Sal back where the story left him
         if (FindActor("sal") is { } sal && State.HasFlag("alley3_sal_out"))
@@ -124,6 +130,11 @@ public partial class Alley : Room
     {
         if (!InAct3)
         {
+            if (target.Id == "back_door" && verb == Verb.Look)
+            {
+                await Say("Propped open on a brick. Light, smoke and a band going over the same sixteen bars, a long way down the hall.");
+                return true;
+            }
             if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand) && State.HasFlag("alley_done"))
             {
                 // Micah sleeps off the beating and goes up to the convent the evening after

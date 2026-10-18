@@ -77,10 +77,13 @@ public partial class Music : Node
         return task;
     }
 
-    /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.</summary>
+    /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.
+    /// A track sharing the score of the one playing (the same band heard from elsewhere) picks up where it was.</summary>
     public async void Play(Track? track)
     {
         if (track == Current) return;
+        float from = Current is { } previous && track is { } next && _player.Playing && MusicSynth.SharesScore(previous, next)
+            ? _player.GetPlaybackPosition() : 0;
         Current = track;
         _player.Stop();
         if (track is not { } t) return;
@@ -94,7 +97,7 @@ public partial class Music : Node
         if (Current != t || _player.Playing) return;
         _player.Stream = stream;
         _player.VolumeDb = MusicSynth.BaseVolumeDb(t);
-        _player.Play();
+        _player.Play(from);
     }
 
     /// <summary>Whether a track has finished rendering and is actually sounding.</summary>
