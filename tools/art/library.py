@@ -56,35 +56,102 @@ def parquet_floor(img):
     noise(img, (82, 172, 398, 226), 6, 31)
 
 
+WINDOW = (354, 20, 398, 132)  # the glass (x0, y0, x1, y1), between the fireplace's side shelf and the right bookcase
+RIGHT_CASE = (408, 474)  # the tall glass-front bookcase right of the window
+LADDER_X = 440  # where the rolling ladder's left rail hooks onto its rail
+
+
 def arched_window(img):
+    """A tall, narrow round-headed window: a fanlight of leaded spokes over divided panes, a keystone, a stone sill
+    with a potted fern, a brass latch, and drapes tied back so the midday sky over the rooftops shows."""
     d = ImageDraw.Draw(img)
-    x0, y0, x1, y1 = 314, 20, 414, 132
-    arch = [x0, y0 - 28, x1, y0 + 36]
-    d.rectangle([x0 - 6, y0 + 14, x1 + 6, y1 + 4], fill=MAHOGANY_D)
-    d.pieslice([x0 - 6, y0 - 34, x1 + 6, y0 + 38], 180, 360, fill=MAHOGANY_D)
+    x0, y0, x1, y1 = WINDOW
+    cx, r = (x0 + x1) // 2, (x1 - x0) // 2
+    spring = y0 + 12  # where the arch springs from the straight jambs
+    arch = [x0, spring - r, x1, spring + r]
+    lead, frame = hx("2c1c14"), hx("20100b")
+    # carved surround with a lit inner moulding
+    d.rectangle([x0 - 6, spring, x1 + 6, y1 + 4], fill=MAHOGANY_D)
+    d.pieslice([x0 - 6, spring - r - 6, x1 + 6, spring + r + 6], 180, 360, fill=MAHOGANY_D)
+    d.arc([x0 - 4, spring - r - 4, x1 + 4, spring + r + 4], 180, 360, fill=MAHOGANY_L)
+    d.line([(x0 - 4, spring), (x0 - 4, y1 + 2)], fill=MAHOGANY_L)
+    d.line([(x1 + 4, spring), (x1 + 4, y1 + 2)], fill=hx("1a0c08"))
+    # the view: a clear midday sky with a drift of cloud, the city's rooftops and a water tower, treetops below
     glass = Image.new("RGB", img.size, 0)
-    # a clear midday sky over sunlit treetops
-    vgrad(glass, (x0, y0 - 28, x1, y1), hx("a8cce8"), hx("e8eee4"))
+    vgrad(glass, (x0, spring - r, x1, y1), hx("9cc4e6"), hx("e6eee6"))
     gd = ImageDraw.Draw(glass)
-    for cx, cy, r, col in ((344, 82, 18, hx("6c9a4c")), (372, 74, 22, hx("7eac58")), (396, 88, 16, hx("5e8a42"))):
-        gd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col)
+    for ex, ey, rx, ry in ((362, 40, 9, 3), (370, 37, 7, 3), (388, 58, 8, 2)):
+        gd.ellipse([ex - rx, ey - ry, ex + rx, ey + ry], fill=hx("f4f6f2"))
+    for bx0, top, bx1, col in ((354, 92, 364, hx("8a96a6")), (364, 84, 372, hx("9aa4b2")),
+                               (372, 96, 386, hx("7e8a9a")), (386, 88, 398, hx("909cac"))):
+        gd.rectangle([bx0, top, bx1, y1], fill=col)
+        for wy in range(top + 3, 108, 5):
+            for wx in range(bx0 + 2, bx1 - 1, 3):
+                gd.point((wx, wy), fill=hx("c8d2dc"))
+    gd.rectangle([388, 78, 394, 84], fill=hx("6e665e"))
+    gd.polygon([(387, 78), (391, 73), (395, 78)], fill=hx("5a524c"))
+    gd.line([(389, 84), (389, 88)], fill=hx("4a4440"))
+    gd.line([(393, 84), (393, 88)], fill=hx("4a4440"))
+    for tx, ty, tr, col in ((358, 116, 9, hx("6c9a4c")), (374, 112, 11, hx("7eac58")), (392, 118, 9, hx("5e8a42"))):
+        gd.ellipse([tx - tr, ty - tr, tx + tr, ty + tr], fill=col)
+        gd.point((tx - tr // 2, ty - tr // 2), fill=hx("a8cc78"))
     mask = Image.new("L", img.size, 0)
     md = ImageDraw.Draw(mask)
-    md.rectangle([x0, y0 + 12, x1, y1], fill=255)
+    md.rectangle([x0, spring, x1, y1], fill=255)
     md.pieslice(arch, 180, 360, fill=255)
     img.paste(glass, (0, 0), mask)
-    d.rectangle([x0, y0 + 12, x1, y1], outline=hx("20100b"), width=3)
-    d.arc(arch, 180, 360, fill=hx("20100b"), width=3)
-    for xx in (346, 380):
-        d.line([(xx, y0 + 4), (xx, y1)], fill=hx("20100b"), width=2)
-    d.line([(x0, 76), (x1, 76)], fill=hx("20100b"), width=2)
-    d.line([(x0 + 10, 108), (x1 - 10, 108)], fill=hx("2c1812"))
-    d.polygon([(292, 18), (330, 18), (352, 146), (316, 146)], fill=hx("5a1e26"))
-    d.polygon([(436, 18), (398, 18), (376, 146), (412, 146)], fill=hx("47151c"))
-    for x in (304, 420):
-        d.line([(x, 18), (x + (-8 if x > 360 else 8), 142)], fill=hx("8a5c42"), width=2)
-    light(img, "polygon", [(328, 30), (404, 30), (468, 198), (286, 198)], hx("fff2d0"), 0.22, 12)
-    shadow(img, "polygon", [(300, 18), (332, 18), (318, 156), (284, 156)], 0.2, 7, hx("28140f"))
+    # fanlight: leaded spokes from a half-round hub, closed off by the transom at the springing line
+    for a in (198, 225, 252, 288, 315, 342):
+        rad = math.radians(a)
+        d.line([(cx + 6 * math.cos(rad), spring + 6 * math.sin(rad)),
+                (cx + r * math.cos(rad), spring + r * math.sin(rad))], fill=lead)
+    d.pieslice([cx - 6, spring - 6, cx + 6, spring + 6], 180, 360, fill=MAHOGANY_D, outline=frame)
+    d.arc([cx - 12, spring - 12, cx + 12, spring + 12], 180, 360, fill=lead)
+    # casement frame, central mullion, glazing bars and the meeting rail
+    d.rectangle([x0, spring, x1, y1], outline=frame, width=3)
+    d.arc(arch, 180, 360, fill=frame, width=3)
+    d.line([(x0, spring), (x1, spring)], fill=frame, width=2)
+    d.line([(cx, spring), (cx, y1)], fill=frame, width=2)
+    for yy in (56, 104):
+        d.line([(x0, yy), (x1, yy)], fill=lead)
+    d.line([(x0, 80), (x1, 80)], fill=frame, width=2)
+    for xx in (x0 + 11, x1 - 11):
+        d.line([(xx, spring + 2), (xx, y1 - 2)], fill=lead)
+    # brass latch on the meeting rail and a glint on the inner edge of the frame
+    d.rectangle([cx - 2, 77, cx + 2, 79], fill=hx("8a6a30"))
+    d.line([(cx - 1, 77), (cx + 1, 77)], fill=hx("e8c870"))
+    d.line([(x0 + 3, spring + 3), (x0 + 3, y1 - 3)], fill=hx("6a4a36"))
+    # keystone at the crown of the arch
+    ky = spring - r - 7
+    d.polygon([(cx - 5, ky), (cx + 5, ky), (cx + 3, ky + 9), (cx - 3, ky + 9)], fill=hx("6c4c36"), outline=frame)
+    d.line([(cx - 4, ky + 1), (cx - 3, ky + 7)], fill=hx("8a6448"))
+    # stone sill and a fern in a terracotta pot on it
+    d.rectangle([x0 - 9, y1 + 4, x1 + 9, y1 + 8], fill=hx("8a7a66"))
+    d.line([(x0 - 9, y1 + 4), (x1 + 9, y1 + 4)], fill=hx("b8a88e"))
+    d.line([(x0 - 8, y1 + 9), (x1 + 8, y1 + 9)], fill=hx("2a160e"))
+    d.polygon([(x0 + 5, y1 - 2), (x0 + 13, y1 - 2), (x0 + 12, y1 + 4), (x0 + 6, y1 + 4)], fill=hx("9a5a36"))
+    d.line([(x0 + 5, y1 - 2), (x0 + 13, y1 - 2)], fill=hx("c07a4a"))
+    for fx, fy in ((-5, -9), (-3, -12), (0, -13), (3, -12), (5, -8), (-6, -4), (6, -4)):
+        d.line([(x0 + 9, y1 - 2), (x0 + 9 + fx, y1 - 2 + fy)], fill=hx("4e7a3a"))
+        d.point((x0 + 9 + fx, y1 - 2 + fy), fill=hx("7eac58"))
+    # drapes on short brass rods either side, gathered by gold tie-backs so the glass stays clear
+    for side in (-1, 1):
+        edge = x0 if side < 0 else x1
+        out, inn = edge + side * 12, edge - side * 3
+        col, fold = (hx("5a1e26"), hx("3e1218")) if side < 0 else (hx("47151c"), hx("2e0c12"))
+        d.line([(edge + side * 15, 12), (edge - side * 2, 12)], fill=hx("a8823e"), width=2)
+        d.ellipse([edge + side * 15 - 2, 10, edge + side * 15 + 2, 14], fill=GOLD)
+        drape = [(out, 13), (inn, 13), (edge - side, 52), (edge + side * 6, 94), (edge, 146), (out - side * 2, 146),
+                 (edge + side * 10, 94)]
+        d.polygon(drape, fill=col)
+        d.line([(edge + side * 4, 14), (edge + side * 8, 92)], fill=fold)
+        d.line([(edge + side * 8, 98), (edge + side * 5, 144)], fill=fold)
+        d.line([(inn, 14), (edge - side, 50)], fill=hx("8a3a3e"))
+        d.ellipse([edge + side * 8 - 3, 92, edge + side * 8 + 3, 97], fill=GOLD, outline=hx("6a4a1e"))
+        d.line([(edge + side * 8, 97), (edge + side * 8, 104)], fill=hx("a8823e"))
+        d.point((edge + side * 8, 105), fill=GOLD)
+    light(img, "polygon", [(x0 - 2, 30), (x1 + 2, 30), (x1 + 58, 198), (x0 - 70, 198)], hx("fff2d0"), 0.22, 12)
+    shadow(img, "polygon", [(x0 - 12, 14), (x0 + 2, 14), (x0 - 4, 156), (x0 - 18, 156)], 0.2, 6, hx("28140f"))
 
 
 def fireplace(img):
@@ -186,7 +253,7 @@ def bookcase(img, x0, x1, shelf_top=14, seed=0):
 
 def shelves(img):
     bookcase(img, 16, 128, 10, 2)
-    bookcase(img, 352, 464, 10, 7)
+    bookcase(img, *RIGHT_CASE, 10, 7)
     d = ImageDraw.Draw(img)
     # middle upper shelves flanking the fireplace
     for x0, x1, seed in ((132, 166, 13), (312, 346, 17)):
@@ -338,23 +405,24 @@ def chairs(img):
 
 def ladder(img):
     d = ImageDraw.Draw(img)
-    d.line([(354, 21), (462, 21)], fill=hx("202024"), width=3)
-    d.line([(354, 20), (462, 20)], fill=hx("82786a"))
-    for x in (360, 390, 454):
+    rx0, rx1 = RIGHT_CASE[0] + 2, RIGHT_CASE[1] - 2
+    d.line([(rx0, 21), (rx1, 21)], fill=hx("202024"), width=3)
+    d.line([(rx0, 20), (rx1, 20)], fill=hx("82786a"))
+    for x in (rx0 + 4, (rx0 + rx1) // 2 + 3, rx1 - 4):
         d.line([(x, 17), (x, 25)], fill=hx("54504a"), width=2)
-    for top_x in (420, 438):
+    for top_x in (LADDER_X, LADDER_X + 18):
         d.arc([top_x - 3, 18, top_x + 3, 30], 180, 350, fill=hx("9a8868"), width=2)
         d.line([(top_x, 26), (top_x - 29, 181)], fill=hx("362418"), width=4)
         d.line([(top_x - 1, 27), (top_x - 30, 180)], fill=hx("a27a46"), width=2)
     for y in range(38, 175, 11):
-        x = 420 - 29 * (y - 26) / 155
+        x = LADDER_X - 29 * (y - 26) / 155
         d.line([(x + 2, y + 1), (x + 16, y + 1)], fill=hx("38261a"), width=3)
         d.line([(x + 2, y), (x + 16, y)], fill=hx("b8945e"), width=2)
-    for x in (391, 409):
+    for x in (LADDER_X - 29, LADDER_X - 11):
         d.rectangle([x - 2, 177, x + 2, 182], fill=hx("56504a"))
         d.ellipse([x - 3, 180, x + 3, 186], fill=hx("242426"), outline=hx("867c6a"))
         d.point((x, 183), fill=hx("b8aa90"))
-    shadow(img, "ellipse", [380, 183, 425, 189], 0.18, 3)
+    shadow(img, "ellipse", [LADDER_X - 40, 183, LADDER_X + 5, 189], 0.18, 3)
 
 
 def paint(include_desk=True):
@@ -380,7 +448,7 @@ def sunlight(img):
     """Midday sun from the tall window on the right: an even daylight fill, slanting shafts and bright patches
     on the parquet and rug."""
     light(img, "rect", [0, 0, W - 1, H - 1], hx("fff0d8"), 0.13, 0)
-    for top, foot in (((330, 0), (380, 0)), ((392, 0), (430, 0))):
+    for top, foot in (((358, 0), (374, 0)), ((380, 0), (396, 0))):
         (a, _), (b, _) = top, foot
         light(img, "polygon", [(a, 0), (b, 0), (b - 190, 212), (a - 210, 212)], hx("fff0c8"), 0.2, 9)
     # the window's panes thrown across the rug, the mullions leaving darker bars
@@ -406,9 +474,41 @@ def ceiling(img):
     d.rectangle([0, 9, W - 1, 12], fill=MAHOGANY_D)
     d.rectangle([0, 13, W - 1, 15], fill=MAHOGANY_L)
     d.line([(0, 16), (W - 1, 16)], fill=hx("1e0d08"))
-    d.ellipse([228, 9, 252, 23], fill=hx("6d4a26"))
-    d.line([(240, 0), (240, 10)], fill=hx("2a140d"))
+    pendant(img)
     noise(img, (0, 0, W - 1, TOP), 4, 41)
+
+
+def pendant(img):
+    """The brass pendant lamp in the middle of the ceiling, cold in the daytime: a canopy and rod, a ribbed domed
+    shade with a beaded gold rim, an amber glass bowl under it and a finial drop."""
+    d = ImageDraw.Draw(img)
+    cx = 240
+    brass, brass_d, brass_l = hx("8a6a30"), hx("4a3418"), hx("e8c870")
+    # ceiling canopy and rod
+    d.ellipse([cx - 6, -2, cx + 6, 3], fill=brass, outline=brass_d)
+    d.line([(cx - 3, 1), (cx + 1, 1)], fill=brass_l)
+    d.line([(cx, 3), (cx, 8)], fill=brass_d, width=2)
+    d.line([(cx - 1, 3), (cx - 1, 8)], fill=hx("b89a5a"))
+    d.rectangle([cx - 2, 7, cx + 2, 9], fill=brass, outline=brass_d)
+    # domed shade: dark walnut-brown metal with ribs, lit from the window on the right
+    d.chord([cx - 12, 9, cx + 12, 25], 180, 360, fill=hx("6d4a26"))
+    d.chord([cx - 12, 9, cx + 12, 25], 270, 360, fill=hx("86603a"))
+    for rx in (-8, -3, 3, 8):
+        d.line([(cx + rx // 2, 10), (cx + rx, 16)], fill=hx("4a2e16"))
+    d.arc([cx - 9, 11, cx + 9, 22], 290, 330, fill=hx("c8a070"))
+    # beaded gold rim
+    d.rectangle([cx - 12, 16, cx + 12, 17], fill=GOLD)
+    d.line([(cx - 12, 18), (cx + 12, 18)], fill=brass_d)
+    for bx in range(cx - 11, cx + 12, 3):
+        d.point((bx, 16), fill=brass_l)
+    # amber glass bowl and finial
+    d.chord([cx - 9, 12, cx + 9, 24], 0, 180, fill=hx("b07a3a"))
+    d.chord([cx - 9, 12, cx + 9, 24], 0, 90, fill=hx("d4a05a"))
+    d.point((cx + 4, 20), fill=hx("f0d090"))
+    d.line([(cx - 6, 19), (cx + 6, 19)], fill=hx("7a4e22"))
+    d.ellipse([cx - 2, 23, cx + 2, 27], fill=brass, outline=brass_d)
+    d.point((cx - 1, 24), fill=brass_l)
+    d.point((cx, 28), fill=brass)
 
 
 def build():
