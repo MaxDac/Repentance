@@ -48,10 +48,10 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 
 | `Track` | Rooms | Piece |
 |---|---|---|
-| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4 |
-| `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
-| `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
-| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
+| `ClubStrings` | Club vestibule, hall, lounge, stage, backstage; Agatha's night visit in the convent cell | Dark string bolero in 3/4, kept soft: no accents, the violins' climax stays at or below C5 |
+| `ChurchOrgan` | Church interior | Organist trying the pipes over held pedal notes, then a chorale; a pipe sounds on every beat, nothing above D5 |
+| `ConventPiano` | Convent corridor, cell | Hymn-like prelude in E-flat on the recorded piano, pedalled arpeggios under a slow tune |
+| `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, rolled chords on the recorded piano, bass |
 | `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing in the next room, muffled through the wall: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
 | `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: almost muted, a dull mono thud and echo |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
