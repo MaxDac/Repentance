@@ -197,12 +197,15 @@ public partial class Speakeasy : Room
         await OutBack();
     }
 
-    /// <summary>The screen holds black while Sal walks Micah out back: what happens out there isn't shown.</summary>
+    /// <summary>Seconds the screen stays black while Sal does his talking out back, before Micah comes to in the alley.</summary>
+    public const double BeatingBlackout = 2.0;
+
+    /// <summary>Sal drags Micah out back: the screen goes black for the beating, then fades in slowly on the alley.</summary>
     private async Task OutBack()
     {
         await Game.Hud.Fade(1, 0.6);
-        await Wait(1.6);
-        await Game.ChangeRoom("alley", "start", 0.9);
+        await Wait(BeatingBlackout);
+        await Game.ChangeRoom("alley", "start", 1.2);
     }
 
     /// <summary>
