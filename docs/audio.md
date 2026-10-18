@@ -52,13 +52,14 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
-| `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road |
+| `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road, kept distant |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
 
 `StreetTraffic` is scored like the music, but its instruments (`MusicSynth.Traffic.cs`) are noise and engines: a
 `CityHum` bed for the whole loop, `Motorcar` passes (Doppler, distance and stereo travel from the part's pan to the
-other side; accented cars pass close), a `Streetcar` with bell and rail-joint clacks, and a `Horn` (bulb honk, or an
-accented klaxon). It plays on the Music bus, so it follows the music volume; rain ambience still plays on top.
+other side), a `Streetcar` with bell and rail-joint clacks, and a bulb `Horn`. The instruments still support
+accents (a car passing close, a klaxon), but like the music the score uses none, so the traffic stays in the
+background. It plays on the Music bus, so it follows the music volume; rain ambience still plays on top.
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second

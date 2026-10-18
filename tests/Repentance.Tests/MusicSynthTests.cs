@@ -181,21 +181,20 @@ public class MusicSynthTests
         Assert.Equal(1, MusicSynth.SecondsPerBeat(Track.StreetTraffic));
         var traffic = new[] { Instrument.CityHum, Instrument.Motorcar, Instrument.Streetcar, Instrument.Horn }.ToHashSet();
         Assert.Equal(traffic, score.Select(n => n.Instrument).ToHashSet());
+        // background, like the music: no accents, so no car passes close and no klaxon blares
+        Assert.DoesNotContain(score, n => n.Strident);
         // the city roars under everything, all the way round the loop
         var hum = Assert.Single(score, n => n.Instrument == Instrument.CityHum);
         Assert.Equal((0.0, 60.0), (hum.Beat, hum.Beats));
-        // cars go by both ways, some of them close, and one crosses the seam so the loop has no quiet start
+        // cars go by both ways, and one crosses the seam so the loop has no quiet start
         var cars = score.Where(n => n.Instrument == Instrument.Motorcar).ToList();
         Assert.True(cars.Count >= 8, $"{cars.Count} cars");
         Assert.Equal(2, cars.Select(n => n.Voice).Distinct().Count());
-        Assert.Contains(cars, n => n.Strident);
         Assert.Contains(cars, n => n.Beat + n.Beats > 60);
         Assert.Single(score, n => n.Instrument == Instrument.Streetcar);
-        // a klaxon and a bulb horn, now and then, never a tune
+        // a bulb horn now and then, never a tune
         var horns = score.Where(n => n.Instrument == Instrument.Horn).ToList();
-        Assert.Contains(horns, n => n.Strident);
-        Assert.Contains(horns, n => !n.Strident);
-        Assert.True(horns.Count <= 4);
+        Assert.InRange(horns.Count, 1, 3);
     }
 
     [Fact]
