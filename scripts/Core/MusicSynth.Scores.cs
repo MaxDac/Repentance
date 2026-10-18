@@ -365,6 +365,6 @@ public static partial class MusicSynth
     private static readonly Piece LanternAlley = Lantern with
     {
         Hall = new Hall(1.5, 0.9, 0.5, 0.7),
-        Distance = new Distance(150, 300, 0.1, 0.39, 0.4, 0.5),
+        Distance = new Distance(60, 150, 0.05, 0.39, 0.4, 0.5),
     };
 }

@@ -110,7 +110,7 @@ public static partial class MusicSynth
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
         Track.BlueLanternJazz => -13f,
-        Track.BlueLanternAlley => -21f,
+        Track.BlueLanternAlley => -27f,
         Track.LobbyPiano => -12f,
         _ => -6f,
     };
@@ -295,8 +295,8 @@ public static partial class MusicSynth
                 SoundSynth.Biquad.HighPass(distance.HighPass), SoundSynth.Biquad.HighPass(distance.HighPass),
                 SoundSynth.Biquad.LowPass(distance.LowPass), SoundSynth.Biquad.LowPass(distance.LowPass),
             };
-            // the echo comes back a little later on the right, and darker each time round
-            var echo = new double[delay + c * 97];
+            // the echo comes back a little later on the right (less, the narrower the band), and darker each time round
+            var echo = new double[delay + c * (int)Math.Round(323 * distance.Width)];
             var echoDark = SoundSynth.Biquad.LowPass(Math.Min(2000, distance.LowPass));
             int at = 0;
             for (int i = 0; i < 2 * length; i++)
