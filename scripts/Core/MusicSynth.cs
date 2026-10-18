@@ -15,6 +15,8 @@ public enum Track
     ConventPiano,
     /// <summary>Micah's office: a slow, depressed minor-key ballad for muted trumpet, piano, upright bass and brushes.</summary>
     OfficeJazz,
+    /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
+    LobbyPiano,
 }
 
 public enum Instrument
@@ -82,6 +84,7 @@ public static partial class MusicSynth
         Track.ChurchOrgan => -7.5f,
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
+        Track.LobbyPiano => -12f,
         _ => -6f,
     };
 

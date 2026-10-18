@@ -157,6 +157,39 @@ public class MusicSynthTests
             score.Select(n => n.Instrument).ToHashSet());
     }
 
+    [Fact]
+    public void LobbyPianoIsASoftLoungeFoxtrot()
+    {
+        var score = MusicSynth.Score(Track.LobbyPiano);
+        Assert.All(score, n => Assert.Equal(Instrument.Piano, n.Instrument));
+        Assert.Equal(64, MusicSynth.LengthBeats(Track.LobbyPiano), 6);
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.LobbyPiano), 60, 76);
+        // background, not a performance: no accents, quieter than the other tracks, the tune in the middle register
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.True(MusicSynth.BaseVolumeDb(Track.LobbyPiano) < MusicSynth.BaseVolumeDb(Track.ConventPiano));
+        var tune = score.Where(n => n.Voice == 2).ToList();
+        Assert.All(tune, n => Assert.InRange(n.Midi, MusicSynth.Midi("C4"), MusicSynth.Midi("C6")));
+        // a pedalled stride: the bass on beats one and three, the chords on two and four, every bar of the loop
+        var bass = score.Where(n => n.Voice == 0).ToList();
+        var chords = score.Where(n => n.Voice == 1).GroupBy(n => n.Beat).ToList();
+        Assert.Equal(32, bass.Count);
+        Assert.All(bass, n => Assert.Equal(0, n.Beat % 2));
+        Assert.Equal(32, chords.Count);
+        Assert.All(chords, c => Assert.Equal(1, c.Key % 2));
+        // AABA: the three A sections open with the same three bars
+        IEnumerable<(double, int)> Bars(double from) =>
+            tune.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
+        Assert.Equal(Bars(0), Bars(16));
+        Assert.Equal(Bars(0), Bars(48));
+        Assert.NotEqual(Bars(0), Bars(32));
+        // F major: the loop opens on F in the bass, and the last chord is the C dominant leading home
+        Assert.Equal(MusicSynth.Midi("F2"), bass[0].Midi);
+        var last = chords.MaxBy(c => c.Key)!.Select(n => n.Midi % 12).ToHashSet();
+        Assert.Contains(4, last);
+        Assert.Contains(10, last);
+        Assert.Equal(MusicSynth.Midi("E4"), tune.MaxBy(n => n.Beat)!.Midi);
+    }
+
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)
