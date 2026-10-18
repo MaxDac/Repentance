@@ -99,10 +99,12 @@ public partial class AutoPlay
         Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
+        int investigationStarts = game.Music.Count(Track.Investigation);
         await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
         await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, LiftRoute(), "lift_route");
         Check(game.Room?.Name == "HotelLinen", "staff elevator up to the fifth-floor linen room");
-        Check(game.Music.Current == null, "the lobby piano stays in the lobby");
+        Check(game.Music.Current == Track.Investigation && game.Music.Count(Track.Investigation) == investigationStarts + 1,
+            "the lobby piano stays in the lobby; the investigation music starts in the linen room");
 
         // ---- the linen room: a hanger and the cart's pliers make a hook for the night bolt
         await Shot("hotel_linen");
@@ -162,6 +164,7 @@ public partial class AutoPlay
         // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
         await Shot("blue_lantern_front");
         Check(game.Sfx.Ambient == Sound.Rain, "rain falls on State Street");
+        Check(game.Music.Current == Track.StreetTraffic, "traffic goes by on State Street");
         await game.Perform(Verb.Look, "chalkboard");
         await game.Perform(Verb.Hand, "grille");
         Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened"), "the grille won't open for a bare lapel");
@@ -274,7 +277,7 @@ public partial class AutoPlay
         await Until(() => !game.Busy && gs.HasFlag("seen_convent_exterior"));
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
             "arrival waits outside for the player to open the convent door");
-        Check(game.Music.Current == null, "no piano outside the convent");
+        Check(game.Music.Current == Track.StreetTraffic, "traffic, not the piano, outside the convent");
         Check(game.Sfx.Ambient == Sound.Rain, "it rains on the road outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");

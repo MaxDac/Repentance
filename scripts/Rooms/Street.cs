@@ -6,6 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>Hubbard Street outside the Club: only the Act 2 cutscene where Bruno throws Micah out.</summary>
 public partial class Street : Room
 {
+    public override Track? Music => Track.StreetTraffic;
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "thrown_out") await Game.Run(ThrownOut);
