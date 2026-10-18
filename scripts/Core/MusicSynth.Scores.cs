@@ -20,6 +20,7 @@ public static partial class MusicSynth
         Track.BlueLanternJazz => Lantern,
         Track.BlueLanternAlley => LanternAlley,
         Track.MansionDread => Mansion,
+        Track.RoseStreet => Street,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -116,68 +117,33 @@ public static partial class MusicSynth
 
     // ------------------------------------------------------------------ the office
 
-    // A slow, depressed ballad in D minor at an adagio drag, in the late-night vein of Chet Baker or Kind of Blue: the
-    // record a washed-up, half-drunk private eye leaves on after the bottle is empty. Sixteen bars, AABA, four to a
-    // section. A Harmon-muted trumpet plays few notes and leaves a lot of air between them: long aching tones, a
-    // lazy swung eighth here and there, every phrase falling. The piano rolls one soft chord a bar (two when the
-    // harmony moves), and the upright bass walks nothing, just roots and fifths on half notes. No drums: nobody is
-    // keeping time any more. The last A ends on the leading tone over A7, falling home to D.
-    private const string BalladOpening =
-        "r:1 E4:3 r:2/3 F4:1/3 E4:2/3 D4:1/3 B3:2 r:1 Bb4:2 A4:2/3 G4:1/3 ";
-
-    private const string BalladBridge =
-        "Bb4:3 A4:2/3 G4:1/3 E4:2 r:2/3 D4:1/3 E4:1 r:2/3 G4:1/3 A4:3 Bb4:2/3 G4:1/3 E4:1 C#4:2 ";
-
-    private const string BalladBassA = "D2:2 A1:2 D2:2 B1:2 E2:2 A1:2 ";
-
-    // declared before Office: static fields initialize in order
-    private static readonly Dictionary<string, string> BalladChords = new()
+    // The record a washed-up, half-drunk private eye leaves on while the rain runs down the office window, and the one
+    // still turning in a motel room after the betrayal: a twelve-bar minor blues in D at a crawl, so soft it is nearly
+    // silence. The real piano lays a pedalled chord down a note a beat, lounge colours on the old changes (ninths,
+    // a flat nine, a thirteenth); a real double bass plucks roots and fifths on the half notes. Over them an alto sax,
+    // breathy and low with a slow vibrato, plays a few short falling strokes and leaves whole bars of air between
+    // them. The turnaround ends on the leading tone over A7, so the loop sinks back home to D.
+    // declared before Office: static fields initialize in order. Each chord: its bass, and the voicing above it
+    private static readonly Dictionary<string, (string Root, string Voicing)> BluesChords = new()
     {
-        ["Dm9"] = "F3+A3+C4+E4", ["Dm6"] = "F3+A3+B3+D4", ["Dm7"] = "C3+F3+A3+D4", ["Em7b5"] = "E3+G3+Bb3+D4",
-        ["A7b9"] = "G3+Bb3+C#4+E4", ["D7b9"] = "F#3+C4+Eb4+A4", ["Gm9"] = "Bb3+D4+F4+A4", ["C9"] = "Bb3+D4+E4+G4",
-        ["Fmaj9"] = "A3+C4+E4+G4",
+        ["Dm9"] = ("D2", "F3+C4+E4"), ["Gm9"] = ("G1", "F3+A3+Bb3"), ["D7b9"] = ("D2", "F#3+C4+Eb4"),
+        ["Bb13"] = ("Bb1", "Ab3+D4+G4"), ["A7b9"] = ("A1", "C#3+G3+Bb3"), ["Em7b5"] = ("E2", "D3+G3+Bb3"),
     };
 
-    private static readonly Piece Office = new(66, new Hall(0.8, 0.82, 0.6, 0.2), new Part[]
-    {
-        new(Instrument.Trumpet, 0.45, -0.15,
-            BalladOpening + "F4:2/3 E4:1/3 D4:1 C#4:1 r:1 " +
-            BalladOpening + "D4:2 r:2/3 F#4:1/3 A4:1 " +
-            BalladBridge +
-            BalladOpening + "F4:2/3 E4:1/3 C#4:2 r:1"),
-        new(Instrument.RecordedPiano, 0.22, 0.25, Rolled(
-            "Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm7 D7b9|" +
-            "Gm9|C9|Fmaj9|Em7b5 A7b9|Dm9|Dm6|Em7b5 A7b9|Dm9 A7b9")),
-        new(Instrument.UprightBass, 0.8, 0.05,
-            BalladBassA + "D2:2 A1:2 " + BalladBassA + "D2:2 F#2:2 " +
-            "G1:2 D2:2 C2:2 G1:2 F1:2 C2:2 E2:2 A1:2 " +
-            BalladBassA + "D2:2 A1:2"),
+    private const string BluesForm = "Dm9|Gm9|Dm9|D7b9|Gm9|Gm9|Dm9|Dm9|Bb13|A7b9|Dm9|Em7b5 A7b9";
 
+    // a smoky little room, the sound hanging in it a while
+    private static readonly Piece Office = new(48, new Hall(1.0, 0.86, 0.55, 0.3), new Part[]
+    {
+        new(Instrument.RecordedPiano, 0.24, -0.15, Pedalled(BluesForm, BluesChords, bass: false)),
+        new(Instrument.RecordedBass, 0.55, 0.05,
+            "D2:2 A1:2 G1:2 D2:2 D2:2 A1:2 D2:2 C2:2 G1:2 D2:2 G1:2 Bb1:2 " +
+            "D2:2 A1:2 D2:2 A1:2 Bb1:2 F1:2 A1:2 E2:2 D2:2 A1:2 E2:2 A1:2"),
+        new(Instrument.RecordedSax, 0.36, 0.3,
+            "r:4 r:2 A4:1 G4:1 F4:1.5 r:0.5 D4:1.5 r:0.5 r:4 " +
+            "r:2 C5:1 A4:1 Ab4:1 G4:1 F4:1.5 r:0.5 D4:1.5 r:2.5 r:4 " +
+            "r:1 D5:1 C5:1 Bb4:1 A4:1.5 r:0.5 G4:1 E4:1 F4:1.5 r:2.5 r:2 E4:1 C#4:1"),
     });
-
-    /// <summary>
-    /// Soft piano chords rolled from the bottom up, one 4/4 bar per <c>|</c>; a bar with two chords changes on beat
-    /// three. Each note of a chord follows the one below it by an eighth of a beat and rings until the chord changes.
-    /// </summary>
-    private static string Rolled(string bars)
-    {
-        var sb = new StringBuilder();
-        foreach (var bar in bars.Split('|'))
-        {
-            var chords = bar.Split(' ');
-            int eighths = 32 / chords.Length;
-            foreach (var chord in chords)
-            {
-                var notes = BalladChords[chord].Split('+');
-                for (int i = 0; i < notes.Length; i++)
-                {
-                    int advance = i < notes.Length - 1 ? 1 : eighths - i;
-                    sb.Append($"{notes[i]}:{advance}/8>{eighths - i}/8 ");
-                }
-            }
-        }
-        return sb.ToString();
-    }
 
     // ------------------------------------------------------------------ the street
 
@@ -228,8 +194,9 @@ public static partial class MusicSynth
     });
 
     /// <summary>
-    /// A soft, pedalled left hand, one 4/4 bar per <c>|</c>, each chord lasting the whole bar or, if the bar has two,
-    /// half of it: with <paramref name="bass"/> the low note on the chord's first beat, ringing through it; otherwise
+    /// A soft, pedalled left hand on <paramref name="chordTable"/>'s chords, one 4/4 bar per <c>|</c>, each chord lasting
+    /// the whole bar or, if the bar has two, half of it: with <paramref name="bass"/> the low note on the chord's first
+    /// beat, ringing through it; otherwise
     /// the voicing broken upwards, one note a beat, each ringing to the chord's end (a two-beat chord sounds whole on
     /// its second beat), so a new note starts on every beat and the sound never thins out.
     /// </summary>
@@ -461,5 +428,16 @@ public static partial class MusicSynth
         new(Instrument.Cello, 0.65, 0.3,
             "r:4 Bb2:6 A2:4 r:2 C3:4 B2:4 F3:6 E3:4 r:2 F3:4 Bb3:6 A3:4 r:2 E3:4"),
         new(Instrument.OpenTrumpet, 0.6, -0.1, "r:50 F5+B5+C6:1/4 r:5.75"),
+    });
+
+    // ------------------------------------------------------------------ Rose's street
+
+    // Not music: an evening on a quiet terrace street a long way from the Loop, a minute long and silent but for two
+    // cars, one coming by from the left and, later, another from the right. No reverb to speak of: it is out in the
+    // open.
+    private static readonly Piece Street = new(60, new Hall(0.5, 0.5, 0.6, 0.05), new Part[]
+    {
+        new(Instrument.Car, 1, 1, "r:7 A1:12 r:41"),
+        new(Instrument.Car, 0.85, -1, "r:38 G1:11 r:11"),
     });
 }

@@ -13,7 +13,7 @@ public enum Track
     ChurchOrgan,
     /// <summary>The convent: a quiet piano prelude, hymn-like over pedalled arpeggios.</summary>
     ConventPiano,
-    /// <summary>Micah's office: a slow, depressed minor-key ballad for muted trumpet, piano, upright bass and brushes.</summary>
+    /// <summary>Micah's office and the motel: a very slow, very soft minor blues for piano, alto sax and plucked bass.</summary>
     OfficeJazz,
     /// <summary>The Blue Lantern: a Chicago hot-jazz band rehearsing across the room, behind the curtain.</summary>
     BlueLanternJazz,
@@ -30,6 +30,8 @@ public enum Track
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
     /// and one brief, piercing trumpet stab.</summary>
     MansionDread,
+    /// <summary>Rose's street: not music but a quiet evening street, silent but for the odd motor car driving past.</summary>
+    RoseStreet,
 }
 
 public enum Instrument
@@ -45,8 +47,12 @@ public enum Instrument
     /// <summary>Organ pedal, 16' and 8'.</summary>
     OrganPedal,
     Piano,
-    /// <summary>A real grand piano, played pianissimo: recordings of each note (<see cref="PianoRecordings"/>).</summary>
+    /// <summary>A real grand piano, played pianissimo: recordings of each note (<see cref="Recordings"/>).</summary>
     RecordedPiano,
+    /// <summary>A real alto saxophone, played pianissimo with vibrato: recordings of each note (<see cref="Recordings"/>).</summary>
+    RecordedSax,
+    /// <summary>A real double bass, plucked pianissimo: recordings of each note (<see cref="Recordings"/>).</summary>
+    RecordedBass,
     /// <summary>A trumpet played soft through a Harmon mute.</summary>
     Trumpet,
     /// <summary>A plucked upright bass.</summary>
@@ -80,6 +86,9 @@ public enum Instrument
     Pizzicato,
     /// <summary>An open trumpet, unmuted, hard-tongued and piercing.</summary>
     OpenTrumpet,
+    /// <summary>A 1920s motor car driving past: the note's pitch is the engine's, its length the whole pass. It moves
+    /// across the stereo field, left to right when the part's pan is positive, right to left when negative.</summary>
+    Car,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -89,7 +98,8 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
 /// strings, pizzicato, pipe organ, piano, muted and open trumpet, plucked bass, brushed drums, a hot band's horns, banjo
 /// and tuba) in a reverberant room, sometimes heard from a distance, plus the street's traffic, scored the same way
-/// for engines, horns and a streetcar, and one room's noises (<see cref="Instrument.Foley"/>). Each track renders exactly
+/// for engines, horns and a streetcar, and one room's noises (<see cref="Instrument.Foley"/>); some instruments play real
+/// recorded notes (piano, alto sax, double bass; see <see cref="Recordings"/>). Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -142,6 +152,7 @@ public static partial class MusicSynth
         Track.PrisonParlour => -12f,
         Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
+        Track.RoseStreet => -18f,
         _ => -6f,
     };
 

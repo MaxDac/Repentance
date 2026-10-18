@@ -15,7 +15,7 @@
 | Regressions | `scripts/Debug/AutoPlay/AutoPlay.<Area>.cs` |
 | Dialogue | `dialogue/repentance.ink` |
 | Normal-game, film and test launchers / shared helpers | `tools/run/` |
-| Recorded piano notes and track renders (C#) | `tools/music/` |
+| Recorded instrument notes and track renders (C#) | `tools/music/` |
 
 ## Partial classes
 
@@ -23,7 +23,7 @@ Use the concern-specific partial, not the main file. [File map](architecture.md#
 
 ## Godot-free files
 
-`Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `SoundSynth*`, `MusicSynth*`, `PianoRecordings`,
+`Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `SoundSynth*`, `MusicSynth*`, `Recordings`,
 `InkScan`, `RainWeather` are linked into the xunit project. They must not reference Godot types; put the Godot side in a separate
 class (`Sfx`, `Music`, `SaveSystem`...).
 

@@ -7,7 +7,7 @@ public static partial class MusicSynth
     private const double SpeedOfSound = 343;
 
     /// <summary>Instruments that travel across the stereo field while they sound, so they render their own panning.</summary>
-    private static bool Moves(Instrument instrument) => instrument is Instrument.Motorcar or Instrument.Streetcar;
+    private static bool Moves(Instrument instrument) => instrument is Instrument.Motorcar or Instrument.Streetcar or Instrument.Car;
 
     /// <summary>
     /// The city's roar for the length of the note: white noise swelling gently, with the colour left to the body
