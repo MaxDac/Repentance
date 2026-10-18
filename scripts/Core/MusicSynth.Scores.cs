@@ -15,6 +15,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => Office,
         Track.StreetTraffic => Traffic,
         Track.LobbyPiano => Lobby,
+        Track.Investigation => Investigation,
         Track.BlueLanternJazz => Lantern,
         Track.BlueLanternAlley => LanternAlley,
         Track.MansionDread => Mansion,
@@ -216,8 +217,8 @@ public static partial class MusicSynth
     // a real grand piano, recorded pianissimo, in a well-damped marble room
     private static readonly Piece Lobby = new(64, new Hall(1.3, 0.86, 0.65, 0.25), new Part[]
     {
-        new(Instrument.RecordedPiano, 0.32, -0.15, Pedalled(LoungeForm, bass: true)),
-        new(Instrument.RecordedPiano, 0.2, -0.05, Pedalled(LoungeForm, bass: false)),
+        new(Instrument.RecordedPiano, 0.32, -0.15, Pedalled(LoungeForm, LoungeChords, bass: true)),
+        new(Instrument.RecordedPiano, 0.2, -0.05, Pedalled(LoungeForm, LoungeChords, bass: false)),
         new(Instrument.RecordedPiano, 0.38, 0.2,
             LoungeOpening + "C4:2 D4:2 " +
             LoungeOpening + "C4:2 Bb3:2 " +
@@ -231,7 +232,7 @@ public static partial class MusicSynth
     /// the voicing broken upwards, one note a beat, each ringing to the chord's end (a two-beat chord sounds whole on
     /// its second beat), so a new note starts on every beat and the sound never thins out.
     /// </summary>
-    private static string Pedalled(string bars, bool bass)
+    private static string Pedalled(string bars, Dictionary<string, (string Root, string Voicing)> chordBook, bool bass)
     {
         var sb = new StringBuilder();
         foreach (var bar in bars.Split('|'))
@@ -240,7 +241,7 @@ public static partial class MusicSynth
             int beats = 4 / chords.Length;
             foreach (var chord in chords)
             {
-                var (root, voicing) = LoungeChords[chord];
+                var (root, voicing) = chordBook[chord];
                 if (bass) sb.Append($"{root}:{beats} ");
                 else if (beats == 2) sb.Append($"r:1 {voicing}:1 ");
                 else
@@ -253,6 +254,35 @@ public static partial class MusicSynth
         }
         return sb.ToString();
     }
+    // ------------------------------------------------------------------ investigation
+
+    // Music to think by, for poking around: sixteen slow bars in D minor on the recorded piano, pianissimo, so far
+    // back it melts into the room's silence. The left hand lays a low bass on each bar and breaks a wide, open chord
+    // upwards over it, a note a beat, as if the sustain pedal never came up, so something is always gently sounding.
+    // Over it the right hand thinks aloud: a few long notes, never above middle register, with whole phrases left
+    // empty. The harmony drifts rather than resolves (D minor ninth, B-flat major seventh, G minor ninth, A suspended),
+    // with one shadowy turn to E-flat, and the last bar, A7, leans on C-sharp so the loop falls back home to D.
+    private static readonly Dictionary<string, (string Root, string Voicing)> PonderChords = new()
+    {
+        ["Dm9"] = ("D2", "A2+F3+E4"), ["Bbmaj7"] = ("Bb1", "F2+D3+A3"), ["Gm9"] = ("G1", "D2+Bb2+A3"),
+        ["Asus"] = ("A1", "E2+D3+G3"), ["Ebmaj7"] = ("Eb2", "Bb2+D3+G3"), ["Dm9/F"] = ("F2", "A2+D3+E3"),
+        ["A7"] = ("A1", "E2+C#3+G3"),
+    };
+
+    private const string PonderForm =
+        "Dm9|Bbmaj7|Gm9|Asus|Dm9|Bbmaj7|Ebmaj7|Asus|Gm9|Dm9/F|Bbmaj7|Asus|Dm9|Bbmaj7|Gm9|A7";
+
+    // a real grand piano, recorded pianissimo, in a large, dim, softly damped room
+    private static readonly Piece Investigation = new(60, new Hall(1.6, 0.9, 0.55, 0.35), new Part[]
+    {
+        new(Instrument.RecordedPiano, 0.24, -0.15, Pedalled(PonderForm, PonderChords, bass: true)),
+        new(Instrument.RecordedPiano, 0.15, -0.05, Pedalled(PonderForm, PonderChords, bass: false)),
+        new(Instrument.RecordedPiano, 0.22, 0.2,
+            "r:16 " +
+            "A4:4 F4:2 D4:2 G4:4 E4:4 " +
+            "D4:4 C4:2 A3:2 F4:4 E4:4 " +
+            "r:8 D4:2 Bb3:2 C#4:4"),
+    });
 
     // ------------------------------------------------------------------ the Blue Lantern
 

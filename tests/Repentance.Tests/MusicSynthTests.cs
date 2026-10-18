@@ -313,6 +313,34 @@ public class MusicSynthTests
     }
 
     [Fact]
+    public void InvestigationIsAQuietReflectivePiano()
+    {
+        var score = MusicSynth.Score(Track.Investigation);
+        Assert.All(score, n => Assert.Equal(Instrument.RecordedPiano, n.Instrument));
+        Assert.Equal(64, MusicSynth.LengthBeats(Track.Investigation), 6);
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.Investigation), 50, 66);
+        // barely there: quieter than every track but the band heard through the alley wall, nothing accented, every
+        // note on the beat and a note starting on every beat
+        Assert.All(Enum.GetValues<Track>().Where(t => t is not (Track.Investigation or Track.BlueLanternAlley)),
+            t => Assert.True(MusicSynth.BaseVolumeDb(Track.Investigation) < MusicSynth.BaseVolumeDb(t), $"{t}"));
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
+        Assert.Equal(Enumerable.Range(0, 64).Select(b => (double)b), score.Select(n => n.Beat).Distinct().Order());
+        // low and dark: nothing above A4; the bass a whole bar to a note, opening on D
+        Assert.All(score, n => Assert.True(n.Midi <= MusicSynth.Midi("A4"), $"{n}"));
+        var bass = score.Where(n => n.Voice == 0).ToList();
+        Assert.Equal(Enumerable.Range(0, 16).Select(b => 4.0 * b), bass.Select(n => n.Beat));
+        Assert.Equal(MusicSynth.Midi("D2"), bass[0].Midi);
+        // the right hand thinks rather than sings: few, long notes, the first phrase left to the left hand alone,
+        // and the last note the leading tone, C-sharp, falling home to D
+        var tune = score.Where(n => n.Voice == 2).ToList();
+        Assert.All(tune, n => Assert.True(n.Beats >= 2, $"{n}"));
+        Assert.True(tune.Count <= 16);
+        Assert.True(tune[0].Beat >= 16);
+        Assert.Equal(MusicSynth.Midi("C#4"), tune[^1].Midi);
+    }
+
+    [Fact]
     public void MansionDreadIsADissonantThrillerLoop()
     {
         var score = MusicSynth.Score(Track.MansionDread);

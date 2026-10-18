@@ -320,6 +320,7 @@ public partial class AutoPlay
 
         var libraryLines = await Listen(game, game.Perform(Verb.Walk, "library"));
         Check(game.Room?.Name == "Library" && game.Player.Visible, "went to the library");
+        Check(game.Music.Current == Track.Investigation, "the investigation music plays in the library");
         Check(libraryLines.Any(l => l.Contains("Not her shift. Thank God")) && libraryLines.Any(l => l.Contains("back in my head")),
             "Micah is relieved Rose isn't on duty, but she's back on his mind");
         Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");

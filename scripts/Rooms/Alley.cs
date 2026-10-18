@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class Alley : Room
 {
+    public override Track? Music => InAct3 ? Track.Investigation : Track.BlueLanternAlley;
+
     private static readonly Texture2D SalOut = GD.Load<Texture2D>("res://assets/art/sprites/sal_out.png");
     private static readonly Texture2D BartenderShot = GD.Load<Texture2D>("res://assets/art/sprites/bartender_shot.png");
 
@@ -37,7 +39,6 @@ public partial class Alley : Room
     private bool Dark => State.HasFlag("alley3_dark");
 
     /// <summary>Act 1: the band rehearsing inside, far off through the open back door. Act 3: the door is shut.</summary>
-    public override Track? Music => InAct3 ? null : Track.BlueLanternAlley;
 
     public override void _Ready()
     {

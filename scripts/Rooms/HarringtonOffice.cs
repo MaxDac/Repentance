@@ -10,6 +10,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class HarringtonOffice : Room
 {
+    public override Track? Music => Track.Investigation;
+
     public override async Task OnEnter(string entry)
     {
         if (State.HasFlag("seen_harrington_office")) return;

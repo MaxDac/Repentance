@@ -23,6 +23,8 @@ public enum Track
     StreetTraffic,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
+    /// <summary>Investigation: a slow, reflective D-minor piano, pianissimo and barely audible, to think by.</summary>
+    Investigation,
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
     /// and one brief, piercing trumpet stab.</summary>
     MansionDread,
@@ -132,6 +134,7 @@ public static partial class MusicSynth
         Track.BlueLanternAlley => -27f,
         Track.StreetTraffic => -13f,
         Track.LobbyPiano => -12f,
+        Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
         _ => -6f,
     };

@@ -56,6 +56,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: almost muted, a dull mono thud and echo |
 | `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road, kept distant |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 
 `StreetTraffic` is scored like the music, but its instruments (`MusicSynth.Traffic.cs`) are noise and engines: a

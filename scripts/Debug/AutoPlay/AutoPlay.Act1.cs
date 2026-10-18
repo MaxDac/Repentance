@@ -99,10 +99,12 @@ public partial class AutoPlay
         Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
+        int investigationStarts = game.Music.Count(Track.Investigation);
         await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
         await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, LiftRoute(), "lift_route");
         Check(game.Room?.Name == "HotelLinen", "staff elevator up to the fifth-floor linen room");
-        Check(game.Music.Current == null, "the lobby piano stays in the lobby");
+        Check(game.Music.Current == Track.Investigation && game.Music.Count(Track.Investigation) == investigationStarts + 1,
+            "the lobby piano stays in the lobby; the investigation music starts in the linen room");
 
         // ---- the linen room: a hanger and the cart's pliers make a hook for the night bolt
         await Shot("hotel_linen");
