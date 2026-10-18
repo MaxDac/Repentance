@@ -367,6 +367,20 @@ sys.exit(int(os.environ["GAME_EXIT"]))
                 self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertIn("None of", result.stdout + result.stderr)
 
+    def test_resume_suites_pass_separate_arguments_and_need_their_marker(self):
+        for suite, resume in (("resume-act2", "act2"), ("resume-act3", "act3")):
+            with self.subTest(suite=suite):
+                self.env["GAME_OUTPUT"] = "PLAYTHROUGH OK"
+                result = self.run_launcher("test.sh", suite, "--no-clean")
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.env["GAME_OUTPUT"] = "RESUME OK"
+                result = self.run_launcher("test.sh", suite, "--no-clean")
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertTrue(
+                    self.trace.read_text().splitlines()[-1].endswith(f"-- --playthrough --resume={resume}")
+                )
+                self.assertTrue((self.project / "logs" / f"{suite}.log").exists())
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is required")
 class PowerShellLauncherTests(LauncherTests):
