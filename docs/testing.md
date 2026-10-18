@@ -23,6 +23,7 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 | Docs only | none |
 | Any C# | `unit` (after `dotnet build`) |
 | Story: Ink, `scripts/Rooms`, `scripts/Story`, items, endings, playthrough | `unit, playthrough` |
+| Saving/loading, `GameState`, state a save must carry | `unit, playthrough, resume-act2, resume-act3` |
 | AutoPlay act file or `Harness.cs` | add `autoplay` |
 | Scenes: walk areas, hotspots, entries, exits | `unit, walk` |
 | Art generators or `assets/art` | `art` |
@@ -36,6 +37,7 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 | `unit` | `dotnet test tests/Repentance.Tests` | Godot-free rules, scene graph, story integrity, Ink walk | exit code |
 | `art` | Python `unittest` in `tests/` | Generated art matches the generators and contracts | exit code |
 | `playthrough` | `--playthrough` | Canonical story, every ending, save/load after every beat, sound/music coverage | `PLAYTHROUGH OK` |
+| `resume-act2`, `resume-act3` | `--playthrough --resume=act2\|act3` | A fresh launch loads a checkpoint `playthrough` kept and plays on to "The End" (run `playthrough` first) | `RESUME OK` |
 | `autoplay` | `--autoplay` | Targeted regressions: puzzles, wrong items, mouse, wheel, inventory, notepad, poses, dialogue variants, seeded endings; screenshots | `AUTOPLAY OK` |
 | `settings` | `--settings-test` | Content, display, volume settings, persistence, menus, both Eleanor variants | `SETTINGS TEST OK` |
 | `pause` | `--pause-test` | Space freezes and resumes everything | `PAUSE TEST OK` |
@@ -86,6 +88,11 @@ modes, the save/load round trip and the coverage gates.
 - Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
   1-oldman 1-steps 8 9 10 11`. No seeded state. `--ending=N` runs one route.
 - After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
+- Fresh-launch checkpoints: the run also keeps two real saves in `user://autoplay_saves/checkpoints/` (end of Act One,
+  Club vestibule) with the choices matched so far. `--resume=act2` / `--resume=act3` (suites `resume-act2`,
+  `resume-act3`, CI's playthrough job) start a new Godot process, load one as the title screen's Load does, and play
+  route 2 / 8 (or `--ending=N`) to "The End". The in-process round trip cannot see state a save forgets (statics,
+  room or puzzle fields), since it is still in memory; a fresh process that keeps playing does. No coverage gates.
 - A beat that cannot reach what it needs times out and fails, naming the beat.
 - Coverage: every `Sound` and every `Track` must play (`UnheardSounds` exceptions, empty), and every choice a route
   wants must be offered.
