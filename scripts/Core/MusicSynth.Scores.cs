@@ -14,6 +14,7 @@ public static partial class MusicSynth
         Track.ConventPiano => Convent,
         Track.OfficeJazz => Office,
         Track.LobbyPiano => Lobby,
+        Track.PrisonParlour => Parlour,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -233,4 +234,19 @@ public static partial class MusicSynth
         }
         return sb.ToString();
     }
+
+    // ------------------------------------------------------------------ the prison visiting room
+
+    // Not music: a minute in Joliet's visiting room, a beat a second, in a bare concrete hall, nearly silent. Only the
+    // faint hum of the room, a guard's few steps along the far wall, a chair dragged out and sat on, and later the
+    // guard walking back and a chair shifted.
+    private static string Steps(string step, double beats, int count) =>
+        Repeat(FormattableString.Invariant($"{step}:{beats} "), count);
+
+    private static readonly Piece Parlour = new(60, new Hall(1.5, 0.9, 0.3, 0.4), new Part[]
+    {
+        new(Instrument.Foley, 0.16, 0, "C2:60"),
+        new(Instrument.Foley, 0.45, 0.55, "r:8 " + Steps("D2", 0.6, 5) + "r:27 " + Steps("D2", 0.6, 5)),
+        new(Instrument.Foley, 0.5, -0.2, "r:18 E2:1.2 F2:2 r:26 E2:0.8 F2:2"),
+    });
 }

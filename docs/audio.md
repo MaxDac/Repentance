@@ -7,7 +7,7 @@ Sounds and music are synthesized at startup; the one exception is a real grand p
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
-| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `MusicSynth` (+ `.Instruments.cs`, `.Foley.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
 | `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
@@ -53,6 +53,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `PrisonParlour` | Joliet visiting room (prison endings) | Not music, near silence on `Foley`: a faint room hum, a guard's few steps twice, a chair dragged and sat on twice |
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
@@ -60,6 +61,10 @@ pass so filters and reverb have no seam.
 
 Score syntax (`MusicSynth.Scores.cs`): parts are space-separated tokens `name:beats` (e.g. `D4:1/2`), `r` rest,
 `+` chord, `>` separates advance from held duration, `!` accent.
+
+`Instrument.Drums` and `Instrument.Foley` use the pitch to pick a sound rather than a note. `Foley`
+(`MusicSynth.Foley.cs`) plays a room's noises: `C2` room tone, `D2` boot, `E2` chair dragged, `F2` chair set
+down; room tone and chair drags last as long as their note.
 
 **Add a track**: `Track` -> score in `MusicSynth.Scores.cs` (parts, instruments, tempo, hall) -> `Room.Music` ->
 `BaseVolumeDb` if needed. Validate with `MusicSynthTests` and playthrough.

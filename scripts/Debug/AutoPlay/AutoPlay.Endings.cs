@@ -50,6 +50,7 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_5"), "ending 5: prison, Caleb visits");
         Check(RainsHere(), "ending 5: it still rains past the prison window");
+        Check(game.Music.Current == Track.PrisonParlour, "ending 5: the visiting room's own noises, no music");
         Check(gs.HasItem("cloth"), "ending 5: Eleanor's cloth is still in Micah's pocket");
         await game.Wait(4);
         await Shot("ending_prison_caleb");

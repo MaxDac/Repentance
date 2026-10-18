@@ -17,6 +17,8 @@ public enum Track
     OfficeJazz,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
+    /// <summary>Joliet's visiting room: no music, near silence - a few footsteps, a chair moved.</summary>
+    PrisonParlour,
 }
 
 public enum Instrument
@@ -41,6 +43,9 @@ public enum Instrument
     /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, D2 brush tap, E2 brush sweep,
     /// F#2 hi-hat, Eb3 ride.</summary>
     Drums,
+    /// <summary>The noises of a room, one per pitch like <see cref="Drums"/>: C2 room tone (held), D2 a boot on
+    /// concrete, E2 a chair dragged (held), F2 a chair set down.</summary>
+    Foley,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -48,7 +53,8 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
-/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
+/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room, and one room's noises
+/// scored the same way (<see cref="Instrument.Foley"/>). Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -87,6 +93,7 @@ public static partial class MusicSynth
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
         Track.LobbyPiano => -12f,
+        Track.PrisonParlour => -12f,
         _ => -6f,
     };
 
