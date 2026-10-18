@@ -32,6 +32,8 @@ public enum Instrument
     /// <summary>Organ pedal, 16' and 8'.</summary>
     OrganPedal,
     Piano,
+    /// <summary>A real grand piano, played pianissimo: recordings of each note (<see cref="PianoRecordings"/>).</summary>
+    RecordedPiano,
     /// <summary>A trumpet played soft through a Harmon mute.</summary>
     Trumpet,
     /// <summary>A plucked upright bass.</summary>

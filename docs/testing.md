@@ -27,6 +27,7 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 | AutoPlay act file or `Harness.cs` | add `autoplay` |
 | Scenes: walk areas, hotspots, entries, exits | `unit, walk` |
 | Art generators or `assets/art` | `art` |
+| Music scores, `assets/audio/piano`, `tools/music` | `unit, playthrough` (listen first with `tools/music render`, see [Audio](audio.md#music-tool)) |
 | Settings menu / pause | `settings` / `pause` |
 | CI, launchers, export presets | no additional suites; validate the changed tooling, then CI |
 

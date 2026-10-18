@@ -174,51 +174,61 @@ public static partial class MusicSynth
 
     // ------------------------------------------------------------------ the Aurelian lobby
 
-    // The house pianist in the Aurelian's marble lobby, playing for nobody in particular: a slow 1920s foxtrot in F
-    // major, kept so soft it is nearly furniture. Sixteen bars, AABA. The left hand plays a tamed, pedalled stride (a
-    // low bass on beats one and three, a hushed sixth or ninth chord on two and four); the right hand sings a sparse
-    // tune in the middle of the keyboard with a lazy swung eighth here and there. The bridge slides from Bb6 to Bbm6
-    // and down through a diminished chord, and the last bar turns round on C9 so the loop falls straight back to F.
-    private const string LoungeOpening = "A4:2 C5:2/3 D5:1/3 C5:1 F#4:2 E4:2/3 F#4:1/3 A4:1 G4:2 r:2/3 E4:1/3 G4:1 ";
+    // The house pianist in the Aurelian's marble lobby, playing for nobody in particular: a slow 1920s ballad in C
+    // major, kept low and so soft it is nearly furniture. Sixteen bars, AABA, with no syncopation at all: the left hand
+    // lays a low bass on each chord and breaks a hushed sixth or ninth chord upwards over it, a note a beat, as if the
+    // sustain pedal never came up; the right hand sings a plain tune in half notes around middle C, never reaching up
+    // into the bright treble. The bridge slides from F6 to Fm6 and down through a diminished chord, and the last bar
+    // turns round on G9 so the loop falls straight back to C.
+    private const string LoungeOpening = "E4:2 G4:2 A4:2 E4:2 F4:2 D4:2 ";
 
-    // declared before Lobby: static fields initialize in order. Each chord: bass on beat one, bass on beat three, voicing
-    private static readonly Dictionary<string, (string Root, string Fifth, string Voicing)> LoungeChords = new()
+    // declared before Lobby: static fields initialize in order. Each chord: its bass, and the voicing above it
+    private static readonly Dictionary<string, (string Root, string Voicing)> LoungeChords = new()
     {
-        ["F6"] = ("F2", "C2", "A3+C4+D4"), ["D9"] = ("D2", "A1", "F#3+C4+E4"), ["Gm7"] = ("G1", "D2", "F3+Bb3+D4"),
-        ["C9"] = ("C2", "G1", "E3+Bb3+D4"), ["F7"] = ("F2", "C2", "Eb3+A3+C4"), ["Bb6"] = ("Bb1", "F2", "F3+G3+D4"),
-        ["Bbm6"] = ("Bb1", "F2", "F3+G3+Db4"), ["F6/A"] = ("A1", "E2", "A3+C4+D4"), ["Abdim7"] = ("Ab1", "D2", "F3+B3+D4"),
+        ["C6"] = ("C2", "E3+G3+A3"), ["A9"] = ("A1", "C#3+G3+B3"), ["Dm7"] = ("D2", "C3+F3+A3"),
+        ["G9"] = ("G1", "B2+F3+A3"), ["C7"] = ("C2", "Bb2+E3+G3"), ["F6"] = ("F2", "C3+D3+A3"),
+        ["Fm6"] = ("F2", "C3+D3+Ab3"), ["C6/E"] = ("E2", "E3+G3+A3"), ["Ebdim7"] = ("Eb2", "C3+F#3+A3"),
     };
 
     private const string LoungeForm =
-        "F6|D9|Gm7 C9|F6 C9|F6|D9|Gm7 C9|F6 F7|Bb6|Bbm6|F6/A Abdim7|Gm7 C9|F6|D9|Gm7 C9|F6 C9";
+        "C6|A9|Dm7 G9|C6 G9|C6|A9|Dm7 G9|C6 C7|F6|Fm6|C6/E Ebdim7|Dm7 G9|C6|A9|Dm7 G9|C6 G9";
 
-    private static readonly Piece Lobby = new(68, new Hall(1.3, 0.86, 0.55, 0.25), new Part[]
+    // a real grand piano, recorded pianissimo, in a well-damped marble room
+    private static readonly Piece Lobby = new(64, new Hall(1.3, 0.86, 0.65, 0.25), new Part[]
     {
-        new(Instrument.Piano, 0.4, -0.15, Stride(LoungeForm, bass: true)),
-        new(Instrument.Piano, 0.25, -0.05, Stride(LoungeForm, bass: false)),
-        new(Instrument.Piano, 0.5, 0.2,
-            LoungeOpening + "F4:3 r:1 " +
-            LoungeOpening + "F4:2 r:2/3 Eb4:1/3 A4:1 " +
-            "D5:2 C5:2/3 Bb4:1/3 G4:1 Db5:2 r:2/3 F4:1/3 G4:1 C5:2 B4:1 D5:1 Bb4:2 G4:1 E4:1 " +
-            LoungeOpening + "F4:2 r:1 E4:1"),
+        new(Instrument.RecordedPiano, 0.32, -0.15, Pedalled(LoungeForm, bass: true)),
+        new(Instrument.RecordedPiano, 0.2, -0.05, Pedalled(LoungeForm, bass: false)),
+        new(Instrument.RecordedPiano, 0.38, 0.2,
+            LoungeOpening + "C4:2 D4:2 " +
+            LoungeOpening + "C4:2 Bb3:2 " +
+            "A4:2 F4:2 Ab4:2 F4:2 G4:2 F#4:2 F4:2 D4:2 " +
+            LoungeOpening + "C4:3 B3:1"),
     });
 
     /// <summary>
-    /// A soft, pedalled stride, one 4/4 bar per <c>|</c>: with <paramref name="bass"/> the low notes on beats one and
-    /// three, each ringing two beats; otherwise the chord on beats two and four, each ringing a beat. A bar with two
-    /// chords changes on beat three.
+    /// A soft, pedalled left hand, one 4/4 bar per <c>|</c>, each chord lasting the whole bar or, if the bar has two,
+    /// half of it: with <paramref name="bass"/> the low note on the chord's first beat, ringing through it; otherwise
+    /// the voicing broken upwards, one note a beat, each ringing to the chord's end (a two-beat chord sounds whole on
+    /// its second beat), so a new note starts on every beat and the sound never thins out.
     /// </summary>
-    private static string Stride(string bars, bool bass)
+    private static string Pedalled(string bars, bool bass)
     {
         var sb = new StringBuilder();
         foreach (var bar in bars.Split('|'))
         {
             var chords = bar.Split(' ');
-            for (int half = 0; half < 2; half++)
+            int beats = 4 / chords.Length;
+            foreach (var chord in chords)
             {
-                var (root, fifth, voicing) = LoungeChords[chords[half * chords.Length / 2]];
-                bool second = chords.Length == 1 && half == 1;
-                sb.Append(bass ? $"{(second ? fifth : root)}:1>2 r:1 " : $"r:1 {voicing}:1 ");
+                var (root, voicing) = LoungeChords[chord];
+                if (bass) sb.Append($"{root}:{beats} ");
+                else if (beats == 2) sb.Append($"r:1 {voicing}:1 ");
+                else
+                {
+                    sb.Append("r:1 ");
+                    var notes = voicing.Split('+');
+                    for (int i = 0; i < notes.Length; i++) sb.Append($"{notes[i]}:1>{notes.Length - i} ");
+                }
             }
         }
         return sb.ToString();

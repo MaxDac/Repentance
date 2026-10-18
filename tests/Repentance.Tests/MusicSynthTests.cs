@@ -5,6 +5,22 @@ namespace Repentance.Tests;
 
 public class MusicSynthTests
 {
+    private static readonly string PianoFolder = FindPianoFolder();
+
+    static MusicSynthTests() => PianoRecordings.Use(name =>
+    {
+        var path = Path.Combine(PianoFolder, name);
+        return File.Exists(path) ? File.ReadAllBytes(path) : null;
+    });
+
+    private static string FindPianoFolder()
+    {
+        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+            if (File.Exists(Path.Combine(dir.FullName, "project.godot")))
+                return Path.Combine(dir.FullName, PianoRecordings.Folder.Replace('/', Path.DirectorySeparatorChar));
+        throw new InvalidOperationException("project.godot not found above the test binaries");
+    }
+
     private static readonly Dictionary<Track, Lazy<float[]>> Renders =
         Enum.GetValues<Track>().ToDictionary(t => t, t => new Lazy<float[]>(() => MusicSynth.Render(t)));
 
@@ -158,36 +174,40 @@ public class MusicSynthTests
     }
 
     [Fact]
-    public void LobbyPianoIsASoftLoungeFoxtrot()
+    public void LobbyPianoIsASoftLoungeBallad()
     {
         var score = MusicSynth.Score(Track.LobbyPiano);
-        Assert.All(score, n => Assert.Equal(Instrument.Piano, n.Instrument));
+        Assert.All(score, n => Assert.Equal(Instrument.RecordedPiano, n.Instrument));
         Assert.Equal(64, MusicSynth.LengthBeats(Track.LobbyPiano), 6);
         Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.LobbyPiano), 60, 76);
-        // background, not a performance: no accents, quieter than the other tracks, the tune in the middle register
+        // background, not a performance: no accents, quieter than the other tracks, the tune low around middle C
         Assert.DoesNotContain(score, n => n.Strident);
         Assert.True(MusicSynth.BaseVolumeDb(Track.LobbyPiano) < MusicSynth.BaseVolumeDb(Track.ConventPiano));
         var tune = score.Where(n => n.Voice == 2).ToList();
-        Assert.All(tune, n => Assert.InRange(n.Midi, MusicSynth.Midi("C4"), MusicSynth.Midi("C6")));
-        // a pedalled stride: the bass on beats one and three, the chords on two and four, every bar of the loop
+        Assert.All(tune, n => Assert.InRange(n.Midi, MusicSynth.Midi("G3"), MusicSynth.Midi("A4")));
+        Assert.All(score, n => Assert.True(n.Midi <= MusicSynth.Midi("A4"), $"{n}"));
+        // a pedalled left hand: a bass on the first beat of each chord, its voicing broken over the rest, so a note
+        // starts on every beat (no gaps) and none off it (no syncopation)
         var bass = score.Where(n => n.Voice == 0).ToList();
         var chords = score.Where(n => n.Voice == 1).GroupBy(n => n.Beat).ToList();
-        Assert.Equal(32, bass.Count);
+        Assert.Equal(16, bass.Count(n => n.Beat % 4 == 0));
         Assert.All(bass, n => Assert.Equal(0, n.Beat % 2));
-        Assert.Equal(32, chords.Count);
-        Assert.All(chords, c => Assert.Equal(1, c.Key % 2));
+        Assert.Empty(chords.Select(c => c.Key).Intersect(bass.Select(n => n.Beat)));
+        Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
+        Assert.Equal(Enumerable.Range(0, 64).Select(b => (double)b), score.Select(n => n.Beat).Distinct().Order());
+        Assert.All(tune, n => Assert.True(n.Beats >= 1, $"{n}"));
         // AABA: the three A sections open with the same three bars
         IEnumerable<(double, int)> Bars(double from) =>
             tune.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
         Assert.Equal(Bars(0), Bars(16));
         Assert.Equal(Bars(0), Bars(48));
         Assert.NotEqual(Bars(0), Bars(32));
-        // F major: the loop opens on F in the bass, and the last chord is the C dominant leading home
-        Assert.Equal(MusicSynth.Midi("F2"), bass[0].Midi);
+        // C major: the loop opens on C in the bass, and the last chord is the G dominant leading home
+        Assert.Equal(MusicSynth.Midi("C2"), bass[0].Midi);
         var last = chords.MaxBy(c => c.Key)!.Select(n => n.Midi % 12).ToHashSet();
-        Assert.Contains(4, last);
-        Assert.Contains(10, last);
-        Assert.Equal(MusicSynth.Midi("E4"), tune.MaxBy(n => n.Beat)!.Midi);
+        Assert.Contains(11, last);
+        Assert.Contains(5, last);
+        Assert.Equal(MusicSynth.Midi("B3"), tune.MaxBy(n => n.Beat)!.Midi);
     }
 
     [Theory]
@@ -200,9 +220,27 @@ public class MusicSynthTests
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
+            [Instrument.RecordedPiano] = ("A0", "C8"),
         };
         Assert.All(MusicSynth.Score(track), n =>
             Assert.InRange(n.Midi, MusicSynth.Midi(range[n.Instrument].Low), MusicSynth.Midi(range[n.Instrument].High)));
+    }
+
+    [Fact]
+    public void EveryRecordedPianoNoteHasARecordingLongEnough()
+    {
+        var needed = PianoRecordings.Needed();
+        Assert.NotEmpty(needed);
+        Assert.All(needed, n =>
+        {
+            var path = Path.Combine(PianoFolder, PianoRecordings.FileName(n.Key));
+            Assert.True(File.Exists(path), $"{path} is missing: run dotnet run --project tools/music -- piano");
+            double seconds = new FileInfo(path).Length / 2.0 / MusicSynth.SampleRate;
+            Assert.True(seconds >= n.Value + PianoRecordings.TailSeconds, $"{path} is {seconds:0.00} s: run dotnet run --project tools/music -- piano");
+        });
+        var extra = Directory.GetFiles(PianoFolder, "*.pcm").Select(Path.GetFileName)
+            .Except(needed.Keys.Select(PianoRecordings.FileName));
+        Assert.Empty(extra);
     }
 
     [Theory]
