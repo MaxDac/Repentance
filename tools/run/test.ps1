@@ -3,7 +3,8 @@
     Runs the test suites from a clean slate and prints a summary. Exits non-zero if any suite fails.
 .DESCRIPTION
     Suites: unit (xunit, including the story-integrity and exhaustive Ink-walk tests), art (Python),
-    autoplay, settings, pause, walk, playthrough (Godot runs). 'all' runs every one.
+    autoplay, settings, pause, walk, playthrough, resume-act2, resume-act3 (Godot runs). 'all' runs every one.
+    resume-act2/resume-act3 are fresh launches that load the checkpoints a playthrough run kept (run it first).
     Unless -NoClean is given, every generated file is deleted first and the project is rebuilt and reimported.
     Godot logs go to logs/<suite>.log; a Godot suite passes only with its marker and no ERROR lines (as in CI).
 .EXAMPLE
@@ -11,7 +12,7 @@
     tools\run\test.ps1 -Suite unit, playthrough -NoClean
 #>
 param(
-    [ValidateSet('all', 'unit', 'art', 'autoplay', 'settings', 'pause', 'walk', 'playthrough')]
+    [ValidateSet('all', 'unit', 'art', 'autoplay', 'settings', 'pause', 'walk', 'playthrough', 'resume-act2', 'resume-act3')]
     [string[]]$Suite = @('all'),
     [switch]$NoClean,
     [string]$Godot
@@ -24,6 +25,8 @@ $godotSuites = [ordered]@{
     pause       = @{ Args = @('--pause-test'); Marker = 'PAUSE TEST OK' }
     walk        = @{ Args = @('--walk-test'); Marker = 'WALK TEST OK' }
     playthrough = @{ Args = @('--playthrough'); Marker = 'PLAYTHROUGH OK' }
+    'resume-act2' = @{ Args = @('--playthrough', '--resume=act2'); Marker = 'RESUME OK' }
+    'resume-act3' = @{ Args = @('--playthrough', '--resume=act3'); Marker = 'RESUME OK' }
 }
 $order = @('unit', 'art') + @($godotSuites.Keys)
 $selected = if ($Suite -contains 'all') { $order } else { $order | Where-Object { $Suite -contains $_ } }

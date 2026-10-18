@@ -137,13 +137,18 @@ described here (other verbs, flavour lines) is left to the implementation.
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
-  the entrance), and on to the next scene.
+  the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
+  beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
+  the same blackout.
 
 #### Street behind the club (the alley)
 
 - New location: the road behind the club, dirty and in the shadow, with only one intermittent street lamp.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
-  Tony behind Sal.
+  Tony behind Sal. So the player understands what happened, Sal steps up behind Micah, half turned to the screen,
+  and kicks him in the belly twice with his right foot, the foot hidden behind Micah's body (new kicking sprite for
+  Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue starts. The beating splits Micah's bottom lip: from here on his close-ups (the convent two-portrait panel
+  and the beaten panel) show a small dark-red cut across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
@@ -187,7 +192,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
   with his own lighter (new smoking strip: head bowed, both hands cupped round the flame against the wind, a gust
-  first blows it out). He holds the lit cigarette while he thinks and, every 5 seconds while he talks, takes a drag
+  first blows it out). He holds the lit cigarette while he thinks and, every 10 seconds while he talks, takes a drag
   (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
 - A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
@@ -227,20 +232,11 @@ described here (other verbs, flavour lines) is left to the implementation.
 - New location: the iron landing on the first floor, sooty masonry behind it, iron grating, windows and a door
   into the floor, rain.
 - Eleanor is there, outside, dressed in black.
-- She opens: "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?"
-  Micah asks about Eleanor Harrington, introduces himself, and the conversation joins the existing exchange.
-- She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
-- While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
-  same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
-  speaker's dialogue is shown below their own portrait half.
-- The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
-  The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
-- After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
-  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." As the
-  line ends he reaches her and kisses her on the lips, and they hold the kiss while his narration says "I'd
-  have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him." and "And
-  somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway." Only then
-  does the screen fade to black, holding a moment on black before the attic fades in (End of Act 1). Their night in her room follows the First Interlude (see *Motel room, night* in Act 2).
+- Micah's arrival thought, then he walks to a talking distance from her. She opens: "Not many fellas climb a fire
+  escape in the rain, mister. Were you looking for someone?"
+- Act 1 cuts there: the screen fades to black on her question, holding a moment on black before the attic fades in
+  (End of Act 1). The rest of their talk, the kiss and their night in her room follow the First Interlude (see
+  *Motel fire escape, again* in Act 2).
 
 ### End of Act 1 - Present day
 
@@ -280,7 +276,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The next day, Daniel is back in the attic and returns to reading the journal (hand on it in the satchel).
   A black screen shows "Chicago, 1927." for 2.5 seconds, then "First Interlude" below it on the same screen;
   both disappear and the First Interlude begins. After it, the story
-  picks up with Micah's night in the motel room, then his office.
+  picks up with Micah on the motel fire escape, in front of Eleanor, then their night in her room, then his office.
 
 ### First Interlude - Eleanor
 
@@ -311,11 +307,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
-4. **Convent cell, that night.** After a knock, Agatha comes into the cell and talks round and round, trying to make Eleanor admit
-   that she wants something impure from her, while it is the other way around. She walks out again before the
-   morning. The choice is saved:
-   - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
-   - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
+4. **Convent cell, that night.** After a knock, Agatha comes into the cell past midnight. She sincerely believes
+   she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
+   she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
+   the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
+   long as she wanted. She walks out again before the morning. The choice is saved:
+   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tells Agatha what she is
+     running from: the Club, the rites, and her own part in them. Agatha, moved, reaches for her; Eleanor stops her
+     gently. Ashamed, Agatha turns it round on her and puts her out at first light.
+   - **Seduce her**: Agatha goes along with it at first; at the last moment she turns back, cursing Eleanor for a
+     demon, and leaves. Nothing is shown.
    The Club's strings replace the convent piano from the knock until Agatha walks out.
    Eleanor leaves the convent the next morning.
 
@@ -333,15 +334,36 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     for the drawer, and the door for all three; at the door she names the first step still to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
-   hears him arguing with the clerk downstairs; she steps out onto the fire escape to wait for him, where he
-   finds her. A 3-second fade to black, the caption "Later that night", then a 3-second fade into the
-   motel room: Micah's journal takes over again with their night in her room.
+   hears him arguing with the clerk downstairs. From the window she sees him in the alley below, on a fruit crate,
+   hooking the fire-escape ladder down with the clerk's umbrella and climbing it; she steps out onto the fire escape
+   to wait for him. A 3-second fade to black, a short hold on black with no caption, then the fire escape fades in:
+   Micah's journal takes over again (*Motel fire escape, again*).
 
 ### Chicago, 1927
 
+#### Motel fire escape, again
+
+- Right after the First Interlude, over black, the journal is Micah's again: the landing fades in with Micah already
+  standing in front of Eleanor, where Act 1 left them, his Act 2 satchel back. The office jazz plays.
+- Eleanor repeats her opening, word for word: "Not many fellas climb a fire escape in the rain, mister. Were you
+  looking for someone?" Micah asks about Eleanor Harrington, introduces himself, and the conversation goes on.
+- She asks why he's trying to find her and Micah explains; the conversation has tension and attraction.
+- While they talk, a framed close-up shows them side by side, Micah on the left and Eleanor on the right, in the
+  same VGA style as the other close-ups. It appears immediately after Eleanor's opening line; each active
+  speaker's dialogue is shown below their own portrait half.
+- The panel disappears completely just before the player answers "And what do you get, if you bring me home?"
+  The compensation choices and the remaining conversation take place on the landing with normal overhead speech.
+- After Eleanor says "I can't go back there...", Micah answers "Then stay. Right here." and starts walking
+  slowly towards her. While he walks she says "You're walking into the rain, Mr. Jones. Not out of it." As the
+  line ends he reaches her and kisses her on the lips, and they hold the kiss while his narration says "I'd
+  have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him." and "And
+  somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway." Only then
+  does the screen fade to black, over 3 seconds. "Later that night" stays alone on the black screen for 3 seconds,
+  then a 3-second fade brings in *Motel room, night*.
+
 #### Motel room, night
 
-- Right after the First Interlude, inside her room at the same motel, Micah is getting dressed (new dressing sprite
+- After the kiss on the fire escape and "Later that night", inside her room at the same motel, Micah is getting dressed (new dressing sprite
   for the character) while Eleanor is in the bed, under the sheet. Micah's Act 2 satchel is already back.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
@@ -462,7 +484,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   back with a "Wait!": Micah will turn, then the wife will say "Don't get into trouble again."
   After "Wait!" (not during it) a framed close-up panel of Rose at her door pops up over the scene, in the same style as
   Eleanor's stage close-up; after a couple of seconds of silence, "Don't get into trouble again." appears along the
-  panel's bottom edge, then the panel is removed and the scene continues.
+  panel's bottom edge, the panel holds for a couple more seconds after the line, then it is removed and the scene
+  continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
 - If Micah leaves without insisting at least three times, Rose answers: "You're running away again. It was always
@@ -513,8 +536,14 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   use the revolver again to threaten her.
   The sister will say "Are you crazy, sir?!"
   Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
-  Sister: "You are of the same lot as that Jezebel. At this point, I'll let you burn in the flames of hell.
-  She's a performer, you know. Almost caught me off guard, the whore. You might want to Harringhton senior.:
+  Micah's madness is escalating with his sin (the librarian at gunpoint, now a nun in her own convent; later he
+  shoots the mobster and kills the old man). With the gun on her, Agatha's own repentance begins: she confesses
+  that she went to Eleanor's cell past midnight and called it charity, that it was all her fault and that she
+  failed her. Both versions keep "She's a performer." and send Micah to Harrington senior.
+  - If Eleanor seduced her, Agatha still calls Eleanor a Jezebel ("She nearly had me fooled, the whore." before
+    she breaks, then "Jezebel she is. But it was my fault.").
+  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits she
+    called her a whore and put her out because Eleanor stopped her.
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
   On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
   name - I'd start there."
@@ -816,7 +845,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
-    - **Exception (endings 10 and 11).** If Eleanor refused both the Mother Superior and the old man's gin and
+    - **Exception (endings 10 and 11).** If Eleanor told the Mother Superior the truth and refused the old man's gin and
       powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
       "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
       the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
@@ -867,7 +896,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
     a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
     Then the scene skips to *End of Act 3* (ending 1).
-  - **Eleanor's coda.** If Eleanor refused both the Mother Superior and the old man's gin and powder, the prayer
+  - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
     doesn't end the act. After the "Amen." the bedroom comes back with the player as Eleanor in the sheet and
     Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
     for his car. Two choices:
@@ -974,7 +1003,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Endings 8 to 11 - Eleanor's own way
 
-These need Eleanor to have refused **both** the Mother Superior (First Interlude) and the old man's gin and powder
+These need Eleanor to have held out **both** times: telling the Mother Superior the truth instead of seducing her
+(First Interlude) and refusing the old man's gin and powder
 (Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
 returning to bed in her coda. Endings 2-7 need her to have given in at least once.
 

@@ -46,16 +46,20 @@ public partial class AutoPlay
             GameState.Instance.SetFlag("crate_moved");
             GameState.Instance.SetFlag("ladder_down");
             var climb = game.Perform(Verb.Hand, "ladder");
-            await Until(() => game.Hud.SpeechVisible &&
-                game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
-            Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
-                !game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
-                "the alternate compensation answer also continues on the fire escape");
             await Until(() => game.Room is Rooms.Attic && !game.Busy, timeout: 300);
             await climb;
             if (game.Room is not Rooms.Attic || game.Busy)
                 throw new InvalidOperationException($"Convent departure did not finish: room={game.Room?.Name}, busy={game.Busy}.");
             Check(game.Room is Rooms.Attic && !game.Busy, "the direct-talk exit completes the motel sequence");
+            Check(!_offered.ContainsKey("eleanor_fire_escape"), "Act 1 stops on Eleanor's question, before the compensation choice");
+            var back = game.ChangeRoom("motel_fire_escape", "interlude1");
+            await Until(() => game.Hud.SpeechVisible &&
+                game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
+            Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
+                !game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
+                "the alternate compensation answer also continues on the fire escape");
+            await Until(() => game.Room is Rooms.Office && !game.Busy, timeout: 300);
+            await back;
         }
         finally
         {

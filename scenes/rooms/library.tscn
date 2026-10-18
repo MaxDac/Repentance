@@ -26,13 +26,13 @@ size = Vector2(48, 68)
 size = Vector2(18, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_7"]
-size = Vector2(74, 116)
+size = Vector2(66, 124)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
-size = Vector2(54, 164)
+size = Vector2(50, 160)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(74, 126)
+size = Vector2(56, 128)
 
 [node name="Library" type="Node2D"]
 script = ExtResource("1_Room")
@@ -162,13 +162,13 @@ script = ExtResource("3_Hotspot")
 Id = "shelves_right"
 DisplayName = "glass-front shelves"
 LookText = "First editions behind glass. In this town, even the books live in witness protection."
-WalkTo = Vector2(376, 184)
+WalkTo = Vector2(440, 186)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/ShelvesRight"]
-position = Vector2(386.0, 86.0)
+position = Vector2(441.0, 104.0)
 shape = SubResource("Rect_7")
 
 [node name="Ladder" type="Area2D" parent="Hotspots"]
@@ -176,7 +176,7 @@ script = ExtResource("3_Hotspot")
 Id = "ladder"
 DisplayName = "rolling ladder"
 LookText = "A rolling ladder for books nobody trusted the help to touch."
-WalkTo = Vector2(395, 230)
+WalkTo = Vector2(424, 226)
 Face = 2
 ClickPriority = 2
 monitoring = false
@@ -191,14 +191,14 @@ script = ExtResource("3_Hotspot")
 Id = "window"
 DisplayName = "draped window"
 LookText = "Heavy drapes, tall glass, and a strip of Chicago trying to get in."
-WalkTo = Vector2(428, 186)
+WalkTo = Vector2(376, 184)
 Face = 2
 ClickPriority = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
-position = Vector2(434.0, 88.0)
+position = Vector2(376.0, 100.0)
 shape = SubResource("Rect_9")
 
 [node name="Librarian" type="Area2D" parent="World"]

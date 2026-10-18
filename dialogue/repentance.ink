@@ -164,32 +164,43 @@ NUN: The last cell on the left. Lights out at nine. You will not leave it until 
 THOUGHT: She told me Agatha watched her all the way down that corridor. Not like a nun watches a sinner. Like a cat watches a door.
 -> END
 
-// The night visit: Agatha wants Eleanor to say she wants something from her. Refusing her is saved
-// (eleanor_refused_abbess, one of the two refusals the endings 8-11 need); indulging her ends with Agatha cursing her.
+// The night visit: Agatha believes she has come to hear a confession; the hour says otherwise. Eleanor sees the old
+// Club trick would buy her the convent. Telling the truth is saved (eleanor_refused_abbess, one of the two refusals
+// the endings 8-11 need); seducing her ends with Agatha cursing her. Either way nun_threat2 has Agatha confess in Act 2.
 === interlude_agatha_night ===
 THOUGHT: Past midnight. A candle under the door, then the door. Agatha, in her night veil, with the candle in both hands like she was carrying it to an altar.
-NUN: You're awake. I knew you would be. Women like you don't sleep at night. You work.
+NUN: You're awake. I thought you would be. A troubled soul doesn't sleep. I've come to hear you, child, if you want to be heard.
 {
 - has_flag("interlude_agatha_proud"):
-    NUN: A queen, you said. I've thought of nothing else since vespers. What a queen does, to make men kneel.
+    NUN: A queen, you said. Queens have the most to confess. I thought of it all through vespers.
 - has_flag("interlude_agatha_sorry"):
-    NUN: Here to hide, you said. Hide what, I wonder. I lay awake wondering.
+    NUN: Here to hide, you said. Nobody hides from God. But you might lay it down, here, tonight.
 - else:
-    NUN: You lowered your eyes to me in the corridor. I know that trick. I've seen it in paintings. I've seen it in the confessional.
+    NUN: You lowered your eyes to me in the corridor. I couldn't stop thinking of it. Of you, alone in here.
 }
-ELEANOR: What do you want, Mother?
-NUN: What do I want? Child, I want nothing. It's you. I felt it the moment you walked in. The way you looked at me.
-NUN: Say it. Say what you want from me, and I'll pray over it, and God will forgive you. Say it.
-THOUGHT: She told me she knew that look. She'd seen it on every man at the Club. It was the first time she'd seen it on a woman who thought it was hers to forgive.
-+ [(Refuse her.) Go back to bed, Mother. Whatever you came here for, it isn't mine to give you. #short: (Refuse her.) Go back to bed, Mother.]
+ELEANOR: It's past midnight, Mother. The priest hears confessions on Saturdays.
+NUN: The priest isn't here. I am. Sit up, child. Let me help you carry it.
+THOUGHT: She set the candle on the night stand and sat on the edge of the cot, closer than a confessor sits. Her hands didn't know where to go.
+THOUGHT: Eleanor told me she saw it straight away. Not a nun's look. A lonely woman's, one who'd never let herself name what she wanted.
+THOUGHT: And she saw what it was worth. One night, the way the Club had taught her, and Agatha would keep her behind these walls as long as she liked. No Club, no old man. Nobody comes into a convent.
+THOUGHT: She'd bought every door she'd ever had that way. This one would have been the easiest.
++ [(Tell her the truth. All of it.)]
     ~ set_flag("eleanor_refused_abbess")
-    NUN: How dare you. How dare you. I came to pray over you.
-    ELEANOR: Then pray, Mother. From the other side of the door.
-    NUN: You'll leave this house in the morning. I won't have it said I sheltered a... a creature like you.
-    THOUGHT: The door shut hard enough to blow the candle out. Eleanor said she slept like a child, after. The first time in years.
-+ [(Indulge her.) Sit down, then, Mother. Tell me what I'm supposed to confess. #short: (Indulge her.) Sit down, then, Mother.]
-    NUN: Yes. Yes. Tell me. Tell me all of it, child, every...
-    THOUGHT: She sat on the edge of the cot. The candle shook. Eleanor said she'd done this a hundred times, for a hundred men, and she knew to the second when it would turn.
+    THOUGHT: She told me she put the thought away like a knife back in a drawer. Then she told Agatha what she was running from.
+    ELEANOR: There's a club on Hubbard Street, Mother. Judges, aldermen, my husband's father. They dress up in robes and antlers and call it the old religion.
+    ELEANOR: I'm the one on the stage. Painted, smiling, whatever they want. And when they wanted new girls, I brought them. I told them it was a party.
+    ELEANOR: I'm not sorry enough yet. I'd like to be. That's all I've got.
+    NUN: Child... oh, child.
+    THOUGHT: Agatha took her hand. Then her face, both hands, the way you'd hold something you were afraid to drop. And she leaned in.
+    ELEANOR: No, Mother. Not you too.
+    NUN: I...
+    NUN: What have you... You did this. You put this in my head, with your painted mouth and your stories. Out of my house at first light.
+    THOUGHT: She took the candle and left her the dark. Eleanor said she slept like a child, after. The first time in years.
++ [(Seduce her. One night, and the convent is yours.)]
+    THOUGHT: So she did what she knew. She let her voice go small and took Agatha's hand, and held it a moment too long.
+    ELEANOR: Nobody's held my hand since I was a girl, Mother. Don't let go. Please.
+    NUN: I won't. Hush, now. I won't.
+    THOUGHT: The candle shook. Agatha didn't let go. Eleanor said she'd done this a hundred times, for a hundred men, and she knew to the second when it would turn.
     NUN: No.
     NUN: No! Get thee behind me! You are no girl. You are a demon in a girl's skin, sent here to try me!
     ELEANOR: I didn't send for you, Mother. You came.
@@ -205,7 +216,9 @@ THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I wa
 THOUGHT: She watched me come out again, alone, and stand in the middle of the road and light a cigarette like a man at the end of a rope.
 ELEANOR: Coat. Gloves. And a face that's run out of places to look.
 THOUGHT: Then I came down the hill, and she heard me through the floor, leaning on the clerk. She heard him tell me nobody goes up.
-THOUGHT: So she opened the window and stepped out on the fire escape, into the rain, and waited to see how badly I wanted to find her. That was the first test she ever set me, and the easiest.
+THOUGHT: A minute later she saw me in the alley under her window: up on a fruit crate in the rain, fishing for the fire-escape ladder with the clerk's umbrella.
+ELEANOR: Well, look at that. A man who won't take no from a desk clerk.
+THOUGHT: So she opened the window and stepped out on the fire escape, into the rain, and waited while I climbed. That was the first test she ever set me, and the easiest.
 -> END
 
 // ---------------------------------------------------------------- OFFICE
@@ -553,6 +566,11 @@ THOUGHT: Somebody upstairs, then. And somebody else had told him to keep her the
 -> END
 = again
 CLERK: I told you, mister. Nobody goes up. Go home.
+-> END
+
+=== eleanor_fire_escape_opening ===
+// End of Act 1: the scene cuts on her question; eleanor_fire_escape repeats it after the First Interlude.
+ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
 -> END
 
 === eleanor_fire_escape ===
@@ -983,11 +1001,23 @@ NUN: I know nothing about clubs. I know nothing about their women. Go with God, 
 ~ set_flag("nun_club_asked")
 -> END
 
+// Agatha's own confession, at gunpoint. Eleanor's night choice (interlude_agatha_night) decides whether she still
+// calls her a Jezebel; both keep "She's a performer." (the harrington_senior note) and the Harrington senior lead.
 === nun_threat2 ===
 NUN: Are you crazy?!
 MICAH: Yeah. You can say that, sister. Where's Eleanor? What goes on at that club?
-NUN: You belong with that Jezebel. Burn with her, then. I am done with you.
-NUN: She's a performer. She nearly had me fooled, the whore.
+{
+- has_flag("eleanor_refused_abbess"):
+    NUN: Put that thing down. Please. I'll tell you. God knows I owe her that much.
+    NUN: She's a performer. That's what they call them, at that Club. She told me so herself, in her cell. All of it, what they made her do, what she did.
+    NUN: And I'd gone to that cell past midnight, with a candle, and called it charity. When she stopped me, I called her a whore and put her out at first light.
+    NUN: It was my fault, Mr. Jones. All of it. She came to this house for shelter, and I failed her.
+- else:
+    NUN: You belong with that Jezebel. Burn with her, then. I am done with you.
+    NUN: She's a performer. She nearly had me fooled, the whore.
+    NUN: ...No. God forgive me. I went to her cell. Past midnight, with a candle, and I called it charity.
+    NUN: Jezebel she is. But it was my fault, Mr. Jones. She came to this house for shelter, and I failed her.
+}
 NUN: You want answers? Go see Harrington senior.
 -> END
 

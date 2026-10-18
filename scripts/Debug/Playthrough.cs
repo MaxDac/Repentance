@@ -17,6 +17,9 @@ namespace Repentance;
 /// one ending (<c>--ending</c>, default 2), from a chapter (<c>--from</c>, see <see cref="Chapters"/>; the earlier
 /// beats play unseen and muted at 60×). The viewer's input is ignored (Space pauses, F11 toggles full screen, Esc
 /// stops). Prints "FILM OK".</item>
+/// <item><c>--playthrough --resume=act2|act3</c>: a fresh launch. Loads a checkpoint the full playthrough kept (end of
+/// Act One, or the Club vestibule) and plays one route to "The End" (<c>--ending</c>, default 2 from Act One and 8 from
+/// the vestibule), so state a save forgets cannot hide in memory. Prints "RESUME OK".</item>
 /// </list>
 /// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
 /// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
@@ -55,7 +58,16 @@ public sealed partial class Playthrough : Harness
         _ => throw new ArgumentException($"unknown chapter {chapter} (use {string.Join(", ", Chapters)})"),
     };
 
+    /// <summary>Where <c>--resume</c> may start a fresh launch: after Act One, or at the Club vestibule before Act 3.</summary>
+    public static readonly string[] ResumePoints = { "act2", "act3" };
+
+    /// <summary>Real saves the full playthrough keeps for <c>--resume</c>; never cleared by a suite's <see cref="Harness.Begin"/>.</summary>
+    private const string CheckpointDirectory = "user://autoplay_saves/checkpoints";
+    private const string AfterActOne = "after_act_one";
+    private const string Vestibule = "vestibule";
+
     private readonly bool _film;
+    private string? _resume;
     private double _speed = 1;
     private string _chapter = "act1";
     private string? _startBeat;
@@ -76,9 +88,9 @@ public sealed partial class Playthrough : Harness
         VerbosePasses = !film;
     }
 
-    protected override string Marker => _film ? "FILM" : "PLAYTHROUGH";
+    protected override string Marker => _film ? "FILM" : _resume != null ? "RESUME" : "PLAYTHROUGH";
 
-    private string Tag => _film ? "film" : "playthrough";
+    private string Tag => _film ? "film" : _resume != null ? "resume" : "playthrough";
 
     private static GameState Gs => GameState.Instance;
 
@@ -91,6 +103,7 @@ public sealed partial class Playthrough : Harness
             DialogueManager.Instance.AutoChoose = Choose;
             DialogueManager.Instance.ChoicesOffered += Record;
             if (_film) await Film();
+            else if (_resume != null) await Resume();
             else await Test();
             summary = $"[{Tag}] {_checks} checks, {_roundTrips} save/load round trips, {_decisions.Count} decisions";
         }
@@ -109,12 +122,28 @@ public sealed partial class Playthrough : Harness
     private bool Setup(Game game)
     {
         _game = game;
-        string ending = Arg("ending") ?? (_film ? "2" : "all");
-        if (ending == "all" && !_film) _routes = Routes;
+        string? resume = Arg("resume");
+        if (resume != null)
+        {
+            if (_film)
+            {
+                _failures.Add("--resume is for --playthrough only");
+                return false;
+            }
+            if (!ResumePoints.Contains(resume))
+            {
+                _failures.Add($"unknown --resume={resume} (use {string.Join(", ", ResumePoints)})");
+                return false;
+            }
+            _resume = resume;
+        }
+        bool allowAll = !_film && _resume == null;
+        string ending = Arg("ending") ?? (_film ? "2" : _resume switch { "act2" => "2", "act3" => "8", _ => "all" });
+        if (ending == "all" && allowAll) _routes = Routes;
         else if (Routes.Contains(ending)) _routes = new[] { ending };
         else
         {
-            _failures.Add($"unknown --ending={ending} (use {string.Join(", ", Routes)}{(_film ? "" : " or all")})");
+            _failures.Add($"unknown --ending={ending} (use {string.Join(", ", Routes)}{(allowAll ? " or all" : "")})");
             return false;
         }
         if (!_film)
@@ -124,7 +153,7 @@ public sealed partial class Playthrough : Harness
                 _failures.Add("--from is for film mode only");
                 return false;
             }
-            return Begin(game, "playthrough");
+            return Begin(game, _resume != null ? "resume" : "playthrough");
         }
 
         string speed = Arg("film") ?? "1";
@@ -214,13 +243,16 @@ public sealed partial class Playthrough : Harness
 
     private async Task Test()
     {
+        ClearCheckpoints();
         await _game.NewGame();
         await WaitIdle();
         await ActOne();
+        KeepCheckpoint(AfterActOne);
         await ActTwo();
         string checkpoint = SaveSystem.ManualSlot(1);
         Check(_game.SaveToSlot(checkpoint), "saved the Club vestibule checkpoint");
         var save = SaveSystem.Read(checkpoint) ?? throw new InvalidOperationException("Missing the vestibule checkpoint");
+        KeepCheckpoint(Vestibule);
         var wantsBeforeActThree = _matchedWants.ToList();
         for (int i = 0; i < _routes.Length; i++)
         {
@@ -237,6 +269,71 @@ public sealed partial class Playthrough : Harness
             await ActThree();
         }
         if (_routes.Length == Routes.Length) CoverageGates();
+    }
+
+    // ------------------------------------------------------------------ fresh-launch checkpoints
+
+    private static string WantsPath(string checkpoint) => $"{CheckpointDirectory}/{checkpoint}.wants";
+
+    /// <summary>Runs <paramref name="body"/> with the save system pointed at the checkpoint folder.</summary>
+    private static T InCheckpoints<T>(Func<T> body)
+    {
+        string suite = SaveSystem.Directory;
+        SaveSystem.Directory = CheckpointDirectory;
+        try { return body(); }
+        finally { SaveSystem.Directory = suite; }
+    }
+
+    private static void ClearCheckpoints()
+    {
+        foreach (var name in new[] { AfterActOne, Vestibule })
+        {
+            InCheckpoints(() => { SaveSystem.Delete(name); return true; });
+            if (FileAccess.FileExists(WantsPath(name))) DirAccess.RemoveAbsolute(WantsPath(name));
+        }
+    }
+
+    /// <summary>
+    /// Writes a real save (through <see cref="Game.SaveToSlot"/>) for a later <c>--resume</c> run, with the choices
+    /// matched so far, which the route checks at "The End" still expect.
+    /// </summary>
+    private void KeepCheckpoint(string name)
+    {
+        Check(InCheckpoints(() => _game.SaveToSlot(name)), $"kept the {name} checkpoint for a fresh launch");
+        using var file = FileAccess.Open(WantsPath(name), FileAccess.ModeFlags.Write);
+        if (file == null) Fail($"cannot write {WantsPath(name)}: {FileAccess.GetOpenError()}");
+        else file.StoreString(string.Join("\n", _matchedWants.Order(StringComparer.Ordinal)));
+    }
+
+    /// <summary>A fresh process: load a kept checkpoint, as the title screen's Load does, and play one route to the end.</summary>
+    private async Task Resume()
+    {
+        _route = _routes[0];
+        string name = _resume == "act2" ? AfterActOne : Vestibule;
+        var save = InCheckpoints(() => SaveSystem.Read(name));
+        if (save == null || !FileAccess.FileExists(WantsPath(name)))
+        {
+            Fail($"--resume={_resume}: no readable {name} checkpoint in {CheckpointDirectory} (run --playthrough first)");
+            return;
+        }
+        using (var file = FileAccess.Open(WantsPath(name), FileAccess.ModeFlags.Read))
+            _matchedWants.UnionWith(file.GetAsText().Split('\n', StringSplitOptions.RemoveEmptyEntries));
+        GD.Print($"[resume] fresh launch from the {name} checkpoint ({save.Room}), route {_route}");
+
+        await _game.LoadGame(save);
+        await WaitIdle();
+        var loaded = _game.CaptureSave();
+        Check(loaded.Room == save.Room && loaded.StoryAct == save.StoryAct
+              && loaded.Flags.ToHashSet().SetEquals(save.Flags) && loaded.Inventory.SequenceEqual(save.Inventory)
+              && loaded.Ink == save.Ink && _game.CanSave,
+            $"the {name} checkpoint loads in a fresh process");
+        if (_resume == "act2")
+        {
+            Check(Gs.StoryAct == 2 && _game.Room is Rooms.Attic, "resumed in the attic after Act One, in Act 2");
+            await ActTwo();
+        }
+        else Check(_game.Room is Rooms.ClubVestibule && Gs.HasItem("sealed_invitation"), "resumed at the Club vestibule");
+        await ActThree();
     }
 
     // ------------------------------------------------------------------ beats

@@ -11,7 +11,7 @@ public partial class AutoPlay
 {
     /// <summary>
     /// The First Interlude: Eleanor's last hour at the Aurelian, the Blue Lantern, the convent (indulging Agatha this time;
-    /// the playthrough refuses her) and the motel window, then Micah's journal again.
+    /// the playthrough refuses her) and the motel window, then Micah's journal again on the fire escape and in her room.
     /// </summary>
     private async Task FirstInterlude(Game game, GameState gs)
     {
@@ -104,7 +104,7 @@ public partial class AutoPlay
         Check(game.Music.Current == Track.ConventPiano, "the convent piano plays in the cell before the knock");
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
-        _prefer = new[] { "(Indulge her.)" };
+        _prefer = new[] { "(Seduce her." };
         var night = game.Perform(Verb.Hand, "bed");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake"));
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
@@ -116,19 +116,26 @@ public partial class AutoPlay
         Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
             "the convent piano comes back once Agatha has gone");
         _prefer = prefer;
-        Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),
-            "the night visit offers the refusal; indulging her saves nothing");
+        Check(Offered("interlude_agatha_night", "(Tell her the truth.") && !gs.HasFlag(Endings.RefusedAbbess),
+            "the night visit offers the truth; seducing her saves nothing");
         Check(game.Room?.Name == "MotelNight" && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_empty.png") == true,
             "the next morning, the motel with an empty bed");
         await Shot("interlude_motel");
         _ = game.Perform(Verb.Hand, "window");
-        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "Later that night", 90);
-        Check(game.Hud.FadeAlpha >= 0.99f && !gs.HasFlag("interlude1"),
-            "the First Interlude ends on black with \"Later that night\"");
-        await Shot("later_that_night");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("fishing for the fire-escape ladder"), 90);
+        Check(game.Room?.Name == "MotelNight", "from the window Eleanor sees Micah climbing to the fire escape");
+        bool captionOnWayBack = false;
+        await Until(() =>
+        {
+            captionOnWayBack |= game.Hud.CaptionVisible;
+            return game.Room is Rooms.MotelFireEscape;
+        }, 90);
+        Check(!captionOnWayBack && !gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
+            "the First Interlude ends on black with no caption, and Micah's journal takes the story back on the fire escape");
+        await FireEscapeNight(game, gs);
         await Until(() => game.Room?.Name == "MotelNight" && game.Player.Character == "micah_dressing");
         Check(!gs.HasFlag("interlude1") && gs.HasItem("revolver"),
-            "after the interlude, Micah's journal takes the story back at the motel night, with his things");
+            "later that night, the motel room, with Micah's things");
         Check(game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_night.png") == true,
             "Eleanor is in the bed again");
         Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays again in Eleanor's room");
@@ -141,6 +148,85 @@ public partial class AutoPlay
         Check(!new[] { "eleanor_box", "pellet", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
             && !gs.HasFlag("interlude_took_box") && !gs.HasFlag("interlude_took_thread"),
             "nothing of Eleanor's, and none of her puzzle flags, follow Micah out of the interlude");
+    }
+
+    /// <summary>
+    /// After the First Interlude: Micah is already in front of Eleanor on the landing; she repeats her Act 1 question,
+    /// the two-portrait close-up, the compensation choice, the slow approach and the kiss, then a 3-second fade.
+    /// </summary>
+    private async Task FireEscapeNight(Game game, GameState gs)
+    {
+        const string opening = "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?";
+        var her = game.Room!.FindActor("eleanor")!.Position;
+        Check(game.Player.Position.DistanceTo(her + new Vector2(-44, 4)) < 1f && game.Room.FindActor("eleanor")!.Visible,
+            "Micah is already standing in front of Eleanor, where Act 1 left them");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == opening);
+        Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn, "Eleanor repeats her opening, word for word, before the close-up");
+        Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
+        await Until(() => game.Hud.InsetVisible);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
+            "the two-portrait close-up appears immediately after Eleanor's opening");
+        Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the two-portrait close-up fills most of the screen");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Eleanor Harrington. You wouldn't happen to know her?");
+        CheckPortraitSpeech(game, right: false);
+        await Shot("convent_portrait_micah");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Tony's boys"));
+        CheckPortraitSpeech(game, right: true);
+        await Shot("convent_portrait_eleanor");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves.");
+        Check(!game.Hud.InsetDrawn, "the compensation answer rejoins the existing conversation on the fire escape");
+        Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
+        await Shot("motel_fire_escape");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
+        Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
+            "the rest of Eleanor's conversation stays on the fire escape without the panel");
+        float talkingX = game.Player.Position.X;
+        int kisses = _poseCounts.GetValueOrDefault("micah_kiss");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Then stay. Right here.");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("You're walking into the rain"));
+        await game.Wait(0.5);
+        Check(game.Player.IsWalking && game.Player.Position.X > talkingX && game.Player.PoseName == null &&
+            !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
+            "Micah walks slowly towards Eleanor, with no portrait panel, as she answers him");
+        await Shot("fire_escape_closer");
+        const string attraction = "I'd have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him.";
+        const string guilt = "And somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway.";
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == attraction);
+        var eleanorActor = game.Room!.FindActor("eleanor")!;
+        Check(game.Player.PoseName == "micah_kiss" && _poseCounts.GetValueOrDefault("micah_kiss") == kisses + 1 &&
+            !eleanorActor.Visible, "Micah reaches Eleanor after her rain line and kisses her");
+        Check(game.Player.Position.DistanceTo(her + Rooms.MotelFireEscape.KissSpot) < 1f,
+            "he stands right in front of her for the kiss");
+        Check(game.Hud.FadeAlpha == 0f, "the kiss is seen before any fade");
+        await Shot("fire_escape_kiss");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == guilt);
+        Check(game.Player.PoseName == "micah_kiss" && game.Hud.FadeAlpha == 0f,
+            "the kiss holds while Micah thinks of Rose, still before the fade");
+        double scale = Engine.TimeScale;
+        Engine.TimeScale = 1;
+        try
+        {
+            await Until(() => !game.Hud.ThoughtVisible && game.Hud.FadeAlpha > 0f, step: 0.02);
+            ulong fadeStart = Time.GetTicksMsec();
+            await Until(() => game.Hud.FadeAlpha > 0.3f, step: 0.02);
+            Check(game.Player.PoseName == "micah_kiss", "the fade to black takes them in the kiss");
+            await Until(() => game.Hud.FadeAlpha >= 1f, step: 0.02);
+            double fadeOut = (Time.GetTicksMsec() - fadeStart) / 1000.0;
+            await Until(() => game.Hud.CaptionVisible, step: 0.02);
+            Check(game.Hud.CaptionText == "Later that night" && game.Hud.FadeAlpha >= 0.99f && game.Room is Rooms.MotelFireEscape,
+                "after the kiss, \"Later that night\" on black");
+            ulong captionStart = Time.GetTicksMsec();
+            await Shot("later_that_night");
+            await Until(() => !game.Hud.CaptionVisible, step: 0.02);
+            double caption = (Time.GetTicksMsec() - captionStart) / 1000.0;
+            await Until(() => game.Room is Rooms.MotelNight && game.Hud.FadeAlpha < 1f, step: 0.02);
+            ulong fadeInStart = Time.GetTicksMsec();
+            await Until(() => game.Hud.FadeAlpha <= 0f, step: 0.02);
+            double fadeIn = (Time.GetTicksMsec() - fadeInStart) / 1000.0;
+            Check(fadeOut is > 2.5 and < 3.6 && caption is > 2.5 and < 3.6 && fadeIn is > 2.5 and < 3.6,
+                $"3s fade to black, 3s \"Later that night\", 3s fade into her room (took {fadeOut:0.0}s, {caption:0.0}s, {fadeIn:0.0}s)");
+        }
+        finally { Engine.TimeScale = scale; }
     }
 
     /// <summary>
@@ -344,6 +430,8 @@ public partial class AutoPlay
         Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below Rose's face while the close-up is up");
         await game.Wait(1);
         await Shot("rose_house_wait");
+        await Until(() => !game.Hud.SpeechVisible || !game.Hud.InsetVisible);
+        Check(game.Hud.InsetVisible, "Rose's close-up holds after her last line");
         await Until(() => !game.Hud.InsetVisible);
         Check(game.Room?.Name == "RoseHouse", "Rose's close-up is gone before the door closes");
         await bell;
@@ -371,9 +459,13 @@ public partial class AutoPlay
                 nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
         }
         var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+        var threatHeard = Listen(game, threat);
         await game.Wait(1.5);
         await Shot("convent_gun");
         await threat;
+        var threatLines = await threatHeard;
+        Check(threatLines.Any(l => l.Contains("Jezebel")) && threatLines.Any(l => l.Contains("I failed her")),
+            "seduced, Agatha still calls her a Jezebel, but confesses she failed her");
         Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
         Check(game.Room?.FindHotspot("tribune")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false
             && game.Room?.FindHotspot("club")?.Visible == false

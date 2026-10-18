@@ -64,16 +64,22 @@ public sealed partial class Playthrough
             }, 600, 0.05);
             await night;
             await WaitIdle();
-            Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor refuses Agatha (saved)");
-            Check(dried, "the rain stops on the cell window when she refuses");
+            Check(Gs.HasFlag(Endings.RefusedAbbess), "Eleanor tells Agatha the truth (saved)");
+            Check(dried, "the rain stops on the cell window when she tells the truth");
             Expect("MotelNight", "the next morning, the motel");
         });
         await Beat("act_two_opening", async () =>
         {
             var window = Do(Verb.Walk, "window");
-            await Until(() => _game.Room?.Name == "MotelNight" && _game.Player.Character == "micah_dressing", 600);
+            bool onFireEscape = false;
+            await Until(() =>
+            {
+                onFireEscape |= _game.Room is Rooms.MotelFireEscape && _game.Player.PoseName == "micah_kiss";
+                return _game.Room?.Name == "MotelNight" && _game.Player.Character == "micah_dressing";
+            }, 600, 0.05);
+            Check(onFireEscape, "after the interlude, back on the fire escape for the rest of their talk and the kiss");
             Check(!Gs.HasFlag("interlude1") && Gs.HasItem("revolver"),
-                "after the interlude, the night in her motel room: Micah getting dressed, with his things");
+                "later that night, in her motel room: Micah getting dressed, with his things");
             await window;
             await Until(() => _game.Room?.Name == "ChicagoMap", 600);
             await WaitIdle();
@@ -129,9 +135,11 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("caleb_club"), "Caleb on the Club");
             await Do(Verb.Walk, "convent");
             Check(Gs.HasFlag("nun_club_asked"), "the sister knows nothing");
-            await Do(Verb.UseItem, "nun", "revolver");
+            var confession = await Spoken(() => Do(Verb.UseItem, "nun", "revolver"));
             await WaitIdle();
             Check(Gs.HasFlag("nun_threatened"), "the sister names Harrington");
+            Check(confession.Any(l => l.Contains("I failed her")) && !confession.Any(l => l.Contains("Jezebel")),
+                "told the truth, Agatha confesses she failed her and never calls her a Jezebel");
             await Do(Verb.Walk, "church");
             Check(Gs.HasFlag("church_before_office"), "Caleb's warning");
             Expect("ChicagoMap", "back to the map");
