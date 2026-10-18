@@ -19,6 +19,9 @@ public enum Track
     LobbyPiano,
     /// <summary>Investigation: a slow, reflective D-minor piano, pianissimo and barely audible, to think by.</summary>
     Investigation,
+    /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
+    /// and one brief, piercing trumpet stab.</summary>
+    MansionDread,
 }
 
 public enum Instrument
@@ -43,6 +46,10 @@ public enum Instrument
     /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, D2 brush tap, E2 brush sweep,
     /// F#2 hi-hat, Eb3 ride.</summary>
     Drums,
+    /// <summary>Plucked string chords, pizzicato, on cello and viola strings.</summary>
+    Pizzicato,
+    /// <summary>An open trumpet, unmuted, hard-tongued and piercing.</summary>
+    OpenTrumpet,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -50,7 +57,7 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
-/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
+/// strings, pizzicato, pipe organ, piano, muted and open trumpet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -90,6 +97,7 @@ public static partial class MusicSynth
         Track.OfficeJazz => -15f,
         Track.LobbyPiano => -12f,
         Track.Investigation => -20f,
+        Track.MansionDread => -8.5f,
         _ => -6f,
     };
 

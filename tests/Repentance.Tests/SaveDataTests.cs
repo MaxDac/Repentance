@@ -76,9 +76,10 @@ public class SaveDataTests
     [InlineData(7)]
     [InlineData(8)]
     [InlineData(9)]
+    [InlineData(10)]
     public void IncompatibleOlderSavesAreRejected(int version)
     {
-        Assert.Equal(10, SaveData.CurrentVersion);
+        Assert.Equal(11, SaveData.CurrentVersion);
         var data = Sample();
         data.Version = version;
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));

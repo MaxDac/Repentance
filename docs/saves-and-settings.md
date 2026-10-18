@@ -2,7 +2,7 @@
 
 ## Saves
 
-The current save format is version 10.
+The current save format is version 11.
 
 `SaveData` (Godot-free, JSON via `System.Text.Json`):
 
@@ -38,6 +38,7 @@ marks the save with `puzzles_v1` / `puzzles_act3_v1`).
 
 | Version | Change |
 |---|---|
+| 11 | Fire-escape conversation moved from Act One to after the First Interlude; version-10 Ink state may already have consumed its choices |
 | 10 | Endings 10/11 are Eleanor's weary follow (`eleanor_dismissed` removed); motel detour, motel night and storm-office room flow |
 | 9 | Acts Two and Three open with Eleanor's interludes (new rooms, entries, flags) |
 | 8 | Laundry bluing moved to Eleanor's brass box; State Street hub prototype removed |
