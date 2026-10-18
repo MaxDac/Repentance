@@ -942,6 +942,36 @@ def eleanor_drink_strip():
     action_strip("eleanor_drink", frames, seconds, anchor=(FW / 2, FH - 3))
 
 
+def _phone_stand(y, z):
+    return ("pts", (-0.1, 0.36, 0.0), (-0.03, y + 0.02, z - 0.03), (-0.02, y, z))
+
+
+# Eleanor in the First Interlude lifts the candlestick off the vanity in her far hand, takes the receiver off the hook
+# with the near one and holds it to her ear; the last frame is held through the call. (near arm, receiver held, s)
+PHONE_KEYS = [
+    (_phone_stand(0.44, 0.22), ("side", 0, 0, 0), False, 0.25),
+    (_phone_stand(0.3, 0.2), ("side", 0, 0, 0), False, 0.25),
+    (_phone_stand(0.25, 0.19), ("pts", (0.12, 0.38, 0.06), (0.06, 0.3, 0.12), (0.04, 0.27, 0.15)), True, 0.25),
+    (_phone_stand(0.25, 0.19), ("pts", (0.12, 0.29, 0.06), (0.1, 0.21, 0.07), (0.06, 0.14, 0.0)), True, 0.3),
+]
+
+
+def eleanor_phone_strips():
+    """eleanor_phone picks the telephone up and ends with the receiver at her ear; eleanor_phone_down hangs it up
+    and ends holding the candlestick out over the vanity, where the room's own telephone takes over again."""
+    idle = (figure(ELEANOR_NPC, pose(90), FW, FH), (FW / 2, 18))
+    keys = []
+    for stand, near, held, duration in PHONE_KEYS:
+        ps = pose(90, arms={-1: stand, 1: near}, telephone=(-1, 1 if held else None),
+                  **({"front_arms": (1,)} if held else {}))
+        keys.append(((figure(ELEANOR_NPC, ps, FW, FH), (FW / 2, 18)), duration))
+    action_strip("eleanor_phone", [idle] + [f for f, _ in keys], [0.2] + [s for _, s in keys],
+                 anchor=(FW / 2, FH - 3))
+    back = keys[::-1]
+    action_strip("eleanor_phone_down", [f for f, _ in back], [0.3] + [s for _, s in back[1:]],
+                 anchor=(FW / 2, FH - 3))
+
+
 # Eleanor in the sheet takes the candlestick off the nightstand and brings it down on the back of Harrington's head,
 # facing right. The near (right) arm swings; the far one keeps the sheet clutched to her. (arm, candle way, lean, legs)
 STRIKE_STANCE = {1: (12, 8, 0), -1: (-12, 10, -6)}
@@ -1131,6 +1161,7 @@ def build():
     player_sheet(ELEANOR_GOWN, "eleanor_gown_play")
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
     eleanor_drink_strip()
+    eleanor_phone_strips()
     kiss_strip()
     build_act3()
     build_storm()
