@@ -27,6 +27,7 @@
     <Compile Include="..\..\scripts\Core\SoundSynth*.cs" LinkBase="Linked" />
     <Compile Include="..\..\scripts\Core\InkScan.cs" Link="Linked\InkScan.cs" />
     <Compile Include="..\..\scripts\Core\MusicSynth*.cs" LinkBase="Linked" />
+    <Compile Include="..\..\scripts\Core\PianoRecordings.cs" LinkBase="Linked" />
   </ItemGroup>
   <!-- The same ink compiler and runtime as the game (downloaded on first build), so StoryIntegrityTests can walk the real story. -->
   <PropertyGroup>
