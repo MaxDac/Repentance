@@ -37,7 +37,7 @@ public static class CloseUps
     /// <summary>The motel sign down the road from the convent, the long shot Micah spots in Act 1.</summary>
     public static readonly CloseUp Motel = new("motel", "motel_closeup");
 
-    /// <summary>On the motel fire escape, end of Act 1: Micah on the left, Eleanor on the right.</summary>
+    /// <summary>On the motel fire escape, after the First Interlude: Micah on the left, Eleanor on the right.</summary>
     public static readonly CloseUp Convent = new("convent", "convent_closeup");
 
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,

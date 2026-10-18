@@ -930,7 +930,7 @@ def eleanor_strike_strip():
     action_strip("eleanor_strike", frames, seconds, anchor=(fw / 2, FH - 3))
 
 
-# The end of Act 1 on the motel fire escape: Micah, stopped facing right KISS_GAP pixels short of Eleanor (in black,
+# On the motel fire escape, after the First Interlude: Micah, stopped facing right KISS_GAP pixels short of Eleanor (in black,
 # facing left), steps in, turns side-on with his near arm round her waist and kisses her, while she turns to him, lifts
 # her face and reaches her near arm round his back. One strip, played on the player with the Eleanor actor hidden:
 # frame 0 is both idle sprites exactly where they stood, her feet KISS_RISE pixels higher (further back on the landing).

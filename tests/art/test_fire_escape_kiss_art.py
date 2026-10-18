@@ -1,4 +1,4 @@
-"""Motel fire escape, end of Act 1: Micah steps in and kisses Eleanor (one strip played on the player)."""
+"""Motel fire escape, after the First Interlude: Micah steps in and kisses Eleanor (one strip played on the player)."""
 import contextlib
 import io
 import json

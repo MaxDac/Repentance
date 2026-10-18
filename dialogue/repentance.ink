@@ -216,7 +216,9 @@ THOUGHT: She watched them let me in. She didn't need Agatha to tell her who I wa
 THOUGHT: She watched me come out again, alone, and stand in the middle of the road and light a cigarette like a man at the end of a rope.
 ELEANOR: Coat. Gloves. And a face that's run out of places to look.
 THOUGHT: Then I came down the hill, and she heard me through the floor, leaning on the clerk. She heard him tell me nobody goes up.
-THOUGHT: So she opened the window and stepped out on the fire escape, into the rain, and waited to see how badly I wanted to find her. That was the first test she ever set me, and the easiest.
+THOUGHT: A minute later she saw me in the alley under her window: up on a fruit crate in the rain, fishing for the fire-escape ladder with the clerk's umbrella.
+ELEANOR: Well, look at that. A man who won't take no from a desk clerk.
+THOUGHT: So she opened the window and stepped out on the fire escape, into the rain, and waited while I climbed. That was the first test she ever set me, and the easiest.
 -> END
 
 // ---------------------------------------------------------------- OFFICE
@@ -564,6 +566,11 @@ THOUGHT: Somebody upstairs, then. And somebody else had told him to keep her the
 -> END
 = again
 CLERK: I told you, mister. Nobody goes up. Go home.
+-> END
+
+=== eleanor_fire_escape_opening ===
+// End of Act 1: the scene cuts on her question; eleanor_fire_escape repeats it after the First Interlude.
+ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
 -> END
 
 === eleanor_fire_escape ===

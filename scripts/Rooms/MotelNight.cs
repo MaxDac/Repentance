@@ -5,8 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// A motel room, the night Micah found Eleanor on the fire escape. Micah gets dressed. Eleanor stays against the
-/// pillows under the white sheet. They agree never to see each other again. It plays after the First Interlude,
-/// then Micah's journal goes on at his office.
+/// pillows under the white sheet. They agree never to see each other again. It plays after the First Interlude and
+/// the rest of their talk on the fire escape (<see cref="MotelFireEscape"/>), then Micah's journal goes on at his office.
 /// In the interludes the room is Eleanor's: in the First she watches the convent from the window until Micah comes;
 /// in the Second, after he has gone, two of the Order's men knock at the door, kick it in and walk her out.
 /// </summary>

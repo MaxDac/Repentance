@@ -71,9 +71,15 @@ public sealed partial class Playthrough
         await Beat("act_two_opening", async () =>
         {
             var window = Do(Verb.Walk, "window");
-            await Until(() => _game.Room?.Name == "MotelNight" && _game.Player.Character == "micah_dressing", 600);
+            bool onFireEscape = false;
+            await Until(() =>
+            {
+                onFireEscape |= _game.Room is Rooms.MotelFireEscape && _game.Player.PoseName == "micah_kiss";
+                return _game.Room?.Name == "MotelNight" && _game.Player.Character == "micah_dressing";
+            }, 600, 0.05);
+            Check(onFireEscape, "after the interlude, back on the fire escape for the rest of their talk and the kiss");
             Check(!Gs.HasFlag("interlude1") && Gs.HasItem("revolver"),
-                "after the interlude, the night in her motel room: Micah getting dressed, with his things");
+                "later that night, in her motel room: Micah getting dressed, with his things");
             await window;
             await Until(() => _game.Room?.Name == "ChicagoMap", 600);
             await WaitIdle();
