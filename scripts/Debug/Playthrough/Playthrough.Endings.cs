@@ -95,7 +95,7 @@ public sealed partial class Playthrough
     /// <summary>What each route answers. Unmatched choices take the first option, as the main story does.</summary>
     private IEnumerable<string> Wants()
     {
-        yield return "(Refuse her.)";
+        yield return "(Tell her the truth.";
         yield return EleanorRoute ? "(Push it away.)" : "(Take the glass";
         yield return "Accept the cross";
         yield return Gs.HasFlag("took_cross") ? "Go to the Blue Lantern" : "Visit Caleb";

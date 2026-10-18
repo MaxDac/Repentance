@@ -67,8 +67,9 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
     **First Interlude** (the player is Eleanor, in Micah's journal voice: what she told him that night at the motel):
     pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
-    "another Jezebel from that hideous Club"; that night in the cell Agatha comes to her: refuse (saved) or indulge
-    (Agatha turns back at the last moment, cursing her as a demon). From the motel window, four days on, she watches Micah reach
+    "another Jezebel from that hideous Club"; that night Agatha comes to her cell to hear her confession, with motives she won't admit: Eleanor
+    can seduce her for the convent's protection (Agatha turns back at the last moment, cursing her as a demon) or tell
+    her the truth (saved; Agatha reaches for her, is stopped, and puts her out at first light). From the motel window, four days on, she watches Micah reach
     the convent, smoke in the road and come asking at the desk; she waits for him on the fire escape. "Later that night"
     over black, and the journal goes back to Micah.
 11. **Motel, that night**: in her room, Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet
@@ -102,7 +103,8 @@ From here the story follows Walkthrough.md:
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
 21. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
-   try Harrington senior. Micah decides to look him up at the Tribune.
+   then Agatha confesses that she went to Eleanor's cell and failed her (still calling her a Jezebel only if Eleanor
+   seduced her). Try Harrington senior. Micah decides to look him up at the Tribune.
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
     bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
     and Micah pins the mended clipping on the Loop wall map at once. The Harrington Building replaces the Tribune on the map.
@@ -155,7 +157,7 @@ From here the story follows Walkthrough.md:
    the four right lines in a row convince her (see `Walkthrough.md`). On the first turn he can lower the gun and
    leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
-   If Eleanor refused both Agatha and the old man: after the Our Father the player is Eleanor in the sheet, with the
+   If Eleanor told Agatha the truth and refused the old man: after the Our Father the player is Eleanor in the sheet, with the
    old man's back turned. Return to bed (ending 1), or take the candlestick off the nightstand and strike him, then
    leave by the kitchen door, optionally burning the house from the cellar first (Micah's lantern, then the barrel).
    If Micah shoots instead, she only says, worn out, "Let's get out of here, quick." and follows him: no persuasion.
@@ -183,7 +185,7 @@ the interludes; their combined effect on ending selection begins once Micah reac
 - **Church return**: Micah went back to Caleb while hunting for Eleanor (`church_before_office`,
   `church_before_club` or `church_act3_return`).
 - **Pressed Rose**: he kept asking her for forgiveness on her doorstep (`rose_wait`).
-- **Held out**: Eleanor refused Agatha in the convent (First Interlude, `eleanor_refused_abbess`) *and* the old
+- **Held out**: Eleanor told Agatha the truth instead of seducing her (First Interlude, `eleanor_refused_abbess`) *and* the old
   man's gin and powder (Second Interlude, `eleanor_refused_drugs`). One refusal alone does not unlock Eleanor's alternative bedroom branches.
 
 ```mermaid
