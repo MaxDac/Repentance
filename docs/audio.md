@@ -55,6 +55,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing in the next room, muffled through the wall: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
 | `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: almost muted, a dull mono thud and echo |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
 moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries

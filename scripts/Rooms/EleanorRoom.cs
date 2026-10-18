@@ -16,6 +16,9 @@ public partial class EleanorRoom : Room
 
     private Texture2D? _searched;
 
+    /// <summary>While Eleanor holds the telephone, the one on the vanity is in her hands, not on it.</summary>
+    private bool _onPhone;
+
     /// <summary>In the First Interlude the bench stands out in the room; she goes round to the front of it.</summary>
     public override Vector2 ClampWalkTarget(Vector2 target) =>
         Interlude && Walk is { } w && !w.Contains(target) && target.X is > 50 and < 136 && target.Y is > 218 and < 240
@@ -26,6 +29,30 @@ public partial class EleanorRoom : Room
         if (GetNodeOrNull<Sprite2D>("Background") is not { } bg) return;
         _searched ??= bg.Texture;
         bg.Texture = Interlude ? GD.Load<Texture2D>(Tidy) : _searched;
+        if (GetNodeOrNull<FlagSprite>("InterludeTelephone") is { } phone) phone.Visible = Interlude && !_onPhone;
+    }
+
+    private void HoldPhone(bool held)
+    {
+        _onPhone = held;
+        OnRefresh();
+    }
+
+    /// <summary>She lifts the candlestick off the vanity, puts the receiver to her ear, makes the call, hangs up.</summary>
+    private async Task CallRizzo()
+    {
+        HoldPhone(true);
+        try
+        {
+            await Player.PlayPose("eleanor_phone");
+            await Talk("interlude_rizzo");
+            await Player.PlayPose("eleanor_phone_down");
+        }
+        finally
+        {
+            Player.SetPose(null);
+            HoldPhone(false);
+        }
     }
 
     public override async Task OnEnter(string entry)
@@ -108,6 +135,9 @@ public partial class EleanorRoom : Room
             case ("bed", Verb.Hand):
                 await Say("Mattress slit, pillows gutted. Feathers and nothing else.");
                 return true;
+            case ("fallen_telephone", Verb.Hand or Verb.Talk):
+                await Say("Dead air. Somebody yanked it off the vanity by the cord and nobody's called down since. I'll leave it where it fell.");
+                return true;
             case ("clothes", Verb.Hand):
                 await Say("Her dresses, her stockings, her letters. All thrown down and trampled over.");
                 return true;
@@ -139,8 +169,8 @@ public partial class EleanorRoom : Room
     /// <summary>
     /// Eleanor's last hour in Room 507 (Puzzle 17): the brass box and a bare paper flower from the vanity, a riddle
     /// written on desk stationery, red thread from a torn hem. The riddle tied round the flower, the flower into the
-    /// box, the box locked in the closet safe. Then the riddle in the drawer, a call to Rizzo's from the bedside
-    /// telephone, and the door, where Sal is waiting.
+    /// box, the box locked in the closet safe. Then the riddle in the drawer, a call to Rizzo's on the candlestick
+    /// telephone on the vanity, and the door, where Sal is waiting.
     /// </summary>
     private async Task<bool> InterludeInteract(Verb verb, Hotspot target, string? item)
     {
@@ -201,15 +231,23 @@ public partial class EleanorRoom : Room
             case ("bed", Verb.Look):
                 await Say("Turned down by the maid, and I won't sleep in it. By morning Theodore's men will have it in ribbons.");
                 return true;
-            case ("bed", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_drawer_locked"):
+            case ("bed", Verb.Hand):
+                await Say("Lie down now and I'd never get up. Not tonight.");
+                return true;
+
+            case ("telephone", Verb.Look):
+                await Say("The hotel extension, black and nickel. No dial: lift the receiver and the girl at the switchboard downstairs asks who I want.");
+                await Say("She'll remember who I asked for, too. Let her. Rizzo's sells flowers.");
+                return true;
+            case ("telephone", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_drawer_locked"):
                 await Say("Not yet. The box in the safe, the riddle in the drawer. Then I call.");
                 return true;
-            case ("bed", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_phoned"):
+            case ("telephone", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_phoned"):
                 State.SetFlag("interlude_phoned");
-                await Say("The telephone on the night table. My hand's shaking. Good thing nobody can see it down a wire.");
-                await Talk("interlude_rizzo");
+                await Say("My hand's shaking. Good thing nobody can see it down a wire.");
+                await CallRizzo();
                 return true;
-            case ("bed", Verb.Hand or Verb.Talk):
+            case ("telephone", Verb.Hand or Verb.Talk):
                 await Say("I've made my call. Now I wait for the knock that isn't Theodore's.");
                 return true;
 
