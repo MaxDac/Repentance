@@ -676,6 +676,8 @@ HARRINGTON: You look disappointed. What were you expecting? A high priest? Some 
 HARRINGTON: Bonfires. Antlers. Old words from the old country. Theatre, Mr. Jones. All of it.
 HARRINGTON: Look around you. Judges. Aldermen. A bishop. The man who owns the stockyards. A hundred men who run this city.
 HARRINGTON: And not one of them will lift a finger tonight unless I allow it.
+HARRINGTON: You've seen my girls. A new face on that stage every Thursday, and not one man in this room asks where she came from.
+HARRINGTON: That is the beauty of it. A secret every man here shares binds him tighter than any oath.
 HARRINGTON: That is the whole rite. That is why we meet. Power that never shows itself is only a rumour.
 HARRINGTON: So now and then, it has to show its face. I show them mine. And they bow.
 HARRINGTON: And next Thursday they will come back, and bow again.
@@ -891,8 +893,22 @@ CALEB: A club? Micah, what would a priest know about clubs?
 * {hid and roof} [They have her, Caleb. If you know anything, tell me.]
     CALEB: ...
     CALEB: I don't know anything about her. But I hear things. A priest always does.
-    CALEB: There are women who go to that place. Performers, they call them. When the Club is done with them, the sisters take some of them in.
-    CALEB: If anybody knows anything, it's the sisters. The convent is the best place to ask.
+    CALEB: That Club keeps its Thursdays. Spectacles, they call them. And spectacles need new faces. Fresh ones.
+    CALEB: Girls off the trains at Union Station. Farm girls, girls off the boat. Somebody meets them with a smile and the promise of work in a nice house.
+    CALEB: Performers, the Club calls them afterwards. Some of them get away. They find the convent door, and the sisters bring them to me.
+    CALEB: We hide them. A new name, a ticket, a parish in Milwaukee or a farm in Iowa that doesn't ask. Fourteen girls, so far.
+    MICAH: Fourteen. And the ones who don't get away?
+    CALEB: ...
+    THOUGHT: He looks at the altar, not at me. That's my answer.
+    MICAH: You knew. All this time you knew what goes on in that place, and you said Mass on Sunday like the city was clean.
+    CALEB: The Club leaves the convent alone, Micah. That's the bargain. I keep my mouth shut, and nobody comes knocking for the girls behind those walls.
+    CALEB: If I talk, they take other girls off the next train, and they come for the ones we've hidden. Nothing changes but the graves.
+    MICAH: You could have walked into the Tribune. A priest, with fourteen girls' stories. They'd have printed it.
+    CALEB: And half the men who'd set the type drink at that Club on Thursdays.
+    MICAH: So you pray, and you keep quiet. And you preach repentance to me.
+    MICAH: You're a hypocrite, Caleb.
+    CALEB: I know what I am. I confess it every week. It doesn't get lighter.
+    CALEB: If anybody knows anything about Eleanor, it's the sisters. The convent is the best place to ask.
     -> rest
 - (rest)
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
@@ -959,6 +975,8 @@ MICAH: I asked nicely first.
 CALEB: Repentance means more than asking nicely. Put the gun away.
 CALEB: Micah, listen to me. Whatever you're about to do next, don't. Turn around. Go to Rose. Go anywhere else.
 CALEB: There's still a way back. There always is. But not where you're going.
+MICAH: You kept quiet about those girls for years, Caleb. Don't tell me where I'm going.
+CALEB: ...That's fair. It's fair. But I'm still asking.
 MICAH: Good night, Caleb.
 -> END
 
@@ -966,13 +984,14 @@ MICAH: Good night, Caleb.
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
+CALEB: I've been praying on what you called me. You weren't wrong. If you go in there, look at the girls on that stage. Somebody ought to.
 CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
 -> END
 
 === nun_club ===
 NUN: You again. Twice in one week. You smell of whiskey and trouble, young man.
-MICAH: There's a club on Hubbard Street. Eleanor Harrington is there. Father Jones says you take in their women.
+MICAH: There's a club on Hubbard Street. Eleanor Harrington is there. Father Jones says you hide the girls who run from it.
 NUN: I know nothing about clubs. I know nothing about their women. Go with God, Mr. Jones.
 * [Where is she, sister?]
     NUN: I told you. I know nothing. Good night.
@@ -1015,6 +1034,7 @@ MICAH: Evening, Tony. Sal's taking a nap. You and me are going to talk.
 MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
 BARTENDER: Are you out of your mind? Beat it, Jones. You don't know who these people are.
 BARTENDER: They own judges. They own cops. They own the men who own the cops.
+BARTENDER: They bring girls in off the trains like crates of oranges, and nobody in this city asks what's in the crate.
 BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, too.
 THOUGHT: The revolver weighs more than it did this morning. Tony's sweating. So am I.
 * [(Shoot him in the shoulder.)]
@@ -1314,6 +1334,10 @@ MICAH: I know enough.
 ELEANOR: Then you know why. I can't go on like this, Micah, I can't be with you. I need ... peace.
 MICAH: Peace. Out here? There's nothing out here but stubble and wind.
 ELEANOR: That's why. Nobody out here wants anything from me.
+{has_flag("took_documents"):
+    ELEANOR: One more thing. The old man's papers in your coat. The girls' names are in there. Don't keep them for yourself, Micah. Give them to the newspapers.
+    MICAH: ...All right. For them.
+}
 ELEANOR: Go home, Micah. Find yours.
 -> END
 
@@ -1351,6 +1375,7 @@ THOUGHT: Brass, heavy as a sin. He never turned round. He never heard her bare f
 THOUGHT: He went down onto his own rug without a word, the first time in his life he had nothing to say.
 ELEANOR: Good girl.
 THOUGHT: She didn't look at him twice. The door Micah had used stood open on the dark of the study.
+THOUGHT: On her way through she took a slim black ledger from the shelf behind his desk, filed between two annual reports. The Thursday book: names, stations, prices, in his own neat hand. She had always known where he kept it. She put it under her arm.
 -> END
 
 === coda_fire ===
@@ -1379,6 +1404,10 @@ CALEB: I've been told. What can I do for you, Eleanor?
 ELEANOR: I want to confess, Father. All of it. Not just the old man. All of it.
 CALEB: Then I'm listening. Take your time. We have the hour.
 THOUGHT: She told him. The Club, the Thursdays, the gin and the powder. The convent, and Agatha's candle. The motel. A walnut bed, and a brass candlestick, and the back of an old man's head.
+ELEANOR: I told the court the rest, Father. Out loud, with the reporters writing. The Thursdays. The girls off the trains. The men in the front row.
+ELEANOR: The Club's finished. They say the building's for sale.
+CALEB: I know. I read every word.
+THOUGHT: He didn't tell her how many years he had kept the same words behind his teeth. She knew it anyway. She said it was in his hands.
 ELEANOR: How is he? Micah.
 CALEB: He's with his wife now.
 ELEANOR: ...
@@ -1396,6 +1425,7 @@ THOUGHT: She said it was the first time anybody had touched her forehead without
 THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
 THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
+THOUGHT: The old man's Thursday book was in a brown envelope under her arm, addressed to the city desk of the Tribune. The first mailbox past the city limits would do.
 ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
 ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
@@ -1480,6 +1510,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "A letter came to Rose's house today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
     DANIEL: "The motel, the Order's men, the old man's gin she wouldn't drink. And what she did with his candlestick after I'd gone. I've copied it all into the pages before these, in her words. I owed her that much."
     DANIEL: "The Harrington house burned to the cellar the night I left it. The papers said a gas main. Nobody ever asked me, and I never said."
+    DANIEL: "A week later the Tribune printed the old man's Thursday book, page by page: the girls, the trains, the men who paid. She had mailed it to them on her way out of the city. The Club never opened on a Thursday again."
     DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
     DANIEL: ...So that's whose hand it was. Hers, copied out by his.
     DANIEL: Maybe Leo would like to read it some day.
@@ -1487,6 +1518,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: Wait. This isn't Micah's writing. It's signed... Father Caleb Jones.
     DANIEL: "My brother kept these pages honestly, as far as he knew. What he could not know, I have added from her own confession, at her asking. She said someone should write it down who wouldn't make her prettier than she was."
     DANIEL: "Micah drinks coffee now, and goes to Mass with his wife. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    DANIEL: "At her trial she named the Club, and the girls, and the trains, in open court. The Club's Thursdays ended with her testimony. She did, in one afternoon, what I had not the courage to do in all my years of silence. My brother called me a hypocrite for it. He was right."
     DANIEL: "Whoever reads this: she said no, twice, when no was the hardest word in Chicago. Remember that about her, if you remember anything."
     DANIEL: ...So that's whose hand it was. Caleb's.
     DANIEL: Maybe Leo would like to read it some day.
@@ -1494,6 +1526,9 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "A year, near enough, since the prairie road. I haven't had a drink since that night. Some days that's the only thing I've done right. Some days it's enough."
     DANIEL: "She told me the rest of it in the car that night, the motel and the old man's gin, before she got out and walked off down the road. I wrote it in the way she said it. She went looking for her peace. I hope she found it."
     DANIEL: "I'm looking for mine. I write to Rose every Sunday, and every Sunday I sit at the back of Caleb's church. She hasn't written back yet. I'll keep writing."
+    {has_flag("took_documents"):
+        DANIEL: "I did what she asked with the old man's papers. I left them on the city desk at the Tribune, in an envelope with no name on it. The Club's Thursdays ended that winter."
+    }
     DANIEL: ...So that's whose hand it was. Micah's, from what she told him on the road.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_11"):
@@ -1507,6 +1542,10 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
     INSET: none
+    {has_flag("took_documents"):
+        DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after that coffee. He said he owed fourteen girls that walk."
+        DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
+    }
     DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's, to his confessional. What he could tell me without breaking the seal, I wrote in, and the rest I guessed."
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
@@ -1531,6 +1570,10 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "Rose came again today. She brought Tommy's drawings. She doesn't say she forgives me, and I don't ask her to."
     DANIEL: "I said the whole Our Father this morning, start to finish, the way Ma taught us. Caleb says I sound like a choirboy with a hangover."
     DANIEL: "I made a lot of awful choices, but now I know, I returned to the faith..."
+    {has_flag("took_documents"):
+        DANIEL: "I gave that cop the old man's papers along with my confession. The girls' names were in them, and the prices, and the trains. They read them out at my trial."
+        DANIEL: "The papers called it a scandal for a week. The Club never opened its doors on a Thursday again. That's the one thing I did in that house I'm not sorry for."
+    }
     DANIEL: There's a note pinned to the page, in another hand: "She told me the rest herself, after the trial. I have written it in for him. - C."
     DANIEL: So that's whose hand it was.
     DANIEL: ...He found his way back. Behind bars, but he found it.

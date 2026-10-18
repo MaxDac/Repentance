@@ -101,7 +101,9 @@ From here the story follows Walkthrough.md:
 20. **Rose's house** (optional): the rain stops at her street (Micah remarks on it). Ring the bell. Push for
    forgiveness up to five times, or leave; push at least
    three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
-21. **Cathedral**: press Caleb about the club. He points Micah to the convent and begs him to give up.
+21. **Cathedral**: press Caleb about the club. He admits the Club traffics girls for its Thursday spectacles, and
+    that he and the sisters hide the ones who escape while he keeps quiet so the Club leaves the convent alone.
+    Micah calls him a hypocrite who could have gone to the press. Caleb points Micah to the convent and begs him to give up.
     On repeat visits Caleb offers a cross if Micah originally left the ring; if he originally took it, offers begin
     only in Act Three. Refusing allows another offer on the next eligible visit; accepting gives the pendant once.
 22. **Convent**: Sister Agatha knows nothing until Micah draws the revolver on her. Eleanor is a performer;
@@ -151,7 +153,7 @@ From here the story follows Walkthrough.md:
    bootleggers' stair to the study's bar panel.
    Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
    index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
-   to locate and take the signed payoff sheets. The register alone is not evidence. Entering the bedroom
+   to locate and take the signed payoff sheets, which also record the Club's payments for the girls. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
 33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
@@ -270,7 +272,14 @@ himself in (6) or Eleanor confesses (9), and the city's edge where Eleanor walks
 
 The core plot and the five original endings are unchanged; endings 6 and 7 branch from the bedroom. The seventeen puzzles include five collect-and-combine locations and the motel fire escape; Eleanor has two more, one in each interlude. Sal receives a cash bribe Micah can afford.
 The Club blames Micah for Eleanor's capture; at his Act Three desk he wonders whether somebody followed him
-or he let something slip, without establishing either as fact. While still supine outside the cathedral,
+or he let something slip, without establishing either as fact.
+The Club runs a trafficking ring that supplies fresh girls for its Thursday spectacles. Caleb and the convent hide
+the girls who escape; Caleb keeps silent so the Club leaves the convent alone (Tony's "Nobody from that Club goes
+near those nuns"). Harrington's unmasking and Tony at gunpoint touch on the girls, and Caleb's later visits return to
+his silence. The traffic ends only where somebody exposes it: Micah's signed papers in endings 1, 6 and 10 (Caleb
+carries them to the Tribune, they come out at Micah's trial, or Eleanor asks him to give them to the papers),
+Eleanor's testimony at her trial in ending 9 and the old man's Thursday book she mails to the Tribune in ending 8.
+Endings 2 and 3 keep the papers as Micah's private insurance. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving is easy, Micah.
 Forgetting is the part you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.

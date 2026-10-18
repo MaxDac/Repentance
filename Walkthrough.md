@@ -510,6 +510,13 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   and Caleb runs the parish; so Caleb might know something. Both reasons must be offered before the choice
   "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
   in his sacristy; the established refuge is the convent.
+- After Micah's plea, Caleb tells the truth about the Club. It runs a trafficking ring to keep its Thursday
+  "spectacles" supplied with fresh girls: farm girls and immigrant girls taken off the trains at Union Station with
+  promises of work. Some escape and find the convent door; the sisters bring them to Caleb, and together they hide
+  them (new names, a ticket to a parish out of state). Caleb can't stop the traffic, so he keeps his mouth shut,
+  and in exchange the Club leaves the convent alone; if he talked, they would simply take other girls and come for
+  the ones behind the convent walls. Micah calls him a hypocrite: he preaches repentance, and he could have gone
+  to the press. Caleb half-concedes ("I confess it every week. It doesn't get lighter.").
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
   Micah will answer "There's little left for me to do, at this point."
@@ -575,6 +582,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Caleb's warning retains "Repentance means more than asking nicely. Put the gun away." without an added
   exact Scripture quotation. Before the masked Club visit, keep "God doesn't turn away a contrite heart, Micah.
   You don't have to be whole to turn to Him."
+- Both later visits come back to the girls: in the warning, Caleb admits he kept quiet for years and Micah calls
+  him on it again; before the masked Club visit he says he has been praying on what Micah told him, and asks Micah
+  to look at the girls on that stage if he goes.
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
   tell him not to go forward again.
   You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
@@ -700,7 +710,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   (new sprite: bald, white-haired, the stag mask held against his chest). Nobody in the room is surprised.
 - Harrington explains himself: the bonfires, the antlers and the old gods are theatre. The whole meeting exists only
   so that he can exercise his power and make it manifest; a hundred men who run the city will not lift a finger
-  unless he allows it, and they come back every Thursday to bow.
+  unless he allows it, and they come back every Thursday to bow. The girls are part of it: a new face on the stage
+  every Thursday, and a secret every man in the room shares, which binds them tighter than any oath.
 - Harrington, unmasked, continues: "You brought Eleanor back to us. For that, the intrusion is forgiven. This is as
   far as you go."
 - Then the player has three choices in dialogue:
@@ -757,7 +768,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
 - Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
   Eleanor.
-- The bartender tells him to bug off, these people are really dangerous, and he'd be better off with a bullet in his skull.
+- The bartender tells him to bug off, these people are really dangerous (they bring girls in off the trains like
+  crates of oranges, and nobody asks), and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between firing the revolver into his shoulder, or walking away, because it's not worth it.
   The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
   office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
@@ -818,7 +830,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   desk. Match all three labelled BANK/JUDGE/CAPTAIN marks by rotating and sliding the index. Its note
   puts BANK above JUDGE and CAPTAIN left of BANK; the asymmetric grid has one solution: one clockwise
   turn, offset **(6, 3)**. The aligned window identifies the drawer pocket containing signed payoff
-  sheets, which Micah takes as the existing documents item. Cancellation keeps both clues.
+  sheets, which Micah takes as the existing documents item. Besides the payoffs, the sheets record the Club's
+  Thursday payments: girls' names, stations and prices. Cancellation keeps both clues.
   Taking the register alone does not count as evidence. This opportunity ends on entering the bedroom,
   as before: neither inventory combination during escape nor returning through the kitchen bypasses it.
   Skipping the puzzle must retain the prison endings when the mansion does not burn.
@@ -890,7 +903,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     - **Return to bed** (her rise played backwards): ending 1, as above.
     - **The candlestick** on the nightstand, a step from where she stands: she takes it while he mutters at the door
       ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
-      sprites: her swing, his fall forward, no wound). She leaves through the study and the kitchen; the doors back to the bedroom
+      sprites: her swing, his fall forward, no wound). She leaves through the study, taking from his desk the old man's
+      "Thursday book" (the Club's ledger of the girls: she always knew where he kept it), and the kitchen; the doors back to the bedroom
       refuse her. The cellar is optional: the lantern hangs on its nail (Micah came in that way), she takes it
       and opens the whiskey barrel over it, and the house burns. No satchel: two hand actions. The kitchen door
       leads outside, a short beat in her voice, without Micah's escape. Then Micah's coffee scene at Rose's (as in
@@ -918,6 +932,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   left of the screen: a 1920s sepia studio print, pixelised like the other close-ups, on a cream card mount with worn
   corners, the size of a photo rather than a full panel. Daniel's lines sit in a column to its right. It appears with
   "Rose and I renewed our vows today" and goes after "...when he has somebody to tell them to."
+- Only if Micah took the signed papers from the study (possible on the Our Father route), the journal adds that
+  Caleb carried them to the Tribune himself; a grand jury followed, and the Club's Thursdays ended. Without the
+  papers, there is no mention.
 
 #### Option 2 - Outskirts, with Eleanor
 
@@ -971,6 +988,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - In the prison parlour, Rose (new seated sprite) visits. Micah says he's sorry; Rose doesn't know if she can forgive
   him and doesn't really understand why he asked her to come, but she'll try.
 - The journal ends: "I made a lot of awful choices, but now I know, I returned to the faith..."
+- Only if Micah carried the signed papers, the journal adds that he handed them over with his confession, and the
+  girls' names came out at his trial: the Club's Thursdays ended there.
 
 #### Option 7 - The bedroom - Murder and suicide
 
@@ -1000,7 +1019,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 - Then the outskirts at night: Eleanor alone, in her black dress, walking out of the city. No car, no Micah, no
   newspaper.
 - Micah keeps the journal; the last entry is his, copied from a letter she sent him at Rose's, without a return
-  address.
+  address. Before leaving the city she mailed the old man's Thursday book to the Tribune; the letter says the paper
+  printed it, and the Club's Thursdays ended.
 
 #### Option 9 - Prison - Eleanor confesses
 
@@ -1008,8 +1028,10 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   first.
 - The prison parlour: Eleanor in an inmate's jumpsuit, seated where Micah sits (new sprite), Caleb across the
   table. She confesses her life's crimes and asks for Micah: "He's with his wife now." "It's better this way."
-  Caleb absolves her.
-- The last entry is Caleb's: he added her pages to his brother's journal from her confession.
+  Caleb absolves her. At her own trial she named the Club and the girls in open court; she tells Caleb so, which
+  keeps the exposure public rather than under the seal of confession.
+- The last entry is Caleb's: he added her pages to his brother's journal from her confession. He records that her
+  testimony ended the Club's Thursdays, and that she did what he had not had the courage to do.
 
 #### Option 10 - Outskirts, Eleanor leaves for her peace
 
@@ -1020,6 +1042,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   road alone, out of sight. Micah stays by the car.
 - The last entry is Micah's, hopeful: he is looking for his own peace (sober, writing to Rose, back at Caleb's
   church on Sundays). She told him the Second Interlude on the road, before she got out of the car.
+- Only if Micah took the signed papers, she asks him to take them to the newspapers, not keep them for himself;
+  the last entry says he did, and the Club's Thursdays ended. The fire alone gives no mention.
 
 #### Option 11 - Prison, Eleanor visits for the last time
 
