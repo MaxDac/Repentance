@@ -180,6 +180,102 @@ public class MusicSynthTests
     }
 
     [Fact]
+    public void BlueLanternIsAHotBandRehearsing()
+    {
+        var score = MusicSynth.Score(Track.BlueLanternJazz);
+        const int together = 36 * 4; // two choruses and four bars of the third, before it falls apart
+        Assert.Equal(192, MusicSynth.LengthBeats(Track.BlueLanternJazz));
+        // a fast Chicago two-beat
+        Assert.True(60 / MusicSynth.SecondsPerBeat(Track.BlueLanternJazz) >= 160);
+        Assert.Equal(
+            new[] { Instrument.Cornet, Instrument.Clarinet, Instrument.Trombone, Instrument.Banjo, Instrument.Tuba,
+                    Instrument.RecordedPiano, Instrument.Drums }.ToHashSet(),
+            score.Select(n => n.Instrument).ToHashSet());
+        List<ScoreNote> Of(Instrument i, double from, double to) =>
+            score.Where(n => n.Instrument == i && n.Beat >= from - 1e-6 && n.Beat < to - 1e-6).ToList();
+        // while the band plays: the tuba only on one and three, the banjo on every beat but the stop-time breaks
+        Assert.All(Of(Instrument.Tuba, 0, together), n => Assert.True(n.Beat % 2 == 0, $"{n}"));
+        var banjoBeats = Of(Instrument.Banjo, 0, together).Select(n => n.Beat).ToHashSet();
+        Assert.True(banjoBeats.Count >= together - 8, "the banjo chunks four to the bar");
+        Assert.All(banjoBeats, b => Assert.Equal(0, b % 1));
+        // the cornet takes its break over the stop-time hits in the second chorus
+        Assert.DoesNotContain(Of(Instrument.Banjo, 89, 96).Concat(Of(Instrument.Tuba, 89, 96)), n => n.Beat % 4 != 0);
+        Assert.True(Of(Instrument.Cornet, 88, 96).Count >= 8);
+        // then it falls apart on a trombone clam, and the rehearsal is just noodling: no rhythm section
+        Assert.Contains(score, n => n.Instrument == Instrument.Trombone && n.Beat == together);
+        Assert.DoesNotContain(score, n => n.Beat > together + 4 && n.Instrument == Instrument.Drums && n.Midi != MusicSynth.Midi("C#2"));
+        Assert.True(Of(Instrument.Banjo, together + 4, 184).Count < 8, "the banjo only checks a string or two");
+        // background, not a performance: no accents, and something sounds on every beat, the clarinet noodling low
+        // through the rehearsal
+        Assert.DoesNotContain(score, n => n.Strident);
+        for (int beat = 0; beat < 192; beat++)
+            Assert.True(score.Any(n => n.Beat <= beat + 1e-6 && n.Beat + n.Beats > beat + 1e-6), $"silent beat {beat}");
+        Assert.True(Of(Instrument.Clarinet, together, 184).Max(n => n.Midi) <= MusicSynth.Midi("Bb4"));
+        // and the drummer counts it back in with his sticks, into the top of the loop
+        var sticks = score.Where(n => n.Midi == MusicSynth.Midi("C#2")).Select(n => n.Beat).ToList();
+        Assert.Equal(new double[] { 184, 186, 188, 189, 190, 191 }, sticks);
+    }
+
+    [Fact]
+    public void BlueLanternAlleyIsTheSameRehearsalFurtherAway()
+    {
+        Assert.True(MusicSynth.SharesScore(Track.BlueLanternJazz, Track.BlueLanternAlley));
+        Assert.False(MusicSynth.SharesScore(Track.BlueLanternJazz, Track.OfficeJazz));
+        Assert.Equal(MusicSynth.LoopSamples(Track.BlueLanternJazz), MusicSynth.LoopSamples(Track.BlueLanternAlley));
+        Assert.True(MusicSynth.BaseVolumeDb(Track.BlueLanternAlley) < MusicSynth.BaseVolumeDb(Track.BlueLanternJazz));
+        // through a door and down a passage the highs go first, and the stereo picture shrinks
+        static double Bright(float[] s)
+        {
+            double edge = 0, all = 0;
+            for (int i = 2; i < s.Length; i += 2)
+            {
+                double d = s[i] - s[i - 2];
+                edge += d * d;
+                all += s[i] * s[i];
+            }
+            return edge / all;
+        }
+        static double Width(float[] s)
+        {
+            double side = 0, mid = 0;
+            for (int i = 0; i < s.Length; i += 2)
+            {
+                side += Math.Pow(s[i] - s[i + 1], 2);
+                mid += Math.Pow(s[i] + s[i + 1], 2);
+            }
+            return side / mid;
+        }
+        var room = Renders[Track.BlueLanternJazz].Value;
+        var alley = Renders[Track.BlueLanternAlley].Value;
+        Assert.True(Bright(alley) < Bright(room) * 2 / 3, $"alley {Bright(alley)} vs room {Bright(room)}");
+        Assert.True(Width(alley) < Width(room), $"alley {Width(alley)} vs room {Width(room)}");
+    }
+
+    [Fact]
+    public void StreetTrafficIsTrafficNotMusic()
+    {
+        var score = MusicSynth.Score(Track.StreetTraffic);
+        Assert.Equal(60, MusicSynth.LengthBeats(Track.StreetTraffic));
+        Assert.Equal(1, MusicSynth.SecondsPerBeat(Track.StreetTraffic));
+        var traffic = new[] { Instrument.CityHum, Instrument.Motorcar, Instrument.Streetcar, Instrument.Horn }.ToHashSet();
+        Assert.Equal(traffic, score.Select(n => n.Instrument).ToHashSet());
+        // background, like the music: no accents, so no car passes close and no klaxon blares
+        Assert.DoesNotContain(score, n => n.Strident);
+        // the city roars under everything, all the way round the loop
+        var hum = Assert.Single(score, n => n.Instrument == Instrument.CityHum);
+        Assert.Equal((0.0, 60.0), (hum.Beat, hum.Beats));
+        // cars go by both ways, and one crosses the seam so the loop has no quiet start
+        var cars = score.Where(n => n.Instrument == Instrument.Motorcar).ToList();
+        Assert.True(cars.Count >= 8, $"{cars.Count} cars");
+        Assert.Equal(2, cars.Select(n => n.Voice).Distinct().Count());
+        Assert.Contains(cars, n => n.Beat + n.Beats > 60);
+        Assert.Single(score, n => n.Instrument == Instrument.Streetcar);
+        // a bulb horn now and then, never a tune
+        var horns = score.Where(n => n.Instrument == Instrument.Horn).ToList();
+        Assert.InRange(horns.Count, 1, 3);
+    }
+
+    [Fact]
     public void LobbyPianoIsASoftLoungeBallad()
     {
         var score = MusicSynth.Score(Track.LobbyPiano);
@@ -223,8 +319,9 @@ public class MusicSynthTests
         Assert.All(score, n => Assert.Equal(Instrument.RecordedPiano, n.Instrument));
         Assert.Equal(64, MusicSynth.LengthBeats(Track.Investigation), 6);
         Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.Investigation), 50, 66);
-        // barely there: the quietest track, nothing accented, every note on the beat and a note starting on every beat
-        Assert.All(Enum.GetValues<Track>().Where(t => t != Track.Investigation),
+        // barely there: quieter than every track but the band heard through the alley wall, nothing accented, every
+        // note on the beat and a note starting on every beat
+        Assert.All(Enum.GetValues<Track>().Where(t => t is not (Track.Investigation or Track.BlueLanternAlley)),
             t => Assert.True(MusicSynth.BaseVolumeDb(Track.Investigation) < MusicSynth.BaseVolumeDb(t), $"{t}"));
         Assert.DoesNotContain(score, n => n.Strident);
         Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
@@ -294,6 +391,10 @@ public class MusicSynthTests
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
+            [Instrument.Cornet] = ("E3", "C6"), [Instrument.Clarinet] = ("D3", "Bb6"), [Instrument.Trombone] = ("E2", "F5"),
+            [Instrument.Banjo] = ("C3", "A5"), [Instrument.Tuba] = ("D1", "F4"),
+            [Instrument.CityHum] = ("C1", "C3"), [Instrument.Motorcar] = ("C1", "C3"), [Instrument.Streetcar] = ("C2", "C5"),
+            [Instrument.Horn] = ("C3", "C6"),
             [Instrument.RecordedPiano] = ("A0", "C8"),
             [Instrument.Pizzicato] = ("C2", "C5"), [Instrument.OpenTrumpet] = ("F#3", "D6"),
         };

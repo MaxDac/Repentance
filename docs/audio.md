@@ -7,7 +7,7 @@ Sounds and music are synthesized at startup; the one exception is a real grand p
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
-| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Traffic.cs`) | yes | Renders scored tracks to seamless stereo loops |
 | `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
@@ -52,16 +52,32 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes over held pedal notes, then a chorale; a pipe sounds on every beat, nothing above D5 |
 | `ConventPiano` | Convent corridor, cell | Hymn-like prelude in E-flat on the recorded piano, pedalled arpeggios under a slow tune |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, rolled chords on the recorded piano, bass |
+| `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing in the next room, muffled through the wall: cornet, low clarinet, trombone, banjo, tuba, recorded piano, drums; two choruses and a cornet break, then the clarinet noodles on under the false starts until a stick count-in. No accents, something on every beat |
+| `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: almost muted, a dull mono thud and echo |
+| `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road, kept distant |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
 | `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 
-A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
+`StreetTraffic` is scored like the music, but its instruments (`MusicSynth.Traffic.cs`) are noise and engines: a
+`CityHum` bed for the whole loop, `Motorcar` passes (Doppler, distance and stereo travel from the part's pan to the
+other side), a `Streetcar` with bell and rail-joint clacks, and a bulb `Horn`. The instruments still support
+accents (a car passing close, a klaxon), but like the music the score uses none, so the traffic stays in the
+background. It plays on the Music bus, so it follows the music volume; rain ambience still plays on top.
+
+A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
+moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries
+on from the same moment. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
 pass so filters and reverb have no seam.
 
+A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening
+feedback echo, applied after the hall. Instruments: strings, organ stops, piano, muted trumpet, upright bass, drums
+(`C2` kick, `C#2` sticks, `D2` snare, `E2` brush sweep, `F#2` hat, others a ride cymbal), cornet, clarinet,
+trombone (`!` smears up into the note), banjo and tuba.
+
 Score syntax (`MusicSynth.Scores.cs`): parts are space-separated tokens `name:beats` (e.g. `D4:1/2`), `r` rest,
-`+` chord, `>` separates advance from held duration, `!` accent.
+`+` chord, `>` separates advance from held duration, `!` accent; `Bars` checks each `|`-separated 4/4 bar.
 
 **Add a track**: `Track` -> score in `MusicSynth.Scores.cs` (parts, instruments, tempo, hall) -> `Room.Music` ->
 `BaseVolumeDb` if needed. Validate with `MusicSynthTests` and playthrough.
