@@ -5,7 +5,8 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
   her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
-- rose_closeup: Rose calling Micah back from her door.
+- rose_closeup: Rose calling Micah back from her door. The source's glazed door leaves are painted over as solid
+  panelled wood (ROSE_DOOR_GLASS) to match her front door in the street scene.
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
@@ -69,9 +70,47 @@ def rose_crop(src):
     return img.crop((0, top, w, top + ch))
 
 
+# The glazed parts of the two door leaves in the 1344x768 source, as (top-left, top-right, bottom-right, bottom-left)
+# quads following each leaf's perspective. Rose's front door in the street scene is solid wood, so these are painted
+# over as raised wooden panels in the leaf's own colour.
+ROSE_DOOR_GLASS = (
+    (((277, 0), (392, 0), (392, 536), (277, 566)), (92, 38, 26)),
+    (((966, 88), (1069, 26), (1069, 584), (966, 540)), (196, 112, 52)),
+)
+
+
+def _quad_point(quad, u, v):
+    """Bilinear point inside quad (tl, tr, br, bl) at u across, v down."""
+    (x0, y0), (x1, y1), (x2, y2), (x3, y3) = quad
+    tx, ty = x0 + (x1 - x0) * u, y0 + (y1 - y0) * u
+    bx, by = x3 + (x2 - x3) * u, y3 + (y2 - y3) * u
+    return tx + (bx - tx) * v, ty + (by - ty) * v
+
+
+def _sub_quad(quad, u0, v0, u1, v1):
+    return [_quad_point(quad, u, v) for u, v in ((u0, v0), (u1, v0), (u1, v1), (u0, v1))]
+
+
+def solid_door(img, quad, base):
+    """Paints a glazed door area as solid wood: the leaf colour with two raised panels, lit from the hall."""
+    def shade(k):
+        return tuple(max(0, min(255, round(c * k))) for c in base)
+
+    d = ImageDraw.Draw(img)
+    d.polygon(quad, fill=base)
+    for v0, v1 in ((0.06, 0.46), (0.54, 0.94)):
+        d.polygon(_sub_quad(quad, 0.12, v0, 0.88, v1), fill=shade(0.62))     # the recess's shadowed groove
+        d.polygon(_sub_quad(quad, 0.16, v0 + 0.012, 0.84, v1 - 0.012), fill=shade(1.18))  # lit bevel
+        d.polygon(_sub_quad(quad, 0.22, v0 + 0.03, 0.80, v1 - 0.03), fill=shade(1.0))      # the panel face
+    return img
+
+
 def rose_closeup(src):
     """Rose calling Micah back from the door: "Wait!"."""
-    img = rose_crop(src)
+    img = src.convert("RGB")
+    for quad, base in ROSE_DOOR_GLASS:
+        solid_door(img, quad, base)
+    img = rose_crop(img)
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
