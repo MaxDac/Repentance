@@ -8,13 +8,19 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class MansionStudy : Room
 {
+    public override Track? Music => Track.MansionDread;
+
     private bool Coda => State.HasFlag("eleanor_coda");
 
     public override async Task OnEnter(string entry)
     {
         if (entry == "eleanor_coda")
         {
-            await Game.Run(() => Think("His study. She had only ever seen it from the doorway, on her way to the other room."));
+            await Game.Run(async () =>
+            {
+                await Think("His study. She had only ever seen it from the doorway, on her way to the other room.");
+                await Think("She took a slim black ledger from the shelf behind his desk, filed between two annual reports. The Thursday book: names, stations, prices, in his own neat hand. She had always known where he kept it. She put it under her arm.");
+            });
             return;
         }
         if (State.HasFlag("seen_mansion_study")) return;

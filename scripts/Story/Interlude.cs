@@ -102,7 +102,7 @@ public static class Interlude
         await Game.ChangeRoom("motel_fire_escape", "interlude1", fadeInSeconds: 1.5);
     }
 
-    /// <summary>Daniel reads on in bed: the pages turn to the motel, the night after Micah left Eleanor there.</summary>
+    /// <summary>Daniel reads on in bed: the pages turn to the motel, the same night, after Micah left Eleanor there.</summary>
     public static async Task BeginSecond()
     {
         Attic.StashMicahItems();

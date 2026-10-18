@@ -82,9 +82,10 @@ public class MusicSynthTests
         Assert.True(Leaves(Instrument.Viola) < Leaves(Instrument.Cello));
         Assert.True(Leaves(Instrument.Cello) < Leaves(Instrument.DoubleBass));
         Assert.Equal(MusicSynth.LengthBeats(Track.ClubStrings), Leaves(Instrument.DoubleBass));
-        // the violins are the strident ones, and they are the highest notes in the piece
-        Assert.All(score.Where(n => n.Strident), n => Assert.Equal(Instrument.Violin, n.Instrument));
+        // background music: no accents, and even the violins' climax, the highest notes in the piece, stays low
+        Assert.DoesNotContain(score, n => n.Strident);
         Assert.Equal(Instrument.Violin, score.MaxBy(n => n.Midi).Instrument);
+        Assert.All(score, n => Assert.True(n.Midi <= MusicSynth.Midi("C5"), $"{n}"));
         // every part fills the whole loop: the sections line up bar for bar
         foreach (var voice in score.GroupBy(n => n.Voice))
             Assert.All(voice.Zip(voice.Skip(1)), p => Assert.True(p.Second.Beat >= p.First.Beat + p.First.Beats - 1e-9));
@@ -116,6 +117,11 @@ public class MusicSynthTests
         // first single pipes, then the first chord
         var firstChord = score.GroupBy(n => n.Beat).Where(g => g.Count() >= 3).Min(g => g.Key);
         Assert.True(score.Count(n => n.Beat < firstChord) >= 8, "the organist tries pipes one at a time first");
+        // background music: a pipe sounds on every beat, and none of them is shrill
+        for (int beat = 0; beat < 64; beat++)
+            Assert.Contains(score, n => n.Beat <= beat && beat < n.Beat + n.Beats);
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.All(score, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
         // the chorale closes on D major, not minor
         var plenum = score.Where(n => n.Instrument == Instrument.OrganPlenum).ToList();
         var last = plenum.Where(n => n.Beat == plenum.Max(p => p.Beat)).Select(n => n.Midi % 12).ToHashSet();
@@ -126,7 +132,7 @@ public class MusicSynthTests
     public void ConventPianoIsAPreludeInEFlat()
     {
         var score = MusicSynth.Score(Track.ConventPiano);
-        Assert.All(score, n => Assert.Equal(Instrument.Piano, n.Instrument));
+        Assert.All(score, n => Assert.Equal(Instrument.RecordedPiano, n.Instrument));
         Assert.Equal(66, MusicSynth.LengthBeats(Track.ConventPiano));
         int[] eFlatMajor = { 3, 5, 7, 8, 10, 0, 2 };
         Assert.All(score, n => Assert.Contains(n.Midi % 12, eFlatMajor));
@@ -161,7 +167,7 @@ public class MusicSynthTests
         // D minor: the bass opens on D under a chord with F, not F#, and the tune leads home from the leading tone
         var bass = score.Where(n => n.Instrument == Instrument.UprightBass).ToList();
         Assert.Equal(MusicSynth.Midi("D2"), bass[0].Midi);
-        var opening = score.Where(n => n.Instrument == Instrument.Piano && n.Beat < 1).Select(n => n.Midi % 12).ToHashSet();
+        var opening = score.Where(n => n.Instrument == Instrument.RecordedPiano && n.Beat < 1).Select(n => n.Midi % 12).ToHashSet();
         Assert.Contains(5, opening);
         Assert.DoesNotContain(6, opening);
         Assert.Equal(MusicSynth.Midi("C#4"), trumpet.MaxBy(n => n.Beat).Midi);
@@ -169,7 +175,7 @@ public class MusicSynthTests
         Assert.All(bass, n => Assert.True(n.Beats >= 2 && n.Beat % 2 == 0, $"{n}"));
         // the band: muted trumpet, piano and plucked bass, no drums
         Assert.Equal(
-            new[] { Instrument.Trumpet, Instrument.Piano, Instrument.UprightBass }.ToHashSet(),
+            new[] { Instrument.Trumpet, Instrument.RecordedPiano, Instrument.UprightBass }.ToHashSet(),
             score.Select(n => n.Instrument).ToHashSet());
     }
 
@@ -234,6 +240,47 @@ public class MusicSynthTests
         Assert.Equal(MusicSynth.Midi("B3"), tune.MaxBy(n => n.Beat)!.Midi);
     }
 
+    [Fact]
+    public void MansionDreadIsADissonantThrillerLoop()
+    {
+        var score = MusicSynth.Score(Track.MansionDread);
+        double length = MusicSynth.LengthBeats(Track.MansionDread);
+        Assert.Equal(56, length);
+        // slow and heavy
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.MansionDread), 50, 60);
+        Assert.Equal(
+            new[] { Instrument.DoubleBass, Instrument.Pizzicato, Instrument.Cello, Instrument.OpenTrumpet }.ToHashSet(),
+            score.Select(n => n.Instrument).ToHashSet());
+        // background, not a performance: no accents, every note on the beat
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.All(score, n => Assert.Equal(0, n.Beat % 1));
+        static bool Dissonant(IEnumerable<int> midis) =>
+            midis.SelectMany(a => midis, (a, b) => Math.Abs(a - b) % 12).Any(i => i is 1 or 6 or 11);
+        // the bass bows without a break all the way round, grinding by semitones and tritones
+        var bass = score.Where(n => n.Instrument == Instrument.DoubleBass).OrderBy(n => n.Beat).ToList();
+        Assert.Equal(0, bass[0].Beat);
+        Assert.Equal(length, bass[^1].Beat + bass[^1].Beats);
+        Assert.All(bass.Zip(bass.Skip(1)), p => Assert.Equal(p.First.Beat + p.First.Beats, p.Second.Beat, 6));
+        Assert.All(bass.Zip(bass.Skip(1)), p => Assert.Contains(Math.Abs(p.Second.Midi - p.First.Midi), new[] { 1, 5, 6, 7 }));
+        Assert.All(bass, n => Assert.True(n.Beats >= 2, $"{n}"));
+        // every pizzicato chord clashes, and they fall at uneven gaps
+        var chords = score.Where(n => n.Instrument == Instrument.Pizzicato).GroupBy(n => n.Beat).OrderBy(g => g.Key).ToList();
+        Assert.All(chords, c => Assert.True(c.Count() >= 3 && Dissonant(c.Select(n => n.Midi)), $"chord at {c.Key}"));
+        Assert.True(chords.Zip(chords.Skip(1), (a, b) => b.Key - a.Key).Distinct().Count() >= 4, "an irregular pulse");
+        // the cello bows long, low arcs above the plucked chords; apart from the trumpet everything stays low
+        var cello = score.Where(n => n.Instrument == Instrument.Cello).ToList();
+        Assert.All(cello, n => Assert.True(n.Beats >= 2, $"{n}"));
+        Assert.True(cello.Average(n => n.Midi) > chords.SelectMany(c => c).Average(n => n.Midi));
+        Assert.All(score.Where(n => n.Instrument != Instrument.OpenTrumpet), n => Assert.True(n.Midi <= MusicSynth.Midi("Bb3"), $"{n}"));
+        // the trumpet stabs once: one brief, dissonant cluster, the highest sound in the piece
+        var trumpet = score.Where(n => n.Instrument == Instrument.OpenTrumpet).ToList();
+        Assert.Single(trumpet.Select(n => n.Beat).Distinct());
+        Assert.All(trumpet, n => Assert.True(n.Beats <= 0.5, $"{n}"));
+        Assert.True(Dissonant(trumpet.Select(n => n.Midi)));
+        Assert.Equal(Instrument.OpenTrumpet, score.MaxBy(n => n.Midi).Instrument);
+        Assert.True(trumpet.Min(n => n.Midi) >= MusicSynth.Midi("F5"), "high-pitched");
+    }
+
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)
@@ -247,6 +294,7 @@ public class MusicSynthTests
             [Instrument.CityHum] = ("C1", "C3"), [Instrument.Motorcar] = ("C1", "C3"), [Instrument.Streetcar] = ("C2", "C5"),
             [Instrument.Horn] = ("C3", "C6"),
             [Instrument.RecordedPiano] = ("A0", "C8"),
+            [Instrument.Pizzicato] = ("C2", "C5"), [Instrument.OpenTrumpet] = ("F#3", "D6"),
         };
         Assert.All(MusicSynth.Score(track), n =>
             Assert.InRange(n.Midi, MusicSynth.Midi(range[n.Instrument].Low), MusicSynth.Midi(range[n.Instrument].High)));
