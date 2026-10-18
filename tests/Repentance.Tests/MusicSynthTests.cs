@@ -5,22 +5,24 @@ namespace Repentance.Tests;
 
 public class MusicSynthTests
 {
-    private static readonly string PianoFolder = FindPianoFolder();
+    private static readonly string ProjectFolder = FindProjectFolder();
 
-    static MusicSynthTests() => PianoRecordings.Use(name =>
+    static MusicSynthTests() => Recordings.Use(path =>
     {
-        var path = Path.Combine(PianoFolder, name);
-        return File.Exists(path) ? File.ReadAllBytes(path) : null;
+        var file = Folder(path);
+        return File.Exists(file) ? File.ReadAllBytes(file) : null;
     });
 
-    private static string FindPianoFolder()
+    private static string Folder(string projectPath) =>
+        Path.Combine(ProjectFolder, projectPath.Replace('/', Path.DirectorySeparatorChar));
+
+    private static string FindProjectFolder()
     {
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
             if (File.Exists(Path.Combine(dir.FullName, "project.godot")))
-                return Path.Combine(dir.FullName, PianoRecordings.Folder.Replace('/', Path.DirectorySeparatorChar));
+                return dir.FullName;
         throw new InvalidOperationException("project.godot not found above the test binaries");
     }
-
     private static readonly Dictionary<Track, Lazy<float[]>> Renders =
         Enum.GetValues<Track>().ToDictionary(t => t, t => new Lazy<float[]>(() => MusicSynth.Render(t)));
 
@@ -140,39 +142,32 @@ public class MusicSynthTests
     }
 
     [Fact]
-    public void OfficeJazzIsASlowSadBallad()
+    public void OfficeJazzIsAVerySlowSoftBlues()
     {
         var score = MusicSynth.Score(Track.OfficeJazz);
-        Assert.Equal(64, MusicSynth.LengthBeats(Track.OfficeJazz));
-        // adagio: slow, but not a lento crawl
-        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.OfficeJazz), 60, 72);
-        var trumpet = score.Where(n => n.Instrument == Instrument.Trumpet).ToList();
-        // swung eighths: an offbeat always falls two thirds of the way through the beat, never half way
-        Assert.DoesNotContain(trumpet, n => Math.Abs(n.Beat % 1 - 0.5) < 1e-6);
-        Assert.Contains(trumpet, n => Math.Abs(n.Beat % 1 - 2.0 / 3) < 1e-6);
-        // low key: the muted trumpet stays in its soft middle register, never reaching for the top
-        Assert.All(trumpet, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
-        // AABA: the three A sections open with the same three bars
-        IEnumerable<(double, int)> Bars(double from) =>
-            trumpet.Where(n => n.Beat >= from - 1e-6 && n.Beat < from + 12 - 1e-6).Select(n => (Math.Round(n.Beat - from, 6), n.Midi));
-        Assert.Equal(Bars(0), Bars(16));
-        Assert.Equal(Bars(0), Bars(48));
-        Assert.NotEqual(Bars(0), Bars(32));
-        // D minor: the bass opens on D under a chord with F, not F#, and the tune leads home from the leading tone
-        var bass = score.Where(n => n.Instrument == Instrument.UprightBass).ToList();
+        // one twelve-bar chorus, very slow: rain on the window, a drink in the hand
+        Assert.Equal(48, MusicSynth.LengthBeats(Track.OfficeJazz), 6);
+        Assert.InRange(60 / MusicSynth.SecondsPerBeat(Track.OfficeJazz), 44, 52);
+        // the band: recorded piano, real alto sax and real plucked bass, no drums
+        Assert.Equal(
+            new[] { Instrument.RecordedPiano, Instrument.RecordedSax, Instrument.RecordedBass }.ToHashSet(),
+            score.Select(n => n.Instrument).ToHashSet());
+        // background, not a performance: no accents, and the sax stays low and soft, never reaching for the top
+        Assert.DoesNotContain(score, n => n.Strident);
+        var sax = score.Where(n => n.Instrument == Instrument.RecordedSax).ToList();
+        Assert.All(sax, n => Assert.True(n.Midi <= MusicSynth.Midi("D5"), $"{n}"));
+        // strokes, not a solo: the sax plays less than half the time
+        Assert.True(sax.Sum(n => n.Beats) < 24, $"the sax holds {sax.Sum(n => n.Beats)} of 48 beats");
+        // D minor: the bass opens on D under a chord with F, not F#, and the sax leads home from the leading tone
+        var bass = score.Where(n => n.Instrument == Instrument.RecordedBass).ToList();
         Assert.Equal(MusicSynth.Midi("D2"), bass[0].Midi);
-        var opening = score.Where(n => n.Instrument == Instrument.Piano && n.Beat < 1).Select(n => n.Midi % 12).ToHashSet();
+        var opening = score.Where(n => n.Instrument == Instrument.RecordedPiano && n.Beat < 4).Select(n => n.Midi % 12).ToHashSet();
         Assert.Contains(5, opening);
         Assert.DoesNotContain(6, opening);
-        Assert.Equal(MusicSynth.Midi("C#4"), trumpet.MaxBy(n => n.Beat).Midi);
+        Assert.Equal(MusicSynth.Midi("C#4"), sax.MaxBy(n => n.Beat)!.Midi);
         // a slow two-feel: the bass plucks only on the half notes
         Assert.All(bass, n => Assert.True(n.Beats >= 2 && n.Beat % 2 == 0, $"{n}"));
-        // the band: muted trumpet, piano and plucked bass, no drums
-        Assert.Equal(
-            new[] { Instrument.Trumpet, Instrument.Piano, Instrument.UprightBass }.ToHashSet(),
-            score.Select(n => n.Instrument).ToHashSet());
     }
-
     [Fact]
     public void LobbyPianoIsASoftLoungeBallad()
     {
@@ -220,29 +215,33 @@ public class MusicSynthTests
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
-            [Instrument.RecordedPiano] = ("A0", "C8"),
+            [Instrument.RecordedPiano] = ("A0", "C8"), [Instrument.RecordedSax] = ("Db3", "Ab5"),
+            [Instrument.RecordedBass] = ("E1", "B2"),
         };
         Assert.All(MusicSynth.Score(track), n =>
             Assert.InRange(n.Midi, MusicSynth.Midi(range[n.Instrument].Low), MusicSynth.Midi(range[n.Instrument].High)));
     }
 
-    [Fact]
-    public void EveryRecordedPianoNoteHasARecordingLongEnough()
+    public static TheoryData<Instrument> RecordedInstruments => new(Recordings.Instruments);
+
+    [Theory]
+    [MemberData(nameof(RecordedInstruments))]
+    public void EveryRecordedNoteHasARecordingLongEnough(Instrument instrument)
     {
-        var needed = PianoRecordings.Needed();
+        var needed = Recordings.Needed(instrument);
         Assert.NotEmpty(needed);
         Assert.All(needed, n =>
         {
-            var path = Path.Combine(PianoFolder, PianoRecordings.FileName(n.Key));
-            Assert.True(File.Exists(path), $"{path} is missing: run dotnet run --project tools/music -- piano");
+            var path = Folder(Recordings.PathOf(instrument, n.Key));
+            Assert.True(File.Exists(path), $"{path} is missing: run dotnet run --project tools/music -- recordings");
             double seconds = new FileInfo(path).Length / 2.0 / MusicSynth.SampleRate;
-            Assert.True(seconds >= n.Value + PianoRecordings.TailSeconds, $"{path} is {seconds:0.00} s: run dotnet run --project tools/music -- piano");
+            Assert.True(seconds >= n.Value + Recordings.TailSeconds(instrument),
+                $"{path} is {seconds:0.00} s: run dotnet run --project tools/music -- recordings");
         });
-        var extra = Directory.GetFiles(PianoFolder, "*.pcm").Select(Path.GetFileName)
-            .Except(needed.Keys.Select(PianoRecordings.FileName));
+        var extra = Directory.GetFiles(Folder(Recordings.Folder(instrument)), "*.pcm").Select(Path.GetFileName)
+            .Except(needed.Keys.Select(Recordings.FileName));
         Assert.Empty(extra);
     }
-
     [Theory]
     [InlineData("C4", 60)]
     [InlineData("A4", 69)]
