@@ -45,14 +45,26 @@ public abstract class Harness
         return true;
     }
 
-    /// <summary>Prints the marker line, restores the clock and quits with 0 (pass) or 1 (fail).</summary>
+    /// <summary>Prints the marker line, lets pending timer waits finish, then quits with 0 (pass) or 1 (fail).</summary>
     protected void Finish(string? summary = null)
     {
         Game.SequenceFailed -= OnSequenceFailed;
         if (summary != null) GD.Print(summary);
         GD.Print(_failures.Count == 0 ? $"{Marker} OK" : $"{Marker} FAILED:\n  " + string.Join("\n  ", _failures));
+        _ = Quit(_failures.Count == 0 ? 0 : 1);
+    }
+
+    // Quitting while a timer is still awaited makes Godot abort at shutdown (see Timers), so the game runs on,
+    // unpaused and on the fast clock, until none is pending (bounded, then it quits anyway).
+    private async Task Quit(int code)
+    {
+        var tree = _game.GetTree();
+        tree.Paused = false;
+        Engine.TimeScale = FastTimeScale;
+        for (int i = 0; i < 100 && Timers.Pending > 0; i++) await Observe(0.1);
+        if (Timers.Pending > 0) GD.Print($"[harness] quitting with {Timers.Pending} timer wait(s) pending");
         Engine.TimeScale = 1;
-        _game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
+        tree.Quit(code);
     }
 
     /// <summary><see cref="Game.Run"/> logs and swallows exceptions so the game survives; a test must not.</summary>
@@ -147,11 +159,7 @@ public abstract class Harness
     // ------------------------------------------------------------------ time
 
     /// <summary>Waits in real time, ignoring the clock scale and pause.</summary>
-    protected async Task Observe(double seconds)
-    {
-        var timer = _game.GetTree().CreateTimer(seconds, processAlways: true, ignoreTimeScale: true);
-        await _game.ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
-    }
+    protected Task Observe(double seconds) => Timers.Wait(_game, seconds, processAlways: true, ignoreTimeScale: true);
 
     protected async Task WaitIdle(Game? game = null)
     {

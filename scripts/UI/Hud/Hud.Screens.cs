@@ -117,7 +117,7 @@ public partial class Hud
             _verses.AddChild(label);
             await TweenAlpha(label, 1, fadeSeconds);
         }
-        await ToSignal(GetTree().CreateTimer(holdSeconds, false), SceneTreeTimer.SignalName.Timeout);
+        await Timers.Wait(this, holdSeconds);
         await TweenAlpha(_verses, 0, fadeSeconds);
         _verses.Visible = false;
         foreach (var child in _verses.GetChildren()) child.QueueFree();
