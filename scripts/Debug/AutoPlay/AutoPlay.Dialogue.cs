@@ -46,16 +46,20 @@ public partial class AutoPlay
             GameState.Instance.SetFlag("crate_moved");
             GameState.Instance.SetFlag("ladder_down");
             var climb = game.Perform(Verb.Hand, "ladder");
-            await Until(() => game.Hud.SpeechVisible &&
-                game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
-            Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
-                !game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
-                "the alternate compensation answer also continues on the fire escape");
             await Until(() => game.Room is Rooms.Attic && !game.Busy, timeout: 300);
             await climb;
             if (game.Room is not Rooms.Attic || game.Busy)
                 throw new InvalidOperationException($"Convent departure did not finish: room={game.Room?.Name}, busy={game.Busy}.");
             Check(game.Room is Rooms.Attic && !game.Busy, "the direct-talk exit completes the motel sequence");
+            Check(!_offered.ContainsKey("eleanor_fire_escape"), "Act 1 stops on Eleanor's question, before the compensation choice");
+            var back = game.ChangeRoom("motel_fire_escape", "interlude1");
+            await Until(() => game.Hud.SpeechVisible &&
+                game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month.");
+            Check(game.Hud.SpeechText == "That's the first honest thing a man has said to me in a month." &&
+                !game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
+                "the alternate compensation answer also continues on the fire escape");
+            await Until(() => game.Room is Rooms.Office && !game.Busy, timeout: 300);
+            await back;
         }
         finally
         {
@@ -119,6 +123,10 @@ public partial class AutoPlay
                 ("caleb_act2", "Our Father, who art in heaven, hallowed be Thy name... and then nothing. I can't get past it."),
                 ("caleb_warn", "There's still a way back. There always is. But not where you're going."),
                 ("caleb_last", "God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him."),
+                ("caleb_club", "We hide them. A new name, a ticket, a parish in Milwaukee or a farm in Iowa that doesn't ask."),
+                ("caleb_club", "You're a hypocrite, Caleb."),
+                ("harrington_unmask", "A new face on that stage every Thursday"),
+                ("bartender_gun", "They bring girls in off the trains like crates of oranges"),
             })
             {
                 await game.LoadGame(original);
@@ -150,6 +158,32 @@ public partial class AutoPlay
                 Check(!lines.Contains("The sky over the Gold Coast is still orange.", StringComparison.Ordinal),
                     "next-morning dialogue does not retain the same-night sky");
             }
+            // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10), Eleanor's Thursday
+            // book (8) or her testimony (9). Endings 2 and 3 keep the papers private.
+            foreach (bool documents in new[] { false, true })
+            for (int ending = 1; ending <= 11; ending++)
+            {
+                await game.LoadGame(original);
+                for (int other = 1; other <= 11; other++) GameState.Instance.SetFlag($"ending_{other}", other == ending);
+                GameState.Instance.SetFlag(Endings.TookDocuments, documents);
+                story.ChoosePathString("epilogue");
+                string lines = story.ContinueMaximally();
+                bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10);
+                Check(lines.Contains("Thursday", StringComparison.Ordinal) == exposed,
+                    $"epilogue {ending}: the end of the Club's traffic is told only where it is exposed (documents={documents})");
+            }
+            foreach (bool documents in new[] { false, true })
+            {
+                await game.LoadGame(original);
+                GameState.Instance.SetFlag(Endings.TookDocuments, documents);
+                story.ChoosePathString("ending_weary_road");
+                Check(story.ContinueMaximally().Contains("Give them to the newspapers.", StringComparison.Ordinal) == documents,
+                    $"ending 10: Eleanor asks Micah to give the papers to the press only when he has them (documents={documents})");
+            }
+            await game.LoadGame(original);
+            story.ChoosePathString("prison_eleanor_caleb");
+            Check(story.ContinueMaximally().Contains("I told the court the rest, Father.", StringComparison.Ordinal),
+                "ending 9: Eleanor testified about the Club in open court");
             await game.LoadGame(original);
             Engine.TimeScale = 1;
             var timer = System.Diagnostics.Stopwatch.StartNew();

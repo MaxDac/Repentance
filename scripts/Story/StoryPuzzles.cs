@@ -25,6 +25,7 @@ public static class StoryPuzzles
         state.SetFlag("audit_identified");
         state.SetFlag(Endings.TookDocuments);
         await game.Say("Bank, judge, captain. The index identifies the numbered pocket in the drawer. Inside: signed payment sheets. Names, dates, signatures. Into the coat. Insurance.");
+        await game.Think("Under the bank drafts, a page headed \"Thursdays\". Girls' first names, a railway station beside each, and a price. Caleb's fourteen were the lucky ones.");
     }
 
     public static async Task TryDecodeCard(Game game)

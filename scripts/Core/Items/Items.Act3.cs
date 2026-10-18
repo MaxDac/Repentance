@@ -12,7 +12,7 @@ public static partial class Items
         new("kitchen_key", "iron key", "res://assets/art/items/kitchen_key.png",
             "A black iron key off the lintel of the Harrington kitchen. The mob's delivery boys know where everything is."),
         new("documents", "documents", "res://assets/art/items/documents.png",
-            "A folder of Harrington Steel's dirty work: payoffs, a judge's name, a union man who fell off a girder. Insurance."),
+            "A folder of Harrington Steel's dirty work: payoffs, a judge's name, a union man who fell off a girder. And the Club's Thursday payments: girls' names, stations, prices. Insurance."),
         // Puzzle 15 - Harrington wine cellar.
         new("lantern", "storm lantern", "res://assets/art/items/lantern.png",
             "A tin storm lantern off the cellar hook. The font is bone dry."),

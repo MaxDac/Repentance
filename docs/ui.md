@@ -43,7 +43,8 @@ Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mon
 ## Components
 
 - **Speech**: 280 px wrapped label above the speaker's head in its `SpeechColor`, clamped to the screen. With a
-  close-up up, speech sits under the inset (380 px; the convent pair puts each speaker under their half).
+  close-up up, speech sits under the inset (380 px; the convent pair puts each speaker under their half). Beside a
+  photo close-up it fills the column to the photo's right, centred on the photo.
 - **Thoughts**: 440 px box at the top, sepia on a dark strip.
 - **Choice bar**: replaces the interface at the bottom; rows 14 px, text width 464 px. Shows `ShownChoices`
   (`#short:` labels).
@@ -61,7 +62,8 @@ Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mon
 
 `CloseUp` = id, texture under `assets/art/ui/` (or a function of settings) and fade times. Catalog: `stage`
 (`stage_closeup` with nudity on, `stage_closeup_clothed` off), `rose`, `beaten`, `convent` (two portraits),
-`heraldry`.
+`heraldry`, `motel`, and `vows` (`vows_photo`, ending 1's epilogue). `Photo = true` (`vows`) places the picture
+32 px from the left edge, vertically centred, with speech beside it.
 
 ```csharp
 Game.Hud.ShowCloseUp(CloseUps.Rose);   // Ink: INSET: rose

@@ -81,8 +81,8 @@ public static class Interlude
     }
 
     /// <summary>
-    /// Micah reaches the convent and Eleanor steps out on the fire escape: his journal takes over again with their
-    /// night in her motel room, then his office the morning of Act 2.
+    /// Eleanor sees Micah climb the fire escape and steps out to wait for him: over black, his journal takes over again
+    /// on the landing, where Act 1 left them (<see cref="MotelFireEscape"/>), then their night in her motel room.
     /// </summary>
     public static async Task EndFirst()
     {
@@ -98,10 +98,8 @@ public static class Interlude
         State.SetFlag("act2_church");
         State.SetFlag("on_map");
         Attic.RestoreMicahItems(2);
-        Game.Hud.ShowCaption("Later that night");
-        await Game.Wait(2.5);
-        Game.Hud.ShowCaption(null);
-        await Game.ChangeRoom("motel_night", "start", fadeInSeconds: 3.0);
+        await Game.Wait(1.0);
+        await Game.ChangeRoom("motel_fire_escape", "interlude1", fadeInSeconds: 1.5);
     }
 
     /// <summary>Daniel reads on in bed: the pages turn to the motel, the night after Micah left Eleanor there.</summary>

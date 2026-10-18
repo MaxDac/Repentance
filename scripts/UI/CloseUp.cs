@@ -18,6 +18,9 @@ public sealed record CloseUp(string Id, Func<GameSettings?, string> Texture, dou
     public CloseUp(string id, string texture, double fadeIn = 0.4, double fadeOut = 0.3)
         : this(id, _ => texture, fadeIn, fadeOut) { }
 
+    /// <summary>A photograph: a small print on the left of the screen, with speech in a column to its right.</summary>
+    public bool Photo { get; init; }
+
     public string TexturePath(GameSettings? settings) => $"res://assets/art/ui/{Texture(settings)}.png";
 }
 
@@ -37,17 +40,21 @@ public static class CloseUps
     /// <summary>The motel sign down the road from the convent, the long shot Micah spots in Act 1.</summary>
     public static readonly CloseUp Motel = new("motel", "motel_closeup");
 
-    /// <summary>On the motel fire escape, end of Act 1: Micah on the left, Eleanor on the right.</summary>
+    /// <summary>On the motel fire escape, after the First Interlude: Micah on the left, Eleanor on the right.</summary>
     public static readonly CloseUp Convent = new("convent", "convent_closeup");
 
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,
     /// stag and moon.</summary>
     public static readonly CloseUp Heraldry = new("heraldry", "heraldry_closeup");
 
+    /// <summary>Micah and Rose the day they renewed their vows, a sepia print on a cream card, in Daniel's epilogue
+    /// to ending 1.</summary>
+    public static readonly CloseUp Vows = new("vows", "vows_photo", 0.8, 0.6) { Photo = true };
+
     private static readonly Dictionary<string, CloseUp> ById = new()
     {
         [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [Convent.Id] = Convent, [Heraldry.Id] = Heraldry,
-        [Motel.Id] = Motel,
+        [Motel.Id] = Motel, [Vows.Id] = Vows,
     };
 
     public static CloseUp Get(string id) =>

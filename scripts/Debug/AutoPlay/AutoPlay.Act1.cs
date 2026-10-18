@@ -462,59 +462,25 @@ public partial class AutoPlay
         Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn && game.Hud.SpeechText ==
             "Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?",
             "Eleanor's opening is spoken on the fire escape before the close-up");
-        await Until(() => game.Hud.InsetVisible);
-        Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
-            "the two-portrait close-up appears immediately after Eleanor's opening");
-        Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the two-portrait close-up fills most of the screen");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Eleanor Harrington. You wouldn't happen to know her?");
-        CheckPortraitSpeech(game, right: false);
-        await Shot("convent_portrait_micah");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Tony's boys"));
-        CheckPortraitSpeech(game, right: true);
-        await Shot("convent_portrait_eleanor");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves.");
-        Check(game.Hud.SpeechText == "Twenty a day. I used to spend that on gloves." && !game.Hud.InsetDrawn,
-            "the compensation answer rejoins the existing conversation on the fire escape");
-        Check(_closeUpAtRoadChoice == null, "Micah answers the compensation choice without a portrait panel");
         Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
-        await Shot("motel_fire_escape");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("can't go back"));
-        Check(game.Hud.CurrentCloseUp == null && !game.Hud.InsetDrawn && game.Room is Rooms.MotelFireEscape,
-            "the rest of Eleanor's conversation stays on the fire escape without the panel");
-        var her = game.Room!.FindActor("eleanor")!.Position;
-        float talkingX = game.Player.Position.X;
-        int kisses = _poseCounts.GetValueOrDefault("micah_kiss");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Then stay. Right here.");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("You're walking into the rain"));
-        await game.Wait(0.5);
-        Check(game.Player.IsWalking && game.Player.Position.X > talkingX && game.Player.PoseName == null &&
-            !game.Hud.InsetVisible && !game.Hud.InsetDrawn,
-            "Micah walks slowly towards Eleanor, with no portrait panel, as she answers him");
-        await Shot("fire_escape_closer");
-        const string attraction = "I'd have climbed a hundred fire escapes for that. Some things a man doesn't decide. They decide him.";
-        const string guilt = "And somewhere across town Rose was waiting up for me, the way she always did. I kissed Eleanor anyway.";
-        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == attraction);
-        var eleanorActor = game.Room!.FindActor("eleanor")!;
-        Check(game.Player.PoseName == "micah_kiss" && _poseCounts.GetValueOrDefault("micah_kiss") == kisses + 1 &&
-            !eleanorActor.Visible, "Micah reaches Eleanor after her rain line and kisses her");
-        Check(game.Player.Position.DistanceTo(her + Rooms.MotelFireEscape.KissSpot) < 1f,
-            "he stands right in front of her for the kiss");
-        Check(game.Hud.FadeAlpha == 0f, "the kiss is seen before any fade");
-        await Shot("fire_escape_kiss");
-        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText == guilt);
-        Check(game.Player.PoseName == "micah_kiss" && game.Hud.FadeAlpha == 0f,
-            "the kiss holds while Micah thinks of Rose, still before the fade");
-        await Until(() => !game.Hud.ThoughtVisible && game.Hud.FadeAlpha > 0.3f);
-        Check(game.Player.PoseName == "micah_kiss", "the fade to black takes them in the kiss");
-        await Until(() => game.Hud.FadeAlpha >= 1f);
+        await Shot("motel_fire_escape_opening");
+        bool closeUp = false;
+        await Until(() =>
+        {
+            closeUp |= game.Hud.InsetVisible || game.Hud.InsetDrawn;
+            return game.Hud.FadeAlpha >= 1f || game.Room is not Rooms.MotelFireEscape;
+        });
+        Check(!closeUp && game.Player.PoseName == null && gs.HasFlag("eleanor_found"),
+            "Act 1 cuts to black on Eleanor's opening question: no close-up, no kiss");
         Check(game.Room is Rooms.MotelFireEscape, "Act 1 fades out on the fire escape");
-        bool sawMotelNight = false;
+        bool sawMotelNight = false, sawMore = false;
         await Until(() =>
         {
             sawMotelNight |= game.Room?.Name == "MotelNight";
+            sawMore |= game.Hud.SpeechVisible && game.Room is Rooms.MotelFireEscape;
             return game.Room?.Name == "Attic";
         });
-        Check(!sawMotelNight, "Act 1 ends on the fire escape; the motel night waits for the First Interlude");
+        Check(!sawMotelNight && !sawMore, "Act 1 ends on her question; the rest of their talk waits for the First Interlude");
         await game.Wait(2.5);
         await Shot("attic_night");
         await leave;
