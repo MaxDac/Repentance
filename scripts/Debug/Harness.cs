@@ -45,26 +45,15 @@ public abstract class Harness
         return true;
     }
 
-    /// <summary>Prints the marker line, lets pending timer waits finish, then quits with 0 (pass) or 1 (fail).</summary>
+    /// <summary>Prints the marker line, restores the clock and quits with 0 (pass) or 1 (fail).</summary>
     protected void Finish(string? summary = null)
     {
         Game.SequenceFailed -= OnSequenceFailed;
         if (summary != null) GD.Print(summary);
         GD.Print(_failures.Count == 0 ? $"{Marker} OK" : $"{Marker} FAILED:\n  " + string.Join("\n  ", _failures));
-        _ = Quit(_failures.Count == 0 ? 0 : 1);
-    }
-
-    // Quitting while a timer is still awaited makes Godot abort at shutdown (see Timers), so the game runs on,
-    // unpaused and on the fast clock, until none is pending (bounded, then it quits anyway).
-    private async Task Quit(int code)
-    {
-        var tree = _game.GetTree();
-        tree.Paused = false;
-        Engine.TimeScale = FastTimeScale;
-        for (int i = 0; i < 100 && Timers.Pending > 0; i++) await Observe(0.1);
-        if (Timers.Pending > 0) GD.Print($"[harness] quitting with {Timers.Pending} timer wait(s) pending");
         Engine.TimeScale = 1;
-        tree.Quit(code);
+        Timers.ReleasePending();
+        _game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 
     /// <summary><see cref="Game.Run"/> logs and swallows exceptions so the game survives; a test must not.</summary>
