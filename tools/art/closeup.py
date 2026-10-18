@@ -42,11 +42,11 @@ MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
-# The lip cut, from the mouth line to the chin, in each source of Micah's face: fresh red and its darker edge.
+# The lip cut, from the mouth line to the chin, in each source of Micah's face: red and its darker edge, which the
+# panel's palette turns into dark, blood-brown lines.
 MICAH_CUT = ((652, 398), (647, 428))
 BEATEN_CUT = ((648, 358), (643, 388))
 CUT, CUT_EDGE = hx("b8262a"), hx("5a0e12")
-CUT_COVER = 80  # how much of an art pixel the cut must cover to be stamped red, out of 255
 # One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
 # before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
 STAGE_PALETTE = [hx(c) for c in """
@@ -85,32 +85,24 @@ def crop_to_panel(img):
     return img.crop((0, 0, w, round(w * AH / AW)))
 
 
-def lip_cut(size, top, bottom, width=10):
-    """The cut the Blue Lantern left on Micah's bottom lip, as masks over a source picture of the given size: a thin
-    line, slightly slanted, from the mouth line down across the lip into the chin, and a darker edge along one side.
-    The masks go through the same crop and reduction as the picture, then stamp_cut paints them in."""
+def lip_cut(img, top, bottom, width=10):
+    """Paints the cut the Blue Lantern left on Micah's bottom lip: a thin red line, slightly slanted, from the mouth
+    line down across the lip into the chin, with a darker edge along one side. Drawn on a copy of the source picture,
+    wide enough to come through the reduction as a line about one art pixel wide."""
+    img = img.copy()
+    draw = ImageDraw.Draw(img)
     (x0, y0), (x1, y1) = top, bottom
-    cut, edge = Image.new("L", size, 0), Image.new("L", size, 0)
-    ImageDraw.Draw(cut).line([top, bottom], fill=255, width=width)
-    ImageDraw.Draw(edge).line([(x0 + width, y0 + 4), (x1 + width, y1)], fill=255, width=width // 2)
-    return cut, edge
-
-
-def stamp_cut(art, masks):
-    """Paints the cut over a picture already reduced to art pixels, in its own two reds, so the reduction of the rest
-    of the face is untouched; masks are lip_cut's, reduced to the same size."""
-    a = np.array(art)
-    cut, edge = (np.asarray(m.convert("L")) >= CUT_COVER for m in masks)
-    a[edge & ~cut] = CUT_EDGE
-    a[cut] = CUT
-    return Image.fromarray(a)
+    draw.line([top, bottom], fill=CUT, width=width)
+    draw.line([(x0 + width, y0 + 4), (x1 + width, y1)], fill=CUT_EDGE, width=width // 2)
+    return img
 
 
 def beaten_closeup(src):
-    """Micah flat on his back on the cathedral steps, looking up from under his hat, the cut on his bottom lip."""
-    img = crop_to_panel(src.convert("RGB"))
-    cut = [crop_to_panel(m) for m in lip_cut(src.size, *BEATEN_CUT)]
-    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS - 2), cut)
+    """Micah flat on his back on the cathedral steps, looking up from under his hat, the cut on his bottom lip.
+    The palette is the uncut picture's, so the cut comes through in the face's own dark reds."""
+    src = src.convert("RGB")
+    img = crop_to_panel(lip_cut(src, *BEATEN_CUT))
+    return framed(img, palette_of(crop_to_panel(src).resize((AW, AH), Image.BOX), COLOURS))
 
 
 def motel_crop(src):
@@ -146,11 +138,12 @@ def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
 
 def convent_closeup(micah, eleanor):
     """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size.
-    Micah's bottom lip carries the cut from the Blue Lantern, in two reds that leave the panel's other 30 colours."""
+    Micah's bottom lip carries the cut from the Blue Lantern; the palette is the uncut pictures', so the cut comes
+    through in the face's own dark reds."""
+    micah = micah.convert("RGB")
     crop = lambda img: portrait_crop(img, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
-    left, right = crop(micah), portrait_crop(eleanor, ELEANOR_FACE_X)
-    cut = [crop(m) for m in lip_cut(micah.size, *MICAH_CUT)]
-    return framed_pair(left, right, pair_palette(left, right, COLOURS - 2), cut)
+    right = portrait_crop(eleanor, ELEANOR_FACE_X)
+    return framed_pair(crop(lip_cut(micah, *MICAH_CUT)), right, pair_palette(crop(micah), right))
 
 
 def frame_border(panel):
@@ -161,36 +154,30 @@ def frame_border(panel):
     return panel
 
 
-def framed(img, pal, cut=None):
-    """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame; cut is lip_cut's
-    masks, cropped like the picture, to stamp over the reduction."""
+def framed(img, pal):
+    """The framed panel: the picture reduced to chunky VGA pixels inside a dark bevelled frame."""
     small = img.resize((AW, AH), Image.BOX)
-    art = pixelize(small, pal, spread=8)
-    if cut: art = stamp_cut(art, [m.resize((AW, AH), Image.BOX) for m in cut])
-    inner = art.resize((IW, IH), Image.NEAREST)
+    inner = pixelize(small, pal, spread=8).resize((IW, IH), Image.NEAREST)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(inner, (FRAME, FRAME))
     return frame_border(panel)
 
 
-def pair_palette(left, right, colours=COLOURS):
+def pair_palette(left, right):
     """The palette a two-portrait panel of these pictures gets."""
     both = Image.new("RGB", (HALF * 2, AH))
     both.paste(left.resize((HALF, AH), Image.BOX), (0, 0))
     both.paste(right.resize((HALF, AH), Image.BOX), (HALF, 0))
-    return palette_of(both, colours)
+    return palette_of(both, COLOURS)
 
 
-def framed_pair(left, right, pal=None, left_cut=None):
-    """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both;
-    left_cut is lip_cut's masks, cropped like the left picture."""
+def framed_pair(left, right, pal=None):
+    """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both."""
     a = left.resize((HALF, AH), Image.BOX)
     b = right.resize((HALF, AH), Image.BOX)
     pal = pal or pair_palette(left, right)
-    art = pixelize(a, pal, spread=8)
-    if left_cut: art = stamp_cut(art, [m.resize((HALF, AH), Image.BOX) for m in left_cut])
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
-    panel.paste(art.resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
+    panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
     panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))
     d = ImageDraw.Draw(panel)
     x0 = FRAME + HALF * SCALE
