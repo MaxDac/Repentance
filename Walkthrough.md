@@ -137,7 +137,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
-  the entrance), and on to the next scene.
+  the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
+  beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
+  the same blackout.
 
 #### Street behind the club (the alley)
 
@@ -187,7 +189,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
   with his own lighter (new smoking strip: head bowed, both hands cupped round the flame against the wind, a gust
-  first blows it out). He holds the lit cigarette while he thinks and, every 5 seconds while he talks, takes a drag
+  first blows it out). He holds the lit cigarette while he thinks and, every 10 seconds while he talks, takes a drag
   (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
 - A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
@@ -311,11 +313,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
-4. **Convent cell, that night.** After a knock, Agatha comes into the cell and talks round and round, trying to make Eleanor admit
-   that she wants something impure from her, while it is the other way around. She walks out again before the
-   morning. The choice is saved:
-   - **Refuse**: Agatha leaves, offended (`eleanor_refused_abbess`).
-   - **Indulge**: at the last moment Agatha turns back, cursing Eleanor for a demon. Nothing is shown.
+4. **Convent cell, that night.** After a knock, Agatha comes into the cell past midnight. She sincerely believes
+   she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
+   she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
+   the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
+   long as she wanted. She walks out again before the morning. The choice is saved:
+   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tells Agatha what she is
+     running from: the Club, the rites, and her own part in them. Agatha, moved, reaches for her; Eleanor stops her
+     gently. Ashamed, Agatha turns it round on her and puts her out at first light.
+   - **Seduce her**: Agatha goes along with it at first; at the last moment she turns back, cursing Eleanor for a
+     demon, and leaves. Nothing is shown.
    The Club's strings replace the convent piano from the knock until Agatha walks out.
    Eleanor leaves the convent the next morning.
 
@@ -507,8 +514,14 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   use the revolver again to threaten her.
   The sister will say "Are you crazy, sir?!"
   Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
-  Sister: "You are of the same lot as that Jezebel. At this point, I'll let you burn in the flames of hell.
-  She's a performer, you know. Almost caught me off guard, the whore. You might want to Harringhton senior.:
+  Micah's madness is escalating with his sin (the librarian at gunpoint, now a nun in her own convent; later he
+  shoots the mobster and kills the old man). With the gun on her, Agatha's own repentance begins: she confesses
+  that she went to Eleanor's cell past midnight and called it charity, that it was all her fault and that she
+  failed her. Both versions keep "She's a performer." and send Micah to Harrington senior.
+  - If Eleanor seduced her, Agatha still calls Eleanor a Jezebel ("She nearly had me fooled, the whore." before
+    she breaks, then "Jezebel she is. But it was my fault.").
+  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits she
+    called her a whore and put her out because Eleanor stopped her.
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
   On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
   name - I'd start there."
@@ -804,7 +817,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - The player has two choices: either shoots the old man or not:
   - If he shoot the man with the revolver, the man is supine with blood on his stomach (you have to generate it, and the
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
-    - **Exception (endings 10 and 11).** If Eleanor refused both the Mother Superior and the old man's gin and
+    - **Exception (endings 10 and 11).** If Eleanor told the Mother Superior the truth and refused the old man's gin and
       powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
       "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
       the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
@@ -855,7 +868,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
     a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
     Then the scene skips to *End of Act 3* (ending 1).
-  - **Eleanor's coda.** If Eleanor refused both the Mother Superior and the old man's gin and powder, the prayer
+  - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
     doesn't end the act. After the "Amen." the bedroom comes back with the player as Eleanor in the sheet and
     Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
     for his car. Two choices:
@@ -956,7 +969,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Endings 8 to 11 - Eleanor's own way
 
-These need Eleanor to have refused **both** the Mother Superior (First Interlude) and the old man's gin and powder
+These need Eleanor to have held out **both** times: telling the Mother Superior the truth instead of seducing her
+(First Interlude) and refusing the old man's gin and powder
 (Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
 returning to bed in her coda. Endings 2-7 need her to have given in at least once.
 

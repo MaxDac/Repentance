@@ -104,7 +104,7 @@ public partial class AutoPlay
         Check(game.Music.Current == Track.ConventPiano, "the convent piano plays in the cell before the knock");
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
-        _prefer = new[] { "(Indulge her.)" };
+        _prefer = new[] { "(Seduce her." };
         var night = game.Perform(Verb.Hand, "bed");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake"));
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
@@ -116,8 +116,8 @@ public partial class AutoPlay
         Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
             "the convent piano comes back once Agatha has gone");
         _prefer = prefer;
-        Check(Offered("interlude_agatha_night", "(Refuse her.)") && !gs.HasFlag(Endings.RefusedAbbess),
-            "the night visit offers the refusal; indulging her saves nothing");
+        Check(Offered("interlude_agatha_night", "(Tell her the truth.") && !gs.HasFlag(Endings.RefusedAbbess),
+            "the night visit offers the truth; seducing her saves nothing");
         Check(game.Room?.Name == "MotelNight" && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_empty.png") == true,
             "the next morning, the motel with an empty bed");
         await Shot("interlude_motel");
@@ -373,9 +373,13 @@ public partial class AutoPlay
                 nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
         }
         var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+        var threatHeard = Listen(game, threat);
         await game.Wait(1.5);
         await Shot("convent_gun");
         await threat;
+        var threatLines = await threatHeard;
+        Check(threatLines.Any(l => l.Contains("Jezebel")) && threatLines.Any(l => l.Contains("I failed her")),
+            "seduced, Agatha still calls her a Jezebel, but confesses she failed her");
         Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
         Check(game.Room?.FindHotspot("tribune")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false
             && game.Room?.FindHotspot("club")?.Visible == false
