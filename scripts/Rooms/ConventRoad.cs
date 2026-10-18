@@ -9,6 +9,8 @@ namespace Repentance.Rooms;
 /// </summary>
 public partial class ConventRoad : Room
 {
+    public override Track? Music => Track.StreetTraffic;
+
     public override async Task OnEnter(string entry)
     {
         if (!State.HasFlag("convent_departed"))

@@ -6,7 +6,7 @@ No audio files; sounds and music are synthesized at startup.
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
-| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Traffic.cs`) | yes | Renders scored tracks to seamless stereo loops |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
 Buses are created at runtime and routed to Master; their volume follows `GameSettings` (0% mutes).
@@ -50,6 +50,12 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
+| `StreetTraffic` | Hubbard Street, Rizzo's Flowers on State Street, cathedral steps, convent road | Not music: 1920s traffic on a wet road |
+
+`StreetTraffic` is scored like the music, but its instruments (`MusicSynth.Traffic.cs`) are noise and engines: a
+`CityHum` bed for the whole loop, `Motorcar` passes (Doppler, distance and stereo travel from the part's pan to the
+other side; accented cars pass close), a `Streetcar` with bell and rail-joint clacks, and a `Horn` (bulb honk, or an
+accented klaxon). It plays on the Music bus, so it follows the music volume; rain ambience still plays on top.
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second

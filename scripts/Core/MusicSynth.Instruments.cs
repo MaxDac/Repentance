@@ -4,7 +4,11 @@ namespace Repentance;
 
 public static partial class MusicSynth
 {
-    private static void Sound(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    /// <summary>
+    /// Adds one note to its part's buffer. A moving source (<see cref="Moves"/>) also gets the right channel and the
+    /// part's pan as the side it comes from.
+    /// </summary>
+    private static void Sound(float[] buf, float[]? right, Random rng, ScoreNote note, double spb, double velocity, double pan)
     {
         switch (note.Instrument)
         {
@@ -25,6 +29,18 @@ public static partial class MusicSynth
                 break;
             case Instrument.Drums:
                 Drum(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.CityHum:
+                Hum(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.Motorcar:
+                Motorcar(buf, right!, rng, note, spb, velocity, pan);
+                break;
+            case Instrument.Streetcar:
+                Streetcar(buf, right!, rng, note, spb, velocity, pan);
+                break;
+            case Instrument.Horn:
+                Horn(buf, rng, note, spb, velocity);
                 break;
         }
     }
@@ -47,6 +63,14 @@ public static partial class MusicSynth
             SoundSynth.Biquad.HighPass(35), SoundSynth.Biquad.Peaking(90, 4, 1), SoundSynth.Biquad.Peaking(700, -2, 1),
             SoundSynth.Biquad.LowPass(2500),
         },
+        // a far-off roar off the buildings: mostly low rumble, the top gone in the distance
+        Instrument.CityHum => new[]
+        {
+            SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.Peaking(110, 9, 0.7), SoundSynth.Biquad.LowPass(900),
+            SoundSynth.Biquad.LowPass(1400),
+        },
+        Instrument.Motorcar or Instrument.Streetcar => new[] { SoundSynth.Biquad.HighPass(28), SoundSynth.Biquad.LowPass(8000) },
+        Instrument.Horn => new[] { SoundSynth.Biquad.HighPass(150), SoundSynth.Biquad.LowPass(5000) },
         _ => new[] { SoundSynth.Biquad.HighPass(60) },
     };
 

@@ -139,7 +139,7 @@ Add code to the partial for its concern:
 | `AutoPlay` | `AutoPlay.cs` + `AutoPlay/AutoPlay.{Act1,Act2,Act3,Endings,Dialogue,Interface,Pause,Presentation,Puzzles,Inheritance}.cs` |
 | `Playthrough` | `Playthrough.cs` + `Playthrough/Playthrough.{Act1,Act2,Act3,Endings}.cs` |
 | `Items` | `Items.cs` + `Items/Items.{Micah,Act1,Act2,Act3}.cs` |
-| `SoundSynth`, `MusicSynth` | `SoundSynth.Effects.cs`; `MusicSynth.{Instruments,Scores}.cs` |
+| `SoundSynth`, `MusicSynth` | `SoundSynth.Effects.cs`; `MusicSynth.{Instruments,Scores,Traffic}.cs` |
 
 ## Third-party code
 

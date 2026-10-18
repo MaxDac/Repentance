@@ -157,6 +157,31 @@ public class MusicSynthTests
             score.Select(n => n.Instrument).ToHashSet());
     }
 
+    [Fact]
+    public void StreetTrafficIsTrafficNotMusic()
+    {
+        var score = MusicSynth.Score(Track.StreetTraffic);
+        Assert.Equal(60, MusicSynth.LengthBeats(Track.StreetTraffic));
+        Assert.Equal(1, MusicSynth.SecondsPerBeat(Track.StreetTraffic));
+        var traffic = new[] { Instrument.CityHum, Instrument.Motorcar, Instrument.Streetcar, Instrument.Horn }.ToHashSet();
+        Assert.Equal(traffic, score.Select(n => n.Instrument).ToHashSet());
+        // the city roars under everything, all the way round the loop
+        var hum = Assert.Single(score, n => n.Instrument == Instrument.CityHum);
+        Assert.Equal((0.0, 60.0), (hum.Beat, hum.Beats));
+        // cars go by both ways, some of them close, and one crosses the seam so the loop has no quiet start
+        var cars = score.Where(n => n.Instrument == Instrument.Motorcar).ToList();
+        Assert.True(cars.Count >= 8, $"{cars.Count} cars");
+        Assert.Equal(2, cars.Select(n => n.Voice).Distinct().Count());
+        Assert.Contains(cars, n => n.Strident);
+        Assert.Contains(cars, n => n.Beat + n.Beats > 60);
+        Assert.Single(score, n => n.Instrument == Instrument.Streetcar);
+        // a klaxon and a bulb horn, now and then, never a tune
+        var horns = score.Where(n => n.Instrument == Instrument.Horn).ToList();
+        Assert.Contains(horns, n => n.Strident);
+        Assert.Contains(horns, n => !n.Strident);
+        Assert.True(horns.Count <= 4);
+    }
+
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)
@@ -167,6 +192,8 @@ public class MusicSynthTests
             [Instrument.Violin] = ("G3", "E7"), [Instrument.OrganFlute] = ("C2", "C7"), [Instrument.OrganPlenum] = ("C2", "C7"),
             [Instrument.OrganPedal] = ("C1", "G3"), [Instrument.Piano] = ("A0", "C8"), [Instrument.Trumpet] = ("F#3", "D6"),
             [Instrument.UprightBass] = ("E1", "G4"), [Instrument.Drums] = ("C2", "B3"),
+            [Instrument.CityHum] = ("C1", "C3"), [Instrument.Motorcar] = ("C1", "C3"), [Instrument.Streetcar] = ("C2", "C5"),
+            [Instrument.Horn] = ("C3", "C6"),
         };
         Assert.All(MusicSynth.Score(track), n =>
             Assert.InRange(n.Midi, MusicSynth.Midi(range[n.Instrument].Low), MusicSynth.Midi(range[n.Instrument].High)));

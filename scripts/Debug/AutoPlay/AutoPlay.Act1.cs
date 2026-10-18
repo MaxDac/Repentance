@@ -154,6 +154,7 @@ public partial class AutoPlay
         // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
         await Shot("blue_lantern_front");
         Check(game.Sfx.Ambient == Sound.Rain, "rain falls on State Street");
+        Check(game.Music.Current == Track.StreetTraffic, "traffic goes by on State Street");
         await game.Perform(Verb.Look, "chalkboard");
         await game.Perform(Verb.Hand, "grille");
         Check(game.Room?.Name == "BlueLanternFront" && !gs.HasFlag("grille_opened"), "the grille won't open for a bare lapel");
@@ -266,7 +267,7 @@ public partial class AutoPlay
         await Until(() => !game.Busy && gs.HasFlag("seen_convent_exterior"));
         Check(game.Room is Rooms.ConventRoad && !gs.HasFlag("nun_talked") && !gs.HasFlag("eleanor_found"),
             "arrival waits outside for the player to open the convent door");
-        Check(game.Music.Current == null, "no piano outside the convent");
+        Check(game.Music.Current == Track.StreetTraffic, "traffic, not the piano, outside the convent");
         Check(game.Sfx.Ambient == Sound.Rain, "it rains on the road outside the convent");
         await Shot("convent_arrival");
         await ReloadCheckpoint("convent_arrival");
