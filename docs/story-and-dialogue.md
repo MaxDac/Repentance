@@ -109,7 +109,7 @@ alarm bell instead validate their ordered settings in their puzzle screens throu
 
 | Puzzle | Steps and flags | Out of order |
 |---|---|---|
-| 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> safe (`interlude_safe_locked`) -> riddle in the drawer (`interlude_drawer_locked`) -> call from the bed (`interlude_phoned`) | the drawer and the bed say what comes first; the door names the first missing step |
+| 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> safe (`interlude_safe_locked`) -> riddle in the drawer (`interlude_drawer_locked`) -> call on the vanity telephone (`interlude_phoned`) | the drawer and the telephone say what comes first; the door names the first missing step |
 | 18, dressing room (`ClubBackstage`) | powder (`interlude_powdered`) -> lipstick (`interlude_lips`) -> hairpin (`interlude_made_up`) | lipstick on a bare face, or the hairpin before the mouth, is refused and kept |
 | Safe, Room 507 (`PuzzleKind.Safe`) | directions right, left, right; numbers 12, 31, 7 (`PuzzleRules.Safe`) | the handle says how many tumblers fell; nothing is used up |
 | Alarm bell (`MansionExterior`, `PuzzleKind.Bell`) | plan: hold the hammer, tie it, release the hand (`PuzzleRules.Bell`) | any other plan (cutting the wire would ring the gong) stops before he touches it |

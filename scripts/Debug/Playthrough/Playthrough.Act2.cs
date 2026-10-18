@@ -36,7 +36,7 @@ public sealed partial class Playthrough
             await Do(Verb.UseItem, "closet", "eleanor_box_packed");
             Check(Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"), "the box locked in the closet safe");
             await Do(Verb.Hand, "desk_drawer");
-            await Do(Verb.Hand, "bed");
+            await Do(Verb.Hand, "telephone");
             Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");
             await Do(Verb.Walk, "exit");
             await WaitIdle();
