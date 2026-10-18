@@ -30,6 +30,8 @@ public enum Track
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
     /// and one brief, piercing trumpet stab.</summary>
     MansionDread,
+    /// <summary>Rose's street: not music but a quiet evening street, silent but for the odd motor car driving past.</summary>
+    RoseStreet,
 }
 
 public enum Instrument
@@ -80,6 +82,9 @@ public enum Instrument
     Pizzicato,
     /// <summary>An open trumpet, unmuted, hard-tongued and piercing.</summary>
     OpenTrumpet,
+    /// <summary>A 1920s motor car driving past: the note's pitch is the engine's, its length the whole pass. It moves
+    /// across the stereo field, left to right when the part's pan is positive, right to left when negative.</summary>
+    Car,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -142,6 +147,7 @@ public static partial class MusicSynth
         Track.PrisonParlour => -12f,
         Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
+        Track.RoseStreet => -18f,
         _ => -6f,
     };
 

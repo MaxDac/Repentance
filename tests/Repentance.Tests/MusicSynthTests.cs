@@ -54,6 +54,8 @@ public class MusicSynthTests
         var s = Renders[track].Value;
         Assert.All(s, v => Assert.True(float.IsFinite(v) && Math.Abs(v) <= 0.9001f));
         Assert.True(s.Max(Math.Abs) > 0.85f, "normalized");
+        // Rose's street is silent between its cars on purpose
+        if (track == Track.RoseStreet) return;
         // never a dead stop: something always sounds, or rings on in the room
         int window = MusicSynth.SampleRate;
         for (int start = 0; start + window <= s.Length / 2; start += window)
@@ -400,6 +402,30 @@ public class MusicSynthTests
         Assert.True(trumpet.Min(n => n.Midi) >= MusicSynth.Midi("F5"), "high-pitched");
     }
 
+    [Fact]
+    public void RoseStreetIsSilentButForTheOddCar()
+    {
+        var score = MusicSynth.Score(Track.RoseStreet);
+        double length = MusicSynth.LengthBeats(Track.RoseStreet);
+        Assert.Equal(60, length);
+        // not music: only cars, nothing accented, a quieter street than the city's traffic
+        Assert.All(score, n => Assert.Equal(Instrument.Car, n.Instrument));
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.True(MusicSynth.BaseVolumeDb(Track.RoseStreet) < MusicSynth.BaseVolumeDb(Track.StreetTraffic));
+        // the odd car, never two at once, none still passing as the loop wraps, and silence between them
+        var cars = score.OrderBy(n => n.Beat).ToList();
+        Assert.InRange(cars.Count, 2, 3);
+        Assert.All(cars, n => Assert.True(n.Beat > 0 && n.Beat + n.Beats < length, $"{n}"));
+        Assert.All(cars.Zip(cars.Skip(1)), p => Assert.True(p.Second.Beat >= p.First.Beat + p.First.Beats + 10, $"{p}"));
+        var s = Renders[Track.RoseStreet].Value;
+        int frames = MusicSynth.LoopSamples(Track.RoseStreet);
+        double spb = MusicSynth.SecondsPerBeat(Track.RoseStreet);
+        int quietFrom = (int)((cars[0].Beat + cars[0].Beats + 1) * spb * MusicSynth.SampleRate);
+        int quietTo = (int)((cars[1].Beat - 1) * spb * MusicSynth.SampleRate);
+        for (int i = 2 * quietFrom; i < 2 * quietTo; i++) Assert.True(Math.Abs(s[i]) < 0.001f, $"sample {i / 2} is silent");
+        Assert.True(Math.Abs(s[0]) < 0.001f && Math.Abs(s[2 * frames - 1]) < 0.001f, "silent at the seam");
+    }
+
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)
@@ -417,6 +443,7 @@ public class MusicSynthTests
             [Instrument.Horn] = ("C3", "C6"),
             [Instrument.RecordedPiano] = ("A0", "C8"),
             [Instrument.Pizzicato] = ("C2", "C5"), [Instrument.OpenTrumpet] = ("F#3", "D6"),
+            [Instrument.RecordedPiano] = ("A0", "C8"), [Instrument.Car] = ("C1", "C3"),
         };
         Assert.All(MusicSynth.Score(track), n =>
             Assert.InRange(n.Midi, MusicSynth.Midi(range[n.Instrument].Low), MusicSynth.Midi(range[n.Instrument].High)));

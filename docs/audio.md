@@ -7,7 +7,7 @@ Sounds and music are synthesized at startup; the one exception is a real grand p
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
-| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Traffic.cs`, `.Foley.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Traffic.cs`, `.Foley.cs`, `.Street.cs`) | yes | Renders scored tracks to seamless stereo loops |
 | `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
@@ -59,6 +59,12 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `PrisonParlour` | Joliet visiting room (prison endings) | Not music, near silence on `Foley`: a faint room hum, a guard's few steps twice, a chair dragged and sat on twice |
 | `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
+| `RoseStreet` | Rose's house (Act 2 visit, Act 3 coffee) | Not music: a quiet evening street, silent but for two 1920s cars driving past across the stereo field |
+
+`RoseStreet` is scored like the others but played by the `Car` in `MusicSynth.Street.cs`: a note is one whole pass,
+its pitch the engine's, and it moves across the stereo field (left to right when its part's pan is positive) with
+distance, air absorption and Doppler. Between the cars the track is silent, so `MusicSynthTests` exempts it from the
+never-silent check.
 
 `StreetTraffic` is scored like the music, but its instruments (`MusicSynth.Traffic.cs`) are noise and engines: a
 `CityHum` bed for the whole loop, `Motorcar` passes (Doppler, distance and stereo travel from the part's pan to the

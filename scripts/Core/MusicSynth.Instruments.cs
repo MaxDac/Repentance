@@ -63,6 +63,9 @@ public static partial class MusicSynth
             case Instrument.Streetcar:
                 Streetcar(buf, right!, rng, note, spb, velocity, pan);
                 break;
+            case Instrument.Car:
+                Car(buf, right!, rng, note, spb, velocity, Math.Sign(pan));
+                break;
             case Instrument.Horn:
                 Horn(buf, rng, note, spb, velocity);
                 break;
@@ -127,6 +130,7 @@ public static partial class MusicSynth
             SoundSynth.Biquad.HighPass(180), SoundSynth.Biquad.Peaking(900, 5, 1.2), SoundSynth.Biquad.Peaking(2600, 3, 1),
             SoundSynth.Biquad.LowPass(7000),
         },
+        Instrument.Car => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(5000) },
         _ => new[] { SoundSynth.Biquad.HighPass(60) },
     };
 

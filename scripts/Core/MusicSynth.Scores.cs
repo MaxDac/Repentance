@@ -20,6 +20,7 @@ public static partial class MusicSynth
         Track.BlueLanternJazz => Lantern,
         Track.BlueLanternAlley => LanternAlley,
         Track.MansionDread => Mansion,
+        Track.RoseStreet => Street,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -461,5 +462,16 @@ public static partial class MusicSynth
         new(Instrument.Cello, 0.65, 0.3,
             "r:4 Bb2:6 A2:4 r:2 C3:4 B2:4 F3:6 E3:4 r:2 F3:4 Bb3:6 A3:4 r:2 E3:4"),
         new(Instrument.OpenTrumpet, 0.6, -0.1, "r:50 F5+B5+C6:1/4 r:5.75"),
+    });
+
+    // ------------------------------------------------------------------ Rose's street
+
+    // Not music: an evening on a quiet terrace street a long way from the Loop, a minute long and silent but for two
+    // cars, one coming by from the left and, later, another from the right. No reverb to speak of: it is out in the
+    // open.
+    private static readonly Piece Street = new(60, new Hall(0.5, 0.5, 0.6, 0.05), new Part[]
+    {
+        new(Instrument.Car, 1, 1, "r:7 A1:12 r:41"),
+        new(Instrument.Car, 0.85, -1, "r:38 G1:11 r:11"),
     });
 }
