@@ -5,7 +5,8 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
   her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
-- rose_closeup: Rose calling Micah back from her door.
+- rose_closeup: Rose calling Micah back from her door. The source's glazed door leaves are painted over as solid
+  panelled wood (ROSE_DOOR_GLASS) to match her front door in the street scene.
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
@@ -42,6 +43,11 @@ MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
+# The lip cut, from the mouth line to the chin, in each source of Micah's face: red and its darker edge, which the
+# panel's palette turns into dark, blood-brown lines.
+MICAH_CUT = ((652, 398), (647, 428))
+BEATEN_CUT = ((648, 358), (643, 388))
+CUT, CUT_EDGE = hx("b8262a"), hx("5a0e12")
 # One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
 # before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
 STAGE_PALETTE = [hx(c) for c in """
@@ -64,9 +70,47 @@ def rose_crop(src):
     return img.crop((0, top, w, top + ch))
 
 
+# The glazed parts of the two door leaves in the 1344x768 source, as (top-left, top-right, bottom-right, bottom-left)
+# quads following each leaf's perspective. Rose's front door in the street scene is solid wood, so these are painted
+# over as raised wooden panels in the leaf's own colour.
+ROSE_DOOR_GLASS = (
+    (((277, 0), (392, 0), (392, 536), (277, 566)), (92, 38, 26)),
+    (((966, 88), (1069, 26), (1069, 584), (966, 540)), (196, 112, 52)),
+)
+
+
+def _quad_point(quad, u, v):
+    """Bilinear point inside quad (tl, tr, br, bl) at u across, v down."""
+    (x0, y0), (x1, y1), (x2, y2), (x3, y3) = quad
+    tx, ty = x0 + (x1 - x0) * u, y0 + (y1 - y0) * u
+    bx, by = x3 + (x2 - x3) * u, y3 + (y2 - y3) * u
+    return tx + (bx - tx) * v, ty + (by - ty) * v
+
+
+def _sub_quad(quad, u0, v0, u1, v1):
+    return [_quad_point(quad, u, v) for u, v in ((u0, v0), (u1, v0), (u1, v1), (u0, v1))]
+
+
+def solid_door(img, quad, base):
+    """Paints a glazed door area as solid wood: the leaf colour with two raised panels, lit from the hall."""
+    def shade(k):
+        return tuple(max(0, min(255, round(c * k))) for c in base)
+
+    d = ImageDraw.Draw(img)
+    d.polygon(quad, fill=base)
+    for v0, v1 in ((0.06, 0.46), (0.54, 0.94)):
+        d.polygon(_sub_quad(quad, 0.12, v0, 0.88, v1), fill=shade(0.62))     # the recess's shadowed groove
+        d.polygon(_sub_quad(quad, 0.16, v0 + 0.012, 0.84, v1 - 0.012), fill=shade(1.18))  # lit bevel
+        d.polygon(_sub_quad(quad, 0.22, v0 + 0.03, 0.80, v1 - 0.03), fill=shade(1.0))      # the panel face
+    return img
+
+
 def rose_closeup(src):
     """Rose calling Micah back from the door: "Wait!"."""
-    img = rose_crop(src)
+    img = src.convert("RGB")
+    for quad, base in ROSE_DOOR_GLASS:
+        solid_door(img, quad, base)
+    img = rose_crop(img)
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
@@ -80,10 +124,24 @@ def crop_to_panel(img):
     return img.crop((0, 0, w, round(w * AH / AW)))
 
 
+def lip_cut(img, top, bottom, width=10):
+    """Paints the cut the Blue Lantern left on Micah's bottom lip: a thin red line, slightly slanted, from the mouth
+    line down across the lip into the chin, with a darker edge along one side. Drawn on a copy of the source picture,
+    wide enough to come through the reduction as a line about one art pixel wide."""
+    img = img.copy()
+    draw = ImageDraw.Draw(img)
+    (x0, y0), (x1, y1) = top, bottom
+    draw.line([top, bottom], fill=CUT, width=width)
+    draw.line([(x0 + width, y0 + 4), (x1 + width, y1)], fill=CUT_EDGE, width=width // 2)
+    return img
+
+
 def beaten_closeup(src):
-    """Micah flat on his back on the cathedral steps, looking up from under his hat."""
-    img = crop_to_panel(src.convert("RGB"))
-    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+    """Micah flat on his back on the cathedral steps, looking up from under his hat, the cut on his bottom lip.
+    The palette is the uncut picture's, so the cut comes through in the face's own dark reds."""
+    src = src.convert("RGB")
+    img = crop_to_panel(lip_cut(src, *BEATEN_CUT))
+    return framed(img, palette_of(crop_to_panel(src).resize((AW, AH), Image.BOX), COLOURS))
 
 
 def motel_crop(src):
@@ -118,10 +176,13 @@ def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
 
 
 def convent_closeup(micah, eleanor):
-    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size."""
-    left = portrait_crop(micah, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
+    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size.
+    Micah's bottom lip carries the cut from the Blue Lantern; the palette is the uncut pictures', so the cut comes
+    through in the face's own dark reds."""
+    micah = micah.convert("RGB")
+    crop = lambda img: portrait_crop(img, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
     right = portrait_crop(eleanor, ELEANOR_FACE_X)
-    return framed_pair(left, right)
+    return framed_pair(crop(lip_cut(micah, *MICAH_CUT)), right, pair_palette(crop(micah), right))
 
 
 def frame_border(panel):
@@ -141,14 +202,19 @@ def framed(img, pal):
     return frame_border(panel)
 
 
+def pair_palette(left, right):
+    """The palette a two-portrait panel of these pictures gets."""
+    both = Image.new("RGB", (HALF * 2, AH))
+    both.paste(left.resize((HALF, AH), Image.BOX), (0, 0))
+    both.paste(right.resize((HALF, AH), Image.BOX), (HALF, 0))
+    return palette_of(both, COLOURS)
+
+
 def framed_pair(left, right, pal=None):
     """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both."""
     a = left.resize((HALF, AH), Image.BOX)
     b = right.resize((HALF, AH), Image.BOX)
-    both = Image.new("RGB", (HALF * 2, AH))
-    both.paste(a, (0, 0))
-    both.paste(b, (HALF, 0))
-    pal = pal or palette_of(both, COLOURS)
+    pal = pal or pair_palette(left, right)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
     panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))

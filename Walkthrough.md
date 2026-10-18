@@ -137,13 +137,18 @@ described here (other verbs, flavour lines) is left to the implementation.
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
-  the entrance), and on to the next scene.
+  the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
+  beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
+  the same blackout.
 
 #### Street behind the club (the alley)
 
 - New location: the road behind the club, dirty and in the shadow, with only one intermittent street lamp.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
-  Tony behind Sal.
+  Tony behind Sal. So the player understands what happened, Sal steps up behind Micah, half turned to the screen,
+  and kicks him in the belly twice with his right foot, the foot hidden behind Micah's body (new kicking sprite for
+  Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue starts. The beating splits Micah's bottom lip: from here on his close-ups (the convent two-portrait panel
+  and the beaten panel) show a small dark-red cut across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
@@ -187,7 +192,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - When Micah gets out, the road is empty: no Eleanor. He walks to the middle of the road and lights a cigarette
   with his own lighter (new smoking strip: head bowed, both hands cupped round the flame against the wind, a gust
-  first blows it out). He holds the lit cigarette while he thinks and, every 5 seconds while he talks, takes a drag
+  first blows it out). He holds the lit cigarette while he thinks and, every 10 seconds while he talks, takes a drag
   (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
 - A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
@@ -479,7 +484,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   back with a "Wait!": Micah will turn, then the wife will say "Don't get into trouble again."
   After "Wait!" (not during it) a framed close-up panel of Rose at her door pops up over the scene, in the same style as
   Eleanor's stage close-up; after a couple of seconds of silence, "Don't get into trouble again." appears along the
-  panel's bottom edge, then the panel is removed and the scene continues.
+  panel's bottom edge, the panel holds for a couple more seconds after the line, then it is removed and the scene
+  continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
 - If Micah leaves without insisting at least three times, Rose answers: "You're running away again. It was always

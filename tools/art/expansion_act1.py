@@ -911,12 +911,12 @@ REGULAR_X = 442
 # the smoker's strip: idle, arm rising, hand at the mouth, drawing on it, arm falling with a puff, idle with the
 # puff drifting off. Each pose is the cigarette hand's elbow and hand offsets from the regular's centre line.
 SMOKE_POSES = (
-    {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": None},
-    {"elbow": (17, 136), "hand": (11, 126), "ember": 0, "puff": None},
-    {"elbow": (14, 129), "hand": (3, 112), "ember": 1, "puff": None},
-    {"elbow": (14, 129), "hand": (3, 112), "ember": 2, "puff": None},
-    {"elbow": (17, 136), "hand": (11, 126), "ember": 1, "puff": ((-3, 113, 2), (-6, 110, 2))},
-    {"elbow": (14, 136), "hand": (13, 150), "ember": 0, "puff": ((-13, 101, 3), (-17, 96, 2), (-9, 106, 2))},
+    {"elbow": (11, 136), "hand": (10, 150), "ember": 0, "puff": None},
+    {"elbow": (13, 136), "hand": (9, 126), "ember": 0, "puff": None},
+    {"elbow": (11, 128), "hand": (3, 110), "ember": 1, "puff": None},
+    {"elbow": (11, 128), "hand": (3, 110), "ember": 2, "puff": None},
+    {"elbow": (13, 136), "hand": (9, 126), "ember": 1, "puff": ((-3, 113, 2), (-6, 110, 2))},
+    {"elbow": (11, 136), "hand": (10, 150), "ember": 0, "puff": ((-12, 101, 3), (-15, 96, 2), (-8, 106, 2))},
 )
 
 
@@ -944,48 +944,48 @@ def regular(img, pose=0):
     skin, skin_d = hx("8a6a58"), hx("4a3830")
     hat, hat_d, hat_l, band = hx("3a3632"), hx("221f1d"), hx("5e5852"), hx("121012")
     # trouser legs and shoes
-    d.rectangle([cx - 7, 162, cx - 2, BASE - 3], fill=hx("1c1a20"))
-    d.rectangle([cx + 2, 162, cx + 7, BASE - 3], fill=hx("16151a"))
-    d.line([(cx - 6, 163), (cx - 6, BASE - 4)], fill=hx("2c2a32"))
-    d.rectangle([cx - 9, BASE - 3, cx - 1, BASE], fill=hx("0c0b0e"))
-    d.rectangle([cx + 1, BASE - 3, cx + 9, BASE], fill=hx("0c0b0e"))
-    d.line([(cx - 8, BASE - 3), (cx - 3, BASE - 3)], fill=hx("4a4650"))
+    d.rectangle([cx - 5, 162, cx - 1, BASE - 3], fill=hx("1c1a20"))
+    d.rectangle([cx + 1, 162, cx + 5, BASE - 3], fill=hx("16151a"))
+    d.line([(cx - 4, 163), (cx - 4, BASE - 4)], fill=hx("2c2a32"))
+    d.rectangle([cx - 6, BASE - 2, cx - 1, BASE], fill=hx("0c0b0e"))
+    d.rectangle([cx + 1, BASE - 2, cx + 6, BASE], fill=hx("0c0b0e"))
+    d.line([(cx - 5, BASE - 2), (cx - 3, BASE - 2)], fill=hx("4a4650"))
     outline = hx("0e0d12")
     # head and neck under the brim: the street lamp on the left lights the cheek, nose and chin, the far side of
     # the face falls into shadow, and the brim throws a band of shade over the brow and eyes
     face, face_d, face_l, face_dd = SKIN
-    d.rectangle([cx - 2, 113, cx + 2, 118], fill=face_dd)
-    d.ellipse([cx - 5, 101, cx + 5, 116], fill=face)
-    d.chord([cx - 5, 101, cx + 5, 116], 270, 90, fill=face_d)
-    d.line([(cx - 4, 109), (cx - 4, 112)], fill=face_l)
-    d.line([(cx - 3, 113), (cx - 1, 115)], fill=face_l)
-    d.line([(cx + 4, 110), (cx + 1, 115)], fill=face_dd)
+    d.rectangle([cx - 2, 111, cx + 2, 117], fill=face_dd)
+    d.ellipse([cx - 4, 103, cx + 4, 113], fill=face)
+    d.chord([cx - 4, 103, cx + 4, 113], 270, 90, fill=face_d)
+    d.line([(cx - 3, 109), (cx - 3, 110)], fill=face_l)
+    d.point((cx - 2, 112), fill=face_l)
+    d.line([(cx + 3, 109), (cx + 3, 111)], fill=face_dd)
     # ear on the lit side
-    d.point((cx - 6, 109), fill=face)
-    d.point((cx - 6, 110), fill=face_d)
+    d.point((cx - 5, 108), fill=face)
+    d.point((cx - 5, 109), fill=face_d)
     # brim shadow, then brow ridge and eyes glinting out of it
-    d.rectangle([cx - 5, 106, cx + 5, 108], fill=face_dd)
-    d.line([(cx - 4, 108), (cx - 1, 108)], fill=hx("2a1a14"))
-    d.line([(cx + 1, 108), (cx + 3, 108)], fill=hx("2a1a14"))
-    d.point((cx - 3, 109), fill=hx("1a1210"))
-    d.point((cx - 2, 109), fill=hx("c8bcae"))
-    d.point((cx + 2, 109), fill=hx("1a1210"))
+    d.rectangle([cx - 4, 105, cx + 4, 107], fill=face_dd)
+    d.line([(cx - 3, 107), (cx - 1, 107)], fill=hx("2a1a14"))
+    d.line([(cx + 1, 107), (cx + 3, 107)], fill=hx("2a1a14"))
+    d.point((cx - 3, 108), fill=hx("1a1210"))
+    d.point((cx - 2, 108), fill=hx("c8bcae"))
+    d.point((cx + 2, 108), fill=hx("1a1210"))
     # nose: a lit ridge, a shadowed side and the nostril
-    d.line([(cx - 1, 109), (cx - 1, 111)], fill=face_l)
-    d.line([(cx, 110), (cx, 111)], fill=face_d)
-    d.point((cx, 112), fill=face_dd)
-    # mouth and the underside of the lower lip, then a lit chin
-    d.line([(cx - 2, 113), (cx + 1, 113)], fill=hx("5a3028"))
-    d.point((cx - 1, 114), fill=face_l)
-    d.point((cx - 1, 115), fill=face)
+    d.point((cx - 1, 108), fill=face_l)
+    d.point((cx - 1, 109), fill=face_l)
+    d.point((cx, 109), fill=face_d)
+    d.point((cx, 110), fill=face_dd)
+    # a flat, closed mouth, then a lit chin
+    d.line([(cx - 1, 111), (cx + 1, 111)], fill=hx("4a3028"))
+    d.point((cx - 1, 112), fill=face_l)
     # overcoat: hunched shoulders, a modest flare, belt, the lamp catching its left edge
-    d.polygon([(cx - 10, 116), (cx + 10, 116), (cx + 10, 123), (cx + 11, 164), (cx - 11, 164), (cx - 10, 123)],
+    d.polygon([(cx - 8, 116), (cx + 8, 116), (cx + 8, 123), (cx + 9, 164), (cx - 9, 164), (cx - 8, 123)],
               fill=coat)
-    d.polygon([(cx + 3, 118), (cx + 10, 116), (cx + 10, 123), (cx + 11, 164), (cx + 4, 164)], fill=coat_d)
-    d.line([(cx - 10, 123), (cx - 11, 163)], fill=coat_l)
-    d.line([(cx + 10, 124), (cx + 11, 163)], fill=hx("34323e"))
-    d.line([(cx - 10, 117), (cx - 5, 116)], fill=coat_l)
-    d.rectangle([cx - 11, 141, cx + 11, 143], fill=coat_d)
+    d.polygon([(cx + 3, 118), (cx + 8, 116), (cx + 8, 123), (cx + 9, 164), (cx + 4, 164)], fill=coat_d)
+    d.line([(cx - 8, 123), (cx - 9, 163)], fill=coat_l)
+    d.line([(cx + 8, 124), (cx + 9, 163)], fill=hx("34323e"))
+    d.line([(cx - 8, 117), (cx - 5, 116)], fill=coat_l)
+    d.rectangle([cx - 9, 141, cx + 9, 143], fill=coat_d)
     d.rectangle([cx - 1, 141, cx + 1, 143], fill=hx("8a8070"))
     d.line([(cx, 128), (cx, 163)], fill=coat_d)
     for y in (132, 150):
@@ -996,65 +996,82 @@ def regular(img, pose=0):
     d.line([(cx - 5, 117), (cx - 1, 128)], fill=coat_l)
     d.line([(cx + 5, 117), (cx + 1, 128)], fill=coat_d)
     # collar turned up against the rain, framing the jaw
-    d.polygon([(cx - 10, 117), (cx - 8, 109), (cx - 5, 112), (cx - 4, 117)], fill=coat)
-    d.line([(cx - 10, 116), (cx - 8, 109)], fill=coat_l)
-    d.polygon([(cx + 10, 117), (cx + 8, 109), (cx + 5, 112), (cx + 4, 117)], fill=coat_d)
+    d.polygon([(cx - 8, 117), (cx - 7, 109), (cx - 5, 112), (cx - 4, 117)], fill=coat)
+    d.line([(cx - 8, 116), (cx - 7, 109)], fill=coat_l)
+    d.polygon([(cx + 8, 117), (cx + 7, 109), (cx + 5, 112), (cx + 4, 117)], fill=coat_d)
     # the other arm, its hand deep in the coat pocket: an outlined sleeve down the lit side
-    d.line([(cx - 10, 119), (cx - 12, 133), (cx - 9, 145)], fill=outline, width=6, joint="curve")
-    d.line([(cx - 10, 119), (cx - 12, 133), (cx - 9, 145)], fill=coat, width=4, joint="curve")
-    d.line([(cx - 13, 122), (cx - 14, 133), (cx - 12, 142)], fill=coat_l)
-    d.line([(cx - 7, 146), (cx - 11, 146)], fill=coat_d)
-    d.line([(cx - 11, 147), (cx - 6, 148)], fill=outline)
+    d.line([(cx - 8, 119), (cx - 9, 133), (cx - 7, 145)], fill=outline, width=5, joint="curve")
+    d.line([(cx - 8, 119), (cx - 9, 133), (cx - 7, 145)], fill=coat, width=3, joint="curve")
+    d.line([(cx - 10, 122), (cx - 11, 133), (cx - 9, 142)], fill=coat_l)
+    d.line([(cx - 5, 146), (cx - 9, 146)], fill=coat_d)
+    d.line([(cx - 9, 147), (cx - 5, 148)], fill=outline)
     # blue carnation in the left buttonhole, ruffled, catching the light
     dark, mid, hi = CARNATION
-    d.ellipse([cx - 10, 119, cx - 4, 125], fill=dark)
-    d.ellipse([cx - 9, 119, cx - 5, 123], fill=mid)
-    for x in (cx - 9, cx - 7, cx - 5):
+    d.ellipse([cx - 8, 119, cx - 3, 124], fill=dark)
+    d.ellipse([cx - 7, 119, cx - 4, 122], fill=mid)
+    for x in (cx - 7, cx - 5):
         d.point((x, 118), fill=mid)
-    d.point((cx - 8, 120), fill=hi)
-    d.point((cx - 6, 121), fill=hi)
-    d.point((cx - 7, 122), fill=dark)
-    d.point((cx - 9, 123), fill=mid)
-    d.line([(cx - 6, 125), (cx - 5, 127)], fill=hx("3a7a3a"))
+    d.point((cx - 7, 120), fill=hi)
+    d.point((cx - 5, 121), fill=hi)
+    d.point((cx - 6, 122), fill=dark)
+    d.point((cx - 7, 123), fill=mid)
+    d.line([(cx - 5, 124), (cx - 4, 126)], fill=hx("3a7a3a"))
     # the smoking arm: an outlined sleeve in its own tone so it reads against the shaded coat, cuff, hand, cigarette
     ex, ey = cx + p["elbow"][0], p["elbow"][1]
     hx_, hy = cx + p["hand"][0], p["hand"][1]
     sleeve = mix(coat, coat_l, 0.25)
-    arm = [(cx + 9, 119), (ex, ey), (hx_ + 1, hy + 2)]
-    d.line(arm, fill=outline, width=7, joint="curve")
-    d.line(arm, fill=sleeve, width=5, joint="curve")
-    d.line([(cx + 10, 118), (ex + 2, ey)], fill=mix(sleeve, coat_l, 0.6), width=1)
+    arm = [(cx + 7, 119), (ex, ey), (hx_ + 1, hy + 2)]
+    d.line(arm, fill=outline, width=6, joint="curve")
+    d.line(arm, fill=sleeve, width=4, joint="curve")
+    d.line([(cx + 8, 118), (ex + 2, ey)], fill=mix(sleeve, coat_l, 0.6), width=1)
     d.line([(ex - 1, ey + 1), (hx_ + 1, hy + 3)], fill=coat_d, width=1)
     d.point((hx_ + 1, hy + 2), fill=hx("b8b4aa"))
     d.ellipse([hx_ - 1, hy - 1, hx_ + 2, hy + 2], fill=skin)
     d.point((hx_ + 2, hy + 1), fill=skin_d)
     d.point((hx_ - 1, hy), fill=mix(skin, hx("e0b090"), 0.5))
     ember = EMBER[p["ember"]]
+    # held away from the mouth, the cigarette points out from the body (to his right, the side of the smoking hand)
+    # and its thread of smoke rises off the ember; at the mouth it sits between the lips
     if p["hand"][1] > 130:
-        d.line([(hx_ - 4, hy + 2), (hx_ - 2, hy + 2)], fill=hx("e8e4dc"))
-        d.point((hx_ - 5, hy + 2), fill=ember)
-        for k, (wx, wy) in enumerate(((-5, 0), (-4, -2), (-5, -4), (-6, -6), (-5, -8))):
+        d.line([(hx_ + 3, hy + 2), (hx_ + 5, hy + 2)], fill=hx("e8e4dc"))
+        d.point((hx_ + 6, hy + 2), fill=ember)
+        for k, (wx, wy) in enumerate(((6, 0), (5, -2), (6, -4), (7, -6), (6, -8))):
             if k % 2 == 0 or p["puff"] is None:
                 d.point((hx_ + wx, hy + wy), fill=hx("7a7e8a"))
+    elif p["hand"][0] > 5:
+        d.point((hx_ + 3, hy + 1), fill=hx("e8e4dc"))
+        d.point((hx_ + 4, hy + 1), fill=ember)
     else:
         d.point((hx_ - 2, hy + 1), fill=hx("e8e4dc"))
         d.point((hx_ - 3, hy + 1), fill=ember)
     # fedora, tipped forward and seen from above: a wide brim, the pinched crown sitting at its back, and the front
     # lip dipping low over the brow so the eyes look out of its shadow
-    hy0, by0 = -3, -6
-    d.ellipse([cx - 12, 101 + by0, cx + 12, 112 + by0], fill=hat_d)
-    d.arc([cx - 12, 101 + by0, cx + 12, 112 + by0], 160, 300, fill=hat_l)
-    d.polygon([(cx - 6, 102 + by0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx + 4, 95 + hy0), (cx + 6, 98 + hy0),
-               (cx + 6, 102 + by0)], fill=hat)
-    d.polygon([(cx - 6, 102 + by0), (cx - 6, 98 + hy0), (cx - 4, 95 + hy0), (cx - 2, 95 + hy0), (cx - 3, 98 + hy0),
-               (cx - 3, 102 + by0)], fill=mix(hat, hat_l, 0.45))
-    d.ellipse([cx - 4, 95 + hy0, cx + 4, 100 + hy0], fill=mix(hat, hat_l, 0.3))
-    d.line([(cx, 95 + hy0), (cx, 99 + hy0)], fill=hat_d)
-    d.point((cx - 1, 96 + hy0), fill=hat_l)
-    d.rectangle([cx - 6, 102 + by0 - 2, cx + 6, 102 + by0], fill=band)
-    d.chord([cx - 12, 101 + by0, cx + 12, 113 + by0], 0, 180, fill=hat_d)
-    d.arc([cx - 12, 101 + by0, cx + 12, 113 + by0], 25, 155, fill=hx("34302c"))
-    d.line([(cx - 11, 107 + by0), (cx - 5, 110 + by0)], fill=mix(hat_d, hat_l, 0.5))
+    rim, crease, ribbon = hx("a89a88"), hx("141214"), hx("4a3a34")
+    # a dark silhouette first so the hat reads against the night street
+    d.ellipse([cx - 10, 97, cx + 10, 106], fill=outline)
+    d.polygon([(cx - 6, 100), (cx - 6, 94), (cx - 4, 92), (cx + 4, 92), (cx + 6, 94), (cx + 6, 100)], fill=outline)
+    # a flat brim seen slightly from above, its back edge catching the lamp
+    d.ellipse([cx - 9, 98, cx + 9, 104], fill=hat_d)
+    d.arc([cx - 9, 98, cx + 9, 104], 180, 270, fill=hat_l)
+    # crown: lit left flank, shaded right flank, and the centre crease with its two front pinches
+    d.polygon([(cx - 5, 100), (cx - 5, 94), (cx - 3, 93), (cx + 3, 93), (cx + 5, 94), (cx + 5, 100)], fill=hat)
+    d.polygon([(cx - 5, 100), (cx - 5, 94), (cx - 3, 93), (cx - 2, 93), (cx - 3, 94), (cx - 3, 100)], fill=hat_l)
+    d.line([(cx + 4, 94), (cx + 4, 97)], fill=hat_d)
+    d.line([(cx, 93), (cx, 95)], fill=crease)
+    d.point((cx - 2, 95), fill=hat_d)
+    d.point((cx + 2, 95), fill=hat_d)
+    d.point((cx - 4, 94), fill=rim)
+    d.point((cx - 3, 93), fill=rim)
+    # band: a dark ribbon edged by a lit top line, its bow on the left
+    d.rectangle([cx - 5, 97, cx + 5, 99], fill=band)
+    d.line([(cx - 5, 97), (cx + 4, 97)], fill=ribbon)
+    d.point((cx - 4, 98), fill=ribbon)
+    d.point((cx - 4, 99), fill=ribbon)
+    # front brim tipped low over the brow, its lip lit along the edge
+    d.chord([cx - 9, 98, cx + 9, 106], 0, 180, fill=hat_d)
+    d.line([(cx - 8, 102), (cx - 4, 104)], fill=rim)
+    d.line([(cx - 3, 105), (cx + 3, 105)], fill=hat)
+    d.line([(cx + 4, 104), (cx + 7, 102)], fill=hat)
     if p["puff"]:
         for px_, py_, r in p["puff"]:
             _puff(d, cx + px_, py_, r)
@@ -1233,8 +1250,11 @@ def build_florist():
     src = Image.blend(variants["base"], variants["grille"], 0.5)
     src.paste(frames[0][0].crop(box), box[:2])
     cx = REGULAR_X
-    face = frames[0][0].crop((cx - 6, 106, cx + 6, 117)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    face = frames[0][0].crop((cx - 6, 104, cx + 6, 114)).quantize(6, method=Image.Quantize.MEDIANCUT)
     skin = [tuple(face.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
+    # likewise the fedora's few greys, so its lit flank, rim and crease survive as separate tones
+    hat = frames[0][0].crop((cx - 10, 91, cx + 11, 107)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    skin += [tuple(hat.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
     pal = (palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45),
                                                                     hx("ccc3a0")] + skin)
     px = {k: pixelize(v, pal) for k, v in variants.items()}

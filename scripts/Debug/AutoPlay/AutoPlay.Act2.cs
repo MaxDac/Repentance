@@ -430,6 +430,8 @@ public partial class AutoPlay
         Check(game.Hud.SpeechRect.Position.Y > game.Hud.InsetRect.Position.Y + game.Hud.InsetRect.Size.Y * 0.7f, "speech sits below Rose's face while the close-up is up");
         await game.Wait(1);
         await Shot("rose_house_wait");
+        await Until(() => !game.Hud.SpeechVisible || !game.Hud.InsetVisible);
+        Check(game.Hud.InsetVisible, "Rose's close-up holds after her last line");
         await Until(() => !game.Hud.InsetVisible);
         Check(game.Room?.Name == "RoseHouse", "Rose's close-up is gone before the door closes");
         await bell;
