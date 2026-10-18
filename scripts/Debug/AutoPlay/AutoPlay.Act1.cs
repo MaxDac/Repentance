@@ -76,6 +76,7 @@ public partial class AutoPlay
         await MouseTest(game);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Lobby", "entered the lobby");
+        Check(game.Music.Current == Track.LobbyPiano, "the house pianist plays in the Aurelian lobby");
 
         await Shot("lobby");
         await game.Perform(Verb.Talk, "concierge");
@@ -101,6 +102,7 @@ public partial class AutoPlay
         await CancelPuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, "lift_routed", "lift_route");
         await SolvePuzzle(() => game.Perform(Verb.Walk, "service_door"), PuzzleKind.Lift, LiftRoute(), "lift_route");
         Check(game.Room?.Name == "HotelLinen", "staff elevator up to the fifth-floor linen room");
+        Check(game.Music.Current == null, "the lobby piano stays in the lobby");
 
         // ---- the linen room: a hanger and the cart's pliers make a hook for the night bolt
         await Shot("hotel_linen");
@@ -147,6 +149,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "HotelLinen", "back across the corridor to the linen room");
         await game.Perform(Verb.Walk, "lift");
         Check(game.Room?.Name == "Lobby", "back down in the lobby");
+        Check(game.Music.Current == Track.LobbyPiano, "the lobby piano plays again on the way back down");
         await SaveLoadTest(game);
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room?.Name == "BlueLanternFront", "the Blue Lantern lead goes to Rizzo's Flowers");

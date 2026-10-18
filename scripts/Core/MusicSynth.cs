@@ -15,6 +15,8 @@ public enum Track
     ConventPiano,
     /// <summary>Micah's office: a slow, depressed minor-key ballad for muted trumpet, piano, upright bass and brushes.</summary>
     OfficeJazz,
+    /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
+    LobbyPiano,
     /// <summary>The Harrington mansion: a dark, dissonant thriller loop for double bass, pizzicato chords, bowed cello
     /// and one brief, piercing trumpet stab.</summary>
     MansionDread,
@@ -33,6 +35,8 @@ public enum Instrument
     /// <summary>Organ pedal, 16' and 8'.</summary>
     OrganPedal,
     Piano,
+    /// <summary>A real grand piano, played pianissimo: recordings of each note (<see cref="PianoRecordings"/>).</summary>
+    RecordedPiano,
     /// <summary>A trumpet played soft through a Harmon mute.</summary>
     Trumpet,
     /// <summary>A plucked upright bass.</summary>
@@ -89,6 +93,7 @@ public static partial class MusicSynth
         Track.ChurchOrgan => -7.5f,
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
+        Track.LobbyPiano => -12f,
         Track.MansionDread => -8.5f,
         _ => -6f,
     };

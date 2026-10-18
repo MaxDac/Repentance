@@ -1,12 +1,14 @@
 # Audio
 
-No audio files; sounds and music are synthesized at startup.
+Sounds and music are synthesized at startup; the one exception is a real grand piano, recorded note by note
+(see [Recorded piano](#recorded-piano)).
 
 | Part | Godot-free | Role |
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
 | `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
 Buses are created at runtime and routed to Master; their volume follows `GameSettings` (0% mutes).
@@ -50,7 +52,8 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
-| `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, irregular pizzicato clusters, cello arcs, one brief high open-trumpet stab |
+| `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
@@ -61,3 +64,37 @@ Score syntax (`MusicSynth.Scores.cs`): parts are space-separated tokens `name:be
 
 **Add a track**: `Track` -> score in `MusicSynth.Scores.cs` (parts, instruments, tempo, hall) -> `Room.Music` ->
 `BaseVolumeDb` if needed. Validate with `MusicSynthTests` and playthrough.
+
+### Recorded piano
+
+`Instrument.RecordedPiano` plays real pianissimo grand piano notes from the University of Iowa Musical Instrument
+Samples (free to use without restrictions, see [CREDITS.md](../CREDITS.md)) instead of synthesizing them. Each
+pitch is a file in `assets/audio/piano/` (`C4.pcm`, `Db4.pcm`...): mono, 22050 Hz, raw 16-bit little-endian PCM
+starting at the hammer's strike. They are not Godot resources, so the export presets list them in `include_filter`.
+`Music._Ready` reads them on the main thread before rendering; a missing file fails the render.
+
+The files hold only the pitches the scores use, each as long as its longest hold plus the damper's fall. After
+changing a `RecordedPiano` part, regenerate them (downloads are cached in the temp folder; stale files are removed):
+
+```sh
+dotnet run --project tools/music -- piano
+```
+
+`MusicSynthTests.EveryRecordedPianoNoteHasARecordingLongEnough` fails until they match the scores.
+Prefer `RecordedPiano` over the synthesized `Piano` for new piano parts.
+
+### Music tool
+
+`tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that links the Godot-free
+`SoundSynth*`, `MusicSynth*` and `PianoRecordings` sources:
+
+| Command | Does |
+|---|---|
+| `dotnet run --project tools/music -- piano` | Downloads, trims and resamples the recorded piano notes the scores need; deletes unused ones |
+| `dotnet run --project tools/music -- render <Track> [out.wav] [loops]` | Renders a track exactly as the game does to a 16-bit stereo WAV, twice round by default so the seam can be heard |
+
+Use `render` to listen to a score change in seconds, without building or importing the game; write the WAV outside
+the repository (or delete it) so it is not committed. The folder has a `.gdignore`, and `Repentance.csproj` excludes
+`tools/**`.
+
+Agents: `.claude/skills/music-change/SKILL.md`.

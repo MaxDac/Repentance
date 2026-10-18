@@ -177,11 +177,24 @@ public partial class Hud
 
     public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
 
-    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face.</summary>
+    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face; beside a
+    /// photo, it fills the column to the photo's right, centred on it.</summary>
     private void ShowSpeechOverInset(string text, ISpeaker speaker, Color color)
     {
         float width = 380;
         float x = (ScreenW - width) / 2f;
+        if (_closeUp?.Photo == true)
+        {
+            x = _inset.Position.X + _inset.Size.X + PhotoMargin / 2f;
+            width = ScreenW - PhotoMargin / 2f - x;
+            var lines = MeasureDialogue(text, width);
+            _speech.Text = text;
+            _speech.LabelSettings.FontColor = color;
+            _speech.Size = new Vector2(width, lines.Y);
+            _speech.Position = new Vector2(x, _inset.Position.Y + (_inset.Size.Y - lines.Y) / 2f).Round();
+            _speech.Visible = true;
+            return;
+        }
         if (_closeUp == CloseUps.Convent)
         {
             const int padding = 12;

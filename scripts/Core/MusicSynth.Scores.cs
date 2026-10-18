@@ -13,6 +13,7 @@ public static partial class MusicSynth
         Track.ChurchOrgan => Church,
         Track.ConventPiano => Convent,
         Track.OfficeJazz => Office,
+        Track.LobbyPiano => Lobby,
         Track.MansionDread => Mansion,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
@@ -172,15 +173,77 @@ public static partial class MusicSynth
         return sb.ToString();
     }
 
+    // ------------------------------------------------------------------ the Aurelian lobby
+
+    // The house pianist in the Aurelian's marble lobby, playing for nobody in particular: a slow 1920s ballad in C
+    // major, kept low and so soft it is nearly furniture. Sixteen bars, AABA, with no syncopation at all: the left hand
+    // lays a low bass on each chord and breaks a hushed sixth or ninth chord upwards over it, a note a beat, as if the
+    // sustain pedal never came up; the right hand sings a plain tune in half notes around middle C, never reaching up
+    // into the bright treble. The bridge slides from F6 to Fm6 and down through a diminished chord, and the last bar
+    // turns round on G9 so the loop falls straight back to C.
+    private const string LoungeOpening = "E4:2 G4:2 A4:2 E4:2 F4:2 D4:2 ";
+
+    // declared before Lobby: static fields initialize in order. Each chord: its bass, and the voicing above it
+    private static readonly Dictionary<string, (string Root, string Voicing)> LoungeChords = new()
+    {
+        ["C6"] = ("C2", "E3+G3+A3"), ["A9"] = ("A1", "C#3+G3+B3"), ["Dm7"] = ("D2", "C3+F3+A3"),
+        ["G9"] = ("G1", "B2+F3+A3"), ["C7"] = ("C2", "Bb2+E3+G3"), ["F6"] = ("F2", "C3+D3+A3"),
+        ["Fm6"] = ("F2", "C3+D3+Ab3"), ["C6/E"] = ("E2", "E3+G3+A3"), ["Ebdim7"] = ("Eb2", "C3+F#3+A3"),
+    };
+
+    private const string LoungeForm =
+        "C6|A9|Dm7 G9|C6 G9|C6|A9|Dm7 G9|C6 C7|F6|Fm6|C6/E Ebdim7|Dm7 G9|C6|A9|Dm7 G9|C6 G9";
+
+    // a real grand piano, recorded pianissimo, in a well-damped marble room
+    private static readonly Piece Lobby = new(64, new Hall(1.3, 0.86, 0.65, 0.25), new Part[]
+    {
+        new(Instrument.RecordedPiano, 0.32, -0.15, Pedalled(LoungeForm, bass: true)),
+        new(Instrument.RecordedPiano, 0.2, -0.05, Pedalled(LoungeForm, bass: false)),
+        new(Instrument.RecordedPiano, 0.38, 0.2,
+            LoungeOpening + "C4:2 D4:2 " +
+            LoungeOpening + "C4:2 Bb3:2 " +
+            "A4:2 F4:2 Ab4:2 F4:2 G4:2 F#4:2 F4:2 D4:2 " +
+            LoungeOpening + "C4:3 B3:1"),
+    });
+
+    /// <summary>
+    /// A soft, pedalled left hand, one 4/4 bar per <c>|</c>, each chord lasting the whole bar or, if the bar has two,
+    /// half of it: with <paramref name="bass"/> the low note on the chord's first beat, ringing through it; otherwise
+    /// the voicing broken upwards, one note a beat, each ringing to the chord's end (a two-beat chord sounds whole on
+    /// its second beat), so a new note starts on every beat and the sound never thins out.
+    /// </summary>
+    private static string Pedalled(string bars, bool bass)
+    {
+        var sb = new StringBuilder();
+        foreach (var bar in bars.Split('|'))
+        {
+            var chords = bar.Split(' ');
+            int beats = 4 / chords.Length;
+            foreach (var chord in chords)
+            {
+                var (root, voicing) = LoungeChords[chord];
+                if (bass) sb.Append($"{root}:{beats} ");
+                else if (beats == 2) sb.Append($"r:1 {voicing}:1 ");
+                else
+                {
+                    sb.Append("r:1 ");
+                    var notes = voicing.Split('+');
+                    for (int i = 0; i < notes.Length; i++) sb.Append($"{notes[i]}:1>{notes.Length - i} ");
+                }
+            }
+        }
+        return sb.ToString();
+    }
+
     // ------------------------------------------------------------------ the mansion
 
     // A dark, dissonant thriller loop for the Harrington house at night, fourteen slow bars of 4/4 with no key to stand
-    // on. The double bass bows a grinding semitone, E against F, with tritone lurches to Bb and B, never letting go;
-    // it quickens in bars 9 and 10 like a pulse and swells harsh at the climax. Over it, pizzicato chords made of minor
-    // seconds and tritones fall off the beat at uneven gaps, an irregular heartbeat that stutters faster before the
-    // climax. The cello bows long arcs above them, creeping by semitones and climbing to a strident F and Bb. Then,
-    // once and only once, in the hush after the climax, an open trumpet stabs a high cluster, F5 B5 C6, flutter-tongued
-    // and gone in a quarter of a beat.
+    // on, kept low and in the background. The double bass bows a grinding semitone, E against F, with tritone lurches
+    // to Bb and B, never letting go, so something sounds on every beat; it quickens in bars 9 and 10 like a pulse.
+    // Over it, pizzicato chords made of minor seconds and tritones fall on the beat but at uneven gaps, an irregular
+    // heartbeat that stutters into every beat before the hush. The cello bows long low arcs above them, creeping by
+    // semitones. Then, once and only once, as the hush begins, an open trumpet stabs a high cluster, F5 B5 C6, gone in
+    // a quarter of a beat.
     private const string ToneRow = "E2+Bb2+F3";
     private const string Fist = "F2+B2+E3";
     private const string Claw = "G2+C#3+Ab3";
@@ -189,17 +252,17 @@ public static partial class MusicSynth
     private static readonly Piece Mansion = new(56, new Hall(1.5, 0.93, 0.5, 0.42), new Part[]
     {
         new(Instrument.DoubleBass, 0.95, 0.1,
-            "E1:4 F1:4 E1:4 F1:2 E1:2 Bb1:6! A1:2 E1:4 F1:4 E1:2 F1:2 E1:2 F1:2 Bb1:4! B1:4! E1:4 F1:4"),
-        new(Instrument.Pizzicato, 0.75, -0.35,
-            $"r:2 {ToneRow}:1.5 {Fist}:2.5 r:1 {ToneRow}:1 " +
-            $"r:0.5 {ToneRow}:0.75 {ToneRow}:2.75 {Claw}:1.5 r:2.5 " +
-            $"{Fist}:1.25 r:1.75 {ToneRow}:1 {ToneRow}:0.5 r:2 {Needle}:1.5 " +
-            $"r:3 {ToneRow}:0.75 {Fist}:0.75 {ToneRow}:2.5 r:1 " +
-            $"{Claw}:1.5 r:1 {ToneRow}:0.5 {ToneRow}:0.5 {ToneRow}:1.5 r:3 " +
-            $"{ToneRow}:1 {Fist}:1 {ToneRow}:0.75 {Fist}:0.75 {ToneRow}:0.5 {Fist}:0.5 {ToneRow}:0.5 r:3 " +
-            $"r:5 {Needle}:1.5 r:1.5"),
-        new(Instrument.Cello, 0.7, 0.3,
-            "r:6 Bb3:6 A3:4 r:1 C4:5 B3:4 r:2 F4:6 E4:4 r:2 F4:4! Bb4:4! A4:2 r:2 E3:4"),
-        new(Instrument.OpenTrumpet, 0.7, -0.1, "r:51.5 F5+B5+C6:1/4! r:4.25"),
+            "E1:4 F1:4 E1:4 F1:2 E1:2 Bb1:6 A1:2 E1:4 F1:4 E1:2 F1:2 E1:2 F1:2 Bb1:4 B1:4 E1:4 F1:4"),
+        new(Instrument.Pizzicato, 0.7, -0.35,
+            $"r:1 {ToneRow}:2 {Fist}:1 r:2 {ToneRow}:2 " +
+            $"{ToneRow}:1 {Claw}:3 r:1 {ToneRow}:1 {ToneRow}:2 " +
+            $"{Fist}:2 r:1 {ToneRow}:1 {Needle}:3 r:1 " +
+            $"r:2 {ToneRow}:1 {Fist}:1 {ToneRow}:3 r:1 " +
+            $"{Claw}:2 {ToneRow}:1 {ToneRow}:1 {ToneRow}:2 r:2 " +
+            $"{ToneRow}:1 {Fist}:1 {ToneRow}:1 {Fist}:1 {ToneRow}:1 {Fist}:1 r:2 " +
+            $"r:3 {Needle}:2 r:3"),
+        new(Instrument.Cello, 0.65, 0.3,
+            "r:4 Bb2:6 A2:4 r:2 C3:4 B2:4 F3:6 E3:4 r:2 F3:4 Bb3:6 A3:4 r:2 E3:4"),
+        new(Instrument.OpenTrumpet, 0.6, -0.1, "r:50 F5+B5+C6:1/4 r:5.75"),
     });
 }

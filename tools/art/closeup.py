@@ -11,6 +11,8 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
 - motel_closeup: a red neon MOTEL sign over a rain-soaked Chicago street at night.
+- vows_photo: Micah and Rose on the day they renewed their vows (ending 1's epilogue), a portrait-shaped sepia
+  studio print on a cream 1920s card mount with worn corners, instead of the dark frame.
 """
 import os
 
@@ -37,6 +39,13 @@ BAR = 4
 HALF = (AW - BAR) // 2
 MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
 ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
+# the vow-renewal photo: a portrait print, as tall as the other close-ups' pictures, on a cream card mount
+VOWS_SRC = os.path.join(ROOT, "tools", "art", "src", "vows_photo.png")
+VOWS_BORDER = 26  # the source's own worn border, trimmed so only the studio picture is reduced
+PHOTO_AW, PHOTO_AH = 72, AH
+PHOTO_IW, PHOTO_IH = PHOTO_AW * SCALE, PHOTO_AH * SCALE
+MOUNT = 9
+PHOTO_PW, PHOTO_PH = PHOTO_IW + 2 * MOUNT, PHOTO_IH + 2 * MOUNT
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 # Face boxes in the sources (brow to chin, cheek to cheek) and the eye lines. Micah's picture is zoomed so his face
 # box covers the same area as Eleanor's, with his eyes on her eye line, so both faces come out the same size.
@@ -248,6 +257,47 @@ def heraldry_closeup():
     return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
 
 
+def vows_crop(src):
+    """The studio picture inside the source's own worn border, trimmed to the photo's art aspect."""
+    img = src.convert("RGB")
+    w, h = img.size
+    x0, y0 = VOWS_BORDER, VOWS_BORDER
+    cw = w - 2 * VOWS_BORDER
+    ch = round(cw * PHOTO_AH / PHOTO_AW)
+    return img.crop((x0, y0, x0 + cw, y0 + ch))
+
+
+def vows_photo(src):
+    """Micah and Rose on the day they renewed their vows: a 1920s studio print in sepia, chunky VGA pixels, on a
+    cream card mount with worn, chipped corners."""
+    from PIL import ImageOps
+    from .common import noise, vgrad
+    grey = ImageOps.autocontrast(vows_crop(src).convert("L"), cutoff=1)
+    toned = ImageOps.colorize(grey, black=hx("1e1209"), mid=hx("8a6640"), white=hx("f2e0b8"))
+    small = toned.resize((PHOTO_AW, PHOTO_AH), Image.BOX)
+    inner = pixelize(small, palette_of(small, COLOURS), spread=8).resize((PHOTO_IW, PHOTO_IH), Image.NEAREST)
+    card = Image.new("RGB", (PHOTO_PW, PHOTO_PH))
+    vgrad(card, (0, 0, PHOTO_PW - 1, PHOTO_PH - 1), hx("eadcbc"), hx("d6c398"))
+    noise(card, (0, 0, PHOTO_PW - 1, PHOTO_PH - 1), 4, 1927)
+    d = ImageDraw.Draw(card)
+    for x, y, r in ((6, 30, 2), (PHOTO_PW - 9, 70, 1), (14, PHOTO_PH - 6, 2), (PHOTO_PW - 20, 4, 1)):  # foxing
+        d.ellipse([x - r, y - r, x + r, y + r], fill=hx("c4a878"))
+    d.rectangle([3, 3, PHOTO_PW - 4, PHOTO_PH - 4], outline=hx("c8b184"))  # the mount's pressed line
+    card.paste(inner, (MOUNT, MOUNT))
+    d.rectangle([MOUNT - 1, MOUNT - 1, PHOTO_PW - MOUNT, PHOTO_PH - MOUNT], outline=hx("4a3620"))
+    d.rectangle([0, 0, PHOTO_PW - 1, PHOTO_PH - 1], outline=hx("8a744e"))
+    photo = card.convert("RGBA")
+    px = photo.load()
+    # worn corners: rounded off, the top right and bottom left chipped deeper
+    for (cx, cy), depth in (((0, 0), 3), ((1, 0), 5), ((0, 1), 4), ((1, 1), 3)):
+        for i in range(depth):
+            for j in range(depth - i):
+                x = i if cx == 0 else PHOTO_PW - 1 - i
+                y = j if cy == 0 else PHOTO_PH - 1 - j
+                px[x, y] = (0, 0, 0, 0)
+    return photo
+
+
 def build():
     nude, clothed = Image.open(SRC), Image.open(CLOTHED_SRC)
     save(stage_closeup(nude), "ui", "stage_closeup.png")
@@ -257,3 +307,4 @@ def build():
     save(motel_closeup(Image.open(MOTEL_SRC)), "ui", "motel_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")
     save(heraldry_closeup(), "ui", "heraldry_closeup.png")
+    save(vows_photo(Image.open(VOWS_SRC)), "ui", "vows_photo.png")

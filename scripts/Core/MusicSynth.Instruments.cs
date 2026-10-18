@@ -17,6 +17,9 @@ public static partial class MusicSynth
             case Instrument.Piano:
                 Hammer(buf, rng, note, spb, velocity);
                 break;
+            case Instrument.RecordedPiano:
+                Recorded(buf, rng, note, spb, velocity);
+                break;
             case Instrument.Trumpet:
                 Brass(buf, rng, note, spb, velocity);
                 break;
@@ -42,6 +45,7 @@ public static partial class MusicSynth
         Instrument.OrganPlenum => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
         Instrument.OrganPedal => new[] { SoundSynth.Biquad.HighPass(25), SoundSynth.Biquad.LowPass(4000) },
         Instrument.Piano => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(9000) },
+        Instrument.RecordedPiano => new[] { SoundSynth.Biquad.HighPass(30) },
         // the Harmon mute: thin in the low end, a soft nasal colour around 1.4 kHz, the top rolled well off
         Instrument.Trumpet => new[]
         {
@@ -280,6 +284,29 @@ public static partial class MusicSynth
         }
     }
 
+    // ------------------------------------------------------------------ recorded piano
+
+    /// <summary>
+    /// A note of the real piano: its recording played from the hammer's strike, as soft as the part asks, until the
+    /// key is let go and the damper falls on the string.
+    /// </summary>
+    private static void Recorded(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    {
+        var rec = PianoRecordings.Get(note.Midi);
+        int held = (int)Math.Round(note.Beats * spb * SampleRate);
+        int start = (int)Math.Round(note.Beat * spb * SampleRate);
+        int n = Math.Min(rec.Length, held + (int)(PianoRecordings.TailSeconds * SampleRate));
+        double amp = velocity * (0.95 + 0.1 * rng.NextDouble());
+        double damper = 1, step = Math.Exp(-1 / (PianoRecordings.DamperSeconds * SampleRate));
+        for (int i = 0; i < n; i++)
+        {
+            if (i > held) damper *= step;
+            // should a recording run short, it fades rather than clicks
+            double end = Math.Min(1, (n - i) / (0.01 * SampleRate));
+            buf[(start + i) % buf.Length] += (float)(amp * damper * end * rec[i]);
+        }
+    }
+
     // ------------------------------------------------------------------ muted trumpet
 
     /// <summary>
@@ -320,7 +347,7 @@ public static partial class MusicSynth
 
     /// <summary>
     /// An open trumpet, hard-tongued: a bright band-limited sawtooth that cracks in on a fast attack, scoops up into
-    /// pitch, and blares with almost no vibrato. Strident notes are flutter-tongued, the tone shaken by a fast rattle.
+    /// pitch, and blares with almost no vibrato.
     /// </summary>
     private static void Blare(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
     {
@@ -329,14 +356,13 @@ public static partial class MusicSynth
         int start = (int)Math.Round(note.Beat * spb * SampleRate), n = (int)((held + release) * SampleRate);
         var tone = SoundSynth.Biquad.LowPass(Math.Min(9000, f0 * 8));
         var breath = SoundSynth.Biquad.BandPass(2500, 0.8);
-        double phase = rng.NextDouble(), flutter = rng.NextDouble() * 2 * Math.PI;
+        double phase = rng.NextDouble();
         double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * 0.25;
         for (int i = 0; i < n; i++)
         {
             double t = (double)i / SampleRate;
             double env = Smooth(t / attack) * (1 + 0.6 * Math.Exp(-t / 0.05))
                 * (t < held ? 1 : Math.Cos(Math.PI / 2 * Math.Min(1, (t - held) / release)));
-            if (note.Strident) env *= 0.7 + 0.3 * Math.Sin(flutter + 2 * Math.PI * 27 * t);
             double dt = f0 * Cents(-35 * Math.Exp(-t / 0.025)) / SampleRate;
             phase += dt; if (phase >= 1) phase -= 1;
             double s = tone.Next(2 * phase - 1 - PolyBlep(phase, dt))
