@@ -50,13 +50,22 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ChurchOrgan` | Church interior | Organist trying the pipes, then a chorale |
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
+| `BlueLanternJazz` | Blue Lantern speakeasy (every visit, including the interlude) | A Chicago hot band rehearsing behind a curtain: cornet, clarinet, trombone, banjo, tuba, piano, drums; two choruses and a cornet break, a clam, noodling, a stick count-in |
+| `BlueLanternAlley` | Alley behind the Blue Lantern in Act 1 (the back door is propped open) | The same rehearsal, far down the hall: dark, narrow and echoing |
 
-A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
+A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
+moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries
+on from the same moment. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second
 pass so filters and reverb have no seam.
 
+A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening
+feedback echo, applied after the hall. Instruments: strings, organ stops, piano, muted trumpet, upright bass, drums
+(`C2` kick, `C#2` sticks, `D2` snare, `E2` brush sweep, `F#2` hat, others a ride cymbal), cornet, clarinet,
+trombone (`!` smears up into the note), banjo and tuba.
+
 Score syntax (`MusicSynth.Scores.cs`): parts are space-separated tokens `name:beats` (e.g. `D4:1/2`), `r` rest,
-`+` chord, `>` separates advance from held duration, `!` accent.
+`+` chord, `>` separates advance from held duration, `!` accent; `Bars` checks each `|`-separated 4/4 bar.
 
 **Add a track**: `Track` -> score in `MusicSynth.Scores.cs` (parts, instruments, tempo, hall) -> `Room.Music` ->
 `BaseVolumeDb` if needed. Validate with `MusicSynthTests` and playthrough.

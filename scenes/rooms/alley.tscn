@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Alley.cs" id="1_Alley"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/alley.png" id="2_alley"]
@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/sal.png" id="6_sal"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/bartender.png" id="7_bartender"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/alley_door_open.png" id="8_door_open"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/alley_door_open_lamp.png" id="9_door_open_lamp"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(40, 64)
@@ -47,10 +49,21 @@ Tint = Color(0.62, 0.7, 0.86, 0.42)
 SplashAreas = Array[Rect2]([Rect2(0, 196, 480, 72)])
 Seed = 71
 
+[node name="DoorOpen" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(303, 119)
+texture = ExtResource("8_door_open")
+centered = false
+
 [node name="Lamp" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(47, 36)
+position = Vector2(47, 35)
 texture = ExtResource("3_alley_lamp")
+centered = false
+
+[node name="DoorOpenLit" type="Sprite2D" parent="Lamp"]
+position = Vector2(256, 84)
+texture = ExtResource("9_door_open_lamp")
 centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]

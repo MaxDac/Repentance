@@ -15,6 +15,10 @@ public enum Track
     ConventPiano,
     /// <summary>Micah's office: a slow, depressed minor-key ballad for muted trumpet, piano, upright bass and brushes.</summary>
     OfficeJazz,
+    /// <summary>The Blue Lantern: a Chicago hot-jazz band rehearsing across the room, behind the curtain.</summary>
+    BlueLanternJazz,
+    /// <summary>The same rehearsal heard from the alley, through the open back door and down a passage.</summary>
+    BlueLanternAlley,
 }
 
 public enum Instrument
@@ -34,9 +38,19 @@ public enum Instrument
     Trumpet,
     /// <summary>A plucked upright bass.</summary>
     UprightBass,
-    /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, D2 brush tap, E2 brush sweep,
-    /// F#2 hi-hat, Eb3 ride.</summary>
+    /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, C#2 sticks clicked together,
+    /// D2 brush tap, E2 brush sweep, F#2 hi-hat, Eb3 ride.</summary>
     Drums,
+    /// <summary>An open cornet, played hot.</summary>
+    Cornet,
+    /// <summary>A Bb clarinet in the old Albert-system style: woody, with a wide vibrato.</summary>
+    Clarinet,
+    /// <summary>A tailgate trombone; a strident note is smeared up into from below.</summary>
+    Trombone,
+    /// <summary>A tenor banjo, chords strummed low string first.</summary>
+    Banjo,
+    /// <summary>A brass bass horn, the band's two-beat bottom.</summary>
+    Tuba,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -44,7 +58,8 @@ public readonly record struct ScoreNote(Instrument Instrument, int Voice, double
 
 /// <summary>
 /// Synthesizes the background music: original pieces written as scores and played by synthesized instruments (bowed
-/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums) in a reverberant room. Each track renders exactly
+/// strings, pipe organ, piano, muted trumpet, plucked bass, brushed drums, a hot band's horns, banjo and tuba) in a
+/// reverberant room, sometimes heard from a distance. Each track renders exactly
 /// one period of an endless loop, so it repeats without a seam. Output is interleaved stereo floats in [-1, 1] at
 /// <see cref="SampleRate"/>. Godot-free, so it is unit tested directly.
 /// </summary>
@@ -63,7 +78,15 @@ public static partial class MusicSynth
     /// <summary>The space a piece is played in: comb delays scale with <see cref="Size"/>.</summary>
     private sealed record Hall(double Size, double Feedback, double Damp, double Wet);
 
-    private sealed record Piece(double Bpm, Hall Hall, Part[] Parts, bool Gramophone = false);
+    /// <summary>
+    /// A band heard from somewhere else: the sound band-limited between <see cref="HighPass"/> and
+    /// <see cref="LowPass"/>, its stereo narrowed to <see cref="Width"/> (0 mono, 1 as played), and a soft echo off a
+    /// far wall every <see cref="EchoSeconds"/>.
+    /// </summary>
+    private sealed record Distance(double HighPass, double LowPass, double Width, double EchoSeconds, double EchoFeedback,
+        double EchoMix);
+
+    private sealed record Piece(double Bpm, Hall Hall, Part[] Parts, bool Gramophone = false, Distance? Distance = null);
 
     private static Hall Concert => new(1, 0.88, 0.35, 0.32);
 
@@ -82,10 +105,16 @@ public static partial class MusicSynth
         Track.ChurchOrgan => -7.5f,
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
+        Track.BlueLanternJazz => -13f,
+        Track.BlueLanternAlley => -21f,
         _ => -6f,
     };
 
     public static IReadOnlyList<ScoreNote> Score(Track track) => Parse(PieceFor(track)).Notes;
+
+    /// <summary>Two tracks playing the same score (one band heard from two places), so one can take over from the
+    /// other at the same moment of the loop.</summary>
+    public static bool SharesScore(Track a, Track b) => ReferenceEquals(PieceFor(a).Parts, PieceFor(b).Parts);
 
     private static (List<ScoreNote> Notes, double Length) Parse(Piece piece)
     {
@@ -169,6 +198,7 @@ public static partial class MusicSynth
 
         Reverb(left, right, piece.Hall);
         if (piece.Gramophone) Gramophone(left, right, rng);
+        if (piece.Distance is { } distance) Distant(left, right, distance);
         var stereo = new float[length * 2];
         float peak = 1e-6f;
         for (int i = 0; i < length; i++) peak = Math.Max(peak, Math.Max(Math.Abs(left[i]), Math.Abs(right[i])));
@@ -242,6 +272,42 @@ public static partial class MusicSynth
         }
         for (int c = 0; c < 2; c++)
             for (int i = 0; i < length; i++) chans[c][i] += wetOut[c][i];
+    }
+
+    /// <summary>
+    /// Moves the band further away (see <see cref="Distance"/>). Like the reverb it runs twice round the loop, so the
+    /// filters and the echo from the end of the period carry on into its start.
+    /// </summary>
+    private static void Distant(float[] left, float[] right, Distance distance)
+    {
+        int length = left.Length;
+        int delay = (int)Math.Round(distance.EchoSeconds * SampleRate);
+        var outs = new[] { new float[length], new float[length] };
+        for (int c = 0; c < 2; c++)
+        {
+            var filters = new[]
+            {
+                SoundSynth.Biquad.HighPass(distance.HighPass), SoundSynth.Biquad.HighPass(distance.HighPass),
+                SoundSynth.Biquad.LowPass(distance.LowPass), SoundSynth.Biquad.LowPass(distance.LowPass),
+            };
+            // the echo comes back a little later on the right, and darker each time round
+            var echo = new double[delay + c * 97];
+            var echoDark = SoundSynth.Biquad.LowPass(Math.Min(2000, distance.LowPass));
+            int at = 0;
+            for (int i = 0; i < 2 * length; i++)
+            {
+                int j = i % length;
+                double mid = (left[j] + right[j]) * 0.5, side = (left[j] - right[j]) * 0.5 * distance.Width;
+                double x = (c == 0 ? mid + side : mid - side) + Dither(i);
+                for (int k = 0; k < filters.Length; k++) x = filters[k].Next(x);
+                double back = echoDark.Next(echo[at]);
+                echo[at] = x + back * distance.EchoFeedback;
+                if (++at == echo.Length) at = 0;
+                if (i >= length) outs[c][j] = (float)(x + back * distance.EchoMix);
+            }
+        }
+        Array.Copy(outs[0], left, length);
+        Array.Copy(outs[1], right, length);
     }
 
     /// <summary>

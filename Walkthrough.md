@@ -122,6 +122,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Club (the Blue Lantern speakeasy)
 
+- Music: a hot band rehearsing somewhere behind the curtain (`BlueLanternJazz`), on every visit including the
+  interlude. It plays through two choruses, breaks down on a wrong trombone note, noodles, and the drummer counts
+  it back in.
 - Inside the cold-room entrance, Sal the guard still asks for the password; the blue carnation only got Micah
   past the florist's grille. Micah has two ways in: if the water flower gave him the password, "Moonshine." is
   the first choice and Sal lets him in for free; otherwise he admits he doesn't know it and can give him $10 as a
@@ -144,6 +147,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Street behind the club (the alley)
 
 - New location: the road behind the club, dirty and in the shadow, with only one intermittent street lamp.
+- The club's back door is propped open on a brick, showing a lit hall and a padded inner door; the band
+  plays on far down the hall (`BlueLanternAlley`, picking up where the speakeasy left off). In Act 3 the door
+  is shut.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
   Tony behind Sal. So the player understands what happened, Sal steps up behind Micah, half turned to the screen,
   and kicks him in the belly twice with his right foot, the foot hidden behind Micah's body (new kicking sprite for

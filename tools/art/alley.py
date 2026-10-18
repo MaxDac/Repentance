@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageChops, ImageFilter
 import math
 import random
 from .common import (W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, pixelize, palette_of, text,
-                     save, _mask)
+                     save, cut, _mask)
 from .street import bricks
 
 BASE = 186                 # foot of the back wall
@@ -17,6 +17,7 @@ NEAR_X0, NEAR_X1 = 0, 100  # passage mouth at the plane of the back wall
 POST_X, POST_FOOT = 156, 196
 SHADE = (188, 62)
 DOOR = (314, 124, 348, BASE)
+LEAF = 8                   # how much of the swung-in door leaf shows when it is propped ajar
 LANTERN = (331, 106)
 PUDDLES = [(150, 238, 236, 252), (300, 244, 380, 258), (80, 204, 128, 211), (392, 220, 446, 229),
            (250, 196, 290, 201), (20, 252, 70, 262)]
@@ -171,11 +172,22 @@ def back_wall(img):
     shadow(img, "rect", [NEAR_X1, BASE - 26, W, BASE], 0.3, 8, hx("303040"))
 
 
-def door(img):
+def door(img, ajar=False):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = DOOR
     d.rectangle([x0 - 4, y0 - 6, x1 + 4, y1], fill=hx("8a8278"))
     d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1], fill=hx("2a2c30"))
+    if ajar:
+        door_ajar(img)
+    else:
+        door_leaf(img)
+    step(d)
+    lantern(d)
+
+
+def door_leaf(img):
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = DOOR
     vgrad(img, (x0, y0, x1, y1), hx("5a6a68"), hx("3e4a48"))
     for y in (y0 + 4, (y0 + y1) // 2, y1 - 6):
         for x in range(x0 + 3, x1 - 1, 4):
@@ -186,29 +198,134 @@ def door(img):
     d.line([(x0 + 10, y0 + 13), (x0 + 24, y0 + 13)], fill=hx("9aa8a4"))
     d.rectangle([x1 - 7, y0 + 30, x1 - 4, y0 + 40], fill=hx("b8b0a0"))
     d.rectangle([x1 - 6, y0 + 42, x1 - 4, y0 + 45], fill=hx("8a7a50"))
+
+
+def door_ajar(img):
+    """Swung inward on its left hinges: painted dark here; door_glow lights the hall, the leaf and the brick."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = DOOR
+    d.rectangle([x0, y0, x1, y1], fill=hx("2a1c14"))
+
+
+def door_glow(img):
+    """The hall behind the ajar door is a light source: a bulb on a cord, wainscoted walls, worn boards and a
+    second, padded door at the far end with light round its edges. The steel leaf stands swung in on the left,
+    its foot on a brick."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = DOOR
+    gx0 = x0 + LEAF + 1
+    ix0, iy0, ix1, iy1 = gx0 + 6, y0 + 13, x1 - 7, y1 - 9          # the inner door's frame, down the hall
+    # ceiling, right wall (plaster over a dark wainscot) and floorboards, all running to the inner door
+    d.polygon([(gx0, y0), (x1, y0), (ix1, iy0), (ix0, iy0)], fill=hx("2e1c12"))
+    vgrad(img, (ix1, y0, x1, y1), hx("6a4424"), hx("94622e"))
+    for x in range(ix1, x1 + 1):
+        t = (x - ix1) / (x1 - ix1)
+        top, foot = iy0 + (y0 - iy0) * t, iy1 + (y1 - iy1) * t
+        wain = foot - (foot - top) * 0.38
+        d.line([(x, wain), (x, foot)], fill=hx("4a2814"))
+        d.point((x, wain), fill=hx("b07a3c"))
+    d.line([(ix1, iy0), (x1, y0)], fill=hx("4a2c18"))
+    d.polygon([(gx0, y1), (x1, y1), (ix1, iy1), (ix0, iy1)], fill=hx("8a5426"))
+    for k in range(1, 5):
+        fx = gx0 + (x1 - gx0) * k / 5
+        d.line([(fx, y1), (ix0 + (ix1 - ix0) * k / 5, iy1)], fill=hx("6a3c1a"))
+    d.line([(gx0, y1 - 1), (x1, y1 - 1)], fill=hx("c88a44"))
+    # the inner door: padded leather in a dark jamb, brass studs, a knob, a peep slot and light leaking round it
+    d.rectangle([ix0 - 1, iy0 - 1, ix1 + 1, iy1], fill=hx("24140c"))
+    vgrad(img, (ix0, iy0, ix1, iy1 - 1), hx("5a2418"), hx("3e1810"))
+    d.rectangle([ix0 + 2, iy0 + 3, ix1 - 2, iy0 + 18], outline=hx("2a100a"))
+    d.rectangle([ix0 + 2, iy0 + 21, ix1 - 2, iy1 - 4], outline=hx("2a100a"))
+    for sx in range(ix0 + 1, ix1, 3):
+        d.point((sx, iy0 + 1), fill=hx("c8a050"))
+        d.point((sx, iy1 - 2), fill=hx("c8a050"))
+    d.rectangle([ix0 + 3, iy0 + 7, ix1 - 3, iy0 + 8], fill=hx("ffd890"))   # the slot, lit from the club
+    d.line([(ix0 + 3, iy0 + 6), (ix1 - 3, iy0 + 6)], fill=hx("8a6a38"))
+    d.point((ix1 - 2, iy0 + 20), fill=hx("ffe0a0"))                         # brass knob
+    d.point((ix1 - 2, iy0 + 21), fill=hx("a07a30"))
+    d.line([(ix0, iy1), (ix1, iy1)], fill=hx("ffd080"))                     # light under the door
+    d.line([(ix1 + 1, iy0), (ix1 + 1, iy1)], fill=hx("c88440"))             # and down its latch side
+    # a bare bulb on a cord, with a brass socket
+    bx = (gx0 + x1) // 2 + 1
+    d.line([(bx, y0), (bx, y0 + 4)], fill=hx("1a120c"))
+    d.rectangle([bx - 1, y0 + 5, bx + 1, y0 + 6], fill=hx("a07a30"))
+    d.point((bx - 1, y0 + 5), fill=hx("e0c070"))
+    d.ellipse([bx - 2, y0 + 7, bx + 2, y0 + 11], fill=hx("ffe8b0"))
+    d.point((bx, y0 + 12), fill=hx("ffe8b0"))
+    d.point((bx - 1, y0 + 8), fill=hx("ffffff"))
+    light(img, "ellipse", [bx - 9, y0 + 1, bx + 9, y0 + 18], hx("ffc070"), 0.4, 3)
+    light(img, "rect", [gx0 + 2, y0 + 12, x1 - 2, y0 + 30], hx("706050"), 0.12, 4)  # smoke under the bulb
+    d = ImageDraw.Draw(img)
+    # the steel leaf, swung in: its inside face catches the hall light; hinges, a drop bar's bracket, its edge
+    d.polygon([(x0, y0), (x0 + LEAF, y0 + 4), (x0 + LEAF, y1 - 4), (x0, y1)], fill=hx("38403e"))
+    d.line([(x0 + LEAF, y0 + 4), (x0 + LEAF, y1 - 4)], fill=hx("c08a50"))
+    d.line([(x0 + LEAF - 1, y0 + 4), (x0 + LEAF - 1, y1 - 4)], fill=hx("6a5a48"))
+    for hy in (y0 + 6, y1 - 10):
+        d.rectangle([x0, hy, x0 + 1, hy + 3], fill=hx("1a1c1e"))
+    d.rectangle([x0 + 3, y0 + 30, x0 + 6, y0 + 33], fill=hx("1a1c1e"))
+    d.point((x0 + 5, y0 + 31), fill=hx("8a7a60"))
+    # the brick under it: a red common brick, its top in the light, a chipped corner and a shadow
+    bx0, by0, bx1, by1 = x0 + LEAF - 4, y1 - 5, x0 + LEAF + 5, y1 - 1
+    d.line([(bx0 + 1, by1 + 1), (bx1 + 2, by1 + 1)], fill=hx("2a1a12"))
+    d.rectangle([bx0, by0, bx1, by1], fill=hx("8a3424"))
+    d.line([(bx0, by0), (bx1 - 1, by0)], fill=hx("d0784c"))
+    d.line([(bx1, by0 + 1), (bx1, by1)], fill=hx("b0583a"))
+    d.line([(bx0, by1), (bx1, by1)], fill=hx("5a1e14"))
+    d.point((bx1, by0), fill=hx("2a1c14"))
+    for px_, py_ in ((bx0 + 2, by0 + 2), (bx0 + 5, by0 + 1), (bx0 + 7, by0 + 3)):
+        d.point((px_, py_), fill=hx("6a2418"))
+    d.point((bx0 + 3, by0 + 1), fill=hx("a8a090"))                            # old mortar
+
+
+def step(d):
+    x0, y0, x1, y1 = DOOR
     # concrete step
     d.rectangle([x0 - 8, y1, x1 + 8, y1 + 5], fill=hx("8a8680"))
     d.line([(x0 - 8, y1), (x1 + 8, y1)], fill=hx("b0aca4"))
     d.line([(x0 - 8, y1 + 5), (x1 + 8, y1 + 5)], fill=hx("3a383c"))
-    # the blue glass lantern on a wrought bracket - the only sign of the club
+
+
+def lantern(d):
+    """The blue glass lantern on a scrolled wrought bracket - the only sign of the club."""
     lx, ly = LANTERN
-    d.line([(lx - 12, ly - 8), (lx, ly - 8)], fill=IRON, width=2)
-    d.line([(lx - 12, ly - 12), (lx - 12, ly)], fill=IRON, width=2)
-    d.arc([lx - 12, ly - 8, lx - 2, ly + 4], 270, 360, fill=IRON)
-    d.line([(lx, ly - 8), (lx, ly - 4)], fill=IRON)
-    d.polygon([(lx - 6, ly - 4), (lx + 6, ly - 4), (lx, ly - 9)], fill=IRON)
+    d.line([(lx - 14, ly - 8), (lx, ly - 8)], fill=IRON, width=2)
+    d.line([(lx - 14, ly - 13), (lx - 14, ly + 1)], fill=IRON, width=2)
+    d.point((lx - 15, ly - 11), fill=IRON_L)                                # wall bolts
+    d.point((lx - 15, ly - 1), fill=IRON_L)
+    d.arc([lx - 14, ly - 8, lx - 3, ly + 4], 270, 360, fill=IRON)
+    d.arc([lx - 9, ly - 13, lx - 3, ly - 8], 180, 360, fill=IRON)          # a scroll over the arm
+    d.point((lx - 9, ly - 10), fill=IRON)
+    d.line([(lx, ly - 8), (lx, ly - 6)], fill=IRON)
+    # hood: a stepped iron cap with a ball finial and a lip that overhangs the glass
+    d.polygon([(lx - 7, ly - 3), (lx + 7, ly - 3), (lx + 3, ly - 6), (lx - 3, ly - 6)], fill=IRON)
+    d.line([(lx - 2, ly - 5), (lx + 2, ly - 5)], fill=IRON_L)
+    d.line([(lx - 7, ly - 3), (lx + 7, ly - 3)], fill=IRON_L)
+    d.rectangle([lx - 1, ly - 8, lx + 1, ly - 7], fill=IRON)
     lantern_glass(d)
 
 
 def lantern_glass(d):
-    """Drawn again after lighting: the glass is a light source, not a lit surface."""
+    """Drawn again after lighting: the glass is a light source, not a lit surface. Three leaded panes show, the
+    side ones darker; a flame burns inside; an iron band and drip cone close the bottom."""
     lx, ly = LANTERN
-    d.polygon([(lx - 5, ly - 3), (lx + 5, ly - 3), (lx + 4, ly + 10), (lx - 4, ly + 10)], fill=hx("3a7ae8"))
-    d.polygon([(lx - 2, ly - 2), (lx + 2, ly - 2), (lx + 1, ly + 8), (lx - 1, ly + 8)], fill=hx("8ac0ff"))
-    d.line([(lx - 3, ly - 3), (lx - 3, ly + 10)], fill=hx("2a4a8a"))
-    d.line([(lx + 3, ly - 3), (lx + 3, ly + 10)], fill=hx("2a4a8a"))
-    d.line([(lx - 5, ly - 3), (lx + 5, ly - 3)], fill=IRON, width=2)
-    d.polygon([(lx - 4, ly + 11), (lx + 4, ly + 11), (lx, ly + 14)], fill=IRON)
+    d.polygon([(lx - 6, ly - 2), (lx + 6, ly - 2), (lx + 5, ly + 10), (lx - 5, ly + 10)], fill=hx("2a5ab8"))
+    d.polygon([(lx - 3, ly - 2), (lx + 3, ly - 2), (lx + 2, ly + 10), (lx - 2, ly + 10)], fill=hx("3a7ae8"))
+    d.ellipse([lx - 2, ly + 1, lx + 2, ly + 7], fill=hx("8ac0ff"))
+    d.line([(lx, ly + 2), (lx, ly + 6)], fill=hx("e8f4ff"))                 # the flame
+    d.point((lx, ly + 3), fill=hx("ffffff"))
+    d.point((lx, ly + 7), fill=hx("ffd890"))                               # its wick
+    d.line([(lx - 3, ly - 2), (lx - 2, ly + 10)], fill=IRON)               # corner posts
+    d.line([(lx + 3, ly - 2), (lx + 2, ly + 10)], fill=IRON)
+    d.line([(lx - 6, ly - 2), (lx - 5, ly + 10)], fill=hx("1e2a4a"))
+    d.line([(lx + 6, ly - 2), (lx + 5, ly + 10)], fill=hx("1e2a4a"))
+    d.line([(lx - 5, ly + 4), (lx - 4, ly + 4)], fill=hx("1e3a6a"))        # leading on the side panes
+    d.line([(lx + 4, ly + 4), (lx + 5, ly + 4)], fill=hx("1e3a6a"))
+    d.point((lx - 5, ly), fill=hx("c0e0ff"))                                # a glint on the glass
+    d.point((lx + 1, ly - 1), fill=hx("c0e0ff"))
+    d.line([(lx - 6, ly - 2), (lx + 6, ly - 2)], fill=IRON)
+    d.line([(lx - 5, ly + 10), (lx + 5, ly + 11)], fill=IRON, width=2)
+    d.line([(lx - 5, ly + 10), (lx + 5, ly + 10)], fill=IRON_L)
+    d.polygon([(lx - 3, ly + 12), (lx + 3, ly + 12), (lx, ly + 15)], fill=IRON)
+    d.point((lx, ly + 16), fill=IRON)
 
 
 def fire_escape(img):
@@ -445,7 +562,7 @@ def shade(d, on):
 
 # --------------------------------------------------------------------------------------------- light
 
-def lighting(img, on, far_box):
+def lighting(img, on, far_box, ajar=False):
     sx, sy = SHADE
     lx, ly = LANTERN
     fx0, fy0, fx1, fy1 = far_box
@@ -468,6 +585,9 @@ def lighting(img, on, far_box):
         ]
     else:
         lights += [("ellipse", [sx - 8, sy, sx + 8, sy + 12], (120, 70, 30), 0.6, 4)]
+    if ajar:
+        x0, y0, x1, y1 = DOOR
+        lights += [("polygon", [(x0 + LEAF, y1), (x1, y1), (x1 + 16, y1 + 18), (x0 + 2, y1 + 18)], (170, 100, 44), 0.8, 4)]
     img = illuminate(img, (46, 52, 90), lights)
     # deep shadows: the passage, under the fire escape, the corners
     shadow(img, "polygon", [(0, 0), (NEAR_X1, 22), (NEAR_X1, BASE), (60, 170), (40, 150), (0, 140)], 0.25, 10)
@@ -479,6 +599,9 @@ def lighting(img, on, far_box):
     light(img, "ellipse", [cat_eye := 393, 154, 399, 157], hx("a0e0ff"), 0.0, 0)
     d = ImageDraw.Draw(img)
     lantern_glass(d)
+    if ajar:
+        door_glow(img)
+        d = ImageDraw.Draw(img)
     glints(img, on)
     d.point((394, 155), fill=hx("b8f0ff"))
     d.point((397, 155), fill=hx("b8f0ff"))
@@ -538,34 +661,55 @@ def reflections(img):
         d.arc([x0, y0, x1, y1], 200, 340, fill=mul(rim, 1.35))
 
 
-def paint(on):
+def paint(on, ajar=False):
     img = Image.new("RGB", (W, FULL_H))
     sky(img)
     wires(img)
     _, far_box = passage(img)
     back_wall(img)
-    door(img)
+    door(img, ajar)
     fire_escape(img)
     ground(img)
     puddles_albedo(img)
     crates(img)
     trash_cans(img)
     lamppost(img, on)
-    img = lighting(img, on, far_box)
+    img = lighting(img, on, far_box, ajar)
     reflections(img)
     vignette(img, 0.5, tint=(14, 14, 34), blur=46)
     return img
 
 
-def build():
+def door_overlay(closed, ajar):
+    """The ajar door as an overlay: opaque only where it differs from the closed-door image under it."""
+    diff = ImageChops.difference(closed, ajar).point(lambda v: 255 if v else 0)
+    mask = ImageChops.lighter(ImageChops.lighter(*diff.split()[:2]), diff.split()[2])
+    box = mask.getbbox()
+    return cut(ajar, mask).crop(box), box
+
+
+def variants():
+    """The four pixelized states on one shared palette: lamp off/on, door shut/ajar."""
     off, on = paint(False), paint(True)
-    both = Image.new("RGB", (W * 2, FULL_H))
-    both.paste(off, (0, 0))
-    both.paste(on, (W, 0))
+    ajar_off, ajar_on = paint(False, ajar=True), paint(True, ajar=True)
+    both = Image.new("RGB", (W * 4, FULL_H))
+    for i, img in enumerate((off, on, ajar_off, ajar_on)):
+        both.paste(img, (W * i, 0))
     pal = palette_of(both, 128)
-    px_off, px_on = pixelize(off, pal), pixelize(on, pal)
+    return tuple(pixelize(i, pal) for i in (off, on, ajar_off, ajar_on))
+
+
+def build():
+    """alley_door_open.png sits between the background and the lamp overlay; alley_door_open_lamp.png is a child
+    of the lamp overlay, so the propped door stays right whichever way the lamp flickers."""
+    px_off, px_on, px_ajar_off, px_ajar_on = variants()
     save(px_off, "rooms", "alley.png")
     box = ImageChops.difference(px_off, px_on).getbbox()
     save(px_on.crop(box), "rooms", "alley_lamp.png")
     print(f"  alley_lamp.png at {box[:2]} size {(box[2] - box[0], box[3] - box[1])}")
+    for name, closed, ajar in (("alley_door_open.png", px_off, px_ajar_off),
+                               ("alley_door_open_lamp.png", px_on, px_ajar_on)):
+        overlay, at = door_overlay(closed, ajar)
+        save(overlay, "rooms", name)
+        print(f"  {name} at {at[:2]} size {overlay.size}")
     return px_off
