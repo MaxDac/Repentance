@@ -4,7 +4,11 @@ namespace Repentance;
 
 public static partial class MusicSynth
 {
-    private static void Sound(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    /// <summary>
+    /// Adds one note to its part's buffer. A moving source (<see cref="Moves"/>) also gets the right channel and the
+    /// part's pan as the side it comes from.
+    /// </summary>
+    private static void Sound(float[] buf, float[]? right, Random rng, ScoreNote note, double spb, double velocity, double pan)
     {
         switch (note.Instrument)
         {
@@ -24,10 +28,16 @@ public static partial class MusicSynth
                 Brass(buf, rng, note, spb, velocity);
                 break;
             case Instrument.UprightBass:
-                Pluck(buf, rng, note, spb, velocity);
+                Pluck(buf, rng, note, spb, velocity, Math.Min(1200, Hz(note.Midi) * 8), 0.6, 0.9975, 0.9, 0.5, 0);
+                break;
+            case Instrument.Banjo:
+                // strummed down from the lowest string, each a few milliseconds behind the one below
+                Pluck(buf, rng, note, spb, velocity, Math.Min(7000, Hz(note.Midi) * 16), 0, 0.991, 0.8, 0.32,
+                    Math.Max(0, note.Midi - 50) * 0.0012);
                 break;
             case Instrument.Pizzicato:
-                Pluck(buf, rng, note, spb, velocity, pizzicato: true);
+                // plucked nearer the middle of a shorter, brighter string that dies away fast, the chord rolled
+                Pluck(buf, rng, note, spb, velocity, Math.Min(3200, Hz(note.Midi) * 12), 0.3, 0.993, 0.9, 0.5, 0, roll: 0.012);
                 break;
             case Instrument.OpenTrumpet:
                 Blare(buf, rng, note, spb, velocity);
@@ -37,6 +47,24 @@ public static partial class MusicSynth
                 break;
             case Instrument.Foley:
                 Foley(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.Cornet or Instrument.Trombone or Instrument.Tuba:
+                HotBrass(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.Clarinet:
+                Reed(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.CityHum:
+                Hum(buf, rng, note, spb, velocity);
+                break;
+            case Instrument.Motorcar:
+                Motorcar(buf, right!, rng, note, spb, velocity, pan);
+                break;
+            case Instrument.Streetcar:
+                Streetcar(buf, right!, rng, note, spb, velocity, pan);
+                break;
+            case Instrument.Horn:
+                Horn(buf, rng, note, spb, velocity);
                 break;
         }
     }
@@ -60,6 +88,14 @@ public static partial class MusicSynth
             SoundSynth.Biquad.HighPass(35), SoundSynth.Biquad.Peaking(90, 4, 1), SoundSynth.Biquad.Peaking(700, -2, 1),
             SoundSynth.Biquad.LowPass(2500),
         },
+        // a far-off roar off the buildings: mostly low rumble, the top gone in the distance
+        Instrument.CityHum => new[]
+        {
+            SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.Peaking(110, 9, 0.7), SoundSynth.Biquad.LowPass(900),
+            SoundSynth.Biquad.LowPass(1400),
+        },
+        Instrument.Motorcar or Instrument.Streetcar => new[] { SoundSynth.Biquad.HighPass(28), SoundSynth.Biquad.LowPass(8000) },
+        Instrument.Horn => new[] { SoundSynth.Biquad.HighPass(150), SoundSynth.Biquad.LowPass(5000) },
         // a cello body under fingered gut: woody low-mids, a dry snap in the upper range
         Instrument.Pizzicato => new[]
         {
@@ -71,6 +107,25 @@ public static partial class MusicSynth
         {
             SoundSynth.Biquad.HighPass(220), SoundSynth.Biquad.Peaking(1300, 2, 1), SoundSynth.Biquad.Peaking(3000, 5, 1.4),
             SoundSynth.Biquad.LowPass(9000),
+        },
+        Instrument.Cornet => new[]
+        {
+            SoundSynth.Biquad.HighPass(220), SoundSynth.Biquad.Peaking(1250, 3, 1), SoundSynth.Biquad.LowPass(5500),
+        },
+        Instrument.Trombone => new[]
+        {
+            SoundSynth.Biquad.HighPass(70), SoundSynth.Biquad.Peaking(600, 3, 1), SoundSynth.Biquad.LowPass(4000),
+        },
+        Instrument.Tuba => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(1200) },
+        Instrument.Clarinet => new[]
+        {
+            SoundSynth.Biquad.HighPass(140), SoundSynth.Biquad.Peaking(1600, 2, 1), SoundSynth.Biquad.LowPass(6000),
+        },
+        // the banjo's skin head: a hard ring around 900 Hz and no low end
+        Instrument.Banjo => new[]
+        {
+            SoundSynth.Biquad.HighPass(180), SoundSynth.Biquad.Peaking(900, 5, 1.2), SoundSynth.Biquad.Peaking(2600, 3, 1),
+            SoundSynth.Biquad.LowPass(7000),
         },
         _ => new[] { SoundSynth.Biquad.HighPass(60) },
     };
@@ -374,38 +429,109 @@ public static partial class MusicSynth
         }
     }
 
-    // ------------------------------------------------------------------ upright bass
+    // ------------------------------------------------------------------ the hot band's brass
 
     /// <summary>
-    /// A plucked gut string (Karplus-Strong): a burst of dark noise circulating in a tuned delay line, losing a little
-    /// on each pass, and choked off by the left hand when the note ends. Pizzicato is plucked nearer the middle of a
-    /// shorter, brighter string that dies away fast, and the notes of a chord are rolled a few milliseconds apart.
+    /// Open brass played hot, 1920s style: a band-limited sawtooth that brightens as it is blown harder, a quick lip
+    /// attack scooped up into pitch, and a fast terminal vibrato shaking out the end of a long note. The cornet is
+    /// bright and singing, the trombone darker, smearing up a minor third into its strident (tailgate) notes, and the
+    /// tuba a round, dark, short-tongued two-beat bottom.
     /// </summary>
-    private static void Pluck(float[] buf, Random rng, ScoreNote note, double spb, double velocity, bool pizzicato = false)
+    private static void HotBrass(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
     {
-        double f0 = Hz(note.Midi), held = note.Beats * spb * 0.9;
+        bool tuba = note.Instrument == Instrument.Tuba, trombone = note.Instrument == Instrument.Trombone;
+        double attack = tuba ? 0.04 : 0.025, release = tuba ? 0.08 : 0.1;
+        double f0 = Hz(note.Midi), held = note.Beats * spb * (tuba ? 0.7 : 0.92);
+        double ceiling = tuba ? 900 : trombone ? 3200 : 5000, harmonics = tuba ? 3 : trombone ? 5 : 7;
+        int start = (int)Math.Round(note.Beat * spb * SampleRate), n = (int)((held + release) * SampleRate);
+        var dark = SoundSynth.Biquad.LowPass(Math.Min(ceiling * 0.6, f0 * harmonics * 0.5));
+        var bright = SoundSynth.Biquad.LowPass(Math.Min(ceiling, f0 * harmonics));
+        var breath = SoundSynth.Biquad.BandPass(tuba ? 400 : 1500, 0.9);
+        var drift = SoundSynth.Biquad.LowPass(3);
+        double phase = rng.NextDouble(), vibPhase = rng.NextDouble() * 2 * Math.PI;
+        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * (tuba ? 0.3 : 0.2);
+        bool smear = trombone && note.Strident;
+        for (int i = 0; i < n; i++)
+        {
+            double t = (double)i / SampleRate;
+            double env = Smooth(t / attack) * (0.85 + 0.15 * Math.Exp(-t / 0.4))
+                * (t < held ? 1 : Math.Cos(Math.PI / 2 * Math.Min(1, (t - held) / release)));
+            double cents = (smear ? -300 * (1 - Smooth(t / 0.14)) : -30 * Math.Exp(-t / 0.035))
+                + (tuba ? 0 : 16 * Smooth((t - 0.22) / 0.15) * Math.Sin(vibPhase + 2 * Math.PI * 5.8 * t))
+                + 10 * drift.Next(rng.NextDouble() * 2 - 1);
+            double dt = f0 * Cents(cents) / SampleRate;
+            phase += dt; if (phase >= 1) phase -= 1;
+            double saw = 2 * phase - 1 - PolyBlep(phase, dt);
+            double glow = Math.Min(1, env * (0.35 + 0.45 * velocity) * (note.Strident ? 1.2 : 1));
+            double s = (1 - glow) * dark.Next(saw) + glow * bright.Next(saw)
+                + (0.03 + 0.08 * Math.Exp(-t / 0.03)) * breath.Next(rng.NextDouble() * 2 - 1);
+            buf[(start + i) % buf.Length] += (float)(amp * env * s);
+        }
+    }
+
+    // ------------------------------------------------------------------ clarinet
+
+    /// <summary>
+    /// A clarinet: the closed pipe's odd harmonics as a band-limited square wave (two sawtooths half a period apart),
+    /// darker low down, a wide, fast New Orleans vibrato from the start of the note, and breath in the reed.
+    /// </summary>
+    private static void Reed(float[] buf, Random rng, ScoreNote note, double spb, double velocity)
+    {
+        const double attack = 0.03, release = 0.08;
+        double f0 = Hz(note.Midi), held = note.Beats * spb * 0.92;
+        int start = (int)Math.Round(note.Beat * spb * SampleRate), n = (int)((held + release) * SampleRate);
+        var tone = SoundSynth.Biquad.LowPass(Math.Min(4500, f0 * 6));
+        var breath = SoundSynth.Biquad.BandPass(2600, 0.8);
+        var drift = SoundSynth.Biquad.LowPass(3);
+        double phase = rng.NextDouble(), vibPhase = rng.NextDouble() * 2 * Math.PI;
+        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * 0.16;
+        for (int i = 0; i < n; i++)
+        {
+            double t = (double)i / SampleRate;
+            double env = Smooth(t / attack) * (t < held ? 1 : Math.Cos(Math.PI / 2 * Math.Min(1, (t - held) / release)));
+            double cents = -20 * Math.Exp(-t / 0.03) + 22 * Smooth(t / 0.12) * Math.Sin(vibPhase + 2 * Math.PI * 6.4 * t)
+                + 8 * drift.Next(rng.NextDouble() * 2 - 1);
+            double dt = f0 * Cents(cents) / SampleRate;
+            phase += dt; if (phase >= 1) phase -= 1;
+            double other = phase + 0.5 >= 1 ? phase - 0.5 : phase + 0.5;
+            double square = (2 * phase - 1 - PolyBlep(phase, dt)) - (2 * other - 1 - PolyBlep(other, dt));
+            double s = tone.Next(0.5 * square) + (0.05 + 0.1 * Math.Exp(-t / 0.04)) * breath.Next(rng.NextDouble() * 2 - 1);
+            buf[(start + i) % buf.Length] += (float)(amp * env * s);
+        }
+    }
+
+    // ------------------------------------------------------------------ plucked strings
+
+    /// <summary>
+    /// A plucked string (Karplus-Strong): a burst of noise, filtered to <paramref name="bright"/> Hz and given a
+    /// <paramref name="hump"/> of low fundamental, circulating in a tuned delay line that loses a little on each pass
+    /// (<paramref name="loss"/>), and choked off by the left hand when the note ends. <paramref name="late"/> seconds
+    /// delay the pluck (a strum), and up to <paramref name="roll"/> more at random (a rolled chord).
+    /// </summary>
+    private static void Pluck(float[] buf, Random rng, ScoreNote note, double spb, double velocity, double bright,
+        double hump, double loss, double heldFraction, double level, double late, double roll = 0)
+    {
+        double f0 = Hz(note.Midi), held = note.Beats * spb * heldFraction;
         double period = (double)SampleRate / f0 - 0.5;
         int len = (int)Math.Floor(period - 0.1);
         double frac = period - len, ap = (1 - frac) / (1 + frac);
         var line = new double[len];
-        var dark = SoundSynth.Biquad.LowPass(pizzicato ? Math.Min(3200, f0 * 12) : Math.Min(1200, f0 * 8));
-        double thumb = pizzicato ? 0.3 : 0.6;
-        for (int k = 0; k < len; k++) line[k] = dark.Next(rng.NextDouble() * 2 - 1) + thumb * Math.Sin(Math.PI * k / len);
+        var dark = SoundSynth.Biquad.LowPass(bright);
+        for (int k = 0; k < len; k++) line[k] = dark.Next(rng.NextDouble() * 2 - 1) + hump * Math.Sin(Math.PI * k / len);
         double mean = 0;
         foreach (var v in line) mean += v;
         mean /= len;
         for (int k = 0; k < len; k++) line[k] -= mean;
-        int roll = pizzicato ? (int)(rng.NextDouble() * 0.012 * SampleRate) : 0;
-        int start = (int)Math.Round(note.Beat * spb * SampleRate) + roll, n = (int)((held + 0.2) * SampleRate);
-        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * 0.5, prev = 0, apX = 0, apY = 0;
-        double ring = pizzicato ? 0.993 : 0.9975;
+        int rolled = roll > 0 ? (int)(rng.NextDouble() * roll * SampleRate) : 0;
+        int start = (int)Math.Round((note.Beat * spb + late) * SampleRate) + rolled, n = (int)((held + 0.2) * SampleRate);
+        double amp = velocity * (0.9 + 0.2 * rng.NextDouble()) * level, prev = 0, apX = 0, apY = 0;
         int idx = 0;
         for (int i = 0; i < n; i++)
         {
             double t = (double)i / SampleRate;
-            double loss = t < held ? ring : 0.95;
+            double l = t < held ? loss : 0.95;
             double x = line[idx];
-            double avg = loss * 0.5 * (x + prev);
+            double avg = l * 0.5 * (x + prev);
             prev = x;
             double y = ap * avg + apX - ap * apY;
             apX = avg;
@@ -439,6 +565,9 @@ public static partial class MusicSynth
                 }
                 break;
             }
+            case 37: // the drummer's sticks clicked together, counting the band in
+                Noise(buf, rng, start, 0.08, amp * 0.9, SoundSynth.Biquad.BandPass(3200, 2), t => Math.Exp(-t / 0.01));
+                break;
             case 38: // brush tap on the snare
                 Noise(buf, rng, start, 0.25, amp * 0.5, SoundSynth.Biquad.BandPass(2500, 0.8), t => Math.Exp(-t / 0.05));
                 break;
