@@ -194,7 +194,15 @@ public partial class Speakeasy : Room
             await sal.MoveTo(Game.Player.Position + new Vector2(18, 0), 60);
         }
         await Say("Hey, easy with the suit, it's rented--");
-        await Game.ChangeRoom("alley", "start");
+        await OutBack();
+    }
+
+    /// <summary>The screen holds black while Sal walks Micah out back: what happens out there isn't shown.</summary>
+    private async Task OutBack()
+    {
+        await Game.Hud.Fade(1, 0.6);
+        await Wait(1.6);
+        await Game.ChangeRoom("alley", "start", 0.9);
     }
 
     /// <summary>
@@ -209,7 +217,7 @@ public partial class Speakeasy : Room
         if (FindActor("sal") is { } sal)
             await sal.MoveTo(Game.Player.Position + new Vector2(-18, 0), 70);
         await Say("sal", "Out back, pal. Tony wants a word. Several, actually.");
-        await Game.ChangeRoom("alley", "start");
+        await OutBack();
     }
 
     /// <summary>Eleanor at the Blue Lantern after hours: Tony at the bar is the only one with anything to say.</summary>

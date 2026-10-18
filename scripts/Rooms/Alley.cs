@@ -21,6 +21,13 @@ public partial class Alley : Room
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
 
+    /// <summary>Act 1: Sal's place by Micah's head, and the spot a step further on that he kicks from.</summary>
+    private static readonly Vector2 SalStands = new(242, 224);
+    private static readonly Vector2 SalKicks = new(272, 228);
+
+    /// <summary>Seconds into sal_kick when his toe lands: the idle and wind-up frames.</summary>
+    private const double KickLands = 0.45;
+
     private Sprite2D? _lamp;
     private double _flickerIn;
     private readonly RandomNumberGenerator _rng = new();
@@ -85,8 +92,20 @@ public partial class Alley : Room
         await Game.Run(async () =>
         {
             Player.SetPose("micah_kneel");
-            await Wait(1.2);
-            await Think("Gravel in my palms, copper in my mouth. Sal's fists did the talking. Now Tony wants his turn.");
+            await Wait(0.8);
+            if (FindActor("sal") is { } bouncer)
+            {
+                // so it's clear what happened out here: two in the gut for the road, then Sal steps back
+                await bouncer.MoveTo(SalKicks, 50);
+                bouncer.FaceLeft(true);
+                for (int kick = 0; kick < 2; kick++)
+                    if (!await Kick(bouncer)) return;
+                await Wait(0.3);
+                await bouncer.MoveTo(SalStands, 50);
+                bouncer.FaceLeft(true);
+            }
+            await Wait(0.6);
+            await Think("Gravel in my palms, copper in my mouth. Sal's fists did the talking, his shoes had the last word. Now Tony wants his turn.");
             await Talk("alley");
             // back inside through the club's back door
             if (FindActor("sal") is { } sal) _ = sal.MoveTo(new Vector2(322, 198), 50);
@@ -171,6 +190,19 @@ public partial class Alley : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>One kick: Sal swings his foot under Micah's chest, and Micah doubles up and sags back onto his forearms.</summary>
+    private async Task<bool> Kick(Actor sal)
+    {
+        var swing = sal.PlayPose("sal_kick");
+        await Wait(KickLands);
+        Game.Sfx.Play(Sound.Thunk);
+        bool hit = await Player.PlayPose("micah_kicked");
+        bool kicked = await swing;
+        Player.SetPose("micah_kneel");
+        sal.SetPose(null);
+        return hit && kicked;
     }
 
     /// <summary>A kick at the cans in the dark: Micah ducks behind the lamp post and Sal comes out to look.</summary>

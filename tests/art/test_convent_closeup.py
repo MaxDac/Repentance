@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 import unittest
-
+import unittest.mock
 import numpy as np
 from PIL import Image
 
@@ -73,6 +73,21 @@ class ConventCloseupTests(unittest.TestCase):
         left, right = halves(self.panel)
         colours = {tuple(c) for c in np.concatenate([left.reshape(-1, 3), right.reshape(-1, 3)])}
         self.assertLessEqual(len(colours), closeup.COLOURS)
+
+    def test_a_small_scar_crosses_micahs_bottom_lip(self):
+        source = Image.open(closeup.MICAH_SRC).convert("RGB")
+        scarred = np.asarray(closeup.lip_scar(source, *closeup.MICAH_SCAR)).astype(int)
+        changed = np.argwhere((scarred != np.asarray(source)).any(axis=2))
+        (top, left), (bottom, right) = changed.min(axis=0), changed.max(axis=0)
+        self.assertLessEqual(bottom - top, 40, "a short scar, not a gash")
+        self.assertLessEqual(right - left, 25, "a thin line")
+        self.assertTrue(abs(top - 400) <= 6 and closeup.MICAH_FACE_X - 40 < left < closeup.MICAH_FACE_X,
+                        "from the mouth line, just off centre")
+        with unittest.mock.patch.object(closeup, "lip_scar", lambda img, *_: img):
+            plain = closeup.convent_closeup(source, Image.open(closeup.ELEANOR_SRC))
+        diff = (np.asarray(self.panel) != np.asarray(plain)).any(axis=2)
+        self.assertTrue(diff[:, :BAR_X].any(), "the scar survives the reduction")
+        self.assertLess(diff[:, :BAR_X].sum(), 200, "and stays small in the panel")
 
     def test_micah_on_the_left_in_his_yellow_coat(self):
         left, _ = halves(self.panel)

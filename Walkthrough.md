@@ -137,13 +137,17 @@ described here (other verbs, flavour lines) is left to the implementation.
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
   calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
-  the entrance), and on to the next scene.
+  the entrance), and on to the next scene. Whichever way Sal walks Micah out, the screen holds black for a moment
+  before the alley: the beating itself is never shown.
 
 #### Street behind the club (the alley)
 
 - New location: the road behind the club, dirty and in the shadow, with only one intermittent street lamp.
 - Micah is on his knees, hands on the pavement (new kneeling pose and sprite) after a beating, Sal next to him and
-  Tony behind Sal.
+  Tony behind Sal. So the player understands what happened, Sal steps up and kicks him in the belly twice (new
+  kicking sprite for Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue
+  starts. The beating splits Micah's bottom lip: from here on his close-ups (the convent two-portrait panel and
+  the beaten panel) show a small scar across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
   anything else.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.

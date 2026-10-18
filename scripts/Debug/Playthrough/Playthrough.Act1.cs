@@ -86,11 +86,13 @@ public sealed partial class Playthrough
             await Do(Verb.Talk, "sal");
             Check(Gs.HasFlag("sal_passed") && Gs.HasFlag("sal_password") && CashRules.Balance(Gs.HasFlag) == 20,
                 "Moonshine gets Micah past Sal without paying");
+            int thunks = _game.Sfx.Count(Sound.Thunk);
             await Do(Verb.Talk, "bartender");
             await WaitIdle();
             Check(Gs.HasFlag("lantern_gin") && CashRules.Balance(Gs.HasFlag) == 19,
                 "Micah knocks back a buck's worth of bathtub gin");
             Expect("Alley", "thrown out into the alley");
+            Check(_game.Sfx.Count(Sound.Thunk) - thunks == 2, "Sal kicks Micah twice in the alley");
         });
         await Beat("convent_road", async () =>
         {

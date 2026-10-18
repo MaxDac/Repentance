@@ -393,6 +393,29 @@ class CharacterArtTests(unittest.TestCase):
         self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "sal_out.png").tobytes())
         self.assertFalse((ART / "sprites" / "sal_supine.png").exists(), "the old on-his-back pose is gone")
 
+    def test_sal_kicks_from_his_idle_pose_and_back(self):
+        clip = json.loads((ART / "sprites" / "sal_kick.json").read_text())
+        image = Image.open(ART / "sprites" / "sal_kick.png")
+        width, height = clip["width"], clip["height"]
+        frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(len(clip["frames"]))]
+        idle = Image.open(ART / "sprites" / "sal.png").crop((0, 0, 56, 96))
+        for at in (0, -1):
+            standing = frames[at].crop(((width - 56) // 2, 0, (width + 56) // 2, height))
+            self.assertEqual(standing.tobytes(), idle.tobytes(), "start and end on Sal's idle pose")
+        self.assertEqual(len({frame.tobytes() for frame in frames[1:4]}), 3, "wind-up, strike and recoil differ")
+        strike = np.array(frames[2])[..., 3]
+        self.assertGreater(np.nonzero(strike.any(axis=0))[0].max(), width // 2 + 24, "the foot swings well out front")
+        self.assertAlmostEqual(sum(f["seconds"] for f in clip["frames"][:2]), 0.45, msg="the toe lands 0.45 s in")
+
+    def test_kicked_micah_doubles_up_and_settles_back_on_his_knees(self):
+        clip = json.loads((ART / "sprites" / "micah_kicked.json").read_text())
+        image = Image.open(ART / "sprites" / "micah_kicked.png")
+        width, height = clip["width"], clip["height"]
+        frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(len(clip["frames"]))]
+        self.assertEqual(len({frame.tobytes() for frame in frames}), len(frames))
+        self.assertEqual(frames[-1].tobytes(), Image.open(ART / "sprites" / "micah_kneel.png").tobytes(),
+                         "ends on the held kneeling pose")
+
     def test_tony_shot_in_the_shoulder_folds_down_onto_his_back(self):
         clip = json.loads((ART / "sprites" / "bartender_fall.json").read_text())
         image = Image.open(ART / "sprites" / "bartender_fall.png").convert("RGBA")

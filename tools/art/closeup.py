@@ -42,6 +42,10 @@ MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
+# The lip scar, from the mouth line to the chin, in each source of Micah's face: pale scar tissue and its dark edge.
+MICAH_SCAR = ((652, 398), (647, 428))
+BEATEN_SCAR = ((648, 358), (643, 388))
+SCAR, SCAR_EDGE = hx("f0c8b0"), hx("6a2a24")
 # One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
 # before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
 STAGE_PALETTE = [hx(c) for c in """
@@ -80,10 +84,24 @@ def crop_to_panel(img):
     return img.crop((0, 0, w, round(w * AH / AW)))
 
 
+def lip_scar(img, top, bottom, width=10):
+    """Paints the scar the Blue Lantern left on Micah's bottom lip: a thin pale seam, slightly slanted, from the
+    mouth line down across the lip into the chin, with a dark healed edge along one side. Drawn on a copy of the
+    source picture, wide enough to come through the reduction as a line about one art pixel wide."""
+    img = img.copy()
+    draw = ImageDraw.Draw(img)
+    (x0, y0), (x1, y1) = top, bottom
+    draw.line([top, bottom], fill=SCAR, width=width)
+    draw.line([(x0 + width, y0 + 4), (x1 + width, y1)], fill=SCAR_EDGE, width=width // 2)
+    return img
+
+
 def beaten_closeup(src):
-    """Micah flat on his back on the cathedral steps, looking up from under his hat."""
-    img = crop_to_panel(src.convert("RGB"))
-    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+    """Micah flat on his back on the cathedral steps, looking up from under his hat, the scar on his bottom lip.
+    The palette is the unscarred picture's, so the scar changes only its own pixels."""
+    src = src.convert("RGB")
+    img = crop_to_panel(lip_scar(src, *BEATEN_SCAR))
+    return framed(img, palette_of(crop_to_panel(src).resize((AW, AH), Image.BOX), COLOURS))
 
 
 def motel_crop(src):
@@ -118,10 +136,13 @@ def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
 
 
 def convent_closeup(micah, eleanor):
-    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size."""
-    left = portrait_crop(micah, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
+    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size.
+    Micah's bottom lip carries the scar from the Blue Lantern; the palette is the unscarred picture's, so the scar
+    changes only its own pixels."""
+    micah = micah.convert("RGB")
+    crop = lambda img: portrait_crop(img, MICAH_FACE_X, MICAH_ZOOM, MICAH_EYES_Y, ELEANOR_EYES_Y)
     right = portrait_crop(eleanor, ELEANOR_FACE_X)
-    return framed_pair(left, right)
+    return framed_pair(crop(lip_scar(micah, *MICAH_SCAR)), right, pair_palette(crop(micah), right))
 
 
 def frame_border(panel):
@@ -141,14 +162,19 @@ def framed(img, pal):
     return frame_border(panel)
 
 
+def pair_palette(left, right):
+    """The palette a two-portrait panel of these pictures gets."""
+    both = Image.new("RGB", (HALF * 2, AH))
+    both.paste(left.resize((HALF, AH), Image.BOX), (0, 0))
+    both.paste(right.resize((HALF, AH), Image.BOX), (HALF, 0))
+    return palette_of(both, COLOURS)
+
+
 def framed_pair(left, right, pal=None):
     """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both."""
     a = left.resize((HALF, AH), Image.BOX)
     b = right.resize((HALF, AH), Image.BOX)
-    both = Image.new("RGB", (HALF * 2, AH))
-    both.paste(a, (0, 0))
-    both.paste(b, (HALF, 0))
-    pal = pal or palette_of(both, COLOURS)
+    pal = pal or pair_palette(left, right)
     panel = Image.new("RGB", (PW, PH), hx("08060a"))
     panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
     panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))
