@@ -928,6 +928,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   happen later, after he has begun showing change rather than merely promising it.
   Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee."
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
+- In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
+  left of the screen: a 1920s sepia studio print, pixelised like the other close-ups, on a cream card mount with worn
+  corners, the size of a photo rather than a full panel. Daniel's lines sit in a column to its right. It appears with
+  "Rose and I renewed our vows today" and goes after "...when he has somebody to tell them to."
 - Only if Micah took the signed papers from the study (possible on the Our Father route), the journal adds that
   Caleb carried them to the Tribune himself; a grand jury followed, and the Club's Thursdays ended. Without the
   papers, there is no mention.

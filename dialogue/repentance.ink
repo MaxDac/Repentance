@@ -1538,8 +1538,10 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: ...So that's whose hand it was. Micah's, from across a prison table.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_1"):
+    INSET: vows
     DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
+    INSET: none
     {has_flag("took_documents"):
         DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after that coffee. He said he owed fourteen girls that walk."
         DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
