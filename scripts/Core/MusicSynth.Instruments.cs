@@ -51,6 +51,7 @@ public static partial class MusicSynth
             SoundSynth.Biquad.HighPass(35), SoundSynth.Biquad.Peaking(90, 4, 1), SoundSynth.Biquad.Peaking(700, -2, 1),
             SoundSynth.Biquad.LowPass(2500),
         },
+        Instrument.Car => new[] { SoundSynth.Biquad.HighPass(30), SoundSynth.Biquad.LowPass(5000) },
         _ => new[] { SoundSynth.Biquad.HighPass(60) },
     };
 

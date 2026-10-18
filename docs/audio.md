@@ -7,7 +7,7 @@ Sounds and music are synthesized at startup; the one exception is a real grand p
 |---|---|---|
 | `SoundSynth` (+ `SoundSynth.Effects.cs`) | yes | Renders `Sound` samples (mono, 22050 Hz, deterministic), parses `*cue*` lines |
 | `Sfx` | no | Plays sounds on the **Effects** bus: 12 voices round-robin, footsteps, cues, room ambience |
-| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`) | yes | Renders scored tracks to seamless stereo loops |
+| `MusicSynth` (+ `.Instruments.cs`, `.Scores.cs`, `.Street.cs`) | yes | Renders scored tracks to seamless stereo loops |
 | `PianoRecordings` | yes | Loads the recorded piano notes for `Instrument.RecordedPiano` |
 | `Music` | no | Plays the room's track on the **Music** bus; keeps playing while paused |
 
@@ -53,6 +53,12 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `ConventPiano` | Convent corridor, cell | Hymn-like piano prelude in E-flat |
 | `OfficeJazz` | Office; motel fire escape and room while Micah is with Eleanor (not the interludes) | Slow D-minor ballad, muted trumpet, piano, bass |
 | `LobbyPiano` | Aurelian Hotel lobby only | House pianist's soft, low 1920s ballad in C on the recorded piano, pedalled broken chords under a plain tune in half notes |
+| `RoseStreet` | Rose's house (Act 2 visit, Act 3 coffee) | Not music: a quiet evening street, silent but for two 1920s cars driving past across the stereo field |
+
+`RoseStreet` is scored like the others but played by the `Car` in `MusicSynth.Street.cs`: a note is one whole pass,
+its pitch the engine's, and it moves across the stereo field (left to right when its part's pan is positive) with
+distance, air absorption and Doppler. Between the cars the track is silent, so `MusicSynthTests` exempts it from the
+never-silent check.
 
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it. Tracks are
 about a minute, rendered on worker threads in `Music._Ready`; rendering runs the loop twice and keeps the second

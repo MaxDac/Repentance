@@ -406,6 +406,7 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(_insetAtStreetChoice == false, "Micah's close-up is removed before he gets up and chooses");
         Check(DryHere(), "the rain stops at Rose's street");
+        Check(game.Music.Current == Track.RoseStreet, "the quiet evening street plays outside Rose's house");
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("it stops at Rose's street"));
         Check(game.Hud.ThoughtText.Contains("it stops at Rose's street"), "Micah notices the rain stop at Rose's street");
         await club;

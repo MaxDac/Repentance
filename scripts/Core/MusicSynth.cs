@@ -17,6 +17,8 @@ public enum Track
     OfficeJazz,
     /// <summary>The Aurelian Hotel lobby: a house pianist's soft 1920s foxtrot over a hushed, pedalled stride.</summary>
     LobbyPiano,
+    /// <summary>Rose's street: not music but a quiet evening street, silent but for the odd motor car driving past.</summary>
+    RoseStreet,
 }
 
 public enum Instrument
@@ -41,6 +43,9 @@ public enum Instrument
     /// <summary>A brushed kit. The pitch picks the drum, General MIDI style: C2 kick, D2 brush tap, E2 brush sweep,
     /// F#2 hi-hat, Eb3 ride.</summary>
     Drums,
+    /// <summary>A 1920s motor car driving past: the note's pitch is the engine's, its length the whole pass. It moves
+    /// across the stereo field, left to right when the part's pan is positive, right to left when negative.</summary>
+    Car,
 }
 
 /// <summary>One note: <see cref="Voice"/> is the player's part, times are in beats, pitch in MIDI.</summary>
@@ -87,6 +92,7 @@ public static partial class MusicSynth
         Track.ConventPiano => -7.5f,
         Track.OfficeJazz => -15f,
         Track.LobbyPiano => -12f,
+        Track.RoseStreet => -18f,
         _ => -6f,
     };
 
@@ -155,21 +161,20 @@ public static partial class MusicSynth
             var part = piece.Parts[voice];
             // one period of the part, wrapped: a note held over the end of the loop sounds again at its start
             var raw = new float[length];
+            // a moving source (a passing car) places itself in the stereo field note by note, instead of the part's pan
+            var rawRight = part.Instrument == Instrument.Car ? new float[length] : null;
             foreach (var note in score.Where(n => n.Voice == voice))
-                Sound(raw, rng, note, spb, part.Velocity);
+                if (rawRight != null) Car(raw, rawRight, rng, note, spb, part.Velocity, Math.Sign(part.Pan));
+                else Sound(raw, rng, note, spb, part.Velocity);
 
-            // run the body twice round the loop and keep the second lap, so the filters start in their looping state
-            var body = BodyOf(part.Instrument);
-            double pan = (part.Pan + 1) * Math.PI / 4;
-            float gl = (float)Math.Cos(pan), gr = (float)Math.Sin(pan);
-            for (int i = 0; i < 2 * length; i++)
+            if (rawRight != null)
             {
-                double x = raw[i % length] + Dither(i);
-                for (int k = 0; k < body.Length; k++) x = body[k].Next(x);
-                if (i < length) continue;
-                left[i - length] += (float)(x * gl);
-                right[i - length] += (float)(x * gr);
+                Body(raw, part.Instrument, left, 1, null, 0);
+                Body(rawRight, part.Instrument, right, 1, null, 0);
+                continue;
             }
+            double pan = (part.Pan + 1) * Math.PI / 4;
+            Body(raw, part.Instrument, left, (float)Math.Cos(pan), right, (float)Math.Sin(pan));
         }
 
         Reverb(left, right, piece.Hall);
@@ -184,6 +189,24 @@ public static partial class MusicSynth
             stereo[2 * i + 1] = right[i] * gain;
         }
         return stereo;
+    }
+
+    /// <summary>
+    /// Runs a part through its instrument's body twice round the loop and keeps the second lap, so the filters start in
+    /// their looping state, and mixes it into one or two channels.
+    /// </summary>
+    private static void Body(float[] raw, Instrument instrument, float[] a, float ga, float[]? b, float gb)
+    {
+        int length = raw.Length;
+        var body = BodyOf(instrument);
+        for (int i = 0; i < 2 * length; i++)
+        {
+            double x = raw[i % length] + Dither(i);
+            for (int k = 0; k < body.Length; k++) x = body[k].Next(x);
+            if (i < length) continue;
+            a[i - length] += (float)(x * ga);
+            if (b != null) b[i - length] += (float)(x * gb);
+        }
     }
 
     /// <summary>Inaudible noise that keeps filters ringing down through silence out of slow denormal arithmetic.</summary>
