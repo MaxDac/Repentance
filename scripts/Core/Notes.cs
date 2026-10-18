@@ -101,7 +101,7 @@ public static class Notes
             L("Then his brute threw me out on the pavement.")),
         N("caleb_convent", "Caleb", "caleb_club",
             L("Eleanor hid at the convent once. The convent answers to the Church. Caleb might know."),
-            L("Performers, he called the women. When the Club is done with them, the sisters take some in."),
+            L("The Club traffics girls off the trains for its Thursdays. Caleb and the sisters hide the ones who run, and he keeps quiet so the Club leaves them be. Hypocrite."),
             L("Ask at the convent.")),
         N("harrington_senior", "The sister again", "nun_threatened",
             L("I pulled a gun on a nun. My hand was shaking."),
