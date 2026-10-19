@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Unit tests for the Godot-free sound and music synthesis. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Repentance.Audio\Repentance.Audio.csproj" />
+  </ItemGroup>
+</Project>

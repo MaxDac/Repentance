@@ -1,0 +1,12 @@
+<Project>
+  <!-- Shared by every project in the solution (game, libraries, tests, tools). -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <WarningsAsErrors>$(WarningsAsErrors);CS0108;CS0114</WarningsAsErrors>
+  </PropertyGroup>
+  <!-- Godot builds exports as ExportDebug/ExportRelease and passes that configuration to referenced libraries. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'ExportRelease'">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+</Project>

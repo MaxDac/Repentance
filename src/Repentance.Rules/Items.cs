@@ -7,7 +7,7 @@ namespace Repentance;
 public sealed record ItemDef(string Id, string Name, string IconPath, string Description);
 
 /// <summary>
-/// Inventory item catalogue. Items are listed per act in scripts/Core/Items/: add new ones to the act that
+/// Inventory item catalogue. Items are listed per act in src/Repentance.Rules/Items/: add new ones to the act that
 /// introduces them and drop a 32x24 icon in assets/art/items.
 /// </summary>
 public static partial class Items

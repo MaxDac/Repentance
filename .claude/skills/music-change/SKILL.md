@@ -22,7 +22,7 @@ Follow `docs/audio.md` ("Music", "Recorded instruments", "Music tool"). Always u
 
 ## Steps
 
-1. Edit the score in `scripts/Core/MusicSynth.Scores.cs` (tempo, `Hall`, parts) and, for a new track, the `Track`
+1. Edit the score in `src/Repentance.Audio/MusicSynth.Scores.cs` (tempo, `Hall`, parts) and, for a new track, the `Track`
    enum, `BaseVolumeDb` and the room's `Music` override.
 2. If any recorded note or hold changed, regenerate the recordings and commit the changed
    `assets/audio/{piano,sax,bass}/*.pcm` files (never hand-edit them):
@@ -41,6 +41,6 @@ Follow `docs/audio.md` ("Music", "Recorded instruments", "Music tool"). Always u
    Iterate on the score with the user before running the slow suites. For in-game listening use
    `tools\run\game.ps1`.
 4. Update the track's row in `docs/audio.md` and its `MusicSynthTests` fact (range, form, rhythm).
-5. Run `dotnet test tests/Repentance.Tests --filter MusicSynthTests` (seams, loudness, ranges, recordings).
+5. Run `dotnet test tests/Repentance.Audio.Tests --filter MusicSynthTests` (seams, loudness, ranges, recordings).
 6. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, playthrough, autoplay` (every track must play in
    the playthrough; autoplay checks room music).

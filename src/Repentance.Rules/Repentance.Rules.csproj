@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Godot-free story rules and data: items, notes, recipes, puzzles, endings, save data, Ink scan. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Repentance</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Repentance.Rules.Tests" />
+    <InternalsVisibleTo Include="Repentance.Content.Tests" />
+  </ItemGroup>
+</Project>

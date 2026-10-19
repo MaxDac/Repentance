@@ -49,8 +49,13 @@ foreach ($s in $selected) {
         switch ($s) {
             'unit' {
                 Write-Host '== unit' -ForegroundColor Cyan
-                dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --nologo
-                $ok = $LASTEXITCODE -eq 0
+                $projects = @(Get-ChildItem tests/*.Tests/*.Tests.csproj -ErrorAction SilentlyContinue)
+                $ok = $projects.Count -gt 0
+                if (-not $ok) { Write-Host 'No test projects under tests/*.Tests/' -ForegroundColor Red }
+                foreach ($project in $projects) {
+                    dotnet test $project.FullName --nologo
+                    if ($LASTEXITCODE -ne 0) { $ok = $false }
+                }
             }
             'art' {
                 Write-Host '== art' -ForegroundColor Cyan

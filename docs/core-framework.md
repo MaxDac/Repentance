@@ -77,6 +77,8 @@ await Game.Run(async () =>
 
 ## Dialogue, items, rules
 
+Godot-free types live in `src/Repentance.Rules/`; the rest in `scripts/Core/`.
+
 | Type | File | Godot-free | Purpose |
 |---|---|---|---|
 | `DialogueManager` (autoload) | `DialogueManager.cs` | no | Runs Ink; see [Story and dialogue](story-and-dialogue.md) |

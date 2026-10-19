@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Unit tests for the Godot-free story rules: items, recipes, notes, puzzles, rain, endings, saves. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Repentance.Rules\Repentance.Rules.csproj" />
+  </ItemGroup>
+</Project>

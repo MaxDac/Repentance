@@ -24,8 +24,8 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 ## Code rules
 
 - Use [concern-specific partials](docs/architecture.md#partial-classes). Shared inventory behavior belongs in
-  `scripts/Story/`; items in the introducing act's `scripts/Core/Items/` file.
-- Keep [unit-linked sources](docs/conventions.md#godot-free-files) Godot-free.
+  `scripts/Story/`; items in the introducing act's `src/Repentance.Rules/Items/` file.
+- Keep [Godot-free libraries](docs/conventions.md#godot-free-libraries) (`src/`) free of Godot; Godot script classes stay in `Repentance.csproj`.
 - Extend intended virtual hooks with required base initialization/cleanup. Godot resources: override
   `_ResetState()`, never hide `ResetState()`. No `new` or warning suppressions to hide inherited methods.
 - Incompatible saved meaning: bump `SaveData.CurrentVersion` and the version sentences in

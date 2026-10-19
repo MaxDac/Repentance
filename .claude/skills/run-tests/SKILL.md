@@ -22,7 +22,7 @@ Logs: `logs/<suite>.log`, `logs/import.log`. Failure = bad exit, missing marker 
 2. Playthrough and AutoPlay name the beat or check that failed; a timeout means a dead end (missing exit, item or
    choice). A run that logged an error fails even if it printed its marker.
 3. xunit: rerun one class:
-   `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter FullyQualifiedName~StoryIntegrityTests`.
+   `dotnet test tests/Repentance.Content.Tests --filter FullyQualifiedName~StoryIntegrityTests`.
 4. Art: `py -3.14 -m unittest discover -s tests\art -v`.
 
 ## Delegate launcher runs to a cheap model

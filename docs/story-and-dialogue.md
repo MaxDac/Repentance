@@ -10,11 +10,11 @@
 | Room behavior | `scripts/Rooms/<Room>.cs` |
 | Item verbs, combinations, shared puzzles valid in any room | `scripts/Story/ItemScripts.cs`, `CombineScripts.cs`, `StoryPuzzles.cs` |
 | Eleanor's interludes and coda | `scripts/Story/Interlude.cs` |
-| Ending plumbing | `scripts/Rooms/Act3.cs`, rules in `scripts/Core/Endings.cs` |
-| Items | `scripts/Core/Items/Items.{Micah,Act1,Act2,Act3}.cs` (the act that introduces them) |
-| Notepad pages | `scripts/Core/Notes.cs` |
-| Combination recipes | `scripts/Core/Recipes.cs` |
-| Puzzle answers | `scripts/Core/PuzzleRules.cs` |
+| Ending plumbing | `scripts/Rooms/Act3.cs`, rules in `src/Repentance.Rules/Endings.cs` |
+| Items | `src/Repentance.Rules/Items/Items.{Micah,Act1,Act2,Act3}.cs` (the act that introduces them) |
+| Notepad pages | `src/Repentance.Rules/Notes.cs` |
+| Combination recipes | `src/Repentance.Rules/Recipes.cs` |
+| Puzzle answers | `src/Repentance.Rules/PuzzleRules.cs` |
 | Canonical playthrough (also film mode) | `scripts/Debug/Playthrough/Playthrough.{Act1,Act2,Act3,Endings}.cs` |
 | Regression checks | `scripts/Debug/AutoPlay/AutoPlay.*.cs` |
 
@@ -59,7 +59,7 @@ Start a conversation from C# with `await Talk("knot")`. It runs inside `Game.Run
   Leave room for inline `{...}` expansion. Tests pick choices by full text, not short labels.
   If the font or bar changes, recompute `floor(width / advance)` and update
   `MaxChoiceChars`; `AutoPlay.ChoiceBarLimitTest` fails until it matches.
-- Find long labels: `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter FitsTheChoiceBar`.
+- Find long labels: `dotnet test tests/Repentance.Content.Tests --filter FitsTheChoiceBar`.
 
 ### Voice and scripture
 

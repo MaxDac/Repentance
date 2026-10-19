@@ -41,8 +41,10 @@ class AssetContractsTests(unittest.TestCase):
                 self.assertEqual(image.convert("RGBA").getchannel("A").getextrema(), (255, 255))
 
     def test_fixed_art_references_exist(self):
-        for folder, extension in (("scenes", "*.tscn"), ("scripts", "*.cs")):
+        for folder, extension in (("scenes", "*.tscn"), ("scripts", "*.cs"), ("src", "*.cs")):
             for path in (ROOT / folder).rglob(extension):
+                if {"bin", "obj"} & set(path.relative_to(ROOT).parts):
+                    continue
                 for asset in re.findall(r'"res://(assets/art/[^"{}]+\.png)"', path.read_text()):
                     with self.subTest(source=path.name, asset=asset):
                         self.assertTrue((ROOT / asset).is_file())

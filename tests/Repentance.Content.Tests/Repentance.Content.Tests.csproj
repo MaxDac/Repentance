@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Checks over the repository's content: the ink story, the scene graph and the game's C# sources. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Repentance.Rules\Repentance.Rules.csproj" />
+  </ItemGroup>
+  <!-- The same ink compiler and runtime as the game (downloaded on first build), so the tests can walk the real story. -->
+  <PropertyGroup>
+    <GodotProjectDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\'))</GodotProjectDir>
+  </PropertyGroup>
+  <Import Project="..\..\addons\GodotInk\GodotInk.props" />
+</Project>

@@ -82,7 +82,7 @@ left work area (about x 14-272, y 31-204). Untimed, unlimited retries; unsubmitt
 
 Screens that call `DirectionPad` (`Lift`, `Alignment`) also move with the arrow keys (`ui_up/down/left/right`,
 held keys repeat) and with left-button or touch drags that start on the work area: `SwipeGesture`
-(`scripts/Core/`, Godot-free) emits one step per `SwipeStep` (one 14px cell) along the drag's dominant axis.
+(`src/Repentance.Rules/`, Godot-free) emits one step per `SwipeStep` (one 14px cell) along the drag's dominant axis.
 All three go through `PuzzleScreen.Step`, so pause blocks them like the pad buttons.
 
 | `PuzzleKind` | Screen | Rule in `PuzzleRules` |

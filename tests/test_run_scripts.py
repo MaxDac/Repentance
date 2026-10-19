@@ -219,10 +219,19 @@ sys.exit(int(os.environ["GAME_EXIT"]))
 
     def test_unit_suite_does_not_require_godot(self):
         self.env["GODOT"] = "/missing/editor"
+        for name in ("Repentance.Rules.Tests", "Repentance.Content.Tests"):
+            (self.project / "tests" / name).mkdir(parents=True)
+            (self.project / "tests" / name / f"{name}.csproj").write_text("<Project />")
         result = self.run_launcher("test.sh", "unit", "--no-clean")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("All suites passed.", result.stdout)
         self.assertFalse(self.trace.exists())
+        self.assertEqual(Path(self.env["EVENTS"]).read_text().split().count("test"), 2)
+
+    def test_unit_suite_fails_without_test_projects(self):
+        result = self.run_launcher("test.sh", "unit", "--no-clean")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("No test projects", result.stdout + result.stderr)
 
     def test_film_default_speed_and_options(self):
         result = self.run_launcher("film.sh", "--no-clean")
