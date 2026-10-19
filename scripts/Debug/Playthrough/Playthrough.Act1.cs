@@ -30,9 +30,9 @@ public sealed partial class Playthrough
         });
         await Beat("office", async () =>
         {
-            await Do(Verb.Hand, "drawer");
-            await Do(Verb.Hand, "revolver");
             await Do(Verb.Hand, "dollar");
+            await Do(Verb.Hand, "revolver");
+            await Do(Verb.Hand, "filing");
             await Do(Verb.Hand, "lockpick");
             await Do(Verb.Walk, "door");
             Expect("Lobby", "out of the office");

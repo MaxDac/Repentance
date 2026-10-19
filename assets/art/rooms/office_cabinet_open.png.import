@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b60wk0emxd3pd"
-path="res://.godot/imported/office_drawer_lockpick.png-dc37af1593d6fc8e0d48f4dfa211d26d.ctex"
+uid="uid://b0bsg8vdoind7"
+path="res://.godot/imported/office_cabinet_open.png-a2e894dd17f39089563f663fdb876027.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_lockpick.png"
-dest_files=["res://.godot/imported/office_drawer_lockpick.png-dc37af1593d6fc8e0d48f4dfa211d26d.ctex"]
+source_file="res://assets/art/rooms/office_cabinet_open.png"
+dest_files=["res://.godot/imported/office_cabinet_open.png-a2e894dd17f39089563f663fdb876027.ctex"]
 
 [params]
 

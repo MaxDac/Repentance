@@ -46,7 +46,7 @@ public static class MicahKit
         "outskirts", "prison",
     };
 
-    // The top drawer in Micah's office, emptied before he can leave in Act 1.
+    // Micah's kit in his office (cash on the desk, revolver on the coat rack, picks in the cabinet), taken before he can leave in Act 1.
     private static readonly (string Item, string Flag)[] OfficeDrawer =
     {
         ("dollar", "took_dollar"), ("revolver", "took_revolver"), ("lockpick", "took_lockpick"),
