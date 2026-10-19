@@ -529,7 +529,7 @@ THOUGHT: Going on four days she'd been gone from that cell. Four days is a long 
     -> leads
 + [Call it a night. Back to the office.]
     MICAH: Nothing for it. Back to the office, a bottle, and a long think.
-    THOUGHT: Then I saw it, down the hill where the road bends: a sign buzzing pink through the rain.
+    THOUGHT: Then I saw it, down the hill where the road bends: a tall sign buzzing amber and blue through the rain.
     INSET: motel
     MICAH: A flophouse...
     MICAH: Maybe she took a powder from Sister Agatha and holed up there. It's a long shot, but I'm fresh out of angles.
