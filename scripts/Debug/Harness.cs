@@ -150,11 +150,16 @@ public abstract class Harness
     /// <summary>Waits in real time, ignoring the clock scale and pause.</summary>
     protected Task Observe(double seconds) => Timers.Wait(_game, seconds, processAlways: true, ignoreTimeScale: true);
 
-    protected async Task WaitIdle(Game? game = null)
+    /// <summary>
+    /// Waits until no scripted sequence runs, for at least <paramref name="timeout"/> game seconds. Long enough for the
+    /// longest entry cutscene (the Act 3 office window, ~52 s of thoughts), whatever the frame rate.
+    /// </summary>
+    protected async Task WaitIdle(Game? game = null, double timeout = 120)
     {
         game ??= _game;
         await game.Wait(0.2);
-        for (int i = 0; i < 300 && game.Busy; i++) await game.Wait(0.1);
+        for (double t = 0; t < timeout && game.Busy; t += 0.1) await game.Wait(0.1);
+        if (game.Busy) GD.Print($"[{Tag}] WaitIdle: still busy after {timeout} s");
     }
 
     /// <summary>When set, every <see cref="Until"/> step records the speech and thoughts on screen into it.</summary>
