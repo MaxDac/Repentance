@@ -70,14 +70,23 @@ public partial class Game
     private async Task TitleScreen()
     {
         _onTitle = true;
-        Hud.ShowTitle(true);
+        ShowTitle(true);
         await Hud.Fade(0, 0.8);
         var choice = await Hud.Menu.OpenTitle();
         await Hud.Fade(1, 0.5);
-        Hud.ShowTitle(false);
+        ShowTitle(false);
         _onTitle = false;
         if (choice is { Action: MenuAction.Load, Save: { } save }) await LoadGame(save);
         else await NewGame();
+    }
+
+    /// <summary>The title screen with the patter of its rain; hiding it hands the ambience back to the room, if any.</summary>
+    public void ShowTitle(bool show)
+    {
+        Hud.ShowTitle(show);
+        if (show) Sfx.SetAmbient(Sound.Rain);
+        else if (Room?.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
+        else Sfx.SetAmbient(null);
     }
 
     public async Task NewGame()

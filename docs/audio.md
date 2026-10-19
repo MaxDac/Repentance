@@ -23,7 +23,8 @@ when diagnosing audio; a clean launcher exit alone does not prove sound played.
 `Click`, `Scrape`, `Whoosh`, `DoorSlam`, `Bell`, `Rain`, `Thunder`.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`).
-- **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)).
+- **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)). The title screen
+  (`Game.ShowTitle`) plays the same rain at full level; hiding it hands the ambience back to the room.
 - **Cues**: only lines whose text starts with `*` (Ink or `Say`). Ordinary speech never plays sounds.
 
 | Word in the `*...*` line | Sound |
