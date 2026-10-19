@@ -35,7 +35,7 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 
 | Suite | Runs | Covers | Pass |
 |---|---|---|---|
-| `unit` | `dotnet test tests/Repentance.Tests` | Godot-free rules, scene graph, story integrity, Ink walk | exit code |
+| `unit` | `dotnet test` on each `tests/*.Tests` project | Godot-free rules, scene graph, story integrity, Ink walk | exit code |
 | `art` | Python `unittest` in `tests/` | Generated art matches the generators and contracts | exit code |
 | `playthrough` | `--playthrough` | Canonical story, every ending, save/load after every beat, sound/music coverage | `PLAYTHROUGH OK` |
 | `resume-act2`, `resume-act3` | `--playthrough --resume=act2\|act3` | A fresh launch loads a checkpoint `playthrough` kept and plays on to "The End" (run `playthrough` first) | `RESUME OK` |
@@ -124,26 +124,28 @@ Launchers: `film.ps1 -Speed <s> -Ending <n> -From <chapter>`;
 `film.sh --speed <s> --ending <n> --from <chapter>`. Bash also accepts `-s <s>` and `--speed=<s>`.
 Speed is optional and defaults to 1x in both launchers; Bash no longer accepts positional speed (`film.sh 4`).
 Ending/chapter options are unchanged.
-## Unit tests (`tests/Repentance.Tests`)
+## Unit tests (`tests/*.Tests`)
 
-`net10.0` xunit project. It references the [Godot-free libraries](conventions.md#godot-free-libraries) and imports
+Three `net10.0` xunit projects, sharing `tests/Directory.Build.props`: `Repentance.Rules.Tests` and
+`Repentance.Audio.Tests` test the [Godot-free libraries](conventions.md#godot-free-libraries);
+`Repentance.Content.Tests` (scene graph, story integrity, Ink walk) reads the repository's content and imports
 `GodotInk.props` to compile the same Ink story.
 
-| Class | Checks |
-|---|---|
-| `ItemsTests` | Catalogue, ids, cash |
-| `EndingsTests` | Resolution order and gates |
-| `MicahKitTests` | Pinned items, act kits, debug kits |
-| `NotesTests` | Pages, conditional lines, debug flags |
-| `PuzzleTests` | Every puzzle rule, migration |
-| `RecipeTests` | Recipe integrity, symmetry, refusals |
-| `SaveDataTests` | Round trips, versions, corrupt input |
-| `SceneGraphTests` | Parses `.tscn`/`.cs`: exits and `ChangeRoom` targets exist, markers on the floor, all rooms reachable from the attic |
-| `SoundSynthTests`, `MusicSynthTests` | Audibility, clipping, seams, cue parsing |
-| `StoryIntegrityTests` | Static story checks (below) |
-| `InkWalkTests` | Exhaustive Ink walk (below) |
+| Class | Project | Checks |
+|---|---|---|
+| `ItemsTests` | Rules | Catalogue, ids, cash |
+| `EndingsTests` | Rules | Resolution order and gates |
+| `MicahKitTests` | Rules | Pinned items, act kits, debug kits |
+| `NotesTests` | Rules | Pages, conditional lines, debug flags |
+| `PuzzleTests` | Rules | Every puzzle rule, migration |
+| `RecipeTests` | Rules | Recipe integrity, symmetry, refusals |
+| `SaveDataTests` | Rules | Round trips, versions, corrupt input |
+| `SceneGraphTests` | Content | Parses `.tscn`/`.cs`: exits and `ChangeRoom` targets exist, markers on the floor, all rooms reachable from the attic |
+| `SoundSynthTests`, `MusicSynthTests` | Audio | Audibility, clipping, seams, cue parsing |
+| `StoryIntegrityTests` | Content | Static story checks (below) |
+| `InkWalkTests` | Content | Exhaustive Ink walk (below) |
 
-Filter: `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter <Name>`.
+Filter: `dotnet test tests/<Project> --filter <Name>`, or `dotnet test --filter <Name>` at the root for the whole solution.
 
 ### Story tests and allowlists
 

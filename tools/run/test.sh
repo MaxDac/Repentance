@@ -66,7 +66,9 @@ for s in "${selected[@]}"; do
   case "$s" in
     unit)
       echo "== unit"
-      (cd "$ROOT" && dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --nologo) ;;
+      (cd "$ROOT" && shopt -s nullglob && projects=(tests/*.Tests/*.Tests.csproj) &&
+        if [ "${#projects[@]}" -eq 0 ]; then echo "No test projects under tests/*.Tests/" >&2; exit 1; fi &&
+        ok=0 && for project in "${projects[@]}"; do dotnet test "$project" --nologo || ok=1; done && exit "$ok") ;;
     art)
       echo "== art"
       py="$(find_python)" &&

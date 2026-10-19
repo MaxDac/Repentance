@@ -29,9 +29,11 @@ The solution splits by concern; all projects share `Directory.Build.props` (null
 | Project | Contents | References |
 |---|---|---|
 | `Repentance.csproj` | The Godot game: `scripts/` (framework, rooms, story, UI, debug) | Rules, Audio, Godot, Ink |
-| `src/Repentance.Rules` | `Items*`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather` | - |
+| `src/Repentance.Rules` | `Items*`, `Verbs`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather` | - |
 | `src/Repentance.Audio` | `SoundSynth*`, `MusicSynth*`, `Recordings` | - |
-| `tests/Repentance.Tests` | xunit | Rules, Audio, Ink |
+| `tests/Repentance.Rules.Tests` | xunit: items, recipes, notes, puzzles, rain, endings, saves | Rules |
+| `tests/Repentance.Audio.Tests` | xunit: sound and music synthesis | Audio |
+| `tests/Repentance.Content.Tests` | xunit: Ink walk, story integrity, scene graph (read the repo's content and sources) | Rules, Ink |
 | `tools/music` | Music tool | Audio |
 
 The libraries have no Godot reference, so Godot types do not compile there; put the Godot side in a game class
@@ -39,7 +41,9 @@ The libraries have no Godot reference, so Godot types do not compile there; put 
 assembly, so anything Godot-facing stays in `scripts/`. Everything keeps the `Repentance` namespace; members the
 tests need but the game must not see are `internal` (the libraries grant `InternalsVisibleTo` to the tests).
 `src/` has a `.gdignore` and `Repentance.csproj` excludes `src/**` from its own compile items. Add new projects
-to `Repentance.sln`, which Godot needs for export.
+to `Repentance.sln`, which Godot needs for export; test projects go in `tests/<Name>.Tests/`, where the `unit`
+suite finds them. `Repentance.csproj` stays at the repository root: Godot requires the game project next to
+`project.godot`.
 
 ## Inheritance contracts
 

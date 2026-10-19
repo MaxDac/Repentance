@@ -5,6 +5,6 @@
     <RootNamespace>Repentance</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <InternalsVisibleTo Include="Repentance.Tests" />
+    <InternalsVisibleTo Include="Repentance.Audio.Tests" />
   </ItemGroup>
 </Project>

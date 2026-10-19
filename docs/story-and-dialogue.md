@@ -59,7 +59,7 @@ Start a conversation from C# with `await Talk("knot")`. It runs inside `Game.Run
   Leave room for inline `{...}` expansion. Tests pick choices by full text, not short labels.
   If the font or bar changes, recompute `floor(width / advance)` and update
   `MaxChoiceChars`; `AutoPlay.ChoiceBarLimitTest` fails until it matches.
-- Find long labels: `dotnet test tests/Repentance.Tests/Repentance.Tests.csproj --filter FitsTheChoiceBar`.
+- Find long labels: `dotnet test tests/Repentance.Content.Tests --filter FitsTheChoiceBar`.
 
 ### Voice and scripture
 

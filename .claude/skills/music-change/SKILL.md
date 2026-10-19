@@ -41,6 +41,6 @@ Follow `docs/audio.md` ("Music", "Recorded instruments", "Music tool"). Always u
    Iterate on the score with the user before running the slow suites. For in-game listening use
    `tools\run\game.ps1`.
 4. Update the track's row in `docs/audio.md` and its `MusicSynthTests` fact (range, form, rhythm).
-5. Run `dotnet test tests/Repentance.Tests --filter MusicSynthTests` (seams, loudness, ranges, recordings).
+5. Run `dotnet test tests/Repentance.Audio.Tests --filter MusicSynthTests` (seams, loudness, ranges, recordings).
 6. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, playthrough, autoplay` (every track must play in
    the playthrough; autoplay checks room music).
