@@ -41,7 +41,9 @@ public partial class Lobby : Room
                 await Talk("bellboy_tip");
                 return true;
             case ("bellboy", Verb.UseItem) when Shows(item, "photo", "eleanor"):
+                await ShowPhoto();
                 await Say("bellboy", "Pretty. But pictures don't pay my rent, mister.");
+                await PocketPhoto();
                 return true;
 
             case ("bell", Verb.Hand or Verb.Kick):
@@ -96,5 +98,30 @@ public partial class Lobby : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>"Seen this lady?": Micah holds Eleanor's photograph up for the bellboy, then puts it away.</summary>
+    public override async Task OnCue(string cue)
+    {
+        if (cue == "show_photo") await ShowPhoto();
+        else if (cue == "pocket_photo") await PocketPhoto();
+    }
+
+    /// <summary>
+    /// Micah takes Eleanor's photograph out of his coat and holds it out to the bellboy; the last frame stays held
+    /// while the bellboy answers. Without the photo (only the notepad's description) there's nothing to show.
+    /// </summary>
+    private async Task ShowPhoto()
+    {
+        if (!State.HasItem("photo")) return;
+        if (FindActor("bellboy") is { } bellboy) Player.FaceTowards(bellboy.GlobalPosition);
+        await Player.PlayPose("micah_show_photo");
+    }
+
+    /// <summary>The photograph goes back inside his coat and Micah is himself again.</summary>
+    private async Task PocketPhoto()
+    {
+        if (Player.PoseName != "micah_show_photo") return;
+        if (await Player.PlayPose("micah_pocket_photo")) Player.SetPose(null);
     }
 }
