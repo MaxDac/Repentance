@@ -488,10 +488,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   phrase will be available.
 - If the player decides to keep pushing at least three times, before going out of the location, the wife will call him
   back with a "Wait!": Micah will turn, then the wife will say "Don't get into trouble again."
-  After "Wait!" (not during it) a framed close-up panel of Rose at her door pops up over the scene, in the same style as
-  Eleanor's stage close-up; after a couple of seconds of silence, "Don't get into trouble again." appears along the
-  panel's bottom edge, the panel holds for a couple more seconds after the line, then it is removed and the scene
-  continues.
+  After "Wait!" (not during it) a framed close-up panel pops up over the scene, two portraits split by a bar like the
+  motel fire-escape panel: Rose at her door on the left, Micah on the right. After a couple of seconds of silence,
+  "Don't get into trouble again." appears along the panel's bottom edge, Micah answers only "...", then the panel is
+  removed and the scene continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
 - If Micah leaves without insisting at least three times, Rose answers: "You're running away again. It was always
