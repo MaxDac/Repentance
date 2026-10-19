@@ -21,21 +21,23 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Micah's office
 
 - Micah's thoughts, then the conversation with Teddy Harrington III about his missing wife, Eleanor
-  Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy takes out his wallet and
-  pays the first day in advance, $22 cash: the $20 daily fee plus $2 for expenses (Micah remarks that he walks
-  around with more than a day's pay in his pocket). He leaves the notes on the corner of the desk by the lamp and
-  walks out of the room.
+  Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy steps to the corner of the
+  desk by the lamp, takes out his wallet and pays the first day in advance, $22 cash: the $20 daily fee plus $2
+  for expenses. Once the notes are on the desk, Micah remarks that he walks around with more than a day's pay in
+  his pocket; then Teddy says good evening and walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
 - Micah's kit is no longer in the desk (its drawers face his own side of the desk, out of view):
   - the money: Teddy's notes on the desk;
-  - the revolver: in a shoulder holster hanging on the coat rack, under the spare coat;
+  - the revolver: in its shoulder holster, the rig thrown over the spare coat on the coat rack;
   - the lockpick: a rolled leather pick case in the middle drawer of the filing cabinet the whiskey stands on.
     The drawer opens and closes with the hand; it slides shut by itself once the picks are taken.
   The $22 is a fictional cash holding, not a claim
   about average PI income. For purchasing-power context, the
   [NBER/BLS manufacturing weekly-earnings series](https://fred.stlouisfed.org/series/M08261USM052NNBR)
   reports $24.37 for October 1927; the $10 Sal bribe is a substantial payment, not an ordinary tip.
-- Micah can't get out of his office without having taken these items.
+- Micah can't get out of his office without having taken these items. The door names each one still missing and
+  where it is: "Not without my gun off the coat rack, my picks from the filing cabinet and my fee off the desk. A
+  man goes out at night in this town, he goes prepared."
 - The door leads to the Aurelian Hotel lobby.
 
 #### Hotel (Aurelian Hotel lobby)
