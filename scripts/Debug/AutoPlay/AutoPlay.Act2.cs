@@ -526,10 +526,15 @@ public partial class AutoPlay
         Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
         await game.Perform(Verb.UseItem, "trash_can", MicahKit.LighterId);
         Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
+        // count frame steps rather than compare two samples: at the fast clock one slow frame can step the strip a whole
+        // loop and land back on the sampled frame
         var flames = game.Room?.GetNodeOrNull<LoopStrip>("Flames");
-        var flameFrame = flames?.Frame ?? -1;
-        await game.Wait(0.35);
-        Check(flames != null && flames.Visible && flames.Hframes > 1 && flames.Frame != flameFrame,
+        int flameSteps = 0;
+        void FlameStepped() => flameSteps++;
+        if (flames != null) flames.FrameChanged += FlameStepped;
+        await Until(() => flameSteps >= 2, timeout: 2);
+        if (flames != null) flames.FrameChanged -= FlameStepped;
+        Check(flames != null && flames.Visible && flames.Hframes > 1 && flameSteps >= 2,
             "the trash-can fire's flames and smoke loop while it burns");
         await Shot("harrington_road_fire");
         await game.Perform(Verb.Hand, "fire_escape");
