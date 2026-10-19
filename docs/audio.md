@@ -117,8 +117,8 @@ dotnet run --project tools/music -- recordings
 Prefer the recorded instruments over the synthesized `Piano`, `Trumpet` and `UprightBass` for new parts.
 ### Music tool
 
-`tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that links the Godot-free
-`SoundSynth*`, `MusicSynth*` and `Recordings` sources:
+`tools/music` is a small .NET console project (no Godot, Python or ffmpeg needed) that references the Godot-free
+`src/Repentance.Audio` library (`SoundSynth*`, `MusicSynth*`, `Recordings`):
 
 | Command | Does |
 |---|---|

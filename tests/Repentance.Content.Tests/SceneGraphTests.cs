@@ -86,8 +86,7 @@ public class SceneGraphTests
 
     /// <summary>(file relative to the repo, room, entry) for every literal ChangeRoom("room", "entry") call.</summary>
     private static IEnumerable<(string File, string Room, string Entry)> ChangeRoomCalls() =>
-        Directory.GetFiles(Path.Combine(Root.Value, "scripts"), "*.cs", SearchOption.AllDirectories)
-            .SelectMany(f => ChangeRoomCalls(f));
+        SourceFiles.All(Root.Value).SelectMany(f => ChangeRoomCalls(f));
 
     private static IEnumerable<(string File, string Room, string Entry)> ChangeRoomCalls(string file)
     {
@@ -191,10 +190,9 @@ public class SceneGraphTests
         foreach (var room in rooms.Values)
         foreach (var h in room.Hotspots.Where(h => h.ExitTo != ""))
             edges[room.Name].Add(h.ExitTo);
-        foreach (var file in Directory.GetFiles(Path.Combine(Root.Value, "scripts"), "*.cs", SearchOption.AllDirectories))
+        foreach (var file in SourceFiles.Game(Root.Value))
         {
             var rel = Path.GetRelativePath(Root.Value, file).Replace('\\', '/');
-            if (rel.StartsWith("scripts/Debug/")) continue;
             var targets = ChangeRoomCalls(file).Select(c => c.Room).ToList();
             if (byScript.TryGetValue(rel, out var sources))
                 foreach (var s in sources) edges[s].UnionWith(targets);
