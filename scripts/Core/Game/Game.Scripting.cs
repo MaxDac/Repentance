@@ -102,9 +102,5 @@ public partial class Game
         await Wait(0.12);
     }
 
-    public async Task Wait(double seconds)
-    {
-        var timer = GetTree().CreateTimer(seconds, processAlways: false);
-        await ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
-    }
+    public Task Wait(double seconds) => Timers.Wait(this, seconds);
 }

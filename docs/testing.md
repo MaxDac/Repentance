@@ -40,13 +40,19 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 | `playthrough` | `--playthrough` | Canonical story, every ending, save/load after every beat, sound/music coverage | `PLAYTHROUGH OK` |
 | `resume-act2`, `resume-act3` | `--playthrough --resume=act2\|act3` | A fresh launch loads a checkpoint `playthrough` kept and plays on to "The End" (run `playthrough` first) | `RESUME OK` |
 | `autoplay` | `--autoplay` | Targeted regressions: puzzles, wrong items, mouse, wheel, inventory, notepad, poses, dialogue variants, seeded endings; screenshots | `AUTOPLAY OK` |
-| `settings` | `--settings-test` | Content, display, volume settings, persistence, menus, both Eleanor variants | `SETTINGS TEST OK` |
-| `pause` | `--pause-test` | Space freezes and resumes everything | `PAUSE TEST OK` |
-| `walk` | `--walk-test` | Movement and reachability in every room, real mouse input | `WALK TEST OK` |
+| `settings` | `--settings-test --no-music` | Content, display, volume settings, persistence, menus, both Eleanor variants | `SETTINGS TEST OK` |
+| `pause` | `--pause-test --no-music` | Space freezes and resumes everything | `PAUSE TEST OK` |
+| `walk` | `--walk-test --no-music` | Movement and reachability in every room, real mouse input | `WALK TEST OK` |
 
 A Godot suite passes only if Godot exits 0, prints the marker, **and** `logs/<suite>.log` has no `ERROR:`,
 `SCRIPT ERROR:`, `USER ERROR:` or `Unhandled exception` line (`Game.Run` turns exceptions into `GD.PushError`, so a
 run can reach its marker after one). Test suites use `--audio-driver Dummy`; CI uses the same pass rule.
+`settings`, `pause` and `walk` never check music, so they run with `--no-music`: rendering the tracks keeps the CPU
+and GC busy at boot, and on a slow runner that stalls frames in timing-sensitive checks. `autoplay` and `playthrough`
+assert that music plays, so they keep it on.
+Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` first: if C# still holds a pending
+`SceneTreeTimer` at quit, Godot aborts at shutdown ("Leaked unsafe reference", `!rc_owner`). Await timers through
+`Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`.
 A local pass does not cover CI's other suites or exported builds.
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses

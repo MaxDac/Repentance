@@ -5,8 +5,9 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
   her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
-- rose_closeup: Rose calling Micah back from her door. The source's glazed door leaves are painted over as solid
-  panelled wood (ROSE_DOOR_GLASS) to match her front door in the street scene.
+- rose_closeup: Rose calling Micah back from her door on the left, Micah answering her on the right, two portraits in
+  one panel like convent_closeup. The source's glazed door leaves are painted over as solid panelled wood
+  (ROSE_DOOR_GLASS) to match her front door in the street scene; Micah is zoomed so his face matches hers.
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
@@ -52,6 +53,9 @@ MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
+# Rose's face in her 1344x768 doorway source, and Micah's zoom to match it in the Rose close-up.
+ROSE_FACE_X, ROSE_FACE_W, ROSE_FACE_H, ROSE_EYES_Y = 672, 250, 260, 270
+ROSE_MICAH_ZOOM = ((ROSE_FACE_W * ROSE_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
 # The lip cut, from the mouth line to the chin, in each source of Micah's face: red and its darker edge, which the
 # panel's palette turns into dark, blood-brown lines.
 MICAH_CUT = ((652, 398), (647, 428))
@@ -68,15 +72,6 @@ f6d3a3 f6d1a2 f6cf9d e6af84 c07c5c 865338 4d3124 26282b 252729 242628 781f27 4f1
 def stage_closeup(src, pal=STAGE_PALETTE):
     """Eleanor on the stage, framed; src is the nude or the clothed picture."""
     return framed(src.convert("RGB"), pal)
-
-
-def rose_crop(src):
-    """Rose in her doorway, trimmed evenly top and bottom to the panel's 1.95:1 so her face stays centred."""
-    img = src.convert("RGB")
-    w, h = img.size
-    ch = round(w * AH / AW)
-    top = (h - ch) // 2
-    return img.crop((0, top, w, top + ch))
 
 
 # The glazed parts of the two door leaves in the 1344x768 source, as (top-left, top-right, bottom-right, bottom-left)
@@ -114,13 +109,16 @@ def solid_door(img, quad, base):
     return img
 
 
-def rose_closeup(src):
-    """Rose calling Micah back from the door: "Wait!"."""
+def rose_closeup(src, micah):
+    """Rose calling Micah back from the door: "Wait!". Rose on the left, Micah on the right answering her, faces the
+    same size, his bottom lip carrying the Blue Lantern cut as in the convent panel."""
     img = src.convert("RGB")
     for quad, base in ROSE_DOOR_GLASS:
         solid_door(img, quad, base)
-    img = rose_crop(img)
-    return framed(img, palette_of(img.resize((AW, AH), Image.BOX), COLOURS))
+    left = portrait_crop(img, ROSE_FACE_X)
+    micah = micah.convert("RGB")
+    crop = lambda m: portrait_crop(m, MICAH_FACE_X, ROSE_MICAH_ZOOM, MICAH_EYES_Y, ROSE_EYES_Y)
+    return framed_pair(left, crop(lip_cut(micah, *MICAH_CUT)), pair_palette(left, crop(micah)))
 
 
 def crop_to_panel(img):
@@ -302,7 +300,7 @@ def build():
     nude, clothed = Image.open(SRC), Image.open(CLOTHED_SRC)
     save(stage_closeup(nude), "ui", "stage_closeup.png")
     save(stage_closeup(clothed), "ui", "stage_closeup_clothed.png")
-    save(rose_closeup(Image.open(ROSE_SRC)), "ui", "rose_closeup.png")
+    save(rose_closeup(Image.open(ROSE_SRC), Image.open(MICAH_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
     save(motel_closeup(Image.open(MOTEL_SRC)), "ui", "motel_closeup.png")
     save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")

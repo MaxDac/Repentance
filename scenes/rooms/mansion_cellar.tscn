@@ -225,7 +225,7 @@ shape = SubResource("Rect_8")
 
 [node name="LanternTaken" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(170, 109)
+position = Vector2(168, 108)
 texture = ExtResource("10_mansion_cellar_lantern_taken")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -251,7 +251,7 @@ ShowIfFlags = "cellar_lit"
 
 [node name="LanternDown" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(379, 140)
+position = Vector2(377, 139)
 texture = ExtResource("13_mansion_cellar_lantern_down")
 centered = false
 script = ExtResource("4_FlagSprite")

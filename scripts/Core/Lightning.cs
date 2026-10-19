@@ -96,7 +96,7 @@ public partial class Lightning : Node2D
     private async Task Pause(double seconds)
     {
         if (!IsInsideTree()) return;
-        await ToSignal(GetTree().CreateTimer(seconds, processAlways: false), SceneTreeTimer.SignalName.Timeout);
+        await Timers.Wait(this, seconds);
     }
 
     private void SetLit(bool lit)

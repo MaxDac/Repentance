@@ -21,9 +21,9 @@ param(
 
 $godotSuites = [ordered]@{
     autoplay    = @{ Args = @('--autoplay'); Marker = 'AUTOPLAY OK' }
-    settings    = @{ Args = @('--settings-test'); Marker = 'SETTINGS TEST OK' }
-    pause       = @{ Args = @('--pause-test'); Marker = 'PAUSE TEST OK' }
-    walk        = @{ Args = @('--walk-test'); Marker = 'WALK TEST OK' }
+    settings    = @{ Args = @('--settings-test', '--no-music'); Marker = 'SETTINGS TEST OK' }
+    pause       = @{ Args = @('--pause-test', '--no-music'); Marker = 'PAUSE TEST OK' }
+    walk        = @{ Args = @('--walk-test', '--no-music'); Marker = 'WALK TEST OK' }
     playthrough = @{ Args = @('--playthrough'); Marker = 'PLAYTHROUGH OK' }
     'resume-act2' = @{ Args = @('--playthrough', '--resume=act2'); Marker = 'RESUME OK' }
     'resume-act3' = @{ Args = @('--playthrough', '--resume=act3'); Marker = 'RESUME OK' }

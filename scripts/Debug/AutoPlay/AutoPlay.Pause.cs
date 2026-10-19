@@ -170,15 +170,19 @@ public partial class AutoPlay
             await AwaitTest(puzzle, "puzzle resumes with its settings preserved");
             Check(await puzzle, "paused puzzle controls did not change the correct solution");
 
-            // long enough that a slow CI frame cannot finish the fade before the pause lands
-            var fade = game.Hud.Fade(1, 2);
+            // a long fade, so a slow frame on a busy runner can't finish it before the pause
+            const double fadeSeconds = 4;
+            var fade = game.Hud.Fade(1, fadeSeconds);
             await Observe(0.2);
-            PressKey(Key.Space);
             var alpha = game.Hud.FadeAlpha;
-            await Observe(1);
-            Check(!fade.IsCompleted && game.Hud.FadeAlpha == alpha && game.Hud.PauseVisible,
-                $"fade freezes with pause indicator above it (completed {fade.IsCompleted}, alpha {alpha} -> {game.Hud.FadeAlpha}, indicator {game.Hud.PauseVisible})");
+            Check(!fade.IsCompleted && alpha < 1, $"fade still running before the pause (alpha {alpha})");
             PressKey(Key.Space);
+            await Observe(1);
+            Check(!fade.IsCompleted && game.Hud.FadeAlpha == alpha,
+                $"fade does not advance while paused (alpha {alpha} -> {game.Hud.FadeAlpha})");
+            Check(game.Hud.PauseVisible, "pause indicator shows above the frozen fade");
+            PressKey(Key.Space);
+            for (double waited = 0; waited < fadeSeconds + 5 && !fade.IsCompleted; waited += 0.1) await Observe(0.1);
             await AwaitTest(fade, "fade completes after resuming");
             await game.Hud.Fade(0, 0.1);
 

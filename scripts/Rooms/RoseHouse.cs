@@ -120,7 +120,9 @@ public partial class RoseHouse : Room
         Game.Hud.ShowCloseUp(CloseUps.Rose);
         await Wait(2.0);
         await Say("rose", "Don't get into trouble again.");
-        await Wait(2.0);
+        await Wait(0.6);
+        await Say("...");
+        await Wait(1.0);
         Game.Hud.HideCloseUp();
         await Wait(0.8);
         State.SetFlag("rose_door", false);

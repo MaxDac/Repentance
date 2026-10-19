@@ -6,18 +6,25 @@ namespace Repentance;
 
 /// <summary>
 /// Loops the room's synthesized background music (<see cref="MusicSynth"/>) on the "Music" bus, whose level follows
-/// <see cref="GameSettings.MusicVolume"/>. Tracks take a moment to render, so they are rendered off the main thread
-/// and start as soon as they are ready; the same track keeps playing from room to room, and through the pause menu.
+/// <see cref="GameSettings.MusicVolume"/>. Tracks take a moment to render, so they are rendered one at a time on a
+/// background worker (a requested track jumps the queue) and start as soon as they are ready; the same track keeps
+/// playing from room to room, and through the pause menu. With <see cref="Enabled"/> off (<c>--no-music</c>) nothing
+/// is rendered or played, but the requested track is still tracked.
 /// </summary>
 public partial class Music : Node
 {
     public const string BusName = "Music";
 
-    private readonly Dictionary<Track, Task<float[]>> _renders = new();
+    private readonly Dictionary<Track, TaskCompletionSource<float[]>> _renders = new();
+    // tracks still to render, in order; shared with the worker, so only touched under its lock
+    private readonly List<Track> _queue = new();
     private readonly Dictionary<Track, AudioStreamWav> _streams = new();
     private readonly Dictionary<Track, int> _counts = new();
     private AudioStreamPlayer _player = null!;
     private GameSettings? _settings;
+
+    /// <summary>Whether music is rendered and played at all (off with <c>--no-music</c>, for suites that never check it).</summary>
+    public bool Enabled { get; set; } = true;
 
     /// <summary>The track the current room asked for, if any (it may still be rendering).</summary>
     public Track? Current { get; private set; }
@@ -43,11 +50,33 @@ public partial class Music : Node
     {
         _player = new AudioStreamPlayer { Name = "Player", Bus = BusName, ProcessMode = ProcessModeEnum.Always };
         AddChild(_player);
+        if (!Enabled) return;
         // the renders run on worker threads, so the instrument recordings are read here, on the main thread
         Recordings.Use(path => FileAccess.GetFileAsBytes($"res://{path}"));
         foreach (var instrument in Recordings.Instruments)
             foreach (var midi in Recordings.Needed(instrument).Keys) Recordings.Get(instrument, midi);
-        foreach (var track in System.Enum.GetValues<Track>()) RenderAsync(track);
+        foreach (var track in System.Enum.GetValues<Track>())
+            _renders[track] = new TaskCompletionSource<float[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _queue.AddRange(_renders.Keys);
+        Task.Run(RenderQueue);
+    }
+
+    // One worker, so the boot doesn't keep every core (and the GC) busy rendering all the tracks at once.
+    private void RenderQueue()
+    {
+        while (true)
+        {
+            Track track;
+            lock (_queue)
+            {
+                if (_queue.Count == 0) return;
+                track = _queue[0];
+                _queue.RemoveAt(0);
+            }
+            var done = _renders[track];
+            try { done.SetResult(MusicSynth.Render(track)); }
+            catch (System.Exception ex) { done.SetException(ex); }
+        }
     }
 
     public void Bind(GameSettings settings)
@@ -61,6 +90,7 @@ public partial class Music : Node
     public override void _ExitTree()
     {
         if (_settings != null) _settings.Changed -= Apply;
+        lock (_queue) _queue.Clear();
     }
 
     private void Apply()
@@ -71,11 +101,12 @@ public partial class Music : Node
         AudioServer.SetBusMute(bus, percent <= 0);
     }
 
+    /// <summary>The track's render, moved to the front of the queue if it hasn't started yet.</summary>
     private Task<float[]> RenderAsync(Track track)
     {
-        if (!_renders.TryGetValue(track, out var task))
-            _renders[track] = task = Task.Run(() => MusicSynth.Render(track));
-        return task;
+        lock (_queue)
+            if (_queue.Remove(track)) _queue.Insert(0, track);
+        return _renders[track].Task;
     }
 
     /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.
@@ -89,6 +120,7 @@ public partial class Music : Node
         _player.Stop();
         if (track is not { } t) return;
         _counts[t] = Count(t) + 1;
+        if (!Enabled) return;
         if (!_streams.TryGetValue(t, out var stream))
         {
             var samples = await RenderAsync(t);
