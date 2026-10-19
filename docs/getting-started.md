@@ -66,6 +66,7 @@ User options go after `--`, e.g. `godot_console --path . --quit-after 600 -- --r
 | `--playthrough [--ending=N]` | Canonical story and every ending with save/load checks. Marker `PLAYTHROUGH OK` |
 | `--film[=1\|2\|4\|8\|16\|60\|hyper] [--ending=N] [--from=<chapter>]` | Watch-only story run; chapters `act1`, `interlude1`, `act2`, `interlude2`, `act3`, `ending`. Marker `FILM OK` |
 | `--settings-test` / `--pause-test` / `--walk-test` | Focused suites. Markers `SETTINGS TEST OK` / `PAUSE TEST OK` / `WALK TEST OK` |
+| `--no-music` | Neither render nor play music (the requested track is still recorded). The launchers pass it to `settings`, `pause` and `walk`, which never check music |
 | `--clock=fast\|normal` | Automated runs only: 60x (default) or 8x game time |
 
 Endings: `1`-`11`, `1-oldman`, `1-steps`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.

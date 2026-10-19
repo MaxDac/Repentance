@@ -203,7 +203,9 @@ public partial class AutoPlay
         await game.Perform(Verb.Talk, "bartender");
         await Until(() => !game.Busy);
         gs.Changed -= OnSalPassed;
-        Check(salWhenPassed is { } p && p.DistanceTo(Rooms.Speakeasy.SalAside) > 4 &&
+        // a jump would put Sal exactly at SalAside when paid; where he intercepts depends on how far Micah got past
+        // the curtain in one frame, which on the fast clock can be just a few pixels from SalAside
+        Check(salWhenPassed is { } p && p.DistanceTo(Rooms.Speakeasy.SalAside) > 0.5f &&
             game.Room?.FindActor("sal")?.Position.DistanceTo(Rooms.Speakeasy.SalAside) < 0.5f,
             $"Sal walks aside after the bribe instead of jumping there (at {salWhenPassed} when paid)");
         Check(game.Room?.Name == "Speakeasy" && _offered.Keys.Any(k => k.StartsWith("sal")),

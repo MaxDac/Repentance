@@ -52,6 +52,7 @@ public abstract class Harness
         if (summary != null) GD.Print(summary);
         GD.Print(_failures.Count == 0 ? $"{Marker} OK" : $"{Marker} FAILED:\n  " + string.Join("\n  ", _failures));
         Engine.TimeScale = 1;
+        Timers.ReleasePending();
         _game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 
@@ -147,11 +148,7 @@ public abstract class Harness
     // ------------------------------------------------------------------ time
 
     /// <summary>Waits in real time, ignoring the clock scale and pause.</summary>
-    protected async Task Observe(double seconds)
-    {
-        var timer = _game.GetTree().CreateTimer(seconds, processAlways: true, ignoreTimeScale: true);
-        await _game.ToSignal(timer, SceneTreeTimer.SignalName.Timeout);
-    }
+    protected Task Observe(double seconds) => Timers.Wait(_game, seconds, processAlways: true, ignoreTimeScale: true);
 
     protected async Task WaitIdle(Game? game = null)
     {

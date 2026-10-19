@@ -15,8 +15,8 @@ ORDER=(unit art autoplay settings pause walk playthrough resume-act2 resume-act3
 # Godot suites: user args and pass marker (case statements, since macOS ships bash 3.2 without associative arrays).
 suite_arg() {
   case "$1" in
-    autoplay) echo --autoplay ;; settings) echo --settings-test ;; pause) echo --pause-test ;;
-    walk) echo --walk-test ;; playthrough) echo --playthrough ;;
+    autoplay) echo --autoplay ;; settings) echo --settings-test --no-music ;; pause) echo --pause-test --no-music ;;
+    walk) echo --walk-test --no-music ;; playthrough) echo --playthrough ;;
     resume-act2) echo --playthrough --resume=act2 ;; resume-act3) echo --playthrough --resume=act3 ;;
   esac
 }
