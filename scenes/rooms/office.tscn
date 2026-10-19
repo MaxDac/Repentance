@@ -57,7 +57,7 @@ size = Vector2(20, 9)
 size = Vector2(18, 9)
 
 [sub_resource type="RectangleShape2D" id="Rect_11"]
-size = Vector2(13, 29)
+size = Vector2(16, 26)
 
 [sub_resource type="RectangleShape2D" id="Rect_13"]
 size = Vector2(26, 21)
@@ -176,7 +176,7 @@ ShowIfFlags = "cabinet_open"
 HideIfFlags = "took_lockpick"
 
 [node name="Holster" type="Sprite2D" parent="."]
-position = Vector2(163, 56)
+position = Vector2(154, 59)
 z_index = -5
 texture = ExtResource("5_office_holster")
 centered = false
@@ -393,7 +393,7 @@ shape = SubResource("Rect_8")
 script = ExtResource("6_Hotspot")
 Id = "revolver"
 DisplayName = "holster"
-LookText = "My .38 in its shoulder holster, hanging under the spare coat. Loaded, oiled, and as reluctant as its owner."
+LookText = "My .38 in its shoulder holster, thrown over the spare coat. Loaded, oiled, and as reluctant as its owner."
 WalkTo = Vector2(166, 170)
 Face = 2
 HideIfFlags = "took_revolver"
@@ -402,7 +402,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Revolver"]
-position = Vector2(179.5, 82.5)
+position = Vector2(166.0, 78.0)
 shape = SubResource("Rect_11")
 
 [node name="Dollar" type="Area2D" parent="Hotspots"]
