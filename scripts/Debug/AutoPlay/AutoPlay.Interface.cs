@@ -246,7 +246,7 @@ public partial class AutoPlay
         var panel = game.Hud.InsetRect;
         var speech = game.Hud.SpeechRect;
         float divider = panel.Position.X + panel.Size.X / 2;
-        Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.SpeechVisible &&
+        Check(game.Hud.CurrentCloseUp == CloseUps.FireEscape && game.Hud.SpeechVisible &&
             speech.Position.X >= (right ? divider : panel.Position.X) &&
             speech.End.X <= (right ? panel.End.X : divider),
             right ? "Eleanor's subtitle stays beneath the right portrait" : "Micah's subtitle stays beneath the left portrait");

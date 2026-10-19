@@ -171,7 +171,7 @@ public partial class AutoPlay
         Check(!game.Hud.InsetVisible && !game.Hud.InsetDrawn, "Eleanor repeats her opening, word for word, before the close-up");
         Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays on the fire escape with Eleanor");
         await Until(() => game.Hud.InsetVisible);
-        Check(game.Hud.CurrentCloseUp == CloseUps.Convent && game.Hud.InsetName == "convent_closeup",
+        Check(game.Hud.CurrentCloseUp == CloseUps.FireEscape && game.Hud.InsetName == "fire_escape_closeup",
             "the two-portrait close-up appears immediately after Eleanor's opening");
         Check(game.Hud.InsetRect.Size.X >= 400 && game.Hud.InsetRect.Size.Y >= 200, "the two-portrait close-up fills most of the screen");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Eleanor Harrington. You wouldn't happen to know her?");

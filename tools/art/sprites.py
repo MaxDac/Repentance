@@ -197,19 +197,21 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
 # Eleanor on stage: retain the dressed variant for players who opt out of nudity, in the close-up panel's red dress.
+# Both variants wear her hair the same way: long, with thin locks falling in front over her chest, as in the close-up.
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
-ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": "ecc4a2",
-                         "sleeves": "ecc4a2", "torso": "781f27",
+_STAGE_HAIR = dict(hair_front=0.34, hair_bulge=0.0, hair_front_w=0.7,
+                   hair_front_root=0.07,  # the lock joins the hair behind the neck in profile
+                   hair_back=0.32, hair_back_width=1.12, hair_back_shade=-1)
+ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"],
+                         "skin": "ecc4a2", "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
-# The implied-nude variant: thin front locks lie flat over the chest, one
-# hand lowered over her lap, the other arm hanging at her side.
+# The implied-nude variant: the locks lie flat over the chest, one hand lowered over her lap, the other arm hanging
+# at her side.
 _SKIN = "e4b898"
-ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
+ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"], "skin": _SKIN,
                  "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
-                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.0,
-                 "hair_front_w": 0.7, "hair_front_root": 0.07,  # the lock joins the hair behind the neck in profile
-                 "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
+                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c",
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
