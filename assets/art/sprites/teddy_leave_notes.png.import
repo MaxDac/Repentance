@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8syx3rol6n57"
-path="res://.godot/imported/office_drawer_open.png-34319917644946e3ee74a27db21731b8.ctex"
+uid="uid://cnh7xhs4ypfcu"
+path="res://.godot/imported/teddy_leave_notes.png-1c813d93cf2d660c919dc8dbd4f668ff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_open.png"
-dest_files=["res://.godot/imported/office_drawer_open.png-34319917644946e3ee74a27db21731b8.ctex"]
+source_file="res://assets/art/sprites/teddy_leave_notes.png"
+dest_files=["res://.godot/imported/teddy_leave_notes.png-1c813d93cf2d660c919dc8dbd4f668ff.ctex"]
 
 [params]
 

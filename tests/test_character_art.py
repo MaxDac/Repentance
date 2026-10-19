@@ -253,6 +253,14 @@ class CharacterArtTests(unittest.TestCase):
         for i in range(11):
             self.assertIsNotNone(dressed.crop((i * 56, 0, (i + 1) * 56, 96)).getbbox())
 
+    def test_eleanor_club_variants_wear_the_same_hair(self):
+        """Dressed or not, her long hair falls in front over her chest, as in the stage close-up."""
+        for key in ("hair", "hair_style", "hair_front", "hair_front_w", "hair_front_root", "hair_back",
+                    "hair_back_width", "hair_back_shade", "hair_bulge"):
+            with self.subTest(key=key):
+                self.assertIn(key, sprites.ELEANOR_STAGE_CLOTHED)
+                self.assertEqual(sprites.ELEANOR_STAGE_CLOTHED[key], sprites.ELEANOR_STAGE[key])
+
     def test_action_contracts(self):
         for path in (ART / "sprites").glob("*.json"):
             with self.subTest(clip=path.stem):

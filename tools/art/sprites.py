@@ -197,19 +197,21 @@ MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84
                     decals=[("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "6a5a70")])
 MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b494", lips="b0384a")
 # Eleanor on stage: retain the dressed variant for players who opt out of nudity, in the close-up panel's red dress.
+# Both variants wear her hair the same way: long, with thin locks falling in front over her chest, as in the close-up.
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
-ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": "ecc4a2",
-                         "sleeves": "ecc4a2", "torso": "781f27",
+_STAGE_HAIR = dict(hair_front=0.34, hair_bulge=0.0, hair_front_w=0.7,
+                   hair_front_root=0.07,  # the lock joins the hair behind the neck in profile
+                   hair_back=0.32, hair_back_width=1.12, hair_back_shade=-1)
+ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"],
+                         "skin": "ecc4a2", "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
                          "decals": [("pearls", 0.226, "e8e2d4"), ("belt", 0.46, "4a1016")]}
-# The implied-nude variant: thin front locks lie flat over the chest, one
-# hand lowered over her lap, the other arm hanging at her side.
+# The implied-nude variant: the locks lie flat over the chest, one hand lowered over her lap, the other arm hanging
+# at her side.
 _SKIN = "e4b898"
-ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, "h": MASKED_WOMAN["h"], "skin": _SKIN,
+ELEANOR_STAGE = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"], "skin": _SKIN,
                  "sleeves": _SKIN, "torso": _SKIN, "pelvis": _SKIN, "neckline": None,
-                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c", "hair_front": 0.34, "hair_bulge": 0.0,
-                 "hair_front_w": 0.7, "hair_front_root": 0.07,  # the lock joins the hair behind the neck in profile
-                 "hair_back": 0.32, "hair_back_width": 1.12, "hair_back_shade": -1,
+                 "coat": None, "stockings": _SKIN, "shoes": "c89a7c",
                  "front_line": (0.36, 0.53), "seamless": ("torso", "leg1", "leg-1"), "decals": []}
 # Act 3. Harrington senior at home, late: a burgundy silk dressing gown with a darker shawl collar and a gold sash.
 HARRINGTON_GOWN = dict(HARRINGTON, torso="5a1e26", sleeves="5a1e26", cuff="5a1e26", collar="f2eee4",
@@ -936,6 +938,78 @@ def build_smoke():
     _smoke_strip("micah_smoke_drag", SMOKE_DRAG_KEYS)
 
 
+# Teddy pays Micah his first day in the office, three-quarters to the viewer like his idle frame: the near hand goes
+# inside his jacket for the wallet, both hands open it at his chest, the far one peels off the notes, the wallet goes
+# back and he's left holding out the money. (near arm, far arm, wallet: (hand, "shut"/"open") or None, notes: where
+# they are - "wallet", a hand mark or None -, seconds)
+_T_POCKET = ("pts", (0.15, 0.34, 0.05), (0.02, 0.26, 0.08), (-0.03, 0.23, 0.07))
+_T_CHEST_NEAR = ("pts", (0.17, 0.38, 0.06), (0.08, 0.31, 0.14), (0.045, 0.29, 0.16))
+_T_CHEST_FAR = ("pts", (-0.16, 0.38, 0.06), (-0.07, 0.31, 0.14), (-0.03, 0.29, 0.16))
+_T_OFFER = ("pts", (0.16, 0.37, 0.08), (0.11, 0.33, 0.18), (0.1, 0.31, 0.22))
+_T_SIDE = ("swing", 3, 6, 10)
+TEDDY_WALLET_KEYS = [
+    (_T_SIDE, _T_SIDE, None, None, 0.25),
+    (_T_POCKET, _T_SIDE, None, None, 0.3),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "shut"), None, 0.3),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "wallet", 0.45),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "hand-1", 0.4),
+    (_T_POCKET, _T_CHEST_FAR, None, "hand-1", 0.3),
+    (_T_OFFER, _T_SIDE, None, "hand1", 0.4),
+]
+# At the corner of the desk, facing right: he leans in, lays the notes down by the lamp and takes his hand back empty
+# (the room shows the money on the desk from then on). (hand height, reach, notes in hand, lean, seconds)
+TEDDY_NOTES_KEYS = [
+    (0.31, 0.12, True, 0.0, 0.25),
+    (0.35, 0.2, True, 3.0, 0.25),
+    (0.42, 0.27, True, 7.0, 0.35),
+    (0.42, 0.27, False, 7.0, 0.2),
+]
+WALLET = ((58, 36, 20, 255), (110, 74, 44, 255), (150, 118, 84, 255))
+NOTE = ((168, 192, 152, 255), (106, 138, 90, 255))
+
+
+def _cash_props(img, marks, wallet, notes):
+    """The wallet (shut, or open with its pale lining showing) and the green fan of notes, at the marked hands."""
+    from PIL import ImageDraw
+    d = ImageDraw.Draw(img)
+    spot = None
+    if wallet:
+        hand, state = wallet
+        x, y = (math.floor(v) for v in marks[hand])
+        if state == "shut":
+            d.rectangle([x - 1, y - 1, x + 2, y + 1], fill=WALLET[0])
+            d.line([(x - 1, y - 1), (x + 2, y - 1)], fill=WALLET[1])
+        else:
+            mx = math.floor((marks["hand1"][0] + marks["hand-1"][0]) / 2)
+            d.rectangle([mx - 3, y - 1, mx + 2, y + 1], fill=WALLET[0])
+            d.rectangle([mx - 2, y - 1, mx + 1, y], fill=WALLET[2])
+            d.point((mx - 1, y - 1), fill=WALLET[1])
+            spot = (mx - 1, y - 2)
+    if notes:
+        x, y = spot if notes == "wallet" else (math.floor(v) for v in marks[notes])
+        for dx, dy, c in ((0, -1, 0), (1, -1, 1), (2, -1, 0), (0, -2, 0), (1, -2, 0), (2, -2, 1), (3, -2, 0)):
+            d.point((x + dx, y + dy), fill=NOTE[c])
+    return img
+
+
+def teddy_cash_strips():
+    frames, seconds = [], []
+    for near, far, wallet, notes, duration in TEDDY_WALLET_KEYS:
+        marks = {}
+        front = tuple(s for s, a in ((1, near), (-1, far)) if a[0] == "pts" and a[3][2] > 0.1)
+        ps = pose(35, arms={1: near, -1: far}, front_arms=front, marks=marks)
+        frames.append((_cash_props(figure(TEDDY, ps, FW, FH), marks, wallet, notes), (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("teddy_wallet", frames, seconds, anchor=(FW / 2, FH - 3))
+    frames, seconds = [], []
+    for height, reach, held, lean, duration in TEDDY_NOTES_KEYS:
+        marks = {}
+        ps = pose(90, arms={1: ("hold", height, reach, 0), -1: _T_SIDE}, lean=lean, marks=marks)
+        frames.append((_cash_props(figure(TEDDY, ps, FW, FH), marks, None, "hand1" if held else None), (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("teddy_leave_notes", frames, seconds, anchor=(FW / 2, FH - 3))
+
+
 def eleanor_drink_strip():
     frames, seconds = [(figure(ELEANOR_GOWN_NPC, pose(90), FW, FH), (FW / 2, 18))], [0.3]
     for height, reach, tip, full, duration in ELEANOR_GIN_KEYS:
@@ -1159,6 +1233,7 @@ def build():
     door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
     build_no_tie()
     door_strip(TEDDY, "teddy_open_door", 35)
+    teddy_cash_strips()
     door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
     build_gin()

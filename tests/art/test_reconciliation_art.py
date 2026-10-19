@@ -29,7 +29,7 @@ class ReconciliationArtTests(unittest.TestCase):
     def test_committed_assets_match_generators(self):
         for folder, names in (
                 ("rooms", ("office", "office_ring", "office_cup", "office_act3", "office_act3_door_ajar",
-                           "office_act3_door_open", "office_act3_drawer_open")),
+                           "office_act3_door_open", "office_act3_cabinet_open", "office_holster", "office_cash")),
                 ("sprites", ("micah_cup", "micah_drink")),
                 ("items", ("faith_ring", "cross"))):
             for name in names:

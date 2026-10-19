@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0x6bljsuakqg"
-path="res://.godot/imported/office_act3_drawer_dollar.png-34e73e369e5341c88c06dbcc64c6ec35.ctex"
+uid="uid://df0u5ud3xj6sr"
+path="res://.godot/imported/office_act3_cabinet_open.png-0f253a87375d012f098642dc2461cbb5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_act3_drawer_dollar.png"
-dest_files=["res://.godot/imported/office_act3_drawer_dollar.png-34e73e369e5341c88c06dbcc64c6ec35.ctex"]
+source_file="res://assets/art/rooms/office_act3_cabinet_open.png"
+dest_files=["res://.godot/imported/office_act3_cabinet_open.png-0f253a87375d012f098642dc2461cbb5.ctex"]
 
 [params]
 

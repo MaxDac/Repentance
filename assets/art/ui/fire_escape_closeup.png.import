@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxrco28316fjc"
-path="res://.godot/imported/convent_closeup.png-f36b5fcc8f170d5ab0329e54edfa47cf.ctex"
+uid="uid://7ox4ke8a5dyt"
+path="res://.godot/imported/fire_escape_closeup.png-b2766ed51379548e44f211ab8d8e2692.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/ui/convent_closeup.png"
-dest_files=["res://.godot/imported/convent_closeup.png-f36b5fcc8f170d5ab0329e54edfa47cf.ctex"]
+source_file="res://assets/art/ui/fire_escape_closeup.png"
+dest_files=["res://.godot/imported/fire_escape_closeup.png-b2766ed51379548e44f211ab8d8e2692.ctex"]
 
 [params]
 

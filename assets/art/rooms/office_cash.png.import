@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bquemavrysnur"
-path="res://.godot/imported/office_act3_drawer_revolver.png-12cda10b2e1010b4c6fff110a490b308.ctex"
+uid="uid://d27kvc33ihngg"
+path="res://.godot/imported/office_cash.png-f1ced45f7941fd5fcb206e270a62ea2b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_act3_drawer_revolver.png"
-dest_files=["res://.godot/imported/office_act3_drawer_revolver.png-12cda10b2e1010b4c6fff110a490b308.ctex"]
+source_file="res://assets/art/rooms/office_cash.png"
+dest_files=["res://.godot/imported/office_cash.png-f1ced45f7941fd5fcb206e270a62ea2b.ctex"]
 
 [params]
 

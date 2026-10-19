@@ -24,8 +24,10 @@ public partial class Office : Room
         // whoever left last opened the door; it's shut again by the time anyone comes back
         State.SetFlag("office_door_open", false);
         State.SetFlag("office_door_ajar", false);
-        // once Micah has emptied the top drawer it stays shut for the rest of the story
-        if (DrawerLeft() == 0) State.SetFlag("drawer_open", false);
+        // saves from before Teddy paid in person: he's gone, so the money he left is on the desk
+        if (State.HasFlag("teddy_gone") && !State.HasFlag("took_dollar")) State.SetFlag("teddy_paid");
+        // once the picks are out of the filing cabinet its drawer stays shut for the rest of the story
+        if (State.HasFlag("took_lockpick")) State.SetFlag("cabinet_open", false);
         base._Ready();
         _glint = GetNodeOrNull<Godot.Sprite2D>("WeddingRing/Glint");
     }
@@ -35,9 +37,9 @@ public partial class Office : Room
         foreach (var (node, file) in new[]
                  {
                      ("Background", "office_act3"), ("DoorAjar", "office_act3_door_ajar"),
-                     ("DoorOpen", "office_act3_door_open"), ("DrawerOpen", "office_act3_drawer_open"),
-                     ("DrawerRevolver", "office_act3_drawer_revolver"), ("DrawerDollar", "office_act3_drawer_dollar"),
-                     ("DrawerLockpick", "office_act3_drawer_lockpick"),
+                     ("DoorOpen", "office_act3_door_open"), ("CabinetOpen", "office_act3_cabinet_open"),
+                     ("CabinetLockpick", "office_act3_cabinet_lockpick"), ("Holster", "office_act3_holster"),
+                     ("DeskCash", "office_act3_cash"),
                  })
             if (GetNodeOrNull<Godot.Sprite2D>(node) is { } sprite)
                 sprite.Texture = Godot.GD.Load<Godot.Texture2D>($"{Art}{file}.png");
@@ -106,6 +108,7 @@ public partial class Office : Room
     private async Task TeddyLeaves()
     {
         if (!State.HasFlag("teddy_briefed") || FindActor("teddy") is not { } teddy) return;
+        await PayTheFirstDay(teddy);
         await Say("teddy", "Good evening, Jones. Do try not to embarrass me.");
         await teddy.MoveTo(new Godot.Vector2(58, 170), 55);
         await OpenTheDoor(player: false);
@@ -114,6 +117,28 @@ public partial class Office : Room
         await Think("Harrington Steel. Funny how the rich always lose the things they never paid attention to.");
         await Think("A wife who walked out. I know a thing or two about that. Just never from his side of the door.");
     }
+
+    /// <summary>
+    /// Teddy's first day in advance: the wallet out of his breast pocket, a few notes peeled off, and the notes laid on
+    /// the corner of the desk by the lamp for Micah to pick up.
+    /// </summary>
+    private async Task PayTheFirstDay(Actor teddy)
+    {
+        if (State.HasFlag("teddy_paid")) return;
+        teddy.FaceLeft(false);
+        await Say("teddy", "Before I forget. Twenty for the day, and two for your quaint expenses.");
+        await teddy.PlayPose("teddy_wallet");
+        await Think("He peels off twenty-two dollars like it's lint. A day's pay walking around in his pocket, and then some.");
+        await teddy.MoveTo(DeskCorner, 45);
+        teddy.FaceLeft(false);
+        await teddy.PlayPose("teddy_leave_notes");
+        State.SetFlag("teddy_paid");
+        await Wait(0.2);
+        teddy.SetPose(null);
+    }
+
+    /// <summary>Where Teddy stands to reach the corner of the desk, just left of it.</summary>
+    private static readonly Godot.Vector2 DeskCorner = new(159, 176);
 
     /// <summary>
     /// The frosted door swings in on its left hinges, then the leaf is clear of the frame. The knob is on the right,
@@ -183,17 +208,20 @@ public partial class Office : Room
         await Game.ChangeRoom("alley", "act3");
     }
 
-    private static readonly string[] DrawerFlags = { "took_revolver", "took_dollar", "took_lockpick" };
+    /// <summary>Micah's kit for the night (the flag set when he takes each thing) and how he calls it.</summary>
+    private static readonly (string Flag, string Name)[] Kit =
+        { ("took_revolver", "my gun"), ("took_lockpick", "my picks"), ("took_dollar", "Teddy's money") };
 
-    /// <summary>How many of the drawer's things (revolver, dollar, lockpicks) Micah hasn't taken yet.</summary>
-    private int DrawerLeft() => DrawerFlags.Count(f => !State.HasFlag(f));
-
-    /// <summary>With the last of his things in his pockets, Micah pushes the top drawer shut.</summary>
-    private async Task ShutEmptyDrawer()
+    /// <summary>What Micah still has to pick up before he goes out, in his words ("my gun and my picks").</summary>
+    private string? MissingKit()
     {
-        if (DrawerLeft() > 0 || !State.HasFlag("drawer_open")) return;
-        await Wait(0.2);
-        State.SetFlag("drawer_open", false);
+        var names = Kit.Where(k => !State.HasFlag(k.Flag)).Select(k => k.Name).ToList();
+        return names.Count switch
+        {
+            0 => null,
+            1 => names[0],
+            _ => string.Join(", ", names.Take(names.Count - 1)) + " and " + names[^1],
+        };
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -220,8 +248,8 @@ public partial class Office : Room
             case ("door", Verb.Walk or Verb.Hand) when !State.HasFlag("teddy_gone"):
                 await Say("Walking out on a paying client? Not this month.");
                 return true;
-            case ("door", Verb.Walk or Verb.Hand) when DrawerLeft() > 0:
-                await Say("Not without my things from the top drawer. A man goes out at night in this town, he goes prepared.");
+            case ("door", Verb.Walk or Verb.Hand) when MissingKit() is { } missing:
+                await Say($"Not without {missing}. A man goes out at night in this town, he goes prepared.");
                 return true;
             case ("door", Verb.Walk or Verb.Hand) when State.HasFlag("on_map"):
                 await OpenTheDoor(player: true);
@@ -231,48 +259,36 @@ public partial class Office : Room
                 await OpenTheDoor(player: true);
                 return false;
 
-            case ("drawer", Verb.Hand):
-                if (State.HasFlag("drawer_open"))
-                {
-                    State.SetFlag("drawer_open", false);
-                    return true;
-                }
-                if (DrawerLeft() == 0)
-                {
-                    await Say("Empty. The story of my life. It can stay shut.");
-                    return true;
-                }
-                State.SetFlag("drawer_open");
-                await Say(DrawerLeft() switch
-                {
-                    3 => "My revolver, twenty-two dollars for the case, and my picks.",
-                    _ => "What's left of the important things.",
-                });
+            case ("filing", Verb.Hand) when State.HasFlag("cabinet_open"):
+                State.SetFlag("cabinet_open", false);
                 return true;
-            case ("drawer", Verb.Kick):
-                await Say("Kicking my own desk. That's a new low, even for me.");
+            case ("filing", Verb.Hand) when !State.HasFlag("took_lockpick"):
+                State.SetFlag("cabinet_open");
+                await Say("The middle drawer. Old files, and my picks rolled up in front where I can reach them.");
                 return true;
-            case ("drawer2", Verb.Hand):
-                await Say("Unpaid bills. I'm not opening that again until 1931.");
+            case ("filing", Verb.Hand):
+                await Say("C for Cases. Empty. D for Debts. Overflowing. Unpaid bills I'm not opening again until 1931.");
+                return true;
+            case ("filing", Verb.Kick):
+                await Say("Kicking my own filing cabinet. That's a new low, even for me.");
                 return true;
 
             case ("dollar", Verb.Hand):
                 State.GiveItem("dollar");
                 State.SetFlag("took_dollar");
-                await Say("Twenty-two dollars. A day's fee, and two dollars left from the last job. Better make it count.");
-                await ShutEmptyDrawer();
+                await Say("Twenty-two dollars. Teddy's first day, paid in advance. Better make it count.");
                 return true;
             case ("revolver", Verb.Hand):
                 State.GiveItem("revolver");
                 State.SetFlag("took_revolver");
                 await Say("Last time I carried it, I shot a mailbox. Let's hope the mailboxes behave tonight.");
-                await ShutEmptyDrawer();
                 return true;
             case ("lockpick", Verb.Hand):
                 State.GiveItem("lockpick");
                 State.SetFlag("took_lockpick");
                 await Say("My picks. A locked door is just a question nobody's asked politely yet.");
-                await ShutEmptyDrawer();
+                await Wait(0.2);
+                State.SetFlag("cabinet_open", false);
                 return true;
 
             case ("bottle", Verb.Hand) when State.HasFlag("office_lamp_off"):
@@ -298,9 +314,6 @@ public partial class Office : Room
                 return true;
             case ("window", Verb.Hand):
                 await Say("Then I'd hear the city. I hear enough of it already.");
-                return true;
-            case ("filing", Verb.Hand):
-                await Say("C for Cases. Empty. D for Debts. Overflowing.");
                 return true;
             case ("coat", Verb.Hand):
                 await Say("I'm already wearing my coat. That's my other coat. It's for when this one's at the pawnshop.");

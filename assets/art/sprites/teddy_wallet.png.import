@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ry10hv80qctd"
-path="res://.godot/imported/office_drawer_dollar.png-8c4fabfb72bd929439849582a101eeef.ctex"
+uid="uid://qr574vofc436"
+path="res://.godot/imported/teddy_wallet.png-857fac69e4b8926dc6c28a8f0d09334b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_dollar.png"
-dest_files=["res://.godot/imported/office_drawer_dollar.png-8c4fabfb72bd929439849582a101eeef.ctex"]
+source_file="res://assets/art/sprites/teddy_wallet.png"
+dest_files=["res://.godot/imported/teddy_wallet.png-857fac69e4b8926dc6c28a8f0d09334b.ctex"]
 
 [params]
 
