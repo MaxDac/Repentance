@@ -1,5 +1,5 @@
-"""The framed close-up of the red neon MOTEL sign over the wet street, reduced to a VGA panel from the committed
-picture."""
+"""The framed close-up of the vertical neon MOTEL sign on the right over the wet street, reduced to a VGA panel from
+the committed picture."""
 from pathlib import Path
 import sys
 import unittest
@@ -50,14 +50,17 @@ class MotelCloseupTests(unittest.TestCase):
     def test_limited_palette(self):
         self.assertLessEqual(len(inner(self.panel).getcolors(4096)), closeup.COLOURS)
 
-    def test_the_neon_sign_glows_red_at_the_top_right_over_a_dark_street(self):
+    def test_the_vertical_neon_sign_glows_amber_in_blue_at_the_top_right_over_a_dark_street(self):
         a = np.asarray(inner(self.panel), dtype=float)
         x0, y0, x1, y1 = closeup.MOTEL_SIGN
+        self.assertGreater(x0, closeup.AW // 2, "on the right, as in the motel scenes")
+        self.assertGreater(y1 - y0, (x1 - x0) * 3, "a vertical sign")
         sign = a[y0:y1, x0:x1]
         r, g, b = sign[..., 0], sign[..., 1], sign[..., 2]
-        neon = (r > 170) & (r > g * 1.4) & (r > b * 1.6)
-        self.assertGreater(neon.mean(), 0.08, "bright red neon letters")
-        self.assertGreater(r.mean(), g.mean() * 1.3)
+        neon = (r > 200) & (g > 150) & (r > b * 1.4)
+        self.assertGreater(neon.mean(), 0.08, "bright amber neon letters")
+        tube = (b > 150) & (b > r * 1.3)
+        self.assertGreater(tube[:, 0].mean(), 0.8, "a blue neon tube down its side")
         self.assertLess(a[:, :, :].mean(), 90, "a night scene")
         self.assertGreater(sign.mean(), a[:, :closeup.AW // 3].mean())
 
