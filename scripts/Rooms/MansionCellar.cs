@@ -88,7 +88,7 @@ public partial class MansionCellar : Room
             case ("barrel", Verb.Look):
                 await Say("Canadian rye, by the stencil, lying on its side. The spigot weeps a little.");
                 return true;
-            case ("barrel", Verb.Hand) when !Escaping:
+            case ("barrel", Verb.Hand or Verb.Kick) when !Escaping:
                 await Say("I could use a drink. That's exactly why I won't. Eleanor's upstairs.");
                 return true;
             case ("barrel", Verb.Hand) when Open:

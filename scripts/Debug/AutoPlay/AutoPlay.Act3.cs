@@ -393,6 +393,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("cellar_lit") && !gs.HasItem("lantern_lit"), "the lantern hung at the stair foot lights the cellar");
         await Shot("mansion_cellar_lit");
         await game.Perform(Verb.Hand, "barrel");
+        await game.Perform(Verb.Kick, "barrel");
         await game.Perform(Verb.Hand, "hung_lantern");
         Check(!gs.HasFlag("barrel_open") && !gs.HasFlag("took_hung_lantern") && !gs.HasItem("lantern_lit"),
             "the whiskey and the hung lantern wait for the escape");

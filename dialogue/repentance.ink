@@ -1031,7 +1031,7 @@ NUN: You want answers? Go see Harrington senior.
 === bartender_gun ===
 BARTENDER: Sal? Sal, what's all the... oh. Oh, no.
 MICAH: Evening, Tony. Sal's taking a nap. You and me are going to talk.
-MICAH: Eleanor Harrington. The Club took her back tonight. Where is she?
+MICAH: Eleanor Harrington. The Club has her back. Where is she?
 BARTENDER: Are you out of your mind? Beat it, Jones. You don't know who these people are.
 BARTENDER: They own judges. They own cops. They own the men who own the cops.
 BARTENDER: They bring girls in off the trains like crates of oranges, and nobody in this city asks what's in the crate.

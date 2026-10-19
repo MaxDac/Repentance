@@ -269,9 +269,13 @@ public class StoryIntegrityTests
     [InlineData("I called her a whore", "in the truth arm Agatha never says the word in the cell")]
     [InlineData("His car's gone from the lot", "Micah came to the motel on foot")]
     [InlineData("the motel on the road", "the motel is down the hill from the convent")]
+    [InlineData("The Club took her back tonight", "the Order took Eleanor the motel night, before the daylight Club visit")]
+    [InlineData("I don't have a car", "Micah owns the Ford Eleanor changes in (endings 2 and 10)")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
-        var sources = Code.Value.Append(new KeyValuePair<string, string>("dialogue/repentance.ink", InkText));
+        var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
+            .Select(f => new KeyValuePair<string, string>(Path.GetRelativePath(Root.Value, f).Replace('\\', '/'), File.ReadAllText(f)));
+        var sources = Code.Value.Append(new KeyValuePair<string, string>("dialogue/repentance.ink", InkText)).Concat(scenes);
         var hits = sources.Where(kv => kv.Value.Contains(stale)).Select(kv => kv.Key).ToList();
         Assert.True(hits.Count == 0, $"\"{stale}\" in {string.Join(", ", hits)}: {reason}");
     }
@@ -284,6 +288,15 @@ public class StoryIntegrityTests
         Assert.Contains("`motel_fire_escape` entry `interlude1`", row);
         Assert.True(row.IndexOf("motel_fire_escape", StringComparison.Ordinal) < row.IndexOf("motel_night", StringComparison.Ordinal),
             "EndFirst resumes Micah on the fire escape before his night in motel_night");
+    }
+
+    [Fact]
+    public void WalkthroughQuotesTeddysPaymentRemark()
+    {
+        var text = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
+        Assert.DoesNotContain("walks around with more than a day's pay", text);
+        Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", text);
+        Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", Code.Value.Single(kv => kv.Key.EndsWith("Rooms/Office.cs")).Value);
     }
 
     [Fact]
