@@ -195,7 +195,7 @@ public partial class Hud
             _speech.Visible = true;
             return;
         }
-        if (_closeUp == CloseUps.Convent)
+        if (_closeUp == CloseUps.FireEscape)
         {
             const int padding = 12;
             float half = _inset.Size.X / 2f;

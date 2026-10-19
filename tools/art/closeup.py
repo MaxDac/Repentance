@@ -5,11 +5,13 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 
 - stage_closeup: Eleanor on the Club stage, the stag and the hooded mask behind her, long locks of hair falling over
   her breasts. The clothed variant is its own picture: the same one in a dark velvet dress over her shoulders and chest.
+  Her face is the fire-escape picture's, pasted in with the neck and skin matched to it;
+  src/backup/stage_closeup_face_compare.png shows the old picture beside the new nude and clothed ones.
 - rose_closeup: Rose calling Micah back from her door on the left, Micah answering her on the right, two portraits in
-  one panel like convent_closeup. The source's glazed door leaves are painted over as solid panelled wood
+  one panel like fire_escape_closeup. The source's glazed door leaves are painted over as solid panelled wood
   (ROSE_DOOR_GLASS) to match her front door in the street scene; Micah is zoomed so his face matches hers.
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
-- convent_closeup: outside the convent at the end of Act 1, Micah on the left and Eleanor on the right, two portraits
+- fire_escape_closeup: on the motel fire escape after the First Interlude, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
 - motel_closeup: a red neon MOTEL sign over a rain-soaked Chicago street at night.
 - vows_photo: Micah and Rose on the day they renewed their vows (ending 1's epilogue), a portrait-shaped sepia
@@ -38,8 +40,8 @@ COLOURS = 32
 # two-portrait panels: each half in art pixels, either side of a bar in the frame's colours
 BAR = 4
 HALF = (AW - BAR) // 2
-MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_micah.png")
-ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "convent_eleanor.png")
+MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "fire_escape_micah.png")
+ELEANOR_SRC = os.path.join(ROOT, "tools", "art", "src", "fire_escape_eleanor.png")
 # the vow-renewal photo: a portrait print, as tall as the other close-ups' pictures, on a cream card mount
 VOWS_SRC = os.path.join(ROOT, "tools", "art", "src", "vows_photo.png")
 VOWS_BORDER = 26  # the source's own worn border, trimmed so only the studio picture is reduced
@@ -61,17 +63,36 @@ ROSE_MICAH_ZOOM = ((ROSE_FACE_W * ROSE_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) 
 MICAH_CUT = ((652, 398), (647, 428))
 BEATEN_CUT = ((648, 358), (643, 388))
 CUT, CUT_EDGE = hx("b8262a"), hx("5a0e12")
-# One palette for both stage variants, so they differ only where the dress is. Pinned to the one the pictures had
-# before the locks of hair were painted in, so her face reduces to exactly the same pixels as it always did.
+# One palette for both stage variants, so they differ only where the dress is. Pinned: the skin, red and hair colours
+# the pictures always had, and tones of her painted face (the fire-escape face) in place of near-identical blacks.
 STAGE_PALETTE = [hx(c) for c in """
-f6d3a3 f6d1a2 f6cf9d e6af84 c07c5c 865338 4d3124 26282b 252729 242628 781f27 4f1b1b 242223 1e2022 18181a 141518
-111316 101114 0d0e11 0a0c0f 0a090b 060608 030405 030204 010202 010102 010101 010100 010001 000101 000001 000000
+f6d3a3 f6d1a2 f6cf9d e6af84 c07c5c 865338 4d3124 26282b 252729 242628 781f27 4f1b1b 242223 1e2022 111316 0a0c0f
+030204 000000 fee3ae f4c290 ecbd8e edb384 df9c78 ca8e6f b57560 a75751 81534e 744141 4d2b2e 191314
 """.split()]
+# Her face in the 2000x1024 stage sources, fringe to chin. It is reduced without dithering so its painted shading
+# stays smooth instead of breaking into dither noise.
+STAGE_FACE = [(857, 380), (877, 327), (927, 286), (977, 244), (1038, 239), (1098, 275), (1138, 327), (1150, 390),
+              (1146, 474), (1128, 536), (1106, 584), (1082, 603), (1060, 620), (1038, 632), (1005, 638), (969, 636),
+              (943, 625), (913, 601), (885, 570), (875, 557), (861, 528), (855, 453)]
+
+
+def stage_face_mask(size):
+    """The art pixels of her face: those mostly inside STAGE_FACE."""
+    m = Image.new("L", size, 0)
+    ImageDraw.Draw(m).polygon(STAGE_FACE, fill=255)
+    return np.asarray(m.resize((AW, AH), Image.BOX)) > 127
 
 
 def stage_closeup(src, pal=STAGE_PALETTE):
-    """Eleanor on the stage, framed; src is the nude or the clothed picture."""
-    return framed(src.convert("RGB"), pal)
+    """Eleanor on the stage, framed; src is the nude or the clothed picture. Dithered except on her face."""
+    img = src.convert("RGB")
+    small = img.resize((AW, AH), Image.BOX)
+    face = stage_face_mask(img.size)[..., None]
+    art = np.where(face, np.asarray(pixelize(small, pal, spread=0)), np.asarray(pixelize(small, pal, spread=8)))
+    inner = Image.fromarray(art.astype(np.uint8)).resize((IW, IH), Image.NEAREST)
+    panel = Image.new("RGB", (PW, PH), hx("08060a"))
+    panel.paste(inner, (FRAME, FRAME))
+    return frame_border(panel)
 
 
 # The glazed parts of the two door leaves in the 1344x768 source, as (top-left, top-right, bottom-right, bottom-left)
@@ -182,8 +203,8 @@ def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
     return img.crop((x, y, x + cw, y + ch))
 
 
-def convent_closeup(micah, eleanor):
-    """Outside the convent, the first time they meet: Micah on the left, Eleanor on the right, faces the same size.
+def fire_escape_closeup(micah, eleanor):
+    """On the motel fire escape, after the First Interlude: Micah on the left, Eleanor on the right, faces the same size.
     Micah's bottom lip carries the cut from the Blue Lantern; the palette is the uncut pictures', so the cut comes
     through in the face's own dark reds."""
     micah = micah.convert("RGB")
@@ -303,6 +324,6 @@ def build():
     save(rose_closeup(Image.open(ROSE_SRC), Image.open(MICAH_SRC)), "ui", "rose_closeup.png")
     save(beaten_closeup(Image.open(BEATEN_SRC)), "ui", "beaten_closeup.png")
     save(motel_closeup(Image.open(MOTEL_SRC)), "ui", "motel_closeup.png")
-    save(convent_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "convent_closeup.png")
+    save(fire_escape_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "fire_escape_closeup.png")
     save(heraldry_closeup(), "ui", "heraldry_closeup.png")
     save(vows_photo(Image.open(VOWS_SRC)), "ui", "vows_photo.png")

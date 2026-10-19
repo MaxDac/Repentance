@@ -1,4 +1,4 @@
-"""The two-portrait close-up outside the convent: Micah on the left, Eleanor on the right, in one framed VGA panel."""
+"""The two-portrait close-up on the motel fire escape: Micah on the left, Eleanor on the right, in one framed VGA panel."""
 from pathlib import Path
 import sys
 import unittest
@@ -25,13 +25,13 @@ def halves(panel):
     return left.astype(float), right.astype(float)
 
 
-class ConventCloseupTests(unittest.TestCase):
+class FireEscapeCloseupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.panel = closeup.convent_closeup(Image.open(closeup.MICAH_SRC), Image.open(closeup.ELEANOR_SRC))
+        cls.panel = closeup.fire_escape_closeup(Image.open(closeup.MICAH_SRC), Image.open(closeup.ELEANOR_SRC))
 
     def test_committed_panel_matches_the_build_and_is_the_same_size_as_the_others(self):
-        committed = Image.open(UI / "convent_closeup.png").convert("RGB")
+        committed = Image.open(UI / "fire_escape_closeup.png").convert("RGB")
         self.assertEqual(committed.size, (closeup.PW, closeup.PH))
         self.assertEqual(self.panel.size, Image.open(UI / "stage_closeup.png").size)
         self.assertTrue((np.asarray(committed) == np.asarray(self.panel)).all(), "regenerate with gen_art.py closeup")
@@ -84,7 +84,7 @@ class ConventCloseupTests(unittest.TestCase):
         self.assertTrue(abs(top - 400) <= 6 and closeup.MICAH_FACE_X - 40 < left < closeup.MICAH_FACE_X,
                         "from the mouth line, just off centre")
         with unittest.mock.patch.object(closeup, "lip_cut", lambda img, *_: img):
-            plain = closeup.convent_closeup(source, Image.open(closeup.ELEANOR_SRC))
+            plain = closeup.fire_escape_closeup(source, Image.open(closeup.ELEANOR_SRC))
         a, p = np.asarray(self.panel).astype(int), np.asarray(plain).astype(int)
         diff = (a != p).any(axis=2)
         self.assertFalse(diff[:, BAR_X:].any(), "Eleanor is untouched")
