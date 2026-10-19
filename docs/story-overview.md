@@ -100,7 +100,7 @@ From here the story follows Walkthrough.md:
    forward.
 20. **Rose's house** (optional): the rain stops at her street (Micah remarks on it). Ring the bell. Push for
    forgiveness up to five times, or leave; push at least
-   three times and Rose calls him back: "Wait!", then a framed close-up of her at the door and "Don't get into trouble again."
+   three times and Rose calls him back: "Wait!", then a framed close-up of her at the door beside Micah, "Don't get into trouble again." and Micah's silent "...".
 21. **Cathedral**: press Caleb about the club. He admits the Club traffics girls for its Thursday spectacles, and
     that he and the sisters hide the ones who escape while he keeps quiet so the Club leaves the convent alone.
     Micah calls him a hypocrite who could have gone to the press. Caleb points Micah to the convent and begs him to give up.

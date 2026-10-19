@@ -31,7 +31,7 @@ public static class CloseUps
     public static readonly CloseUp Stage = new("stage",
         s => s?.NudityEnabled == true ? "stage_closeup" : "stage_closeup_clothed");
 
-    /// <summary>Rose at her door, calling Micah back.</summary>
+    /// <summary>Rose at her door, calling Micah back, on the left; Micah on the right, with nothing to say.</summary>
     public static readonly CloseUp Rose = new("rose", "rose_closeup");
 
     /// <summary>Micah flat on the cathedral steps in Act 3.</summary>
