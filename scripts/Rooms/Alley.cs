@@ -84,6 +84,12 @@ public partial class Alley : Room
         _flickerIn = _lamp.Visible ? _rng.RandfRange(0.4f, 2.6f) : _rng.RandfRange(0.04f, 0.3f);
     }
 
+    /// <summary>Act 1: Micah is already on his knees when the alley fades in.</summary>
+    public override void OnArriving(string entry)
+    {
+        if (entry != "act3" && !InAct3 && !State.HasFlag("alley_done")) Player.SetPose("micah_kneel");
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "act3")

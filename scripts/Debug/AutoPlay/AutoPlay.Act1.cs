@@ -243,6 +243,7 @@ public partial class AutoPlay
             "the gin is offered only after Tony names the bathtub gin");
         int thunks = game.Sfx.Count(Sound.Thunk);
         await Until(() => game.Room?.Name == "Alley");
+        Check(game.Player.PoseName == "micah_kneel", "Micah is already on his knees when the alley fades in");
         Check(_offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").Count(o => o.Options.Any(l => l.StartsWith("Bathtub?"))) == 1 &&
             CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");

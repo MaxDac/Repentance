@@ -40,6 +40,7 @@ interlude bench, checked by `WalkTest.HoleTests`).
 
 | Override | Use |
 |---|---|
+| `void OnArriving(string entry)` | Still black, before the fade-in: stage the arrival's first frame (a held pose). Skipped with `OnEnter` |
 | `Task OnEnter(string entry)` | Arrival cutscene. Guard one-shots with a flag (`seen_lobby`). Not replayed on load |
 | `Task<bool> OnInteract(Verb, Hotspot, string? item)` | Main handler. `switch (target.Id, verb)`; return `true` if handled |
 | `Task<bool> OnCombine(string item, string other)` | Room-only item combinations |
