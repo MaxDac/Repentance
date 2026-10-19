@@ -23,8 +23,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah's thoughts, then the conversation with Teddy Harrington III about his missing wife, Eleanor
   Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy steps to the corner of the
   desk by the lamp, takes out his wallet and pays the first day in advance, $22 cash: the $20 daily fee plus $2
-  for expenses. Once the notes are on the desk, Micah remarks that he walks around with more than a day's pay in
-  his pocket; then Teddy says good evening and walks out of the room.
+  for expenses. Once the notes are on the desk, Micah thinks, "Twenty-two dollars. Pocket lint to him. A day's pay
+  to me, and then some."; then Teddy says good evening and walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
 - Micah's kit is no longer in the desk (its drawers face his own side of the desk, out of view):
   - the money: Teddy's notes on the desk;
