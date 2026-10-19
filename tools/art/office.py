@@ -1033,13 +1033,14 @@ def build():
         save(pixelize(paint(**kw), pal).crop(box), "rooms", f"office_{name}.png")
     # Act 3: the lamp off, the whiskey on the desk; the overlays that can still show get dark twins
     dark = paint(lamp_on=False)
-    dark_pal = palette_of(paint(lamp_on=False, holster=True), 128)
+    dark_pal = palette_of(dark, 128)
     save(pixelize(dark, dark_pal), "rooms", "office_act3.png")
     for state in ("ajar", "open"):
         save(pixelize(paint(door_state=state, lamp_on=False), dark_pal).crop(DOOR_BOX), "rooms",
              f"office_act3_door_{state}.png")
     for name, box, kw in overlays:
-        save(pixelize(paint(lamp_on=False, **kw), dark_pal).crop(box), "rooms", f"office_act3_{name}.png")
+        if name != "holster":  # the gun went out with Micah in Act 1: by Act 3 the rack holds only the coat
+            save(pixelize(paint(lamp_on=False, **kw), dark_pal).crop(box), "rooms", f"office_act3_{name}.png")
     # the ring is only a glint of gold on the desk: two bright pixels and a shadowed band
     ring = Image.new("RGBA", (3, 2))
     d = ImageDraw.Draw(ring)

@@ -38,7 +38,7 @@ public partial class Office : Room
                  {
                      ("Background", "office_act3"), ("DoorAjar", "office_act3_door_ajar"),
                      ("DoorOpen", "office_act3_door_open"), ("CabinetOpen", "office_act3_cabinet_open"),
-                     ("CabinetLockpick", "office_act3_cabinet_lockpick"), ("Holster", "office_act3_holster"),
+                     ("CabinetLockpick", "office_act3_cabinet_lockpick"),
                      ("DeskCash", "office_act3_cash"),
                  })
             if (GetNodeOrNull<Godot.Sprite2D>(node) is { } sprite)
