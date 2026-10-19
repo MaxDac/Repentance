@@ -575,7 +575,7 @@ ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looki
 
 === eleanor_fire_escape ===
 ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
-INSET: convent
+INSET: fire_escape
 MICAH: Eleanor Harrington. You wouldn't happen to know her?
 ELEANOR: That depends on who's asking.
 MICAH: Micah Jones. Private detective.
