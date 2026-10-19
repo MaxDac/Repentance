@@ -34,7 +34,7 @@ size = Vector2(48, 98)
 size = Vector2(26, 16)
 
 [sub_resource type="RectangleShape2D" id="Rect_9"]
-size = Vector2(28, 86)
+size = Vector2(28, 74)
 
 [sub_resource type="RectangleShape2D" id="Rect_10"]
 size = Vector2(18, 16)
@@ -70,7 +70,7 @@ ShowIfFlags = "grille_opened"
 
 [node name="Regular" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(424, 92)
+position = Vector2(424, 104)
 texture = ExtResource("8_regular")
 centered = false
 hframes = 6
@@ -227,7 +227,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Regular"]
-position = Vector2(442, 134)
+position = Vector2(442, 140)
 shape = SubResource("Rect_9")
 
 [node name="Lantern" type="Area2D" parent="Hotspots"]

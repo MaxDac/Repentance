@@ -932,13 +932,48 @@ def _puff(d, cx, cy, r):
                 d.point((x, y), fill=thin)
 
 
+# The regular is drawn below in a tall 85px layout (hat crown at y=92, shoes at BASE) and squashed on the way to the
+# canvas to about 72px, a head shorter than Micah by the door: the head, hat and collar keep their size and drop
+# REGULAR_DROP pixels, and the shoulders-to-shoes body is compressed to fit.
+REGULAR_NECK = 116
+REGULAR_DROP = 12
+
+
+def regular_y(y):
+    """Where a y of the regular's drawing layout lands on the canvas."""
+    if y <= REGULAR_NECK:
+        return y + REGULAR_DROP
+    top = REGULAR_NECK + REGULAR_DROP
+    return top + round((y - REGULAR_NECK) * (BASE - top) / (BASE - REGULAR_NECK))
+
+
+class _SquashedDraw:
+    """An ImageDraw whose y coordinates pass through regular_y."""
+
+    def __init__(self, draw):
+        self._d = draw
+
+    @staticmethod
+    def _map(xy):
+        if isinstance(xy, tuple):
+            return (xy[0], regular_y(xy[1]))
+        if xy and isinstance(xy[0], tuple):
+            return [(x, regular_y(y)) for x, y in xy]
+        return [v if k % 2 == 0 else regular_y(v) for k, v in enumerate(xy)]
+
+    def __getattr__(self, name):
+        method = getattr(self._d, name)
+        return lambda xy, *args, **kwargs: method(self._map(xy), *args, **kwargs)
+
+
 def regular(img, pose=0):
     """A member waiting by the wall in a dark overcoat, fedora tipped low so his eyes look out of the brim's shadow,
     a blue carnation bright in his buttonhole and a cigarette in his hand. Painted on its own layer (the game animates
     the smoking); returns the figure's mask."""
     p = SMOKE_POSES[pose]
     fig = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(fig)
+    raw = ImageDraw.Draw(fig)
+    d = _SquashedDraw(raw)
     cx = REGULAR_X
     coat, coat_d, coat_l = hx("2c2a34"), hx("18171e"), hx("4a4856")
     skin, skin_d = hx("8a6a58"), hx("4a3830")
@@ -1074,15 +1109,16 @@ def regular(img, pose=0):
     d.line([(cx + 4, 104), (cx + 7, 102)], fill=hat)
     if p["puff"]:
         for px_, py_, r in p["puff"]:
-            _puff(d, cx + px_, py_, r)
+            _puff(raw, cx + px_, regular_y(py_), r)
     img.paste(fig, (0, 0), fig)
     mask = fig.getchannel("A")
-    light(img, "ellipse", [cx - 12, 115, cx - 1, 129], hx("4a80f0"), 0.3, 3)
+    light(img, "ellipse", _SquashedDraw._map([cx - 12, 115, cx - 1, 129]), hx("4a80f0"), 0.3, 3)
     if p["hand"][1] > 130:
         tx, ty = hx_ - 5, hy + 2
     else:
         tx, ty = hx_ - 3, hy + 1
-    light(img, "ellipse", [tx - 3, ty - 3, tx + 3, ty + 2], hx("ff9040"), 0.15 + 0.15 * p["ember"], 1)
+    light(img, "ellipse", _SquashedDraw._map([tx - 3, ty - 3, tx + 3, ty + 2]), hx("ff9040"),
+          0.15 + 0.15 * p["ember"], 1)
     return mask
 
 
@@ -1250,10 +1286,12 @@ def build_florist():
     src = Image.blend(variants["base"], variants["grille"], 0.5)
     src.paste(frames[0][0].crop(box), box[:2])
     cx = REGULAR_X
-    face = frames[0][0].crop((cx - 6, 104, cx + 6, 114)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    face = frames[0][0].crop((cx - 6, regular_y(104), cx + 6, regular_y(114))).quantize(
+        6, method=Image.Quantize.MEDIANCUT)
     skin = [tuple(face.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
     # likewise the fedora's few greys, so its lit flank, rim and crease survive as separate tones
-    hat = frames[0][0].crop((cx - 10, 91, cx + 11, 107)).quantize(6, method=Image.Quantize.MEDIANCUT)
+    hat = frames[0][0].crop((cx - 10, regular_y(91), cx + 11, regular_y(107))).quantize(
+        6, method=Image.Quantize.MEDIANCUT)
     skin += [tuple(hat.getpalette()[i * 3:i * 3 + 3]) for i in range(6)]
     pal = (palette_of(src, 128) + list(CARNATION) + list(EMBER) + [ROSE, mul(ROSE, 0.62), mul(ROSE, 0.45),
                                                                     hx("ccc3a0")] + skin)
