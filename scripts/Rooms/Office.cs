@@ -119,22 +119,22 @@ public partial class Office : Room
     }
 
     /// <summary>
-    /// Teddy's first day in advance: the wallet out of his breast pocket, a few notes peeled off, and the notes laid on
-    /// the corner of the desk by the lamp for Micah to pick up.
+    /// Teddy's first day in advance: at the corner of the desk by the lamp, the wallet out of his breast pocket, a few
+    /// notes peeled off and laid down for Micah to pick up. Micah's remark comes once the money is on the desk.
     /// </summary>
     private async Task PayTheFirstDay(Actor teddy)
     {
         if (State.HasFlag("teddy_paid")) return;
         teddy.FaceLeft(false);
         await Say("teddy", "Before I forget. Twenty for the day, and two for your quaint expenses.");
-        await teddy.PlayPose("teddy_wallet");
-        await Think("He peels off twenty-two dollars like it's lint. A day's pay walking around in his pocket, and then some.");
         await teddy.MoveTo(DeskCorner, 45);
         teddy.FaceLeft(false);
+        await teddy.PlayPose("teddy_wallet");
         await teddy.PlayPose("teddy_leave_notes");
         State.SetFlag("teddy_paid");
         await Wait(0.2);
         teddy.SetPose(null);
+        await Think("Twenty-two dollars. Pocket lint to him. A day's pay to me, and then some.");
     }
 
     /// <summary>Where Teddy stands to reach the corner of the desk, just left of it.</summary>
@@ -208,11 +208,17 @@ public partial class Office : Room
         await Game.ChangeRoom("alley", "act3");
     }
 
-    /// <summary>Micah's kit for the night (the flag set when he takes each thing) and how he calls it.</summary>
+    /// <summary>
+    /// Micah's kit for the night (the flag set when he takes each thing) and how he calls it, with where it is, so the
+    /// door tells the player what is left and where to look.
+    /// </summary>
     private static readonly (string Flag, string Name)[] Kit =
-        { ("took_revolver", "my gun"), ("took_lockpick", "my picks"), ("took_dollar", "Teddy's money") };
+    {
+        ("took_revolver", "my gun off the coat rack"), ("took_lockpick", "my picks from the filing cabinet"),
+        ("took_dollar", "my fee off the desk"),
+    };
 
-    /// <summary>What Micah still has to pick up before he goes out, in his words ("my gun and my picks").</summary>
+    /// <summary>What Micah still has to pick up before he goes out, in his words ("my gun off the coat rack and ...").</summary>
     private string? MissingKit()
     {
         var names = Kit.Where(k => !State.HasFlag(k.Flag)).Select(k => k.Name).ToList();

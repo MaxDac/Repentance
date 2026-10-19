@@ -257,13 +257,13 @@ DESK_BOTTLE = (214, 80)
 DESK_CUP = (224, 92)
 
 RACK_X = 162
-# the shoulder holster with the revolver, hung on the rack's right hook beside the spare coat (screen coordinates)
-HOLSTER_BOX = (163, 26 + TOP, 186, 68 + TOP)
+# the shoulder rig with the revolver, thrown over the spare coat on the rack (screen coordinates)
+HOLSTER_BOX = (154, 29 + TOP, 176, 62 + TOP)
 
 
 def coat_rack(img, hat=True, holster=False):
     """A bentwood coat rack: the spare trench coat with a red scarf round its collar, the spare fedora (a bullet hole
-    in the crown) on the left hook, and - until Micah straps it on - his shoulder holster on the right one."""
+    in the crown) on the left hook, and - until Micah straps it on - his shoulder rig thrown over the coat."""
     d = ImageDraw.Draw(img)
     x = RACK_X
     wood, wood_l, wood_d = hx("4a2c18"), hx("7a5034"), hx("1e120a")
@@ -302,13 +302,13 @@ def coat_rack(img, hat=True, holster=False):
     for by in (44, 50):
         d.point((158, by), fill=tan_dd)
         d.point((167, by), fill=tan_dd)
-    # the red scarf round the collar, its ends hanging down the front
+    # the red scarf round the collar, its ends hanging down the left of the front
     red, red_l, red_d = hx("7a2420"), hx("a83a30"), hx("4a1210")
     d.polygon([(157, 32), (167, 32), (165, 36), (159, 36)], fill=red)
-    d.polygon([(159, 35), (162, 35), (161, 62), (157, 62)], fill=red)
-    d.polygon([(162, 35), (165, 35), (164, 56), (161, 56)], fill=red_d)
-    d.line([(160, 36), (159, 61)], fill=red_l)
-    for fx in range(157, 162):
+    d.polygon([(157, 35), (160, 35), (155, 62), (152, 62)], fill=red)
+    d.polygon([(159, 35), (162, 35), (158, 56), (155, 56)], fill=red_d)
+    d.line([(158, 36), (154, 61)], fill=red_l)
+    for fx in range(152, 157):
         d.point((fx, 63), fill=red_d if fx % 2 else red)
     if hat:
         felt, felt_l, felt_d = hx("34343c"), hx("5a5a64"), hx("1a1a20")
@@ -327,29 +327,46 @@ def coat_rack(img, hat=True, holster=False):
         _holster(d)
 
 
-def _holster(d):
-    strap, strap_l, strap_d = hx("5a3418"), hx("8a5a30"), hx("2e1a0a")
-    # the harness looped over the right hook, two straps running down the coat's side
-    d.line([(169, 26), (174, 34), (176, 44)], fill=strap, width=2)
-    d.line([(171, 25), (178, 33), (181, 44)], fill=strap_d)
-    d.line([(169, 26), (174, 34)], fill=strap_l)
-    d.point((176, 38), fill=BRASS)
-    # the holster, the snub .38 butt-forward in it: walnut grip, hammer spur, a sliver of blued cylinder
-    d.polygon([(175, 46), (182, 45), (184, 60), (180, 66), (176, 61)], fill=hx("6a3e1c"))
-    d.line([(182, 46), (184, 59)], fill=hx("9a6a3c"))
-    d.line([(176, 61), (180, 66)], fill=strap_d)
-    for sy in (50, 54, 58):
-        d.point((178, sy), fill=hx("a87a4a"))
-    d.polygon([(175, 40), (180, 39), (182, 45), (176, 46)], fill=hx("8a5430"))
-    d.line([(176, 41), (179, 40)], fill=hx("b07848"))
-    d.point((178, 43), fill=hx("5a3018"))
-    d.point((176, 44), fill=hx("5a3018"))
-    d.point((181, 38), fill=hx("7a7a84"))
-    d.line([(176, 46), (182, 45)], fill=hx("5a5a64"))
-    d.point((179, 46), fill=hx("b0b0b8"))
-    d.line([(175, 47), (182, 47)], fill=strap_d)
-    d.point((181, 47), fill=BRASS_L)
+# the snub .38 in its holster, drawn lying down - barrel right and sheathed, butt down and out (one character per pixel)
+REVOLVER = (
+    "..lb...................",
+    "..bdb.....kkkkkkkk.....",
+    "...bLLLLLLbhhhhhhhhk...",
+    "...bGbbdbbbHHHHHHHHHk..",
+    "..wbbbbdbbbHHsHHsHHHk..",
+    "..wWbbbdbbbHHHHHHHHk...",
+    ".wWWdbbdbbdkkkkkkkk....",
+    ".wKWWd.d..d............",
+    ".wWKWdd..dd............",
+    "wWKWK..dd..............",
+    "wKWKW..................",
+    "wWKWK..................",
+    "GlLLd..................",
+)
+REVOLVER_AT = (160, 37)
+# hung upright, as a shoulder holster hangs: the drawing turned a quarter clockwise, barrel down, grip up top
+REVOLVER_UPRIGHT = tuple("".join(col) for col in zip(*REVOLVER[::-1]))
+REVOLVER_INK = {"b": "2e3442", "d": "14161e", "L": "8a96ae", "l": "b8c2d6", "G": "eef4ff",
+                "W": "6a3a1a", "w": "a8683a", "K": "3a1c0a",
+                "H": "7a4620", "h": "b07440", "k": "3e2010", "s": "d8a868"}
 
+
+def _holster(d):
+    """The shoulder rig thrown over the spare coat: a strap over each shoulder down to the holster hanging upright on
+    the chest, and in it the snub .38 - blued cylinder and hammer, trigger guard, checkered walnut grip - drawn pixel
+    by pixel so it reads at a glance against the tan coat."""
+    strap, strap_l, strap_d = hx("4a2810"), hx("8a5a30"), hx("24120a")
+    for top, bot in (((157, 32), (161, 41)), ((168, 32), (170, 48))):
+        d.line([top, bot], fill=strap, width=2)
+        d.line([(top[0] - 1, top[1]), (bot[0] - 1, bot[1])], fill=strap_l)
+    d.line([(154, 31), (170, 31)], fill=strap_d)
+    for bx, by in ((159, 36), (169, 40)):
+        d.point((bx, by), fill=BRASS_L)
+    ox, oy = REVOLVER_AT
+    for y, row in enumerate(REVOLVER_UPRIGHT):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                d.point((ox + x, oy + y), fill=hx(REVOLVER_INK[ch]))
 
 def clock(img, hour=9, minute=0):
     """The deco wall clock: a sunburst round a brass bezel, the hands set to hour:minute."""
@@ -1005,7 +1022,7 @@ def ring_glint():
 
 def build():
     base = paint()
-    pal = palette_of(base, 128)
+    pal = palette_of(paint(holster=True), 128)  # the revolver's steel and walnut need their own inks
     px = pixelize(base, pal)
     save(px, "rooms", "office.png")
     for state in ("ajar", "open"):
@@ -1016,7 +1033,7 @@ def build():
         save(pixelize(paint(**kw), pal).crop(box), "rooms", f"office_{name}.png")
     # Act 3: the lamp off, the whiskey on the desk; the overlays that can still show get dark twins
     dark = paint(lamp_on=False)
-    dark_pal = palette_of(dark, 128)
+    dark_pal = palette_of(paint(lamp_on=False, holster=True), 128)
     save(pixelize(dark, dark_pal), "rooms", "office_act3.png")
     for state in ("ajar", "open"):
         save(pixelize(paint(door_state=state, lamp_on=False), dark_pal).crop(DOOR_BOX), "rooms",
