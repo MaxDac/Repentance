@@ -169,6 +169,7 @@ shape = SubResource("Rect_5")
 [node name="CorridorDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "corridor_door"
+Door = true
 DisplayName = "corridor door"
 LookText = "Night bolt on the far side. The transom's cracked open an inch – a hook could reach it."
 WalkTo = Vector2(421, 192)

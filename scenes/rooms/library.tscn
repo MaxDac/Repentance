@@ -75,6 +75,7 @@ offset = Vector2(-64, -76)
 [node name="Exit" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "exit"
+Door = true
 DisplayName = "hall door"
 LookText = "The hall door. Polished brass, old money, no welcome."
 WalkTo = Vector2(42, 182)

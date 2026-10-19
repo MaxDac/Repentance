@@ -79,6 +79,7 @@ y_sort_enabled = true
 [node name="Door" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "door"
+Door = true
 DisplayName = "steel door"
 LookText = "The way back out through Rizzo's cold room. And to the rain."
 WalkTo = Vector2(48, 176)

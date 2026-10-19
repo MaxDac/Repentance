@@ -63,8 +63,10 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "filing");
         Check(gs.HasFlag("cabinet_open"), "the filing cabinet's middle drawer slides open on the picks");
         await Shot("office_cabinet");
+        int doorsOpened = game.Sfx.Count(Sound.DoorOpen), doorsClosed = game.Sfx.Count(Sound.DoorClose);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Office", "can't leave without the gun, the picks and the money");
+        Check(game.Sfx.Count(Sound.DoorOpen) == doorsOpened, "a door Micah doesn't go through stays quiet");
         await game.Perform(Verb.Hand, "revolver");
         await game.Perform(Verb.Hand, "dollar");
         await game.Perform(Verb.Hand, "lockpick");
@@ -78,6 +80,8 @@ public partial class AutoPlay
         await MouseTest(game);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Lobby", "entered the lobby");
+        Check(game.Sfx.Count(Sound.DoorOpen) == doorsOpened + 1 && game.Sfx.Count(Sound.DoorClose) == doorsClosed + 1,
+            "the office door opens once and shuts once behind Micah");
         Check(game.Music.Current == Track.LobbyPiano, "the house pianist plays in the Aurelian lobby");
 
         await Shot("lobby");

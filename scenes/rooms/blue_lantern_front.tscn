@@ -190,6 +190,7 @@ shape = SubResource("Rect_6")
 [node name="ColdDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "cold_door"
+Door = true
 DisplayName = "cold-room door"
 LookText = "Steel, painted green, stencilled COLD ROOM. No handle on this side. Flowers don't need this much door."
 WalkTo = Vector2(386, 190)
@@ -204,6 +205,7 @@ shape = SubResource("Rect_7")
 [node name="Grille" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "grille"
+Door = true
 DisplayName = "speaking grille"
 LookText = "A slot at eye height. Somebody inside checks lapels before they check faces."
 WalkTo = Vector2(386, 190)
