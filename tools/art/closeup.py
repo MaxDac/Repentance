@@ -13,7 +13,9 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - fire_escape_closeup: on the motel fire escape after the First Interlude, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
-- motel_closeup: a red neon MOTEL sign over a rain-soaked Chicago street at night.
+- motel_closeup: a vertical neon MOTEL sign, amber letters in a blue tube, high on the right of a rain-soaked Chicago
+  street at night, matching the sign in the motel scenes. The source is the original picture mirrored to put the sign
+  there, with the sign itself pasted back unmirrored so MOTEL still reads left to right.
 - vows_photo: Micah and Rose on the day they renewed their vows (ending 1's epilogue), a portrait-shaped sepia
   studio print on a cream 1920s card mount with worn corners, instead of the dark frame.
 """
@@ -29,8 +31,8 @@ CLOTHED_SRC = os.path.join(ROOT, "tools", "art", "src", "stage_closeup_clothed.p
 ROSE_SRC = os.path.join(ROOT, "tools", "art", "src", "rose_closeup.png")
 BEATEN_SRC = os.path.join(ROOT, "tools", "art", "src", "beaten_closeup.png")
 MOTEL_SRC = os.path.join(ROOT, "tools", "art", "src", "motel_street.png")
-MOTEL_TOP = 245 / 1024  # just above the neon sign in the square source, so the wet street below stays in view
-MOTEL_SIGN, MOTEL_NEON = (138, 6, 188, 28), 6  # the sign's letters in panel art pixels, and the colours kept for them
+MOTEL_TOP = 0  # the top of the 1344x768 source, just above the neon sign, trimming only the bottom of the wet street
+MOTEL_SIGN, MOTEL_NEON = (149, 5, 158, 47), 6  # the vertical sign in panel art pixels, and the colours kept for it
 AW, AH = 220, 113  # art pixels, the picture's 1.95:1, so both masked men stay in view
 SCALE = 2  # doubled into chunky pixels, nearly filling the 480x270 screen
 IW, IH = AW * SCALE, AH * SCALE
@@ -182,7 +184,7 @@ def motel_crop(src):
 
 
 def motel_closeup(src):
-    """The red neon MOTEL sign over a rain-soaked street at night."""
+    """The vertical neon MOTEL sign on the right, over a rain-soaked street at night."""
     img = motel_crop(src)
     small = img.resize((AW, AH), Image.BOX)
     # the neon is a sliver of the picture: give the sign its own reds so the reduction keeps it glowing
