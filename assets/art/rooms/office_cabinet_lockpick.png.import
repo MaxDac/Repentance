@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xhe06nahw7fe"
-path="res://.godot/imported/office_drawer_revolver.png-7bfce01a762ea5011654f05f84144878.ctex"
+uid="uid://cdg0dt7grumgu"
+path="res://.godot/imported/office_cabinet_lockpick.png-15819bb6efaa8ec9c5ca76fb3477d5a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/rooms/office_drawer_revolver.png"
-dest_files=["res://.godot/imported/office_drawer_revolver.png-7bfce01a762ea5011654f05f84144878.ctex"]
+source_file="res://assets/art/rooms/office_cabinet_lockpick.png"
+dest_files=["res://.godot/imported/office_cabinet_lockpick.png-15819bb6efaa8ec9c5ca76fb3477d5a3.ctex"]
 
 [params]
 

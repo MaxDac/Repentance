@@ -170,6 +170,82 @@ def city(img, box, seed=7, lit=0.3, haze=hx("3a2a4a"), rain=True):
         d.line([(rx, ry), (rx - 1, ry + 3)], fill=hx("4a5a7a"))
 
 
+PHONE, PHONE_M, PHONE_L, NICKEL = hx("121016"), hx("2c2a34"), hx("5a5664"), hx("c4c4cc")
+NICKEL_D, CORD, CORD_L, CARD = hx("7c7c88"), hx("2a1e18"), hx("5a4434"), hx("e8dcc0")
+
+
+def braided_cord(d, pts, step=2):
+    """A cloth-braided cord: dark brown, flecked lighter every few pixels along its length."""
+    d.line(pts, fill=CORD)
+    n = 0
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        k = max(abs(x1 - x0), abs(y1 - y0), 1)
+        for i in range(int(k)):
+            if n % step == 0:
+                d.point((round(x0 + (x1 - x0) * i / k), round(y0 + (y1 - y0) * i / k)), fill=CORD_L)
+            n += 1
+
+
+def candlestick_phone(img, x, y, dial=False):
+    """A black Western Electric candlestick telephone standing with its foot centred on (x, y): a flared, stepped
+    foot, a column ringed in nickel, the mouthpiece trumpet turned to the room with its nickel rim and dark throat,
+    and the receiver hanging by its bell on the nickel switchhook, its braided cord looping down to the foot.
+    Without a dial (a hotel extension: lifting the receiver rings the switchboard) the foot carries a number card;
+    dial=True puts a nickel finger wheel on the foot's face instead, for a private line."""
+    d = ImageDraw.Draw(img)
+    shadow(img, "ellipse", [x - 7, y - 2, x + 7, y + 2], 0.45, 1)
+    # the receiver cord, from the end of the receiver down and round into the foot
+    braided_cord(d, [(x + 7, y - 6), (x + 8, y - 3), (x + 7, y), (x + 4, y)])
+    # flared foot, stepped dome
+    if dial:
+        d.ellipse([x - 6, y - 3, x + 6, y + 2], fill=PHONE)
+        d.line([(x - 5, y - 3), (x + 2, y - 3)], fill=PHONE_L)
+    else:
+        d.ellipse([x - 5, y - 3, x + 5, y + 1], fill=PHONE)
+        d.line([(x - 4, y - 3), (x + 1, y - 3)], fill=PHONE_L)
+    d.point((x - 5, y - 1), fill=PHONE_M)
+    d.ellipse([x - 3, y - 5, x + 3, y - 2], fill=PHONE)
+    d.line([(x - 2, y - 5), (x, y - 5)], fill=PHONE_M)
+    if dial:
+        # the finger wheel on the foot's face: a nickel ring, its holes, the white number card in the hub
+        d.ellipse([x - 3, y - 2, x + 2, y + 2], fill=NICKEL_D)
+        d.line([(x - 2, y - 2), (x + 1, y - 2)], fill=NICKEL)
+        for hx_, hy_ in ((x - 2, y - 1), (x - 2, y + 1), (x + 1, y + 1)):
+            d.point((hx_, hy_), fill=PHONE)
+        d.point((x - 1, y), fill=CARD)
+        d.point((x + 2, y - 1), fill=NICKEL)
+    else:
+        # the number card on its face
+        d.line([(x - 1, y), (x + 1, y)], fill=CARD)
+        d.point((x, y), fill=hx("8a2020"))
+    # column with a nickel collar at the foot and another under the mouthpiece
+    d.rectangle([x, y - 17, x + 1, y - 6], fill=PHONE)
+    d.line([(x, y - 16), (x, y - 7)], fill=PHONE_L)
+    d.line([(x - 1, y - 6), (x + 2, y - 6)], fill=NICKEL_D)
+    d.point((x - 1, y - 6), fill=NICKEL)
+    d.line([(x, y - 17), (x + 1, y - 17)], fill=NICKEL)
+    # the mouthpiece: a short neck, the trumpet flaring to the room, nickel rim round a dark throat
+    d.polygon([(x - 1, y - 18), (x + 2, y - 18), (x + 3, y - 20), (x - 2, y - 20)], fill=PHONE)
+    d.point((x - 1, y - 19), fill=PHONE_L)
+    d.ellipse([x - 3, y - 23, x + 4, y - 19], fill=NICKEL_D)
+    d.line([(x - 2, y - 23), (x + 1, y - 23)], fill=NICKEL)
+    d.ellipse([x - 2, y - 22, x + 3, y - 20], fill=hx("060608"))
+    d.point((x - 1, y - 21), fill=PHONE_M)
+    # the nickel switchhook out of the column's side, its fork cradling the receiver
+    d.line([(x + 2, y - 14), (x + 4, y - 14)], fill=NICKEL)
+    d.point((x + 4, y - 15), fill=NICKEL)
+    d.point((x + 7, y - 15), fill=NICKEL_D)
+    # the receiver hanging from the fork by its bell: earpiece cup at the top, ribbed handle below
+    d.ellipse([x + 3, y - 17, x + 8, y - 14], fill=PHONE)
+    d.line([(x + 4, y - 17), (x + 6, y - 17)], fill=PHONE_L)
+    d.rectangle([x + 5, y - 14, x + 6, y - 6], fill=PHONE)
+    d.line([(x + 5, y - 13), (x + 5, y - 7)], fill=PHONE_L)
+    for ry in (y - 12, y - 10, y - 8):
+        d.point((x + 6, ry), fill=PHONE_M)
+    d.line([(x + 5, y - 14), (x + 6, y - 14)], fill=NICKEL_D)
+    d.line([(x + 5, y - 5), (x + 6, y - 5)], fill=PHONE_M)
+
+
 def tall(img, band):
     """Places a W x H room painting below a TOP-pixel ceiling band painted by band(canvas)."""
     out = Image.new("RGB", (W, FULL_H))

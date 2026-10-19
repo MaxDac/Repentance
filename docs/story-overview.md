@@ -11,8 +11,9 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    over the boxes, then search them again: the MISC box holds a locked tool tin. The suitcase's small key opens that tin,
    not the trunk; its crowbar opens the steamer trunk. Inside is Micah's journal.
    Right-click it in the satchel and choose the hand to read it. This part doubles as the tutorial.
-1. **Office**: Teddy briefs you and hands over Eleanor's photograph. The top desk drawer holds a revolver,
-   $22 in cash and a set of lockpicks. Micah won't leave without all three.
+1. **Office**: Teddy briefs you, hands over Eleanor's photograph and leaves the first day's $22 on the desk. The
+   revolver hangs in its holster on the coat rack and the lockpicks are in the filing cabinet. Micah won't leave
+   without all three.
 2. **Aurelian Hotel lobby**: the concierge sees nothing. A dollar loosens the bellboy's memory; another buys the
    staff elevator up to Eleanor's floor. Steer the cage through the maze of service shafts from the loading bay
    to the fifth-floor linen room next to 507 (rooms count up west to east), then dispatch it.
@@ -295,8 +296,8 @@ The fuse is figurative; the fire is the cellar's whiskey and the lantern. "They 
 replaces the previous claim that nobody will know what happened. Documents-only escape has no death report;
 when Eleanor accompanies him, the scene remains that night and she survives. The existing ending outcomes remain unchanged.
 
-Micah carries **$22** at the start of the case, enough for two $1 bellboy payments and the $10 Sal bribe, framed as a day's fee plus $2
-from a previous job. The story already quotes his fee as $20 a day plus expenses. This is a fictional cash
+Micah carries **$22** at the start of the case, enough for two $1 bellboy payments and the $10 Sal bribe: Teddy's
+advance for the first day, his $20 daily fee plus $2 for expenses. This is a fictional cash
 holding, not a documented average PI income. Historical purchasing-power context comes from the
 [NBER/BLS manufacturing weekly-earnings series](https://fred.stlouisfed.org/series/M08261USM052NNBR):
 October 1927 weekly earnings were $24.37. The $22 reserve is about 90% of that benchmark, making the $10 door

@@ -21,12 +21,17 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Micah's office
 
 - Micah's thoughts, then the conversation with Teddy Harrington III about his missing wife, Eleanor
-  Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy walks out of the room.
+  Harrington; Teddy gives Micah her photograph. At the end of the conversation Teddy takes out his wallet and
+  pays the first day in advance, $22 cash: the $20 daily fee plus $2 for expenses (Micah remarks that he walks
+  around with more than a day's pay in his pocket). He leaves the notes on the corner of the desk by the lamp and
+  walks out of the room.
 - Micah can't walk out on Teddy before the conversation is over.
-- The top drawer of the desk holds a revolver, the money ($22 cash) and a lockpick. Micah takes all three
-  and shuts the drawer; it stays shut for the rest of the story
-  (the bottom drawer only holds unpaid bills).
-  The cash is framed as his existing fictional $20 daily fee plus $2 from a previous job, not a claim
+- Micah's kit is no longer in the desk (its drawers face his own side of the desk, out of view):
+  - the money: Teddy's notes on the desk;
+  - the revolver: in a shoulder holster hanging on the coat rack, under the spare coat;
+  - the lockpick: a rolled leather pick case in the middle drawer of the filing cabinet the whiskey stands on.
+    The drawer opens and closes with the hand; it slides shut by itself once the picks are taken.
+  The $22 is a fictional cash holding, not a claim
   about average PI income. For purchasing-power context, the
   [NBER/BLS manufacturing weekly-earnings series](https://fred.stlouisfed.org/series/M08261USM052NNBR)
   reports $24.37 for October 1927; the $10 Sal bribe is a substantial payment, not an ordinary tip.

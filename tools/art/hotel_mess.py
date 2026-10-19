@@ -579,22 +579,9 @@ def bedside_lamp(img):
     return x, (ty + by) // 2
 
 
-PHONE, PHONE_M, PHONE_L, NICKEL = hx("121016"), hx("2c2a34"), hx("5a5664"), hx("c4c4cc")
-NICKEL_D, CORD, CORD_L, CARD = hx("7c7c88"), hx("2a1e18"), hx("5a4434"), hx("e8dcc0")
+from .common import PHONE, PHONE_M, PHONE_L, NICKEL, NICKEL_D, CORD, CORD_L, CARD, braided_cord as _cord, candlestick_phone
 PHONE_AT = (461, 30, 13)  # the candlestick's foot at the right end of the vanity, by the wall
 RINGER = (469, 477, 44, 57)  # the bell box on the wall over the vanity's right end: x0, x1, bottom, top
-
-
-def _cord(d, pts, step=2):
-    """A cloth-braided cord: dark brown, flecked lighter every few pixels along its length."""
-    d.line(pts, fill=CORD)
-    n = 0
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-        k = max(abs(x1 - x0), abs(y1 - y0), 1)
-        for i in range(int(k)):
-            if n % step == 0:
-                d.point((round(x0 + (x1 - x0) * i / k), round(y0 + (y1 - y0) * i / k)), fill=CORD_L)
-            n += 1
 
 
 def ringer(img, tidy=True):
@@ -630,45 +617,8 @@ def telephone(img):
     rings the switchboard downstairs). A flared, stepped foot with the room's number card, a column ringed in nickel,
     the mouthpiece trumpet turned to the room with its nickel rim and dark throat, and the receiver hanging by its bell
     on the nickel switchhook, its braided cord looping down to the foot."""
-    d = ImageDraw.Draw(img)
     x, y = (int(v) for v in R.P(*PHONE_AT))
-    shadow(img, "ellipse", [x - 7, y - 2, x + 7, y + 2], 0.45, 1)
-    # the receiver cord, from the end of the receiver down and round into the foot
-    _cord(d, [(x + 7, y - 6), (x + 8, y - 3), (x + 7, y), (x + 4, y)])
-    # flared foot, stepped dome, the number card on its face
-    d.ellipse([x - 5, y - 3, x + 5, y + 1], fill=PHONE)
-    d.line([(x - 4, y - 3), (x + 1, y - 3)], fill=PHONE_L)
-    d.point((x - 5, y - 1), fill=PHONE_M)
-    d.ellipse([x - 3, y - 5, x + 3, y - 2], fill=PHONE)
-    d.line([(x - 2, y - 5), (x, y - 5)], fill=PHONE_M)
-    d.line([(x - 1, y), (x + 1, y)], fill=CARD)
-    d.point((x, y), fill=hx("8a2020"))
-    # column with a nickel collar at the foot and another under the mouthpiece
-    d.rectangle([x, y - 17, x + 1, y - 6], fill=PHONE)
-    d.line([(x, y - 16), (x, y - 7)], fill=PHONE_L)
-    d.line([(x - 1, y - 6), (x + 2, y - 6)], fill=NICKEL_D)
-    d.point((x - 1, y - 6), fill=NICKEL)
-    d.line([(x, y - 17), (x + 1, y - 17)], fill=NICKEL)
-    # the mouthpiece: a short neck, the trumpet flaring to the room, nickel rim round a dark throat
-    d.polygon([(x - 1, y - 18), (x + 2, y - 18), (x + 3, y - 20), (x - 2, y - 20)], fill=PHONE)
-    d.point((x - 1, y - 19), fill=PHONE_L)
-    d.ellipse([x - 3, y - 23, x + 4, y - 19], fill=NICKEL_D)
-    d.line([(x - 2, y - 23), (x + 1, y - 23)], fill=NICKEL)
-    d.ellipse([x - 2, y - 22, x + 3, y - 20], fill=hx("060608"))
-    d.point((x - 1, y - 21), fill=PHONE_M)
-    # the nickel switchhook out of the column's side, its fork cradling the receiver
-    d.line([(x + 2, y - 14), (x + 4, y - 14)], fill=NICKEL)
-    d.point((x + 4, y - 15), fill=NICKEL)
-    d.point((x + 7, y - 15), fill=NICKEL_D)
-    # the receiver hanging from the fork by its bell: earpiece cup at the top, ribbed handle below
-    d.ellipse([x + 3, y - 17, x + 8, y - 14], fill=PHONE)
-    d.line([(x + 4, y - 17), (x + 6, y - 17)], fill=PHONE_L)
-    d.rectangle([x + 5, y - 14, x + 6, y - 6], fill=PHONE)
-    d.line([(x + 5, y - 13), (x + 5, y - 7)], fill=PHONE_L)
-    for ry in (y - 12, y - 10, y - 8):
-        d.point((x + 6, ry), fill=PHONE_M)
-    d.line([(x + 5, y - 14), (x + 6, y - 14)], fill=NICKEL_D)
-    d.line([(x + 5, y - 5), (x + 6, y - 5)], fill=PHONE_M)
+    candlestick_phone(img, x, y)
 
 
 def telephone_down(img):
