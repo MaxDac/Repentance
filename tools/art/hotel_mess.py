@@ -737,7 +737,7 @@ def _closet_carcass(img):
         d.line([(fx - 2, fy - 2), (fx + 1, fy - 2)], fill=hx("6b4428"))
 
 
-def wall_safe(img, opened=False, box=False, ajar=False):
+def wall_safe(img, opened=False, box=False, ajar=False, scratched=True):
     """The wall safe sunk into the back of the closet: a bolted steel door with hinges, a maker's plate, a ticked
     combination dial scratched raw by whoever tried it, and a spoked handle. Open, it shows a shelved steel box and
     the inside of the door with its locking bolts."""
@@ -792,9 +792,9 @@ def wall_safe(img, opened=False, box=False, ajar=False):
         d.rectangle([x1 - 11, y0 + 5, x1 - 5, y0 + 6], fill=GOLD_D)
         d.line([(x1 - 11, y0 + 5), (x1 - 5, y0 + 5)], fill=GOLD)
         d.line([(x1 - 9, y0 + 6), (x1 - 7, y0 + 6)], fill=hx("4a3418"))
-        # scratches around the dial, gouged by somebody without the combination
+        # scratches around the dial, gouged by somebody without the combination (not yet the night she locked it)
         rnd = random.Random(507)
-        for _ in range(9):
+        for _ in range(9 if scratched else 0):
             a = rnd.uniform(0, 2 * math.pi)
             r0 = rnd.uniform(6, 7.5)
             r1 = r0 + rnd.uniform(1.5, 3)
@@ -923,7 +923,7 @@ def closet(img, opened=False, safe_open=False, box=False, tidy=False, ajar=False
         _stamp(img, heap, hx_ - 1, hy - heap.height + 2)
         slip = _crumple(dress(7, 16, IVORY, bow=False).rotate(-90, expand=True), 1, 6, 1.0)
         _stamp(img, slip, hx_ + 16, hy - slip.height + 3)
-    wall_safe(img, safe_open, box, ajar)
+    wall_safe(img, safe_open, box, ajar, scratched=not tidy)
     # both doors flung wide, their inner faces panelled like the fronts
     for x in (X0, X1):
         R.quad(img, [(x, 6, Z1), (x, 6, Z1 + 24), (x, 100, Z1 + 24), (x, 100, Z1)], DOOR_WOOD, DOOR_LINE)

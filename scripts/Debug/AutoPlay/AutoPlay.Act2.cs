@@ -91,11 +91,13 @@ public partial class AutoPlay
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The box goes in the safe first."),
             "the box in an open safe isn't locked away yet");
+        int safeCloses = game.Sfx.Count(Sound.SafeClose);
         await game.Perform(Verb.Hand, "interlude_safe");
         Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 2
               && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeAjar")?.Visible == false
-              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == false,
-            "the safe door shut and the dial spun on the box");
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == false
+              && game.Sfx.Count(Sound.SafeClose) == safeCloses + 1,
+            "the safe door shut and the dial spun on the box, heard once");
         await game.Perform(Verb.Hand, "closet");
         Check(!gs.HasFlag("interlude_closet_open"), "the closet shut again over the locked safe");
         var early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));

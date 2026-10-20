@@ -120,6 +120,7 @@ public partial class EleanorRoom : Room
             case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
             case ("safe", Verb.UseItem) when Shows(item, "combination", "safe_riddle") && !State.HasFlag("safe_open"):
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
+                Game.Sfx.Play(Sound.SafeOpen);
                 State.SetFlag("safe_open");
                 await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
                 await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
@@ -184,6 +185,7 @@ public partial class EleanorRoom : Room
     {
         State.SetFlag("interlude_box_in_safe");
         State.SetFlag("interlude_safe_locked");
+        Game.Sfx.Play(Sound.SafeClose);
         await Say("Swing the door to, and spin the dial. The Twelve at His table. December. The day He rested.");
         await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
     }

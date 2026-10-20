@@ -30,11 +30,14 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
-`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`.
+`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`, `SafeOpen`,
+`SafeClose`.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`). Every step is a 1920s
   leather dress shoe: the hard heel's sharp click, the floor's answer (boards ring hollow, cobbles stay dry and
   bright), then the leather sole patting down; carpet muffles it but keeps the heel distinct.
+- **Room 507's safe**: `SafeOpen` (dial, tumblers, bolts, hinge) when Micah solves the safe puzzle; `SafeClose`
+  (door, bolts, dial spun) when Eleanor locks it in the First Interlude. Not tied to cue words.
 - **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
   script's `ChangeRoom`), `DoorOpen` plays as the screen fades out and `DoorClose` once the new room has faded in.
   A door that opens on screen first (the office) calls `Game.OpenDoor()` with its animation; it sounds once per action.
