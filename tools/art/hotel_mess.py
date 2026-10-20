@@ -936,25 +936,88 @@ def closet(img, opened=False, safe_open=False, box=False, tidy=False, ajar=False
         R.line(img, (x, 52, Z1 + 21), (x, 57, Z1 + 21), GOLD, 2)
 
 
+WOOD_L = hx("9a6c46")
+
+
+def _turned_leg(img, x, z, top, w=3.0):
+    """A tapering leg, lit down its left edge, with a turned collar under the apron and a brass cap at the foot."""
+    d = ImageDraw.Draw(img)
+    s = R.s(z)
+    xt, yt = R.P(x, top, z)
+    yb = R.P(x, 0, z)[1]
+    y0, y1 = int(round(yt)), int(round(yb))
+    for y in range(y0, y1 + 1):
+        hw = w * s / 2 * (1 - 0.4 * (y - y0) / max(1, y1 - y0))
+        xa, xb = int(round(xt - hw)), int(round(xt + hw)) - 1
+        d.line([(xa, y), (max(xa, xb), y)], fill=WOOD)
+        d.point((xa, y), fill=WOOD_L)
+        if xb > xa:
+            d.point((xb, y), fill=WOOD_D)
+    cy = y0 + max(1, int(round(1.5 * s)))
+    hw = int(round(w * s / 2))
+    d.line([(int(round(xt)) - hw, cy), (int(round(xt)) + hw - 1, cy)], fill=WOOD_L)
+    d.line([(int(round(xt)) - hw, cy + 1), (int(round(xt)) + hw - 1, cy + 1)], fill=WOOD_D)
+    d.point((int(round(xt - w * s / 3)), y1), fill=GOLD)
+    d.point((int(round(xt - w * s / 3)) + 1, y1), fill=GOLD_D)
+
+
+def _drawer_front(img, c, z, face=None):
+    """A recessed drawer panel with a brass escutcheon at its centre and a knob either side."""
+    R.quad(img, [(c, 21, z), (c + 24, 21, z), (c + 24, 25, z), (c, 25, z)], face or mul(WOOD, 0.8), WOOD_D)
+    R.line(img, (c + 1, 21.7, z), (c + 23, 21.7, z), mul(WOOD_L, 0.9))
+    d = ImageDraw.Draw(img)
+    ex, ey = R.P(c + 12, 23, z)
+    d.rectangle([ex - 1, ey - 1, ex + 1, ey + 1], fill=GOLD_D)
+    d.point((ex, ey - 1), fill=GOLD)
+    d.point((ex, ey), fill=hx("120a06"))
+    for k in (c + 5, c + 19):
+        kx, ky = R.P(k, 23, z)
+        d.point((kx, ky), fill=GOLD)
+        d.point((kx + 1, ky), fill=GOLD_D)
+
+
 def desk(img, drawer_open=False, paper=False, tidy=False):
     X0, X1, Z0, Z1 = DESK_X0, DESK_X1, DESK_Z0, DESK_Z1
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
     shadow(img, "rect", [a[0], a[1] - 4, b[0] + 6, a[1] + 3], 0.35, 3)
     for x in (X0 + 2, X1 - 2):
-        R.line(img, (x, 0, Z0 + 2), (x, 24, Z0 + 2), WOOD_D, 2)
+        _turned_leg(img, x, Z0 + 2, 20, 2.4)
     R.box(img, X0, X1, 20, 26, Z0, Z1, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    # the apron: a bead along its lower edge and a carved brass rosette between the drawers, over a shallow arch
+    R.line(img, (X0, 20.4, Z1), (X1, 20.4, Z1), WOOD_L)
+    d = ImageDraw.Draw(img)
+    m = (X0 + X1) / 2
+    arc = [R.P(m - 9 + 18 * t / 8, 20 - 1.6 * math.sin(math.pi * t / 8), Z1) for t in range(9)]
+    d.polygon(arc, fill=mul(WOOD, 0.9))
+    d.line(arc, fill=WOOD_D)
+    rx, ry = R.P(m, 23, Z1)
+    d.point([(rx - 1, ry), (rx + 1, ry), (rx, ry - 1), (rx, ry + 1)], fill=GOLD_D)
+    d.point((rx, ry), fill=GOLD)
+    # the top: a moulded edge catching the light over a shadowed underside, an inlaid border and a tooled leather inset
     R.box(img, X0 - 1, X1 + 1, 26, 28, Z0, Z1 + 1, hx("7d5232"), top=hx("8e6040"), side=WOOD_D)
+    R.line(img, (X0 - 1, 27.7, Z1 + 1), (X1 + 1, 27.7, Z1 + 1), hx("a87850"))
+    R.line(img, (X0 - 1, 26.2, Z1 + 1), (X1 + 1, 26.2, Z1 + 1), WOOD_D)
+    R.quad(img, [(X0 + 2, 28.02, Z0 + 2), (X1 - 2, 28.02, Z0 + 2), (X1 - 2, 28.02, Z1 - 1), (X0 + 2, 28.02, Z1 - 1)],
+           None, hx("a87850"))
+    R.quad(img, [(X0 + 6, 28.04, Z0 + 5), (X1 - 6, 28.04, Z0 + 5), (X1 - 6, 28.04, Z1 - 4), (X0 + 6, 28.04, Z1 - 4)],
+           mul(GREEN, 0.62), GOLD_D)
+    R.line(img, (X0 + 8, 28.06, Z1 - 5), (X1 - 8, 28.06, Z1 - 5), mul(GREEN, 0.85))
+    # a low gallery of spindles along the back edge
+    for x in range(X0 + 2, X1 - 1, 4):
+        R.line(img, (x, 28, Z0 + 0.6), (x, 30.5, Z0 + 0.6), mul(WOOD_D, 1.2))
+    R.line(img, (X0 + 1, 30.8, Z0 + 0.6), (X1 - 1, 30.8, Z0 + 0.6), WOOD_L)
+    for x in (X0 + 1, X1 - 1):
+        px, py = R.P(x, 31.5, Z0 + 0.6)
+        d.point((px, py), fill=GOLD)
     for x in (X0 + 2, X1 - 2):
-        R.line(img, (x, 0, Z1 - 2), (x, 20, Z1 - 2), WOOD_D, 2)
-    # left drawer: locked, brass keyhole; right drawer: yanked out and dumped
+        _turned_leg(img, x, Z1 - 2, 20)
+    # left drawer: locked; right drawer: yanked out and dumped
     c = X0 + 6
-    R.quad(img, [(c, 21, Z1), (c + 24, 21, Z1), (c + 24, 25, Z1), (c, 25, Z1)], None, WOOD_D)
-    R.line(img, (c + 11, 23, Z1), (c + 13, 23, Z1), GOLD)
+    _drawer_front(img, c, Z1)
     c2 = X1 - 30
     if tidy:
         # both drawers shut; on top a squared stack of stationery, a sealed envelope, the pen laid by an upright inkwell
-        R.quad(img, [(c2, 21, Z1), (c2 + 24, 21, Z1), (c2 + 24, 25, Z1), (c2, 25, Z1)], None, WOOD_D)
-        R.line(img, (c2 + 11, 23, Z1), (c2 + 13, 23, Z1), GOLD)
+        _drawer_front(img, c2, Z1)
         d = ImageDraw.Draw(img)
         sheet(img, 166, 120, 14, 6, lines=0, seed=3)
         sheet(img, 167, 119, 14, 6, lines=3, seed=4)
@@ -984,12 +1047,124 @@ def desk(img, drawer_open=False, paper=False, tidy=False):
     d.point((ix + 4, iy - 1), fill=hx("a8c8c8"))
     if drawer_open:
         R.box(img, c, c + 24, 20, 25, Z1, Z1 + 12, hx("6a4428"), top=hx("1e120a"), side=WOOD_D)
-        R.line(img, (c + 11, 23, Z1 + 12), (c + 13, 23, Z1 + 12), GOLD)
+        _drawer_front(img, c, Z1 + 12, hx("6a4428"))
         if paper:
             R.quad(img, [(c + 6, 25.1, Z1 + 3), (c + 18, 25.1, Z1 + 2), (c + 19, 25.1, Z1 + 9), (c + 7, 25.1, Z1 + 10)],
                    hx("f4ecdc"))
             R.line(img, (c + 8, 25.2, Z1 + 5), (c + 16, 25.2, Z1 + 5), hx("3a3a6a"))
             R.line(img, (c + 8, 25.2, Z1 + 7), (c + 15, 25.2, Z1 + 7), hx("3a3a6a"))
+
+
+def _upholstery(img, corner, du, dv, nu=3, nv=3):
+    """Button-tufted burgundy upholstery on a flat panel spanned from corner by the world vectors du and dv: a diamond
+    of buttons, each with the stuffing swelling lit above it, inside a border of brass nailheads."""
+    d = ImageDraw.Draw(img)
+
+    def at(u, v):
+        return R.P(*(corner[i] + du[i] * u + dv[i] * v for i in range(3)))
+
+    d.polygon([at(0, 0), at(1, 0), at(1, 1), at(0, 1)], fill=BURGUNDY, outline=mul(BURGUNDY, 0.55))
+    for j in range(nv):
+        for i in range(nu if j % 2 == 0 else nu - 1):
+            x, y = at((i + (1 if j % 2 == 0 else 1.5)) / (nu + 1), (j + 1) / (nv + 1))
+            x, y = int(round(x)), int(round(y))
+            d.point((x, y), fill=mul(BURGUNDY, 0.45))
+            d.point((x - 1, y - 1), fill=BURGUNDY_L)
+            d.point((x + 1, y + 1), fill=mul(BURGUNDY, 0.8))
+    lu, lv = math.dist((0, 0, 0), du), math.dist((0, 0, 0), dv)
+    eu, ev = 0.6 / lu, 0.6 / lv
+    for n in range(int(lu / 2.2) + 1):
+        u = eu + (1 - 2 * eu) * n / max(1, int(lu / 2.2))
+        for v in (ev, 1 - ev):
+            d.point(at(u, v), fill=GOLD_D)
+    for n in range(1, int(lv / 2.2)):
+        v = ev + (1 - 2 * ev) * n / int(lv / 2.2)
+        for u in (eu, 1 - eu):
+            d.point(at(u, v), fill=GOLD_D)
+
+
+def _finial(d, p):
+    x, y = int(round(p[0])), int(round(p[1]))
+    d.rectangle([x - 1, y - 1, x, y], fill=GOLD_D)
+    d.point((x - 1, y - 1), fill=GOLD)
+
+
+def chair_upright(img):
+    """The desk chair pulled up square, its back to us: turned front legs joined by stretchers, a piped cushion on a
+    nailed seat rail, and rear legs rising into stiles that frame a tufted back under an arched, carved crest rail."""
+    d = ImageDraw.Draw(img)
+    a, b = R.P(182, 0, 46), R.P(204, 0, 46)
+    shadow(img, "rect", [a[0] - 1, a[1] - 3, b[0] + 3, a[1] + 2], 0.35, 2)
+    for x in (183.5, 202.5):
+        _turned_leg(img, x, 32, 10.5, 2.4)
+        R.line(img, (x, 4, 32), (x, 4, 44), WOOD_D)
+    R.line(img, (183.5, 5, 32), (202.5, 5, 32), WOOD_D)
+    R.line(img, (183.5, 4, 44), (202.5, 4, 44), mul(WOOD, 0.85), 2)
+    R.box(img, 181, 205, 10.5, 13.5, 30, 44, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    R.box(img, 181.5, 204.5, 13.5, 16, 30.5, 44, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
+    R.line(img, (204.5, 16, 30.5), (204.5, 16, 44), mul(BURGUNDY_L, 1.15))
+    for z in range(32, 44, 3):
+        d.point(R.P(205, 12, z), fill=GOLD_D)
+    for x0 in (181, 202.6):
+        R.box(img, x0, x0 + 2.4, 0, 37, 44, 46, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+        R.line(img, (x0 + 0.2, 1, 46), (x0 + 0.2, 36, 46), WOOD_L)
+        px, py = R.P(x0 + 0.6, 0, 46)
+        d.point((px, py), fill=GOLD)
+    R.box(img, 183.4, 202.6, 16, 18, 44.5, 45.5, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    R.line(img, (183.4, 16.3, 45.5), (202.6, 16.3, 45.5), WOOD_L)
+    _upholstery(img, (183.4, 18, 45.6), (19.2, 0, 0), (0, 15.2, 0))
+    arch = [R.P(181 + 24 * t / 10, 36.5 + 2.2 * math.sin(math.pi * t / 10), 46.1) for t in range(11)]
+    d.polygon([R.P(181, 33, 46.1)] + arch + [R.P(205, 33, 46.1)], fill=mul(WOOD, 0.95), outline=WOOD_D)
+    d.line(arch[1:-1], fill=WOOD_L)
+    R.line(img, (183.4, 33.4, 46.15), (202.6, 33.4, 46.15), mul(WOOD, 0.7))
+    # a carved shell at the crown of the crest rail
+    sx, sy = (int(round(v)) for v in R.P(193, 36.6, 46.2))
+    d.point([(sx - 2, sy + 1), (sx - 1, sy), (sx + 1, sy), (sx + 2, sy + 1)], fill=GOLD_D)
+    d.point([(sx, sy - 1), (sx, sy)], fill=GOLD)
+    for x in (182.2, 203.8):
+        _finial(d, R.P(x, 38, 46))
+
+
+def chair_toppled(img):
+    """The desk chair knocked over on its back: the tufted back flat on the carpet with its crest rail and finials,
+    the seat on end showing its webbed underside, and the legs sticking out stiff, front pair over rear."""
+    d = ImageDraw.Draw(img)
+    a, b = R.P(176, 0, 49), R.P(213, 0, 49)
+    shadow(img, "rect", [a[0] - 1, a[1] - 5, b[0] + 3, a[1] + 2], 0.4, 3)
+    # the far pair of legs, behind the seat
+    R.line(img, (201.5, 1.2, 35.5), (212, 1.2, 35.5), mul(WOOD, 0.8), 2)
+    R.line(img, (201.5, 13.5, 35.5), (211.5, 13, 35.5), mul(WOOD, 0.8), 2)
+    R.line(img, (207, 1.5, 35.5), (207, 13, 35.5), WOOD_D)
+    # the back lying flat: a wooden frame, stiles down its long sides, the tufted panel facing up
+    R.box(img, 178, 197, 0, 3, 34, 49, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    for z0 in (34, 47):
+        R.box(img, 178, 201.5, 0, 3.4, z0, z0 + 2, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+        R.line(img, (178, 3.4, z0 + 2), (201.5, 3.4, z0 + 2), WOOD_L)
+    _upholstery(img, (180, 3.05, 36), (15.5, 0, 0), (0, 0, 11))
+    R.box(img, 176, 180, 0, 4.2, 34, 49, mul(WOOD, 0.95), top=WOOD_L, side=WOOD_D)
+    R.line(img, (176, 4.2, 49), (180, 4.2, 49), WOOD_L)
+    sx, sy = (int(round(v)) for v in R.P(177.8, 4.2, 41.5))
+    d.point([(sx, sy - 1), (sx, sy + 1)], fill=GOLD_D)
+    d.point((sx, sy), fill=GOLD)
+    for z in (35, 48):
+        _finial(d, R.P(175.5, 2, z))
+    # the seat on end: cushion against the back, the rail behind it, webbing and burlap where the bottom shows
+    R.box(img, 197, 199.6, 0.5, 14.5, 34.5, 48.5, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
+    R.box(img, 199.5, 201.5, 0, 15, 34, 49, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
+    R.quad(img, [(201.55, 1.5, 35.5), (201.55, 1.5, 47.5), (201.55, 13.5, 47.5), (201.55, 13.5, 35.5)], hx("4a3a28"))
+    for (p, q) in (((1.5, 38.5), (13.5, 38.5)), ((1.5, 44.5), (13.5, 44.5)), ((5, 35.5), (5, 47.5)),
+                   ((10, 35.5), (10, 47.5))):
+        R.line(img, (201.6, p[0], p[1]), (201.6, q[0], q[1]), hx("8a7656"))
+    for z in range(36, 48, 3):
+        d.point(R.P(200.5, 15, z), fill=GOLD_D)
+    # the near pair of legs, the brass caps on their feet
+    R.line(img, (201.5, 1.2, 47.5), (212, 1.2, 47.5), WOOD, 2)
+    R.line(img, (201.5, 2, 47.5), (212, 2, 47.5), WOOD_L)
+    R.line(img, (201.5, 13.5, 47.5), (211.5, 13, 47.5), WOOD, 2)
+    R.line(img, (201.5, 14.2, 47.5), (211.5, 13.7, 47.5), WOOD_L)
+    R.line(img, (207, 2.5, 47.5), (207, 12.5, 47.5), WOOD_D)
+    for (y, z) in ((1.2, 35.5), (13, 35.5), (1.2, 47.5), (13, 47.5)):
+        d.point(R.P(212, y, z), fill=GOLD)
 
 
 def bed(img):
@@ -1094,11 +1269,7 @@ def bed(img):
 def mess(img):
     """Everything the searchers threw on the floor."""
     d = ImageDraw.Draw(img)
-    # the desk chair, on its back
-    R.box(img, 186, 210, 0, 3, 34, 48, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
-    R.box(img, 210, 214, 0, 14, 34, 48, mul(WOOD, 0.85), top=WOOD, side=WOOD_D)
-    for z in (36, 46):
-        R.line(img, (186, 6, z), (172, 8, z), WOOD_D, 2)
+    chair_toppled(img)
     # papers and letters, a bundle of them still tied in ribbon, and the emptied handbag
     dx, dy = R.P(96, 0, 110)
     spr = _crumple(dress(20, 50, LILAC, folds=3).rotate(90, expand=True), 1, 26, 0.6)
@@ -1307,19 +1478,7 @@ def tidy_floor(img, bench=True):
     upholstered bench at the foot of the closet, a loose thread hanging from the hem. The bench stands out in the room,
     so it is painted on its own (bench=False leaves only its shadow) and cut out as a y-sorted sprite."""
     d = ImageDraw.Draw(img)
-    # the desk chair, upright, its back to us
-    a, b = R.P(182, 0, 46), R.P(204, 0, 46)
-    shadow(img, "rect", [a[0] - 1, a[1] - 3, b[0] + 3, a[1] + 2], 0.35, 2)
-    for x in (183, 203):
-        for z in (32, 44):
-            R.line(img, (x, 0, z), (x, 13, z), WOOD_D, 2)
-    R.box(img, 181, 205, 13, 16, 30, 45, BURGUNDY, top=BURGUNDY_L, side=mul(BURGUNDY, 0.7))
-    R.box(img, 181, 205, 16, 36, 44, 46, mul(WOOD, 0.9), top=WOOD, side=WOOD_D)
-    R.quad(img, [(184, 19, 46.1), (202, 19, 46.1), (202, 33, 46.1), (184, 33, 46.1)], BURGUNDY, mul(BURGUNDY, 0.55))
-    R.line(img, (185, 32, 46.2), (201, 32, 46.2), BURGUNDY_L)
-    for x in (181, 205):
-        px, py = R.P(x, 37, 46)
-        d.point((px, py), fill=GOLD)
+    chair_upright(img)
     # the bench, and the dress laid out across it
     B0, B1, Bz0, Bz1 = 90, 140, 104, 122
     a, b = R.P(B0, 0, Bz1), R.P(B1, 0, Bz1)
