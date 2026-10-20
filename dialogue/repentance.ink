@@ -132,10 +132,12 @@ BARTENDER: Only for people I like. What do you want?
     BARTENDER: ...Yeah. I figured you'd say that.
 + [(Say nothing.)]
     BARTENDER: Fine. The less I know, the longer I live.
-- BARTENDER: There's a convent up on the North Side. I sell the sisters their sacramental wine, and they don't ask where it comes from.
-BARTENDER: The Mother Superior owes me. Nobody from that Club goes near those nuns. Not even them.
+- BARTENDER: The convent. Up on the North Side, behind the iron spikes.
+BARTENDER: Funny business up there, see? Father Caleb pulls up after dark with a flivver full of skirts, young ones, and drives home alone. What kind of racket a padre's runnin', I don't wanna know.
+BARTENDER: But it's the one joint in this town the Club won't touch. They'll turn every flop and speak inside out lookin' for you. Not them walls.
+THOUGHT: She told me she knew where some of those girls had come from. She'd brought a few of them to the Club herself.
 ELEANOR: A convent. Me.
-BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you.
+BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you. Ring the bell and keep your trap shut.
 ELEANOR: One more thing, Tony. If the Club ever gets me back, you'll hear. You hear everything.
 BARTENDER: And?
 ELEANOR: Then you pick up a telephone. Not the cops; half of them drink here. The Tribune city desk.
@@ -148,8 +150,8 @@ THOUGHT: She said Tony wouldn't take her money. That frightened her more than an
 -> END
 
 === interlude_agatha ===
-NUN: So. Tony's parcel. He said a lady. He didn't say what kind.
-NUN: I know that face. I know that perfume. Another Jezebel from that hideous Club, come to hide her paint behind our walls.
+NUN: Another one at the door after Compline. They always come at night, the poor lambs. Let me look at you.
+NUN: ...No. I know that face. I know that perfume. A Jezebel from that hideous Club, come to hide her paint behind our walls.
 + [I'm not here to sin, Sister. I'm here to hide.]
     ~ set_flag("interlude_agatha_sorry")
     NUN: Every sinner says that. It's the oldest prayer there is.
@@ -923,10 +925,9 @@ CALEB: Micah. Twice in one week. People will start to talk.
 MICAH: There's a club on Hubbard. No sign on the door, a man in a robe at the bell. They have Eleanor.
 CALEB: A club? Micah, what would a priest know about clubs?
 - (opts)
-* (hid) [Before they took her, Eleanor was hiding at the convent.]
-    MICAH: Tony at the Blue Lantern sent her to the sisters, and they didn't ask a single question.
-    MICAH: Doors don't open that easily the first time. Maybe she'd been there before.
-    CALEB: The sisters open their door to anybody who knocks. That's what the door is for.
+* (hid) [Tony told Eleanor you drive girls up to the convent after dark.]
+    MICAH: That's where he sent her to hide. The one door the Club won't knock on, he said. And you're the one with the car.
+    CALEB: I drive the sisters' groceries, and I drive up to say their Mass. That's all a priest's car is for.
     -> opts
 * (roof) [The convent answers to the Church. And you're the Church on this side of town. #short: The convent answers to the Church. And you're the Church.]
     CALEB: The convent is Mother Superior's house, not mine. I say Mass for the sisters. I don't keep their books.
@@ -937,7 +938,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     CALEB: I don't know anything about her. But I hear things. A priest always does.
     CALEB: That Club keeps its Thursdays. Spectacles, they call them. And spectacles need new faces. Fresh ones.
     CALEB: Girls off the trains at Union Station. Farm girls, girls off the boat. Somebody meets them with a smile and the promise of work in a nice house.
-    CALEB: Performers, the Club calls them afterwards. Some of them get away. They find the convent door, and the sisters bring them to me.
+    CALEB: Performers, the Club calls them afterwards. Some of them get away, to my church door. I drive them up to the convent after dark, and the sisters keep them till it's safe.
     CALEB: We hide them. A new name, a ticket, a parish in Milwaukee or a farm in Iowa that doesn't ask. Fourteen girls, so far.
     MICAH: Fourteen. And the ones who don't get away?
     CALEB: ...
