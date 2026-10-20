@@ -14,6 +14,14 @@ sprites, UI, icons) also shows it:
   `gh pr edit <pr> --body-file body.md --attach ./before.png --attach ./after.png`.
 - Keep preview files out of the repository.
 
+### Stacked pull requests
+
+Before opening a PR, check the open ones (`gh pr list --state open`). A PR whose title starts with `[NoStack]` is
+independent and ignored. If any other PR is open, the new one stacks on top of them: rebase the branch onto the top
+of the stack (the newest open PR whose branch no other open PR targets), open the PR against that branch instead of
+`main`, and say `Stacked on #N` in the description. With no such PR, target `main`. Prefix a PR's title with
+`[NoStack]` to keep later work from stacking on it.
+
 ## CI (`.github/workflows/ci.yml`)
 
 Runs on every pull request (a newer push cancels the older run) and every push to `main`. Godot 4.7.2 .NET and .NET
