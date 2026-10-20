@@ -40,6 +40,8 @@ public partial class Hud : CanvasLayer
     private Label _hover = null!;
     private TextureButton _satchel = null!;
     private Control _inventory = null!;
+    private TextureRect _case = null!;
+    private bool _cursorEnteredInventory;
     private readonly List<Button> _slots = new();
     private ColorRect _choicesBg = null!;
     private VBoxContainer _choices = null!;
@@ -189,6 +191,7 @@ public partial class Hud : CanvasLayer
     public override void _Input(InputEvent e)
     {
         if (e is InputEventMouse m) MousePos = m.Position;
+        if (e is InputEventMouseMotion && !Game.Instance.IsPaused) TrackInventoryHover(MousePos);
         if (e.IsAction("pause_game"))
         {
             if (e.IsActionPressed("pause_game") && e is not InputEventKey { Echo: true })

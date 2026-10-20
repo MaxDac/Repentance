@@ -50,7 +50,8 @@ the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
 - **Choice bar**: replaces the interface at the bottom; rows 14 px, text width 464 px. Shows `ShownChoices`
   (`#short:` labels).
 - **Inventory**: 2x6 slots of 40x28 at (110,186), paged with `<`/`>` beyond 12 items; satchel button at (444,234),
-  or **I**.
+  or **I**. Picking an item keeps it open; once the cursor has been over the case or page buttons
+  (`Hud.InventorySurface`), leaving them closes it. A click outside the case also closes it.
 - **Verb wheel**: four 32x32 slots (Look, Hand, Talk, Kick) at radius 22 around the cursor; press-drag-release or
   click.
 - **Captions and fades**: `Fade(alpha, seconds)`, chapter captions with an optional second line under them

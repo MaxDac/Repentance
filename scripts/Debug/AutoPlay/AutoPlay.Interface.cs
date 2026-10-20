@@ -33,6 +33,10 @@ public partial class AutoPlay
         Click(game.Hud.SatchelCenter, MouseButton.Left);
         await game.Wait(0.1);
         Check(game.Hud.InventoryOpen, "satchel opens the inventory");
+        var trunk = new Vector2(432, 205);
+        Move(trunk);
+        await game.Wait(0.05);
+        Check(game.Hud.InventoryOpen, "moving away before ever reaching the case keeps the inventory open");
         var slot = game.Hud.SlotCenter(IndexOf("crowbar"));
         Move(slot);
         await game.Wait(0.1);
@@ -49,7 +53,7 @@ public partial class AutoPlay
         var crosshair = game.Hud.CursorSize;
         Click(slot, MouseButton.Left);
         await game.Wait(0.1);
-        Check(game.Carried == "crowbar" && !game.Hud.InventoryOpen, "clicking an item holds it as the cursor");
+        Check(game.Carried == "crowbar" && game.Hud.InventoryOpen, "clicking an item holds it and keeps the case open");
         Check(game.Hud.CursorItemVisible && game.Hud.CursorSize == crosshair,
             "a held item shows as a badge while the crosshair keeps its size");
         PressKey(Key.Space);
@@ -57,8 +61,9 @@ public partial class AutoPlay
         await Observe(0.1);
         Check(game.IsPaused && game.Carried == "crowbar", "Space pause preserves the carried inventory item");
         PressKey(Key.Space);
-        var trunk = new Vector2(432, 205);
         Move(trunk);
+        await game.Wait(0.05);
+        Check(!game.Hud.InventoryOpen && game.Carried == "crowbar", "leaving the case closes the inventory, still holding the item");
         await Shot("attic_carry_crowbar");
         Click(trunk, MouseButton.Left);
         for (int i = 0; i < 100 && !game.Busy; i++) await game.Wait(0.05);

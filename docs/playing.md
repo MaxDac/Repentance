@@ -12,7 +12,8 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
   👄 *Talk*, 🥾 *Kick*. Click an icon, or hold the right button and release it over one.
 - **Satchel** (bottom right) or **I** opens the inventory. Left-click an item to hold it (a small icon follows the cursor), then click
   it on an object or person to use or give it (or on another item to combine them). Right-click
-  anywhere to put it back. Right-click an item in the satchel to open its verb wheel.
+  anywhere to put it back. Right-click an item in the satchel to open its verb wheel. Picking an item leaves the
+  satchel open, so a second click combines; moving the cursor off the satchel closes it.
 - **N** (or look/hand on the notepad, always Micah's first satchel slot) opens Micah's notepad full screen.
   **< / >**, the arrow keys or the mouse wheel turn its pages; **N**, **Esc** or **X** close it. Showing the
   notepad works wherever only the information matters (Eleanor's likeness, the triquetra, the safe riddle,

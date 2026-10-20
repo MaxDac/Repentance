@@ -323,6 +323,7 @@ public abstract class Harness
     {
         await SelectInventoryItem(first);
         Check(_game.Carried == first, $"picked {first} from paged inventory");
+        Check(_game.Hud.InventoryOpen, $"the case stays open after picking {first}");
         await SelectInventoryItem(second);
     }
 

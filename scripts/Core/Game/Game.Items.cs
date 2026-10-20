@@ -48,7 +48,6 @@ public partial class Game
                 await Say(Items.Get(item).Description);
                 break;
             case Verb.Hand:
-                Hud.ShowInventory(false);
                 SetCarried(item);
                 break;
             case Verb.Talk:
@@ -69,7 +68,6 @@ public partial class Game
                 await Say(Items.Get(item).Description);
                 break;
             case Verb.Hand:
-                Hud.ShowInventory(false);
                 SetCarried(item);
                 break;
             case Verb.Talk:
