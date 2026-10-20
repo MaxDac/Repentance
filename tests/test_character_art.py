@@ -484,6 +484,33 @@ class CharacterArtTests(unittest.TestCase):
         rise = Image.open(ART / "sprites" / "micah_kneel_rise.png")
         self.assertEqual(held.tobytes(), rise.crop((0, 0, *held.size)).tobytes())
 
+    def test_kneeling_rise_pushes_up_forward_from_the_planted_foot(self):
+        keys = [sprites.KNEEL, sprites.KNEEL_PUSH, sprites.KNEEL_BACK, sprites.KNEE_UP, sprites.PUSH_OFF,
+                sprites.NEARLY_UP]
+        for i, joints in enumerate(keys):
+            with self.subTest(key=i):
+                hip, shoulder, head = grounded_joints(joints)[:3]
+                self.assertEqual(grounded_joints(joints)[4][0], 98, "the near foot stays planted")
+                self.assertGreaterEqual(shoulder[0], hip[0], "the trunk never leans back")
+                self.assertGreaterEqual(head[0], shoulder[0] - 1, "the head stays over or ahead of the shoulders")
+        hips = [grounded_joints(k)[0][1] for k in keys[2:]]
+        self.assertEqual(hips[1:], sorted(hips[1:], reverse=True), "once kneeling up, the hips only rise")
+        for joints in keys[3:]:
+            fknee, fankle, fheel, ftoe = joints[7:11]
+            self.assertEqual((fheel[1], ftoe[1]), (90, 91), "the raised far foot stands flat on the floor")
+
+    def test_kneeling_rise_has_no_red_tie_streak_until_it_turns_to_idle(self):
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+        red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
+        clip = json.loads((ART / "sprites" / "micah_kneel_rise.json").read_text())
+        strip = Image.open(ART / "sprites" / "micah_kneel_rise.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        for i in range(len(clip["frames"]) - 2):
+            with self.subTest(frame=i):
+                frame = np.array(strip.crop((i * width, 0, (i + 1) * width, height)))
+                pixels = frame[frame[..., 3] > 0][:, :3].astype(int)
+                self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any())
+
     def test_kneeling_micah_is_on_knees_and_forearms_without_a_red_tie_streak(self):
         hip, shoulder, head, knee, ankle, elbow, hand = sprites.KNEEL
         self.assertLess(knee[1] - hip[1], 20)
