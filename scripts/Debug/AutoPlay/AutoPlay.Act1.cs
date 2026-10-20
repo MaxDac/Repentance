@@ -435,6 +435,8 @@ public partial class AutoPlay
         await Shot("motel_closeup");
         Check(_offered.TryGetValue("convent_dead_end", out var deadEnd) && deadEnd.Length == 1 && deadEnd[0].Contains("office"),
             "the mob, Harrington and the cops are refused before the office");
+        Check(deadEnd != null && deadEnd.All(o => o.StartsWith('(')),
+            "the leads are silent choices: the narration, not Micah, answers them");
         await Until(() => game.Room is Rooms.MotelAlley && !game.Busy);
         Check(gs.HasFlag("convent_dead_end_done") && gs.HasFlag("seen_motel_alley") && !gs.HasFlag("eleanor_found") &&
             !game.Hud.InsetVisible && game.Player.PoseName == null, "down the hill to the motel's back alley");
