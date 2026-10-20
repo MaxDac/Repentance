@@ -538,7 +538,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
   questions about his life, why he abandoned his wife and son. He recalls Rose's empty desk at the library: he was
   glad she wasn't there, yet she hasn't left his mind since.
-- His recovery is shown through sitting, a supported crouch, and standing rather than an instantaneous pose swap.
+- His recovery is shown through sitting up, rolling forward onto his hands and knees, and getting up off his knees
+  as in the alley, rather than an instantaneous pose swap.
   The player is then presented with two choices:
   - Go find his wife.
   - Push forward.

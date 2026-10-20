@@ -663,6 +663,37 @@ PUSH_OFF = [(46, 66), (57, 44), (63, 30), (54, 79), (41, 87), (60, 56), (63, 69)
             (60, 72), (65, 88), (63, 90), (70, 91)]
 NEARLY_UP = [(42, 58), (46, 35), (49, 20), (44, 74), (41, 91), (48, 47), (51, 58),
              (50, 74), (55, 88), (53, 90), (60, 91)]
+# Getting up off his back after a beating (micah_recover), facing right. Unlike the other keys these are screen
+# positions in the strip's frame, where REST lies once grounded: nothing stays planted from lying to standing, so each
+# frame is placed rather than grounded on its near ankle. He lifts his head and shoulders onto the near elbow, sits up
+# hunched with a hand behind and the knees drawn up, leans forward over his feet onto the near hand, tips his weight
+# off the seat onto hands and feet, and drops forward onto his knees, his feet going back onto their tucked toes.
+# From there he gets up as in the alley, RECOVER_SHIFT along from the kneel-rise keys, then rises over the front foot
+# and brings the back one in under him, so he stands where the idle frame does.
+PROPPED = [(60, 83), (40, 73), (43, 60), (79, 80), (98, 84), (33, 86), (45, 91)]
+SIT_UP = [(61, 83), (64, 60), (70, 47), (77, 70), (88, 88), (56, 73), (50, 90),
+          (75, 72), (86, 88), (84, 90), (91, 91)]
+HUNCH = [(62, 82), (76, 63), (85, 54), (78, 69), (86, 88), (84, 76), (94, 90),
+         (76, 71), (84, 88), (82, 90), (89, 91)]
+TIP = [(69, 75), (88, 64), (97, 57), (82, 72), (83, 88), (94, 77), (101, 90),
+       (80, 74), (81, 88), (79, 90), (86, 91)]
+ROLL = [(76, 73), (95, 66), (105, 61), (87, 85), (73, 87), (102, 78), (107, 90)]
+RECOVER_SHIFT = -28
+RISE_OVER = [(88, 59), (93, 36), (97, 21), (82, 75), (74, 88), (95, 48), (98, 59),
+             (93, 74), (94, 88), (92, 90), (99, 91)]
+STEP_IN = [(93, 57), (96, 34), (99, 19), (95, 74), (93, 89), (97, 47), (99, 58),
+           (95, 74), (94, 88), (92, 90), (99, 91)]
+
+
+def recover_keys():
+    """micah_recover's keys after the held REST frame, in the strip's screen space."""
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def kneeling(joints):
+        return [(float(x) + RECOVER_SHIFT, float(y)) for x, y in grounded_joints(joints)]
+    return [PROPPED, SIT_UP, HUNCH, TIP, ROLL, kneeling(KNEEL_PUSH), kneeling(between(KNEEL_PUSH, KNEEL_BACK)),
+            kneeling(KNEEL_BACK), kneeling(KNEE_UP), kneeling(PUSH_OFF), RISE_OVER, STEP_IN]
 
 
 def with_far_leg(joints):
@@ -714,9 +745,7 @@ def action_sequences(spec, name):
         falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
-        recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
-                                   [0.28, 0.3, 0.28, 0.22, 0.12])
-        action_strip("micah_recover", recovery, times)
+        recover_strip(spec, scaled, standing)
         kneel_rise_strip(spec, scaled, standing)
         crouch_strips(spec, scaled, standing)
     if name == "micah_no_tie":
@@ -743,25 +772,54 @@ def profile_head(spec):
     return head, ((min(neck) + max(neck) + 1) / 2, collar)
 
 
+def rise_figure(scaled, joints):
+    """A frame of Micah getting up, facing right. Bent over the floor, the trunk hides the shirt and tie; sitting or
+    upright, only the coat shows side-on, hanging with gravity (the shirt front faces the way he looks). A foot behind
+    its knee stands on tucked toes."""
+    hip, shoulder, knee, ankle = joints[0], joints[1], joints[3], joints[4]
+    down = shoulder[0] > hip[0] and -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder)
+    tucked = ankle[1] < 91 and ankle[0] < knee[0]
+    if down:
+        return action_figure(scaled, joints, chest_down=True, toes_tucked=tucked)
+    return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=tucked)
+
+
+def turning_frame(spec):
+    """Standing, halfway between the walk sheet's profile and the idle sheet's 3/4 view, so a rise turns to idle."""
+    from PIL import Image
+    turning = Image.new("RGBA", (192, FH))
+    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
+    return turning, (96, 18)
+
+
 def kneel_rise_strip(spec, scaled, standing):
     """Micah getting up off his hands and knees after the beating (micah_kneel_rise), from the held micah_kneel frame
     to the idle sheet frame, by way of the walk sheet's profile frame so he turns to the idle pose standing up."""
-    from PIL import Image
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
-
-    def paint(joints):
-        hip, shoulder = joints[0], joints[1]
-        if -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder):
-            return kneeling_figure(scaled, joints)
-        # upright, the shirt front faces the way he looks, so only the coat shows side-on, hanging with gravity
-        return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=joints[4][1] < 91)
-    turning = Image.new("RGBA", (192, FH))
-    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
     keys = [KNEEL, between(KNEEL, KNEEL_PUSH), KNEEL_PUSH, between(KNEEL_PUSH, KNEEL_BACK), KNEEL_BACK, KNEE_UP,
             PUSH_OFF, NEARLY_UP]
-    frames = [paint(k) for k in keys] + [(turning, (96, 18)), standing]
+    frames = [rise_figure(scaled, k) for k in keys] + [turning_frame(spec), standing]
     action_strip("micah_kneel_rise", frames, [0.13, 0.07, 0.1, 0.08, 0.12, 0.15, 0.12, 0.1, 0.11, 0.12])
+
+
+def recover_strip(spec, scaled, standing):
+    """Micah getting up off his back after a beating (micah_recover), from the held micah_supine frame to the idle
+    sheet frame: sitting up, rolling forward onto his hands and knees, then up as in micah_kneel_rise."""
+    from PIL import Image
+
+    def placed(joints):
+        # action_figure grounds the near ankle; move the frame back so the joints land where they are given
+        img, head = rise_figure(scaled, joints)
+        dx = round(joints[4][0] - (img.width / 2 + 2))
+        out = Image.new("RGBA", img.size)
+        out.alpha_composite(img.crop((max(0, -dx), 0, img.width - max(0, dx), img.height)), (max(0, dx), 0))
+        return out, (head[0] + dx, head[1])
+
+    frames = [action_figure(scaled, REST)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
+    action_strip("micah_recover", frames, [0.3, 0.22, 0.2, 0.16, 0.12, 0.12, 0.1, 0.07, 0.1, 0.15, 0.12, 0.1, 0.09,
+                                           0.11, 0.12])
+
 
 
 def crouch_strips(spec, scaled, standing, name="micah"):
