@@ -135,8 +135,8 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("librarian_refused"), "the librarian won't help");
             await SolvePuzzle(() => Do(Verb.Hand, "desk"), PuzzleKind.Catalogue,
                 new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
-            await Do(Verb.UseItem, "librarian", "revolver");
-            Check(Gs.HasItem("book"), "the book at gunpoint");
+            await Do(Verb.Hand, "librarian");
+            Check(Gs.HasItem("book"), "the book, by the collar");
             await Do(Verb.Walk, "exit");
             Expect("ChicagoMap", "out of the library");
         });

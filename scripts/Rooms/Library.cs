@@ -1,3 +1,4 @@
+using Godot;
 using System.Threading.Tasks;
 
 namespace Repentance.Rooms;
@@ -28,7 +29,7 @@ public partial class Library : Room
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
 
-            case ("librarian", Verb.Talk or Verb.UseItem) when State.HasFlag("librarian_threatened"):
+            case ("librarian", Verb.Talk or Verb.UseItem or Verb.Hand) when State.HasFlag("librarian_threatened"):
                 await Say("librarian", "Please. You have your book. Just go.");
                 return true;
             case ("librarian", Verb.Talk):
@@ -52,8 +53,16 @@ public partial class Library : Room
                 Player.SetPose(null);
                 await Think("I've just held up a library. Mother would be so proud.");
                 return true;
+            case ("librarian", Verb.Hand) when !State.HasFlag("librarian_refused"):
+                await Say("He looks like he'd break. And I haven't even asked him nicely yet.");
+                return true;
             case ("librarian", Verb.Hand):
-                await Say("He looks like he'd break. I'm not that desperate. Not yet.");
+                if (!State.HasFlag("catalogue_identified"))
+                {
+                    await Say("Shaking him won't shake a title loose. I need the precise one first; that desk catalogue might help.");
+                    return true;
+                }
+                await GrabCollar(target);
                 return true;
 
             case ("shelves_right" or "shelves_left", Verb.Hand):
@@ -82,5 +91,32 @@ public partial class Library : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Where Micah stands to grab the librarian: COLLAR_GAP pixels short of him, COLLAR_RISE nearer the shelves, as the
+    /// micah_collar strips (tools/art/sprites.py) draw them both.
+    /// </summary>
+    public static readonly Vector2 CollarSpot = new(-46, 2);
+
+    /// <summary>Micah hauls him up by the collar, holds him through the request, then lets him go.</summary>
+    private async Task GrabCollar(Hotspot target)
+    {
+        var librarian = FindActor("librarian");
+        Player.Teleport(target.Position + CollarSpot, Facing.Right);
+        if (librarian != null) librarian.Visible = false;
+        try
+        {
+            await Player.PlayPose("micah_collar");
+            await Talk("librarian_collar");
+            State.SetFlag("librarian_threatened");
+            await Player.PlayPose("micah_collar_release");
+        }
+        finally
+        {
+            Player.SetPose(null);
+            if (librarian != null) librarian.Visible = true;
+        }
+        await Think("Roughing up a librarian in broad daylight. Mother would be so proud.");
     }
 }

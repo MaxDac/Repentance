@@ -427,6 +427,8 @@ public partial class AutoPlay
         await Shot("library_day");
         await game.Perform(Verb.UseItem, "librarian", "revolver");
         Check(!gs.HasFlag("library_banned"), "no gun before asking");
+        await game.Perform(Verb.Hand, "librarian");
+        Check(game.Player.PoseName == null && !gs.HasFlag("librarian_threatened"), "no collar grab before asking");
         gs.TakeItem("mirror");
         var ask = game.Perform(Verb.UseItem, "librarian", Notes.ItemId);
         await Until(() => game.Hud.ImageVisible);
@@ -445,11 +447,33 @@ public partial class AutoPlay
         Check(gs.HasFlag("librarian_refused"), "the librarian won't talk");
         await game.Perform(Verb.UseItem, "librarian", "revolver");
         Check(!gs.HasItem("book"), "cannot retrieve book before identifying title");
+        await game.Perform(Verb.Hand, "librarian");
+        Check(!gs.HasItem("book") && !gs.HasFlag("librarian_threatened"), "no collar grab before identifying title");
         await game.Perform(Verb.Hand, "shelves_right");
         Check(!gs.HasItem("book"), "locked restricted shelves prevent a catalogue bypass");
         await CancelPuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue, "catalogue_identified", "catalogue");
         await SolvePuzzle(() => game.Perform(Verb.Hand, "desk"), PuzzleKind.Catalogue,
             new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
+        var beforeThreat = (Flags: gs.Flags.ToArray(), Items: gs.Inventory.ToArray());
+
+        var librarian = game.Room?.FindActor("librarian");
+        int grabs = _poseCounts.GetValueOrDefault("micah_collar"), releases = _poseCounts.GetValueOrDefault("micah_collar_release");
+        var grab = game.Perform(Verb.Hand, "librarian");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Unhand me", StringComparison.Ordinal));
+        Check(game.Player.PoseName == "micah_collar" && _poseCounts.GetValueOrDefault("micah_collar") == grabs + 1 &&
+            librarian?.Visible == false, "Micah grabs the librarian by the collar (one strip for both, the actor hidden)");
+        await Shot("library_collar");
+        await grab;
+        Check(_poseCounts.GetValueOrDefault("micah_collar_release") == releases + 1 && game.Player.PoseName == null &&
+            librarian?.Visible == true, "Micah lets him go and the librarian stands where he was");
+        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&
+            game.Room?.Name == "Library", "roughed the librarian up for the book; Micah stays until he leaves");
+        await game.Perform(Verb.Hand, "librarian");
+        Check(game.Player.PoseName == null && _poseCounts.GetValueOrDefault("micah_collar") == grabs + 1,
+            "no second grab once he has the book");
+
+        // the revolver is still a way to get the book
+        gs.Restore(beforeThreat.Flags, beforeThreat.Items, gs.StoryAct);
         int draws = _poseCounts.GetValueOrDefault("micah_draw");
         var threaten = game.Perform(Verb.UseItem, "librarian", "revolver");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Good Lord", StringComparison.Ordinal));
