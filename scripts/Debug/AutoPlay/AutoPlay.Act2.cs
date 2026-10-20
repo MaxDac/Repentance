@@ -148,7 +148,13 @@ public partial class AutoPlay
         Check(game.Music.Current == Track.OfficeJazz, "the office jazz plays again in Eleanor's room");
         await game.Wait(2);
         await Shot("motel_night");
-        await Until(() => game.Room?.Name == "Office");
+        bool daysLater = false;
+        await Until(() =>
+        {
+            daysLater |= game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
+            return game.Room?.Name == "Office";
+        }, step: 0.05);
+        Check(daysLater, "\"Days later\" on black between her motel room and the office");
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
@@ -261,6 +267,50 @@ public partial class AutoPlay
         Check(!gs.HasFlag("interlude_safe_locked") && !gs.HasFlag("interlude_box_packed"), "back to the run");
     }
 
+    /// <summary>
+    /// Days later, back at the flophouse: the drop ladder is up again and Micah won't climb it; the clerk won't talk
+    /// until Micah hauls him across the counter by his tie. Two men took her. Then on to the cathedral.
+    /// </summary>
+    private async Task MotelReturn(Game game, GameState gs)
+    {
+        await Until(() => game.Room?.Name == "MotelAlley");
+        await WaitIdle(game);
+        Check(gs.HasFlag("motel_return") && !gs.HasFlag("ladder_down") &&
+            game.Room?.FindHotspot("drop_ladder")?.Visible == true && game.Room?.FindHotspot("ladder")?.Visible != true,
+            "back at the motel alley, the drop ladder pulled up out of reach again");
+        await Shot("motel_return_alley");
+        var refusal = await Spoken(() => game.Perform(Verb.Hand, "drop_ladder"));
+        Check(game.Room?.Name == "MotelAlley" && refusal.Any(l => l.Contains("brace the joe at the desk")),
+            "Micah won't go up the fire escape: better ask the clerk");
+        await game.Perform(Verb.Walk, "street");
+        Check(game.Room?.Name == "MotelAlley", "not leaving before he knows where she went");
+        await game.Perform(Verb.Walk, "motel_door");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "MotelLobby", "in at the front door");
+        int tiePulls = _poseCounts.GetValueOrDefault("micah_tie_pull"), clerkPulls = _poseCounts.GetValueOrDefault("clerk_tie_pulled");
+        bool onCounter = false;
+        var said = new List<string>();
+        // the talk runs on into the cathedral steps and Caleb; stop watching once Micah is out of the lobby
+        _ = game.Perform(Verb.Talk, "clerk");
+        await Until(() =>
+        {
+            Heard(said);
+            if (!onCounter && game.Room is Rooms.MotelLobby lobby && lobby.FindActor("clerk") is { } clerk &&
+                clerk.Poses?.Action == "clerk_tie_pulled" && !clerk.Poses.Playing && game.Player.PoseName == "micah_tie_pull")
+            {
+                onCounter = true;
+                Check(clerk.ZIndex > 0 && game.Player.ZIndex > clerk.ZIndex,
+                    "the clerk's face goes down over the counter, Micah's fist in front of him");
+            }
+            return game.Room?.Name == "ChurchExterior";
+        }, 180, 0.02);
+        Check(onCounter && _poseCounts.GetValueOrDefault("micah_tie_pull") == tiePulls + 1 &&
+            _poseCounts.GetValueOrDefault("clerk_tie_pulled") == clerkPulls + 1,
+            "\"Nice tie, pal\": Micah hauls the clerk across the counter by it");
+        Check(said.Any(l => l.Contains("Two men took her")) && gs.HasFlag("motel_return_done"),
+            "the clerk spills: two men took her, the night Micah left");
+    }
+
     /// <summary>The end of Act 1 and Act 2: the cathedral, the library, the Club, the morgue and the Harrington office.</summary>
     private async Task PlayActTwo(Game game, GameState gs)
     {
@@ -278,6 +328,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("act2_whiskey_drunk") && gs.HasFlag("ring_taken_act2") && gs.HasItem("faith_ring"),
             "Act 2 opens with whiskey and the recorded take-ring choice");
         Check(game.Room?.FindHotspot("faith_ring")?.Visible != true, "taken ring is no longer on the desk");
+        await MotelReturn(game, gs);
         await Until(() => game.Room?.Name == "ChurchExterior");
         Check(game.Music.Current == Track.StreetTraffic, "traffic, not the organ, out on the cathedral steps");
         Check(gs.HasItem("mirror") && gs.HasItem("cloth"), "reading again leads back to 1927 with Micah's things, Eleanor's cloth too");

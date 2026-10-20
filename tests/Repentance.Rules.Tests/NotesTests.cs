@@ -70,6 +70,7 @@ public class NotesTests
     [InlineData("lobby", "eleanor")]
     [InlineData("eleanor_room", "night_bolt")]
     [InlineData("library", "triquetra")]
+    [InlineData("chicago_map", "taken")]
     [InlineData("harrington_office", "harrington_road")]
     [InlineData("mansion_cellar", "cellar")]
     public void DebugStart_KnowsWhatMicahWouldKnow(string room, string note) =>

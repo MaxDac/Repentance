@@ -381,21 +381,46 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   for the character) while Eleanor is in the bed, under the sheet. Micah's Act 2 satchel is already back.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
+- Micah asks what she'll do now and where she'll go. She will get away: she has friends, and money enough; he
+  doesn't have to worry. The narration says Micah has a hunch it isn't the truth, but he is too ashamed to ask
+  more, too ashamed to be in that room at all, and she knows it; he can see it in her eyes. So he leaves.
 - Eleanor remains in bed against the pillows, covered by the white sheet. She does not rise; her lips move while
   she talks.
-  The scene then fades to Micah's office, the next morning.
+  The scene then fades to black: "Days later" appears for 3 seconds, then Micah's office fades in.
 
-#### Office, before the cathedral
+#### Office, days later
 
 - A bottle of whiskey and a cup are in the office. Micah raises the cup, drinks, and puts it down.
+- Micah's thoughts go back to the motel: he knew her answer was a lie and let it stand, too ashamed to ask; and
+  every night since he has wanted her back, not saved but wanted.
 - Micah chooses whether to take his wedding ring or leave it in the office; the original decision is saved.
 - A left-behind ring remains visible and can be collected on a later office visit without changing the original decision.
-- After the choice, Micah leaves for the cathedral steps.
+- After the choice, Micah decides to go back to the motel to find out where she went, and the scene moves to the
+  motel's back alley.
+
+#### Behind the motel, days later
+
+- The drop ladder is pulled up out of reach again, as before Micah hooked it down with the umbrella (the crate
+  stays under it). Micah won't climb up to her room: "Up the fire escape like a second-story man again? Nix.
+  Better brace the joe at the desk."
+- The fire escape and the main road are refused until the clerk has talked; the motel door leads to the lobby.
+
+#### Motel lobby, days later
+
+- Micah asks the clerk whether the woman is still upstairs. Gone, the clerk says: checked out.
+- Two rounds of questions (where she was headed, who picked her up, whether she paid or left a note) only make the
+  clerk more tense; he holds on to the register and tells Micah to beat it. Micah realises something happened.
+- "Nice tie, pal. Your wife's present?" "...What?" Micah grabs the tie and hauls the clerk's face down onto the
+  counter (new `micah_tie_pull` and `clerk_tie_pulled` sprites) and threatens him.
+- The clerk spills: two men took her, the same night, not an hour after Micah left; a big one and a young one. He
+  knows nothing else. Micah lets go, and walks out to the cathedral steps.
+- A notepad page, *The motel again*, records it.
 
 #### Outside of the church (cathedral steps)
 
 - Existing location.
-- Micah thinks that, even though he couldn't turn her in, he can't think of anything else but her.
+- Micah thinks that two men took her the night he walked out, and he didn't even ask where she'd go; still he
+  can't think of anything else but her.
 - After this thought, he walks up to the doors and enters the church.
 
 #### Inside the church

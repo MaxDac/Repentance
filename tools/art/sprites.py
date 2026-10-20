@@ -811,6 +811,57 @@ def build_show_photo():
     action_strip("micah_pocket_photo", back, [0.15, 0.15, 0.2, 0.3, 0.2], anchor=(FW / 2, FH - 3))
 
 
+# Act 2, back at the motel desk: Micah, facing right across the counter, reaches for the clerk's tie, closes his fist
+# on it and hauls it down to the desktop. (near arm (elbow, wrist, hand), lean, seconds); the last frame is held.
+TIE_REACH = ("pts", (0.17, 0.31, 0.13), (0.07, 0.24, 0.28), (0.05, 0.225, 0.32))
+TIE_GRAB = ("pts", (0.17, 0.31, 0.12), (0.07, 0.235, 0.27), (0.05, 0.22, 0.305))
+TIE_YANK = ("pts", (0.17, 0.38, 0.03), (0.07, 0.32, 0.17), (0.05, 0.305, 0.205))
+TIE_PULL_KEYS = [
+    (("swing", 4, 6, 10), 0.0, 0.15),
+    (TIE_REACH, 5.0, 0.18),
+    (TIE_GRAB, 5.0, 0.22),
+    (TIE_YANK, -4.0, 0.35),
+]
+# The clerk, facing right (the lobby flips him to face Micah): yanked forward by the tie and down onto the desktop,
+# face first, his hands slapping down either side. The counter hides him from the hips down, so those frames are cut
+# off below the desktop (CLERK_CUT rows above the feet) and the lobby draws him over it while he's down there.
+CLERK_YANKED = [(64, 56), (77, 38), (87, 27), (65, 74), (66, 91), (76, 47), (86, 50)]
+CLERK_DOWN = [(64, 56), (79, 52), (90, 55), (65, 74), (66, 91), (78, 60), (88, 60)]
+CLERK_CUT = 34
+
+
+def tie_pull_strips():
+    from PIL import Image
+    frames, seconds = [], []
+    for i, (arm, lean, duration) in enumerate(TIE_PULL_KEYS):
+        marks = {}
+        ps = pose(90, arms={1: arm, -1: ("side", 0, 0, 0)}, lean=lean, front_arms=(1,) if arm[0] == "pts" else (),
+                  marks=marks)
+        img = figure(MICAH, ps, FW, FH)
+        if i >= 2:  # the clerk's tie, balled in his fist and pulled taut towards the clerk
+            hx_, hy_ = (math.floor(v) for v in marks["hand1"])
+            for dx in range(1, min(6, img.width - 1 - hx_)):
+                img.putpixel((hx_ + dx, hy_ - (dx > 3)), (106, 44, 34, 255) if dx % 3 else (138, 64, 48, 255))
+        frames.append((img, (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_tie_pull", frames, seconds, anchor=(FW / 2, FH - 3))
+
+    scaled = dict(CLERK, h=CLERK["h"] * SCALE)
+    stand = Image.new("RGBA", (192, FH))
+    stand.alpha_composite(figure(CLERK, pose(90, arms=_arms("down"), lean=4.0), FW, FH), (64, 0))
+    clip = []
+    face = profile_head(CLERK)
+    bent = [action_figure(scaled, k, head_sprite=face) for k in (CLERK_YANKED, CLERK_DOWN)]
+    for img, head in [(stand, (96, 18))] + bent:
+        img = img.copy()
+        px = img.load()
+        for y in range(FH - 3 - CLERK_CUT, FH):
+            for x in range(img.width):
+                px[x, y] = (0, 0, 0, 0)
+        clip.append((img, head))
+    action_strip("clerk_tie_pulled", clip, [0.15, 0.12, 0.3], anchor=(96, FH - 3))
+
+
 # Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,
 # then dips her fingers in the compact and lifts a pinch of powder to her nose: (hand height, reach, powder, nod, s).
 POWDER_KEYS = [
@@ -1281,6 +1332,7 @@ def build():
     build_drinking()
     build_gin()
     build_show_photo()
+    tie_pull_strips()
     build_smoke()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
