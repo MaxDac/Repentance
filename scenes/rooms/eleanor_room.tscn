@@ -45,7 +45,7 @@ size = Vector2(128, 68)
 size = Vector2(56, 116)
 
 [sub_resource type="RectangleShape2D" id="Rect_11"]
-size = Vector2(56, 18)
+size = Vector2(65, 42)
 
 [sub_resource type="RectangleShape2D" id="Rect_12"]
 size = Vector2(28, 14)
@@ -93,7 +93,7 @@ ShowIfFlags = "closet_open"
 HideIfFlags = "interlude1"
 
 [node name="SafeOpen" type="Sprite2D" parent="."]
-position = Vector2(79, 143)
+position = Vector2(78, 139)
 z_index = -4
 texture = ExtResource("6_eleanor_room_safe_open")
 centered = false
@@ -336,7 +336,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Clothes"]
-position = Vector2(92.0, 231.0)
+position = Vector2(95.5, 220.0)
 shape = SubResource("Rect_11")
 
 [node name="Chair" type="Area2D" parent="Hotspots"]

@@ -80,7 +80,33 @@ public sealed partial class Playthrough
             Check(onFireEscape, "after the interlude, back on the fire escape for the rest of their talk and the kiss");
             Check(!Gs.HasFlag("interlude1") && Gs.HasItem("revolver"),
                 "later that night, in her motel room: Micah getting dressed, with his things");
-            await window;
+            bool daysLater = false;
+            await Until(() =>
+            {
+                daysLater |= _game.Hud.CaptionVisible && _game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
+                return window.IsCompleted && _game.Room?.Name == "MotelAlley" && !_game.Busy;
+            }, 600, 0.05);
+            await WaitIdle();
+            Check(daysLater, "\"Days later\" on black between the motel night and the office");
+            Check(Gs.HasFlag("act2_whiskey_drunk") && Gs.HasFlag("motel_return"), "the office, then back to the motel");
+            Check(!Gs.HasFlag("ladder_down"), "the drop ladder is pulled up again");
+            await Do(Verb.Hand, "drop_ladder");
+            Expect("MotelAlley", "Micah won't go up the fire escape again");
+            await Do(Verb.Walk, "street");
+            Expect("MotelAlley", "not away until he knows where she went");
+            await Do(Verb.Walk, "motel_door");
+            Expect("MotelLobby", "in at the front, to ask the clerk");
+            bool tie = false, pulled = false;
+            var ask = Do(Verb.Talk, "clerk");
+            await Until(() =>
+            {
+                tie |= _game.Player.PoseName == "micah_tie_pull";
+                pulled |= _game.Room?.FindActor("clerk")?.Poses?.Action == "clerk_tie_pulled";
+                return ask.IsCompleted;
+            }, 600, 0.05);
+            await ask;
+            Check(tie && pulled, "Micah hauls the clerk across the counter by his tie");
+            Check(Gs.HasFlag("motel_return_done"), "the clerk spills: two men took her");
             await Until(() => _game.Room?.Name == "ChicagoMap", 600);
             await WaitIdle();
             Check(!Story.Interlude.EleanorPlays(Gs.HasFlag) && !_game.Player.Character.StartsWith("eleanor"), "Micah's journal again");

@@ -84,7 +84,7 @@ public partial class Office : Room
 
     private async Task Act2Opening()
     {
-        await Think("The office again. Teddy's twenty a day is gone, and the bottle's still here. Loyal, the bottle.");
+        await Think("The office again. Days of it. Teddy's twenty a day is gone, and the bottle's still here. Loyal, the bottle.");
         await Game.WalkTo(new Godot.Vector2(124, 172));
         Player.Face(Facing.Right);
         State.SetFlag("office_cup_held");
@@ -98,11 +98,18 @@ public partial class Office : Room
         State.SetFlag("office_cup_held", false);
         State.SetFlag("act2_whiskey_drunk");
         await Think("Whiskey. It burns going down. It doesn't burn away a thing.");
+        await Think("Friends, she said. Money enough. I knew it was a lie while she was saying it, and I let it stand.");
+        await Think("I was too ashamed to ask. Too ashamed to be standing in that room at all. So I walked out on her.");
+        await Think("And every night since, I've wanted her back on that pillow. Not saved. Wanted. God forgive me, that's the truth.");
         await Talk("office_ring");
         State.SetFlag("act2_office_done");
+        await Think("Enough. I'll go back to that motel and find out where she went. Just to know she's all right. That's what I tell myself.");
+        State.SetFlag("motel_return");
+        // days later, the clerk has pulled the drop ladder back up out of reach
+        State.SetFlag("ladder_down", false);
         await Game.WalkTo(new Godot.Vector2(58, 172));
         await OpenTheDoor(player: true);
-        await Game.ChangeRoom("church_exterior", "start");
+        await Game.ChangeRoom("motel_alley", "start");
     }
 
     private async Task TeddyLeaves()

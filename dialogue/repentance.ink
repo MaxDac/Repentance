@@ -569,6 +569,40 @@ THOUGHT: Somebody upstairs, then. And somebody else had told him to keep her the
 CLERK: I told you, mister. Nobody goes up. Go home.
 -> END
 
+// Act 2, days after the motel night: Micah comes back to make sure Eleanor got away, and the clerk won't say how.
+=== motel_clerk_return ===
+{has_flag("motel_return_done"): -> motel_clerk_return.again}
+CLERK: You again. Rooms are still a dollar, and you still ain't getting one.
+MICAH: The dame upstairs. First floor, the room over the alley. She still there?
+CLERK: ...
+CLERK: Gone. Checked out.
+THOUGHT: Checked out. Nobody checks out of a joint like this. They just stop paying.
+* [She say where she was headed?]
+* [She leave in a cab? Somebody pick her up?]
+- CLERK: I don't know nothing about it, mister. I keep the book. I don't keep track.
+THOUGHT: His hands have found the register again. He's holding on to it like a life raft.
+* [A dame doesn't just evaporate. Did she pay up? Leave a note?]
+* [You saw her go. Who was she with?]
+- CLERK: I told you. Gone. That's all. Now beat it, before... just beat it.
+THOUGHT: Before what? He isn't scared of me. He's scared of something that already happened.
+MICAH: Nice tie, pal. Your wife's present?
+CLERK: ...What?
+CUE: tie
+CLERK: Agh! Lemme go!
+MICAH: Listen close, pal, 'cause I'm only asking once more. I left her upstairs. What happened to her?
+MICAH: Sing, or you'll be eating this counter till Friday, and Moretti's boys can have what's left of you.
+CLERK: Two men! Two men took her! The same night you was here. Not an hour after you blew.
+MICAH: What men? Whose?
+CLERK: I don't know! A big one and a young one. They didn't sign the book, mister. They went up, they came down with her, they drove off.
+CLERK: That's all I know. I swear on my mother. Nothing else.
+CUE: release
+~ set_flag("motel_return_done")
+THOUGHT: Two men, the night I left. While I was walking home feeling sorry for myself, they were walking her down those stairs.
+-> END
+= again
+CLERK: I told you everything, mister. Two men. Now please. Go.
+-> END
+
 === eleanor_fire_escape_opening ===
 // End of Act 1: the scene cuts on her question; eleanor_fire_escape repeats it after the First Interlude.
 ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
@@ -625,6 +659,12 @@ MICAH: I won't tell anyone where they can find you. Not Teddy, not Moretti, not 
 MICAH: And I'm giving up the job. Teddy can keep his twenty a day.
 ELEANOR: He'll hate you for it.
 MICAH: He'll have to get in line.
+MICAH: What'll you do now? Where'll you go?
+ELEANOR: Away. Out of Chicago, before the week's out.
+ELEANOR: I have friends, Micah. And money enough to reach them. You don't have to worry about me.
+THOUGHT: Friends. Money. I have a hunch neither one is true.
+THOUGHT: I should ask which friends, and where, and how much. I don't. I'm too ashamed to ask. Too ashamed to be standing in this room at all.
+THOUGHT: And she knows it. I can see it in her eyes. She's letting me off the hook, and I let her.
 ELEANOR: Goodbye, Micah Jones.
 MICAH: Goodbye, Eleanor.
 -> END
@@ -718,6 +758,7 @@ CALEB: Six years. You look like a man who hasn't slept for most of them.
 MICAH: I didn't come to confess. I came to talk. There's a difference, isn't there?
 CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
 MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
+MICAH: The same night I walked out on her, two men walked her out of that flophouse. I didn't even ask where she'd go.
 MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
 MICAH: Right now, Caleb... I'm too far gone to be saved.
 CALEB: That's crap, Micah.

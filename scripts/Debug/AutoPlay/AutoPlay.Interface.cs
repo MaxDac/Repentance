@@ -167,7 +167,8 @@ public partial class AutoPlay
     /// <summary>Shows the title menu: Continue/Load are only offered once a save exists.</summary>
     private async Task TitleMenuTest(Game game, bool expectSaves)
     {
-        game.Hud.ShowTitle(true);
+        game.ShowTitle(true);
+        Check(game.Sfx.Ambient == Sound.Rain, "rain patters on the title screen");
         var menu = game.Hud.Menu.OpenTitle();
         await game.Hud.Fade(0, 0.1);
         await Shot(expectSaves ? "title_with_saves" : "title_new");
@@ -177,7 +178,8 @@ public partial class AutoPlay
         var result = await menu;
         Check(result.Action == (expectSaves ? MenuAction.Load : MenuAction.NewGame) && (result.Save != null) == expectSaves,
             "title menu returns the chosen action");
-        game.Hud.ShowTitle(false);
+        game.ShowTitle(false);
+        Check(game.Sfx.Ambient == game.Room?.Ambience?.Sound, "leaving the title hands the ambience back to the room");
     }
 
     /// <summary>Micah's notepad: always the first slot, read full screen from N or the satchel, paged back and forth.</summary>
