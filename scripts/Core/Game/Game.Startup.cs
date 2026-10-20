@@ -27,6 +27,8 @@ public partial class Game
         Music.Bind(Settings);
         // film mode is watched, so it may go fullscreen with F11 (the setting is the autoplay copy, not the player's)
         AddChild(new WindowModeController(Settings, !anyTest || film) { Name = "WindowMode" });
+        Touch = new TouchInput { Name = "TouchInput" };
+        AddChild(Touch);
         _roomHost = new Node2D { Name = "RoomHost" };
         AddChild(_roomHost);
         Player = new Player { Name = "Player" };

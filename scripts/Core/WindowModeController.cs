@@ -16,7 +16,8 @@ public partial class WindowModeController : Node
     public WindowModeController(GameSettings settings, bool applyToWindow)
     {
         _settings = settings;
-        _applyToWindow = applyToWindow && DisplayServer.GetName() != "headless";
+        // a phone or tablet always runs full screen; only desktops have a window to size
+        _applyToWindow = applyToWindow && DisplayServer.GetName() != "headless" && !OS.HasFeature("mobile");
         ProcessMode = ProcessModeEnum.Always;
     }
 

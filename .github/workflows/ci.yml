@@ -229,6 +229,37 @@ jobs:
           path: logs/
           if-no-files-found: ignore
 
+  # Exports the Android preset to a debug-signed APK (throwaway key), as release.yml does with the release key.
+  android-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          export-templates: 'true'
+      - name: Android SDK
+        run: tools/package/android-sdk.sh
+
+      - name: Build C# and import assets
+        run: |
+          set -euo pipefail
+          dotnet build Repentance.csproj
+          "$GODOT" --headless --path . --import
+
+      - name: Export Android (debug-signed)
+        run: tools/package/android-export.sh debug build/android/Repentance.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/android/Repentance.apk
+          retention-days: 7
+
   windows-installer:
     needs: export
     runs-on: windows-latest
@@ -262,7 +293,7 @@ jobs:
   # The single check to require on main (branch protection / ruleset): green only when every job above passed.
   ci-ok:
     if: always()
-    needs: [unit-tests, art-tests, godot-tests, export, windows-installer]
+    needs: [unit-tests, art-tests, godot-tests, export, android-export, windows-installer]
     runs-on: ubuntu-latest
     steps:
       - name: All CI jobs passed

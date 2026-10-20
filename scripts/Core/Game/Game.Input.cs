@@ -9,6 +9,9 @@ public partial class Game
     /// <summary>Inventory item currently held as the mouse cursor (left click a hotspot to use it there).</summary>
     public string? Carried => _carried;
 
+    /// <summary>Touch screen play: taps, long presses and the HUD's touch buttons become clicks and keys.</summary>
+    public TouchInput Touch { get; private set; } = null!;
+
     public override void _UnhandledInput(InputEvent e)
     {
         if (IsPaused) return;

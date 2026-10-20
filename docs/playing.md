@@ -32,6 +32,16 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
 - **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers
   *Continue* (most recent save), *New game*, *Load game* and *Settings*.
 
+### Touch (Android)
+
+- **Tap** is a left click. **Touch and hold** (about half a second) is a right click: it opens the verb wheel, which
+  stays open when you lift your finger; tap an icon, or keep holding and slide onto one before lifting.
+- **MENU** (bottom left) or the phone's **back** gesture/button is Esc. **NOTES** opens the notepad; swipe its pages
+  left or right.
+- With an item held, touch and hold anywhere puts it back. Dragging works on the arrow-pad puzzles as with a mouse.
+- The crosshair and the touch buttons hide as soon as a mouse moves; the *Full screen* setting is not offered (the
+  game is always full screen on a phone).
+
 ## Settings
 
 Stored in `user://settings.cfg`, separate from saves (details: [Saves and settings](saves-and-settings.md)):

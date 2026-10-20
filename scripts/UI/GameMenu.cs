@@ -139,20 +139,25 @@ public partial class GameMenu : Control
     {
         var settings = Game.Instance.Settings;
         Action back = _title ? TitlePage : PausePage;
-        Page("Settings", -1, back,
+        var rows = new List<(string text, bool enabled, Action onPress)>
+        {
             ($"Nudity: {(settings.NudityEnabled ? "On" : "Off")}", true, () =>
             {
                 _status.Text = settings.SetNudity(!settings.NudityEnabled) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }),
-            ($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
+            ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
+            ($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)),
+            ("Back", true, () => { _status.Text = ""; back(); }),
+        };
+        // a phone is always full screen
+        if (!OS.HasFeature("mobile"))
+            rows.Insert(1, ($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
             {
                 _status.Text = settings.SetFullscreen(!settings.Fullscreen) ? "" : "Couldn't save settings.";
                 SettingsPage();
-            }),
-            ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
-            ($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)),
-            ("Back", true, () => { _status.Text = ""; back(); }));
+            }));
+        Page("Settings", -1, back, rows.ToArray());
         OnAltPress(EffectsLabel, () => StepEffects(up: false));
         OnAltPress(MusicLabel, () => StepMusic(up: false));
         _onSettings = true;

@@ -219,6 +219,57 @@ public partial class AutoPlay
         gs.TakeItem("hanger");
     }
 
+    /// <summary>
+    /// Touch screen play: a long press opens the verb wheel and a tap picks its verb, the NOTES touch button opens the
+    /// notepad, a swipe turns its page and a tap closes it; moving a real mouse hides the touch buttons again.
+    /// </summary>
+    private async Task TouchTest(Game game)
+    {
+        await WaitIdle(game);
+        var window = new Vector2(400, 80);
+        Touch(window, true);
+        for (int i = 0; i < 100 && !game.Hud.Wheel.IsOpen; i++) await game.Wait(0.02);
+        Check(game.Hud.Wheel.IsOpen && !game.Busy, "a long press opens the verb wheel without clicking first");
+        Touch(window, false);
+        await game.Wait(0.1);
+        Check(game.Hud.Wheel.IsOpen, "lifting the finger off the wheel's centre leaves it open");
+        Check(game.Hud.TouchButtonsVisible, "touch buttons show once the screen is touched");
+        await Shot("touch_wheel");
+        var look = game.Hud.Wheel.SlotCenter(Verb.Look);
+        Touch(look, true);
+        Touch(look, false);
+        for (int i = 0; i < 100 && !game.Busy; i++) await game.Wait(0.02);
+        Check(!game.Hud.Wheel.IsOpen && game.Busy, "a tap on the wheel's eye looks at the window");
+        await WaitIdle(game);
+
+        var notes = game.Hud.TouchNotesCenter;
+        Touch(notes, true);
+        Touch(notes, false);
+        var pad = game.Hud.Notepad;
+        for (int i = 0; i < 50 && !pad.IsOpen; i++) await game.Wait(0.02);
+        Check(pad.IsOpen && pad.Page == pad.PageCount - 1, "the NOTES touch button opens the notepad");
+        var at = new Vector2(240, 130);
+        Touch(at, true);
+        await game.Wait(0.05);
+        for (int i = 1; i <= 6; i++)
+        {
+            TouchDrag(at + new Vector2(i * 10, 0));
+            await game.Wait(0.02);
+        }
+        Touch(at + new Vector2(60, 0), false);
+        await game.Wait(0.1);
+        Check(pad.Page == pad.PageCount - 2, "swiping right turns back one page");
+        var close = pad.CloseCenter;
+        Touch(close, true);
+        Touch(close, false);
+        await WaitIdle(game);
+        Check(!pad.IsOpen && !game.Busy, "a tap on the close button puts the notepad away");
+
+        Move(new Vector2(240, 135));
+        await game.Wait(0.05);
+        Check(!game.Hud.TouchButtonsVisible, "moving the mouse hides the touch buttons");
+    }
+
     /// <summary>Wherever a character is drawn over the scenery behind him, hovering or clicking there means him (#73, #97).</summary>
     private void CheckActorWins(Game game, string actorId, string sceneryId, string what)
     {

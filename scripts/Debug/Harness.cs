@@ -225,6 +225,11 @@ public abstract class Harness
             });
     }
 
+    /// <summary>A finger on the touch screen (index 0): down, dragged or lifted at <paramref name="pos"/>.</summary>
+    protected void Touch(Vector2 pos, bool pressed) => Push(new InputEventScreenTouch { Position = pos, Pressed = pressed });
+
+    protected void TouchDrag(Vector2 pos) => Push(new InputEventScreenDrag { Position = pos });
+
     /// <summary>Pushes a synthetic event past film mode's <see cref="SpectatorFilter"/>.</summary>
     private void Push(InputEvent e)
     {
