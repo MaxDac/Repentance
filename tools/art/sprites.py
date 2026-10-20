@@ -769,13 +769,13 @@ def build_gin():
 
 
 # Micah shows the bellboy Eleanor's photograph, facing right: the near hand goes inside his coat, comes out with the
-# card and holds it up at arm's length for the bellboy to look at. (near arm, hand inside the coat, card shown,
-# seconds); micah_pocket_photo plays the same keys back the other way.
+# card and holds it up, elbow still bent, halfway between him and the bellboy for the bellboy to look at. (near arm,
+# hand inside the coat, card shown, seconds); micah_pocket_photo plays the same keys back the other way.
 _P_SIDE = ("side", 0, 0, 0)
 _P_POCKET = ("pts", (0.16, 0.38, 0.04), (0.08, 0.31, 0.08), (0.03, 0.29, 0.09))
 _P_DRAWN = ("pts", (0.16, 0.38, 0.05), (0.09, 0.32, 0.11), (0.06, 0.3, 0.13))
-_P_RISING = ("pts", (0.16, 0.37, 0.1), (0.1, 0.31, 0.2), (0.08, 0.29, 0.24))
-_P_SHOWN = ("pts", (0.15, 0.34, 0.14), (0.1, 0.27, 0.28), (0.09, 0.255, 0.32))
+_P_RISING = ("pts", (0.16, 0.37, 0.08), (0.1, 0.31, 0.15), (0.08, 0.29, 0.17))
+_P_SHOWN = ("pts", (0.15, 0.35, 0.1), (0.1, 0.28, 0.18), (0.09, 0.265, 0.21))
 SHOW_PHOTO_KEYS = [
     (_P_SIDE, False, False, 0.2),
     (_P_POCKET, True, False, 0.3),
@@ -1042,21 +1042,21 @@ _T_CHEST_FAR = ("pts", (-0.16, 0.38, 0.06), (-0.07, 0.31, 0.14), (-0.03, 0.29, 0
 _T_OFFER = ("pts", (0.16, 0.37, 0.08), (0.11, 0.33, 0.18), (0.1, 0.31, 0.22))
 _T_SIDE = ("swing", 3, 6, 10)
 TEDDY_WALLET_KEYS = [
-    (_T_SIDE, _T_SIDE, None, None, 0.25),
-    (_T_POCKET, _T_SIDE, None, None, 0.3),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "shut"), None, 0.3),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "wallet", 0.45),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "hand-1", 0.4),
-    (_T_POCKET, _T_CHEST_FAR, None, "hand-1", 0.3),
-    (_T_OFFER, _T_SIDE, None, "hand1", 0.4),
+    (_T_SIDE, _T_SIDE, None, None, 0.12),
+    (_T_POCKET, _T_SIDE, None, None, 0.14),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "shut"), None, 0.14),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "wallet", 0.22),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "hand-1", 0.2),
+    (_T_POCKET, _T_CHEST_FAR, None, "hand-1", 0.14),
+    (_T_OFFER, _T_SIDE, None, "hand1", 0.2),
 ]
 # At the corner of the desk, facing right: he leans in, lays the notes down by the lamp and takes his hand back empty
 # (the room shows the money on the desk from then on). (hand height, reach, notes in hand, lean, seconds)
 TEDDY_NOTES_KEYS = [
-    (0.31, 0.12, True, 0.0, 0.25),
-    (0.35, 0.2, True, 3.0, 0.25),
-    (0.42, 0.27, True, 7.0, 0.35),
-    (0.42, 0.27, False, 7.0, 0.2),
+    (0.31, 0.12, True, 0.0, 0.12),
+    (0.35, 0.2, True, 3.0, 0.12),
+    (0.42, 0.27, True, 7.0, 0.18),
+    (0.42, 0.27, False, 7.0, 0.1),
 ]
 WALLET = ((58, 36, 20, 255), (110, 74, 44, 255), (150, 118, 84, 255))
 NOTE = ((168, 192, 152, 255), (106, 138, 90, 255))
