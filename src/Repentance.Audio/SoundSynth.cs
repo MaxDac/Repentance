@@ -57,9 +57,9 @@ public static partial class SoundSynth
         var rng = new Random(((int)sound + 1) * 7919 + variant * 104729);
         var buf = sound switch
         {
-            Sound.StepWood => Step(rng, body: 520, q: 1.6, tau: 0.018, click: 0.55, thump: 0.45),
-            Sound.StepStone => Step(rng, body: 1900, q: 0.9, tau: 0.009, click: 1.0, thump: 0.15),
-            Sound.StepCarpet => Step(rng, body: 260, q: 0.8, tau: 0.03, click: 0.0, thump: 0.3),
+            Sound.StepWood => Step(rng, Boards),
+            Sound.StepStone => Step(rng, Cobbles),
+            Sound.StepCarpet => Step(rng, Rug),
             Sound.Gunshot => Gunshot(rng),
             Sound.Knock => Knock(rng),
             Sound.Clang => Clang(rng),

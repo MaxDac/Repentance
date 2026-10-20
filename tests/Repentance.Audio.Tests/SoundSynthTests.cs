@@ -47,6 +47,26 @@ public class SoundSynthTests
     }
 
     [Fact]
+    public void FootstepsClickLikeLeatherHeelsThenTheSolePatsDown()
+    {
+        double Brightness(float[] s) =>
+            Enumerable.Range(1, s.Length - 1).Sum(i => Math.Pow(s[i] - s[i - 1], 2)) / s.Sum(v => (double)v * v);
+        int ms(double m) => (int)(m * SoundSynth.SampleRate / 1000);
+        foreach (var step in new[] { Sound.StepWood, Sound.StepStone, Sound.StepCarpet })
+            for (int v = 0; v < SoundSynth.StepVariants; v++)
+            {
+                var s = SoundSynth.Render(step, v);
+                int peak = Array.IndexOf(s, s.MaxBy(Math.Abs));
+                Assert.True(peak < ms(step == Sound.StepCarpet ? 8 : 4), $"{step}/{v}: the heel strikes at once (peak at {peak} samples)");
+                double gapLevel = s[ms(30)..ms(40)].Max(Math.Abs), sole = s[ms(40)..ms(140)].Max(Math.Abs);
+                Assert.True(sole > 0.15 && sole > gapLevel * 1.5, $"{step}/{v}: the sole lands after the heel ({sole} vs {gapLevel})");
+            }
+        double wood = Brightness(SoundSynth.Render(Sound.StepWood)), stone = Brightness(SoundSynth.Render(Sound.StepStone)),
+            carpet = Brightness(SoundSynth.Render(Sound.StepCarpet));
+        Assert.True(stone > wood && wood > carpet * 2, $"brightness stone {stone}, wood {wood}, carpet {carpet}");
+    }
+
+    [Fact]
     public void GunshotIsLouderAndLongerThanAFootstep()
     {
         double Energy(float[] s) => s.Sum(v => (double)v * v);
