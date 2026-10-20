@@ -840,7 +840,7 @@ def tie_pull_strips():
         img = figure(MICAH, ps, FW, FH)
         if i >= 2:  # the clerk's tie, balled in his fist and pulled taut towards the clerk
             hx_, hy_ = (math.floor(v) for v in marks["hand1"])
-            for dx in range(1, 6):
+            for dx in range(1, min(6, img.width - 1 - hx_)):
                 img.putpixel((hx_ + dx, hy_ - (dx > 3)), (106, 44, 34, 255) if dx % 3 else (138, 64, 48, 255))
         frames.append((img, (FW / 2, 18)))
         seconds.append(duration)
