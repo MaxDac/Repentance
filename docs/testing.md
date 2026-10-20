@@ -47,8 +47,8 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 A Godot suite passes only if Godot exits 0, prints the marker, **and** `logs/<suite>.log` has no `ERROR:`,
 `SCRIPT ERROR:`, `USER ERROR:` or `Unhandled exception` line (`Game.Run` turns exceptions into `GD.PushError`, so a
 run can reach its marker after one). Test suites use `--audio-driver Dummy`; CI uses the same pass rule.
-`settings`, `pause` and `walk` never check music, so they run with `--no-music`: rendering the tracks keeps the CPU
-and GC busy at boot, and on a slow runner that stalls frames in timing-sensitive checks. `autoplay` and `playthrough`
+`settings`, `pause` and `walk` never check music, so they run with `--no-music`: rendering tracks keeps the CPU
+and GC busy, and on a slow runner that stalls frames in timing-sensitive checks. `autoplay` and `playthrough`
 assert that music plays, so they keep it on.
 Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` first: if C# still holds a pending
 `SceneTreeTimer` at quit, Godot aborts at shutdown ("Leaked unsafe reference", `!rc_owner`). Await timers through

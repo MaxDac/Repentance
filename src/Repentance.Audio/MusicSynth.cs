@@ -142,6 +142,19 @@ public static partial class MusicSynth
     public static int LoopSamples(Track track) =>
         (int)Math.Round(LengthBeats(track) * SecondsPerBeat(track) * SampleRate);
 
+    /// <summary>Little-endian signed 16-bit PCM of samples in [-1, 1], clamped (half the memory of the floats).</summary>
+    public static byte[] ToPcm16(float[] samples)
+    {
+        var bytes = new byte[samples.Length * 2];
+        for (int i = 0; i < samples.Length; i++)
+        {
+            short v = (short)Math.Clamp(Math.Round(samples[i] * (double)short.MaxValue), short.MinValue, short.MaxValue);
+            bytes[i * 2] = (byte)(v & 0xff);
+            bytes[i * 2 + 1] = (byte)((v >> 8) & 0xff);
+        }
+        return bytes;
+    }
+
     /// <summary>Playback level of each track relative to the Music bus, in dB, evening out how loud they feel.</summary>
     public static float BaseVolumeDb(Track track) => track switch
     {
