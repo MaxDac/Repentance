@@ -55,7 +55,8 @@ the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
 - **Verb wheel**: four 32x32 slots (Look, Hand, Talk, Kick) at radius 22 around the cursor; press-drag-release or
   click.
 - **Captions and fades**: `Fade(alpha, seconds)`, chapter captions with an optional second line under them
-  (`ShowCaptionSub`, the interlude titles), verse lines that fade in one by one.
+  (`ShowCaptionSub`, the interlude titles), caption fades (`FadeCaptionIn`, `FadeCaptionSubIn`, `FadeCaptionOut`)
+  and the act-change cards over black (`ActCards`), verse lines that fade in one by one.
 - **GameMenu** (runs while paused): title (Continue, New game, Load game, Settings), pause (Resume, Save, Load,
   Settings, Quit to title), slots (autosave + 3; unreadable = *Incompatible*, missing = *Empty*), settings.
 - **NotepadView**: one page per unlocked note, newest first; arrows, mouse wheel; N/Esc/X closes.
