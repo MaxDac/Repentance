@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MotelNight.cs" id="1_MotelNight"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night.png" id="2_motel_night"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_night_door_kicked.png" id="9_door_kicked"]
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="10_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/motel_eleanor_talk.png" id="11_eleanor_talk"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/duffle_bag.png" id="12_duffle_bag"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
@@ -82,6 +83,15 @@ metadata/facing = 3
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="EleanorBag" type="Sprite2D" parent="World"]
+modulate = Color(0.8, 0.82, 0.95, 1)
+position = Vector2(398, 189)
+scale = Vector2(0.893, 0.893)
+texture = ExtResource("12_duffle_bag")
+centered = false
+offset = Vector2(-32, -94)
+flip_h = true
 
 [node name="Eleanor" type="Node2D" parent="."]
 position = Vector2(125, 108)

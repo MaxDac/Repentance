@@ -5,7 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Room 507 at the Aurelian: where Eleanor slept the night she vanished, turned over by someone in a hurry.
-/// In the First Interlude it is still in order: the old man's men only search it after she has gone.
+/// In the First Interlude it is still in order: the old man's men only search it after she has gone. Her packed duffle
+/// waits at the foot of the bed; she takes it once she has called Rizzo's, and doesn't leave without it.
 /// </summary>
 public partial class EleanorRoom : Room
 {
@@ -197,7 +198,18 @@ public partial class EleanorRoom : Room
         await Say("In it goes, right at the back, where the light doesn't reach.");
     }
 
-    private bool ReadyToLeave => SafeLocked && State.HasFlag("interlude_drawer_locked") && State.HasFlag("interlude_phoned");
+    private bool ReadyToLeave => SafeLocked && State.HasFlag("interlude_drawer_locked") && State.HasFlag("interlude_phoned")
+        && State.HasFlag("interlude_took_bag");
+
+    /// <summary>She stands over the packed duffle at the foot of the bed and takes it by the handles.</summary>
+    private async Task TakeBag()
+    {
+        Player.Face(Facing.Right);
+        State.SetFlag("interlude_took_bag");
+        Player.SetCharacter(Story.EleanorBag.Sheet);
+        await Player.PlayPose("eleanor_bag_up");
+        Player.SetPose(null);
+    }
 
     /// <summary>The safe in her open closet: the packed box goes in, then her hand swings the door shut and spins the dial.</summary>
     private async Task<bool> InterludeSafe(Verb verb, string? item)
@@ -360,14 +372,30 @@ public partial class EleanorRoom : Room
                     : !State.HasFlag("interlude_riddle_written") ? "Not yet. The combination goes on paper first, at the desk."
                     : !State.HasFlag("interlude_riddle_in_drawer") ? "Not yet. The riddle goes in the drawer."
                     : !State.HasFlag("interlude_drawer_locked") ? "Not yet. The drawer wants my key."
-                    : "Not yet. Nobody's coming for me unless I call.");
+                    : !State.HasFlag("interlude_phoned") ? "Not yet. Nobody's coming for me unless I call."
+                    : "Not without my bag. It's packed, at the foot of the bed.");
                 return true;
             case ("exit", Verb.Walk or Verb.Hand):
                 await Game.WalkTo(target.WalkTo);
+                Player.Face(Facing.Left);
                 await Say("*Knock, knock*");
-                await Talk("interlude_sal");
+                await Story.EleanorBag.Around(() => Talk("interlude_sal"));
                 await Game.Hud.Fade(1, 1.2);
                 await Game.ChangeRoom("speakeasy", "interlude");
+                return true;
+
+            case ("bag", Verb.Look):
+                await Say("My duffle, packed this afternoon. Two dresses, my nightclothes, a comb and a mirror. Nothing Theodore paid for.");
+                return true;
+            case ("bag", Verb.Hand) when !State.HasFlag("interlude_phoned"):
+                await Say("Not yet. The bag goes last, when there's somebody coming to carry me out of here.");
+                return true;
+            case ("bag", Verb.Hand):
+                await TakeBag();
+                await Say("Light enough to run with. That was the idea.");
+                return true;
+            case ("bag", Verb.Kick):
+                await Say("Everything I own that's still mine is in there.");
                 return true;
 
             case ("clothes", Verb.Look):

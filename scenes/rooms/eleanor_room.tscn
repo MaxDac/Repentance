@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3]
+[gd_scene load_steps=33 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/EleanorRoom.cs" id="1_EleanorRoom"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room.png" id="2_eleanor_room"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_interlude_closet_open.png" id="14_eleanor_room_interlude_closet_open"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_interlude_safe_ajar.png" id="15_eleanor_room_interlude_safe_ajar"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/eleanor_room_interlude_safe_box.png" id="16_eleanor_room_interlude_safe_box"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/duffle_bag.png" id="17_duffle_bag"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 100)
@@ -58,6 +59,9 @@ size = Vector2(20, 30)
 
 [sub_resource type="RectangleShape2D" id="Rect_14"]
 size = Vector2(28, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_15"]
+size = Vector2(26, 18)
 
 [node name="EleanorRoom" type="Node2D"]
 script = ExtResource("1_EleanorRoom")
@@ -200,6 +204,16 @@ centered = false
 offset = Vector2(0, -28)
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "interlude1"
+
+[node name="InterludeBag" type="Sprite2D" parent="World"]
+position = Vector2(248, 207)
+scale = Vector2(0.94, 0.94)
+texture = ExtResource("17_duffle_bag")
+centered = false
+offset = Vector2(-32, -94)
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "interlude1"
+HideIfFlags = "interlude_took_bag"
 
 [node name="Exit" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
@@ -429,6 +443,22 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/FallenTelephone"]
 position = Vector2(466.0, 194.0)
 shape = SubResource("Rect_14")
+
+[node name="Bag" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bag"
+DisplayName = "duffle bag"
+WalkTo = Vector2(248, 206)
+Face = 4
+ShowIfFlags = "interlude1"
+HideIfFlags = "interlude_took_bag"
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bag"]
+position = Vector2(253.0, 199.0)
+shape = SubResource("Rect_15")
 
 [node name="RizzoVoice" type="Node2D" parent="."]
 position = Vector2(466, 118)

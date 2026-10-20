@@ -231,12 +231,12 @@ public partial class Speakeasy : Room
         switch (target.Id, verb)
         {
             case ("bartender", Verb.Talk or Verb.Hand):
-                await Talk("interlude_tony");
+                await Story.EleanorBag.Around(() => Talk("interlude_tony"));
                 await Game.Hud.Fade(1, 1.0);
                 await Game.ChangeRoom("convent_corridor", "interlude");
                 return true;
             case ("sal", Verb.Talk or Verb.Hand):
-                await Say("sal", "Tony's the one you want, Miss. I just carry things.");
+                await Story.EleanorBag.Around(() => Say("sal", "Tony's the one you want, Miss. I just carry things."));
                 return true;
             case ("door", Verb.Walk or Verb.Hand):
                 await Say("Back out into the rain? Not without somewhere to go.");

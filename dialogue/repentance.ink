@@ -84,7 +84,7 @@ DANIEL: Wait. These first pages aren't about him at all. "What follows, she told
 === interlude_aurelian ===
 THOUGHT: Tuesday night, the Aurelian. Room 507. The bed turned down, the dresses on their hangers, the chair squared to the desk.
 THOUGHT: She left it neater than she ever kept that marriage. The mess came after, when Theodore's men came looking for what she'd hidden.
-THOUGHT: She didn't pack a bag. She packed insurance: if the Club ever dragged her back, the Club would go into the morning paper with her.
+THOUGHT: She packed one bag, light enough to run with. The rest of what she packed was insurance: if the Club ever dragged her back, the Club would go into the morning paper with her.
 THOUGHT: Not on her; they'd search her first. In the room, in her name, behind a dial Theodore's men couldn't count to.
 ELEANOR: The box. The safe. The drawer. Then a telephone call, and the door. Don't look back, Ellie.
 -> END

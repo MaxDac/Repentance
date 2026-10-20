@@ -27,7 +27,7 @@ public partial class ConventCorridor : Room
                     await Game.WalkTo(nun.WalkTo);
                     Player.FaceTowards(nun.Position);
                 }
-                await Talk("interlude_agatha");
+                await Story.EleanorBag.Around(() => Talk("interlude_agatha"));
             });
             return;
         }
@@ -154,10 +154,10 @@ public partial class ConventCorridor : Room
         switch (target.Id, verb)
         {
             case ("nun", Verb.Talk) when !State.HasFlag("interlude_agatha_met"):
-                await Talk("interlude_agatha");
+                await Story.EleanorBag.Around(() => Talk("interlude_agatha"));
                 return true;
             case ("nun", Verb.Talk):
-                await Say("nun", "Your cell is at the end of the corridor. Lights out at nine. We rise at five.");
+                await Story.EleanorBag.Around(() => Say("nun", "Your cell is at the end of the corridor. Lights out at nine. We rise at five."));
                 return true;
             case ("nun", Verb.Hand or Verb.Kick):
                 await Say("She'd like that. It would prove her right.");
