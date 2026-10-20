@@ -804,28 +804,90 @@ def l_crucifix_lit(img):
     img.paste(ImageChops.multiply(layer.convert("RGB"), tint), (0, 0), layer.getchannel("A"))
 
 
-def l_lamp(img):
-    """A tall iron stand with a little brass oil lamp and glass chimney, lit."""
-    d = ImageDraw.Draw(img)
+def l_lamp_geom():
+    """Screen centre line, floor row and tray row of the lampstand."""
     base, top = LR.P(LAMP_X, 0, LAMP_Z), LR.P(LAMP_X, LAMP_H, LAMP_Z)
-    shadow(img, "ellipse", [base[0] - 9, base[1] - 3, base[0] + 9, base[1] + 3], 0.5, 2)
-    for dx in (-6, 6):
-        d.line([(base[0], base[1] - 5), (base[0] + dx, base[1] + 1)], fill=IRON, width=2)
-    d.line([(base[0], base[1] - 3), (base[0], base[1] + 2)], fill=IRON, width=2)
-    d.line([(base[0], base[1] - 4), (top[0], top[1])], fill=hx("2a2420"), width=2)
-    d.line([(base[0] - 1, base[1] - 4), (top[0] - 1, top[1])], fill=hx("4a4038"))
-    x, y = int(top[0]), int(top[1])
-    d.rectangle([x - 6, y - 1, x + 6, y + 1], fill=hx("3a3028"))
-    d.ellipse([x - 5, y - 7, x + 5, y - 1], fill=hx("a8803a"), outline=hx("5a4018"))
-    d.line([(x - 3, y - 6), (x + 1, y - 6)], fill=hx("e0c070"))
-    d.rectangle([x - 2, y - 9, x + 2, y - 7], fill=hx("6a5020"))
-    d.polygon([(x - 2, y - 9), (x + 2, y - 9), (x + 3, y - 14), (x + 1, y - 20), (x - 1, y - 20), (x - 3, y - 14)],
-              fill=hx("e8d8a8"))
-    d.line([(x - 1, y - 19), (x - 2, y - 11)], fill=hx("fff8e0"))
-    d.point((x, y - 13), fill=hx("fffce8"))
-    d.point((x, y - 12), fill=hx("ffd060"))
-    d.point((x, y - 11), fill=hx("ff9a30"))
+    return int(top[0]), int(base[1]), int(top[1])
+
+
+def l_lamp(img):
+    """Only the stand's pool of shadow goes under the lamplight; the stand and lamp are laid on after, undithered.
+    Returns the flame point the room's lights are centred on."""
+    x, floor, y = l_lamp_geom()
+    shadow(img, "ellipse", [x - 10, floor - 3, x + 10, floor + 3], 0.55, 2)
     return (x, y - 12)
+
+
+def l_lamp_layer(size):
+    """A wrought-iron stand on scrolled tripod feet, a drip tray, a brass oil font with burner and wick key, and a
+    glass chimney round a lit flame, on a transparent layer. Lit from the flame above and a little left."""
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    x, floor, y = l_lamp_geom()
+    IRON_D, IRON, IRON_L, IRON_H = hx("140f0c"), hx("2a201a"), hx("4a3a2e"), hx("7a6048")
+    # tripod: two splayed legs with curled toes and a third leg going back behind the shaft
+    hub = floor - 7
+    d.line([(x, hub), (x, floor - 3)], fill=IRON_D, width=2)
+    for s in (-1, 1):
+        d.line([(x, hub + 1), (x + 4 * s, floor - 2), (x + 7 * s, floor)], fill=IRON, width=2)
+        d.point((x + 8 * s, floor - 1), fill=IRON)
+        d.point((x + 8 * s, floor - 2), fill=IRON_L)
+        d.point((x + 7 * s, floor + 1), fill=IRON_D)
+    d.line([(x - 1, hub + 1), (x - 3, floor - 2)], fill=IRON_L)
+    d.point((x + 1, floor - 2), fill=IRON_D)
+    d.rectangle([x - 2, hub - 2, x + 1, hub], fill=IRON)
+    d.line([(x - 2, hub - 2), (x + 1, hub - 2)], fill=IRON_L)
+    # the shaft: dark core, a lit left edge that brightens towards the flame
+    d.rectangle([x - 1, y + 2, x, hub - 3], fill=IRON)
+    for yy in range(y + 2, hub - 2):
+        t = (yy - y) / (hub - y)
+        d.point((x - 1, yy), fill=mix(IRON_H, IRON_L, t))
+        d.point((x, yy), fill=mix(IRON, IRON_D, t))
+    # turned knops on the shaft
+    for ky in (y + 16, y + 34):
+        d.rectangle([x - 2, ky - 1, x + 1, ky + 1], fill=IRON)
+        d.line([(x - 2, ky - 1), (x, ky - 1)], fill=IRON_H)
+        d.point((x + 1, ky + 1), fill=IRON_D)
+    # drip tray under the font
+    d.rectangle([x - 7, y, x + 6, y + 1], fill=IRON)
+    d.line([(x - 7, y), (x + 6, y)], fill=IRON_H)
+    d.line([(x - 6, y + 2), (x + 5, y + 2)], fill=IRON_D)
+    d.point((x - 8, y), fill=IRON_L)
+    d.point((x + 7, y), fill=IRON_L)
+    # brass font: rounded, highlight towards the upper left
+    BR_D, BR, BR_L, BR_H = hx("5a3c12"), hx("9a6e26"), hx("d0a048"), hx("fff0b0")
+    d.ellipse([x - 6, y - 8, x + 5, y - 1], fill=BR, outline=BR_D)
+    d.line([(x - 4, y - 7), (x + 2, y - 7)], fill=BR_L)
+    d.line([(x - 5, y - 6), (x - 5, y - 4)], fill=BR_L)
+    d.point((x - 3, y - 6), fill=BR_H)
+    d.point((x - 2, y - 6), fill=BR_H)
+    d.line([(x - 3, y - 2), (x + 3, y - 2)], fill=BR_D)
+    d.line([(x - 5, y - 4), (x + 4, y - 4)], fill=hx("b8863a"))  # stamped band round the belly
+    # burner collar and wick key
+    d.rectangle([x - 3, y - 11, x + 2, y - 9], fill=BR_D)
+    d.line([(x - 3, y - 11), (x + 2, y - 11)], fill=BR_L)
+    d.point((x - 2, y - 10), fill=BR)
+    d.line([(x + 3, y - 10), (x + 4, y - 10)], fill=BR_D)
+    d.rectangle([x + 5, y - 11, x + 6, y - 9], fill=BR_L)
+    d.point((x + 6, y - 9), fill=BR_D)
+    # glass chimney: bulb round the flame, narrowing to a neck; glass is see-through, its edges catch the light
+    glass = (255, 236, 196, 110)
+    bulb = [(x - 2, y - 12), (x - 4, y - 14), (x - 4, y - 19), (x - 2, y - 22), (x - 2, y - 28),
+            (x + 1, y - 28), (x + 1, y - 22), (x + 3, y - 19), (x + 3, y - 14), (x + 1, y - 12)]
+    d.polygon(bulb, fill=glass)
+    edge, edge_d = hx("fff4d8"), hx("c8a878")
+    d.line([(x - 2, y - 12), (x - 4, y - 14), (x - 4, y - 19), (x - 2, y - 22), (x - 2, y - 28)], fill=edge)
+    d.line([(x + 1, y - 12), (x + 3, y - 14), (x + 3, y - 19), (x + 1, y - 22), (x + 1, y - 28)], fill=edge_d)
+    d.line([(x - 2, y - 28), (x + 1, y - 28)], fill=edge)
+    # the flame: a white-hot core in an orange teardrop on the wick
+    d.point((x - 1, y - 21), fill=hx("ffe890"))
+    d.line([(x - 1, y - 20), (x - 1, y - 14)], fill=hx("fffce8"))
+    d.line([(x, y - 19), (x, y - 15)], fill=hx("ffe070"))
+    d.line([(x - 2, y - 18), (x - 2, y - 15)], fill=hx("ffc050"))
+    d.point((x, y - 14), fill=hx("ff9a30"))
+    d.point((x - 2, y - 14), fill=hx("ff9a30"))
+    d.point((x - 1, y - 13), fill=hx("3a2410"))  # the wick
+    return layer
 
 
 def l_nightstand(img, drawer=False, comb=False, mirror=False):
@@ -966,6 +1028,8 @@ def paint_cell(drawer=False, comb=False, mirror=False):
     light(img, "polygon", beam, hx("8898c8"), 0.09, 3)
     light(img, "polygon", core, hx("a8b4e0"), 0.06, 2)
     l_crucifix_lit(img)
+    lamp = l_lamp_layer(img.size)
+    img.paste(lamp.convert("RGB"), (0, 0), lamp.getchannel("A"))
     vignette(img, 0.6, tint=(16, 14, 26), blur=40)
     return img
 
@@ -1024,8 +1088,9 @@ def build():
     full = paint_cell(drawer=True, comb=True, mirror=True)
     only_comb = paint_cell(drawer=True, comb=True)
     pal = palette_of(Image.blend(base, full, 0.5), 128)
-    # the crucifix is too small for dithering: it keeps its exact colours, as in the corridor
-    cross = l_crucifix_layer(base.size).getchannel("A")
+    # the crucifix and the lampstand are too small for dithering: they keep their exact colours, as in the corridor
+    cross = ImageChops.lighter(l_crucifix_layer(base.size).getchannel("A"),
+                               l_lamp_layer(base.size).getchannel("A").point(lambda v: 255 if v else 0))
     px, drawer, comb = (pixelize(im, pal) for im in (base, full, only_comb))
     for out, src in ((px, base), (drawer, full), (comb, only_comb)):
         out.paste(src, (0, 0), cross)

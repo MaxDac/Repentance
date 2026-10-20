@@ -17,7 +17,7 @@ size = Vector2(42, 110)
 size = Vector2(115, 85)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(18, 72)
+size = Vector2(18, 92)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
 size = Vector2(26, 13)
@@ -139,7 +139,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Lampstand"]
-position = Vector2(278, 165)
+position = Vector2(278, 156)
 shape = SubResource("Rect_3")
 
 [node name="Book" type="Area2D" parent="Hotspots"]
