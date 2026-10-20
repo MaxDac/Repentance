@@ -76,10 +76,14 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
     about the rain ends, kisses her. His narration admits the pull he can't resist and the guilt over Rose; then a
     slow fade to black, "Later that night", and a slow fade into her room.
 12. **Motel, that night**: in her room, Micah gets dressed, Eleanor lies under the sheet. A mistake; they won't meet
-    again, and Micah drops the case. The journal goes on at his office.
-13. **Office, then cathedral steps**: Micah drinks whiskey from a cup and chooses to take his wedding ring or leave
-    it behind. The original choice is saved; a left-behind ring can be collected later. He leaves for the cathedral,
-    unable to think of anything but Eleanor.
+    again, and Micah drops the case. He asks where she'll go: away, she has friends and money enough. He suspects it
+    isn't true, but he's too ashamed to ask more, and she sees it; he leaves. "Days later" on black.
+13. **Office, the motel again, then cathedral steps**: Micah drinks whiskey from a cup, admits his shame at walking
+    out and his lust for her, and chooses to take his wedding ring or leave it behind. The original choice is saved;
+    a left-behind ring can be collected later. He goes back to the motel: the drop ladder is pulled up again, and he
+    won't climb it ("Better brace the joe at the desk"). The clerk says she left, then won't say more until Micah
+    hauls him across the counter by his tie ("Nice tie, pal. Your wife's present?"): two men took her, the night
+    Micah left. He walks to the cathedral, unable to think of anything but Eleanor.
 14. **Inside the cathedral**: Micah tells his brother Caleb he's too far off to be saved. Caleb calls it the
    Devil's work. Micah admits he can't get past "hallowed be Thy name" in the Our Father; "Then start there. He
    remembers the rest." "I'll think about that." Coming was a mistake, and Micah walks out.

@@ -69,7 +69,7 @@ public partial class ChicagoMap : Room
         State.SetFlag("map_seen");
         await Game.Run(async () =>
         {
-            await Think("An old map of the city, soft at the folds. Somewhere on it she's breathing, and I let her walk away.");
+            await Think("An old map of the city, soft at the folds. Somewhere on it two men are holding her, and I let them.");
             await Say("I have to find her again.");
         });
     }

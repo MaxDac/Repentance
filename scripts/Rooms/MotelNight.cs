@@ -6,13 +6,16 @@ namespace Repentance.Rooms;
 /// <summary>
 /// A motel room, the night Micah found Eleanor on the fire escape. Micah gets dressed. Eleanor stays against the
 /// pillows under the white sheet. They agree never to see each other again. It plays after the First Interlude and
-/// the rest of their talk on the fire escape (<see cref="MotelFireEscape"/>), then Micah's journal goes on at his office.
+/// the rest of their talk on the fire escape (<see cref="MotelFireEscape"/>), then, days later, Micah's journal goes on
+/// at his office.
 /// In the interludes the room is Eleanor's: in the First she watches the convent from the window until Micah comes;
 /// in the Second, after he has gone, two of the Order's men knock at the door, kick it in and walk her out.
 /// </summary>
 public partial class MotelNight : Room
 {
     private const string EmptyBed = "res://assets/art/rooms/motel_empty.png";
+    /// <summary>The black card between the motel night and the office: Micah's journal skips the days in between.</summary>
+    public const string DaysLater = "Days later";
 
     private bool First => State.HasFlag("interlude1");
     private bool Second => State.HasFlag("interlude2");
@@ -64,8 +67,11 @@ public partial class MotelNight : Room
             await Talk("motel_night");
             await Think("I close the door on her softly. Rose, the boy, and now Eleanor. I'm getting good at doors.");
             await Wait(0.6);
-            await Game.Hud.Fade(1, 1.5);
-            await Game.ChangeRoom("office", "act2");
+            await Game.Hud.Fade(1, MotelFireEscape.NightFade);
+            Game.Hud.ShowCaption(DaysLater);
+            await Wait(MotelFireEscape.NightCaption);
+            Game.Hud.ShowCaption(null);
+            await Game.ChangeRoom("office", "act2", fadeInSeconds: MotelFireEscape.NightFade);
         });
     }
 
