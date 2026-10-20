@@ -236,7 +236,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 - New location: a cheap, dirty lobby, a long way from the Aurelian: peeling paper, a bare bulb, a counter with a
   bell and a register, a key board, a sagging armchair, a roped-off staircase and an umbrella stand by the door.
-- Micah asks the desk clerk whether he has seen Eleanor. The clerk doesn't answer, but he's visibly worried.
+- Micah asks the desk clerk whether he has seen Eleanor, holding her photograph up across the counter (back-view
+  `micah_show_photo_back` / `micah_pocket_photo_back` sprites: only his bent arm shows, the photo is hidden by his
+  back). The clerk doesn't answer, but he's visibly worried.
   A couple of questions show that the motel belongs to the mob without anyone saying so (friends who own the
   building, men who come by on Fridays, a clerk who doesn't want trouble with them). He won't let Micah upstairs.
 - **Puzzle 19 - Fire escape:** take the crook-handled umbrella from the stand; the clerk lets him take it,

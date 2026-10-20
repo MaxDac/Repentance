@@ -844,6 +844,32 @@ def build_show_photo():
     action_strip("micah_pocket_photo", back, [0.15, 0.15, 0.2, 0.3, 0.2], anchor=(FW / 2, FH - 3))
 
 
+# The same gesture seen from behind, for the motel clerk across his counter: the near hand goes inside the coat, then
+# the arm comes up in front of him with the elbow bent out to the side. His back hides the hand and the photograph, so
+# only the flexing arm shows. (near arm or None for the back idle frame, hand inside the coat, seconds);
+# micah_pocket_photo_back plays the same frames back the other way.
+SHOW_PHOTO_BACK_KEYS = [
+    (None, False, 0.2),
+    (((0.16, 0.39, 0.05), (0.06, 0.34, 0.1), (0.01, 0.31, 0.1)), True, 0.3),
+    (((0.18, 0.37, 0.09), (0.05, 0.32, 0.2), (0.01, 0.31, 0.23)), False, 0.2),
+    (((0.19, 0.34, 0.12), (0.04, 0.3, 0.25), (0.0, 0.29, 0.28)), False, 0.15),
+    (((0.2, 0.33, 0.13), (0.03, 0.29, 0.26), (-0.01, 0.28, 0.29)), False, 0.6),
+]
+
+
+def build_show_photo_back():
+    frames, seconds = [], []
+    for pts, in_coat, duration in SHOW_PHOTO_BACK_KEYS:
+        kw = {}
+        if pts:
+            arms = {1: ("pts",) + tuple(list(p) for p in pts), -1: pose(164)["arms"][-1]}
+            kw = dict(arms=arms, behind_arms=(1,), **({"hand_in_coat": 1} if in_coat else {}))
+        frames.append((figure(MICAH, pose(164, **kw), FW, FH), (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_show_photo_back", frames, seconds, anchor=(FW / 2, FH - 3))
+    action_strip("micah_pocket_photo_back", frames[::-1], [0.15, 0.15, 0.2, 0.3, 0.2], anchor=(FW / 2, FH - 3))
+
+
 # Act 2, back at the motel desk: Micah, facing right across the counter, reaches for the clerk's tie, closes his fist
 # on it and hauls it down to the desktop. (near arm (elbow, wrist, hand), lean, seconds); the last frame is held.
 TIE_REACH = ("pts", (0.17, 0.31, 0.13), (0.07, 0.24, 0.28), (0.05, 0.225, 0.32))
@@ -1425,6 +1451,7 @@ def build():
     build_drinking()
     build_gin()
     build_show_photo()
+    build_show_photo_back()
     tie_pull_strips()
     build_smoke()
     for name, spec, arms, *extra in NPCS:

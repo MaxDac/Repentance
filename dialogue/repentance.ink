@@ -544,8 +544,10 @@ THOUGHT: Going on four days she'd been gone from that cell. Four days is a long 
 {has_flag("clerk_talked"): -> motel_clerk.again}
 CLERK: Rooms are a dollar a night. Pay in advance, no visitors, no questions.
 MICAH: I'm not after a room. I'm after a woman. Dark hair, fur collar, a face you'd remember. Name of Eleanor.
+CUE: show_photo
 CLERK: ...
 CLERK: Never saw her.
+CUE: pocket_photo
 THOUGHT: He said it to the register. A man who never saw anybody doesn't usually sweat through his collar saying so.
 * [You're sweating, friend. It's not that warm in here.]
     CLERK: It's the radiator. Landlord won't fix it.

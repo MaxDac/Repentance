@@ -53,7 +53,9 @@ public partial class MotelLobby : Room
                 await Say("clerk", "Put your money away, mister. There's no room for you here at any price.");
                 return true;
             case ("clerk", Verb.UseItem) when item == "photo":
+                await ShowPhoto("clerk");
                 await Say("clerk", "I told you. I never saw nobody.");
+                await PocketPhoto();
                 await Think("He looked at the photograph for half a second, then he looked at the stairs. That was answer enough.");
                 return true;
             case ("clerk", Verb.UseItem) when item == "revolver":
@@ -146,11 +148,14 @@ public partial class MotelLobby : Room
     }
 
     /// <summary>
-    /// "tie": Micah steps up to the counter, grabs the clerk's tie and hauls his face down onto the counter top.
+    /// Act 1: "show_photo" / "pocket_photo": Micah holds Eleanor's photograph up across the counter, then puts it away.
+    /// Act 2: "tie": Micah steps up to the counter, grabs the clerk's tie and hauls his face down onto the counter top.
     /// "release": he lets go, and the clerk straightens up behind the counter.
     /// </summary>
     public override async Task OnCue(string cue)
     {
+        if (cue == "show_photo") { await ShowPhoto("clerk"); return; }
+        if (cue == "pocket_photo") { await PocketPhoto(); return; }
         if (FindActor("clerk") is not { } clerk) return;
         switch (cue)
         {
