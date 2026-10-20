@@ -56,41 +56,192 @@ def floor(img):
     light(img, "ellipse", [300, FLOOR, 380, 180], hx("fff0c0"), 0.2, 10)
 
 
+WALNUT, WALNUT_D, WALNUT_L = hx("5a3820"), hx("2e1a0c"), hx("8a5a32")
+SLOT_IN = hx("140a04")
+LAMP_X = 137
+# what each pigeonhole holds, by (row, column): keys, messages, both, and the lady's glove from the look text
+CUBBY = {(0, 0): "key", (0, 1): "msg", (0, 3): "key", (0, 5): "keymsg", (0, 7): "key",
+         (1, 0): "msg", (1, 2): "key", (1, 4): "msg", (1, 6): "key", (1, 7): "msg",
+         (2, 1): "key", (2, 3): "keymsg", (2, 5): "key", (2, 6): "glove",
+         (3, 0): "key", (3, 2): "msg", (3, 4): "key", (3, 5): "msg", (3, 7): "key"}
+
+
 def plaque_and_cubbies(img):
     d = ImageDraw.Draw(img)
     d.rectangle([28, 20, 128, 36], fill=hx("1e1a14"))
     d.rectangle([30, 22, 126, 34], outline=GOLD)
     text(img, (78, 28), "THE AURELIAN", GOLD, size=8)
-    d.rectangle([22, 40, 134, 92], fill=hx("4a2e1a"))
+    key_board(img)
+
+
+def key_board(img):
+    """Walnut pigeonhole rack: stepped cornice, gold frame, recessed slots with brass number plates."""
+    d = ImageDraw.Draw(img)
+    shadow(img, "rect", [22, 40, 138, 96], 0.45, 3)
+    # stepped deco cornice
+    d.rectangle([18, 37, 138, 40], fill=WALNUT_D)
+    d.line([(18, 37), (138, 37)], fill=GOLD)
+    d.rectangle([20, 41, 136, 42], fill=WALNUT)
+    d.line([(20, 42), (136, 42)], fill=GOLD_D)
+    # carcass
+    vgrad(img, (21, 43, 135, 92), WALNUT, hx("402614"))
+    noise(img, (21, 43, 135, 92), 4, 31)
+    d.rectangle([21, 43, 135, 92], outline=WALNUT_D)
+    d.rectangle([23, 44, 133, 90], outline=GOLD_D)
+    d.line([(24, 45), (132, 45)], fill=WALNUT_L)
+    # plinth
+    d.rectangle([20, 91, 136, 94], fill=WALNUT_D)
+    d.line([(20, 91), (136, 91)], fill=GOLD)
     for r in range(4):
         for c in range(8):
-            x, y = 26 + c * 13, 43 + r * 12
-            d.rectangle([x, y, x + 10, y + 9], fill=hx("2a180c"))
-            if (r * 3 + c) % 4 == 1:
-                d.rectangle([x + 2, y + 4, x + 8, y + 9], fill=hx("e0d8c0"))
-            if (r + c) % 5 == 2:
-                d.line([(x + 5, y + 1), (x + 5, y + 6)], fill=GOLD)
-                d.point((x + 5, y + 7), fill=GOLD)
+            x, y = 26 + c * 13, 47 + r * 11
+            cubby(d, x, y, CUBBY.get((r, c)))
+
+
+def cubby(d, x, y, what):
+    # recess: dark top/left lip, warm lit sill
+    d.rectangle([x, y, x + 10, y + 8], fill=SLOT_IN)
+    d.line([(x + 1, y + 8), (x + 10, y + 8)], fill=hx("3a2212"))
+    d.line([(x + 10, y + 1), (x + 10, y + 7)], fill=hx("2a1608"))
+    d.line([(x - 1, y + 9), (x + 11, y + 9)], fill=WALNUT_L)
+    d.point((x + 5, y + 10), fill=GOLD)
+    d.point((x + 4, y + 10), fill=GOLD_D)
+    d.point((x + 6, y + 10), fill=GOLD_D)
+    if what in ("msg", "keymsg"):
+        mx = x + (1 if what == "keymsg" else 2)
+        d.rectangle([mx, y + 4, mx + 6, y + 7], fill=hx("e8e0c8"))
+        d.line([(mx, y + 4), (mx + 3, y + 6), (mx + 6, y + 4)], fill=hx("a89c84"))
+        d.line([(mx, y + 7), (mx + 6, y + 7)], fill=hx("c4b898"))
+    if what in ("key", "keymsg"):
+        kx = x + (8 if what == "keymsg" else 5)
+        d.point((kx, y + 1), fill=hx("b0a080"))
+        d.line([(kx, y + 2), (kx, y + 4)], fill=GOLD)
+        d.rectangle([kx - 1, y + 5, kx + 1, y + 6], outline=GOLD)
+        d.point((kx, y + 5), fill=hx("fff0b0"))
+        if what == "key":
+            d.rectangle([kx - 1, y + 7, kx + 1, y + 8], fill=hx("c8382c"))
+    if what == "glove":
+        # a lady's evening glove: cuff tucked in the slot, fingers draped over the sill
+        pale, crease = hx("e4d4e4"), hx("a490ac")
+        d.rectangle([x + 1, y + 4, x + 5, y + 8], fill=crease)
+        d.rectangle([x + 2, y + 5, x + 6, y + 8], fill=pale)
+        d.polygon([(x + 6, y + 6), (x + 9, y + 7), (x + 9, y + 9), (x + 6, y + 9)], fill=pale)
+        for fx, ln in ((x + 6, 2), (x + 7, 3), (x + 8, 3), (x + 9, 2)):
+            d.line([(fx, y + 10), (fx, y + 9 + ln)], fill=pale if fx != x + 7 else crease)
 
 
 def desk(img, d=None):
+    """Concierge desk: black-marble top, walnut front with fluted pilasters and an inlaid sunburst panel."""
     d = d or ImageDraw.Draw(img)
-    vgrad(img, (14, 104, 142, 150), hx("3a2414"), hx("1e120a"))
-    d.rectangle([10, 98, 146, 104], fill=hx("1e1a20"))
-    d.line([(10, 98), (146, 98)], fill=hx("6a6070"))
-    d.line([(10, 104), (146, 104)], fill=GOLD)
-    sunburst(d, 78, 150, 34, 14, hx("6a4424"), hx("4a2c16"))
-    for x in (20, 136):
-        d.rectangle([x - 3, 106, x + 3, 150], fill=hx("2a1a10"))
-        d.line([(x, 106), (x, 150)], fill=GOLD_D)
-    d.line([(14, 150), (142, 150)], fill=GOLD)
-    # bell, ledger, lamp
-    d.chord([116, 92, 126, 102], 180, 360, fill=GOLD)
-    d.point((121, 91), fill=GOLD)
-    d.polygon([(40, 96), (64, 96), (66, 98), (38, 98)], fill=hx("e0d8c0"))
-    d.line([(52, 96), (52, 98)], fill=hx("6a1a1a"))
-    d.rectangle([92, 82, 94, 97], fill=GOLD_D)
-    d.polygon([(86, 82), (100, 82), (96, 74), (90, 74)], fill=hx("f0e0b0"))
+    x0, x1 = 10, 146
+    shadow(img, "rect", [x0 - 2, 150, x1 + 4, 156], 0.55, 3)
+    # walnut front
+    vgrad(img, (x0 + 2, 104, x1 - 2, 147), hx("4a2c16"), hx("24140a"))
+    noise(img, (x0 + 2, 104, x1 - 2, 147), 4, 32)
+    for px0, px1 in ((24, 46), (110, 132)):
+        side_panel(img, d, px0, px1)
+    centre_panel(img, d, 52, 104)
+    for x in (16, 140):
+        fluted_post(d, x)
+    # plinth
+    d.rectangle([x0, 147, x1, 152], fill=hx("161216"))
+    d.line([(x0, 147), (x1, 147)], fill=GOLD)
+    d.line([(x0, 149), (x1, 149)], fill=hx("3a3238"))
+    # marble top: lit surface, bevelled front edge, gold under-strip
+    d.rectangle([x0 - 2, 97, x1 + 2, 98], fill=hx("4a4250"))
+    d.line([(x0 - 2, 97), (x1 + 2, 97)], fill=hx("8a8094"))
+    d.rectangle([x0 - 2, 99, x1 + 2, 102], fill=hx("1e1a20"))
+    d.line([(x0 - 2, 99), (x1 + 2, 99)], fill=hx("5a5262"))
+    for vx in (22, 58, 96, 128):
+        d.line([(vx, 100), (vx + 5, 102)], fill=hx("3a3440"))
+    d.line([(x0 - 2, 103), (x1 + 2, 103)], fill=GOLD)
+    shadow(img, "rect", [x0, 104, x1, 106], 0.5, 1)
+    ledger(d)
+    bell(d)
+    lamp(img, d)
+
+
+def fluted_post(d, x):
+    d.rectangle([x - 4, 104, x + 4, 147], fill=hx("2a1a10"))
+    for k, col in zip(range(-3, 4), (hx("1a0e06"), GOLD_D, hx("3a2414"), GOLD_D, hx("3a2414"), GOLD_D, hx("1a0e06"))):
+        d.line([(x + k, 109), (x + k, 142)], fill=col)
+    d.rectangle([x - 5, 104, x + 5, 107], fill=GOLD_D)
+    d.line([(x - 5, 104), (x + 5, 104)], fill=GOLD)
+    d.rectangle([x - 5, 143, x + 5, 146], fill=GOLD_D)
+    d.line([(x - 5, 146), (x + 5, 146)], fill=GOLD)
+
+
+def side_panel(img, d, x0, x1):
+    y0, y1 = 110, 141
+    vgrad(img, (x0, y0, x1, y1), hx("3a2210"), hx("1e1008"))
+    d.rectangle([x0, y0, x1, y1], outline=GOLD_D)
+    d.line([(x0 + 1, y1), (x1, y1)], fill=WALNUT_L)
+    cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+    # stepped gold lozenge
+    for k, col in ((9, GOLD_D), (6, GOLD), (3, GOLD_D)):
+        d.polygon([(cx, cy - k - 3), (cx + k, cy), (cx, cy + k + 3), (cx - k, cy)], outline=col)
+    d.point((cx, cy), fill=GOLD)
+
+
+def centre_panel(img, d, x0, x1):
+    y0, y1 = 108, 143
+    cx = (x0 + x1) // 2
+    vgrad(img, (x0, y0, x1, y1), hx("2a180c"), hx("1a0e06"))
+    d.rectangle([x0, y0, x1, y1], outline=GOLD)
+    d.rectangle([x0 + 2, y0 + 2, x1 - 2, y1 - 2], outline=GOLD_D)
+    # fine inlaid fan of alternating veneers, rays in gold
+    r = 25
+    sunburst(d, cx, y1 - 3, r, 16, hx("8a5a30"), hx("5a3618"))
+    for i in range(17):
+        a = math.pi + math.pi * i / 16
+        d.line([(cx, y1 - 3), (round(cx + r * math.cos(a)), round(y1 - 3 + r * math.sin(a)))], fill=GOLD_D)
+    d.arc([cx - r, y1 - 3 - r, cx + r, y1 - 3 + r], 180, 360, fill=GOLD)
+    d.arc([cx - r - 3, y1 - 6 - r, cx + r + 3, y1 + r], 180, 360, fill=GOLD_D)
+    d.pieslice([cx - 5, y1 - 8, cx + 5, y1 + 2], 180, 360, fill=GOLD, outline=GOLD_D)
+    d.line([(x0 + 3, y1 - 3), (x1 - 3, y1 - 3)], fill=GOLD_D)
+    light(img, "ellipse", [cx - 20, y0 + 4, cx + 20, y1 - 6], hx("ffe0a0"), 0.12, 6)
+
+
+def ledger(d):
+    # open guest book with a pen across it
+    d.polygon([(32, 95), (46, 95), (47, 97), (31, 97)], fill=hx("e8e0c8"))
+    d.polygon([(47, 95), (61, 95), (63, 97), (47, 97)], fill=hx("d8cfb4"))
+    d.line([(47, 94), (47, 97)], fill=hx("6a1a1a"))
+    d.line([(31, 98), (63, 98)], fill=hx("5a1414"))
+    for y in (95, 96):
+        d.line([(34, y), (44, y)], fill=hx("b8ae96"))
+    d.line([(50, 96), (58, 94)], fill=hx("1a1418"))
+    d.point((59, 94), fill=GOLD)
+
+
+def bell(d):
+    d.rectangle([115, 96, 127, 97], fill=GOLD_D)
+    d.chord([116, 90, 126, 102], 180, 360, fill=GOLD)
+    d.arc([116, 90, 126, 102], 200, 250, fill=hx("fff0b0"))
+    d.line([(121, 88), (121, 90)], fill=GOLD_D)
+    d.point((121, 87), fill=GOLD)
+
+
+def lamp(img, d):
+    """Deco desk lamp at the end of the counter: stepped brass base, slim stem, fluted silk shade."""
+    x = LAMP_X
+    light(img, "ellipse", [x - 24, 62, x + 20, 96], hx("ffe8b0"), 0.2, 8)
+    light(img, "ellipse", [x - 12, 96, x + 9, 99], hx("fff0c0"), 0.25, 1)
+    d.rectangle([x - 5, 95, x + 5, 96], fill=GOLD_D)
+    d.line([(x - 5, 95), (x + 5, 95)], fill=GOLD)
+    d.rectangle([x - 3, 93, x + 3, 94], fill=GOLD)
+    d.rectangle([x - 1, 82, x, 92], fill=GOLD_D)
+    d.line([(x - 1, 82), (x - 1, 92)], fill=GOLD)
+    top, bot = 73, 82
+    shade = [(x - 4, top), (x + 3, top), (x + 7, bot), (x - 8, bot)]
+    d.polygon(shade, fill=hx("f0e0b0"))
+    for k in range(-6, 6, 3):
+        d.line([(x + k * 4 // 7, top + 1), (x + k, bot - 1)], fill=hx("d8c088"))
+    d.line([(x + 3, top), (x + 7, bot)], fill=hx("c8a868"))
+    d.line([(x - 4, top), (x + 3, top)], fill=GOLD)
+    d.line([(x - 8, bot), (x + 7, bot)], fill=GOLD)
+    d.line([(x - 7, bot + 1), (x + 6, bot + 1)], fill=hx("fff8d8"))
+    d.point((x, top - 1), fill=GOLD)
 
 
 def elevator(img):
@@ -446,9 +597,9 @@ def build():
     save(px, "rooms", "lobby.png")
     mask = Image.new("L", (W, H + TOP), 0)
     md = ImageDraw.Draw(mask)
-    md.rectangle([10, 98 + TOP, 146, 152 + TOP], fill=255)
-    md.rectangle([86, 74 + TOP, 100, 98 + TOP], fill=255)
-    md.rectangle([114, 90 + TOP, 128, 98 + TOP], fill=255)
-    md.rectangle([36, 94 + TOP, 68, 98 + TOP], fill=255)
+    md.rectangle([8, 97 + TOP, 148, 152 + TOP], fill=255)
+    md.rectangle([LAMP_X - 8, 72 + TOP, LAMP_X + 8, 97 + TOP], fill=255)
+    md.rectangle([115, 87 + TOP, 127, 97 + TOP], fill=255)
+    md.rectangle([31, 93 + TOP, 63, 97 + TOP], fill=255)
     save(cut(px, mask), "rooms", "lobby_fg.png")
     return px
