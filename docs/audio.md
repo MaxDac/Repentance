@@ -20,9 +20,13 @@ when diagnosing audio; a clean launcher exit alone does not prove sound played.
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
-`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `Bell`, `Rain`, `Thunder`.
+`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`).
+- **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
+  script's `ChangeRoom`), `DoorOpen` plays as the screen fades out and `DoorClose` once the new room has faded in.
+  A door that opens on screen first (the office) calls `Game.OpenDoor()` with its animation; it sounds once per action.
+  Refused doors, archways, map exits and cutscene room changes stay silent.
 - **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)). The title screen
   (`Game.ShowTitle`) plays the same rain at full level; hiding it hands the ambience back to the room.
 - **Cues**: only lines whose text starts with `*` (Ink or `Say`). Ordinary speech never plays sounds.
@@ -125,6 +129,7 @@ Prefer the recorded instruments over the synthesized `Piano`, `Trumpet` and `Upr
 |---|---|
 | `dotnet run --project tools/music -- recordings` | Downloads, cuts, pitch-checks, trims and resamples the recorded notes the scores need; deletes unused ones |
 | `dotnet run --project tools/music -- render <Track> [out.wav] [loops]` | Renders a track exactly as the game does to a 16-bit stereo WAV, twice round by default so the seam can be heard |
+| `dotnet run --project tools/music -- sound <Sound> [out.wav]` | Renders one sound effect exactly as the game does to a 16-bit mono WAV |
 
 Use `render` to listen to a score change in seconds, without building or importing the game; write the WAV outside
 the repository (or delete it) so it is not committed. The folder has a `.gdignore`, and `Repentance.csproj` excludes

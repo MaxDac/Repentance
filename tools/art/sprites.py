@@ -768,6 +768,49 @@ def build_gin():
     action_strip("micah_gin", frames, seconds, anchor=(FW / 2, FH - 3))
 
 
+# Micah shows the bellboy Eleanor's photograph, facing right: the near hand goes inside his coat, comes out with the
+# card and holds it up at arm's length for the bellboy to look at. (near arm, hand inside the coat, card shown,
+# seconds); micah_pocket_photo plays the same keys back the other way.
+_P_SIDE = ("side", 0, 0, 0)
+_P_POCKET = ("pts", (0.16, 0.38, 0.04), (0.08, 0.31, 0.08), (0.03, 0.29, 0.09))
+_P_DRAWN = ("pts", (0.16, 0.38, 0.05), (0.09, 0.32, 0.11), (0.06, 0.3, 0.13))
+_P_RISING = ("pts", (0.16, 0.37, 0.1), (0.1, 0.31, 0.2), (0.08, 0.29, 0.24))
+_P_SHOWN = ("pts", (0.15, 0.34, 0.14), (0.1, 0.27, 0.28), (0.09, 0.255, 0.32))
+SHOW_PHOTO_KEYS = [
+    (_P_SIDE, False, False, 0.2),
+    (_P_POCKET, True, False, 0.3),
+    (_P_DRAWN, False, True, 0.2),
+    (_P_RISING, False, True, 0.15),
+    (_P_SHOWN, False, True, 0.6),
+]
+PHOTO_CARD = ((236, 226, 196, 255), (184, 168, 132, 255), (122, 92, 62, 255), (62, 44, 32, 255))
+
+
+def _photo_card(img, hand):
+    """The photograph held up in the fingers: a cream mount round a little sepia face under dark hair."""
+    from PIL import ImageDraw
+    d = ImageDraw.Draw(img)
+    x, y = (math.floor(v) for v in hand)
+    d.rectangle([x - 1, y - 5, x + 2, y], fill=PHOTO_CARD[0])
+    d.line([(x + 2, y - 5), (x + 2, y)], fill=PHOTO_CARD[1])
+    d.rectangle([x, y - 4, x + 1, y - 2], fill=PHOTO_CARD[2])
+    d.line([(x, y - 4), (x + 1, y - 4)], fill=PHOTO_CARD[3])
+    return img
+
+
+def build_show_photo():
+    frames, seconds = [], []
+    for arm, in_coat, shown, duration in SHOW_PHOTO_KEYS:
+        marks = {}
+        ps = pose(90, arms={1: arm, -1: _P_SIDE}, marks=marks, **({"hand_in_coat": 1} if in_coat else {}))
+        img = figure(MICAH, ps, FW, FH)
+        frames.append((_photo_card(img, marks["hand1"]) if shown else img, (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_show_photo", frames, seconds, anchor=(FW / 2, FH - 3))
+    back = frames[::-1]
+    action_strip("micah_pocket_photo", back, [0.15, 0.15, 0.2, 0.3, 0.2], anchor=(FW / 2, FH - 3))
+
+
 # Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,
 # then dips her fingers in the compact and lifts a pinch of powder to her nose: (hand height, reach, powder, nod, s).
 POWDER_KEYS = [
@@ -1237,6 +1280,7 @@ def build():
     door_strip(ROSE, "rose_open_door", 20)
     build_drinking()
     build_gin()
+    build_show_photo()
     build_smoke()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))

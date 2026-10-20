@@ -110,6 +110,7 @@ shape = SubResource("StreetShape")
 [node name="MotelDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "motel_door"
+Door = true
 DisplayName = "motel door"
 LookText = "The motel door, the paint coming off in sheets. ROOMS, it says, stencilled by somebody in a hurry."
 WalkTo = Vector2(185, 214)

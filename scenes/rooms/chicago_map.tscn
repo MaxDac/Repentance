@@ -13,28 +13,28 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_tribune.png" id="m_tribune"]
 
 [sub_resource type="RectangleShape2D" id="Rect_hotel"]
-size = Vector2(64, 28)
+size = Vector2(53, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_library"]
-size = Vector2(50, 28)
+size = Vector2(50, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_church"]
-size = Vector2(62, 28)
+size = Vector2(62, 22)
 
 [sub_resource type="RectangleShape2D" id="Rect_office"]
-size = Vector2(41, 28)
+size = Vector2(44, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_club"]
-size = Vector2(54, 28)
+size = Vector2(81, 25)
 
 [sub_resource type="RectangleShape2D" id="Rect_convent"]
-size = Vector2(54, 28)
+size = Vector2(52, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_harrington"]
-size = Vector2(69, 28)
+size = Vector2(64, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_tribune"]
-size = Vector2(49, 28)
+size = Vector2(51, 24)
 
 [node name="ChicagoMap" type="Node2D"]
 script = ExtResource("1_ChicagoMap")
@@ -50,42 +50,42 @@ centered = false
 [node name="Markers" type="Node2D" parent="."]
 z_index = -9
 [node name="Library" type="Sprite2D" parent="Markers"]
-position = Vector2(299, 48)
+position = Vector2(301, 178)
 texture = ExtResource("m_library")
 centered = false
 
 [node name="Church" type="Sprite2D" parent="Markers"]
-position = Vector2(89, 112)
+position = Vector2(283, 87)
 texture = ExtResource("m_cathedral")
 centered = false
 
 [node name="Office" type="Sprite2D" parent="Markers"]
-position = Vector2(273, 146)
+position = Vector2(157, 172)
 texture = ExtResource("m_office")
 centered = false
 
 [node name="Club" type="Sprite2D" parent="Markers"]
-position = Vector2(287, 202)
+position = Vector2(216, 130)
 texture = ExtResource("m_club")
 centered = false
 
 [node name="Convent" type="Sprite2D" parent="Markers"]
-position = Vector2(237, 80)
+position = Vector2(207, 30)
 texture = ExtResource("m_convent")
 centered = false
 
 [node name="Harrington" type="Sprite2D" parent="Markers"]
-position = Vector2(137, 174)
+position = Vector2(212, 202)
 texture = ExtResource("m_harrington")
 centered = false
 
 [node name="Tribune" type="Sprite2D" parent="Markers"]
-position = Vector2(325, 78)
+position = Vector2(300, 130)
 texture = ExtResource("m_tribune")
 centered = false
 
 [node name="Hotel" type="Sprite2D" parent="Markers"]
-position = Vector2(45, 194)
+position = Vector2(329, 58)
 texture = ExtResource("m_hotel")
 centered = false
 
@@ -108,7 +108,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Library"]
-position = Vector2(323, 61)
+position = Vector2(322, 186)
 shape = SubResource("Rect_library")
 
 [node name="Church" type="Area2D" parent="Hotspots"]
@@ -120,7 +120,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Church"]
-position = Vector2(119, 125)
+position = Vector2(310, 94)
 shape = SubResource("Rect_church")
 
 [node name="Office" type="Area2D" parent="Hotspots"]
@@ -132,7 +132,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Office"]
-position = Vector2(292, 159)
+position = Vector2(175, 180)
 shape = SubResource("Rect_office")
 
 [node name="Club" type="Area2D" parent="Hotspots"]
@@ -144,7 +144,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Club"]
-position = Vector2(313, 215)
+position = Vector2(254, 138)
 shape = SubResource("Rect_club")
 
 [node name="Convent" type="Area2D" parent="Hotspots"]
@@ -156,7 +156,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Convent"]
-position = Vector2(263, 93)
+position = Vector2(229, 38)
 shape = SubResource("Rect_convent")
 
 [node name="Harrington" type="Area2D" parent="Hotspots"]
@@ -168,7 +168,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Harrington"]
-position = Vector2(170, 187)
+position = Vector2(242, 210)
 shape = SubResource("Rect_harrington")
 
 [node name="Tribune" type="Area2D" parent="Hotspots"]
@@ -180,7 +180,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Tribune"]
-position = Vector2(348, 91)
+position = Vector2(321, 138)
 shape = SubResource("Rect_tribune")
 
 [node name="Hotel" type="Area2D" parent="Hotspots"]
@@ -192,5 +192,5 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Hotel"]
-position = Vector2(77, 208)
+position = Vector2(351, 66)
 shape = SubResource("Rect_hotel")

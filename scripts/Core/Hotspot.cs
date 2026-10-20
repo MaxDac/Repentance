@@ -19,6 +19,8 @@ public partial class Hotspot : Area2D
     /// <summary>If set, "Walk to"/"Open" moves the player to this room (file name in scenes/rooms).</summary>
     [Export] public string ExitTo = "";
     [Export] public string ExitEntry = "";
+    /// <summary>A door to another room: leaving through it (an exit, or a room script's ChangeRoom) sounds it opening and shutting.</summary>
+    [Export] public bool Door;
     /// <summary>Comma-separated flags that must all be set for this hotspot to exist.</summary>
     [Export] public string ShowIfFlags = "";
     /// <summary>Comma-separated flags; if any is set the hotspot is hidden.</summary>

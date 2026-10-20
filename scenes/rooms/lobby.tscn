@@ -237,6 +237,7 @@ shape = SubResource("Rect_10")
 [node name="ServiceDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "service_door"
+Door = true
 DisplayName = "staff door"
 LookText = "STAFF. Behind it, the service elevator: the Aurelian's back stairs for maids, bags and secrets."
 WalkTo = Vector2(327, 180)

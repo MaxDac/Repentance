@@ -13,7 +13,7 @@ public class SceneGraphTests
     /// <summary>Entries deliberately off the floor: the player is hidden there and teleported before he can move.</summary>
     private static readonly HashSet<string> OffFloorEntries = new();
 
-    private sealed record HotspotDef(string Node, string Id, (float X, float Y)? WalkTo, string ExitTo, string ExitEntry);
+    private sealed record HotspotDef(string Node, string Id, (float X, float Y)? WalkTo, string ExitTo, string ExitEntry, bool Door);
 
     private sealed record RoomDef(
         string Name,
@@ -78,7 +78,7 @@ public class SceneGraphTests
                 (float, float)? walkTo = Prop("WalkTo") is { } w && Vec.Match(w) is { Success: true } wv
                     ? (F(wv.Groups[1].Value), F(wv.Groups[2].Value)) : null;
                 hotspots.Add(new HotspotDef(name, id.Trim('"'), walkTo,
-                    Prop("ExitTo")?.Trim('"') ?? "", Prop("ExitEntry")?.Trim('"') ?? ""));
+                    Prop("ExitTo")?.Trim('"') ?? "", Prop("ExitEntry")?.Trim('"') ?? "", Prop("Door") == "true"));
             }
         }
         return new RoomDef(Path.GetFileNameWithoutExtension(path), rootScript, floor, entries, hotspots);
@@ -124,6 +124,22 @@ public class SceneGraphTests
                 problems.Add($"{room.Name}/{h.Id} exits to missing room '{h.ExitTo}'");
             else if (!target.Entries.ContainsKey(h.ExitEntry))
                 problems.Add($"{room.Name}/{h.Id} exits to {h.ExitTo} entry '{h.ExitEntry}', which has no marker");
+        }
+        Assert.Empty(problems);
+    }
+
+    [Fact]
+    public void DoorHotspots_LeadToAnotherRoom()
+    {
+        var doors = Rooms.Value.Values.SelectMany(r => r.Hotspots.Where(h => h.Door).Select(h => (Room: r, Hotspot: h))).ToList();
+        Assert.True(doors.Count > 20, $"only {doors.Count} door hotspots found");
+        var problems = new List<string>();
+        foreach (var (room, h) in doors)
+        {
+            if (h.ExitTo != "") continue;
+            var script = room.Script is { } s ? File.ReadAllText(Path.Combine(Root.Value, s)) : "";
+            if (!script.Contains($"\"{h.Id}\"") || !script.Contains("ChangeRoom("))
+                problems.Add($"{room.Name}/{h.Id} is a Door but neither exits nor is handled by a room script that changes room");
         }
         Assert.Empty(problems);
     }
