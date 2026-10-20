@@ -75,4 +75,25 @@ public class RainTests
         Assert.Equal(acts[2], RainWeather.ForAct(7));
         Assert.Equal(acts[0], RainWeather.ForAct(0));
     }
+
+    [Fact]
+    public void PanesOfOneWindowShareTheRain()
+    {
+        // motel_night: four panes split by 2px muntins, one window
+        var motel = new List<RainPane> { new(318, 57, 31, 31), new(351, 57, 31, 31), new(318, 90, 31, 32), new(351, 90, 31, 32) };
+        var window = Assert.Single(RainPanes.Windows(motel));
+        Assert.Equal([0, 1, 2, 3], window);
+        Assert.Equal(new RainPane(318, 57, 64, 65), RainPanes.Bounds(motel, window));
+
+        // church_interior: two windows across the nave stay apart
+        var church = new List<RainPane> { new(64, 62, 36, 85), new(381, 60, 35, 70) };
+        Assert.Equal(2, RainPanes.Windows(church).Count);
+
+        // a row of bars joins transitively; a far pane stays on its own
+        var row = new List<RainPane> { new(0, 0, 5, 10), new(40, 0, 5, 10), new(7, 0, 5, 10), new(14, 0, 5, 10) };
+        var groups = RainPanes.Windows(row);
+        Assert.Equal(2, groups.Count);
+        Assert.Equal([0, 2, 3], groups[0]);
+        Assert.Equal([1], groups[1]);
+    }
 }
