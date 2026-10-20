@@ -200,7 +200,7 @@ public partial class Speakeasy : Room
     }
 
     /// <summary>Seconds the screen stays black while Sal does his talking out back, before Micah comes to in the alley.</summary>
-    public const double BeatingBlackout = 2.0;
+    public const double BeatingBlackout = 0.45;
 
     /// <summary>Sal drags Micah out back: the screen goes black for the beating, then fades in slowly on the alley.</summary>
     private async Task OutBack()

@@ -302,7 +302,9 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
 * {has_item("photo") or knows_note("eleanor")} [Seen this lady?]
+    CUE: show_photo
     BELLBOY: Maybe I have, maybe I haven't. My memory works better when it's been fed.
+    CUE: pocket_photo
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
 * [How's business?]

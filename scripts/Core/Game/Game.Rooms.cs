@@ -60,6 +60,7 @@ public partial class Game
             var marker = Room!.GetNodeOrNull<Node2D>($"Entries/{entry}");
             var facing = marker != null && marker.HasMeta("facing") ? (Facing)marker.GetMeta("facing").AsInt32() : Facing.Down;
             Player.Teleport(Room.EntryPoint(entry), facing);
+            if (!SkipRoomEnter) Room.OnArriving(entry);
             await Hud.Fade(0, fadeInSeconds);
             if (door) Sfx.Play(Sound.DoorClose);
         }

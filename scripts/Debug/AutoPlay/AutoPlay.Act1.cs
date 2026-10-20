@@ -86,6 +86,11 @@ public partial class AutoPlay
 
         await Shot("lobby");
         await game.Perform(Verb.Talk, "concierge");
+        var showing = game.Perform(Verb.UseItem, "bellboy", "photo");
+        await Until(() => game.Player.PoseName == "micah_show_photo" || showing.IsCompleted);
+        Check(game.Player.PoseName == "micah_show_photo", "Micah holds Eleanor's photo out to the bellboy");
+        await showing;
+        Check(game.Player.PoseName == null, "the photo goes back inside Micah's coat");
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room is Rooms.Lobby, "the revolving door holds Micah in the lobby before the bellboy's tip");
         await game.Perform(Verb.Talk, "bellboy");
@@ -247,6 +252,7 @@ public partial class AutoPlay
             "the gin is offered only after Tony names the bathtub gin");
         int thunks = game.Sfx.Count(Sound.Thunk);
         await Until(() => game.Room?.Name == "Alley");
+        Check(game.Player.PoseName == "micah_kneel", "Micah is already on his knees when the alley fades in");
         Check(_offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").Count(o => o.Options.Any(l => l.StartsWith("Bathtub?"))) == 1 &&
             CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");

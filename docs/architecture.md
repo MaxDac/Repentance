@@ -112,8 +112,8 @@ Inventory actions follow the same pattern with their own chains:
 
 `Game.ChangeRoom(scene, entry)`: validate scene and marker -> fade out (0.35 s) -> unload the old room -> instance
 `res://scenes/rooms/<scene>.tscn` -> reparent the persistent `Player` into its `World` -> pick the player sheet,
-ambience and music -> place the player at `Entries/<entry>` facing `metadata/facing` -> fade in ->
-`await room.OnEnter(entry)` -> queue autosave for the next idle frame. Code: `scripts/Core/Game/Game.Rooms.cs`.
+ambience and music -> place the player at `Entries/<entry>` facing `metadata/facing` -> `room.OnArriving(entry)` ->
+fade in -> `await room.OnEnter(entry)` -> queue autosave for the next idle frame. Code: `scripts/Core/Game/Game.Rooms.cs`.
 
 ## Story structure in code
 
