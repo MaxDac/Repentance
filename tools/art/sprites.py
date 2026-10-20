@@ -119,7 +119,8 @@ NUN = dict(h=61, sw=0.122, hw=0.046, waist=0.084, hipw=0.096, skin="dcb49a", hai
            old=True, soft_face=True, lips="a07468", lips_lo="8a5e54", eye="3a3a44", brow="5a4a44", hat="veil",
            hat_col="1a181e", coif="e8e4dc", torso="2a2830", sleeves="2a2830",
            coat=dict(col="2a2830", top=0.40, hem=0.97, flare=0.03), pants="2a2830", shoes="141216",
-           decals=[("strip", 0.205, 0.285, 0.05, 0.072, "e6e2da"), ("strip", 0.285, 0.315, 0.072, 0.03, "e6e2da"),
+           decals=[("strip", 0.205, 0.285, 0.05, 0.072, "e8e4dc", "flat"),
+                   ("strip", 0.285, 0.315, 0.072, 0.03, "e8e4dc", "flat"),
                    ("belt", 0.415, "16141a"), ("rosary", 0.045, 0.43, 0.62, "6a4a34", "c8b070")])
 # The old librarian: thin and a little stooped, bald on top with grey at the sides, round wire spectacles, a
 # grey-brown buttoned cardigan over a white shirt with a small burgundy bow tie.
