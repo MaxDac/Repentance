@@ -52,6 +52,7 @@ public partial class Library : Room
                 State.SetFlag("librarian_threatened");
                 Player.SetPose(null);
                 await Think("I've just held up a library. Mother would be so proud.");
+                await LeaveWithBook();
                 return true;
             case ("librarian", Verb.Hand) when !State.HasFlag("librarian_refused"):
                 await Say("He looks like he'd break. And I haven't even asked him nicely yet.");
@@ -63,6 +64,7 @@ public partial class Library : Room
                     return true;
                 }
                 await GrabCollar(target);
+                await LeaveWithBook();
                 return true;
 
             case ("shelves_right" or "shelves_left", Verb.Hand):
@@ -99,7 +101,15 @@ public partial class Library : Room
     /// </summary>
     public static readonly Vector2 CollarSpot = new(-46, 2);
 
-    /// <summary>Micah hauls him up by the collar, holds him through the request, then lets him go.</summary>
+    /// <summary>With the book in hand after the hold-up, Micah walks straight out through the hall door to the map.</summary>
+    private async Task LeaveWithBook()
+    {
+        State.SetFlag("library_banned");
+        if (FindHotspot("exit") is { } door) await Game.WalkTo(door.WalkTo);
+        await Game.ChangeRoom("chicago_map", "start");
+    }
+
+    /// <summary>Micah drags him in by the collar, holds him through the request, then lets him go.</summary>
     private async Task GrabCollar(Hotspot target)
     {
         var librarian = FindActor("librarian");

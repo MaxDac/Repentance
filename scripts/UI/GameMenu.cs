@@ -32,6 +32,9 @@ public partial class GameMenu : Control
 
     public bool IsOpen => Visible;
 
+    /// <summary>The status line under the entries (used by the autoplay test).</summary>
+    public string Status => _status.Text;
+
     public override void _Ready()
     {
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
@@ -118,11 +121,27 @@ public partial class GameMenu : Control
     {
         var latest = SaveSystem.Latest();
         bool any = latest != null;
-        Page("", 142, null,
+        var rows = new List<(string, bool, Action)>
+        {
             ("Continue", any, () => Finish(new MenuResult(MenuAction.Load, latest))),
             ("New game", true, () => Finish(new MenuResult(MenuAction.NewGame))),
             ("Load game", any, () => SlotsPage(saving: false)),
-            ("Settings", true, SettingsPage));
+            ("Settings", true, SettingsPage),
+        };
+        AddRestartSound(rows);
+        Page("", 142, null, rows.ToArray());
+    }
+
+    public const string RestartSoundLabel = "Restart sound";
+    public const string SoundLostText = "No sound device was found, so the game is silent.";
+
+    /// <summary>When Godot fell back to its silent driver at start, offers the relaunch that brings sound back and says
+    /// why (unless the page already has something to report).</summary>
+    private void AddRestartSound(List<(string, bool, Action)> rows)
+    {
+        if (!Game.Instance.SoundLost) return;
+        rows.Add((RestartSoundLabel, true, Game.Instance.RestartSound));
+        if (_status.Text == "") _status.Text = SoundLostText;
     }
 
     private void PausePage()
@@ -139,24 +158,25 @@ public partial class GameMenu : Control
     {
         var settings = Game.Instance.Settings;
         Action back = _title ? TitlePage : PausePage;
-        var rows = new List<(string text, bool enabled, Action onPress)>
+        var rows = new List<(string, bool, Action)>
         {
             ($"Nudity: {(settings.NudityEnabled ? "On" : "Off")}", true, () =>
             {
                 _status.Text = settings.SetNudity(!settings.NudityEnabled) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }),
-            ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
-            ($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)),
-            ("Back", true, () => { _status.Text = ""; back(); }),
         };
         // a phone is always full screen
         if (!OS.HasFeature("mobile"))
-            rows.Insert(1, ($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
+            rows.Add(($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
             {
                 _status.Text = settings.SetFullscreen(!settings.Fullscreen) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }));
+        rows.Add(($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)));
+        rows.Add(($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)));
+        AddRestartSound(rows);
+        rows.Add(("Back", true, () => { _status.Text = ""; back(); }));
         Page("Settings", -1, back, rows.ToArray());
         OnAltPress(EffectsLabel, () => StepEffects(up: false));
         OnAltPress(MusicLabel, () => StepMusic(up: false));

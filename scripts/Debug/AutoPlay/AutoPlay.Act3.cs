@@ -181,8 +181,11 @@ public partial class AutoPlay
         await Shot("club_hall_masked");
         await game.Perform(Verb.Walk, "exit");
         Check(game.Room?.Name == "ClubLounge", "into the lounge");
-        Check(game.Music.Current == Track.ClubStrings && game.Music.Count(Track.ClubStrings) == clubStarts && game.Music.Playing,
+        Check(game.Music.Current == Track.ClubStrings && game.Music.Count(Track.ClubStrings) == clubStarts,
             "the same strings carry on through the vestibule, hall and lounge without restarting");
+        // tracks render in the background, so the strings may still be on their way
+        await Until(() => game.Music.Playing);
+        Check(game.Music.Playing, "the strings are sounding in the lounge");
         await Shot("club_lounge");
         var stage = game.Perform(Verb.Walk, "stage_exit");
         await Until(() => game.Room?.Name == "ClubStage");
@@ -197,7 +200,7 @@ public partial class AutoPlay
         await Shot("club_stage");
         await Until(() => game.Room?.Name == "Attic");
         Check(!game.Hud.InsetVisible, "the close-up is gone in the attic");
-        Check(game.Music.Current == null, "the music stops when the journal closes");
+        Check(game.Music.Current == Track.AtticHouse, "the club's strings give way to the house when the journal closes");
         await game.Wait(2);
         await Shot("attic_night2");
         await Until(() => game.Hud.CaptionVisible);

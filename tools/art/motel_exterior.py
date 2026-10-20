@@ -17,6 +17,9 @@ H = FULL_H
 IRON, IRON_E, IRON_M, IRON_H = hx("12151c"), hx("7a8492"), hx("3e4552"), hx("b0b8c4")
 NEON, NEON_HOT, NEON_DIM = hx("ff3048"), hx("ffb0b8"), hx("7a1a26")
 AMBER, AMBER_HOT = hx("ffb050"), hx("ffe8b0")
+PANEL, PANEL_E = hx("121830"), hx("2a3452")                    # the blade sign's navy face and its edge
+TUBE, TUBE_HOT, TUBE_DIM = hx("38c0ff"), hx("d0f4ff"), hx("1a4a7a")  # the blue tube round it
+LETTER_E = hx("d84a1c")                                        # the orange-red edge of its amber letters
 
 # ------------------------------------------------------------------------------------------------ the alley
 
@@ -445,8 +448,9 @@ def lighting(img, far_box, lowered):
     fx0, fy0, fx1, fy1 = far_box
     lights = [
         ("rect", [MOUTH, -20, W + 20, 60], (26, 26, 50), 1.0, 30),               # the city's glow on the upper wall
-        ("ellipse", [bx0 - 60, by0 - 40, bx1 + 60, by1 + 60], (170, 34, 54), 1.0, 26),  # the big sign's red
-        ("ellipse", [-60, 150, 200, 290], (150, 30, 50), 0.9, 24),             # ... on the wet stones
+        ("ellipse", [bx0 - 60, by0 - 40, bx1 + 60, by1 + 60], (40, 96, 180), 1.0, 26),  # the big sign's blue
+        ("ellipse", [bx0 - 20, by0 - 10, bx1 + 20, by1 + 10], (130, 70, 20), 0.8, 14),  # ... and amber
+        ("ellipse", [-60, 150, 200, 290], (70, 80, 130), 0.9, 24),             # ... on the wet stones
         ("ellipse", [fx0 - 10, fy0 - 10, fx1 + 20, fy1 + 30], (200, 140, 80), 0.6, 12),  # the lunch-room
         ("ellipse", [scx - 44, sy0 - 30, scx + 44, sy1 + 60], (180, 40, 60), 1.0, 16),  # the door sign
         ("ellipse", [scx - 70, BASE - 8, scx + 70, BASE + 50], (160, 40, 60), 0.8, 14),
@@ -491,9 +495,10 @@ def lighting(img, far_box, lowered):
 
 
 def blade_sign(img):
-    """The motel's big sign, bolted to the front corner and hanging out over the main road: a riveted sheet-iron
-    box with a cornice and a finial, red neon MOTEL letters on their dark cans, a chaser of amber bulbs round the
-    edge (some dead), the conduit feeding it and a little VACANCY board hung underneath on chains."""
+    """The motel's big sign, bolted to the front corner and hanging out over the main road, as in the closeup: a
+    navy panel with rounded corners, a blue neon tube round its edge, amber MOTEL letters stacked down it with a hot
+    orange-red edge, two brackets and the conduit back to the wall, and a little VACANCY board hung underneath on
+    chains."""
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = BLADE
     for by in (y0 + 10, y1 - 10):  # the brackets back to the corner, with a tie rod and its turnbuckle
@@ -501,39 +506,25 @@ def blade_sign(img):
         d.line([(x1 + 4, by), (MOUTH + 2, by - 10)], fill=IRON)
         d.line([(x1 + 1, by - 1), (MOUTH + 2, by - 1)], fill=IRON_M)
         d.rectangle([x1 + 14, by - 6, x1 + 16, by - 4], fill=IRON_E)
-    d.line([(x1 - 6, y0 - 3), (x1 - 6, y0 - 8), (MOUTH + 2, y0 - 8)], fill=hx("26242a"))  # the conduit
-    # the box: a shadowed side face for depth, the front panel, a cornice and a finial on top
-    d.rectangle([x0 - 3, y0 + 1, x0, y1 - 1], fill=hx("120a0c"))
-    d.rectangle([x0, y0, x1, y1], fill=hx("1c1012"), outline=hx("3a2024"))
-    d.rectangle([x0 - 4, y0 - 3, x1 + 1, y0 - 1], fill=hx("2a1a1c"))
-    d.line([(x0 - 4, y0 - 3), (x1 + 1, y0 - 3)], fill=hx("5a3a3c"))
-    d.rectangle([x0 - 2, y1 + 1, x1 - 1, y1 + 2], fill=hx("2a1a1c"))
+    d.line([(x1 - 6, y0 - 1), (x1 - 6, y0 - 6), (MOUTH + 2, y0 - 6)], fill=hx("26242a"))  # the conduit
+    # the panel: a shadowed side face for depth, the tube's soft blue glow round it, then the navy face over that
+    light(img, "rect", [x0 - 4, y0 - 4, x1 + 4, y1 + 4], hx("2a8cff"), 0.4, 6)
+    d.rounded_rectangle([x0 - 3, y0 + 1, x0 + 3, y1 - 1], 3, fill=hx("0a0c18"))
+    d.rounded_rectangle([x0, y0, x1, y1], 4, fill=PANEL, outline=PANEL_E)
+    # the tube just inside the edge, its hot core on the lit side
+    d.rounded_rectangle([x0 + 1, y0 + 1, x1 - 1, y1 - 1], 3, outline=TUBE_DIM)
+    d.rounded_rectangle([x0 + 2, y0 + 2, x1 - 2, y1 - 2], 3, outline=TUBE)
+    d.line([(x0 + 2, y0 + 5), (x0 + 2, y1 - 5)], fill=TUBE_HOT)
+    d.line([(x0 + 5, y0 + 2), (x1 - 5, y0 + 2)], fill=TUBE_HOT)
+    # the letters: a faint warm halo, an orange-red edge, the amber tube and its pale core
     cx = (x0 + x1) // 2 + 1
-    d.line([(cx, y0 - 4), (cx, y0 - 7)], fill=IRON_M)
-    d.ellipse([cx - 2, y0 - 11, cx + 2, y0 - 7], fill=hx("3a2a2c"), outline=hx("5a3a3c"))
-    for y in range(y0 + 4, y1 - 2, 6):  # rivet rows down both edges, rust bleeding from them
-        for x in (x0 + 1, x1 - 1):
-            d.point((x, y), fill=hx("5a3a3c"))
-            d.point((x, y + 2), fill=hx("3a1a14"))
-    d.rectangle([x0 + 2, y0 + 2, x1 - 2, y1 - 2], outline=hx("6a4020"))
-    # the letters' sheet-metal cans, a shade darker than the panel, behind the tubes
+    light(img, "rect", [x0 + 6, y0 + 6, x1 - 6, y1 - 6], hx("ff8030"), 0.12, 3)
     for i, ch in enumerate("MOTEL"):
         cy = y0 + 14 + i * 18
-        d.rectangle([cx - 8, cy - 8, cx + 6, cy + 7], fill=hx("140a0c"), outline=hx("2e1a1e"))
-        text(img, (cx + 1, cy + 1), ch, hx("3a0e14"), 16)
-        text(img, (cx, cy), ch, NEON, 16)
-        if i < 4:  # the blacked-out jumper tube down to the next letter
-            d.line([(cx - 1, cy + 8), (cx - 1, cy + 10)], fill=hx("4a1a20"))
-    light(img, "rect", [x0 - 4, y0 - 4, x1 + 4, y1 + 4], hx("ff2a40"), 0.35, 8)
-    for i, ch in enumerate("MOTEL"):
-        text(img, (cx, y0 + 14 + i * 18), ch, NEON_HOT, 8)
-    # the chaser: bulbs every 4px round the border, every third one dead
-    k = 0
-    border = ([(x, y0 + 2) for x in range(x0 + 2, x1 - 1, 4)] + [(x1 - 2, y) for y in range(y0 + 2, y1 - 1, 4)] +
-              [(x, y1 - 2) for x in range(x1 - 2, x0 + 1, -4)] + [(x0 + 2, y) for y in range(y1 - 2, y0 + 1, -4)])
-    for p in border:
-        d.point(p, fill=hx("6a4020") if k % 3 == 2 else AMBER_HOT)
-        k += 1
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            text(img, (cx + dx, cy + dy), ch, LETTER_E, 16)
+        text(img, (cx, cy), ch, AMBER, 16)
+        text(img, (cx, cy), ch, AMBER_HOT, 8)
     # the VACANCY board, hung on two chains under the box, as wide as its lettering needs
     tl, _, tr, _ = ImageFont.truetype(FONT, 8).getbbox("VACANCY")
     cx = (x0 + x1) // 2
@@ -545,7 +536,7 @@ def blade_sign(img):
     d.rectangle([vx0, vy0, vx1, vy1], fill=hx("101a14"), outline=hx("2a3a30"))
     text(img, (cx + 1, (vy0 + vy1) // 2 + 1), "VACANCY", hx("70ff98"), 8)
     light(img, "rect", [vx0 - 3, vy0 - 3, vx1 + 3, vy1 + 3], hx("40c070"), 0.25, 4)
-    light(img, "ellipse", [x0 - 30, y0 - 20, x1 + 30, y1 + 20], hx("c01830"), 0.22, 18)
+    light(img, "ellipse", [x0 - 30, y0 - 20, x1 + 30, y1 + 20], hx("1860c0"), 0.22, 18)
 
 
 def door_sign(img):
@@ -595,7 +586,8 @@ def reflections(img):
     # neon streaks on the stones under the signs
     scx = (DOOR_SIGN[0] + DOOR_SIGN[2]) // 2
     light(img, "rect", [scx - 10, BASE + 8, scx + 10, 262], hx("ff3048"), 0.18, 3)
-    light(img, "rect", [BLADE[0] + 4, BASE + 8, BLADE[2] - 4, 268], hx("ff3048"), 0.2, 4)
+    light(img, "rect", [BLADE[0] + 2, BASE + 8, BLADE[2] - 2, 268], hx("38c0ff"), 0.14, 4)
+    light(img, "rect", [BLADE[0] + 8, BASE + 8, BLADE[2] - 8, 268], hx("ffb050"), 0.18, 3)
     light(img, "rect", [LIT_WINDOW[0] + 4, 214, LIT_WINDOW[2] - 4, 262], hx("ffb050"), 0.08, 4)
 
 
@@ -606,7 +598,7 @@ def glints(img):
         x, y = rnd.randint(0, W - 1), rnd.randint(BASE + 6, H - 1)
         r = rnd.random()
         if x < 220 and r < 0.35:
-            px[x, y] = mix(px[x, y], (255, 120, 140), 0.35)
+            px[x, y] = mix(px[x, y], (120, 190, 255) if x < MOUTH else (255, 120, 140), 0.35)
         elif r < 0.12:
             px[x, y] = mix(px[x, y], (150, 160, 210), 0.35)
 
@@ -641,7 +633,7 @@ def alley_palette(base, *variants):
         blend = Image.blend(blend, v, 0.35)
     return palette_of(blend, 116) + [NEON, NEON_HOT, NEON_DIM, AMBER, AMBER_HOT, hx("f0c070"), hx("d89a50"),
                                      hx("e09a48"), hx("fff0c0"), hx("c01830"), hx("5a1420"), hx("2a1418"),
-                                     hx("70ff98"), hx("101a14")]
+                                     hx("70ff98"), hx("101a14"), PANEL, PANEL_E, TUBE, TUBE_HOT, TUBE_DIM, LETTER_E]
 
 
 def overlay(variant, before, pal, box, name):

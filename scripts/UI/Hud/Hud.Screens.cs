@@ -9,8 +9,10 @@ namespace Repentance;
 public partial class Hud
 {
     private const float CaptionTop = 126;
-    private const int CaptionFontSize = 16;
-    private const float CaptionSubGap = 22;
+    private const int CaptionFontSize = 22;
+    private const float CaptionSubGap = 26;
+    /// <summary>The Art Deco face of the captions over black (chapter cards, "Later that night").</summary>
+    public static Font CaptionFont { get; private set; } = null!;
 
     private void BuildTitle(Control root)
     {
@@ -50,12 +52,13 @@ public partial class Hud
         _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         root.AddChild(_fade);
 
+        CaptionFont = GD.Load<Font>("res://assets/fonts/PoiretOne-Regular.ttf");
         _caption = new Label
         {
             Position = new Vector2(0, CaptionTop),
             Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
+            LabelSettings = new LabelSettings { Font = CaptionFont, FontSize = CaptionFontSize, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
@@ -66,7 +69,7 @@ public partial class Hud
             Position = new Vector2(0, CaptionTop + CaptionSubGap),
             Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
+            LabelSettings = new LabelSettings { Font = CaptionFont, FontSize = CaptionFontSize, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
@@ -168,9 +171,10 @@ public partial class Hud
     /// <summary>Large centred text drawn above the fade layer (chapter cards, "To be continued...").</summary>
     public void ShowCaption(string? text)
     {
+        _caption.Modulate = Colors.White;
         _caption.Position = new Vector2(0, CaptionTop);
         _caption.Size = new Vector2(ScreenW, 16);
-        _caption.LabelSettings.FontSize = CaptionFontSize;
+        _caption.LabelSettings.FontSize = CaptionFitSize(text);
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
         ShowCaptionSub(null);
@@ -179,7 +183,75 @@ public partial class Hud
     /// <summary>A second caption line under the one already showing, as in "Chicago, 1927." over "First Interlude".</summary>
     public void ShowCaptionSub(string? text)
     {
+        _captionSub.Modulate = Colors.White;
+        _captionSub.LabelSettings.FontSize = CaptionFitSize(text);
         _captionSub.Text = text ?? "";
         _captionSub.Visible = text != null;
+    }
+
+    /// <summary>The caption size, stepped down until the line fits the screen with a margin.</summary>
+    private static int CaptionFitSize(string? text)
+    {
+        int size = CaptionFontSize;
+        while (text != null && size > 8 && CaptionFont.GetStringSize(text, HorizontalAlignment.Left, -1, size).X > ScreenW - 16)
+            size -= 2;
+        return size;
+    }
+
+    private const double CaptionFadeSeconds = 0.8;
+
+    private async Task TweenCaption(float alpha, double seconds, params CanvasItem[] items)
+    {
+        var tw = CreateTween();
+        tw.SetPauseMode(Tween.TweenPauseMode.Stop);
+        tw.SetParallel();
+        foreach (var item in items) tw.TweenProperty(item, "modulate:a", alpha, seconds);
+        await ToSignal(tw, Tween.SignalName.Finished);
+    }
+
+    /// <summary>Shows <paramref name="text"/> as the caption, fading it in from transparent.</summary>
+    public async Task FadeCaptionIn(string text, double seconds = CaptionFadeSeconds)
+    {
+        ShowCaption(text);
+        _caption.Modulate = new Color(1, 1, 1, 0);
+        await TweenCaption(1, seconds, _caption);
+    }
+
+    /// <summary>Shows <paramref name="text"/> under the current caption, fading it in from transparent.</summary>
+    public async Task FadeCaptionSubIn(string text, double seconds = CaptionFadeSeconds)
+    {
+        ShowCaptionSub(text);
+        _captionSub.Modulate = new Color(1, 1, 1, 0);
+        await TweenCaption(1, seconds, _captionSub);
+    }
+
+    /// <summary>Fades the caption and its second line out, then hides them.</summary>
+    public async Task FadeCaptionOut(double seconds = CaptionFadeSeconds)
+    {
+        if (!_caption.Visible && !_captionSub.Visible) return;
+        await TweenCaption(0, seconds, _caption, _captionSub);
+        ShowCaption(null);
+    }
+
+    /// <summary>
+    /// Act change over black: <paramref name="endOfAct"/> fades in and out, the screen stays empty for a beat, then
+    /// <paramref name="title"/> fades in with <paramref name="subtitle"/> under it two seconds later, and both fade out.
+    /// The fade layer must already be black.
+    /// </summary>
+    public async Task ActCards(string endOfAct, string? title = null, string? subtitle = null)
+    {
+        await FadeCaptionIn(endOfAct);
+        await Timers.Wait(this, 2.0);
+        await FadeCaptionOut();
+        if (title == null) return;
+        await Timers.Wait(this, 0.7);
+        await FadeCaptionIn(title);
+        if (subtitle != null)
+        {
+            await Timers.Wait(this, 2.0);
+            await FadeCaptionSubIn(subtitle);
+        }
+        await Timers.Wait(this, 2.2);
+        await FadeCaptionOut();
     }
 }

@@ -5,18 +5,52 @@ namespace Repentance;
 /// <summary>The recipe for each <see cref="Sound"/>, built from the blocks in SoundSynth.cs.</summary>
 public static partial class SoundSynth
 {
-    /// <summary>A shoe on the floor: heel strike, then a softer toe roll-off.</summary>
-    private static float[] Step(Random rng, double body, double q, double tau, double click, double thump)
+    /// <summary>How a floor answers a shoe: its resonance, how bright the heel click stays, how much it booms.</summary>
+    private readonly record struct FloorResponse(
+        double BodyHz, double BodyQ, double BodyTau, double Click, double Thump, double Muffle);
+
+    private static readonly FloorResponse Boards = new(BodyHz: 480, BodyQ: 2.2, BodyTau: 0.022, Click: 1.0, Thump: 0.35, Muffle: 0);
+    private static readonly FloorResponse Cobbles = new(BodyHz: 2100, BodyQ: 1.2, BodyTau: 0.008, Click: 1.15, Thump: 0.08, Muffle: 0);
+    private static readonly FloorResponse Rug = new(BodyHz: 280, BodyQ: 0.9, BodyTau: 0.02, Click: 0.55, Thump: 0.3, Muffle: 1400);
+
+    /// <summary>
+    /// A 1920s leather dress shoe: the hard stacked heel strikes with a sharp click, the floor answers, then the
+    /// leather sole pats down a moment later. A rug muffles the whole step but leaves the heel distinct.
+    /// </summary>
+    private static float[] Step(Random rng, FloorResponse floor)
     {
         var buf = Buffer(0.2);
-        double toe = Vary(rng, 0.05, 0.25);
-        foreach (var (start, amp) in new[] { (0.0, 1.0), (toe, 0.45) })
+        double click = floor.Click, pitch = Vary(rng, 1, 0.06);
+
+        // heel: a bright crack and the short ring of the hard heel block
+        Burst(buf, rng, 0, 0.0012, 0.9 * click, Biquad.HighPass(3000), attack: 0.0001);
+        foreach (var (hz, amp, tau) in new[] { (2350.0, 0.55, 0.011), (3400.0, 0.35, 0.007), (1650.0, 0.3, 0.014) })
+            Tone(buf, 0, hz * pitch, hz * pitch * 0.98, Vary(rng, tau, 0.15), amp * click, attack: 0.0001);
+        Burst(buf, rng, 0, Vary(rng, floor.BodyTau, 0.2), 0.6, Biquad.BandPass(Vary(rng, floor.BodyHz, 0.1), floor.BodyQ));
+        Tone(buf, 0, Vary(rng, 150, 0.1), 95, 0.018, floor.Thump);
+
+        // sole: the flat leather slapping down, softer and duller, no click
+        double sole = Vary(rng, 0.075, 0.3), level = Vary(rng, 0.42, 0.15);
+        Burst(buf, rng, sole, 0.006, level, Biquad.BandPass(Vary(rng, 1300, 0.15), 0.8), attack: 0.0004);
+        Burst(buf, rng, sole, 0.002, level * 0.45 * click, Biquad.HighPass(2000), attack: 0.0003);
+        Burst(buf, rng, sole, Vary(rng, floor.BodyTau, 0.2) * 0.7, level * 0.6,
+            Biquad.BandPass(Vary(rng, floor.BodyHz, 0.1), floor.BodyQ));
+        Tone(buf, sole, Vary(rng, 120, 0.1), 85, 0.012, floor.Thump * level);
+
+        if (floor.Muffle > 0)
         {
-            Burst(buf, rng, start, Vary(rng, tau, 0.2), amp, Biquad.BandPass(Vary(rng, body, 0.12), q));
-            if (click > 0) Burst(buf, rng, start, 0.0018, click * amp, Biquad.HighPass(3500));
-            Tone(buf, start, Vary(rng, 140, 0.1), 90, 0.02, thump * amp);
+            var lp = Biquad.LowPass(floor.Muffle);
+            var lp2 = Biquad.LowPass(floor.Muffle * 1.6);
+            for (int i = 0; i < buf.Length; i++) buf[i] = (float)lp2.Next(lp.Next(buf[i]));
         }
+        FadeTail(buf, 0.03);
         return buf;
+    }
+
+    private static void FadeTail(float[] buf, double seconds)
+    {
+        int n = Math.Min(buf.Length, At(seconds));
+        for (int i = 0; i < n; i++) buf[buf.Length - 1 - i] *= (float)i / n;
     }
 
     private static float[] Gunshot(Random rng)
@@ -146,6 +180,46 @@ public static partial class SoundSynth
         return buf;
     }
 
+    /// <summary>A small tool tin opened: the padlock's shackle snaps free, a hinge squeaks, the thin enamelled lid
+    /// clanks back, and the crowbar inside shifts with a dull rattle.</summary>
+    private static float[] TinOpen(Random rng)
+    {
+        var buf = Buffer(1.1);
+        // the padlock: a bright snap and a tiny brass ping
+        Burst(buf, rng, 0, 0.0015, 0.7, Biquad.HighPass(3000));
+        Tone(buf, 0, 2950, 2900, 0.02, 0.35, attack: 0.0002);
+        Tone(buf, 0.035, 4100, 4050, 0.012, 0.2, attack: 0.0002);
+        // the hinge, a short dry squeak rising in pitch
+        int h0 = At(0.12), hn = At(0.16);
+        double phase = 0;
+        var grit = Biquad.BandPass(1800, 3);
+        for (int i = 0; i < hn; i++)
+        {
+            double t = (double)i / hn;
+            phase += 2 * Math.PI * (850 + 600 * t + 40 * Math.Sin(t * 60)) / SampleRate;
+            double env = Math.Sin(Math.PI * t);
+            buf[h0 + i] += (float)(env * (0.1 * Math.Sin(phase) + 0.08 * grit.Next(Noise(rng))));
+        }
+        // the lid clanking back: thin sheet steel, inharmonic and quick to die
+        double lid = 0.3;
+        Burst(buf, rng, lid, 0.003, 0.6, Biquad.HighPass(1800));
+        double[] hz = { 610, 1490, 2560, 3870 }, amp = { 0.7, 0.55, 0.4, 0.25 }, tau = { 0.16, 0.1, 0.07, 0.05 };
+        for (int k = 0; k < hz.Length; k++)
+        {
+            Tone(buf, lid, hz[k], hz[k], tau[k], amp[k], attack: 0.0004);
+            Tone(buf, lid, hz[k] * 1.013, hz[k] * 1.013, tau[k], amp[k] * 0.4, attack: 0.0004);
+        }
+        // a smaller bounce, and the crowbar shifting against the tin
+        Tone(buf, lid + 0.07, 1490, 1490, 0.04, 0.2, attack: 0.0004);
+        foreach (var (at, a) in new[] { (0.46, 0.45), (0.53, 0.25) })
+        {
+            Tone(buf, at, 340, 320, 0.05, a, attack: 0.0006);
+            Tone(buf, at, 1150, 1150, 0.03, a * 0.4, attack: 0.0004);
+            Burst(buf, rng, at, 0.006, a * 0.4, Biquad.BandPass(900, 1.5));
+        }
+        return buf;
+    }
+
     /// <summary>Spirits catching all at once: a soft thump of air, a roar that swells and settles, crackling.</summary>
     private static float[] Whoosh(Random rng)
     {
@@ -220,6 +294,106 @@ public static partial class SoundSynth
         Burst(buf, rng, 0.045, 0.0015, 0.45, Biquad.HighPass(2800));
         Tone(buf, 0.045, 2100, 2060, 0.008, 0.25, attack: 0.0002);
         return buf;
+    }
+
+    /// <summary>
+    /// A wall safe cracked: the dial ratcheting round, a tumbler dropping at each number, the handle drawing the bolts
+    /// back, then the heavy door groaning open on its hinge.
+    /// </summary>
+    private static float[] SafeOpen(Random rng)
+    {
+        var buf = Buffer(1.8);
+        double t = 0;
+        foreach (int ticks in new[] { 7, 5, 4 })
+        {
+            for (int i = 0; i < ticks; i++)
+            {
+                DialTick(buf, rng, t, 0.3);
+                t += Vary(rng, 0.032, 0.15);
+            }
+            Tumbler(buf, rng, t, 0.6);
+            t += 0.09;
+        }
+        // the handle: the bolts sliding back in their keepers, ending on a clack
+        Slide(buf, rng, t, 0.16, 0.35);
+        t += 0.16;
+        Tone(buf, t, 240, 200, 0.03, 0.5);
+        Burst(buf, rng, t, 0.003, 0.45, Biquad.HighPass(2400));
+        // the hinge: a low steel groan swelling and dying as the weight swings out
+        Groan(buf, rng, t + 0.1, 0.75, 150, 0.32);
+        return buf;
+    }
+
+    /// <summary>
+    /// A wall safe locked: the heavy door shutting with a dull ring, the handle throwing the bolts, then the dial
+    /// spun hard so its ticks run fast and slow to a stop.
+    /// </summary>
+    private static float[] SafeClose(Random rng)
+    {
+        var buf = Buffer(1.6);
+        Groan(buf, rng, 0, 0.3, 175, 0.18);
+        double t = 0.26;
+        Tone(buf, t, 80, 48, 0.09, 1.0, attack: 0.002);
+        Burst(buf, rng, t, 0.04, 0.6, Biquad.LowPass(600));
+        Tone(buf, t, 640, 632, 0.12, 0.16);
+        Tone(buf, t, 1470, 1462, 0.07, 0.09);
+        Burst(buf, rng, t, 0.002, 0.35, Biquad.HighPass(2600));
+        t += 0.28;
+        Slide(buf, rng, t, 0.13, 0.3);
+        t += 0.13;
+        Tone(buf, t, 260, 210, 0.03, 0.55);
+        Burst(buf, rng, t, 0.003, 0.5, Biquad.HighPass(2400));
+        t += 0.14;
+        for (double gap = 0.016; t < 1.5; gap *= 1.13)
+        {
+            DialTick(buf, rng, t, 0.28 * Math.Clamp((1.5 - t) / 0.5, 0.2, 1));
+            t += gap;
+        }
+        return buf;
+    }
+
+    /// <summary>One click of a combination dial's ratchet.</summary>
+    private static void DialTick(float[] buf, Random rng, double start, double amp)
+    {
+        Burst(buf, rng, start, 0.0012, amp, Biquad.HighPass(3000), attack: 0.0002);
+        Tone(buf, start, Vary(rng, 2700, 0.05), 2650, 0.004, amp * 0.5, attack: 0.0002);
+    }
+
+    /// <summary>A tumbler wheel falling into place behind the dial: a small, deeper clunk.</summary>
+    private static void Tumbler(float[] buf, Random rng, double start, double amp)
+    {
+        Tone(buf, start, 420, 360, 0.018, amp);
+        Burst(buf, rng, start, 0.006, amp * 0.6, Biquad.BandPass(1200, 2));
+    }
+
+    /// <summary>Steel bolts sliding in their keepers.</summary>
+    private static void Slide(float[] buf, Random rng, double start, double seconds, double amp)
+    {
+        int s = At(start), n = At(seconds);
+        var tone = Biquad.BandPass(2100, 3);
+        for (int i = 0; i < n && s + i < buf.Length; i++)
+        {
+            double env = Math.Sin(Math.PI * i / n);
+            buf[s + i] += (float)(amp * env * tone.Next(Noise(rng)));
+        }
+    }
+
+    /// <summary>A heavy hinge turning: a low rubbing groan whose pitch wanders, swelling and fading to nothing.</summary>
+    private static void Groan(float[] buf, Random rng, double start, double seconds, double hz, double amp)
+    {
+        int s = At(start), n = At(seconds);
+        var wobble = Biquad.LowPass(12);
+        var body = Biquad.BandPass(hz * 3, 2);
+        double phase = 0;
+        for (int i = 0; i < n && s + i < buf.Length; i++)
+        {
+            double t = (double)i / n;
+            double env = Math.Sin(Math.PI * t) * Math.Sin(Math.PI * t);
+            phase += 2 * Math.PI * (hz * (1 + 0.15 * t) + 8 * Math.Sin(2 * Math.PI * 3 * t)) / SampleRate;
+            double grain = Math.Clamp(0.6 + 8 * wobble.Next(Noise(rng)), 0.1, 1.3);
+            double rub = Math.Sin(phase) + 0.5 * Math.Sin(2 * phase) + 0.3 * Math.Sin(3 * phase);
+            buf[s + i] += (float)(amp * env * (grain * rub + 0.5 * body.Next(Noise(rng))));
+        }
     }
 
     /// <summary>A two-tone door chime: a hammer strikes a high bar ("ding"), then a lower one a major third down ("dong").</summary>

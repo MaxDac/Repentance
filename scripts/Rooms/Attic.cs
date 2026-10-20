@@ -34,6 +34,14 @@ public partial class Attic : Room
         GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_act3.png"),
     };
 
+    // the tool tin unlocked and thrown open, once the crowbar is out of it
+    private static readonly Texture2D[] TinOpenTextures =
+    {
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_tin_open.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_tin_open_act2.png"),
+        GD.Load<Texture2D>("res://assets/art/rooms/attic_tin_open_act3.png"),
+    };
+
     private static readonly Texture2D[] ChairTextures =
     {
         GD.Load<Texture2D>("res://assets/art/rooms/attic_chair.png"),
@@ -57,6 +65,9 @@ public partial class Attic : Room
     };
 
     private Task Hint(string text) => Say("hint", text);
+
+    /// <summary>No music up here, only the house below: its hum, steps downstairs, a car going by outside.</summary>
+    public override Track? Music => Track.AtticHouse;
 
     private const string StashPrefix = "stash_";
 
@@ -93,6 +104,7 @@ public partial class Attic : Room
     private static readonly Texture2D NightBackground = GD.Load<Texture2D>("res://assets/art/rooms/attic_night.png");
     private static readonly Texture2D NightPapers = GD.Load<Texture2D>("res://assets/art/rooms/attic_papers_night.png");
     private static readonly Texture2D NightBoxOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_box_open_night.png");
+    private static readonly Texture2D NightTinOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_tin_open_night.png");
     private static readonly Texture2D NightChair = GD.Load<Texture2D>("res://assets/art/rooms/attic_chair_night.png");
     private static readonly Texture2D NightTrunkOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_trunk_open_night.png");
     private static readonly Texture2D NightSuitcaseOpen = GD.Load<Texture2D>("res://assets/art/rooms/attic_suitcase_open_night.png");
@@ -112,6 +124,7 @@ public partial class Attic : Room
                 night.Texture = NightBackground;
             SetTexture("Papers", NightPapers);
             SetTexture("BoxOpen", NightBoxOpen);
+            SetTexture("TinOpen", NightTinOpen);
             SetTexture("Chair", NightChair);
             SetTexture("TrunkOpen", NightTrunkOpen);
             SetTexture("SuitcaseOpen", NightSuitcaseOpen);
@@ -122,6 +135,7 @@ public partial class Attic : Room
             background.Texture = ActBackgrounds[actIndex];
         SetTexture("Papers", PapersTextures[actIndex]);
         SetTexture("BoxOpen", BoxOpenTextures[actIndex]);
+        SetTexture("TinOpen", TinOpenTextures[actIndex]);
         SetTexture("Chair", ChairTextures[actIndex]);
         SetTexture("TrunkOpen", TrunkOpenTextures[actIndex]);
         SetTexture("SuitcaseOpen", SuitcaseOpenTextures[actIndex]);
@@ -216,6 +230,7 @@ public partial class Attic : Room
                 await Say(State.HasFlag("got_crowbar") ? "The tin is empty now." : "A small locked tool tin. That little suitcase key might fit.");
                 return true;
             case ("tool_tin", Verb.UseItem) when item == "suitcase_key" && !State.HasFlag("got_crowbar"):
+                Game.Sfx.Play(Sound.TinOpen);
                 State.SetFlag("got_crowbar");
                 State.GiveItem("crowbar");
                 await Say("The small key turns. Inside, a crowbar. A small lock gets me into the big one.");
@@ -324,11 +339,7 @@ public partial class Attic : Room
         await Say("...");
         await Talk("dinner_call");
         await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act One");
-        await Wait(2.5);
-        Game.Hud.ShowCaption("Act Two - The next day");
-        await Wait(2.5);
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ActCards("End of Act One", "Act Two", "The next day");
         State.SetFlag("attic_night", false);
         State.SetStoryAct(2);
         State.GiveItem("journal");
@@ -356,11 +367,7 @@ public partial class Attic : Room
         await Say("...");
         await Talk("dinner_call2");
         await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act Two");
-        await Wait(2.5);
-        Game.Hud.ShowCaption("Act Three - That night");
-        await Wait(2.5);
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ActCards("End of Act Two", "Act Three", "That night");
         State.SetFlag("attic_night", false);
         State.SetStoryAct(3);
         await Game.ChangeRoom("bedroom", "start");

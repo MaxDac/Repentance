@@ -91,19 +91,21 @@ public partial class AutoPlay
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The box goes in the safe first."),
             "the box in an open safe isn't locked away yet");
+        int safeCloses = game.Sfx.Count(Sound.SafeClose);
         await game.Perform(Verb.Hand, "interlude_safe");
         Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 2
               && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeAjar")?.Visible == false
-              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == false,
-            "the safe door shut and the dial spun on the box");
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == false
+              && game.Sfx.Count(Sound.SafeClose) == safeCloses + 1,
+            "the safe door shut and the dial spun on the box, heard once");
         await game.Perform(Verb.Hand, "closet");
         Check(!gs.HasFlag("interlude_closet_open"), "the closet shut again over the locked safe");
         var early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
-        Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The box in the safe, the riddle in the drawer. Then I call."),
-            "no call before the riddle is locked in the drawer");
+        Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The combination goes on paper first, at the desk."),
+            "no call before the riddle is written");
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
-        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nothing of mine stays out in the open for them."),
-            "with the safe locked, the exit points to the drawer");
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The combination goes on paper first, at the desk."),
+            "with the safe locked, the exit points to writing the riddle");
         var drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
         Check(!gs.HasFlag("interlude_drawer_locked") && !gs.HasFlag("interlude_phoned") &&
               drawerLook.Contains("The safe's locked. Now the riddle goes in this drawer, and I turn the key.") &&
@@ -118,9 +120,19 @@ public partial class AutoPlay
         await game.Perform(Verb.UseItem, "desk", "eleanor_slip");
         Check(gs.HasItem("eleanor_riddle") && !gs.HasItem("eleanor_slip") && gs.HasFlag("interlude_riddle_written"),
             "the combination written as a riddle on the slip at the desk");
+        early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(!gs.HasFlag("interlude_phoned") && game.Room?.Name == "EleanorRoom"
+              && early.Contains("Not yet. The riddle goes in the drawer.") && leaving.Contains("Not yet. The riddle goes in the drawer."),
+            "with the riddle written, the telephone and door point to the drawer");
         await game.Perform(Verb.UseItem, "desk_drawer", "eleanor_riddle");
         Check(gs.HasFlag("interlude_riddle_in_drawer") && !gs.HasItem("eleanor_riddle") && !gs.HasFlag("interlude_drawer_locked"),
             "the riddle in the drawer, not yet locked");
+        early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(!gs.HasFlag("interlude_phoned") && game.Room?.Name == "EleanorRoom"
+              && early.Any(l => l.Contains("key")) && leaving.Any(l => l.Contains("key")),
+            "with the riddle in the unlocked drawer, the telephone and door ask for her key");
         drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
         Check(drawerLook.Any(l => l.Contains("It wants my key.")), "the drawer with the riddle in asks for her key");
         drawer = await Spoken(() => game.Perform(Verb.UseItem, "desk_drawer", "eleanor_key"));
@@ -336,13 +348,19 @@ public partial class AutoPlay
         await WaitIdle(game);
         Check(game.Room?.Name == "MotelLobby", "in at the front door");
         int tiePulls = _poseCounts.GetValueOrDefault("micah_tie_pull"), clerkPulls = _poseCounts.GetValueOrDefault("clerk_tie_pulled");
-        bool onCounter = false;
+        bool onCounter = false, overCounterStanding = false, speechClearsMicah = false;
         var said = new List<string>();
         // the talk runs on into the cathedral steps and Caleb; stop watching once Micah is out of the lobby
         _ = game.Perform(Verb.Talk, "clerk");
         await Until(() =>
         {
             Heard(said);
+            if (game.Room is Rooms.MotelLobby room && room.FindActor("clerk") is { } c)
+            {
+                overCounterStanding |= c.ZIndex > 0 && c.Poses?.Action != "clerk_tie_pulled";
+                speechClearsMicah |= c.Poses?.Action == "clerk_tie_pulled" && !c.Poses.Playing &&
+                    c.HeadPosition.Y < game.Player.HeadPosition.Y;
+            }
             if (!onCounter && game.Room is Rooms.MotelLobby lobby && lobby.FindActor("clerk") is { } clerk &&
                 clerk.Poses?.Action == "clerk_tie_pulled" && !clerk.Poses.Playing && game.Player.PoseName == "micah_tie_pull")
             {
@@ -355,6 +373,8 @@ public partial class AutoPlay
         Check(onCounter && _poseCounts.GetValueOrDefault("micah_tie_pull") == tiePulls + 1 &&
             _poseCounts.GetValueOrDefault("clerk_tie_pulled") == clerkPulls + 1,
             "\"Nice tie, pal\": Micah hauls the clerk across the counter by it");
+        Check(!overCounterStanding, "the clerk's standing figure never draws over the counter");
+        Check(speechClearsMicah, "pinned to the desk, the clerk's lines sit above Micah's head, not over his face");
         Check(said.Any(l => l.Contains("Two men took her")) && gs.HasFlag("motel_return_done"),
             "the clerk spills: two men took her, the night Micah left");
     }
@@ -425,6 +445,10 @@ public partial class AutoPlay
         Check(game.Room?.FindHotspot("librarian")?.Visible == true && game.Room?.FindHotspot("rose") == null, "the daytime librarian is there, and Rose isn't in the library at all");
         CheckActorWins(game, "librarian", "ladder", "the librarian wins over the ladder behind him");
         await Shot("library_day");
+        Check(game.Room?.HotspotAt(new Vector2(35, 130))?.Id == "exit" && game.Room.HotspotAt(new Vector2(95, 120))?.Id == "shelves_left",
+            "the painted hall door is the way out, the bookcase beside it is just shelves");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("World/ArmchairLeft") != null && game.Room.GetNodeOrNull<Sprite2D>("World/ArmchairRight") != null,
+            "the armchairs are Y-sorted props, not painted into the background");
         await game.Perform(Verb.UseItem, "librarian", "revolver");
         Check(!gs.HasFlag("library_banned"), "no gun before asking");
         await game.Perform(Verb.Hand, "librarian");
@@ -464,16 +488,16 @@ public partial class AutoPlay
             librarian?.Visible == false, "Micah grabs the librarian by the collar (one strip for both, the actor hidden)");
         await Shot("library_collar");
         await grab;
-        Check(_poseCounts.GetValueOrDefault("micah_collar_release") == releases + 1 && game.Player.PoseName == null &&
-            librarian?.Visible == true, "Micah lets him go and the librarian stands where he was");
-        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&
-            game.Room?.Name == "Library", "roughed the librarian up for the book; Micah stays until he leaves");
-        await game.Perform(Verb.Hand, "librarian");
-        Check(game.Player.PoseName == null && _poseCounts.GetValueOrDefault("micah_collar") == grabs + 1,
-            "no second grab once he has the book");
+        Check(_poseCounts.GetValueOrDefault("micah_collar_release") == releases + 1 && game.Player.PoseName == null,
+            "Micah lets the librarian go");
+        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && gs.HasFlag("library_banned") &&
+            game.Room?.Name == "ChicagoMap", "roughed the librarian up for the book, then walked straight out to the map");
 
         // the revolver is still a way to get the book
         gs.Restore(beforeThreat.Flags, beforeThreat.Items, gs.StoryAct);
+        await game.ChangeRoom("library", "start");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Library" && game.Room.FindActor("librarian")?.Visible == true, "back in the library for the revolver");
         int draws = _poseCounts.GetValueOrDefault("micah_draw");
         var threaten = game.Perform(Verb.UseItem, "librarian", "revolver");
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Good Lord", StringComparison.Ordinal));
@@ -481,13 +505,9 @@ public partial class AutoPlay
             "Micah draws the revolver and aims it at the librarian");
         await Shot("library_threat");
         await threaten;
-        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && !gs.HasFlag("library_banned") &&
-            game.Room?.Name == "Library" && game.Player.PoseName == null,
-            "threatened the librarian into giving up the book; Micah stays until he leaves");
-        await game.Perform(Verb.Talk, "librarian");
-        Check(game.Room?.Name == "Library", "the cowed librarian won't talk any more");
-        await game.Perform(Verb.Walk, "exit");
-        Check(gs.HasFlag("library_banned") && game.Room?.Name == "ChicagoMap", "leaving after the hold-up bans the library");
+        Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && gs.HasFlag("library_banned") &&
+            game.Room?.Name == "ChicagoMap" && game.Player.PoseName == null,
+            "threatened the librarian into giving up the book, then walked straight out to the map");
         await game.Perform(Verb.Walk, "library");
         Check(game.Room?.Name == "ChicagoMap", "the library is off limits now");
 

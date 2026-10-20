@@ -19,6 +19,7 @@ public partial class Game
         bool anyTest = settingsTest || pauseTest || walkTest || film || playthrough || Array.IndexOf(args, "--autoplay") >= 0;
         Settings = new GameSettings(anyTest ? "user://autoplay_settings.cfg" : "user://settings.cfg");
         Settings.Load();
+        ReportSoundLost();
         Sfx = new Sfx { Name = "Sfx" };
         AddChild(Sfx);
         Sfx.Bind(Settings);

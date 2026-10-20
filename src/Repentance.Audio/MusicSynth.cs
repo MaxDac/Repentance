@@ -32,6 +32,9 @@ public enum Track
     MansionDread,
     /// <summary>Rose's street: not music but a quiet evening street, silent but for the odd motor car driving past.</summary>
     RoseStreet,
+    /// <summary>The attic: not music but the house beneath it - its hum, someone walking about downstairs and the odd
+    /// car going by outside, all muffled through the floor and the roof.</summary>
+    AtticHouse,
 }
 
 public enum Instrument
@@ -139,6 +142,19 @@ public static partial class MusicSynth
     public static int LoopSamples(Track track) =>
         (int)Math.Round(LengthBeats(track) * SecondsPerBeat(track) * SampleRate);
 
+    /// <summary>Little-endian signed 16-bit PCM of samples in [-1, 1], clamped (half the memory of the floats).</summary>
+    public static byte[] ToPcm16(float[] samples)
+    {
+        var bytes = new byte[samples.Length * 2];
+        for (int i = 0; i < samples.Length; i++)
+        {
+            short v = (short)Math.Clamp(Math.Round(samples[i] * (double)short.MaxValue), short.MinValue, short.MaxValue);
+            bytes[i * 2] = (byte)(v & 0xff);
+            bytes[i * 2 + 1] = (byte)((v >> 8) & 0xff);
+        }
+        return bytes;
+    }
+
     /// <summary>Playback level of each track relative to the Music bus, in dB, evening out how loud they feel.</summary>
     public static float BaseVolumeDb(Track track) => track switch
     {
@@ -153,6 +169,7 @@ public static partial class MusicSynth
         Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
         Track.RoseStreet => -18f,
+        Track.AtticHouse => -14f,
         _ => -6f,
     };
 

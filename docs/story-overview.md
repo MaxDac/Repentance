@@ -65,7 +65,7 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
     **First Interlude** (the player is Eleanor, in Micah's journal voice: what she told him that night at the motel):
     pack the brass box, lock the safe and drawer and telephone Rizzo's Flowers in room 507, then Sal takes her down
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
-    "another Jezebel from that hideous Club"; that night Agatha comes to her cell to hear her confession, with motives she won't admit: Eleanor
+    "a Jezebel from that hideous Club"; that night Agatha comes to her cell to hear her confession, with motives she won't admit: Eleanor
     can seduce her for the convent's protection (Agatha turns back at the last moment, cursing her as a demon) or tell
     her the truth (saved; she stammers out only the Club and its painted stage before Agatha cuts her off, reaches for her, is stopped, and puts her out at first light). From the motel window, four days on, she watches Micah reach
     the convent, smoke in the road, come asking at the desk and climb the fire escape; she steps out to wait for him.
@@ -120,7 +120,7 @@ From here the story follows Walkthrough.md:
 23. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
    on the jammed ladder catch before climbing in.
-24. **Harrington's office**: pick the locked right drawer for an invitation to the club, for Sunday night; behind the closet's false
+24. **Harrington's office**: pick the locked right drawer for an invitation to the club, for Thursday night; behind the closet's false
    back are a white Bauta mask and a cloak. Look at the portrait for a close-up of the heraldry at its foot
    (raven and star, lion and sun, stag and moon), then follow the invitation's raven/lion/stag procession; set the
    false-back lock to STAR / SUN / MOON. The lock's clue box only says "Three dials. Three symbols."

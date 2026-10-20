@@ -1,6 +1,6 @@
 # Audio
 
-Sounds and music are synthesized at startup; the exceptions are a real grand piano, alto sax and double bass, recorded note by note
+Sounds are synthesized at startup and music when a room needs it; the exceptions are a real grand piano, alto sax and double bass, recorded note by note
 (see [Recorded instruments](#recorded-instruments)).
 
 | Part | Godot-free | Role |
@@ -17,12 +17,27 @@ For listening checks, `tools/run/game.sh` / `tools\run\game.ps1` uses real audio
 suites' dummy driver). Runtime errors are printed and logged to `logs/game.log` as warnings, so inspect the log
 when diagnosing audio; a clean launcher exit alone does not prove sound played.
 
+### Lost sound device
+
+If no output device can be opened at start (headset off or asleep, device held exclusively by another app), Godot logs
+`WASAPI: init_output_device error` and `All audio drivers failed, falling back to the dummy driver`, and stays silent
+for the whole run: it never retries a failed start. `AudioFallback.IsUnintended` (Godot-free) tells this fallback
+from a requested Dummy driver (`--audio-driver Dummy`, `--headless`); `Game.SoundLost` then makes the title and
+settings pages say so and offer **Restart sound**, which autosaves when the game can be saved and relaunches with
+the same arguments (`OS.SetRestartOnExit`); Continue picks the game up. A device lost mid-run (`WASAPI: Current
+output_device invalidated`) is reopened by Godot itself about once a second once Windows has a default device again.
+
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
-`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`.
+`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`, `SafeOpen`,
+`SafeClose`.
 
-- **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`).
+- **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`). Every step is a 1920s
+  leather dress shoe: the hard heel's sharp click, the floor's answer (boards ring hollow, cobbles stay dry and
+  bright), then the leather sole patting down; carpet muffles it but keeps the heel distinct.
+- **Room 507's safe**: `SafeOpen` (dial, tumblers, bolts, hinge) when Micah solves the safe puzzle; `SafeClose`
+  (door, bolts, dial spun) when Eleanor locks it in the First Interlude. Not tied to cue words.
 - **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
   script's `ChangeRoom`), `DoorOpen` plays as the screen fades out and `DoorClose` once the new room has faded in.
   A door that opens on screen first (the office) calls `Game.OpenDoor()` with its animation; it sounds once per action.
@@ -30,6 +45,8 @@ when diagnosing audio; a clean launcher exit alone does not prove sound played.
 - **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)). The title screen
   (`Game.ShowTitle`) plays the same rain at full level; hiding it hands the ambience back to the room.
 - **Cues**: only lines whose text starts with `*` (Ink or `Say`). Ordinary speech never plays sounds.
+- **Room scripts**: a few actions play their own sound with `Game.Sfx.Play`, such as `TinOpen` when the suitcase key
+  opens the attic's tool tin.
 
 | Word in the `*...*` line | Sound |
 |---|---|
@@ -65,6 +82,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 | `RoseStreet` | Rose's house (Act 2 visit, Act 3 coffee) | Not music: a quiet evening street, silent but for two 1920s cars driving past across the stereo field |
+| `AtticHouse` | Present-day attic (prologue, act ends, epilogue) | Not music: the house heard through the floor and roof, muffled by a `Distance` low-pass: a faint hum on `Foley`, someone walking about downstairs twice, two cars passing outside, one each way |
 
 `RoseStreet` is scored like the others but played by the `Car` in `MusicSynth.Street.cs`: a note is one whole pass,
 its pitch the engine's, and it moves across the stereo field (left to right when its part's pan is positive) with
@@ -80,10 +98,14 @@ background. It plays on the Music bus, so it follows the music volume; rain ambi
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
 moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries
 on from the same moment. Tracks are
-about a minute, rendered one at a time on a single background worker queued in `Music._Ready` (a track a room asks
-for moves to the front of the queue; `--no-music` skips rendering and playback); rendering runs the loop twice and
-keeps the second
-pass so filters and reverb have no seam.
+about a minute, rendered only when needed, one at a time on a single background worker; rendering runs the loop
+twice and keeps the second pass so filters and reverb have no seam. `Music` keeps at most `CacheSize` (4) rendered
+tracks as 16-bit PCM (about 5 MB each), evicting the least recently used but never the playing one; the policy is
+the Godot-free `RenderCache`. A room asks for its track, which jumps ahead of everything else, then
+`Game.LoadRoomScene` prefetches the tracks of the rooms its visible exits lead to, so the next room usually starts
+with its music ready. A room whose track is not cached yet stays silent until the render finishes (about a second).
+After each render the worker runs a compacting GC to hand the float buffers back to the system. `--no-music` skips
+rendering and playback.
 
 A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening
 feedback echo, applied after the hall. Instruments: strings, organ stops, piano, muted trumpet, upright bass, drums
@@ -129,7 +151,7 @@ Prefer the recorded instruments over the synthesized `Piano`, `Trumpet` and `Upr
 |---|---|
 | `dotnet run --project tools/music -- recordings` | Downloads, cuts, pitch-checks, trims and resamples the recorded notes the scores need; deletes unused ones |
 | `dotnet run --project tools/music -- render <Track> [out.wav] [loops]` | Renders a track exactly as the game does to a 16-bit stereo WAV, twice round by default so the seam can be heard |
-| `dotnet run --project tools/music -- sound <Sound> [out.wav]` | Renders one sound effect exactly as the game does to a 16-bit mono WAV |
+| `dotnet run --project tools/music -- sound <Sound> [out.wav] [count]` | Renders one sound effect exactly as the game does to a 16-bit mono WAV; a `count` above 1 repeats it as a walk (variants cycled, game pitch jitter) |
 
 Use `render` to listen to a score change in seconds, without building or importing the game; write the WAV outside
 the repository (or delete it) so it is not committed. The folder has a `.gdignore`, and `Repentance.csproj` excludes

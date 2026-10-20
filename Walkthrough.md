@@ -169,7 +169,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
   "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).
-  The investigation resumes on Sunday; the Club invitation is for Sunday night.
+  The investigation resumes days later, on Thursday; the Club invitation is for Thursday night, the Club's regular
+  night.
 
 #### Convent
 
@@ -257,6 +258,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### End of Act 1 - Present day
 
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
+- The screen fades to black. "End of Act One" fades in, then fades out to an empty black screen; "Act Two" fades
+  in, with "The next day" fading in below it two seconds later. Every act change uses the same cards (*End of
+  Act Two*, then *Act Three* / *That night*; *End of Act Three*, then *The next morning*).
 - Micah's 1927 inventory is put aside during the present-day scenes. When the journal picks up again, each act
   starts with a reset satchel: the notepad and lighter plus only what the rest of that act needs.
   - Act 2: revolver, lockpick, the brass box's card, the mirror, Eleanor's cloth, and Faith's ring and cross if he
@@ -478,14 +482,15 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah has to intimidate the librarian (before asking about the symbol Micah refuses to do it, and before the
   lookup he needs a precise title). Either way he requests the identified book, the librarian confirms that it
   describes ancient Celtic rituals and gives it to him if he goes away:
-  - **Hand on the librarian** (canonical): Micah steps in and grabs him by the collar, lifting him onto his toes
-    (one animation for both, the librarian actor hidden), holds him through the request, then lets him go.
+  - **Hand on the librarian** (canonical): Micah steps in, grabs him by the collar and drags him in
+    close, the librarian stumbling forward with his feet on the floor (one animation for both, the librarian actor
+    hidden), holds him through the request, then lets him go.
   - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
-- Both routes set the same flags. Micah stays in the library; the shaken librarian won't say another word, and the
-  player leaves through the exit to the map.
+- Both routes set the same flags. With the book in hand Micah walks straight out through the hall door to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
-- Leaving the library normally returns to the map.
+- Leaving the library normally (the hall door on the left wall) returns to the map. The two armchairs are props:
+  Micah passes behind or in front of them depending on where he stands.
 
 #### Office
 
@@ -720,7 +725,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 
 ### End of Act 2 - Present day, the attic
 
-- Dark again, the father is called for dinner.
+- Dark again, the father is called for dinner. "End of Act Two" fades out to black, then "Act Three" fades in,
+  and "That night" below it (as at the end of Act 1).
 
 ### Act 3 - Present day, bedroom
 
@@ -1161,7 +1167,8 @@ motel map and burial survey are not part of the completed Act 3.
 All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 11 (`SaveData.CurrentVersion`); earlier versions are incompatible with the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
+is version 12 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Thursday Club night, the motel
+return after the Act 2 office, Room 507's new interlude steps, the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
 10 and 11, the motel detour and storm-office room flow, the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in

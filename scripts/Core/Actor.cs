@@ -51,9 +51,12 @@ public partial class Actor : Hotspot, ISpeaker
         ? new Vector2(_sprite!.Texture.GetWidth() / _sprite.Hframes, _sprite.Texture.GetHeight())
         : Texture == null ? new Vector2(16, 40) : new Vector2(Texture.GetWidth() / Frames, Texture.GetHeight());
 
-    public Vector2 HeadPosition => _poses?.Active == true
+    /// <summary>Extra screen pixels to raise this actor's speech by, for a room moment where it would cover someone.</summary>
+    public float SpeechLift { get; set; }
+
+    public Vector2 HeadPosition => (_poses?.Active == true
         ? ToGlobal(_poses.HeadOffset - new Vector2(0, 7))
-        : GlobalPosition - new Vector2(0, FrameSize.Y * GlobalScale.Y + 3);
+        : GlobalPosition - new Vector2(0, FrameSize.Y * GlobalScale.Y + 3)) - new Vector2(0, SpeechLift);
 
     public bool Talking
     {

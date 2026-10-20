@@ -37,7 +37,8 @@ game menu, puzzle panel, pause overlay, cursor and held-item badge.
 | `ThoughtColor` | `#d8b878` | Journal narration |
 
 Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mono 11 px (speech, thoughts, choices;
-7 px per character), IM Fell English (verse over black). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
+7 px per character), IM Fell English (verse over black), Poiret One 22 px (captions over black, stepped down to fit
+the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
 16x12 badge.
 
 ## Components
@@ -49,11 +50,13 @@ Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mon
 - **Choice bar**: replaces the interface at the bottom; rows 14 px, text width 464 px. Shows `ShownChoices`
   (`#short:` labels).
 - **Inventory**: 2x6 slots of 40x28 at (110,186), paged with `<`/`>` beyond 12 items; satchel button at (444,234),
-  or **I**.
+  or **I**. Picking an item keeps it open; once the cursor has been over the case or page buttons
+  (`Hud.InventorySurface`), leaving them closes it. A click outside the case also closes it.
 - **Verb wheel**: four 32x32 slots (Look, Hand, Talk, Kick) at radius 22 around the cursor; press-drag-release or
   click.
 - **Captions and fades**: `Fade(alpha, seconds)`, chapter captions with an optional second line under them
-  (`ShowCaptionSub`, the interlude titles), verse lines that fade in one by one.
+  (`ShowCaptionSub`, the interlude titles), caption fades (`FadeCaptionIn`, `FadeCaptionSubIn`, `FadeCaptionOut`)
+  and the act-change cards over black (`ActCards`), verse lines that fade in one by one.
 - **GameMenu** (runs while paused): title (Continue, New game, Load game, Settings), pause (Resume, Save, Load,
   Settings, Quit to title), slots (autosave + 3; unreadable = *Incompatible*, missing = *Empty*), settings.
 - **NotepadView**: one page per unlocked note, newest first; arrows, mouse wheel; N/Esc/X closes.

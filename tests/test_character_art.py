@@ -147,50 +147,58 @@ class CharacterArtTests(unittest.TestCase):
         self.assertFalse(np.any(np.all(patch[:, :, None] == skin, axis=3)),
                          "the coat collar must cover the shoulder rather than expose a skin patch")
 
-    def test_eleanor_marked_back_hair_patch_is_darker(self):
-        spec = sprites.ELEANOR_STAGE
-        pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
-        before = np.array(sprites.figure(dict(spec, hair_back_shade=0), pose, sprites.NPC_W, sprites.FH))
-        after = np.array(sprites.figure(spec, pose, sprites.NPC_W, sprites.FH))
-        self.assertTrue(np.array_equal(before[:, :, 3], after[:, :, 3]), "shading must not change the silhouette")
-        changed = np.any(before[:, :, :3] != after[:, :, :3], axis=2)
-        self.assertGreater(np.count_nonzero(changed), 0)
-        self.assertLess(after[changed, :3].mean(), before[changed, :3].mean(),
-                        "darken the bright back-hair patch without lifting the dark underside")
-        hair_palette = painter.ramp(spec["hair"])
-        for image in (before, after):
-            self.assertTrue(np.all(np.any(np.all(image[changed, None, :3] == hair_palette, axis=2), axis=1)),
-                            "only hair pixels should change color")
+    def test_eleanor_hair_is_one_mass(self):
+        """Crown and mane share one shading: the mane is not left as a separately lit, dithered, seamed part."""
+        canvases = []
+        render = painter.Canvas.render
 
-    def test_eleanor_back_hair_has_a_little_more_volume(self):
+        def record(canvas, *args, **kwargs):
+            canvases.append(canvas)
+            return render(canvas, *args, **kwargs)
+
+        pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
+        for name in ("ELEANOR", "ELEANOR_STAGE", "ELEANOR_STAGE_CLOTHED"):
+            spec = getattr(sprites, name)
+            with self.subTest(spec=name), patch.object(painter.Canvas, "render", record):
+                canvases.clear()
+                sprites.figure(dict(spec, hair_unified=False), pose, sprites.NPC_W, sprites.FH)
+                sprites.figure(spec, pose, sprites.NPC_W, sprites.FH)
+                split, unified = canvases
+                self.assertTrue(split.parts_mask("hairback").any())
+                self.assertFalse(unified.parts_mask("hairback").any(), "the mane joins the crown as one part")
+        self.assertNotIn("hair_unified", sprites.ROSE, "only Eleanor's hair is reshaded")
+
+    def test_eleanor_back_hair_is_trimmed_only_behind(self):
         paint = painter._long_hair_back
-        edges = []
+        masks = []
 
         def record(canvas, *args):
             paint(canvas, *args)
-            edges.append(np.nonzero(canvas.parts_mask("hairback"))[1].min())
+            masks.append(canvas.parts_mask("hairback") | canvas.parts_mask("hair"))
 
         pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
         with patch.object(painter, "_long_hair_back", side_effect=record):
-            sprites.figure(dict(sprites.ELEANOR_STAGE, hair_back_width=1.0), pose, sprites.NPC_W, sprites.FH)
+            sprites.figure(dict(sprites.ELEANOR_STAGE, hair_back_trim=1.0), pose, sprites.NPC_W, sprites.FH)
             sprites.figure(sprites.ELEANOR_STAGE, pose, sprites.NPC_W, sprites.FH)
-        self.assertLess(edges[1], edges[0])
-        self.assertLessEqual(edges[0] - edges[1], 2, "add only a pixel or two along the back edge")
+        full, trimmed = (np.nonzero(m)[1] for m in masks)
+        self.assertGreaterEqual(trimmed.min() - full.min(), 3, "the back edge comes in")
+        self.assertLessEqual(abs(int(trimmed.max()) - int(full.max())), 1,
+                             "the front edge the chest locks hang from stays")
 
-    def test_eleanor_back_hair_is_slightly_longer(self):
+    def test_eleanor_back_hair_falls_past_the_shoulder_blades(self):
         paint = painter._long_hair_back
         bottoms = []
 
         def record(canvas, *args):
             paint(canvas, *args)
-            bottoms.append(np.nonzero(canvas.parts_mask("hairback"))[0].max())
+            bottoms.append(np.nonzero(canvas.parts_mask("hairback") | canvas.parts_mask("hair"))[0].max())
 
         pose = sprites.pose(35, arms=sprites._arms("cover", "side"))
         with patch.object(painter, "_long_hair_back", side_effect=record):
             sprites.figure(dict(sprites.ELEANOR_STAGE, hair_back=0.29), pose, sprites.NPC_W, sprites.FH)
             sprites.figure(sprites.ELEANOR_STAGE, pose, sprites.NPC_W, sprites.FH)
         self.assertGreater(bottoms[1], bottoms[0])
-        self.assertLessEqual(bottoms[1] - bottoms[0], 3, "extend the back only slightly")
+        self.assertLessEqual(bottoms[1] - bottoms[0], 10, "longer, but not down to the waist")
         self.assertEqual(sprites.ELEANOR_STAGE["hair_front"], 0.34)
         self.assertEqual(sprites.ELEANOR_STAGE["hair_bulge"], 0.0, "no stray hair proud of the chest")
         self.assertEqual(sprites.ELEANOR_STAGE["hair_front_w"], 0.7, "slim but continuous front locks over the chest")
@@ -256,7 +264,7 @@ class CharacterArtTests(unittest.TestCase):
     def test_eleanor_club_variants_wear_the_same_hair(self):
         """Dressed or not, her long hair falls in front over her chest, as in the stage close-up."""
         for key in ("hair", "hair_style", "hair_front", "hair_front_w", "hair_front_root", "hair_back",
-                    "hair_back_width", "hair_back_shade", "hair_bulge"):
+                    "hair_back_width", "hair_back_trim", "hair_unified", "hair_bulge"):
             with self.subTest(key=key):
                 self.assertIn(key, sprites.ELEANOR_STAGE_CLOTHED)
                 self.assertEqual(sprites.ELEANOR_STAGE_CLOTHED[key], sprites.ELEANOR_STAGE[key])
@@ -483,6 +491,33 @@ class CharacterArtTests(unittest.TestCase):
         held = Image.open(ART / "sprites" / "micah_kneel.png")
         rise = Image.open(ART / "sprites" / "micah_kneel_rise.png")
         self.assertEqual(held.tobytes(), rise.crop((0, 0, *held.size)).tobytes())
+
+    def test_kneeling_rise_pushes_up_forward_from_the_planted_foot(self):
+        keys = [sprites.KNEEL, sprites.KNEEL_PUSH, sprites.KNEEL_BACK, sprites.KNEE_UP, sprites.PUSH_OFF,
+                sprites.NEARLY_UP]
+        for i, joints in enumerate(keys):
+            with self.subTest(key=i):
+                hip, shoulder, head = grounded_joints(joints)[:3]
+                self.assertEqual(grounded_joints(joints)[4][0], 98, "the near foot stays planted")
+                self.assertGreaterEqual(shoulder[0], hip[0], "the trunk never leans back")
+                self.assertGreaterEqual(head[0], shoulder[0] - 1, "the head stays over or ahead of the shoulders")
+        hips = [grounded_joints(k)[0][1] for k in keys[2:]]
+        self.assertEqual(hips[1:], sorted(hips[1:], reverse=True), "once kneeling up, the hips only rise")
+        for joints in keys[3:]:
+            fknee, fankle, fheel, ftoe = joints[7:11]
+            self.assertEqual((fheel[1], ftoe[1]), (90, 91), "the raised far foot stands flat on the floor")
+
+    def test_kneeling_rise_has_no_red_tie_streak_until_it_turns_to_idle(self):
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+        red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
+        clip = json.loads((ART / "sprites" / "micah_kneel_rise.json").read_text())
+        strip = Image.open(ART / "sprites" / "micah_kneel_rise.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        for i in range(len(clip["frames"]) - 2):
+            with self.subTest(frame=i):
+                frame = np.array(strip.crop((i * width, 0, (i + 1) * width, height)))
+                pixels = frame[frame[..., 3] > 0][:, :3].astype(int)
+                self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any())
 
     def test_kneeling_micah_is_on_knees_and_forearms_without_a_red_tie_streak(self):
         hip, shoulder, head, knee, ankle, elbow, hand = sprites.KNEEL

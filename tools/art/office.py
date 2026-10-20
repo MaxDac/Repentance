@@ -519,7 +519,7 @@ def papers(img):
 
 
 def ashtray(img):
-    """A heavy glass ashtray: two stubbed butts, a cigarette burning in the notch, its smoke curling up."""
+    """A heavy glass ashtray: two stubbed butts and a cigarette left out in the notch, burned down and gone cold."""
     d = ImageDraw.Draw(img)
     d.ellipse([293, 98, 309, 103], fill=hx("26262c"))
     d.ellipse([293, 96, 309, 102], fill=hx("5a5a66"))
@@ -531,11 +531,7 @@ def ashtray(img):
     d.point((302, 99), fill=hx("8a8a8a"))
     d.line([(303, 98), (308, 96)], fill=hx("ece4d4"))
     d.point((309, 96), fill=hx("8a8484"))
-    d.point((310, 95), fill=hx("ff6020"))
-    for i in range(22):
-        y = 94 - i
-        x = 310 + round(1.6 * math.sin(i / 3.2)) + i // 9
-        d.point((x, y), fill=mix(hx("9a9aa0"), hx("3c3a2c"), i / 24))
+    d.point((310, 95), fill=hx("4a4440"))
 
 
 DESK_PHONE = (322, 103)

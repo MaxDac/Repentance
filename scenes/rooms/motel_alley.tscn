@@ -63,7 +63,7 @@ HideIfFlags = "crate_moved"
 
 [node name="CrateUnder" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(272, 174)
+position = Vector2(271, 174)
 texture = ExtResource("6_CrateUnder")
 centered = false
 script = ExtResource("4_FlagSprite")

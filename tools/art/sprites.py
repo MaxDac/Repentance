@@ -73,8 +73,10 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
                   ("belt", 0.42, "d8d0c0")])
 # Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
-# figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat.
+# figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat. Her mane is
+# trimmed at the back (its front edge beside the neck kept) and falls past her shoulder blades.
 ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85,
+                    hair_back_trim=0.72, hair_back=0.40, hair_unified=True,
                     fringe=0.3, front_gaze=True, full_jaw=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
                     hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12")
 # In profile her torso is slim and flat: a near-straight back from nape to waist, the front straight down from the
@@ -119,7 +121,8 @@ NUN = dict(h=61, sw=0.122, hw=0.046, waist=0.084, hipw=0.096, skin="dcb49a", hai
            old=True, soft_face=True, lips="a07468", lips_lo="8a5e54", eye="3a3a44", brow="5a4a44", hat="veil",
            hat_col="1a181e", coif="e8e4dc", torso="2a2830", sleeves="2a2830",
            coat=dict(col="2a2830", top=0.40, hem=0.97, flare=0.03), pants="2a2830", shoes="141216",
-           decals=[("strip", 0.205, 0.285, 0.05, 0.072, "e6e2da"), ("strip", 0.285, 0.315, 0.072, 0.03, "e6e2da"),
+           decals=[("strip", 0.205, 0.285, 0.05, 0.072, "e8e4dc", "flat"),
+                   ("strip", 0.285, 0.315, 0.072, 0.03, "e8e4dc", "flat"),
                    ("belt", 0.415, "16141a"), ("rosary", 0.045, 0.43, 0.62, "6a4a34", "c8b070")])
 # The old librarian: thin and a little stooped, bald on top with grey at the sides, round wire spectacles, a
 # grey-brown buttoned cardigan over a white shirt with a small burgundy bow tie.
@@ -201,7 +204,7 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
 _STAGE_HAIR = dict(hair_front=0.34, hair_bulge=0.0, hair_front_w=0.7,
                    hair_front_root=0.07,  # the lock joins the hair behind the neck in profile
-                   hair_back=0.32, hair_back_width=1.12, hair_back_shade=-1)
+                   hair_back=0.40, hair_back_width=1.12, hair_back_trim=0.72, hair_unified=True)
 ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"],
                          "skin": "ecc4a2", "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
@@ -631,6 +634,19 @@ HALF_KNEEL = [(60, 65), (64, 42), (67, 27), (73, 75), (66, 91), (68, 54), (73, 6
               (55, 81), (42, 87), (42, 84), (38, 91)]
 HIDE_KNEEL = [(55, 72), (60, 50), (64, 36), (71, 74), (66, 91), (64, 62), (72, 71),
               (54, 90), (37, 90), (37, 87), (32, 92)]
+# Getting up off his knees after the beating, facing right, from KNEEL. The near foot stays planted on its tucked toes
+# (the strip's contact point), so the body comes back over it rather than sliding: he pushes up onto straight arms,
+# sits back towards his heels with the trunk upright and the hands on his thighs, brings the far knee up with its foot
+# flat in front and the near hand on it, then pushes off that knee leaning forward, the near heel coming down as he
+# straightens. The four extra points are the far leg's knee, ankle, heel and toe.
+KNEEL_PUSH = [(58, 71), (77, 65), (87, 59), (61, 88), (41, 85), (78, 77), (80, 90)]
+KNEEL_BACK = [(46, 79), (51, 57), (54, 42), (61, 88), (41, 85), (55, 69), (61, 78)]
+KNEE_UP = [(47, 77), (54, 55), (58, 40), (61, 88), (41, 85), (59, 66), (64, 70),
+           (63, 70), (65, 88), (63, 90), (70, 91)]
+PUSH_OFF = [(46, 66), (57, 44), (63, 30), (54, 79), (41, 87), (60, 56), (63, 69),
+            (60, 72), (65, 88), (63, 90), (70, 91)]
+NEARLY_UP = [(42, 58), (46, 35), (49, 20), (44, 74), (41, 91), (48, 47), (51, 58),
+             (50, 74), (55, 88), (53, 90), (60, 91)]
 
 
 def with_far_leg(joints):
@@ -685,11 +701,7 @@ def action_sequences(spec, name):
         recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
                                    [0.28, 0.3, 0.28, 0.22, 0.12])
         action_strip("micah_recover", recovery, times)
-        # Retain the planted hands/feet while lifting the bowed spine, then bring one knee underneath the body.
-        lifting = [(61, 73), (73, 54), (79, 44), (68, 87), (48, 91), (79, 71), (87, 88)]
-        keys = [KNEEL, lifting, CROUCH, HALF_UP, UPRIGHT]
-        rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12], kneeling_figure)
-        action_strip("micah_kneel_rise", rise, times)
+        kneel_rise_strip(spec, scaled, standing)
         crouch_strips(spec, scaled, standing)
     if name == "micah_no_tie":
         crouch_strips(spec, scaled, standing, name)
@@ -713,6 +725,27 @@ def profile_head(spec):
                 hp[x, y] = px[x, y]
     neck = [x for x in range(FW) if hp[x, collar - 1][3]]
     return head, ((min(neck) + max(neck) + 1) / 2, collar)
+
+
+def kneel_rise_strip(spec, scaled, standing):
+    """Micah getting up off his hands and knees after the beating (micah_kneel_rise), from the held micah_kneel frame
+    to the idle sheet frame, by way of the walk sheet's profile frame so he turns to the idle pose standing up."""
+    from PIL import Image
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def paint(joints):
+        hip, shoulder = joints[0], joints[1]
+        if -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder):
+            return kneeling_figure(scaled, joints)
+        # upright, the shirt front faces the way he looks, so only the coat shows side-on, hanging with gravity
+        return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=joints[4][1] < 91)
+    turning = Image.new("RGBA", (192, FH))
+    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
+    keys = [KNEEL, between(KNEEL, KNEEL_PUSH), KNEEL_PUSH, between(KNEEL_PUSH, KNEEL_BACK), KNEEL_BACK, KNEE_UP,
+            PUSH_OFF, NEARLY_UP]
+    frames = [paint(k) for k in keys] + [(turning, (96, 18)), standing]
+    action_strip("micah_kneel_rise", frames, [0.13, 0.07, 0.1, 0.08, 0.12, 0.15, 0.12, 0.1, 0.11, 0.12])
 
 
 def crouch_strips(spec, scaled, standing, name="micah"):
@@ -769,13 +802,13 @@ def build_gin():
 
 
 # Micah shows the bellboy Eleanor's photograph, facing right: the near hand goes inside his coat, comes out with the
-# card and holds it up at arm's length for the bellboy to look at. (near arm, hand inside the coat, card shown,
-# seconds); micah_pocket_photo plays the same keys back the other way.
+# card and holds it up, elbow still bent, halfway between him and the bellboy for the bellboy to look at. (near arm,
+# hand inside the coat, card shown, seconds); micah_pocket_photo plays the same keys back the other way.
 _P_SIDE = ("side", 0, 0, 0)
 _P_POCKET = ("pts", (0.16, 0.38, 0.04), (0.08, 0.31, 0.08), (0.03, 0.29, 0.09))
 _P_DRAWN = ("pts", (0.16, 0.38, 0.05), (0.09, 0.32, 0.11), (0.06, 0.3, 0.13))
-_P_RISING = ("pts", (0.16, 0.37, 0.1), (0.1, 0.31, 0.2), (0.08, 0.29, 0.24))
-_P_SHOWN = ("pts", (0.15, 0.34, 0.14), (0.1, 0.27, 0.28), (0.09, 0.255, 0.32))
+_P_RISING = ("pts", (0.16, 0.37, 0.08), (0.1, 0.31, 0.15), (0.08, 0.29, 0.17))
+_P_SHOWN = ("pts", (0.15, 0.35, 0.1), (0.1, 0.28, 0.18), (0.09, 0.265, 0.21))
 SHOW_PHOTO_KEYS = [
     (_P_SIDE, False, False, 0.2),
     (_P_POCKET, True, False, 0.3),
@@ -817,10 +850,10 @@ TIE_REACH = ("pts", (0.17, 0.31, 0.13), (0.07, 0.24, 0.28), (0.05, 0.225, 0.32))
 TIE_GRAB = ("pts", (0.17, 0.31, 0.12), (0.07, 0.235, 0.27), (0.05, 0.22, 0.305))
 TIE_YANK = ("pts", (0.17, 0.38, 0.03), (0.07, 0.32, 0.17), (0.05, 0.305, 0.205))
 TIE_PULL_KEYS = [
-    (("swing", 4, 6, 10), 0.0, 0.15),
-    (TIE_REACH, 5.0, 0.18),
-    (TIE_GRAB, 5.0, 0.22),
-    (TIE_YANK, -4.0, 0.35),
+    (("swing", 4, 6, 10), 0.0, 0.1),
+    (TIE_REACH, 5.0, 0.1),
+    (TIE_GRAB, 5.0, 0.12),
+    (TIE_YANK, -4.0, 0.2),
 ]
 # The clerk, facing right (the lobby flips him to face Micah): yanked forward by the tie and down onto the desktop,
 # face first, his hands slapping down either side. The counter hides him from the hips down, so those frames are cut
@@ -859,7 +892,7 @@ def tie_pull_strips():
             for x in range(img.width):
                 px[x, y] = (0, 0, 0, 0)
         clip.append((img, head))
-    action_strip("clerk_tie_pulled", clip, [0.15, 0.12, 0.3], anchor=(96, FH - 3))
+    action_strip("clerk_tie_pulled", clip, [0.08, 0.07, 0.2], anchor=(96, FH - 3))
 
 
 # Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,
@@ -1042,21 +1075,21 @@ _T_CHEST_FAR = ("pts", (-0.16, 0.38, 0.06), (-0.07, 0.31, 0.14), (-0.03, 0.29, 0
 _T_OFFER = ("pts", (0.16, 0.37, 0.08), (0.11, 0.33, 0.18), (0.1, 0.31, 0.22))
 _T_SIDE = ("swing", 3, 6, 10)
 TEDDY_WALLET_KEYS = [
-    (_T_SIDE, _T_SIDE, None, None, 0.25),
-    (_T_POCKET, _T_SIDE, None, None, 0.3),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "shut"), None, 0.3),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "wallet", 0.45),
-    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "hand-1", 0.4),
-    (_T_POCKET, _T_CHEST_FAR, None, "hand-1", 0.3),
-    (_T_OFFER, _T_SIDE, None, "hand1", 0.4),
+    (_T_SIDE, _T_SIDE, None, None, 0.12),
+    (_T_POCKET, _T_SIDE, None, None, 0.14),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "shut"), None, 0.14),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "wallet", 0.22),
+    (_T_CHEST_NEAR, _T_CHEST_FAR, ("hand1", "open"), "hand-1", 0.2),
+    (_T_POCKET, _T_CHEST_FAR, None, "hand-1", 0.14),
+    (_T_OFFER, _T_SIDE, None, "hand1", 0.2),
 ]
 # At the corner of the desk, facing right: he leans in, lays the notes down by the lamp and takes his hand back empty
 # (the room shows the money on the desk from then on). (hand height, reach, notes in hand, lean, seconds)
 TEDDY_NOTES_KEYS = [
-    (0.31, 0.12, True, 0.0, 0.25),
-    (0.35, 0.2, True, 3.0, 0.25),
-    (0.42, 0.27, True, 7.0, 0.35),
-    (0.42, 0.27, False, 7.0, 0.2),
+    (0.31, 0.12, True, 0.0, 0.12),
+    (0.35, 0.2, True, 3.0, 0.12),
+    (0.42, 0.27, True, 7.0, 0.18),
+    (0.42, 0.27, False, 7.0, 0.1),
 ]
 WALLET = ((58, 36, 20, 255), (110, 74, 44, 255), (150, 118, 84, 255))
 NOTE = ((168, 192, 152, 255), (106, 138, 90, 255))
@@ -1237,49 +1270,52 @@ def kiss_strip():
     action_strip("micah_kiss", frames, seconds, anchor=(anchor_x, FH - 3))
 
 
-# In the library, Micah hauls the librarian up by the collar: stopped facing right COLLAR_GAP pixels short of him (the
-# librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, grabs the shirt collar under the bow tie with
-# his near hand and pulls him up onto his toes; the librarian turns to him, straightens out of his stoop and lifts his
-# hands. micah_collar ends on the held grab (kept through the dialogue); micah_collar_release lets go and steps back,
-# ending on both idle sprites exactly where they stood. Played on the player with the librarian actor hidden.
-# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, lift, his arms or None,
-# seconds)
+# In the library, Micah grabs the librarian by the collar and drags him in: stopped facing right COLLAR_GAP pixels short
+# of him (the librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, takes a fistful of shirt collar
+# under the bow tie with his near hand and yanks him close, leaning back into the pull; the librarian, both feet still
+# on the floor, stumbles a step towards him, pitched forward off balance with his hands up. micah_collar ends on the
+# held grab (kept through the dialogue); micah_collar_release lets go and steps back while the librarian straightens
+# and steps back, ending on both idle sprites exactly where they stood. Played on the player with the librarian actor
+# hidden.
+# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, pull (pixels he is dragged
+# towards Micah), his arms or None, seconds)
 COLLAR_GAP, COLLAR_RISE, COLLAR_W = 46, 2, 136
 _LIB_IDLE = dict(arms=_arms("fold"), lean=9.0, nod=0.006)
 _GRIP_REACH = ((0.13, 0.31, 0.13), (0.1, 0.25, 0.25), (0.075, 0.235, 0.285))
-_GRIP = ((0.13, 0.30, 0.15), (0.09, 0.24, 0.27), (0.065, 0.225, 0.305))
+_GRIP_PULL = ((0.12, 0.35, 0.06), (0.09, 0.27, 0.17), (0.065, 0.25, 0.2))
+_GRIP = ((0.12, 0.37, 0.03), (0.09, 0.28, 0.13), (0.065, 0.26, 0.16))
 _HANDS_UP = ((0.17, 0.36, 0.02), (0.18, 0.25, 0.06), (0.175, 0.22, 0.07))
 _HANDS_HALF = ((0.16, 0.38, 0.04), (0.13, 0.32, 0.1), (0.12, 0.3, 0.11))
 COLLAR_KEYS = [
     (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
     (8, 80, 6.0, _GRIP_REACH, 50, 6.0, 0, _HANDS_HALF, 0.15),
-    (16, 90, 8.0, _GRIP, 70, 1.0, 2, _HANDS_UP, 0.15),
-    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.6),
+    (10, 90, 0.0, _GRIP_PULL, 70, 12.0, 6, _HANDS_UP, 0.12),
+    (10, 90, -3.0, _GRIP, 75, 14.0, 10, _HANDS_UP, 0.6),
 ]
 COLLAR_RELEASE_KEYS = [
-    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.2),
-    (12, 80, 2.0, None, 60, 3.0, 0, _HANDS_HALF, 0.2),
-    (6, 70, 0.0, None, 45, 7.0, 0, None, 0.25),
+    (10, 90, -3.0, _GRIP, 75, 14.0, 10, _HANDS_UP, 0.2),
+    (8, 80, 0.0, None, 60, 8.0, 5, _HANDS_HALF, 0.2),
+    (4, 70, 0.0, None, 45, 7.0, 2, None, 0.25),
     (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
 ]
 
 
-def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, lift, lib_arms):
+def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, pull, lib_arms):
     from PIL import Image
     mx0 = 20
     anchor_x = mx0 + FW // 2
-    lx = anchor_x + COLLAR_GAP - NPC_W // 2
+    lx = anchor_x + COLLAR_GAP - NPC_W // 2 - pull
     img = Image.new("RGBA", (COLLAR_W, FH))
     if lib_arms is None:
         lib_pose = pose(lib_yaw, **dict(_LIB_IDLE, lean=lib_lean))
     else:
         near, far = ("pts",) + lib_arms, ("pts",) + tuple((-x, y, z) for x, y, z in lib_arms)
-        # on his toes: heels up, feet pointing down
-        legs = {1: (2, 2, -35 if lift else 0), -1: (-2, 4, -35 if lift else -6)} if lift else None
-        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004,
-                        **({"legs": legs} if legs else {}))
+        # dragged off balance: a stumbling step towards Micah, both soles flat on the floor
+        stride = min(pull, 10)
+        legs = {1: (stride, 3, 0), -1: (-stride * 0.6, 5, 0)}
+        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004, legs=legs)
     lib = figure(LIBRARIAN, lib_pose, NPC_W, FH).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-    img.alpha_composite(lib, (lx, -COLLAR_RISE - lift))
+    img.alpha_composite(lib, (lx, -COLLAR_RISE))
     ps = pose(yaw, lean=lean)
     if arm:
         ps["arms"] = {1: ("pts",) + arm, -1: ("side", 0, 0, 0)}

@@ -63,14 +63,7 @@ public static class Act3
     {
         await Game.Wait(1.0);
         await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act Three");
-        await Game.Wait(2.5);
-        if (nextMorning)
-        {
-            Game.Hud.ShowCaption("The next morning");
-            await Game.Wait(2.2);
-        }
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ActCards("End of Act Three", nextMorning ? "The next morning" : null);
         Attic.StashMicahItems();
         State.SetFlag("masked", false);
         State.GiveItem("journal");

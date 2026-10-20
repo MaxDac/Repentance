@@ -91,7 +91,7 @@ SpeechColor = Color(0.96, 0.78, 0.62, 1)
 Mouth = NodePath("../EleanorMouth")
 
 [node name="EleanorMouth" type="Sprite2D" parent="."]
-position = Vector2(124, 126)
+position = Vector2(125, 126)
 z_index = -6
 texture = ExtResource("11_eleanor_talk")
 centered = false

@@ -104,7 +104,6 @@ public partial class Game
         if (_carried == null)
         {
             SetCarried(item);
-            Hud.ShowInventory(false);
             return;
         }
         var first = _carried;

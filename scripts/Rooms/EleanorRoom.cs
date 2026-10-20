@@ -120,6 +120,7 @@ public partial class EleanorRoom : Room
             case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
             case ("safe", Verb.UseItem) when Shows(item, "combination", "safe_riddle") && !State.HasFlag("safe_open"):
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
+                Game.Sfx.Play(Sound.SafeOpen);
                 State.SetFlag("safe_open");
                 await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
                 await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
@@ -184,6 +185,7 @@ public partial class EleanorRoom : Room
     {
         State.SetFlag("interlude_box_in_safe");
         State.SetFlag("interlude_safe_locked");
+        Game.Sfx.Play(Sound.SafeClose);
         await Say("Swing the door to, and spin the dial. The Twelve at His table. December. The day He rested.");
         await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
     }
@@ -339,7 +341,10 @@ public partial class EleanorRoom : Room
                 await Say("She'll remember who I asked for, too. Let her. Rizzo's sells flowers.");
                 return true;
             case ("telephone", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_drawer_locked"):
-                await Say("Not yet. The box in the safe, the riddle in the drawer. Then I call.");
+                await Say(!State.HasFlag("interlude_safe_locked") ? "Not yet. The box goes in the safe first."
+                    : !State.HasFlag("interlude_riddle_written") ? "Not yet. The combination goes on paper first, at the desk."
+                    : !State.HasFlag("interlude_riddle_in_drawer") ? "Not yet. The riddle goes in the drawer."
+                    : "Not yet. My key turns on that drawer first. Then I call.");
                 return true;
             case ("telephone", Verb.Hand or Verb.Talk) when !State.HasFlag("interlude_phoned"):
                 State.SetFlag("interlude_phoned");
@@ -352,7 +357,9 @@ public partial class EleanorRoom : Room
 
             case ("exit", Verb.Walk or Verb.Hand) when !ReadyToLeave:
                 await Say(!State.HasFlag("interlude_safe_locked") ? "Not yet. The box goes in the safe first."
-                    : !State.HasFlag("interlude_drawer_locked") ? "Not yet. Nothing of mine stays out in the open for them."
+                    : !State.HasFlag("interlude_riddle_written") ? "Not yet. The combination goes on paper first, at the desk."
+                    : !State.HasFlag("interlude_riddle_in_drawer") ? "Not yet. The riddle goes in the drawer."
+                    : !State.HasFlag("interlude_drawer_locked") ? "Not yet. The drawer wants my key."
                     : "Not yet. Nobody's coming for me unless I call.");
                 return true;
             case ("exit", Verb.Walk or Verb.Hand):

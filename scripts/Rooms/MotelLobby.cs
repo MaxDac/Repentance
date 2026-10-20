@@ -157,16 +157,21 @@ public partial class MotelLobby : Room
             case "tie":
                 await Game.WalkTo(TieSpot);
                 Player.Face(Facing.Right);
-                clerk.ZIndex = 1;
                 Player.ZIndex = 2;
                 var micah = Player.PlayPose("micah_tie_pull");
-                await Wait(0.35);
-                await Task.WhenAll(micah, clerk.PlayPose("clerk_tie_pulled"));
+                await Wait(0.2);
+                // Only the counter-cut pose may draw over the desk; his standing sprite stays behind it.
+                var pulled = clerk.PlayPose("clerk_tie_pulled");
+                clerk.ZIndex = 1;
+                await Task.WhenAll(micah, pulled);
+                // Pinned face down on the desk, his lines would cover Micah's face: lift them clear of Micah's hat.
+                clerk.SpeechLift = Mathf.Max(0, clerk.HeadPosition.Y - (Player.HeadPosition.Y - 4));
                 break;
             case "release":
                 Player.SetPose(null);
                 Player.Face(Facing.Right);
                 clerk.SetPose(null);
+                clerk.SpeechLift = 0;
                 clerk.ZIndex = 0;
                 Player.ZIndex = 0;
                 await Wait(0.4);

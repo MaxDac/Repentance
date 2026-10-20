@@ -93,3 +93,4 @@ on Linux.
 | `No loader found` for `.cs`, `Could not find type "CSharpScript"` | Non-.NET Godot build |
 | Export exits 0 but no C# assemblies | `Repentance.sln` missing |
 | Test passes its marker but the launcher fails | An `ERROR:` line in `logs/<suite>.log` |
+| No sound; log says `falling back to the dummy driver` | No audio device at start; connect one, then **Restart sound** ([Audio](audio.md#lost-sound-device)) |

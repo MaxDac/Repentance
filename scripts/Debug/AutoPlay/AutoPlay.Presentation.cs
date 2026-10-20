@@ -16,7 +16,21 @@ public partial class AutoPlay
             Check(DirAccess.RemoveAbsolute(path) == Error.Ok, "removed only the isolated test settings");
         Check(game.Settings.Load() && !game.Settings.NudityEnabled, "nudity defaults to off");
         game.Hud.ShowTitle(true);
+        Check(!game.SoundLost && !game.Hud.Menu.HasEntry(GameMenu.RestartSoundLabel),
+            "a requested Dummy driver (--audio-driver Dummy) isn't mistaken for a lost sound device");
+        game.SoundLostOverride = true;
         var title = game.Hud.Menu.OpenTitle();
+        Check(game.Hud.Menu.HasEntry(GameMenu.RestartSoundLabel) && game.Hud.Menu.Status == GameMenu.SoundLostText,
+            "with the sound device lost at start, the title explains and offers Restart sound");
+        await Shot("title_sound_lost");
+        Check(game.Hud.Menu.Press("Settings"), "title offers Settings without sound");
+        await Observe(0.1);
+        Check(game.Hud.Menu.HasEntry(GameMenu.RestartSoundLabel), "settings offer Restart sound too");
+        game.SoundLostOverride = null;
+        game.Hud.Menu.Press("Back");
+        await Observe(0.1);
+        Check(!game.Hud.Menu.HasEntry(GameMenu.RestartSoundLabel) && game.Hud.Menu.Status == "",
+            "with sound, the title has no Restart sound");
         Check(game.Hud.Menu.Press("Settings"), "title offers Settings");
         await Observe(0.1);
         Check(game.Hud.Menu.Press("Nudity: Off"), "settings offers explicit nudity opt-in");
