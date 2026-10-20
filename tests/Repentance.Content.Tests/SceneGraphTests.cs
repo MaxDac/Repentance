@@ -196,6 +196,57 @@ public class SceneGraphTests
         Assert.Empty(problems);
     }
 
+    /// <summary>
+    /// Hotspots without ExitTo whose way out the room script runs. Where a cutscene leaves the room on its own, the
+    /// hotspot is the failsafe for when it stops short (an error in <c>Game.Run</c> hands control back mid-scene), and
+    /// calls the same method the cutscene ends with.
+    /// </summary>
+    private static readonly (string Room, string Hotspot)[] ScriptedExits =
+    {
+        ("alley", "street"), ("church_exterior", "doors"), ("club_backstage", "door"), ("club_hall", "street_door"),
+        ("club_stage", "lounge_exit"), ("club_vestibule", "inner_door"), ("convent_road", "road"),
+        ("harrington_office", "window"), ("mansion_exterior", "gate"), ("motel_fire_escape", "ladder"),
+        ("motel_fire_escape", "door"), ("motel_night", "door"), ("office", "door"), ("rose_house", "exit"),
+        ("street", "street"),
+    };
+
+    /// <summary>Rooms with no hotspot out, and why that is fine.</summary>
+    private static readonly Dictionary<string, string> NoManualExit = new()
+    {
+        ["attic"] = "Daniel's attic: the journal and the hatch scenes move the story on, and Micah and Eleanor never stand here",
+        ["bedroom"] = "Daniel's bedroom: reading on in bed is the way out, and Micah and Eleanor never stand here",
+        ["chicago_map"] = "the map is itself the way out: every pin changes room",
+        ["prison"] = "an ending: the credits follow",
+    };
+
+    [Fact]
+    public void ScriptedExits_AreHandledByTheRoomScript()
+    {
+        var problems = new List<string>();
+        foreach (var (roomName, id) in ScriptedExits)
+        {
+            if (!Rooms.Value.TryGetValue(roomName, out var room)) { problems.Add($"{roomName}: no such room"); continue; }
+            if (room.Hotspots.All(h => h.Id != id)) problems.Add($"{roomName}: no hotspot '{id}'");
+            var script = room.Script is { } s ? File.ReadAllText(Path.Combine(Root.Value, s)) : "";
+            if (!script.Contains($"\"{id}\"")) problems.Add($"{roomName}: script does not handle '{id}'");
+        }
+        Assert.Empty(problems);
+    }
+
+    [Fact]
+    public void EveryRoom_HasAWayOut()
+    {
+        var scripted = ScriptedExits.Select(m => m.Room).ToHashSet();
+        var stuck = Rooms.Value.Values
+            .Where(r => !r.Hotspots.Any(h => h.ExitTo != "" || h.Door) && !scripted.Contains(r.Name) && !NoManualExit.ContainsKey(r.Name))
+            .Select(r => r.Name)
+            .OrderBy(n => n);
+        Assert.Empty(stuck);
+        foreach (var name in NoManualExit.Keys)
+            Assert.True(Rooms.Value.TryGetValue(name, out var room) && !room.Hotspots.Any(h => h.ExitTo != "" || h.Door),
+                $"{name} has a way out now; drop it from {nameof(NoManualExit)}");
+    }
+
     [Fact]
     public void EveryRoom_IsReachableFromTheAttic()
     {

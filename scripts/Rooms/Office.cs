@@ -101,12 +101,24 @@ public partial class Office : Room
         await Think("Friends, she said. Money enough. I knew it was a lie while she was saying it, and I let it stand.");
         await Think("I was too ashamed to ask. Too ashamed to be standing in that room at all. So I walked out on her.");
         await Think("And every night since, I've wanted her back on that pillow. Not saved. Wanted. God forgive me, that's the truth.");
-        await Talk("office_ring");
-        State.SetFlag("act2_office_done");
+        await BackToTheMotel();
+    }
+
+    /// <summary>The ring, then back to the motel. The door runs it too until the clerk has talked, in case the opening stopped short.</summary>
+    private async Task BackToTheMotel()
+    {
+        if (!State.HasFlag("act2_office_done"))
+        {
+            await Talk("office_ring");
+            State.SetFlag("act2_office_done");
+        }
         await Think("Enough. I'll go back to that motel and find out where she went. Just to know she's all right. That's what I tell myself.");
-        State.SetFlag("motel_return");
-        // days later, the clerk has pulled the drop ladder back up out of reach
-        State.SetFlag("ladder_down", false);
+        if (!State.HasFlag("motel_return"))
+        {
+            State.SetFlag("motel_return");
+            // days later, the clerk has pulled the drop ladder back up out of reach
+            State.SetFlag("ladder_down", false);
+        }
         await Game.WalkTo(new Godot.Vector2(58, 172));
         await OpenTheDoor(player: true);
         await Game.ChangeRoom("motel_alley", "start");
@@ -245,6 +257,9 @@ public partial class Office : Room
             case ("door", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
                 await OpenTheDoor(player: true);
                 await LeaveAct3();
+                return true;
+            case ("door", Verb.Walk or Verb.Hand) when State.StoryAct == 2 && !State.HasFlag("motel_return_done"):
+                await BackToTheMotel();
                 return true;
             case ("faith_ring", Verb.Hand):
                 State.GiveItem("faith_ring");

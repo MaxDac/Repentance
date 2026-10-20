@@ -53,6 +53,12 @@ public partial class ClubHall : Room
             await Game.WalkTo(new Vector2(36, 228));
             await leave;
         }
+        await OutOnTheStreet();
+    }
+
+    /// <summary>Thrown out: the pavement outside. The street door runs it too, in case the cutscene stopped short.</summary>
+    private async Task OutOnTheStreet()
+    {
         State.SetFlag("club_out");
         State.SetFlag("on_map", false);
         await Game.ChangeRoom("street", "thrown_out");
@@ -85,6 +91,12 @@ public partial class ClubHall : Room
 
             case ("street_door", Verb.Walk or Verb.Hand) when Masked:
                 await Say("Not now. Eleanor's in there, past those curtains. I didn't climb a fire escape to stop at the hat check.");
+                return true;
+            case ("street_door", Verb.Walk or Verb.Hand) when !State.HasFlag("club_out"):
+                await OutOnTheStreet();
+                return true;
+            case ("exit", Verb.Walk or Verb.Hand) when !Masked:
+                await Say("Not past the man in the wig, not in this coat. They've made that plain.");
                 return true;
         }
         return false;

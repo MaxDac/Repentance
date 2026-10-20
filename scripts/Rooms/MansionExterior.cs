@@ -108,6 +108,12 @@ public partial class MansionExterior : Room
                 await Say("The coal hatch. I'd fit, if I were nine years old and stupid. I'm only one of those.");
                 return true;
 
+            case ("gate", Verb.Hand or Verb.Walk) when State.HasFlag("eleanor_coda"):
+                await DownTheRoad();
+                return true;
+            case ("gate", Verb.Hand or Verb.Walk) when State.HasFlag("escaping"):
+                await Getaway();
+                return true;
             case ("gate", Verb.Hand or Verb.Walk):
                 await Say("Not without Eleanor. Not after all this.");
                 return true;
@@ -168,6 +174,12 @@ public partial class MansionExterior : Room
         Player.Face(Facing.Right);
         await Wait(0.6);
         await Talk("coda_outside");
+        await DownTheRoad();
+    }
+
+    /// <summary>Eleanor off down the road, and the night back at Rose's door. The gate runs it too, in case the coda stopped short.</summary>
+    private async Task DownTheRoad()
+    {
         await Game.WalkTo(new Vector2(30, 236));
         await Game.Hud.Fade(1, 1.5);
         State.SetFlag("eleanor_coda", false);
@@ -203,6 +215,13 @@ public partial class MansionExterior : Room
         {
             await Think("The house sleeps on, with the old man on the carpet. Somebody will find him by breakfast.");
         }
+        await Getaway();
+    }
+
+    /// <summary>Out through the gate, and the end of the night. The gate runs it too, in case the escape stopped short.</summary>
+    private async Task Getaway()
+    {
+        if (State.HasFlag("cellar_fire")) State.SetFlag(Endings.MansionExploded);
         await Game.WalkTo(new Vector2(30, 236));
         await Act3.End();
     }

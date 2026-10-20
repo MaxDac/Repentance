@@ -26,11 +26,20 @@ public partial class ChurchExterior : Room
             await Think("Two men took her, the night I walked out. I didn't ask where she'd go. I didn't want to hear the answer.");
             await Think("So why can't I think of anything but her? Her voice. Her hair on the pillow. \"I can't go back there.\"");
             await Think("A man in my state ends up in one of two places. The bars know me too well. So, the other one.");
-            if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
-            Player.Face(Facing.Up);
-            await Game.ChangeRoom("church_interior", "start");
+            await GoIn();
         });
     }
+
+    /// <summary>Act 2: up the steps and in. The street exit takes him there too until he has been inside.</summary>
+    private async Task GoIn()
+    {
+        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
+        Player.Face(Facing.Up);
+        await Game.ChangeRoom("church_interior", "start");
+    }
+
+    /// <summary>Act 3 before the choice: the only way Micah is on these steps in Act 3 is beaten, Bruno's delivery.</summary>
+    private bool LeftBeaten => State.StoryAct == 3 && !State.HasFlag("keep_going") && !State.HasFlag(Endings.GaveUpSteps);
 
     /// <summary>Act 3: on the cathedral steps, beaten. Keep going for Eleanor, or give up and go to Rose.</summary>
     private async Task Beaten()
@@ -47,6 +56,13 @@ public partial class ChurchExterior : Room
         await Think("Rose and Tommy ought to be in my heart. Eleanor's there instead. And God help me, I don't want to let her go.");
         Game.Hud.HideCloseUp();
         if (!await Player.PlayPose("micah_recover")) return;
+        await Choose();
+    }
+
+    /// <summary>On his feet: keep going, or give up. The doors and the street run it too, in case the cutscene stopped short.</summary>
+    private async Task Choose()
+    {
+        Game.Hud.HideCloseUp(0);
         Player.SetPose(null);
         Player.Face(Facing.Down);
         await Wait(0.6);
@@ -63,5 +79,19 @@ public partial class ChurchExterior : Room
             State.SetFlag(Endings.GaveUpSteps);
             await Act3.End();
         }
+    }
+
+    public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
+    {
+        switch (target.Id, verb)
+        {
+            case ("doors" or "exit", Verb.Walk or Verb.Hand) when LeftBeaten:
+                await Choose();
+                return true;
+            case ("doors" or "exit", Verb.Walk or Verb.Hand) when State.HasFlag("act2_church"):
+                await GoIn();
+                return true;
+        }
+        return false;
     }
 }
