@@ -28,6 +28,7 @@ public static class Interlude
         "interlude_riddle_in_drawer",
         "interlude_agatha_met", "interlude_agatha_sorry", "interlude_agatha_proud",
         "interlude_took_box", "interlude_took_scrap", "interlude_took_thread",
+        "interlude_took_bag", "interlude_bag_left", "interlude_pyjamas",
     };
     private static readonly string[] SecondBeats =
     {
@@ -46,11 +47,19 @@ public static class Interlude
     /// </summary>
     public static bool SatchelOpen(Func<string, bool> has) => has("interlude1") || has("interlude2");
 
-    /// <summary>Eleanor's player sheet for <paramref name="room"/>, or null when Micah (or Daniel) plays there.</summary>
+    /// <summary>
+    /// Eleanor's player sheet for <paramref name="room"/>, or null when Micah (or Daniel) plays there. In the First
+    /// Interlude she carries her duffle (<see cref="EleanorBag"/>) from Room 507 to the convent cell, and is in her
+    /// pyjamas in the cell when Agatha knocks.
+    /// </summary>
     public static string? PlayerSheet(string room, Func<string, bool> has)
     {
         if (has("eleanor_coda")) return "eleanor_sheet_play";
         if (has("interlude2") && room == "club_backstage") return "eleanor_gown_play";
+        if (has("interlude1") && room == "convent_cell" && has("interlude_pyjamas")) return "eleanor_pyjama_play";
+        if (has("interlude1") && !has("interlude_bag_left")
+            && (room is "speakeasy" or "convent_corridor" or "convent_cell" || (room == "eleanor_room" && has("interlude_took_bag"))))
+            return EleanorBag.Sheet;
         if (has("interlude1") || has("interlude2")) return "eleanor_play";
         if (has("eleanor_epilogue") && room == "outskirts") return "eleanor_play";
         return null;

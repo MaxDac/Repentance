@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_drawer_comb.png" id="6_drawer_comb"]
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="8_nun"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/duffle_bag.png" id="12_duffle_bag"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
@@ -96,6 +97,16 @@ metadata/facing = 3
 
 [node name="World" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="CellBag" type="Sprite2D" parent="World"]
+position = Vector2(312, 216)
+scale = Vector2(0.957, 0.957)
+texture = ExtResource("12_duffle_bag")
+centered = false
+offset = Vector2(-32, -94)
+flip_h = true
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "interlude1,interlude_bag_left"
 
 [node name="Exit" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

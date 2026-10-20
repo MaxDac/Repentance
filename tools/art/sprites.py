@@ -75,8 +75,8 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
 # Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
 # figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat. Her mane is
 # trimmed at the back (its front edge beside the neck kept) and falls past her shoulder blades.
-ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85,
-                    hair_back_trim=0.72, hair_back=0.40, hair_unified=True,
+ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=1.0,
+                    hair_back_trim=0.82, hair_back=0.40, hair_unified=True, hair_loose=True,
                     fringe=0.3, front_gaze=True, full_jaw=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
                     hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12")
 # In profile her torso is slim and flat: a near-straight back from nape to waist, the front straight down from the
@@ -243,6 +243,20 @@ ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar
                       decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
 
 
+# Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
+# and cuffs piped dark, bare feet, her hair down.
+PYJAMA = "e8e0cc"
+ELEANOR_PYJAMA = dict(ELEANOR, **_CURVES, high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
+                      pants=PYJAMA, coat=None, stockings=None, shoes=ELEANOR["skin"],
+                      # loose cotton: a one-pixel swell spread over more rows, set a little higher; the open neck
+                      # shows her throat; the waist curves in and out to fuller hips and seat
+                      bust_peak=((-3, 0), (-2, 0), (-1, 1), (0, 1), (1, 1), (2, 1), (3, 0), (4, 0)), bust_y=0.278,
+                      neckline=0.23, hipw=0.1,
+                      profile=ELEANOR_FIGURE["profile"][:5] + [(0.40, 0.05, -0.036, 0.048), (0.47, 0.098, -0.09, 0.05),
+                                                               (0.53, 0.086, -0.082, 0.046)],
+                      decals=_vee(0.29, 0.03, ELEANOR["skin"], top=0.22) + [("buttons", 0.30, 0.45, 3, "3a3040", True)])
+
+
 def _fuller(spec, k=1.1):
     """Eleanor in her NPC, action and seated strips: hips, seat and stance a tenth fuller, and any skirt following
     her legs to the hem rather than hanging from the hip width. Her player sheets keep the base specs."""
@@ -254,7 +268,8 @@ def _fuller(spec, k=1.1):
     return out
 
 
-ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC = map(_fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE))
+ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC, ELEANOR_PYJAMA_NPC = map(
+    _fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE, ELEANOR_PYJAMA))
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
 GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
             pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
@@ -1209,6 +1224,120 @@ def eleanor_phone_strips():
                  anchor=(FW / 2, FH - 3))
 
 
+# Eleanor's duffle in the First Interlude. She sets it down at her near (right) side, in front of her feet, before
+# every conversation and takes it back after; the floor sprite takes over from the strip's last frame at her feet.
+BAG_AT = ("floor", (0.065, 0.15))  # where it stands, in her yaw-55 idle frame
+BAG_Z = 2.5  # the bag on the floor is in front of her legs and hanging arm
+# (lean, legs, hand target or None, still in her hand, seconds): she dips, lowers it until it all but touches the
+# floor, lets it settle with her hand still on the handles, and straightens up.
+_BAG_FLOOR_Y = 1.0 - 0.095 * 1.92 - 0.03
+BAG_DOWN_KEYS = [
+    (4, {1: (12, 16, 0), -1: (4, 12, -4)}, (0.07, 0.62, 0.08), True, 0.12),
+    (8, {1: (26, 40, 0), -1: (12, 32, -6)}, (0.065, _BAG_FLOOR_Y - 0.05, 0.15), True, 0.14),
+    (10, {1: (45, 75, 0), -1: (24, 60, -8)}, (0.065, _BAG_FLOOR_Y - 0.08, 0.15), False, 0.16),
+    (6, {1: (18, 28, 0), -1: (8, 22, -6)}, None, False, 0.14),
+]
+
+
+def _bag_frame(spec, lean, legs, target, carried, opened=False):
+    arm = ("reach", target, 0, 0) if target else ("swing", 14, 6, 18)
+    ps = pose(PLAYER_IDLE_YAW, lean=lean, legs=legs, arms={1: arm, -1: ("swing", 4, 6, 10)}, front_arms=(1,))
+    if carried:
+        ps["duffle"] = (1,)
+    else:
+        ps["duffle"] = BAG_AT + ((1,) if target else ())
+        ps["duffle_z"] = BAG_Z
+    ps["duffle_open"] = opened
+    return figure(spec, ps, FW, FH)
+
+
+def _bag_idle(spec, opened=False):
+    return figure(spec, pose(PLAYER_IDLE_YAW, duffle=BAG_AT, duffle_z=BAG_Z, duffle_open=opened), FW, FH)
+
+
+def bag_floor_sprites():
+    """duffle_bag(_open): the bag alone where her strips leave it, in a full 64x96 frame placed at her feet."""
+    import numpy as np
+    from PIL import Image
+    plain = np.asarray(figure(ELEANOR, pose(PLAYER_IDLE_YAW), FW, FH)).astype(int)
+    out = {}
+    for opened, name in ((False, "duffle_bag"), (True, "duffle_bag_open")):
+        withbag = np.asarray(_bag_idle(ELEANOR, opened)).astype(int)
+        mask = np.abs(withbag - plain).sum(axis=2) > 0
+        rgba = withbag.astype(np.uint8).copy()
+        rgba[..., 3] = np.where(mask, rgba[..., 3], 0)
+        out[name] = Image.fromarray(rgba, "RGBA")
+        save(out[name], "sprites", f"{name}.png")
+    return out
+
+
+# Combing her hair in the cell: (comb hand height, seconds). She faces us with the mirror held up in her left hand.
+COMB_STROKES = [(0.3, 0.3), (0.08, 0.35), (0.16, 0.3), (0.24, 0.3), (0.08, 0.35), (0.16, 0.3), (0.24, 0.3),
+                (0.1, 0.5)]
+COMB_STEP = 11  # pixels she steps to her left of the bag to stand and comb
+
+
+def _comb_pose(y):
+    return pose(16, arms={-1: ("pts", (-0.12, 0.36, 0.08), (-0.10, 0.25, 0.16), (-0.095, 0.23, 0.17)),
+                          1: ("pts", (0.16, 0.22, -0.02), (0.1, y + 0.025, 0.0), (0.085, y, 0.0))},
+                front_arms=(1, -1), comb=1, hand_mirror=-1)
+
+
+BAG_PAD = 4  # transparent rows under her strips: the bag on the floor stands lower than her feet
+
+
+def _padded(frames):
+    from PIL import Image
+    out = []
+    for img, head in frames:
+        tall = Image.new("RGBA", (img.width, img.height + BAG_PAD))
+        tall.alpha_composite(img)
+        out.append((tall, head))
+    return out
+
+
+def eleanor_bag_strips():
+    """eleanor_bag_down sets the duffle down, eleanor_bag_up (the same frames backwards) takes it again;
+    eleanor_comb bends to the bag, opens it, and stands combing her hair in the little mirror, the last stroke held."""
+    from PIL import Image
+    head = (FW / 2, 18)
+    spec = ELEANOR  # the player's own figure: her skirt stays one piece as she bends
+    carry = figure(spec, pose(PLAYER_IDLE_YAW, arms={1: ("carry", 0, 0, 0), -1: ("swing", -2, 6, 12)}, duffle=(1,)),
+                   FW, FH)
+    frames, seconds = [(carry, head)], [0.1]
+    for lean, legs, target, carried, duration in BAG_DOWN_KEYS:
+        frames.append((_bag_frame(spec, lean, legs, target, carried), head))
+        seconds.append(duration)
+    frames.append((_bag_idle(spec), head))
+    seconds.append(0.12)
+    frames = _padded(frames)
+    action_strip("eleanor_bag_down", frames, seconds, anchor=(FW / 2, FH - 3))
+    action_strip("eleanor_bag_up", frames[::-1], seconds[::-1], anchor=(FW / 2, FH - 3))
+
+    bag_open = bag_floor_sprites()["duffle_bag_open"]
+    frames, seconds = [(_bag_idle(spec), head)], [0.2]
+    reach = [(8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2),  # bends to it, opens it, reaches in
+             (10, BAG_DOWN_KEYS[2][1], (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 0.45),
+             (8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2)]
+    for lean, legs, target, duration in reach:
+        frames.append((_bag_frame(spec, lean, legs, target, False, opened=True), head))
+        seconds.append(duration)
+    for y, duration in COMB_STROKES:  # standing a step to the side of the open bag, facing us
+        img = Image.new("RGBA", (FW, FH))
+        img.alpha_composite(figure(spec, _comb_pose(y), FW, FH), (-COMB_STEP, 0))
+        img.alpha_composite(bag_open)
+        frames.append((img, (FW / 2 - COMB_STEP, 18)))
+        seconds.append(duration)
+    action_strip("eleanor_comb", _padded(frames), seconds, anchor=(FW / 2, FH - 3))
+
+
+def eleanor_bag_sheets():
+    player_sheet(ELEANOR, "eleanor_bag_play", arms={1: ("carry", 0, 0, 0), -1: ("swing", 0, 0, 0)},
+                 props=dict(duffle=(1,)))
+    player_sheet(ELEANOR_PYJAMA, "eleanor_pyjama_play")
+    eleanor_bag_strips()
+
+
 # Eleanor in the sheet takes the candlestick off the nightstand and brings it down on the back of Harrington's head,
 # facing right. The near (right) arm swings; the far one keeps the sheet clutched to her. (arm, candle way, lean, legs)
 STRIKE_STANCE = {1: (12, 8, 0), -1: (-12, 10, -6)}
@@ -1463,6 +1592,7 @@ def build():
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
     eleanor_drink_strip()
     eleanor_phone_strips()
+    eleanor_bag_sheets()
     kiss_strip()
     collar_strips()
     build_act3()

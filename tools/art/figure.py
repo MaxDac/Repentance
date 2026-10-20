@@ -229,6 +229,50 @@ def _rot_x(v, ang):
     return np.array([v[0], v[1] * c - v[2] * s, v[1] * s + v[2] * c])
 
 
+DUFFLE = ("4a2c1a", "2e1a0e", "b08a48")  # dark brown leather, its darker end panels and seams, the brass clasp
+DUFFLE_R = 0.095  # body-frame half-height of the bag: a tall, soft doctor's-style duffle
+DUFFLE_E = 0.055  # how round its ends are; its long axis runs front to back (z)
+DUFFLE_L = 0.12  # half its length
+
+
+def paint_duffle(c, P, H, centre, opened=False, hand=None):
+    """Eleanor's leather duffle: a tall soft bag lying front to back, darker stitched end panels, a seam and brass
+    clasp along the top and two rolled handles that meet in the hand when it's carried. opened: the mouth gapes
+    along the top, a dark slot with the folded lining showing."""
+    leather, dark, brass = DUFFLE
+    z = np.array([0, 0, DUFFLE_L])
+    up = np.array([0, -DUFFLE_R, 0])
+    r = H * DUFFLE_E
+    mask = np.zeros((c.h, c.w), bool)
+    for k in np.linspace(-1, 1, 5):  # stacked rounded bars make a tall barrel, flatter on top than below
+        off = up * k * (1 - DUFFLE_E / DUFFLE_R) * (0.85 if k < 0 else 1.0)
+        mask |= c.capsule(P(centre - z + off), P(centre + z + off), r, r)[0]
+    (x0, y0), (x1, y1) = P(centre - z)[:2], P(centre + z)[:2]
+    ys, xs = np.nonzero(mask)
+    if len(xs):
+        mid = ((xs.min() + xs.max() + 1) / 2, (ys.min() + ys.max() + 1) / 2)
+        _, nx, ny, nz = c.ellipse(mid, (xs.max() - xs.min() + 1) / 2 + 0.5, (ys.max() - ys.min() + 1) / 2 + 0.5)
+        c.put((mask, nx, ny, nz), leather, "duffle")
+    for e in (centre - z * 1.0, centre + z * 1.0):  # stitched end panels
+        ex, ey = P(e)[:2]
+        c.put(c.ellipse((ex, ey), r * 0.5, H * DUFFLE_R * 0.85), dark, "duffle_end")
+    top0, top1 = P(centre - z * 0.8 + up * 0.94), P(centre + z * 0.8 + up * 0.94)
+    if opened:
+        c.put(c.capsule(top0, top1, H * 0.014, H * 0.014), "120a06", "duffle_mouth", dither=False)
+        mid = P(centre + up * 0.88)
+        c.dot(mid[0], mid[1] - 1, "+c8b89a")
+    else:
+        c.put(c.capsule(top0, top1, H * 0.006, H * 0.006), dark, "duffle_seam", dither=False)
+        m = P(centre + up * 0.94)
+        c.dot(m[0], m[1] + 1, "+" + brass)
+    band = P(centre - up * 0.35)  # a strap stitched round the belly
+    c.recolor(c.parts_mask("duffle") & (np.abs(c.Y - band[1]) < 0.6), dark, dither=False)
+    for k in (-0.45, 0.45):  # the handles: rolled leather from the seam up to the hand, or lying flat on top
+        foot = centre + z * k + up * 0.9
+        grip = hand if hand is not None else centre + z * k * 0.5 + up * 1.3
+        c.put(c.capsule(P(foot), P(grip), H * 0.007, H * 0.007), dark, "duffle_handle", dither=False)
+
+
 def figure(spec, ps, fw=56, fh=80):
     H = spec["h"]
     c = Canvas(fw, fh)
@@ -344,10 +388,10 @@ def figure(spec, ps, fw=56, fh=80):
             shape[0] = shape[0] | cap[0]
         c.put(tuple(shape), torso, "torso")
         if col.get("rear"):  # rounded seat swelling out at the back of the near hip, easing into the thighs
-            side, back, ry = (*col["rear"], 0.525)[:3]
+            side, back, ry, rh = (*col["rear"], 0.525, 0.055)[:4] if len(col["rear"]) < 3 else (*col["rear"], 0.055)[:4]
             rc = P(body([side, ry, -back]))
             rx = H * math.sqrt((hipw * 0.62 * cp) ** 2 + (0.03 * sp) ** 2)
-            c.put(c.ellipse((rc[0], rc[1]), rx, H * 0.055), torso, "torso", cast=False, clip=c.mat < 0)
+            c.put(c.ellipse((rc[0], rc[1]), rx, H * rh), torso, "torso", cast=False, clip=c.mat < 0)
         if col.get("bust") and spec.get("profile") and abs(sp) > 0.3:
             # turned to the side: the same small bust in every frame, one pixel proud of the chest line for three
             # rows, whatever the yaw or stride, kept in front of an arm hanging at her side
@@ -427,6 +471,10 @@ def figure(spec, ps, fw=56, fh=80):
             el = body([s * (sw + 0.004), 0.385, 0.03])
             wr = body([s * 0.03, 0.31, 0.08])
             hand = body([s * 0.008, 0.29, 0.088])
+        elif kind == "carry":  # hanging straight, a little out from the hip, taking the weight of a bag
+            el = body([s * (sw + 0.012), 0.40, -0.005])
+            wr = body([s * (hipw + 0.028), 0.515, 0.0])
+            hand = body([s * (hipw + 0.03), 0.55, 0.0])
         elif kind == "side":  # hanging still, drawn back behind the flank
             el = body([s * (sw - 0.01), 0.40, -0.035])
             wr = body([s * (hipw - 0.01), 0.50, -0.045])
@@ -441,6 +489,20 @@ def figure(spec, ps, fw=56, fh=80):
             wr = hand + np.array([s * 0.015, 0.035, 0.018])
         elif kind == "pts":  # explicit elbow, wrist and hand positions in the body frame (f, o, e)
             el, wr, hand = (body(list(v)) for v in (f, o, e))
+        elif kind == "reach":  # the hand reaches f, a point already on the ground frame (y 1 = the floor)
+            hand = np.array(f, float)
+            d = hand - sh
+            n = max(np.linalg.norm(d), 1e-6)
+            reach = (0.142 + 0.145 + 0.036) * 1.12  # a little give, so a moderate bend reaches the floor
+            if n > reach * 0.98:  # out of reach: the arm stretches straight towards it
+                hand = sh + d / n * reach * 0.98
+                d, n = hand - sh, reach * 0.98
+            bend = np.array([s * 0.4, 0.0, -1.0])  # the elbow bows out and back
+            bend -= d * (bend @ d) / (n * n)
+            bend /= max(np.linalg.norm(bend), 1e-6)
+            half = n / 2
+            el = sh + d * 0.5 + bend * math.sqrt(max(0.142 ** 2 - half ** 2, 0.0))
+            wr = hand - (hand - el) / max(np.linalg.norm(hand - el), 1e-6) * 0.036
         elif kind == "temple":  # hand raised beside the head, a held gun pointing back into the temple
             el = body([s * (sw + 0.11), 0.12, -0.03])
             hand = body([s * 0.08, 0.09, 0.0])
@@ -639,6 +701,51 @@ def figure(spec, ps, fw=56, fh=80):
             g = P(fist + d * 0.03 - up * 0.004)
             c.dot(g[0], g[1], "1a1a20")
         add(2.95 if ps["arms"][ps["gun"]][0] == "temple" else 2.0 + P(arm_pts[ps["gun"]][0])[2] + 0.08, gun)
+
+    if ps.get("duffle"):  # Eleanor's leather duffle: (arm side, way) carried by both handles, or ("floor", centre)
+        def duffle(spec_=ps["duffle"]):
+            s, opened = spec_[0], ps.get("duffle_open", False)
+            if s == "floor":  # ("floor", (x, z)[, arm side holding the handles]) on the ground frame
+                x, z = spec_[1]
+                centre = np.array([x, 1.0 - DUFFLE_R * 0.92, z])
+                hand = arm_pts[spec_[2]][3] if len(spec_) > 2 else None
+                s = spec_[2] if len(spec_) > 2 else None
+            else:
+                hand = arm_pts[s][3]
+                centre = hand + np.array([0, DUFFLE_R + 0.03, 0])
+            paint_duffle(c, P, H, centre, opened, hand)
+            if hand is not None:
+                c.put(c.capsule(P(arm_pts[s][2]), P(hand), H * 0.025, H * 0.022), col["skin"], f"hand{s}",
+                      dither=False)
+        if ps["duffle"][0] == "floor":
+            z = ps.get("duffle_z", 1.9)
+        else:
+            z = ps.get("duffle_z", 2.0 + P(arm_pts[ps["duffle"][0]][0])[2] + 0.08)
+        add(z, duffle)
+
+    if ps.get("comb"):  # a tortoiseshell comb in the fingers of arm side, drawn through the hair beside her face
+        def comb(s=ps["comb"]):
+            _, el, wr, hand = arm_pts[s]
+            c.put(c.capsule(P(wr), P(hand), H * 0.023, H * 0.02), col["skin"], f"hand{s}", dither=False)
+            top = P(hand + np.array([0, -0.022, 0]))
+            c.put(c.capsule((top[0] - H * 0.022, top[1]), (top[0] + H * 0.022, top[1]), H * 0.008, H * 0.008),
+                  "c88440", "comb", dither=False)
+            for k in range(-2, 3):
+                c.dot(top[0] + k * H * 0.009, top[1] + H * 0.012, "+5a2e10")
+        add(2.95, comb)
+
+    if ps.get("hand_mirror"):  # the little hand mirror held up in arm side, glass towards her face
+        def hand_mirror(s=ps["hand_mirror"]):
+            _, el, wr, hand = arm_pts[s]
+            up = np.array([0, -1.0, 0])
+            top = hand + up * 0.05
+            c.put(c.capsule(P(hand + up * 0.005), P(hand + up * 0.025), H * 0.006, H * 0.006), "7a5432", "mirror",
+                  dither=False)
+            c.put(c.ellipse(P(top)[:2], H * 0.02, H * 0.026), "c09850", "mirror", dither=False)
+            g = c.ellipse(P(top)[:2], H * 0.013, H * 0.018)
+            c.put(g, "c4d4e4", "mirror_glass", dither=False)
+            c.put(c.capsule(P(wr), P(hand), H * 0.023, H * 0.02), col["skin"], f"hand{s}", dither=False)
+        add(2.9, hand_mirror)
 
     if col.get("held_mask"):  # a mask taken off and held in the hand of arm side, face out: (side, plate, accent)
         def held(spec_=col["held_mask"]):
@@ -1008,6 +1115,12 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
     wave = np.sin(c.Y / 1.7) * 0.9
     m2, _, _, _ = c.ellipse(center, rx + wave, ry)
     top = P(body([0, 0.02 + nod, 0]))[1]
+    if col.get("hair_loose"):
+        # loose hair: the mane falls straight from the head at full width and ends in a broad, softly rounded fall
+        # instead of tapering in at the nape and to a point at the tips like a tied tail
+        u = (c.X - center[0]) / np.maximum(rx + wave, 0.5)
+        v = (c.Y - center[1]) / ry
+        m2 = (np.abs(u) <= 1) & (u ** 2 + v ** 2 <= 1) | (v >= 0) & (u ** 4 + v ** 2 <= 1)
     keep = m2 & (c.Y > top)
     if abs(sp) > 0.15 and cp > -0.25:
         # In profile/3-4 the mane must stay behind the jaw, never under the chin.

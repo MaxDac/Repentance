@@ -144,6 +144,9 @@ public partial class AutoPlay
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nobody's coming for me unless I call."),
             "with the drawer locked, the exit points to the call");
+        var earlyBag = await Spoken(() => game.Perform(Verb.Hand, "bag"));
+        Check(!gs.HasFlag("interlude_took_bag") && earlyBag.Any(l => l.Contains("The bag goes last")),
+            "the duffle waits for the call");
         Check(game.Room?.FindHotspot("telephone")?.Visible == true && game.Room?.FindHotspot("fallen_telephone")?.Visible == false
               && game.Room?.GetNodeOrNull<Sprite2D>("InterludeTelephone")?.Visible == true,
             "the candlestick telephone stands on the vanity, not on the floor");
@@ -155,23 +158,53 @@ public partial class AutoPlay
             "Eleanor lifts the telephone for the call and hangs it back on the vanity");
         await ReloadCheckpoint("first_interlude");
         Check(game.Player.Character == "eleanor_play" && gs.HasFlag("interlude1"), "a save inside the interlude loads back as Eleanor");
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not without my bag. It's packed, at the foot of the bed."),
+            "after the call, the exit waits for her bag");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("World/InterludeBag")?.Visible == true, "the packed duffle stands at the foot of the bed");
+        await game.Perform(Verb.Hand, "bag");
+        await WaitIdle(game);
+        Check(gs.HasFlag("interlude_took_bag") && game.Player.Character == Story.EleanorBag.Sheet
+              && game.Room?.GetNodeOrNull<Sprite2D>("World/InterludeBag")?.Visible == false && game.Room?.FindHotspot("bag")?.Visible == false,
+            "Eleanor picks up her duffle and carries it");
         await game.Perform(Verb.Walk, "exit");
         await WaitIdle(game);
-        Check(game.Room?.Name == "Speakeasy", "Sal takes her down to the Blue Lantern");
+        Check(game.Room?.Name == "Speakeasy" && game.Player.Character == Story.EleanorBag.Sheet,
+            "Sal takes her down to the Blue Lantern, the bag in her hand");
         await Shot("interlude_lantern");
-        await game.Perform(Verb.Talk, "bartender");
+        bool bagDownForTony = false;
+        var tony = game.Perform(Verb.Talk, "bartender");
+        await Until(() =>
+        {
+            bagDownForTony |= game.Hud.SpeechVisible && game.Room is Rooms.Speakeasy && game.Player.Character == Story.EleanorBag.Plain;
+            return tony.IsCompleted;
+        }, 300, 0.05);
+        await tony;
         await WaitIdle(game);
+        Check(bagDownForTony, "she sets the bag down to talk to Tony");
         Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("interlude_agatha_met"), "Tony sends her to the convent; Agatha meets her");
         await Shot("interlude_corridor");
         await game.Perform(Verb.Walk, "cell_door");
+        await WaitIdle(game);
         Check(game.Room?.Name == "ConventCell", "to her cell");
+        Check(gs.HasFlag("interlude_bag_left") && game.Player.Character == Story.EleanorBag.Plain
+              && game.Room?.GetNodeOrNull<Sprite2D>("World/CellBag")?.Visible == true,
+            "in the cell she sets her bag down by the nightstand");
         Check(game.Room?.FindActor("nun") is { Visible: false }, "Eleanor is alone in the cell until the knock");
         Check(game.Music.Current == Track.ConventPiano, "the convent piano plays in the cell before the knock");
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
         _prefer = new[] { "(Seduce her." };
+        bool combed = false;
         var night = game.Perform(Verb.Hand, "bed");
-        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake"));
+        await Until(() =>
+        {
+            combed |= game.Player.PoseName == "eleanor_comb";
+            return game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake");
+        }, step: 0.05);
+        Check(combed, "she takes her comb and mirror out of the bag and combs her hair");
+        Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == "eleanor_cell_sit",
+            "when Agatha comes in, Eleanor sits awake on the bed in her pyjamas");
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
             "Agatha is in the cell, by the bed, while she talks");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");
@@ -185,6 +218,8 @@ public partial class AutoPlay
             "the night visit offers the truth; seducing her saves nothing");
         Check(game.Room?.Name == "MotelNight" && game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("motel_empty.png") == true,
             "the next morning, the motel with an empty bed");
+        Check(game.Player.Character == "eleanor_play" && game.Room?.GetNodeOrNull<Sprite2D>("World/EleanorBag")?.Visible == true,
+            "at the motel she wears the black dress again, her bag on the floor");
         await Shot("interlude_motel");
         _ = game.Perform(Verb.Hand, "window");
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("fishing for the fire-escape ladder"), 90);

@@ -314,7 +314,12 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    dress is a separate object (`eleanor_room_interlude_bench.png`) and a hole in the walk area: Eleanor walks
    round it, and reaches the dress from in front of it. She packs the brass box
    (**Puzzle 17**, below), puts the combination in the
-   drawer, and phones Rizzo's Flowers on the candlestick telephone on the vanity (the answers are colour). At the door, Sal and a second hood take her down
+   drawer, and phones Rizzo's Flowers on the candlestick telephone on the vanity (the answers are colour). Her
+   packed duffle (dark brown leather) stands at the foot of the bed: hand on it after the call and she takes it
+   (`interlude_took_bag`); the door waits for it. From here to the convent cell she carries it (the
+   `eleanor_bag_play` sheet), and before every conversation (Sal at the door, Tony, Sal at the Blue Lantern,
+   Agatha) she sets it down at her feet (`eleanor_bag_down`) and takes it back afterwards (`eleanor_bag_up`).
+   At the door, Sal and a second hood take her down
    the service stairs, told over black: the bellboy's memory, from her side.
    The box is a dead man's switch, not an invitation: if the Club ever drags her back, the Club goes into the
    morning paper. The card hides the Club's address; the matchbook, the bluing and the password get a reporter
@@ -335,7 +340,12 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) first takes her for another of the girls who
    come to the door at night; then she knows the face and the perfume and calls her "a Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
-4. **Convent cell, that night.** After a knock, Agatha comes into the cell past midnight. She sincerely believes
+4. **Convent cell, that night.** She walks in and sets her bag down in front of the nightstand
+   (`interlude_bag_left`). Hand on the nightstand or the bed: she opens the bag, takes out her comb and little
+   mirror and combs her hair (`eleanor_comb`). The scene fades to black; Micah's narration says she put the comb and
+   mirror in the nightstand drawer and left them there (the ones Micah finds in Act 1). When the knock comes she is
+   sitting up on the edge of the bed by the pillow, awake, in her pyjamas (`eleanor_pyjama_play`, the
+   `eleanor_cell_sit` pose). After the knock, Agatha comes into the cell past midnight. She sincerely believes
    she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
    she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
    the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
@@ -368,9 +378,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Use the blank slip on the writing desk: she writes the safe's combination as the three references Micah finds.
     Use it on the drawer to put it in, then her key on the drawer to lock it (she keeps the key).
   - Wrong joins and wrong items on the closet, safe or drawer get a hint in her voice. The drawer waits for the
-    safe, the call for the locked drawer, and the door for all three; at the door she names the first step still
-    to do.
-5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
+    safe, the call for the locked drawer, the bag for the call, and the door for all of them; at the door she names
+    the first step still to do.
+5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair, her
+   duffle on the floor by the dresser; she is back in the black dress) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
    hears him arguing with the clerk downstairs. From the window she sees him in the alley below, on a fruit crate,
    hooking the fire-escape ladder down with the clerk's umbrella and climbing it; she steps out onto the fire escape
