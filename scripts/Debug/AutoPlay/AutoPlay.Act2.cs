@@ -99,11 +99,11 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "closet");
         Check(!gs.HasFlag("interlude_closet_open"), "the closet shut again over the locked safe");
         var early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
-        Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The box in the safe, the riddle in the drawer. Then I call."),
-            "no call before the riddle is locked in the drawer");
+        Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The combination goes on paper first, at the desk."),
+            "no call before the riddle is written");
         leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
-        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. Nothing of mine stays out in the open for them."),
-            "with the safe locked, the exit points to the drawer");
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The combination goes on paper first, at the desk."),
+            "with the safe locked, the exit points to writing the riddle");
         var drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
         Check(!gs.HasFlag("interlude_drawer_locked") && !gs.HasFlag("interlude_phoned") &&
               drawerLook.Contains("The safe's locked. Now the riddle goes in this drawer, and I turn the key.") &&
@@ -118,9 +118,19 @@ public partial class AutoPlay
         await game.Perform(Verb.UseItem, "desk", "eleanor_slip");
         Check(gs.HasItem("eleanor_riddle") && !gs.HasItem("eleanor_slip") && gs.HasFlag("interlude_riddle_written"),
             "the combination written as a riddle on the slip at the desk");
+        early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(!gs.HasFlag("interlude_phoned") && game.Room?.Name == "EleanorRoom"
+              && early.Contains("Not yet. The riddle goes in the drawer.") && leaving.Contains("Not yet. The riddle goes in the drawer."),
+            "with the riddle written, the telephone and door point to the drawer");
         await game.Perform(Verb.UseItem, "desk_drawer", "eleanor_riddle");
         Check(gs.HasFlag("interlude_riddle_in_drawer") && !gs.HasItem("eleanor_riddle") && !gs.HasFlag("interlude_drawer_locked"),
             "the riddle in the drawer, not yet locked");
+        early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(!gs.HasFlag("interlude_phoned") && game.Room?.Name == "EleanorRoom"
+              && early.Any(l => l.Contains("key")) && leaving.Any(l => l.Contains("key")),
+            "with the riddle in the unlocked drawer, the telephone and door ask for her key");
         drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
         Check(drawerLook.Any(l => l.Contains("It wants my key.")), "the drawer with the riddle in asks for her key");
         drawer = await Spoken(() => game.Perform(Verb.UseItem, "desk_drawer", "eleanor_key"));

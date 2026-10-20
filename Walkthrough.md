@@ -169,7 +169,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
   "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).
-  The investigation resumes on Sunday; the Club invitation is for Sunday night.
+  The investigation resumes days later, on Thursday; the Club invitation is for Thursday night, the Club's regular
+  night.
 
 #### Convent
 
@@ -1161,7 +1162,8 @@ motel map and burial survey are not part of the completed Act 3.
 All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 11 (`SaveData.CurrentVersion`); earlier versions are incompatible with the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
+is version 12 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Thursday Club night, the motel
+return after the Act 2 office, Room 507's new interlude steps, the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
 10 and 11, the motel detour and storm-office room flow, the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
 Blue Lantern entrance, Harrington lead, masked Club entrance and mansion entrance. Completed discoveries in

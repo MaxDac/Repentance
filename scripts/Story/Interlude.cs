@@ -96,7 +96,7 @@ public static class Interlude
         State.SetFlag("sal_passed");
         State.SetFlag("photo_shown");
         State.SetFlag("club_lead");
-        // The office opening leads to the cathedral, then the city map.
+        // The office opening leads to the motel return, then the cathedral, then the city map.
         State.SetFlag("act2_church");
         State.SetFlag("on_map");
         Attic.RestoreMicahItems(2);

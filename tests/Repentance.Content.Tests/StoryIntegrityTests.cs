@@ -258,11 +258,16 @@ public class StoryIntegrityTests
 
     /// <summary>
     /// Timeline wording that drifted when the convent visit moved to the next evening (Saturday) and Micah started
-    /// arriving at the motel on foot: Act Two is Sunday, he met Eleanor the night before, and he has no car there.
+    /// arriving at the motel on foot: Act Two is Thursday, days after the motel, Eleanor was met on the fire escape,
+    /// and he has no car there.
     /// </summary>
     [Theory]
-    [InlineData("Saturday, at the turning of the night", "the Club card is for Sunday night, the day after the motel")]
-    [InlineData("Saturday is tonight", "Act Two is Sunday")]
+    [InlineData("Saturday, at the turning of the night", "the Club card is for Thursday, days after the motel")]
+    [InlineData("Saturday is tonight", "Act Two is days later, on Thursday")]
+    [InlineData("Sunday, at the turning of the night", "the Club card is for Thursday, days after the motel")]
+    [InlineData("Sunday is tonight", "the motel night is Saturday and Act Two is days later, on Thursday")]
+    [InlineData("The Harringtons liked their reading", "the library is the public library where Rose works")]
+    [InlineData("or a daughter.", "the library desk is a public catalogue desk")]
     [InlineData("a woman I met four days ago", "Micah met Eleanor on the fire escape the night before")]
     [InlineData("Still warm on his side", "the Second Interlude is later the same night, after he left her")]
     [InlineData("The motel, the night after.", "the Order takes Eleanor the same night Micah leaves her")]
@@ -317,5 +322,13 @@ public class StoryIntegrityTests
         var text = File.ReadAllText(Path.Combine(Root.Value, doc));
         Assert.DoesNotContain("sixteen", text);
         Assert.Contains("seventeen", text);
+    }
+
+    [Fact]
+    public void OverviewQuotesAgathasJezebelLine()
+    {
+        var text = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "docs/story-overview.md")), @"\s+", " ");
+        Assert.DoesNotContain("another Jezebel from that hideous Club", text);
+        Assert.Contains("A Jezebel from that hideous Club", InkText);
     }
 }
