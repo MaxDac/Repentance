@@ -631,6 +631,19 @@ HALF_KNEEL = [(60, 65), (64, 42), (67, 27), (73, 75), (66, 91), (68, 54), (73, 6
               (55, 81), (42, 87), (42, 84), (38, 91)]
 HIDE_KNEEL = [(55, 72), (60, 50), (64, 36), (71, 74), (66, 91), (64, 62), (72, 71),
               (54, 90), (37, 90), (37, 87), (32, 92)]
+# Getting up off his knees after the beating, facing right, from KNEEL. The near foot stays planted on its tucked toes
+# (the strip's contact point), so the body comes back over it rather than sliding: he pushes up onto straight arms,
+# sits back towards his heels with the trunk upright and the hands on his thighs, brings the far knee up with its foot
+# flat in front and the near hand on it, then pushes off that knee leaning forward, the near heel coming down as he
+# straightens. The four extra points are the far leg's knee, ankle, heel and toe.
+KNEEL_PUSH = [(58, 71), (77, 65), (87, 59), (61, 88), (41, 85), (78, 77), (80, 90)]
+KNEEL_BACK = [(46, 79), (51, 57), (54, 42), (61, 88), (41, 85), (55, 69), (61, 78)]
+KNEE_UP = [(47, 77), (54, 55), (58, 40), (61, 88), (41, 85), (59, 66), (64, 70),
+           (63, 70), (65, 88), (63, 90), (70, 91)]
+PUSH_OFF = [(46, 66), (57, 44), (63, 30), (54, 79), (41, 87), (60, 56), (63, 69),
+            (60, 72), (65, 88), (63, 90), (70, 91)]
+NEARLY_UP = [(42, 58), (46, 35), (49, 20), (44, 74), (41, 91), (48, 47), (51, 58),
+             (50, 74), (55, 88), (53, 90), (60, 91)]
 
 
 def with_far_leg(joints):
@@ -685,11 +698,7 @@ def action_sequences(spec, name):
         recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
                                    [0.28, 0.3, 0.28, 0.22, 0.12])
         action_strip("micah_recover", recovery, times)
-        # Retain the planted hands/feet while lifting the bowed spine, then bring one knee underneath the body.
-        lifting = [(61, 73), (73, 54), (79, 44), (68, 87), (48, 91), (79, 71), (87, 88)]
-        keys = [KNEEL, lifting, CROUCH, HALF_UP, UPRIGHT]
-        rise, times = sequence(keys, standing, [0.22, 0.28, 0.28, 0.22, 0.12], kneeling_figure)
-        action_strip("micah_kneel_rise", rise, times)
+        kneel_rise_strip(spec, scaled, standing)
         crouch_strips(spec, scaled, standing)
     if name == "micah_no_tie":
         crouch_strips(spec, scaled, standing, name)
@@ -713,6 +722,27 @@ def profile_head(spec):
                 hp[x, y] = px[x, y]
     neck = [x for x in range(FW) if hp[x, collar - 1][3]]
     return head, ((min(neck) + max(neck) + 1) / 2, collar)
+
+
+def kneel_rise_strip(spec, scaled, standing):
+    """Micah getting up off his hands and knees after the beating (micah_kneel_rise), from the held micah_kneel frame
+    to the idle sheet frame, by way of the walk sheet's profile frame so he turns to the idle pose standing up."""
+    from PIL import Image
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def paint(joints):
+        hip, shoulder = joints[0], joints[1]
+        if -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder):
+            return kneeling_figure(scaled, joints)
+        # upright, the shirt front faces the way he looks, so only the coat shows side-on, hanging with gravity
+        return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=joints[4][1] < 91)
+    turning = Image.new("RGBA", (192, FH))
+    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
+    keys = [KNEEL, between(KNEEL, KNEEL_PUSH), KNEEL_PUSH, between(KNEEL_PUSH, KNEEL_BACK), KNEEL_BACK, KNEE_UP,
+            PUSH_OFF, NEARLY_UP]
+    frames = [paint(k) for k in keys] + [(turning, (96, 18)), standing]
+    action_strip("micah_kneel_rise", frames, [0.13, 0.07, 0.1, 0.08, 0.12, 0.15, 0.12, 0.1, 0.11, 0.12])
 
 
 def crouch_strips(spec, scaled, standing, name="micah"):
