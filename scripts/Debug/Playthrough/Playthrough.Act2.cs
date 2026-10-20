@@ -20,6 +20,7 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("interlude1") && _game.Player.Character == "eleanor_play", "the player is Eleanor");
             Check(_game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("eleanor_room_interlude.png") == true,
                 "Room 507 is still in order the night she leaves");
+            Check(Gs.HasItem("eleanor_slip") && Gs.HasItem("eleanor_key"), "Eleanor brings a blank slip and her drawer key");
             // Puzzle 17: the brass box, the flower, the riddle and the thread, packed and locked in the closet safe
             await Do(Verb.Hand, "vanity");
             Check(Gs.HasItem("eleanor_box") && Gs.HasItem("pellet"), "the open brass box and the bare paper flower");
@@ -33,9 +34,20 @@ public sealed partial class Playthrough
             await Pace(0.6);
             await CombineAndWait("eleanor_flower", "eleanor_box");
             Check(Gs.HasItem("eleanor_box_packed") && Gs.HasFlag("interlude_box_packed"), "the flower in the box, the lid down");
-            await Do(Verb.UseItem, "closet", "eleanor_box_packed");
-            Check(Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"), "the box locked in the closet safe");
-            await Do(Verb.Hand, "desk_drawer");
+            await Do(Verb.Hand, "closet");
+            Check(Gs.HasFlag("interlude_closet_open"), "the closet opens on the safe, standing half open");
+            await Do(Verb.UseItem, "interlude_safe", "eleanor_box_packed");
+            Check(Gs.HasFlag("interlude_box_in_safe") && !Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"),
+                "the box put in the safe");
+            await Do(Verb.Hand, "interlude_safe");
+            Check(Gs.HasFlag("interlude_safe_locked"), "the safe shut on the box");
+            await Do(Verb.Hand, "closet");
+            Check(!Gs.HasFlag("interlude_closet_open"), "the closet shut again");
+            await Do(Verb.UseItem, "desk", "eleanor_slip");
+            Check(Gs.HasItem("eleanor_riddle") && !Gs.HasItem("eleanor_slip"), "the combination written as a riddle");
+            await Do(Verb.UseItem, "desk_drawer", "eleanor_riddle");
+            await Do(Verb.UseItem, "desk_drawer", "eleanor_key");
+            Check(Gs.HasFlag("interlude_drawer_locked") && !Gs.HasItem("eleanor_riddle"), "the riddle locked in the drawer with her key");
             await Do(Verb.Hand, "telephone");
             Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");
             await Do(Verb.Walk, "exit");

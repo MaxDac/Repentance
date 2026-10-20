@@ -25,8 +25,9 @@ public partial class AutoPlay
         Check(gs.HasFlag("interlude1") && game.Player.Character == "eleanor_play", "the player is Eleanor in Room 507");
         Check(game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("eleanor_room_interlude.png") == true,
             "Room 507 is still in order: Theodore's men search it only after she has gone");
-        Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0 && !gs.HasItem("revolver") && !gs.HasItem("journal"),
-            "Micah's things (and Daniel's journal) are put away; Eleanor's satchel starts empty");
+        Check(game.Hud.SatchelVisible && gs.Inventory.Count == 2 && gs.HasItem("eleanor_slip") && gs.HasItem("eleanor_key")
+              && !gs.HasItem("revolver") && !gs.HasItem("journal"),
+            "Micah's things (and Daniel's journal) are put away; Eleanor's satchel holds only her blank slip and drawer key");
         await game.ItemVerb(Verb.Hand, Notes.ItemId);
         Check(!game.Hud.Notepad.Visible, "Micah's notepad doesn't open for Eleanor");
         await game.Wait(0.5);
@@ -34,9 +35,19 @@ public partial class AutoPlay
         var leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
         Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The box goes in the safe first."),
             "Eleanor won't leave before the call and the locks; the safe comes first");
+        var box = await Spoken(() => game.Perform(Verb.UseItem, "closet", "eleanor_slip"));
+        Check(!gs.HasFlag("interlude_closet_open") && box.Contains("That doesn't go in the closet."), "the closet is shut at first");
         await game.Perform(Verb.Hand, "closet");
-        Check(!gs.HasFlag("interlude_safe_locked"), "the safe waits for the packed box");
+        Check(gs.HasFlag("interlude_closet_open") && game.Room?.FindHotspot("interlude_safe")?.Visible == true
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeAjar")?.Visible == true
+              && game.Room?.GetNodeOrNull<Sprite2D>("ClosetOpen")?.Visible == false,
+            "the hand opens the closet on her own dresses and the safe standing half open");
+        await game.Perform(Verb.Hand, "interlude_safe");
+        Check(!gs.HasFlag("interlude_safe_locked") && !gs.HasFlag("interlude_box_in_safe"), "the safe waits for the packed box");
         await LegacyPackedBox(game, gs);
+        await game.Perform(Verb.Hand, "closet");
+        Check(!gs.HasFlag("interlude_closet_open") && game.Room?.GetNodeOrNull<Sprite2D>("InterludeClosetOpen")?.Visible == false,
+            "an empty safe doesn't stop her shutting the closet");
         // Puzzle 17: wrong joins first, then the box packed and locked away
         await game.Perform(Verb.Hand, "vanity");
         Check(gs.HasItem("eleanor_box") && gs.HasItem("pellet"), "the open brass box and the bare paper flower from the vanity");
@@ -54,20 +65,39 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "vanity");
         await game.Perform(Verb.Hand, "desk");
         await game.Perform(Verb.Hand, "clothes");
-        Check(gs.Inventory.Count == 2 && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
+        Check(gs.Inventory.Count == 4 && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
             "the vanity, the desk and the dress give nothing twice");
         await game.Perform(Verb.UseItem, "closet", "eleanor_flower");
         Check(!gs.HasFlag("interlude_safe_locked") && gs.HasItem("eleanor_flower"), "the flower alone doesn't go in the safe");
         await ReloadCheckpoint("first_interlude_flower");
         Check(gs.HasItem("eleanor_flower") && gs.HasItem("eleanor_box") && game.Hud.SatchelVisible, "a save holding the wrapped flower loads back");
         await CombineAndWait("eleanor_flower", "eleanor_box");
-        Check(gs.HasItem("eleanor_box_packed") && gs.HasFlag("interlude_box_packed") && gs.Inventory.Count == 1, "the flower packed in the box");
-        await game.Perform(Verb.Hand, "closet");
-        Check(!gs.HasFlag("interlude_safe_locked") && gs.HasItem("eleanor_box_packed"), "the box has to be put in the safe, not just the hand");
+        Check(gs.HasItem("eleanor_box_packed") && gs.HasFlag("interlude_box_packed") && gs.Inventory.Count == 3, "the flower packed in the box");
+        box = await Spoken(() => game.Perform(Verb.UseItem, "closet", "eleanor_box_packed"));
+        Check(!gs.HasFlag("interlude_box_in_safe") && gs.HasItem("eleanor_box_packed") && box.Any(l => l.Contains("Open them first.")),
+            "the box won't go through shut closet doors");
         await ReloadCheckpoint("first_interlude_packed");
         Check(gs.HasItem("eleanor_box_packed") && !gs.HasFlag("interlude_safe_locked"), "a save holding the packed box loads back");
-        await game.Perform(Verb.UseItem, "closet", "eleanor_box_packed");
-        Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 0, "the packed box locked in the closet safe");
+        await game.Perform(Verb.Hand, "closet");
+        await game.Perform(Verb.UseItem, "interlude_safe", "eleanor_box_packed");
+        Check(gs.HasFlag("interlude_box_in_safe") && !gs.HasFlag("interlude_safe_locked") && !gs.HasItem("eleanor_box_packed")
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == true,
+            "the box put in the open safe, not yet locked");
+        await game.Wait(0.3);
+        await Shot("interlude_safe_box");
+        box = await Spoken(() => game.Perform(Verb.Hand, "closet"));
+        Check(gs.HasFlag("interlude_closet_open") && box.Any(l => l.Contains("Not with the safe standing open.")),
+            "she won't shut the closet on an open safe");
+        leaving = await Spoken(() => game.Perform(Verb.Walk, "exit"));
+        Check(game.Room?.Name == "EleanorRoom" && leaving.Contains("Not yet. The box goes in the safe first."),
+            "the box in an open safe isn't locked away yet");
+        await game.Perform(Verb.Hand, "interlude_safe");
+        Check(gs.HasFlag("interlude_safe_locked") && gs.Inventory.Count == 2
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeAjar")?.Visible == false
+              && game.Room?.GetNodeOrNull<Sprite2D>("InterludeSafeBox")?.Visible == false,
+            "the safe door shut and the dial spun on the box");
+        await game.Perform(Verb.Hand, "closet");
+        Check(!gs.HasFlag("interlude_closet_open"), "the closet shut again over the locked safe");
         var early = await Spoken(() => game.Perform(Verb.Hand, "telephone"));
         Check(!gs.HasFlag("interlude_phoned") && early.Contains("Not yet. The box in the safe, the riddle in the drawer. Then I call."),
             "no call before the riddle is locked in the drawer");
@@ -79,7 +109,23 @@ public partial class AutoPlay
               drawerLook.Contains("The safe's locked. Now the riddle goes in this drawer, and I turn the key.") &&
               !drawerLook.Contains("Locked, with the riddle inside."),
             "looking at the empty drawer after the safe asks for the riddle, not claims it's inside");
-        await game.Perform(Verb.Hand, "desk_drawer");
+        var drawer = await Spoken(() => game.Perform(Verb.Hand, "desk_drawer"));
+        Check(!gs.HasFlag("interlude_drawer_locked") && drawer.Any(l => l.Contains("I haven't written it yet.")), "the hand doesn't lock the drawer by itself");
+        drawer = await Spoken(() => game.Perform(Verb.UseItem, "desk_drawer", "eleanor_slip"));
+        Check(gs.HasItem("eleanor_slip") && drawer.Any(l => l.Contains("A blank slip won't open anything.")), "a blank slip doesn't go in the drawer");
+        drawer = await Spoken(() => game.Perform(Verb.UseItem, "desk_drawer", "eleanor_key"));
+        Check(!gs.HasFlag("interlude_drawer_locked") && drawer.Any(l => l.Contains("Lock an empty drawer?")), "the key waits for the riddle");
+        await game.Perform(Verb.UseItem, "desk", "eleanor_slip");
+        Check(gs.HasItem("eleanor_riddle") && !gs.HasItem("eleanor_slip") && gs.HasFlag("interlude_riddle_written"),
+            "the combination written as a riddle on the slip at the desk");
+        await game.Perform(Verb.UseItem, "desk_drawer", "eleanor_riddle");
+        Check(gs.HasFlag("interlude_riddle_in_drawer") && !gs.HasItem("eleanor_riddle") && !gs.HasFlag("interlude_drawer_locked"),
+            "the riddle in the drawer, not yet locked");
+        drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(drawerLook.Any(l => l.Contains("It wants my key.")), "the drawer with the riddle in asks for her key");
+        drawer = await Spoken(() => game.Perform(Verb.UseItem, "desk_drawer", "eleanor_key"));
+        Check(gs.HasFlag("interlude_drawer_locked") && gs.HasItem("eleanor_key") && drawer.Any(l => l.Contains("This is the only key.")),
+            "her own key locks the drawer she had fitted with her own lock");
         drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
         Check(gs.HasFlag("interlude_drawer_locked") && drawerLook.Contains("Locked, with the riddle inside."),
             "once the riddle is in, the drawer says so");
@@ -260,8 +306,10 @@ public partial class AutoPlay
         await game.LoadGame(legacy);
         await WaitIdle(game);
         Check(game.Player.Character == "eleanor_play" && game.Hud.SatchelVisible, "the legacy save loads as Eleanor");
-        await game.Perform(Verb.Hand, "closet");
-        Check(gs.HasFlag("interlude_safe_locked"), "a legacy packed box locks by hand, with no box in the satchel");
+        if (!gs.HasFlag("interlude_closet_open")) await game.Perform(Verb.Hand, "closet");
+        await game.Perform(Verb.Hand, "interlude_safe");
+        Check(gs.HasFlag("interlude_safe_locked") && gs.HasItem("eleanor_slip") && gs.HasItem("eleanor_key"),
+            "a legacy packed box locks by hand, with no box in the satchel; her slip and key are restored");
         await game.LoadGame(resume);
         await WaitIdle(game);
         Check(!gs.HasFlag("interlude_safe_locked") && !gs.HasFlag("interlude_box_packed"), "back to the run");
