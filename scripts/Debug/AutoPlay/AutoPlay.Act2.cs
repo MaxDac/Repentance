@@ -195,16 +195,19 @@ public partial class AutoPlay
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
         _prefer = new[] { "(Seduce her." };
-        bool combed = false;
+        bool combed = false, sat = false, rose = false;
         var night = game.Perform(Verb.Hand, "bed");
         await Until(() =>
         {
             combed |= game.Player.PoseName == "eleanor_comb";
+            sat |= game.Player.PoseName == "eleanor_cell_sit";
+            rose |= game.Player.PoseName == "eleanor_cell_rise";
             return game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake");
         }, step: 0.05);
         Check(combed, "she takes her comb and mirror out of the bag and combs her hair");
-        Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == "eleanor_cell_sit",
-            "when Agatha comes in, Eleanor sits awake on the bed in her pyjamas");
+        Check(sat && rose, "at the knock Eleanor sits awake on the bed in her pyjamas, then gets up");
+        Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == null,
+            "when Agatha talks to her, Eleanor stands in her pyjamas");
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
             "Agatha is in the cell, by the bed, while she talks");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");

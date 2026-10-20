@@ -1255,6 +1255,43 @@ def _bag_idle(spec, opened=False):
     return figure(spec, pose(PLAYER_IDLE_YAW, duffle=BAG_AT, duffle_z=BAG_Z, duffle_open=opened), FW, FH)
 
 
+# Lifting it off the floor (eleanor_bag_up only): (lean, legs, hand target, pixels the bag has risen). Her reach stops
+# short of the floor, so the bag is the one on the floor in the hand-on-the-handles frame, raised, hidden above her
+# hand and with her hand drawn back over it.
+BAG_LIFT_KEYS = [
+    BAG_DOWN_KEYS[2][:3] + (2,),
+    (9, {1: (38, 62, 0), -1: (20, 50, -7)}, (0.065, _BAG_FLOOR_Y - 0.07, 0.15), 5),
+    (8.5, {1: (32, 50, 0), -1: (16, 40, -6)}, (0.065, _BAG_FLOOR_Y - 0.06, 0.15), 8),
+]
+
+
+def _bag_lift_frames(spec):
+    import numpy as np
+    from PIL import Image
+    lean, legs, target = BAG_DOWN_KEYS[2][:3]
+    floor = np.asarray(_bag_frame(spec, lean, legs, target, False)).astype(int)
+
+    def body(lean, legs, target):  # the same pose with no bag at all
+        ps = pose(PLAYER_IDLE_YAW, lean=lean, legs=legs, arms={1: ("reach", target, 0, 0), -1: ("swing", 4, 6, 10)},
+                  front_arms=(1,))
+        return np.asarray(figure(spec, ps, FW, FH)).astype(int)
+
+    bag = (np.abs(floor - body(lean, legs, target)).sum(axis=2) > 0) & (floor[..., 3] == 255)
+    out = []
+    for lean, legs, target, dy in BAG_LIFT_KEYS:
+        b = body(lean, legs, target)
+        skin = (b[..., 3] == 255) & (b[..., 0] - b[..., 2] > 40) & (b[..., 0] > 150)
+        hand = np.nonzero(skin[55:])[0].max() + 55  # the bottom of her hand on the handles
+        f = b.copy()
+        for y, x in zip(*np.nonzero(bag)):
+            if y - dy >= hand - 1:
+                f[y - dy, x] = floor[y, x]
+        skin[:hand - 5] = False
+        f[skin] = b[skin]
+        out.append(Image.fromarray(f.astype(np.uint8), "RGBA"))
+    return out
+
+
 def bag_floor_sprites():
     """duffle_bag(_open): the bag alone where her strips leave it, in a full 64x96 frame placed at her feet."""
     import numpy as np
@@ -1312,7 +1349,12 @@ def eleanor_bag_strips():
     seconds.append(0.12)
     frames = _padded(frames)
     action_strip("eleanor_bag_down", frames, seconds, anchor=(FW / 2, FH - 3))
-    action_strip("eleanor_bag_up", frames[::-1], seconds[::-1], anchor=(FW / 2, FH - 3))
+    # taking it back is the same frames backwards, with three more where the bag leaves the floor: she grips it, it
+    # comes up off the floor, then to her shin, before the knee-height frame
+    up, up_seconds = frames[::-1], seconds[::-1]
+    lifts = _padded([(img, head) for img in _bag_lift_frames(spec)])
+    action_strip("eleanor_bag_up", up[:3] + lifts + up[3:], up_seconds[:3] + [0.14, 0.12, 0.12] + up_seconds[3:],
+                 anchor=(FW / 2, FH - 3))
 
     bag_open = bag_floor_sprites()["duffle_bag_open"]
     frames, seconds = [(_bag_idle(spec), head)], [0.2]
