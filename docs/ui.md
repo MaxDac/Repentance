@@ -37,7 +37,8 @@ game menu, puzzle panel, pause overlay, cursor and held-item badge.
 | `ThoughtColor` | `#d8b878` | Journal narration |
 
 Fonts (`assets/fonts/`): Silkscreen 8 px (UI, black 4 px outline), Departure Mono 11 px (speech, thoughts, choices;
-7 px per character), IM Fell English (verse over black). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
+7 px per character), IM Fell English (verse over black), Poiret One 22 px (captions over black, stepped down to fit
+the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
 16x12 badge.
 
 ## Components

@@ -30,10 +30,10 @@ public partial class FilmCover : CanvasLayer
         _root.AddChild(new Label
         {
             Text = _text,
-            Position = new Vector2(0, Hud.ScreenH / 2f - 8),
-            Size = new Vector2(Hud.ScreenW, 16),
+            Position = new Vector2(0, Hud.ScreenH / 2f - 12),
+            Size = new Vector2(Hud.ScreenW, 24),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Hud.Font, FontSize = 16, FontColor = Hud.VerbHover },
+            LabelSettings = new LabelSettings { Font = Hud.CaptionFont, FontSize = 22, FontColor = Hud.VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
         });
     }

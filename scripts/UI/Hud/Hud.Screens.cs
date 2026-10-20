@@ -9,8 +9,10 @@ namespace Repentance;
 public partial class Hud
 {
     private const float CaptionTop = 126;
-    private const int CaptionFontSize = 16;
-    private const float CaptionSubGap = 22;
+    private const int CaptionFontSize = 22;
+    private const float CaptionSubGap = 26;
+    /// <summary>The Art Deco face of the captions over black (chapter cards, "Later that night").</summary>
+    public static Font CaptionFont { get; private set; } = null!;
 
     private void BuildTitle(Control root)
     {
@@ -50,12 +52,13 @@ public partial class Hud
         _fade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         root.AddChild(_fade);
 
+        CaptionFont = GD.Load<Font>("res://assets/fonts/PoiretOne-Regular.ttf");
         _caption = new Label
         {
             Position = new Vector2(0, CaptionTop),
             Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
+            LabelSettings = new LabelSettings { Font = CaptionFont, FontSize = CaptionFontSize, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
@@ -66,7 +69,7 @@ public partial class Hud
             Position = new Vector2(0, CaptionTop + CaptionSubGap),
             Size = new Vector2(ScreenW, 16),
             HorizontalAlignment = HorizontalAlignment.Center,
-            LabelSettings = new LabelSettings { Font = Font, FontSize = CaptionFontSize, FontColor = VerbHover },
+            LabelSettings = new LabelSettings { Font = CaptionFont, FontSize = CaptionFontSize, FontColor = VerbHover },
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Visible = false,
         };
@@ -170,7 +173,7 @@ public partial class Hud
     {
         _caption.Position = new Vector2(0, CaptionTop);
         _caption.Size = new Vector2(ScreenW, 16);
-        _caption.LabelSettings.FontSize = CaptionFontSize;
+        _caption.LabelSettings.FontSize = CaptionFitSize(text);
         _caption.Text = text ?? "";
         _caption.Visible = text != null;
         ShowCaptionSub(null);
@@ -179,7 +182,17 @@ public partial class Hud
     /// <summary>A second caption line under the one already showing, as in "Chicago, 1927." over "First Interlude".</summary>
     public void ShowCaptionSub(string? text)
     {
+        _captionSub.LabelSettings.FontSize = CaptionFitSize(text);
         _captionSub.Text = text ?? "";
         _captionSub.Visible = text != null;
+    }
+
+    /// <summary>The caption size, stepped down until the line fits the screen with a margin.</summary>
+    private static int CaptionFitSize(string? text)
+    {
+        int size = CaptionFontSize;
+        while (text != null && size > 8 && CaptionFont.GetStringSize(text, HorizontalAlignment.Left, -1, size).X > ScreenW - 16)
+            size -= 2;
+        return size;
     }
 }
