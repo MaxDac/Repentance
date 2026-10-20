@@ -72,6 +72,8 @@ public partial class Hud : CanvasLayer
     public bool ChoicesVisible => _choices.Visible;
     public bool CaptionVisible => _caption.Visible;
     public string CaptionText => _caption.Text;
+    /// <summary>The caption's opacity, below 1 while it fades in or out.</summary>
+    public float CaptionAlpha => _caption.Modulate.A;
     public bool CaptionSubVisible => _captionSub.Visible;
     public string CaptionSubText => _captionSub.Text;
     public bool InventoryOpen => _inventory.Visible;

@@ -6,6 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Eleanor's cell at the convent: a bed, a lampstand, a book and a nightstand. In the drawer, a comb and a little
 /// waxed mirror. Warming and cleaning its back reveals the symbol; Micah won't leave until he has found it.
+/// In the First Interlude Eleanor sets her duffle down in front of the nightstand, combs her hair from it, and leaves
+/// the comb and mirror in the drawer: Agatha finds her sitting up on the bed in her pyjamas.
 /// </summary>
 public partial class ConventCell : Room
 {
@@ -22,11 +24,21 @@ public partial class ConventCell : Room
     /// <summary>Agatha's night visit: she comes in at the door and stops a step short of Eleanor at the bed.</summary>
     private static readonly Vector2 AgathaDoor = new(92, 228), AgathaByTheBed = new(238, 222);
 
+    /// <summary>Where Eleanor stands to set her duffle down in front of the nightstand, facing left (the CellBag node).</summary>
+    private static readonly Vector2 BagSpot = new(312, 215);
+
+    /// <summary>Where she sits up on the edge of the bed by the pillow when Agatha knocks (tools/art/convent.py CELL_SIT_AT).</summary>
+    private static readonly Vector2 SitAt = new(364, 236);
+
+    /// <summary>While she combs her hair the open bag is drawn into her strip, so the one on the floor steps aside.</summary>
+    private bool _combing;
+
     protected override void OnRefresh()
     {
         Modulate = Interlude ? Night : Colors.White;
         // Room.Refresh shows every hotspot without flag rules; Agatha is only here during her night visit
         if (FindActor("nun") is { } agatha) agatha.Visible = _agathaIn;
+        if (GetNodeOrNull<FlagSprite>("World/CellBag") is { } bag) bag.Visible &= !_combing;
     }
 
     /// <summary>Agatha is in the cell: set for her night visit only, never saved.</summary>
@@ -42,7 +54,11 @@ public partial class ConventCell : Room
     {
         if (Interlude)
         {
-            await Game.Run(() => Think("Narrow enough to touch both walls. After Room 507, it feels like a coffin with a window."));
+            await Game.Run(async () =>
+            {
+                await Think("Narrow enough to touch both walls. After Room 507, it feels like a coffin with a window.");
+                if (!State.HasFlag("interlude_bag_left")) await SetBagDown();
+            });
             return;
         }
         if (State.HasFlag("cell_seen")) return;
@@ -119,40 +135,71 @@ public partial class ConventCell : Room
         return false;
     }
 
+    /// <summary>The first thing she does in the cell: her duffle down in front of the nightstand, for good.</summary>
+    private async Task SetBagDown()
+    {
+        await Game.WalkTo(BagSpot);
+        Player.Face(Facing.Left);
+        if (Player.Character == Story.EleanorBag.Sheet) await Player.PlayPose("eleanor_bag_down");
+        State.SetFlag("interlude_bag_left");
+        Player.SetCharacter(Story.EleanorBag.Plain);
+    }
+
+    /// <summary>
+    /// Her first night (hand on the nightstand or the bed): she opens the duffle, takes out her comb and little mirror
+    /// and combs her hair out. Over black the comb and mirror go in the drawer; when Agatha knocks she is sitting up on
+    /// the edge of the bed in her pyjamas, awake.
+    /// </summary>
+    private async Task FirstNight()
+    {
+        if (!State.HasFlag("interlude_bag_left")) await SetBagDown();
+        await Game.WalkTo(BagSpot);
+        Player.Face(Facing.Left);
+        _combing = true;
+        Refresh();
+        await Player.PlayPose("eleanor_comb");
+        await Say("A hundred strokes, the way my mother taught me. I lose count at forty, every night.");
+        await Game.Hud.Fade(1, 1.2);
+        _combing = false;
+        await Think("She put the comb and the little mirror away in the nightstand drawer, and lay down in her nightclothes. She left them there when she went.");
+        State.SetFlag("interlude_pyjamas");
+        Player.SetCharacter("eleanor_pyjama_play");
+        Player.Teleport(SitAt, Facing.Left);
+        Player.SetPose("eleanor_cell_sit");
+        await Wait(0.6);
+        await Say("nun", "*Knock, knock*");
+        // the Club follows her to the convent: its strings play for Agatha's visit only
+        Game.Music.Play(Track.ClubStrings);
+        await Game.Hud.Fade(0, 0.6);
+        var agatha = FindActor("nun");
+        if (agatha != null)
+        {
+            agatha.Position = AgathaDoor;
+            AgathaIn(true);
+            await agatha.MoveTo(AgathaByTheBed, 32);
+            agatha.FaceLeft(false);
+        }
+        await Talk("interlude_agatha_night");
+        if (agatha != null)
+        {
+            await agatha.MoveTo(AgathaDoor, 44);
+            AgathaIn(false);
+        }
+        Game.Music.Play(Music);
+        await Game.Hud.Fade(1, 1.2);
+        Game.Hud.ShowCaption("The next morning");
+        await Wait(1.6);
+        Game.Hud.ShowCaption(null);
+        await Game.ChangeRoom("motel_night", "interlude1");
+    }
+
     private async Task<bool> InterludeInteract(Verb verb, Hotspot target)
     {
         switch (target.Id, verb)
         {
             case ("bed", Verb.Hand or Verb.Walk):
-                await Game.WalkTo(target.WalkTo);
-                await Say("Lights out at nine. I lie down in my clothes, in case.");
-                await Game.Hud.Fade(0.6f, 1.0);
-                await Wait(0.6);
-                await Say("nun", "*Knock, knock*");
-                // the Club follows her to the convent: its strings play for Agatha's visit only
-                Game.Music.Play(Track.ClubStrings);
-                await Game.Hud.Fade(0, 0.6);
-                var agatha = FindActor("nun");
-                if (agatha != null)
-                {
-                    agatha.Position = AgathaDoor;
-                    AgathaIn(true);
-                    await agatha.MoveTo(AgathaByTheBed, 32);
-                    agatha.FaceLeft(false);
-                    Player.FaceTowards(agatha.Position);
-                }
-                await Talk("interlude_agatha_night");
-                if (agatha != null)
-                {
-                    await agatha.MoveTo(AgathaDoor, 44);
-                    AgathaIn(false);
-                }
-                Game.Music.Play(Music);
-                await Game.Hud.Fade(1, 1.2);
-                Game.Hud.ShowCaption("The next morning");
-                await Wait(1.6);
-                Game.Hud.ShowCaption(null);
-                await Game.ChangeRoom("motel_night", "interlude1");
+            case ("nightstand" or "drawer", Verb.Hand):
+                await FirstNight();
                 return true;
             case ("exit", Verb.Walk or Verb.Hand):
                 await Say("The corridor's dark, and somebody in it is still awake. I can feel it.");
@@ -166,8 +213,11 @@ public partial class ConventCell : Room
             case ("lampstand", Verb.Look or Verb.Hand):
                 await Say("A lamp turned low. Somebody wanted me to have just enough light to be sorry by.");
                 return true;
-            case ("nightstand" or "drawer", Verb.Look or Verb.Hand):
-                await Say("A comb and a little mirror in the drawer. Somebody's idea of a welcome.");
+            case ("nightstand" or "drawer", Verb.Look):
+                await Say("An empty drawer, and my bag in front of it. My comb and my little mirror will do for a welcome.");
+                return true;
+            case ("bed" or "nightstand", Verb.Kick):
+                await Say("Kick the furniture in a convent. They'd hear it in Rome.");
                 return true;
         }
         return false;

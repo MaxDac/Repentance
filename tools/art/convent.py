@@ -1100,4 +1100,59 @@ def build():
     save(drawer.crop(box), "rooms", "convent_cell_drawer.png")
     save(comb.crop(box), "rooms", "convent_cell_drawer_comb.png")
     print(f"  convent_cell_drawer(.png/_comb.png) at {box[:2]} size {(box[2] - box[0], box[3] - box[1])}")
+    cell_bed_art()
     return corridor, base
+
+
+# The First Interlude's night in the cell: where the player stands while she sits on the bed (room pixels, where the
+# room's perspective scale is 1), the room box her sitting sprite covers, and the point of the bed's near edge, by the
+# pillow, she sits on.
+CELL_SIT_AT = (364, 236)
+CELL_SIT_BOX = (300, 120, 470, 262)
+CELL_SEAT = (BED_X0 + 5, 18, BED_Z0 + 30)  # just clear of the nightstand, her legs in front of it
+
+
+def cell_bed_art():
+    """eleanor_cell_sit: awake in her pyjamas on the edge of the bed by the pillow, facing the door, her hands on the
+    blanket beside her, feet on the floor. Drawn in room pixels as seen, then mirrored so the player (facing left, so
+    flipped) shows it the right way round."""
+    import math
+    import numpy as np
+    from PIL import ImageOps
+    from .sprites import ELEANOR_PYJAMA, figure, pose, FW, FH, action_strip, PLAYER_IDLE_YAW, SCALE
+    x0, y0, x1, y1 = CELL_SIT_BOX
+    w, h = x1 - x0, y1 - y0
+    px, py = CELL_SIT_AT
+    hip = LR.P(*CELL_SEAT)
+    floor_y = LR.P(BED_X0, 0, CELL_SEAT[2])[1]
+    drop = floor_y - hip[1]
+    # the room's perspective scale where her feet are, relative to the player's at CELL_SIT_AT (from convent_cell.tscn)
+    def depth(y):
+        return 0.92 + (y - 197) / (265 - 197) * (1.06 - 0.92)
+
+    # seated, the seat rounds up her back from the blanket to the waist
+    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.075, 0.47, 0.08))
+    H = spec["h"] * SCALE
+    thigh = 84
+
+    def sole(knee):
+        a, k = math.radians(thigh), math.radians(knee)
+        return 0.5 + 0.235 * math.cos(a) + 0.215 * math.cos(a - k) + 0.03 + 0.018
+
+    knee = min(range(30, 100), key=lambda k: abs((sole(k) - 0.5) * H - drop))  # feet flat on the floor
+
+    def resting(s):  # arm hanging straight, the hand flat on the blanket beside her hip
+        return ("pts", (s * 0.118, 0.37, -0.02), (s * 0.125, 0.49, 0.0), (s * 0.125, 0.52, 0.015))
+
+    ps = pose(PLAYER_IDLE_YAW, arms={1: resting(1), -1: resting(-1)},
+              legs={1: (thigh, knee, 0), -1: (thigh - 4, knee - 4, 0)})
+    fig = np.asarray(ImageOps.mirror(figure(spec, ps, FW, FH))).copy()
+    fig[fig[..., 3] < 255] = 0  # no floor shadow: she sits on the bed
+    base_y = FH - 3.0
+    fx = round(hip[0] - FW / 2) - x0
+    fy = round(hip[1] - (base_y - (sole(knee) - 0.5) * H)) - y0
+    img = Image.new("RGBA", (w, h))
+    img.alpha_composite(Image.fromarray(fig, "RGBA"), (fx, fy))
+    head = (fx + FW // 2, round(fy + base_y - (sole(knee) - 0.06) * H))
+    action_strip("eleanor_cell_sit", [(ImageOps.mirror(img), (w - head[0], head[1]))], [1.0],
+                 anchor=(w - (px - x0), py - y0))

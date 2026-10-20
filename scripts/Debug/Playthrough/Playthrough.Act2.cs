@@ -50,6 +50,8 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("interlude_drawer_locked") && !Gs.HasItem("eleanor_riddle"), "the riddle locked in the drawer with her key");
             await Do(Verb.Hand, "telephone");
             Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");
+            await Do(Verb.Hand, "bag");
+            Check(Gs.HasFlag("interlude_took_bag"), "Eleanor takes her packed duffle");
             await Do(Verb.Walk, "exit");
             await WaitIdle();
             Expect("Speakeasy", "Sal takes her to the Blue Lantern");

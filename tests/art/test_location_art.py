@@ -51,7 +51,8 @@ class AssetContractsTests(unittest.TestCase):
 
     def test_animation_frames_and_padding_match_runtime_layout(self):
         for name in ("micah", "daniel", "micah_dressing", "micah_masked", "micah_no_tie",
-                     "eleanor_play", "eleanor_gown_play", "eleanor_sheet_play"):
+                     "eleanor_play", "eleanor_gown_play", "eleanor_sheet_play",
+                     "eleanor_bag_play", "eleanor_pyjama_play"):
             with Image.open(ROOT / "assets" / "art" / "sprites" / f"{name}.png") as image:
                 self.assertEqual(image.size, (640, 288))
                 alpha = image.getchannel("A")

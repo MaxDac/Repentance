@@ -1,5 +1,6 @@
 """A cheap roadside motel room in flat, dingy daytime light."""
 import math
+import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of, save,
@@ -55,16 +56,191 @@ def shell(img, night=False):
     shadow(img, "ellipse", [24, 112, 120, 132], 0.28, 6)
 
 
+FLOOR_Z = 196  # world depth of the bottom of the painting
+RUG = (150, 350, 60, 150)  # x0, x1, z0, z1 of the rug on the floor
+
+
+def planks(img):
+    """Pine boards running from the wall towards the camera, laid in staggered lengths: butt joints with nail heads,
+    a lit leading edge on each length, grain streaks and the odd knot."""
+    d = ImageDraw.Draw(img)
+    rnd = random.Random(405)
+    bw, seam = 16, hx("24160e")
+    for i in range(-17, 17):
+        xa, xb = 250 + i * bw, 250 + (i + 1) * bw
+        z = -rnd.uniform(0, 60)  # each board's first joint falls somewhere different
+        while z < FLOOR_Z:
+            ze = min(FLOOR_Z, z + rnd.uniform(48, 120))
+            za = max(0.0, z)
+            col = mix(hx("6e543a"), hx("44321f"), rnd.random() ** 1.3)
+            R.quad(img, [(xa, 0, za), (xb, 0, za), (xb, 0, ze), (xa, 0, ze)], col)
+            for _ in range(rnd.randint(1, 3)):
+                gx = rnd.uniform(xa + 2, xb - 2)
+                g0 = rnd.uniform(za, ze)
+                g1 = min(ze, g0 + rnd.uniform(14, 50))
+                gx1 = gx + rnd.uniform(-1.2, 1.2)
+                R.line(img, (gx, 0, g0), (gx1, 0, g1), mul(col, rnd.choice((0.84, 0.9, 1.1))))
+            if rnd.random() < 0.18:
+                kx, kz = rnd.uniform(xa + 4, xb - 4), rnd.uniform(za + 6, max(za + 6, ze - 6))
+                kp = R.P(kx, 0, kz)
+                d.ellipse([kp[0] - 1.5, kp[1] - 0.6, kp[0] + 1.5, kp[1] + 0.6], fill=mul(col, 0.66))
+                d.point((round(kp[0]), round(kp[1])), fill=mul(col, 0.5))
+            if z > 0:
+                R.line(img, (xa + 0.5, 0, za), (xb - 0.5, 0, za), seam)
+                R.line(img, (xa + 1, 0, za + 1), (xb - 1, 0, za + 1), mix(col, hx("8e7252"), 0.45))
+                for xn in (xa + 3, xb - 3):
+                    p = R.P(xn, 0, za + 2.2)
+                    d.point((round(p[0]), round(p[1])), fill=hx("140c06"))
+            z = ze
+        top, bot = R.P(xa, 0, 0), R.P(xa, 0, FLOOR_Z)
+        d.line([top, bot], fill=seam)
+        d.line([(top[0] + 1, top[1]), (bot[0] + 1, bot[1])], fill=hx("5a4430"))
+
+
+def floor_wear(img):
+    """Scuffs, a worn track from the door to the bed and the rug, grime packed into the boards along the skirting."""
+    d = ImageDraw.Draw(img)
+    rnd = random.Random(408)
+    shadow(img, "rect", [0, FLOOR, W - 1, FLOOR + 5], 0.35, 3)
+    track = [R.P(*p) for p in ((20, 0, 8), (60, 0, 6), (150, 0, 70), (240, 0, 150), (180, 0, 170), (40, 0, 30))]
+    light(img, "polygon", track, hx("4a4034"), 0.16, 10)
+    for _ in range(46):
+        x, z = rnd.uniform(0, 480), rnd.uniform(4, FLOOR_Z - 4)
+        p = R.P(x, 0, z)
+        n = rnd.randint(2, 6)
+        d.line([p, (p[0] + n, p[1] + rnd.choice((-1, 0, 0, 1)))], fill=rnd.choice((hx("7a6248"), hx("2e2014"))))
+    for _ in range(12):
+        x, z = rnd.uniform(0, 480), rnd.uniform(10, FLOOR_Z - 8)
+        p = R.P(x, 0, z)
+        shadow(img, "ellipse", [p[0] - 7, p[1] - 2, p[0] + 7, p[1] + 2], 0.22, 2, hx("3a2a1a"))
+
+
+def _stepped(cx, cz, w, h, n):
+    """A stepped (woven) diamond around (cx, cz), half-width w along x and half-depth h along z, in n steps."""
+    sx, sz = w / n, h / n
+    q = [(-w, 0.0)]
+    for i in range(n):
+        q += [(-w + i * sx, -(i + 1) * sz), (-w + (i + 1) * sx, -(i + 1) * sz)]
+    pts = q + [(-dx, dz) for dx, dz in reversed(q)] + [(-dx, -dz) for dx, dz in q] + [(dx, -dz) for dx, dz in reversed(q)]
+    return [R.P(cx + dx, 0, cz + dz) for dx, dz in pts]
+
+
+def rug(img):
+    """A cheap woven motel rug, its colours long faded: a rust edge, an indigo border of hollow diamonds and a stepped
+    medallion on a sage field. It is worn bald where people walk, frayed at the ends, burnt and stained, and its near
+    right corner has curled up."""
+    x0, x1, z0, z1 = RUG
+    under = img.copy()
+    d = ImageDraw.Draw(img)
+    rust, cream, indigo, ochre, sage = hx("7a3e2a"), hx("b2a07a"), hx("3c3a4c"), hx("a2864a"), hx("68664a")
+
+    def band(o, fill):
+        R.quad(img, [(x0 + o, 0, z0 + o), (x1 - o, 0, z0 + o), (x1 - o, 0, z1 - o), (x0 + o, 0, z1 - o)], fill)
+
+    for o, fill in ((0, rust), (3, cream), (4, indigo), (13, cream), (14, sage)):
+        band(o, fill)
+    # the border: hollow diamonds along the indigo band, a square knot at each corner
+    for z in (z0 + 8.5, z1 - 8.5):
+        for x in range(x0 + 20, x1 - 14, 10):
+            d.polygon(_stepped(x, z, 3.6, 3.4, 2), fill=ochre)
+            d.polygon(_stepped(x, z, 1.4, 1.3, 1), fill=indigo)
+    for x in (x0 + 8.5, x1 - 8.5):
+        for z in range(z0 + 20, z1 - 14, 9):
+            d.polygon(_stepped(x, z, 3.4, 3.4, 2), fill=ochre)
+            d.polygon(_stepped(x, z, 1.3, 1.3, 1), fill=indigo)
+        for z in (z0 + 8.5, z1 - 8.5):
+            R.quad(img, [(x - 3, 0, z - 3), (x + 3, 0, z - 3), (x + 3, 0, z + 3), (x - 3, 0, z + 3)], rust)
+            R.quad(img, [(x - 1, 0, z - 1), (x + 1, 0, z + 1), (x + 1, 0, z - 1), (x - 1, 0, z + 1)], cream)
+    # the field: a scatter of small crosses, stepped corner pieces and the medallion
+    cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+    for x in range(x0 + 26, x1 - 20, 16):
+        for z in range(z0 + 24, z1 - 18, 13):
+            if abs(x - cx) / 62 + abs(z - cz) / 34 < 1:
+                continue
+            p = R.P(x, 0, z)
+            d.point((round(p[0]), round(p[1])), fill=ochre)
+            d.point((round(p[0]) - 1, round(p[1])), fill=mul(ochre, 0.8))
+            d.point((round(p[0]) + 1, round(p[1])), fill=mul(ochre, 0.8))
+    for sx, sz in ((x0 + 14, z0 + 14), (x1 - 14, z0 + 14), (x1 - 14, z1 - 14), (x0 + 14, z1 - 14)):
+        kx, kz = (1 if sx < cx else -1), (1 if sz < cz else -1)
+        tri = [(0, 0), (18, 0), (18, 3), (12, 3), (12, 6), (6, 6), (6, 9), (0, 9)]
+        d.polygon([R.P(sx + kx * a, 0, sz + kz * b) for a, b in tri], fill=rust)
+    for (w, h, n, fill) in ((50, 28, 6, rust), (44, 24, 6, cream), (40, 22, 5, indigo), (28, 15, 4, ochre),
+                            (18, 10, 3, rust), (8, 4.5, 2, cream)):
+        d.polygon(_stepped(cx, cz, w, h, n), fill=fill)
+    for dx in (-57, 57):  # small diamonds riding the medallion's tips
+        d.polygon(_stepped(cx + dx, cz, 4, 3, 2), fill=ochre)
+
+    # the weave: every other row of the weft a touch darker
+    a, b = R.P(x0, 0, z0), R.P(x1, 0, z1)
+    weft = Image.new("L", img.size, 0)
+    wd = ImageDraw.Draw(weft)
+    z = z0 + 1.0
+    while z < z1:
+        wd.line([R.P(x0, 0, z), R.P(x1, 0, z)], fill=255)
+        z += 2.2
+    img.paste(img.point(lambda v: int(v * 0.88)), mask=weft)
+    # threadbare where the traffic crosses it: the pile is gone and the pale warp shows through
+    worn = Image.blend(img, Image.new("RGB", img.size, hx("7e7254")), 0.55)
+    wdraw = ImageDraw.Draw(worn)
+    for x in range(x0 + 6, x1 - 6, 2):
+        wdraw.line([R.P(x, 0, z0 + 4), R.P(x, 0, z1 - 4)], fill=hx("6a5e44"))
+    m = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(m)
+    md.polygon([R.P(*p) for p in ((170, 0, 120), (230, 0, 108), (300, 0, 116), (318, 0, 140), (250, 0, 146),
+                                  (180, 0, 142))], fill=190)
+    md.polygon([R.P(*p) for p in ((154, 0, 74), (176, 0, 70), (196, 0, 96), (176, 0, 104))], fill=120)
+    m = m.filter(ImageFilter.GaussianBlur(4))
+    img.paste(worn, mask=m)
+    noise(img, (int(a[0]) - 30, int(a[1]), int(b[0]) + 10, int(b[1])), 6, 407)
+    d = ImageDraw.Draw(img)
+    # stains and cigarette burns
+    for (x, z, rx, k) in ((196, 136, 8, 0.32), (292, 84, 7, 0.28), (318, 98, 5, 0.3), (232, 72, 6, 0.2)):
+        p = R.P(x, 0, z)
+        shadow(img, "ellipse", [p[0] - rx, p[1] - rx * 0.45, p[0] + rx, p[1] + rx * 0.45], k, 2, hx("3a2016"))
+    for (x, z) in ((214, 128), (266, 96), (300, 132), (178, 88), (330, 120)):
+        p = (round(R.P(x, 0, z)[0]), round(R.P(x, 0, z)[1]))
+        d.point((p[0] - 1, p[1]), fill=hx("5a3a1e"))
+        d.point((p[0] + 1, p[1]), fill=hx("5a3a1e"))
+        d.point(p, fill=hx("120a06"))
+    # a thin shadow under the near edge gives the rug its thickness
+    near_l, near_r = R.P(x0, 0, z1), R.P(x1, 0, z1)
+    d.line([(near_l[0], near_l[1] + 1), (near_r[0], near_r[1] + 1)], fill=hx("1e140c"))
+
+    # frayed fringe on both short ends, thinning where it has been walked on
+    rnd = random.Random(409)
+    for side, x in ((-1, x0), (1, x1)):
+        z = z0 + 1.0
+        while z < z1 - 1:
+            if not (side == 1 and z > z1 - 32) and rnd.random() > 0.18:
+                ln = rnd.uniform(2.5, 6)
+                d.line([R.P(x, 0, z), R.P(x + side * ln, 0, z + rnd.uniform(-1.2, 1.2))],
+                       fill=mul(cream, rnd.uniform(0.7, 1.0)))
+            z += 1.8
+
+    # the curled corner: lift the near right triangle off the floor and show its pale, coarse backing
+    hinge_a, hinge_b, tip = (x1 - 34, 0, z1), (x1, 0, z1 - 30), (x1 + 1, 8, z1 + 1)
+    cut = Image.new("L", img.size, 0)
+    ImageDraw.Draw(cut).polygon([R.P(*hinge_a), R.P(x1 + 1, 0, z1 + 1), R.P(*hinge_b)], fill=255)
+    img.paste(under, mask=cut)
+    shadow(img, "polygon", [R.P(*hinge_a), R.P(x1 + 2, 0, z1 + 2), R.P(*hinge_b)], 0.45, 2)
+    d = ImageDraw.Draw(img)
+    flap = [R.P(*hinge_a), R.P(*tip), R.P(*hinge_b)]
+    d.polygon(flap, fill=hx("d8c89c"))
+    for t in (0.3, 0.55, 0.8):
+        pa = R.P(*[hinge_a[i] + (tip[i] - hinge_a[i]) * t for i in range(3)])
+        pb = R.P(*[hinge_b[i] + (tip[i] - hinge_b[i]) * t for i in range(3)])
+        d.line([pa, pb], fill=hx("b4a47c"))
+    d.line([R.P(*hinge_a), R.P(*tip)], fill=hx("a04a30"))
+    d.line([R.P(*tip), R.P(*hinge_b)], fill=hx("f0e4c0"))
+    d.line([R.P(*hinge_a), R.P(*hinge_b)], fill=hx("5a4030"))
+
+
 def floor(img):
-    floor_boards(img, FLOOR, H - 1, (250, -250), 20, hx("6a5138"), hx("503b28"), hx("2a1a12"), 405)
+    planks(img)
     noise(img, (0, FLOOR, W - 1, H - 1), 6, 406)
-    # threadbare rug lying flat in the middle of the room
-    R.quad(img, [(150, 0, 60), (350, 0, 60), (350, 0, 150), (150, 0, 150)], hx("666046"))
-    R.quad(img, [(158, 0, 66), (342, 0, 66), (342, 0, 144), (158, 0, 144)], None, hx("968460"))
-    for z in range(72, 144, 8):
-        R.line(img, (154, 0, z), (346, 0, z), hx("575139"))
-    a, b = R.P(150, 0, 60), R.P(350, 0, 150)
-    noise(img, (int(a[0]) - 30, int(a[1]), int(b[0]) + 10, int(b[1])), 7, 407)
+    floor_wear(img)
+    rug(img)
 
 
 def door(img):
@@ -821,15 +997,69 @@ def sleeper(img, mouth=0):
     img.paste(eleanor, ELEANOR_ORIGIN, eleanor)
 
 def nightstand_night(img):
+    """A cheap two-drawer bedside cabinet: recessed plinth, an overhanging top with a worn front edge, grain down the
+    side, bevelled drawer fronts with brass pulls and a keyhole; on top an ashtray of butts, a glass and matches."""
     X0, X1, Z0, Z1 = 148, 172, 3, 22
-    R.box(img, X0, X1, 0, 30, Z0, Z1, hx("5a4130"), top=hx("74563e"), side=hx("3c2a1d"))
-    R.quad(img, [(X0 + 2, 18, Z1), (X1 - 2, 18, Z1), (X1 - 2, 27, Z1), (X0 + 2, 27, Z1)], None, hx("2a1c12"))
-    R.quad(img, [(X0 + 2, 3, Z1), (X1 - 2, 3, Z1), (X1 - 2, 15, Z1), (X0 + 2, 15, Z1)], None, hx("2a1c12"))
-    for y in (22, 9):
-        px, py = R.P((X0 + X1) / 2, y, Z1)
-        ImageDraw.Draw(img).rectangle([px - 2, py, px + 2, py + 1], fill=hx("ac8a4a"))
-    R.box(img, 150, 157, 30, 31.5, 13, 19, hx("5e5a52"), top=hx("8a857a"))  # ashtray
-    R.box(img, 150, 153, 30, 36, 6, 9, hx("a9b2a6"), top=hx("d8e0d4"))  # half-empty glass
+    d = ImageDraw.Draw(img)
+    wood, wood_d, wood_l, ink = hx("5a4130"), hx("3c2a1d"), hx("74563e"), hx("24180e")
+    R.box(img, X0 + 1, X1 - 1, 0, 2.5, Z0 + 1, Z1 - 1.2, hx("2a1c12"), top=wood_d, side=hx("22160e"))
+    R.box(img, X0, X1, 2.5, 28.5, Z0, Z1, wood, top=wood_l, side=wood_d)
+    rnd = random.Random(823)
+    for i in range(6):  # grain on the side
+        y0 = 4.5 + i * 4 + rnd.uniform(-0.6, 0.6)
+        ph = rnd.uniform(0, 6)
+        pts = [R.P(X1, y0 + 0.6 * math.sin(z * 0.5 + ph), z) for z in np.arange(Z0 + 1, Z1 - 0.9, 1.5)]
+        d.line(pts, fill=mul(wood_d, rnd.uniform(0.75, 0.88)))
+    R.line(img, (X1, 2.5, Z1), (X1, 28.5, Z1), mul(wood_l, 1.08))
+    # the top: a slab overhanging the carcass, its front edge rubbed pale
+    R.box(img, X0 - 1, X1 + 1, 28.5, 30, Z0 - 0.5, Z1 + 1, mul(wood_l, 0.9), top=wood_l, side=mul(wood_d, 1.1))
+    R.line(img, (X0 - 1, 30, Z1 + 1), (X1 + 1, 30, Z1 + 1), mul(wood_l, 1.3))
+    R.line(img, (X0 - 1, 28.5, Z1 + 1), (X1 + 1, 28.5, Z1 + 1), mul(wood_d, 0.7))
+    for x in (X0 + 3, X0 + 9, X1 - 4):
+        p = R.P(x, 30, Z1 + 1)
+        d.point((round(p[0]), round(p[1])), fill=hx("a08060"))
+    # two drawers, each a bevelled face in a dark reveal with a brass bail pull; a keyhole in the top one
+    for (y0, y1, key) in ((16, 26.5, True), (4, 14.5, False)):
+        R.quad(img, [(X0 + 1.5, y0, Z1), (X1 - 1.5, y0, Z1), (X1 - 1.5, y1, Z1), (X0 + 1.5, y1, Z1)], ink)
+        R.quad(img, [(X0 + 2, y0 + 0.6, Z1), (X1 - 2, y0 + 0.6, Z1), (X1 - 2, y1 - 0.6, Z1), (X0 + 2, y1 - 0.6, Z1)],
+               mul(wood, 1.1))
+        R.quad(img, [(X0 + 3.5, y0 + 2, Z1), (X1 - 3.5, y0 + 2, Z1), (X1 - 3.5, y1 - 2, Z1), (X0 + 3.5, y1 - 2, Z1)],
+               mul(wood, 1.02))
+        R.line(img, (X0 + 2, y0 + 0.6, Z1), (X1 - 2, y0 + 0.6, Z1), mul(wood_l, 1.25))
+        R.line(img, (X0 + 2, y1 - 0.6, Z1), (X1 - 2, y1 - 0.6, Z1), mul(wood_d, 0.9))
+        R.line(img, (X1 - 2, y0 + 0.6, Z1), (X1 - 2, y1 - 0.6, Z1), mul(wood_d, 1.05))
+        R.line(img, (X0 + 5, y0 + 4.2, Z1), (X1 - 6, y0 + 4.6, Z1), mul(wood, 0.9))
+        cx, cy = (X0 + X1) / 2, (y0 + y1) / 2
+        px, py = R.P(cx, cy, Z1)
+        px, py = round(px), round(py)
+        d.rectangle([px - 4, py - 1, px + 4, py + 1], fill=hx("5a4420"))
+        d.line([(px - 3, py), (px + 3, py)], fill=hx("c8a050"))
+        d.line([(px - 2, py + 1), (px + 2, py + 1)], fill=hx("8a6a30"))
+        d.point((px - 2, py), fill=hx("ecd090"))
+        if key:
+            d.point((px, py - 3), fill=hx("140c06"))
+            d.point((px, py - 2), fill=hx("2a1c10"))
+    # chipped corners showing the paler wood under the stain
+    for (x, y) in ((X0, 27), (X1, 4), (X0, 3)):
+        p = R.P(x, y, Z1)
+        d.point((round(p[0]), round(p[1])), fill=hx("8a6c4c"))
+    # on top: a matchbook, the ashtray with its butts and ash, the half-empty glass
+    R.box(img, 165, 170, 30, 30.8, 15, 19.5, hx("8a2a20"), top=hx("b8382a"))
+    p = R.P(166, 30.8, 16.5)
+    d.line([(round(p[0]), round(p[1])), (round(p[0]) + 3, round(p[1]))], fill=hx("e0d0a8"))
+    R.box(img, 150, 157, 30, 31.5, 13, 19, hx("5e5a52"), top=hx("8a857a"))
+    a = R.P(151.5, 31.5, 16)
+    ax, ay = round(a[0]), round(a[1])
+    d.line([(ax, ay), (ax + 3, ay)], fill=hx("e8e0cc"))
+    d.point((ax + 3, ay), fill=hx("b07a3a"))
+    d.line([(ax + 2, ay - 1), (ax + 4, ay - 1)], fill=hx("d8d0bc"))
+    d.point((ax + 5, ay), fill=hx("5a5650"))
+    d.point((ax + 1, ay + 1), fill=hx("6e6a62"))
+    R.box(img, 150, 153, 30, 36, 6, 9, hx("a9b2a6"), top=hx("d8e0d4"))
+    g0, g1 = R.P(150, 32.5, 9), R.P(153, 32.5, 9)
+    d.line([g0, g1], fill=hx("c8a060"))
+    gl = R.P(150.6, 35, 9)
+    d.line([(round(gl[0]), round(gl[1])), (round(gl[0]), round(gl[1]) + 3)], fill=hx("f4f8f0"))
 
 
 def lamp_night(img):
