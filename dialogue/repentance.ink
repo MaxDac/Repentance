@@ -186,11 +186,10 @@ THOUGHT: And she saw what it was worth. One night, the way the Club had taught h
 THOUGHT: She'd bought every door she'd ever had that way. This one would have been the easiest.
 + [(Tell her the truth. All of it.)]
     ~ set_flag("eleanor_refused_abbess")
-    THOUGHT: She told me she put the thought away like a knife back in a drawer. Then she told Agatha what she was running from.
-    ELEANOR: There's a club on Hubbard Street, Mother. Judges, aldermen, my husband's father. They dress up in robes and antlers and call it the old religion.
-    ELEANOR: I'm the one on the stage. Painted, smiling, whatever they want. And when they wanted new girls, I brought them. I told them it was a party.
-    ELEANOR: I'm not sorry enough yet. I'd like to be. That's all I've got.
-    NUN: Child... oh, child.
+    THOUGHT: She told me she put the thought away like a knife back in a drawer. Then she tried to tell Agatha what she was running from. It wouldn't come.
+    ELEANOR: Mother, I... there's a... a club. In the city. I...
+    ELEANOR: They put me on a stage. Painted. I'm... I'm the one they paint, and then I...
+    NUN: I know... I know enough of that diabolical club, child. Hush. You needn't say another word.
     THOUGHT: Agatha took her hand. Then her face, both hands, the way you'd hold something you were afraid to drop. And she leaned in.
     ELEANOR: No, Mother. Not you too.
     NUN: I...
@@ -1011,7 +1010,7 @@ MICAH: Yeah. You can say that, sister. Where's Eleanor? What goes on at that clu
 {
 - has_flag("eleanor_refused_abbess"):
     NUN: Put that thing down. Please. I'll tell you. God knows I owe her that much.
-    NUN: She's a performer. That's what they call them, at that Club. She told me so herself, in her cell. All of it, what they made her do, what she did.
+    NUN: She's a performer. That's what they call them, at that Club. She tried to tell me, in her cell. I wouldn't let her finish. I knew enough.
     NUN: And I'd gone to that cell past midnight, with a candle, and called it charity. When she stopped me, I turned it round on her and put her out at first light.
     NUN: It was my fault, Mr. Jones. All of it. She came to this house for shelter, and I failed her.
 - else:

@@ -67,7 +67,7 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
     the service stairs. At the Blue Lantern Tony sends her to the convent. In the corridor Sister Agatha calls her
     "another Jezebel from that hideous Club"; that night Agatha comes to her cell to hear her confession, with motives she won't admit: Eleanor
     can seduce her for the convent's protection (Agatha turns back at the last moment, cursing her as a demon) or tell
-    her the truth (saved; Agatha reaches for her, is stopped, and puts her out at first light). From the motel window, four days on, she watches Micah reach
+    her the truth (saved; she stammers out only the Club and its painted stage before Agatha cuts her off, reaches for her, is stopped, and puts her out at first light). From the motel window, four days on, she watches Micah reach
     the convent, smoke in the road, come asking at the desk and climb the fire escape; she steps out to wait for him.
     Over black, the journal goes back to Micah, already on the landing in front of her.
 11. **The fire escape, again**: Eleanor repeats her opening question. After it, a framed close-up shows Micah on the
