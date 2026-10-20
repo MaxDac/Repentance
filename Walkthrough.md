@@ -482,14 +482,15 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah has to intimidate the librarian (before asking about the symbol Micah refuses to do it, and before the
   lookup he needs a precise title). Either way he requests the identified book, the librarian confirms that it
   describes ancient Celtic rituals and gives it to him if he goes away:
-  - **Hand on the librarian** (canonical): Micah steps in and grabs him by the collar, lifting him onto his toes
-    (one animation for both, the librarian actor hidden), holds him through the request, then lets him go.
+  - **Hand on the librarian** (canonical): Micah steps in, grabs him by the collar and drags him in
+    close, the librarian stumbling forward with his feet on the floor (one animation for both, the librarian actor
+    hidden), holds him through the request, then lets him go.
   - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
-- Both routes set the same flags. Micah stays in the library; the shaken librarian won't say another word, and the
-  player leaves through the exit to the map.
+- Both routes set the same flags. With the book in hand Micah walks straight out through the hall door to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
-- Leaving the library normally returns to the map.
+- Leaving the library normally (the hall door on the left wall) returns to the map. The two armchairs are props:
+  Micah passes behind or in front of them depending on where he stands.
 
 #### Office
 

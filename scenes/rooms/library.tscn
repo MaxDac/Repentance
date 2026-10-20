@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Library.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library.png" id="2_library"]
@@ -6,12 +6,14 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="90_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/librarian.png" id="92_librarian"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library_desk.png" id="4_desk"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/library_armchair_left.png" id="5_armchair_left"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/library_armchair_right.png" id="6_armchair_right"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(42, 96)
+size = Vector2(48, 122)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(108, 132)
+size = Vector2(66, 132)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(94, 82)
@@ -72,6 +74,18 @@ texture = ExtResource("4_desk")
 centered = false
 offset = Vector2(-64, -76)
 
+[node name="ArmchairLeft" type="Sprite2D" parent="World"]
+position = Vector2(116, 232)
+texture = ExtResource("5_armchair_left")
+centered = false
+offset = Vector2(-21, -61)
+
+[node name="ArmchairRight" type="Sprite2D" parent="World"]
+position = Vector2(366, 236)
+texture = ExtResource("6_armchair_right")
+centered = false
+offset = Vector2(-21, -61)
+
 [node name="Exit" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "exit"
@@ -86,7 +100,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"]
-position = Vector2(31.0, 112.0)
+position = Vector2(35.0, 123.0)
 shape = SubResource("Rect_1")
 
 [node name="ShelvesLeft" type="Area2D" parent="Hotspots"]
@@ -100,7 +114,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/ShelvesLeft"]
-position = Vector2(88.0, 92.0)
+position = Vector2(95.0, 92.0)
 shape = SubResource("Rect_2")
 
 [node name="Fireplace" type="Area2D" parent="Hotspots"]
