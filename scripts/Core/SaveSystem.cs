@@ -8,7 +8,7 @@ namespace Repentance;
 public static class SaveSystem
 {
     public const string AutosaveSlot = "autosave";
-    public const int ManualSlots = 3;
+    public const int ManualSlots = 5;
 
     /// <summary>Save folder; the autoplay test points this elsewhere so it never touches the player's saves.</summary>
     public static string Directory { get; set; } = "user://saves";

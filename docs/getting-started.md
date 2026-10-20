@@ -81,7 +81,7 @@ on Linux.
 
 | Path | Content |
 |---|---|
-| `user://saves/` | Player saves (`autosave`, `slot1`-`slot3`) |
+| `user://saves/` | Player saves (`autosave`, `slot1`-`slot5`) |
 | `user://settings.cfg` | Player settings |
 | `user://autoplay_saves/<suite>/`, `user://autoplay_settings.cfg` | Isolated test/film data; see [Testing](testing.md#launchers-toolsrun) for cleanup |
 
