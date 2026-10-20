@@ -197,7 +197,7 @@ public partial class AutoPlay
         await Shot("club_stage");
         await Until(() => game.Room?.Name == "Attic");
         Check(!game.Hud.InsetVisible, "the close-up is gone in the attic");
-        Check(game.Music.Current == null, "the music stops when the journal closes");
+        Check(game.Music.Current == Track.AtticHouse, "the club's strings give way to the house when the journal closes");
         await game.Wait(2);
         await Shot("attic_night2");
         await Until(() => game.Hud.CaptionVisible);

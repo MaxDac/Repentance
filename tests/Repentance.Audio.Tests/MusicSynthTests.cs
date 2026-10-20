@@ -421,6 +421,29 @@ public class MusicSynthTests
         Assert.True(Math.Abs(s[0]) < 0.001f && Math.Abs(s[2 * frames - 1]) < 0.001f, "silent at the seam");
     }
 
+    [Fact]
+    public void AtticHouseIsTheHouseBelowNotMusic()
+    {
+        var score = MusicSynth.Score(Track.AtticHouse);
+        double length = MusicSynth.LengthBeats(Track.AtticHouse);
+        Assert.Equal(60, length);
+        // not music: the house's hum, steps downstairs and cars outside, nothing accented, quieter than the music
+        Assert.All(score, n => Assert.Contains(n.Instrument, new[] { Instrument.Foley, Instrument.Car }));
+        Assert.DoesNotContain(score, n => n.Strident);
+        Assert.True(MusicSynth.BaseVolumeDb(Track.AtticHouse) < MusicSynth.BaseVolumeDb(Track.ConventPiano));
+        // the hum under the whole loop
+        Assert.Contains(score, n => n.Instrument == Instrument.Foley && n.Midi == MusicSynth.Midi("C2") && n.Beat == 0 && n.Beats == length);
+        // someone walking about below: steps close behind each other, a few walks
+        var steps = score.Where(n => n.Instrument == Instrument.Foley && n.Midi == MusicSynth.Midi("D2")).OrderBy(n => n.Beat).ToList();
+        Assert.InRange(steps.Count, 6, 20);
+        Assert.All(steps, s => Assert.Contains(steps, o => o != s && Math.Abs(o.Beat - s.Beat) <= 0.75 + 1e-9));
+        // a car or two going by, never two at once, none still passing as the loop wraps
+        var cars = score.Where(n => n.Instrument == Instrument.Car).OrderBy(n => n.Beat).ToList();
+        Assert.InRange(cars.Count, 1, 3);
+        Assert.All(cars, n => Assert.True(n.Beat > 0 && n.Beat + n.Beats < length, $"{n}"));
+        Assert.All(cars.Zip(cars.Skip(1)), p => Assert.True(p.Second.Beat >= p.First.Beat + p.First.Beats, $"{p}"));
+    }
+
     [Theory]
     [MemberData(nameof(Tracks))]
     public void EveryNoteIsInItsInstrumentsRange(Track track)

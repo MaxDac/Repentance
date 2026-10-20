@@ -30,7 +30,7 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
-`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`.
+`Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`).
 - **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
@@ -40,6 +40,8 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 - **Ambience**: `Room.Ambience`; by default rain where a `Rain` node exists, louder each act and silent once `Room.RainStopped` (see [Rooms](rooms-and-scenes.md)). The title screen
   (`Game.ShowTitle`) plays the same rain at full level; hiding it hands the ambience back to the room.
 - **Cues**: only lines whose text starts with `*` (Ink or `Say`). Ordinary speech never plays sounds.
+- **Room scripts**: a few actions play their own sound with `Game.Sfx.Play`, such as `TinOpen` when the suitcase key
+  opens the attic's tool tin.
 
 | Word in the `*...*` line | Sound |
 |---|---|
@@ -75,6 +77,7 @@ optional word in `CuesFor`. Validate with `SoundSynthTests` and the
 | `Investigation` | Hotel linen room, library, Tribune morgue, Harrington's office, the alley in Act 3 | Barely audible, reflective D-minor piece on the recorded piano: pedalled low broken chords, a note a beat, under a few long right-hand notes, with one shadowy turn to E-flat |
 | `MansionDread` | Harrington mansion: exterior, kitchen, cellar, study, bedroom (including Eleanor's coda) | Dissonant thriller loop: bowed double bass grinding on E-F, on-beat pizzicato clusters at irregular gaps, low cello arcs, one brief unaccented high open-trumpet stab (the only high note) |
 | `RoseStreet` | Rose's house (Act 2 visit, Act 3 coffee) | Not music: a quiet evening street, silent but for two 1920s cars driving past across the stereo field |
+| `AtticHouse` | Present-day attic (prologue, act ends, epilogue) | Not music: the house heard through the floor and roof, muffled by a `Distance` low-pass: a faint hum on `Foley`, someone walking about downstairs twice, two cars passing outside, one each way |
 
 `RoseStreet` is scored like the others but played by the `Car` in `MusicSynth.Street.cs`: a note is one whole pass,
 its pitch the engine's, and it moves across the stereo field (left to right when its part's pan is positive) with

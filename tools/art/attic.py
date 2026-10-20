@@ -157,12 +157,91 @@ def floor(img):
     d.line([(b["x0"], b["floor"]), (b["x1"], b["floor"])], fill=hx("2a1e14"))
     d.line([(b["x0"], b["floor"]), along((b["x0"], b["floor"]), 1.75)], fill=hx("2a1e14"))
     d.line([(b["x1"], b["floor"]), along((b["x1"], b["floor"]), 1.47)], fill=hx("2a1e14"))
-    # an old rag rug
-    rug = [(150, 214), (250, 214), (262, 246), (128, 246)]
-    d.polygon(rug, fill=hx("5a4a5a"))
-    for i, y in enumerate(range(217, 244, 4)):
-        d.line([(146 - i, y), (254 + i * 1.3, y)], fill=[hx("7a5a4a"), hx("4a5a6a"), hx("8a7a50")][i % 3], width=2)
-    noise(img, (128, 214, 262, 246), 6, 47)
+    braided_rug(img)
+
+
+# the braided rag rug: an oval of plaited rag coils lying flat in the floor's perspective
+RUG = dict(cx=195, cy=230, half_len=16, radius=51, aspect=3.2, ring=10.0)
+RUG_STRANDS = (hx("a8584e"), hx("4e6684"), hx("b8923c"), hx("c0aa86"), hx("5e7044"), hx("6e4866"), hx("8a4430"))
+# each coil plaits three strands, outermost first
+RUG_COILS = ((6, 1, 3), (0, 3, 2), (5, 4, 3), (1, 0, 2), (6, 3, 4), (2, 3, 2))
+RUG_HOLE = (229, 240, 4.4, 2.0)  # moth hole: centre and radii, through the outer coils at the front right
+
+
+def _rug_coords(x, y):
+    """A pixel's place on the rug: distance from its centre line in plane units and position along the coil."""
+    r = RUG
+    u, v = x + 0.5 - r["cx"], (y + 0.5 - r["cy"]) * r["aspect"]
+    du = max(0.0, abs(u) - r["half_len"])
+    dist = math.hypot(du, v)
+    if abs(u) <= r["half_len"]:
+        along_coil = u if v > 0 else -u
+    else:
+        ang = math.atan2(v, du)
+        along_coil = (r["half_len"] + ang * dist) * (1 if u > 0 else -1)
+    return dist, along_coil
+
+
+def braided_rug(img):
+    """An old braided rag rug: concentric coils, each three faded rag strands plaited into chevrons, darker seams
+    between them, a frayed rim and a moth hole showing the boards."""
+    r = RUG
+    px = img.load()
+    rnd = random.Random(47)
+    x0, x1 = int(r["cx"] - r["half_len"] - r["radius"]) - 3, int(r["cx"] + r["half_len"] + r["radius"]) + 3
+    y0, y1 = int(r["cy"] - r["radius"] / r["aspect"]) - 3, int(r["cy"] + r["radius"] / r["aspect"]) + 3
+    hx0, hy0, hrx, hry = RUG_HOLE
+    edge = []
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            dist, s = _rug_coords(x, y)
+            if dist > r["radius"]:
+                continue
+            k = (r["radius"] - dist) / r["ring"]
+            coil = min(int(k), len(RUG_COILS) - 1)
+            t = k - int(k) if coil < len(RUG_COILS) - 1 else 0.5
+            # chevrons: strands lean one way on each side of the coil's middle, so the coil reads as a plait
+            step = 4.6 + 1.0 * (y - r["cy"]) / 16
+            phase = s / step + abs(t - 0.5) * 1.6 + coil * 0.37
+            strand = RUG_COILS[coil][int(math.floor(phase)) % 3]
+            c = RUG_STRANDS[strand]
+            f = phase - math.floor(phase)
+            shade = 0.8 + 0.3 * math.sin(f * math.pi)
+            if t < 0.2 or t > 0.8:
+                shade *= 0.55
+            # wear: the front coils, walked over, are a shade paler
+            if y > r["cy"] + 8:
+                c = mix(c, hx("8a8070"), 0.2)
+            px[x, y] = tuple(max(0, min(255, int(ch * shade))) for ch in c[:3])
+            if dist > r["radius"] - 1.6:
+                edge.append((x, y))
+    # the moth hole: the boards show through a ragged gap, its edge torn and lighter
+    hole_edge = []
+    for y in range(int(hy0 - hry) - 1, int(hy0 + hry) + 2):
+        for x in range(int(hx0 - hrx) - 1, int(hx0 + hrx) + 2):
+            q = ((x + 0.5 - hx0) / hrx) ** 2 + ((y + 0.5 - hy0) / hry) ** 2 + rnd.uniform(-0.25, 0.25)
+            if q < 1:
+                px[x, y] = mix(hx("54402c"), hx("1a120c"), 0.6)
+            elif q < 1.7:
+                hole_edge.append((x, y))
+    for (x, y) in hole_edge:
+        px[x, y] = mix(px[x, y][:3], hx("c8b898"), 0.35)
+    # a shadow where the rim lies on the boards, and loose rag ends fraying out of it
+    for (x, y) in edge:
+        if y > r["cy"]:
+            below = (x, y + 1)
+            if _rug_coords(*below)[0] > r["radius"]:
+                px[below] = mix(px[below][:3], hx("2a1e14"), 0.45)
+    for _ in range(26):
+        x, y = rnd.choice(edge)
+        dx, dy = x - r["cx"], (y - r["cy"]) * r["aspect"]
+        n = math.hypot(dx, dy) or 1
+        col = mix(RUG_STRANDS[rnd.choice(RUG_COILS[0])], hx("c8b898"), 0.2)
+        for j in range(1, rnd.randint(2, 4)):
+            fx, fy = int(round(x + dx / n * j * 1.4)), int(round(y + dy / n * j * 0.6))
+            if _rug_coords(fx, fy)[0] > r["radius"]:
+                px[fx, fy] = col
+    noise(img, (x0, y0, x1, y1), 4, 47)
 
 
 def window(img, act=1):
@@ -357,6 +436,7 @@ STACK = (((338, 158, 382, 190), "XMAS"), ((284, 152, 340, 190), "TAXES\n87-94"),
 OPEN_BOX = STACK[3][0]  # the box Daniel opens on his second search
 TIN_AT = (288, 151)  # front-bottom-left corner of the tool tin, set down on top of the TAXES box
 BOX_OPEN_BOX = (276, 104, 352, 156)  # crop for the opened-box overlay (box flaps and the tin)
+TIN_OPEN_BOX = (278, 124, 316, 156)  # crop for the opened tin, drawn over the opened box
 
 
 def _box_points(box):
@@ -409,8 +489,9 @@ def carton(img, box, label="", opened=False):
         d.line([(cx, cy), (cx + 2, cy + 2)], fill=mix(c["front"], c["edge"], 0.6))
 
 
-def tool_tin(img, at=TIN_AT):
-    """A red enamel tool tin with a carrying handle, its hasp shut by a little brass padlock."""
+def tool_tin(img, at=TIN_AT, opened=False):
+    """A red enamel tool tin with a carrying handle, its hasp shut by a little brass padlock; opened, the lid stands
+    thrown back on its hinges, the empty inside shows and the unlocked padlock hangs from the hasp."""
     d = ImageDraw.Draw(img)
     x, y = at
     w, h = 18, 8
@@ -419,35 +500,68 @@ def tool_tin(img, at=TIN_AT):
     dx, dy = back[0] - x, back[1] - (y - h)
     lid = [(x, y - h), (x + w, y - h), (x + w + dx, y - h + dy), (x + dx, y - h + dy)]
     d.polygon([(x, y - h), (x + dx, y - h + dy), (x + dx, y + dy), (x, y)], fill=hx("7a1e18"))
-    d.polygon(lid, fill=hx("d4523e"))
-    d.line([(x + dx + 1, y - h + dy), (x + w + dx - 1, y - h + dy)], fill=hx("e87a60"))
+    if opened:
+        # the lid thrown back past upright, its paler inside towards the room, hinged along the back edge
+        bx0, by = x + dx, y - h + dy
+        lh, lean = 8, 4
+        raised = [(bx0, by), (bx0 + w, by), (bx0 + w + lean, by - lh), (bx0 + lean, by - lh)]
+        # its red edge, then the bare steel lining that faces the room once the lid is thrown back
+        d.polygon(raised, fill=hx("8a2218"), outline=hx("4a1210"))
+        d.polygon([(bx0 + 2, by - 1), (bx0 + w - 1, by - 1), (bx0 + w + lean - 2, by - lh + 1), (bx0 + lean + 1, by - lh + 1)],
+                  fill=hx("a8a8b0"))
+        d.line([(bx0 + 2, by - 1), (bx0 + w - 1, by - 1)], fill=hx("6a6870"))
+        d.line([(bx0 + lean + 1, by - lh + 1), (bx0 + 2, by - 1)], fill=hx("6a6870"))
+        d.line([(bx0 + lean + 1, by - lh), (bx0 + w + lean - 1, by - lh)], fill=hx("e8705a"))
+        # the hasp's staple on the lid's front edge, swung up with it
+        sx = bx0 + w // 2 + lean
+        d.rectangle([sx - 1, by - lh - 1, sx + 1, by - lh + 1], fill=hx("b8b4a8"))
+        # the open box: a dark well, its tin floor catching a little light, the rim's bare metal edge
+        d.polygon(lid, fill=hx("241a10"))
+        d.polygon([(x + 2, y - h + 1), (x + w - 2, y - h + 1), (x + w + dx - 2, y - h + dy + 1), (x + dx + 2, y - h + dy + 1)],
+                  fill=hx("5a1610"))
+        d.line([(x + 3, y - h + 1), (x + w - 3, y - h + 1)], fill=hx("6a6870"))
+        d.line([(x, y - h), (x + w, y - h)], fill=hx("c8c0b0"))
+    else:
+        d.polygon(lid, fill=hx("d4523e"))
+        d.line([(x + dx + 1, y - h + dy), (x + w + dx - 1, y - h + dy)], fill=hx("e87a60"))
     hgrad(img, (x, y - h, x + w, y), hx("c03a2c"), hx("8a2218"))
     d.rectangle([x, y - h, x + w, y], outline=hx("4a1210"))
-    d.line([(x + 1, y - h + 1), (x + w - 1, y - h + 1)], fill=hx("e8705a"))
-    d.line([(x + 1, y - h + 3), (x + w - 1, y - h + 3)], fill=hx("5a1610"))
-    for px_ in (x + 2, x + w - 2):  # hinges
-        d.point((px_, y - h + 2), fill=hx("c8c0b0"))
-    # folding handle over the lid
-    hy = y - h + dy // 2
-    d.line([(x + 5, hy), (x + 5, hy - 4), (x + 13, hy - 4), (x + 13, hy)], fill=hx("2a2a30"), width=1)
-    d.line([(x + 6, hy - 4), (x + 12, hy - 4)], fill=hx("a8a8b0"))
-    # hasp and padlock
+    if opened:
+        d.line([(x + 1, y - h), (x + w - 1, y - h)], fill=hx("c8c0b0"))
+    else:
+        d.line([(x + 1, y - h + 1), (x + w - 1, y - h + 1)], fill=hx("e8705a"))
+        d.line([(x + 1, y - h + 3), (x + w - 1, y - h + 3)], fill=hx("5a1610"))
+        for px_ in (x + 2, x + w - 2):  # hinges
+            d.point((px_, y - h + 2), fill=hx("c8c0b0"))
+        # folding handle over the lid
+        hy = y - h + dy // 2
+        d.line([(x + 5, hy), (x + 5, hy - 4), (x + 13, hy - 4), (x + 13, hy)], fill=hx("2a2a30"), width=1)
+        d.line([(x + 6, hy - 4), (x + 12, hy - 4)], fill=hx("a8a8b0"))
     cx = x + w // 2
-    d.rectangle([cx - 1, y - h + 1, cx + 1, y - h + 4], fill=hx("b8b4a8"))
-    d.arc([cx - 2, y - h + 2, cx + 2, y - h + 6], 180, 360, fill=hx("e0dcd0"))
-    d.rectangle([cx - 2, y - h + 4, cx + 2, y - 1], fill=hx("e0b850"), outline=hx("7a5a1c"))
-    d.point((cx, y - h + 6), fill=hx("2a2010"))
+    if opened:
+        # the padlock unlocked, hanging crooked by its open shackle from the loop on the front
+        d.rectangle([cx - 1, y - h + 1, cx + 1, y - h + 3], fill=hx("b8b4a8"))
+        d.line([(cx + 1, y - h + 2), (cx + 2, y - h + 5)], fill=hx("e0dcd0"))
+        d.line([(cx + 4, y - h + 3), (cx + 4, y - h + 5)], fill=hx("e0dcd0"))
+        d.polygon([(cx, y - h + 5), (cx + 5, y - h + 5), (cx + 6, y), (cx + 1, y)], fill=hx("e0b850"), outline=hx("7a5a1c"))
+        d.point((cx + 3, y - 2), fill=hx("2a2010"))
+    else:
+        # hasp and padlock
+        d.rectangle([cx - 1, y - h + 1, cx + 1, y - h + 4], fill=hx("b8b4a8"))
+        d.arc([cx - 2, y - h + 2, cx + 2, y - h + 6], 180, 360, fill=hx("e0dcd0"))
+        d.rectangle([cx - 2, y - h + 4, cx + 2, y - 1], fill=hx("e0b850"), outline=hx("7a5a1c"))
+        d.point((cx, y - h + 6), fill=hx("2a2010"))
     # chipped enamel
     for (px_, py_) in ((x + 3, y - 2), (x + 15, y - 5), (x + 1, y - 1), (x + 16, y - 1)):
         d.point((px_, py_), fill=hx("6a6870"))
 
 
-def boxes(img, opened=False):
+def boxes(img, opened=False, tin_open=False):
     for box, label in STACK:
         carton(img, box, label, opened and box == OPEN_BOX)
     shadow(img, "rect", [282, 186, 386, 194], 0.4, 3)
     if opened:
-        tool_tin(img)
+        tool_tin(img, opened=tin_open)
     else:
         d = ImageDraw.Draw(img)
         x0, y0 = OPEN_BOX[0], OPEN_BOX[1]
@@ -1056,16 +1170,16 @@ def relight_night(img):
     return out
 
 
-def paint(act=1, spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False):
+def paint(act=1, spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False, tin_open=False):
     if act == "night":
-        return paint_night(spill, lifted, opened, box_open, suitcase_open)
+        return paint_night(spill, lifted, opened, box_open, suitcase_open, tin_open)
     mood = ACTS[act]
     img = Image.new("RGB", (W, H))
     shell(img)
     floor(img)
     window(img, act)
     clutter(img)
-    boxes(img, box_open)
+    boxes(img, box_open, tin_open)
     sheet_furniture(img, lifted)
     suitcase(img, suitcase_open)
     trunk(img, opened)
@@ -1085,13 +1199,13 @@ def paint(act=1, spill=False, lifted=False, opened=False, box_open=False, suitca
     return img
 
 
-def paint_night(spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False):
+def paint_night(spill=False, lifted=False, opened=False, box_open=False, suitcase_open=False, tin_open=False):
     img = Image.new("RGB", (W, H))
     shell(img)
     floor(img)
     window(img, 1)
     clutter(img)
-    boxes(img, box_open)
+    boxes(img, box_open, tin_open)
     sheet_furniture(img, lifted)
     suitcase(img, suitcase_open)
     trunk(img, opened)
@@ -1110,7 +1224,7 @@ def paint_night(spill=False, lifted=False, opened=False, box_open=False, suitcas
 def build():
     act1 = paint(1)
     act1_alt = paint(1, True, True, True, True, True)
-    pal = palette_of(_side_by_side(act1, act1_alt), 128) + DAY_EXTRA
+    pal = palette_of(_side_by_side(act1, act1_alt, paint(1, True, True, True, True, True, True)), 128) + DAY_EXTRA
 
     outputs = {}
     for act in (1, 2, 3):
@@ -1125,36 +1239,45 @@ def build():
     for act in (1, 2, 3):
         alt = pixelize(paint(act, True, True, True, True, True), pal)
         shut = pixelize(paint(act, True, True, True, True, False), pal)
+        tin = pixelize(paint(act, True, True, True, True, True, True), pal)
+        suffix = "" if act == 1 else f"_act{act}"
         for name, box in overlay_boxes:
-            suffix = "" if act == 1 else f"_act{act}"
             save(_overlay(alt, shut, name, box), "rooms", f"{name}{suffix}.png")
+        save(_diff_overlay(tin, alt, TIN_OPEN_BOX), "rooms", f"attic_tin_open{suffix}.png")
 
     night, night_alt = paint("night"), paint("night", True, True, True, True, True)
-    night_pal = palette_of(_side_by_side(night, night_alt), 116) + NIGHT_EXTRA + DAY_EXTRA[3:6]
+    night_tin = paint("night", True, True, True, True, True, True)
+    night_pal = palette_of(_side_by_side(night, night_alt, night_tin), 116) + NIGHT_EXTRA + DAY_EXTRA[3:6]
     save(pixelize(night, night_pal), "rooms", "attic_night.png")
     night_shut = pixelize(paint("night", True, True, True, True, False), night_pal)
     night_alt = pixelize(night_alt, night_pal)
     for name, box in overlay_boxes:
         save(_overlay(night_alt, night_shut, name, box), "rooms", f"{name}_night.png")
+    save(_diff_overlay(pixelize(night_tin, night_pal), night_alt, TIN_OPEN_BOX), "rooms", "attic_tin_open_night.png")
     return outputs[1]
 
 
 def _overlay(alt, shut, name, box):
     """Crops an overlay. The open suitcase's lid rises into the chair's crop, so its overlay keeps only the pixels
     that opening the suitcase changes and is transparent elsewhere."""
-    crop = alt.crop(box)
     if name != "attic_suitcase_open":
-        return crop
-    diff = ImageChops.difference(crop.convert("RGB"), shut.crop(box).convert("RGB")).convert("L")
+        return alt.crop(box)
+    return _diff_overlay(alt, shut, box)
+
+
+def _diff_overlay(changed, base, box):
+    """The pixels inside box that differ between two renders, transparent elsewhere."""
+    crop = changed.crop(box)
+    diff = ImageChops.difference(crop.convert("RGB"), base.crop(box).convert("RGB")).convert("L")
     mask = diff.point(lambda v: 255 if v else 0)
     out = crop.convert("RGBA")
     out.putalpha(mask)
     return out
 
 
-def _side_by_side(a, b):
-    """Both states in one image, so the palette keeps the overlay colours (the red tin) unblended."""
-    out = Image.new("RGB", (a.width * 2, a.height))
-    out.paste(a, (0, 0))
-    out.paste(b, (a.width, 0))
+def _side_by_side(*imgs):
+    """All states in one image, so the palette keeps the overlay colours (the red tin) unblended."""
+    out = Image.new("RGB", (imgs[0].width * len(imgs), imgs[0].height))
+    for i, img in enumerate(imgs):
+        out.paste(img, (img.width * i, 0))
     return out
