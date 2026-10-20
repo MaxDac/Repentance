@@ -20,7 +20,7 @@ public partial class AutoPlay
         Check(game.Player.Character == "daniel" && !gs.HasItem(Notes.ItemId) && !gs.HasItem(MicahKit.LighterId), "prologue plays as Daniel, without Micah's notepad or lighter");
         await Shot("attic");
         Check(game.Sfx.Ambient == null, "no rain sounds in the dry attic");
-        Check(game.Music.Current == null, "no music in the attic");
+        Check(game.Music.Current == Track.AtticHouse, "the house murmurs below the attic");
         int woodSteps = game.Sfx.Count(Sound.StepWood);
         await WheelTest(game);
         await PuzzleGestureTest(game);
@@ -42,7 +42,9 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "tool_tin");
         Check(!gs.HasItem("crowbar"), "tin cannot be opened by hand");
         await game.Perform(Verb.UseItem, "tool_tin", "suitcase_key");
-        Check(gs.HasItem("crowbar"), "small key opens the tool tin for the crowbar");
+        Check(gs.HasItem("crowbar") && game.Sfx.Count(Sound.TinOpen) > 0
+              && game.Room?.GetNodeOrNull<Sprite2D>("TinOpen")?.Visible == true,
+              "small key opens the tool tin for the crowbar, with a clank, and it stays open");
         await Shot("attic_mess");
         await InventoryTest(game);
         await ReadJournal(game);

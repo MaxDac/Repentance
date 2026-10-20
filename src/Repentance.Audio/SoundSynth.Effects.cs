@@ -146,6 +146,46 @@ public static partial class SoundSynth
         return buf;
     }
 
+    /// <summary>A small tool tin opened: the padlock's shackle snaps free, a hinge squeaks, the thin enamelled lid
+    /// clanks back, and the crowbar inside shifts with a dull rattle.</summary>
+    private static float[] TinOpen(Random rng)
+    {
+        var buf = Buffer(1.1);
+        // the padlock: a bright snap and a tiny brass ping
+        Burst(buf, rng, 0, 0.0015, 0.7, Biquad.HighPass(3000));
+        Tone(buf, 0, 2950, 2900, 0.02, 0.35, attack: 0.0002);
+        Tone(buf, 0.035, 4100, 4050, 0.012, 0.2, attack: 0.0002);
+        // the hinge, a short dry squeak rising in pitch
+        int h0 = At(0.12), hn = At(0.16);
+        double phase = 0;
+        var grit = Biquad.BandPass(1800, 3);
+        for (int i = 0; i < hn; i++)
+        {
+            double t = (double)i / hn;
+            phase += 2 * Math.PI * (850 + 600 * t + 40 * Math.Sin(t * 60)) / SampleRate;
+            double env = Math.Sin(Math.PI * t);
+            buf[h0 + i] += (float)(env * (0.1 * Math.Sin(phase) + 0.08 * grit.Next(Noise(rng))));
+        }
+        // the lid clanking back: thin sheet steel, inharmonic and quick to die
+        double lid = 0.3;
+        Burst(buf, rng, lid, 0.003, 0.6, Biquad.HighPass(1800));
+        double[] hz = { 610, 1490, 2560, 3870 }, amp = { 0.7, 0.55, 0.4, 0.25 }, tau = { 0.16, 0.1, 0.07, 0.05 };
+        for (int k = 0; k < hz.Length; k++)
+        {
+            Tone(buf, lid, hz[k], hz[k], tau[k], amp[k], attack: 0.0004);
+            Tone(buf, lid, hz[k] * 1.013, hz[k] * 1.013, tau[k], amp[k] * 0.4, attack: 0.0004);
+        }
+        // a smaller bounce, and the crowbar shifting against the tin
+        Tone(buf, lid + 0.07, 1490, 1490, 0.04, 0.2, attack: 0.0004);
+        foreach (var (at, a) in new[] { (0.46, 0.45), (0.53, 0.25) })
+        {
+            Tone(buf, at, 340, 320, 0.05, a, attack: 0.0006);
+            Tone(buf, at, 1150, 1150, 0.03, a * 0.4, attack: 0.0004);
+            Burst(buf, rng, at, 0.006, a * 0.4, Biquad.BandPass(900, 1.5));
+        }
+        return buf;
+    }
+
     /// <summary>Spirits catching all at once: a soft thump of air, a roar that swells and settles, crackling.</summary>
     private static float[] Whoosh(Random rng)
     {

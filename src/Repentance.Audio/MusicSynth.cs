@@ -32,6 +32,9 @@ public enum Track
     MansionDread,
     /// <summary>Rose's street: not music but a quiet evening street, silent but for the odd motor car driving past.</summary>
     RoseStreet,
+    /// <summary>The attic: not music but the house beneath it - its hum, someone walking about downstairs and the odd
+    /// car going by outside, all muffled through the floor and the roof.</summary>
+    AtticHouse,
 }
 
 public enum Instrument
@@ -153,6 +156,7 @@ public static partial class MusicSynth
         Track.Investigation => -20f,
         Track.MansionDread => -8.5f,
         Track.RoseStreet => -18f,
+        Track.AtticHouse => -14f,
         _ => -6f,
     };
 

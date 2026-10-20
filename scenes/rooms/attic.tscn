@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Attic.cs" id="1_Attic"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic.png" id="2_attic"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Hotspot.cs" id="8_Hotspot"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic_box_open.png" id="9_attic_box_open"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/attic_suitcase_open.png" id="10_attic_suitcase_open"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/attic_tin_open.png" id="11_attic_tin_open"]
 
 [sub_resource type="RectangleShape2D" id="TinShape"]
 size = Vector2(24, 16)
@@ -129,10 +130,18 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "tool_tin_found"
 
+[node name="TinOpen" type="Sprite2D" parent="."]
+position = Vector2(278, 124)
+z_index = -5
+texture = ExtResource("11_attic_tin_open")
+centered = false
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "got_crowbar"
+
 [node name="ToolTin" type="Area2D" parent="Hotspots"]
 script = ExtResource("8_Hotspot")
 Id = "tool_tin"
-DisplayName = "locked tool tin"
+DisplayName = "tool tin"
 WalkTo = Vector2(300, 200)
 Face = 2
 ShowIfFlags = "tool_tin_found"
@@ -354,8 +363,8 @@ shape = SubResource("Rect_13")
 [node name="Rug" type="Area2D" parent="Hotspots"]
 script = ExtResource("8_Hotspot")
 Id = "rug"
-DisplayName = "rag rug"
-LookText = "A rag rug. Hand-made, by the look of it. Moths have been eating well."
+DisplayName = "braided rug"
+LookText = "A braided rag rug. Somebody plaited old clothes into it, coil by coil. Moths have been eating well."
 ClickPriority = -1
 monitoring = false
 monitorable = false

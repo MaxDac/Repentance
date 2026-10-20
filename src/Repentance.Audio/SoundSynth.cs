@@ -8,7 +8,7 @@ public enum Sound
 {
     StepWood, StepStone, StepCarpet,
     Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, DoorOpen, DoorClose, Bell,
-    Rain, Thunder,
+    Rain, Thunder, TinOpen,
 }
 
 /// <summary>What the floor of a room is made of; picks the footstep sound.</summary>
@@ -76,6 +76,7 @@ public static partial class SoundSynth
             Sound.Bell => Bell(rng),
             Sound.Rain => Rain(rng),
             Sound.Thunder => Thunder(rng),
+            Sound.TinOpen => TinOpen(rng),
             _ => throw new ArgumentOutOfRangeException(nameof(sound)),
         };
         Normalize(buf);

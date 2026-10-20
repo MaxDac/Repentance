@@ -21,6 +21,7 @@ public static partial class MusicSynth
         Track.BlueLanternAlley => LanternAlley,
         Track.MansionDread => Mansion,
         Track.RoseStreet => Street,
+        Track.AtticHouse => AtticHouse,
         _ => throw new ArgumentOutOfRangeException(nameof(track)),
     };
 
@@ -440,4 +441,19 @@ public static partial class MusicSynth
         new(Instrument.Car, 1, 1, "r:7 A1:12 r:41"),
         new(Instrument.Car, 0.85, -1, "r:38 G1:11 r:11"),
     });
+
+    // ------------------------------------------------------------------ the attic
+
+    // Not music: the present-day house heard from its attic, a beat a second for a minute. The faint hum of
+    // the house all through; someone (Leo) walking about downstairs, a few steps, a pause, a few more; and two cars
+    // going by in the street outside, one each way. Everything comes up through the floorboards and the roof, so
+    // the whole piece is muffled, narrow and dull.
+    private static readonly Piece AtticHouse = new(60, new Hall(0.9, 0.8, 0.6, 0.25), new Part[]
+    {
+        new(Instrument.Foley, 0.4, 0, "C2:60"),
+        new(Instrument.Foley, 0.25, 0.35,
+            "r:5 " + Steps("D2", 0.55, 7) + "r:24 " + Steps("D2", 0.6, 4) + "r:1.5 " + Steps("D2", 0.6, 3)),
+        new(Instrument.Car, 0.4, 1, "r:18 A1:13 r:29"),
+        new(Instrument.Car, 0.35, -1, "r:44 F1:12 r:4"),
+    }, Distance: new Distance(40, 400, 0.45, 0.06, 0.1, 0.1));
 }
