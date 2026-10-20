@@ -40,5 +40,6 @@ Stored in `user://settings.cfg`, separate from saves (details: [Saves and settin
 - **Full screen**: Off by default; **F11** or **Alt+Enter** anywhere. Borderless, whole-pixel scaling.
 - **Effects volume** (80%) and **Music volume** (70%): left click louder, right click quieter, steps of 10%.
 
-Sound and music are synthesized at startup, apart from the hotel lobby's recorded piano. The game autosaves on every room change
+Sound and music are synthesized by the game (music as each room needs it), apart from the recorded piano, sax and
+bass. The game autosaves on every room change
 and has five manual slots; saving over an occupied slot asks for confirmation first.
