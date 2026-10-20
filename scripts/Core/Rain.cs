@@ -5,7 +5,8 @@ namespace Repentance;
 
 /// <summary>
 /// Animated pixel rain drawn over a painted background: slanted 1px streaks in parallax layers, clipped to
-/// <see cref="Areas"/> (window panes, the sky). Optional droplets running down the glass and splash ticks where
+/// <see cref="Areas"/> (window panes, the sky). Panes a muntin apart (<see cref="RainPanes"/>) share one rain field,
+/// so a streak passes behind the bar and carries on in the next pane. Optional droplets running down the glass and splash ticks where
 /// drops hit water. Seeded, so recorded frames are reproducible.
 /// </summary>
 [GlobalClass]
@@ -34,10 +35,12 @@ public partial class Rain : Node2D
     /// </summary>
     [Export] public bool FollowsStory = true;
 
-    private struct Drop { public int Area, Layer; public float X, Y; }
+    private struct Drop { public int Window, Layer; public float X, Y; }
+    private struct Window { public Rect2 Bounds; public int[] Panes; }
     private struct Drip { public int Area; public float X, Y, Speed, Pause; }
     private struct Splash { public Vector2I At; public float Age; }
 
+    private readonly List<Window> _windows = new();
     private readonly List<Drop> _drops = new();
     private readonly List<Drip> _drips = new();
     private readonly List<Splash> _splashes = new();
@@ -59,13 +62,20 @@ public partial class Rain : Node2D
         }
         if (Areas.Count == 0)
             Areas.Add(new Rect2(0, 0, 480, 270));
-        for (int a = 0; a < Areas.Count; a++)
+        var panes = new List<RainPane>();
+        foreach (var r in Areas) panes.Add(new RainPane(r.Position.X, r.Position.Y, r.Size.X, r.Size.Y));
+        foreach (var group in RainPanes.Windows(panes))
         {
-            var r = Areas[a];
+            var b = RainPanes.Bounds(panes, group);
+            _windows.Add(new Window { Bounds = new Rect2(b.X, b.Y, b.Width, b.Height), Panes = group.ToArray() });
+        }
+        for (int w = 0; w < _windows.Count; w++)
+        {
+            var r = _windows[w].Bounds;
             int n = Mathf.Max(1, Mathf.RoundToInt(r.Size.X * r.Size.Y * Density / 1000f));
             for (int i = 0; i < n; i++)
             {
-                var d = new Drop { Area = a, Layer = i % Mathf.Max(1, Layers) };
+                var d = new Drop { Window = w, Layer = i % Mathf.Max(1, Layers) };
                 Respawn(ref d, r.Position.Y + _rng.RandfRange(0, r.Size.Y + Length));
                 _drops.Add(d);
             }
@@ -84,7 +94,7 @@ public partial class Rain : Node2D
 
     private void Respawn(ref Drop d, float y)
     {
-        var r = Areas[d.Area];
+        var r = _windows[d.Window].Bounds;
         // spawn across the width the slant will sweep through, so the edges stay covered
         float sweep = -Slant * r.Size.Y;
         d.X = _rng.RandfRange(r.Position.X + Mathf.Min(0, sweep), r.End.X + Mathf.Max(0, sweep));
@@ -106,7 +116,7 @@ public partial class Rain : Node2D
         for (int i = 0; i < _drops.Count; i++)
         {
             var d = _drops[i];
-            var r = Areas[d.Area];
+            var r = _windows[d.Window].Bounds;
             float dy = Speed * (0.55f + 0.45f * Depth(d.Layer)) * dt;
             d.Y += dy;
             d.X += Slant * dy;
@@ -156,11 +166,23 @@ public partial class Rain : Node2D
         DrawRect(new Rect2(p, Vector2.One), c);
     }
 
+    /// <summary>A rain dot in whichever pane of its window it falls in; the muntins between panes hide it.</summary>
+    private void DotInPanes(Window w, float x, float y, Color c)
+    {
+        var p = new Vector2(Mathf.Floor(x), Mathf.Floor(y));
+        foreach (int i in w.Panes)
+            if (Areas[i].HasPoint(p))
+            {
+                DrawRect(new Rect2(p, Vector2.One), c);
+                return;
+            }
+    }
+
     public override void _Draw()
     {
         foreach (var d in _drops)
         {
-            var r = Areas[d.Area];
+            var w = _windows[d.Window];
             float depth = Depth(d.Layer);
             int len = Mathf.Max(1, Mathf.RoundToInt(Length * (0.5f + 0.5f * depth)));
             var c = Tint with { A = Tint.A * (0.45f + 0.55f * depth) };
@@ -168,7 +190,7 @@ public partial class Rain : Node2D
             {
                 // the head is brightest, the tail fades out
                 var ck = c with { A = c.A * (1f - 0.5f * k / len) };
-                Dot(r, d.X - Slant * k, d.Y - k, ck);
+                DotInPanes(w, d.X - Slant * k, d.Y - k, ck);
             }
         }
         foreach (var d in _drips)

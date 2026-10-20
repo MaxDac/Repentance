@@ -24,6 +24,13 @@ public partial class EleanorRoom : Room
         Interlude && Walk is { } w && !w.Contains(target) && target.X is > 50 and < 136 && target.Y is > 218 and < 240
             ? new Vector2(target.X, 241) : target;
 
+    /// <summary>Her kit is granted on load as well as on entering, so a save from before she carried it gets it too.</summary>
+    public override void _Ready()
+    {
+        if (Interlude) PackEleanorsKit();
+        base._Ready();
+    }
+
     protected override void OnRefresh()
     {
         if (GetNodeOrNull<Sprite2D>("Background") is not { } bg) return;
@@ -82,7 +89,8 @@ public partial class EleanorRoom : Room
                 return true;
             case ("desk_drawer", Verb.UseItem) when item == "lockpick" && !State.HasFlag("eleanor_drawer_open"):
                 State.SetFlag("eleanor_drawer_open");
-                await Say("A tension wrench, a rake, a little patience. The lock gave up before I did.");
+                await Say("No hotel lock, this. Somebody paid a locksmith for it. It took the tension wrench, two rakes and the better part of my patience.");
+                await Say("Damn hard. It snapped one of my picks off in the keyway before it gave.");
                 return true;
             case ("desk_drawer", Verb.UseItem) when item == "lockpick":
             case ("desk_drawer", Verb.Hand):
@@ -156,21 +164,84 @@ public partial class EleanorRoom : Room
     }
 
     private bool Packed => State.HasFlag("interlude_box_packed");
+    private bool ClosetOpen => State.HasFlag("interlude_closet_open");
+    private bool BoxInSafe => State.HasFlag("interlude_box_in_safe");
+    private bool SafeLocked => State.HasFlag("interlude_safe_locked");
+
+    /// <summary>
+    /// What Eleanor brings to Room 507: a blank slip for the safe's riddle and the key to the lock she had fitted to the
+    /// desk drawer. Derived from her progress, so a save from before she carried them loads with them too.
+    /// </summary>
+    private void PackEleanorsKit()
+    {
+        if (!State.HasFlag("interlude_riddle_written") && !State.HasItem("eleanor_slip")) State.GiveItem("eleanor_slip");
+        if (State.HasFlag("interlude_riddle_written") && !State.HasFlag("interlude_riddle_in_drawer") && !State.HasItem("eleanor_riddle"))
+            State.GiveItem("eleanor_riddle");
+        if (!State.HasFlag("interlude_drawer_locked") && !State.HasItem("eleanor_key")) State.GiveItem("eleanor_key");
+    }
 
     private async Task LockSafe()
     {
+        State.SetFlag("interlude_box_in_safe");
         State.SetFlag("interlude_safe_locked");
-        await Say("Into the safe, and spin the dial. The Twelve at His table. December. The day He rested.");
+        await Say("Swing the door to, and spin the dial. The Twelve at His table. December. The day He rested.");
         await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
     }
-    private bool ReadyToLeave => State.HasFlag("interlude_safe_locked") && State.HasFlag("interlude_drawer_locked")
-        && State.HasFlag("interlude_phoned");
+
+    private async Task PutBoxInSafe()
+    {
+        State.TakeItem("eleanor_box_packed");
+        State.SetFlag("interlude_box_in_safe");
+        await Say("In it goes, right at the back, where the light doesn't reach.");
+    }
+
+    private bool ReadyToLeave => SafeLocked && State.HasFlag("interlude_drawer_locked") && State.HasFlag("interlude_phoned");
+
+    /// <summary>The safe in her open closet: the packed box goes in, then her hand swings the door shut and spins the dial.</summary>
+    private async Task<bool> InterludeSafe(Verb verb, string? item)
+    {
+        switch (verb)
+        {
+            case Verb.Look:
+                await Say(SafeLocked ? "Shut and spun. Only the riddle knows the way in now."
+                    : BoxInSafe ? "My brass box inside. Now the door, and the dial."
+                    : "Standing half open, the way I left it. Empty, waiting for the box.");
+                return true;
+            case Verb.UseItem when SafeLocked:
+                await Say("Locked. Twice locked, like everything else I care about.");
+                return true;
+            case Verb.UseItem when item == "eleanor_box_packed" && !BoxInSafe:
+                await PutBoxInSafe();
+                return true;
+            case Verb.UseItem:
+                await Say(BoxInSafe ? "The box is all that goes in there."
+                    : item is "eleanor_box" or "eleanor_flower" or "pellet" or "riddle_scrap" or "red_thread"
+                        ? "Not yet. Everything goes in the box first, and then the box goes in the safe."
+                        : "That doesn't go in the safe. Only the box.");
+                return true;
+            case Verb.Hand when SafeLocked:
+                await Say("Locked. Twice locked, like everything else I care about.");
+                return true;
+            // a save from before the box went in by hand: packed, with no box left in the satchel
+            case Verb.Hand when BoxInSafe || (Packed && !State.HasItem("eleanor_box_packed")):
+                await LockSafe();
+                return true;
+            case Verb.Hand:
+                await Say(Packed ? "Not yet. The box goes in first." : "The safe can wait. The box isn't packed yet.");
+                return true;
+            case Verb.Kick:
+                await Say("Steel. My foot would lose that argument.");
+                return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Eleanor's last hour in Room 507 (Puzzle 17): the brass box and a bare paper flower from the vanity, a riddle
     /// written on desk stationery, red thread from a torn hem. The riddle tied round the flower, the flower into the
-    /// box, the box locked in the closet safe. Then the riddle in the drawer, a call to Rizzo's on the candlestick
-    /// telephone on the vanity, and the door, where Sal is waiting.
+    /// box. The closet opened on the safe she left standing half open, the box put in it, the safe shut. Then the
+    /// safe's combination written as a riddle on her blank slip at the desk, put in the drawer and locked with her own
+    /// key, a call to Rizzo's on the candlestick telephone on the vanity, and the door, where Sal is waiting.
     /// </summary>
     private async Task<bool> InterludeInteract(Verb verb, Hotspot target, string? item)
     {
@@ -191,38 +262,66 @@ public partial class EleanorRoom : Room
                 await Say("Nothing else on there I'll miss.");
                 return true;
 
+            case ("closet", Verb.Look) when !ClosetOpen:
+                await Say("My dresses in a row behind those doors, waiting like I'll be back to wear them. The safe's at the back, behind them.");
+                return true;
             case ("closet", Verb.Look):
-                await Say("My dresses in a row, waiting like I'll be back to wear them. The safe's at the back, behind them.");
+                await Say(SafeLocked ? "My dresses, and the safe behind them, shut and spun."
+                    : "My dresses in a row, waiting like I'll be back to wear them. And the safe at the back, standing half open.");
                 return true;
-            case ("closet", Verb.UseItem) when item == "eleanor_box_packed" && !State.HasFlag("interlude_safe_locked"):
-                State.TakeItem("eleanor_box_packed");
-                await LockSafe();
+            case ("closet", Verb.Hand) when !ClosetOpen:
+                State.SetFlag("interlude_closet_open");
+                await Say("My dresses in a row, waiting like I'll be back to wear them.");
+                await Say(SafeLocked ? "And the safe behind them, shut and spun."
+                    : "And at the back, the safe, standing half open the way I left it this afternoon.");
                 return true;
-            case ("closet", Verb.UseItem) when !State.HasFlag("interlude_safe_locked"):
-                await Say(item is "eleanor_box" or "eleanor_flower" or "pellet" or "riddle_scrap" or "red_thread"
-                    ? "Not yet. Everything goes in the box first, and then the box goes in the safe."
-                    : "That doesn't go in the safe. Only the box.");
+            case ("closet", Verb.Hand) when BoxInSafe && !SafeLocked:
+                await Say("Not with the safe standing open. The safe door first.");
                 return true;
-            case ("closet", Verb.Hand) when Packed && !State.HasFlag("interlude_safe_locked") && !State.HasItem("eleanor_box_packed"):
-                await LockSafe();
+            case ("closet", Verb.Hand):
+                State.SetFlag("interlude_closet_open", false);
+                await Say("I shut the doors on them. Let the dresses keep it company.");
                 return true;
-            case ("closet", Verb.Hand) when !State.HasFlag("interlude_safe_locked"):
-                await Say(Packed ? "The safe's open and waiting. The box goes in." : "The safe can wait. The box isn't packed yet.");
+            case ("closet", Verb.UseItem) when !ClosetOpen:
+                await Say(item is "eleanor_box_packed" or "eleanor_box" or "eleanor_flower"
+                    ? "The safe's behind the closet doors. Open them first."
+                    : "That doesn't go in the closet.");
                 return true;
-            case ("closet", Verb.Hand or Verb.UseItem):
-                await Say("Locked. Twice locked, like everything else I care about.");
-                return true;
-
-            case ("desk_drawer", _) when !State.HasFlag("interlude_safe_locked"):
+            case ("closet", Verb.UseItem):
+                return await InterludeSafe(Verb.UseItem, item);
+            case ("interlude_safe", _):
+                return await InterludeSafe(verb, item);
+            case ("desk_drawer", _) when !SafeLocked:
                 await Say("The riddle goes in the drawer. But the box goes in the safe first.");
                 return true;
-            case ("desk_drawer", Verb.Hand) when !State.HasFlag("interlude_drawer_locked"):
+            case ("desk_drawer", Verb.UseItem) when item == "eleanor_riddle" && !State.HasFlag("interlude_riddle_in_drawer"):
+                State.TakeItem("eleanor_riddle");
+                State.SetFlag("interlude_riddle_in_drawer");
+                await Say("Three lines of Sunday school on hotel paper, into the drawer. My grandmother would be proud.");
+                return true;
+            case ("desk_drawer", Verb.UseItem) when item == "eleanor_slip":
+                await Say("A blank slip won't open anything. The combination goes on it first, at the desk.");
+                return true;
+            case ("desk_drawer", Verb.UseItem) when item == "eleanor_key" && !State.HasFlag("interlude_riddle_in_drawer"):
+                await Say("Lock an empty drawer? The riddle goes in first.");
+                return true;
+            case ("desk_drawer", Verb.UseItem) when item == "eleanor_key" && !State.HasFlag("interlude_drawer_locked"):
                 State.SetFlag("interlude_drawer_locked");
-                await Say("Three lines of Sunday school on hotel paper. My grandmother would be proud.");
-                await Say("Into the drawer, and turn the key. Theodore's men will kick it and give up. A reporter with a whole night won't.");
+                await Say("I had a locksmith on Wabash fit this drawer with a lock of his own, and paid him to forget it. This is the only key.");
+                await Say("Turn it, and keep it. Theodore's men will kick it and give up. A reporter with a whole night won't.");
+                return true;
+            case ("desk_drawer", Verb.Hand) when !State.HasFlag("interlude_riddle_in_drawer"):
+                await Say(State.HasItem("eleanor_riddle") ? "The riddle goes in here, and then my key turns on it."
+                    : "The riddle goes in here. I haven't written it yet.");
+                return true;
+            case ("desk_drawer", Verb.Hand or Verb.UseItem) when !State.HasFlag("interlude_drawer_locked"):
+                await Say("The riddle's in. Now my key.");
+                return true;
+            case ("desk_drawer", _) when !State.HasFlag("interlude_riddle_in_drawer"):
+                await Say("The safe's locked. Now the riddle goes in this drawer, and I turn the key.");
                 return true;
             case ("desk_drawer", _) when !State.HasFlag("interlude_drawer_locked"):
-                await Say("The safe's locked. Now the riddle goes in this drawer, and I turn the key.");
+                await Say("The riddle's inside. It wants my key.");
                 return true;
             case ("desk_drawer", _):
                 await Say("Locked, with the riddle inside.");
@@ -281,6 +380,16 @@ public partial class EleanorRoom : Room
                 return true;
             case ("window", Verb.Look or Verb.Hand):
                 await Say("Five floors down to the alley. The rain doesn't care who's leaving.");
+                return true;
+            case ("desk", Verb.UseItem) when item == "eleanor_slip":
+                State.TakeItem("eleanor_slip");
+                State.SetFlag("interlude_riddle_written");
+                State.GiveItem("eleanor_riddle");
+                await Say("Pencil, my best Sunday hand. The Twelve at His table. The days of December. The day He rested.");
+                await Say("No numbers, no right or left. Anybody who doesn't know his Bible can stare at it all night.");
+                return true;
+            case ("desk", Verb.UseItem) when item == "eleanor_riddle":
+                await Say("Written. It goes in the drawer, under lock and key.");
                 return true;
             case ("desk", Verb.Hand) when !State.HasFlag("interlude_took_scrap"):
                 State.SetFlag("interlude_took_scrap");

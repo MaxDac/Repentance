@@ -244,15 +244,31 @@ public partial class GameMenu : Control
             if (saving)
                 rows.Add((label, true, () =>
                 {
-                    bool ok = Game.Instance.SaveToSlot(slot);
-                    _status.Text = ok ? $"Saved to {SlotName(slot)}." : "Couldn't save the game.";
-                    PausePage();
+                    if (SaveSystem.Exists(slot)) OverwritePage(slot, data);
+                    else SaveTo(slot);
                 }));
             else
                 rows.Add((label, data != null, () => Finish(new MenuResult(MenuAction.Load, data))));
         }
         rows.Add(("Back", true, back));
         Page(saving ? "Save game" : "Load game", -1, back, rows.ToArray());
+    }
+
+    /// <summary>Asks before replacing the save already in <paramref name="slot"/>; No or Esc returns to the slot list.</summary>
+    private void OverwritePage(string slot, SaveData? data)
+    {
+        Action back = () => SlotsPage(saving: true);
+        _status.Text = Describe(slot, data);
+        Page($"Overwrite {SlotName(slot)}?", -1, back,
+            ("Yes, overwrite", true, () => SaveTo(slot)),
+            ("No", true, back));
+    }
+
+    private void SaveTo(string slot)
+    {
+        bool ok = Game.Instance.SaveToSlot(slot);
+        _status.Text = ok ? $"Saved to {SlotName(slot)}." : "Couldn't save the game.";
+        PausePage();
     }
 
     private static string SlotName(string slot) =>

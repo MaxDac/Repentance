@@ -138,10 +138,13 @@ public partial class AutoPlay
         Check(game.Hud.Menu.Press("Save game"), "pause menu offers Save game");
         await Observe(0.1);
         await Shot("save_slots");
+        Check(game.Hud.Menu.HasEntry($"Slot {SaveSystem.ManualSlots}") && SaveSystem.ManualSlots == 5, "save menu lists five manual slots");
         Check(game.Hud.Menu.Press("Slot 1"), "save menu lists slot 1");
         await Observe(0.1);
+        Check(!game.Hud.Menu.HasEntry("Yes, overwrite"), "saving to an empty slot asks no confirmation");
         var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
         Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("brass_box"), "saved to slot 1 from the menu");
+        await OverwriteTest(game);
         PressKey(Key.Escape);
         await game.Wait(0.1);
         Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc resumes the game");
@@ -164,10 +167,38 @@ public partial class AutoPlay
         await TitleMenuTest(game, expectSaves: true);
     }
 
+    /// <summary>Saving over an occupied slot asks first: No keeps the old save, Yes replaces it.</summary>
+    private async Task OverwriteTest(Game game)
+    {
+        var menu = game.Hud.Menu;
+        var path = $"{SaveSystem.Directory}/{SaveSystem.ManualSlot(0)}.json";
+        // a trailing-space marker so a real rewrite is detectable even within the same second
+        var stale = FileAccess.GetFileAsString(path) + " ";
+        using (var f = FileAccess.Open(path, FileAccess.ModeFlags.Write)) f?.StoreString(stale);
+
+        Check(menu.Press("Save game"), "pause menu offers Save game again");
+        await Observe(0.1);
+        Check(menu.Press("Slot 1"), "save menu lists the occupied slot 1");
+        await Observe(0.1);
+        Check(menu.HasEntry("Yes, overwrite") && menu.HasEntry("No"), "saving over an occupied slot asks for confirmation");
+        await Shot("save_overwrite");
+        Check(menu.Press("No"), "confirmation offers No");
+        await Observe(0.1);
+        Check(menu.HasEntry("Slot 1") && FileAccess.GetFileAsString(path) == stale, "No keeps the old save and returns to the slot list");
+        Check(menu.Press("Slot 1"), "slot 1 can be chosen again");
+        await Observe(0.1);
+        Check(menu.Press("Yes, overwrite"), "confirmation offers Yes, overwrite");
+        await Observe(0.1);
+        Check(FileAccess.GetFileAsString(path) != stale && SaveSystem.Read(SaveSystem.ManualSlot(0)) != null,
+            "Yes overwrites the slot");
+        Check(menu.HasEntry("Resume"), "overwriting returns to the pause menu");
+    }
+
     /// <summary>Shows the title menu: Continue/Load are only offered once a save exists.</summary>
     private async Task TitleMenuTest(Game game, bool expectSaves)
     {
-        game.Hud.ShowTitle(true);
+        game.ShowTitle(true);
+        Check(game.Sfx.Ambient == Sound.Rain, "rain patters on the title screen");
         var menu = game.Hud.Menu.OpenTitle();
         await game.Hud.Fade(0, 0.1);
         await Shot(expectSaves ? "title_with_saves" : "title_new");
@@ -177,7 +208,8 @@ public partial class AutoPlay
         var result = await menu;
         Check(result.Action == (expectSaves ? MenuAction.Load : MenuAction.NewGame) && (result.Save != null) == expectSaves,
             "title menu returns the chosen action");
-        game.Hud.ShowTitle(false);
+        game.ShowTitle(false);
+        Check(game.Sfx.Ambient == game.Room?.Ambience?.Sound, "leaving the title hands the ambience back to the room");
     }
 
     /// <summary>Micah's notepad: always the first slot, read full screen from N or the satchel, paged back and forth.</summary>

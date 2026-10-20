@@ -51,4 +51,4 @@ Stored in `user://settings.cfg`, separate from saves (details: [Saves and settin
 - **Effects volume** (80%) and **Music volume** (70%): left click louder, right click quieter, steps of 10%.
 
 Sound and music are synthesized at startup, apart from the hotel lobby's recorded piano. The game autosaves on every room change
-and has three manual slots.
+and has five manual slots; saving over an occupied slot asks for confirmation first.

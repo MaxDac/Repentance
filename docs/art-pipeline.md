@@ -36,7 +36,9 @@ normal play for visual review. `--no-clean` / `-NoClean` preserves existing capt
 | `icon.py`, `iconfx.py` | Game icon (`assets/art/ui/icon.png`, `icon.ico`, `dist/linux/icons/hicolor`) |
 | `office.py`, `lobby.py`, `hotel.py`, `hotel_mess.py`, `speakeasy.py`, `alley.py`, `attic.py`, `street.py`, `chicago_map.py`, `convent.py`, `convent_road.py`, `club.py`, `library.py`, `motel.py`, `motel_exterior.py`, `motel_lobby.py`, `outskirts.py`, `church.py`, `mansion.py`, `act2_rooms.py`, `act3_rooms.py`, `act3_extra.py`, `expansion_act1..3.py` | Rooms, their state overlays and foreground layers |
 
-`tools/art/src/` holds the source pictures reduced into close-ups and the club's stag portrait.
+`tools/art/src/` holds the source pictures reduced into close-ups and the club's stag portrait, the public-domain 1920
+Chicago street map scan that `chicago_map.py` prints the map screen from, and the Caveat font for its handwritten pin
+tags (see [CREDITS.md](../CREDITS.md)).
 
 ## Asset contracts
 
@@ -76,3 +78,5 @@ make the hem follow the legs (padding past each leg) rather than the hip width.
 - Shared painters (the mansion and motel bed figure) must stay identical across rooms; per-room differences go in
   parameters (sheet color), not copies.
 - Passing tests is not visual approval: look at the frames (see [Testing](testing.md#seeing-what-the-game-draws)).
+- Show changed images as before/after previews in the PR description
+  ([CI and release](ci-and-release.md#pull-requests)).

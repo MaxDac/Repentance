@@ -23,7 +23,7 @@ public partial class ChurchExterior : Room
         {
             State.SetFlag("act2_church_thought");
             await Wait(0.6);
-            await Think("I couldn't turn her in. I decided that in a motel room, with my shirt half buttoned.");
+            await Think("Two men took her, the night I walked out. I didn't ask where she'd go. I didn't want to hear the answer.");
             await Think("So why can't I think of anything but her? Her voice. Her hair on the pillow. \"I can't go back there.\"");
             await Think("A man in my state ends up in one of two places. The bars know me too well. So, the other one.");
             if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);

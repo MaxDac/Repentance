@@ -1,7 +1,8 @@
 """The Aurelian, room 507: the room Eleanor had the night she vanished. Luxurious, lived in, and turned upside down.
 
 Overlays: the closet thrown open (with the wall safe), the safe door open, the brass box inside it, and the
-lockpicked desk drawer with the slip of paper."""
+lockpicked desk drawer with the slip of paper. For the First Interlude: the tidy closet opened, its safe standing half
+open, and the brass box put inside."""
 import math
 import random
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
@@ -736,7 +737,124 @@ def _closet_carcass(img):
         d.line([(fx - 2, fy - 2), (fx + 1, fy - 2)], fill=hx("6b4428"))
 
 
-def closet(img, opened=False, safe_open=False, box=False, tidy=False):
+def wall_safe(img, opened=False, box=False, ajar=False):
+    """The wall safe sunk into the back of the closet: a bolted steel door with hinges, a maker's plate, a ticked
+    combination dial scratched raw by whoever tried it, and a spoked handle. Open, it shows a shelved steel box and
+    the inside of the door with its locking bolts."""
+    X0, X1, Y0, Y1, Z = SAFE_X0, SAFE_X1, SAFE_Y0, SAFE_Y1, SAFE_Z
+    SEAM, SCRATCH, CAVITY = hx("18191c"), hx("9a9ea6"), hx("121214")
+    d = ImageDraw.Draw(img)
+    # the housing set into the wall: dark steel collar, lit along the top and left where the closet light catches it
+    R.quad(img, [(X0 - 2, Y0 - 2, Z), (X1 + 2, Y0 - 2, Z), (X1 + 2, Y1 + 2, Z), (X0 - 2, Y1 + 2, Z)], STEEL_D)
+    R.line(img, (X0 - 2, Y1 + 2, Z), (X1 + 2, Y1 + 2, Z), mul(STEEL, 0.85))
+    R.line(img, (X0 - 2, Y0 - 2, Z), (X0 - 2, Y1 + 2, Z), mul(STEEL, 0.85))
+    R.line(img, (X0 - 2, Y0 - 2, Z), (X1 + 2, Y0 - 2, Z), SEAM)
+    R.line(img, (X1 + 2, Y0 - 2, Z), (X1 + 2, Y1 + 2, Z), SEAM)
+    bolt_ys = (Y0 + 6, (Y0 + Y1) / 2, Y1 - 6)
+    if ajar:
+        # the door left standing half open on its left hinge, waiting for the box
+        R.quad(img, [(X0, Y0, Z - 0.5), (X1, Y0, Z - 0.5), (X1, Y1, Z - 0.5), (X0, Y1, Z - 0.5)], CAVITY)
+        if box:
+            R.box(img, X0 + 8, X1 - 4, Y0, Y0 + 8, Z - 0.4, Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
+            px, py = R.P((X0 + X1) / 2 + 2, Y0 + 4, Z + 0.3)
+            d.point((px, py), fill=hx("6a5020"))
+        ex, ez = X0 + 6, Z + 16
+        R.quad(img, [(X0, Y0, Z), (ex, Y0, ez), (ex, Y1, ez), (X0, Y1, Z)], STEEL, STEEL_L)
+        # the dial on the door's face, turned half away
+        cx, cy = R.P(X0 + 3, (Y0 + Y1) / 2, Z + 8.5)
+        d.ellipse([cx - 2, cy - 4, cx + 2, cy + 4], fill=STEEL_D, outline=GOLD)
+        return
+    if not opened:
+        x0, y0 = (round(v) for v in R.P(X0, Y1, Z + 0.5))
+        x1, y1 = (round(v) for v in R.P(X1, Y0, Z + 0.5))
+        d.rectangle([x0, y0, x1, y1], fill=STEEL)
+        # the door seam: lit on the top and left, shadowed underneath and on the right
+        d.line([(x0, y0), (x1, y0)], fill=STEEL_L)
+        d.line([(x0, y0), (x0, y1)], fill=STEEL_L)
+        d.line([(x0, y1), (x1, y1)], fill=SEAM)
+        d.line([(x1, y0), (x1, y1)], fill=SEAM)
+        # a recessed panel in the door, its bevel the other way round
+        d.line([(x0 + 3, y0 + 3), (x1 - 3, y0 + 3)], fill=STEEL_D)
+        d.line([(x0 + 3, y0 + 3), (x0 + 3, y1 - 3)], fill=STEEL_D)
+        d.line([(x0 + 3, y1 - 3), (x1 - 3, y1 - 3)], fill=mul(STEEL_L, 0.9))
+        d.line([(x1 - 3, y0 + 3), (x1 - 3, y1 - 3)], fill=mul(STEEL_L, 0.9))
+        # rivets at the corners
+        for rx, ry in ((x0 + 1, y0 + 1), (x1 - 1, y0 + 1), (x0 + 1, y1 - 1), (x1 - 1, y1 - 1)):
+            d.point((rx, ry), fill=STEEL_L)
+            d.point((rx + 1, ry + 1), fill=SEAM)
+        # two hinge knuckles on the left edge
+        for hy in (y0 + 5, y1 - 7):
+            d.rectangle([x0 - 2, hy, x0 - 1, hy + 3], fill=STEEL_L)
+            d.point((x0 - 1, hy + 3), fill=SEAM)
+            d.point((x0 - 2, hy), fill=mul(STEEL_L, 1.2))
+        # the maker's brass plate in the top right corner of the panel
+        cx, cy = x0 + 11, (y0 + y1) // 2 + 1
+        d.rectangle([x1 - 11, y0 + 5, x1 - 5, y0 + 6], fill=GOLD_D)
+        d.line([(x1 - 11, y0 + 5), (x1 - 5, y0 + 5)], fill=GOLD)
+        d.line([(x1 - 9, y0 + 6), (x1 - 7, y0 + 6)], fill=hx("4a3418"))
+        # scratches around the dial, gouged by somebody without the combination
+        rnd = random.Random(507)
+        for _ in range(9):
+            a = rnd.uniform(0, 2 * math.pi)
+            r0 = rnd.uniform(6, 7.5)
+            r1 = r0 + rnd.uniform(1.5, 3)
+            da = rnd.uniform(-0.25, 0.25)
+            d.line([(cx + r0 * math.cos(a), cy + r0 * math.sin(a)),
+                    (cx + r1 * math.cos(a + da), cy + r1 * math.sin(a + da))], fill=SCRATCH)
+        # the combination dial: gold rim lit at the top left, ticks round the face, an index notch, a knob
+        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=hx("1c1c20"), outline=GOLD_D)
+        d.arc([cx - 5, cy - 5, cx + 5, cy + 5], 160, 290, fill=GOLD)
+        for k in range(12):
+            a = k * math.pi / 6
+            d.point((round(cx + 3.6 * math.cos(a)), round(cy + 3.6 * math.sin(a))),
+                    fill=STEEL_L if k % 3 else hx("e8e4d8"))
+        d.polygon([(cx - 1, cy - 7), (cx + 1, cy - 7), (cx, cy - 6)], fill=GOLD)
+        d.rectangle([cx - 1, cy - 1, cx + 1, cy + 1], fill=STEEL_L)
+        d.point((cx - 1, cy - 1), fill=hx("e8e4d8"))
+        d.point((cx + 1, cy + 1), fill=STEEL_D)
+        # the spoked handle: a hub with three arms, each ending in a little knob
+        hx_, hy = x1 - 8, cy + 2
+        for a in (-90, 30, 150):
+            ex, ey = hx_ + 4 * math.cos(math.radians(a)), hy + 4 * math.sin(math.radians(a))
+            d.line([(hx_ + 1, hy + 1), (ex + 1, ey + 1)], fill=SEAM)
+            d.line([(hx_, hy), (ex, ey)], fill=GOLD_D)
+            d.point((round(ex), round(ey)), fill=GOLD)
+        d.ellipse([hx_ - 2, hy - 2, hx_ + 2, hy + 2], fill=GOLD_D, outline=GOLD)
+        d.point((hx_, hy), fill=hx("4a3418"))
+        return
+    # the open box: dark back wall, its left side and floor catching some light, a steel shelf across the middle
+    B = Z - 10
+    R.quad(img, [(X0, Y0, Z - 0.5), (X1, Y0, Z - 0.5), (X1, Y1, Z - 0.5), (X0, Y1, Z - 0.5)], CAVITY)
+    R.quad(img, [(X0, Y0, B), (X1, Y0, B), (X1, Y1, B), (X0, Y1, B)], hx("1a1b1f"))
+    R.quad(img, [(X0, Y0, Z - 0.5), (X0, Y0, B), (X0, Y1, B), (X0, Y1, Z - 0.5)], hx("2a2b31"))
+    R.quad(img, [(X0, Y0, Z - 0.5), (X1, Y0, Z - 0.5), (X1, Y0, B), (X0, Y0, B)], hx("34363d"))
+    ym = Y0 + 15
+    R.quad(img, [(X0, ym, Z - 0.5), (X1, ym, Z - 0.5), (X1, ym, B), (X0, ym, B)], hx("3c3e46"))
+    R.line(img, (X0, ym, Z - 0.5), (X1, ym, Z - 0.5), STEEL_L)
+    R.line(img, (X0, ym - 1, Z - 0.5), (X1, ym - 1, Z - 0.5), SEAM)
+    # an envelope left flat on the shelf
+    R.quad(img, [(X1 - 12, ym, B + 2), (X1 - 3, ym, B + 2), (X1 - 3, ym, B + 8), (X1 - 12, ym, B + 8)], PAPER_D)
+    # bolt sockets in the jamb on the far side of the opening
+    for by in bolt_ys:
+        R.line(img, (X1 + 1, by, Z), (X1 + 1, by + 1, Z), CAVITY)
+    if box:
+        R.box(img, X0 + 6, X1 - 6, Y0, Y0 + 8, Z - 0.4, Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
+        px, py = R.P((X0 + X1) / 2, Y0 + 4, Z + 0.3)
+        d.point((px, py), fill=hx("6a5020"))
+    # the heavy door swung open on its left hinge, seen nearly edge on: its inner face lit along the top, the locking
+    # bolts standing out of the free edge
+    DZ = Z + 22
+    R.quad(img, [(X0, Y0, Z), (X0, Y0, DZ), (X0, Y1, DZ), (X0, Y1, Z)], STEEL, STEEL_L)
+    R.line(img, (X0, Y0, DZ), (X0, Y1, DZ), SEAM)
+    for by in bolt_ys:
+        a, b = R.P(X0, by, DZ), R.P(X0, by, DZ + 3)
+        d.line([(a[0], a[1] + 1), (b[0], b[1] + 1)], fill=SEAM)
+        d.line([a, b], fill=hx("b4b8c0"))
+    for hy in (Y0 + 4, Y1 - 6):
+        R.line(img, (X0, hy, Z + 0.5), (X0, hy + 3, Z + 0.5), hx("b4b8c0"), 2)
+
+
+def closet(img, opened=False, safe_open=False, box=False, tidy=False, ajar=False):
     X0, X1, Z0, Z1 = CL_X0, CL_X1, CL_Z0, CL_Z1
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
     shadow(img, "rect", [a[0] - 2, a[1] - 3, b[0] + 10, a[1] + 3], 0.4, 3)
@@ -788,41 +906,24 @@ def closet(img, opened=False, safe_open=False, box=False, tidy=False):
     R.quad(img, [(X0 + 3, 4, Z0 + 2), (X1 - 3, 4, Z0 + 2), (X1 - 3, 100, Z0 + 2), (X0 + 3, 100, Z0 + 2)], hx("2a1a10"))
     R.line(img, (X0 + 4, 88, Z0 + 12), (X1 - 4, 88, Z0 + 12), GOLD_D, 2)
     d = ImageDraw.Draw(img)
-    for (x, col, h) in ((X0 + 10, LILAC, 40), (X1 - 12, IVORY, 36), (X0 + 24, NAVY, 42)):
+    # the night she left her dresses still hang in a row; after the old man's men, three are left on the rail
+    hanging = (((X0 + 9, LILAC, 40), (X0 + 18, NAVY, 42), (X0 + 27, IVORY, 38), (X1 - 18, LILAC, 36),
+                (X1 - 10, NAVY, 40)) if tidy else ((X0 + 10, LILAC, 40), (X1 - 12, IVORY, 36), (X0 + 24, NAVY, 42)))
+    for (x, col, h) in hanging:
         rx, ry = R.P(x, 88, Z0 + 12)
         d.line([(rx, ry - 2), (rx + 1, ry - 2), (rx, ry + 2)], fill=STEEL_L)
         d.line([(rx - 6, ry + 5), (rx, ry + 2), (rx + 6, ry + 5)], fill=STEEL_L)
         spr = dress(12, h, col, bow=False)
         _stamp(img, spr, rx - spr.width / 2 + 0.5, ry + 3)
-    # clothes yanked off their hangers, heaped at the bottom
-    hx_, hy = R.P(X0 + 4, 4, Z1 - 4)
-    heap = _crumple(dress(9, 26, (hx("8a6a8a"), hx("5a3e5a"), hx("b096b0"), hx("3e2a3e"), hx("1a101a")), bow=False)
-                    .rotate(90, expand=True), 1.2, 9)
-    _stamp(img, heap, hx_ - 1, hy - heap.height + 2)
-    slip = _crumple(dress(7, 16, IVORY, bow=False).rotate(-90, expand=True), 1, 6, 1.0)
-    _stamp(img, slip, hx_ + 16, hy - slip.height + 3)
-    # wall safe set into the back
-    R.quad(img, [(SAFE_X0 - 2, SAFE_Y0 - 2, SAFE_Z), (SAFE_X1 + 2, SAFE_Y0 - 2, SAFE_Z), (SAFE_X1 + 2, SAFE_Y1 + 2, SAFE_Z),
-                 (SAFE_X0 - 2, SAFE_Y1 + 2, SAFE_Z)], STEEL_D)
-    if not safe_open:
-        R.quad(img, [(SAFE_X0, SAFE_Y0, SAFE_Z + 0.5), (SAFE_X1, SAFE_Y0, SAFE_Z + 0.5), (SAFE_X1, SAFE_Y1, SAFE_Z + 0.5),
-                     (SAFE_X0, SAFE_Y1, SAFE_Z + 0.5)], STEEL, STEEL_L)
-        cx, cy = R.P((SAFE_X0 + SAFE_X1) / 2, (SAFE_Y0 + SAFE_Y1) / 2, SAFE_Z + 1)
-        d = ImageDraw.Draw(img)
-        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=STEEL_D, outline=GOLD)
-        d.line([(cx, cy - 4), (cx, cy - 1)], fill=GOLD)
-        hx_, hy = R.P(SAFE_X1 - 4, (SAFE_Y0 + SAFE_Y1) / 2, SAFE_Z + 1)
-        d.line([(hx_, hy - 3), (hx_, hy + 3)], fill=STEEL_L, width=2)
-    else:
-        R.quad(img, [(SAFE_X0, SAFE_Y0, SAFE_Z - 0.5), (SAFE_X1, SAFE_Y0, SAFE_Z - 0.5), (SAFE_X1, SAFE_Y1, SAFE_Z - 0.5),
-                     (SAFE_X0, SAFE_Y1, SAFE_Z - 0.5)], hx("121214"))
-        # heavy door swung open on its left hinge
-        R.quad(img, [(SAFE_X0, SAFE_Y0, SAFE_Z), (SAFE_X0, SAFE_Y0, SAFE_Z + 22), (SAFE_X0, SAFE_Y1, SAFE_Z + 22),
-                     (SAFE_X0, SAFE_Y1, SAFE_Z)], STEEL, STEEL_L)
-        if box:
-            R.box(img, SAFE_X0 + 6, SAFE_X1 - 6, SAFE_Y0, SAFE_Y0 + 8, SAFE_Z - 0.4, SAFE_Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
-            px, py = R.P((SAFE_X0 + SAFE_X1) / 2, SAFE_Y0 + 4, SAFE_Z + 0.3)
-            ImageDraw.Draw(img).point((px, py), fill=hx("6a5020"))
+    if not tidy:
+        # clothes yanked off their hangers, heaped at the bottom
+        hx_, hy = R.P(X0 + 4, 4, Z1 - 4)
+        heap = _crumple(dress(9, 26, (hx("8a6a8a"), hx("5a3e5a"), hx("b096b0"), hx("3e2a3e"), hx("1a101a")), bow=False)
+                        .rotate(90, expand=True), 1.2, 9)
+        _stamp(img, heap, hx_ - 1, hy - heap.height + 2)
+        slip = _crumple(dress(7, 16, IVORY, bow=False).rotate(-90, expand=True), 1, 6, 1.0)
+        _stamp(img, slip, hx_ + 16, hy - slip.height + 3)
+    wall_safe(img, safe_open, box, ajar)
     # both doors flung wide, their inner faces panelled like the fronts
     for x in (X0, X1):
         R.quad(img, [(x, 6, Z1), (x, 6, Z1 + 24), (x, 100, Z1 + 24), (x, 100, Z1)], DOOR_WOOD, DOOR_LINE)
@@ -1242,7 +1343,7 @@ def tidy_floor(img, bench=True):
     d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
 
 def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True,
-          phone=True):
+          phone=True, ajar=False):
     img = Image.new("RGB", (W, H))
     hotel.shell(img)
     crooked_painting(img, 0 if tidy else -6)
@@ -1250,7 +1351,7 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     hotel.door(img)
     window_night(img, tidy)
     sconces(img)
-    closet(img, closet_open, safe_open, box, tidy)
+    closet(img, closet_open, safe_open, box, tidy, ajar)
     desk(img, drawer_open, paper, tidy)
     if tidy:
         hotel.bed(img)
@@ -1336,4 +1437,14 @@ def build():
     phone.putalpha(mask)
     save(phone.crop(box), "rooms", "eleanor_room_interlude_telephone.png")
     print(f"  eleanor_room_interlude_telephone.png at {box[:2]}, size {(box[2] - box[0], box[3] - box[1])}")
+    # Puzzle 17: her closet opened on the safe she left standing half open, the box put in it, the door shut on it
+    tstates = {
+        "closet_open": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True), tpal),
+        "safe_ajar": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True, ajar=True), tpal),
+        "safe_box": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True, ajar=True, box=True), tpal),
+    }
+    for name, under in (("closet_open", room), ("safe_ajar", tstates["closet_open"]), ("safe_box", tstates["safe_ajar"])):
+        box = _bbox(under, tstates[name])
+        save(tstates[name].crop(box), "rooms", f"eleanor_room_interlude_{name}.png")
+        print(f"  eleanor_room_interlude_{name}.png at {box[:2]}")
     return px

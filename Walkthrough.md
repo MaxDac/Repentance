@@ -85,7 +85,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Eleanor's room at the hotel (room 507)
 
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
-- There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
+- There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it. It is no hotel lock:
+  Eleanor had a locksmith fit it, and it is damn hard; it snaps one of his picks before it gives (the lockpick
+  stays in the inventory).
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
   "Those who sat at His table. The days of the month He was born. The day He rested."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
@@ -313,29 +315,37 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    the room is in her name, the hotel keeps a guest's things, a hotel safe can't be forced quietly, and if they
    catch her they search her first. The riddles keep Theodore's men out; somebody sent there on purpose, with a
    whole night, gets in.
-2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the
-   sacramental wine and sends her to the convent. Before Sal drives her, she asks Tony to hold the switch: if the
+2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He sends her to the convent
+   for what he has seen of it, not for any debt: funny business, Father Caleb driving young girls up there after
+   dark and going home alone, a padre's racket Tony doesn't want to know about. Whatever it is, it's the one place
+   in town the Club won't touch. He has no line to the sisters: she is to ring the bell and keep quiet. Micah's
+   narration adds that Eleanor knew where some of those girls had come from: she had brought a few to the Club
+   herself. Micah hears all of this from her at the motel, so his brother's name is in it before Act 2. Before Sal drives her, she asks Tony to hold the switch: if the
    Club gets her back, he calls the Tribune city desk (not the cops: half of them drink at his bar) and says
    "Room 507, the Aurelian. The drawer, then the safe." He agrees: it is leverage on the old man. Micah's
    narration adds that she didn't know, telling him at the motel, that he had already emptied the safe (the
    Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
-3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
+3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) first takes her for another of the girls who
+   come to the door at night; then she knows the face and the perfume and calls her "a Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
 4. **Convent cell, that night.** After a knock, Agatha comes into the cell past midnight. She sincerely believes
    she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
    she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
    the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
    long as she wanted. She walks out again before the morning. The choice is saved:
-   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tells Agatha what she is
-     running from: the Club, the rites, and her own part in them. Agatha, moved, reaches for her; Eleanor stops her
-     gently. Ashamed, Agatha turns it round on her and puts her out at first light.
+   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tries to tell Agatha what
+     she is running from. Ashamed and frightened, she stammers out only that there is a club and that she is on its
+     stage, painted, before Agatha cuts in ("I know... I know enough of that diabolical club..."). No other detail of
+     the Club is given here. Agatha reaches for her; Eleanor stops her gently. Ashamed, Agatha turns it round on her
+     and puts her out at first light.
    - **Seduce her**: Agatha goes along with it at first; at the last moment she turns back, cursing Eleanor for a
      demon, and leaves. Nothing is shown.
    The Club's strings replace the convent piano from the knock until Agatha walks out.
    Eleanor leaves the convent the next morning.
 
 - **Puzzle 17 - The brass box:** she builds the insurance Micah finds later, and locks it away herself. Her lines
-  name its reader as whoever the paper sends, never Micah.
+  name its reader as whoever the paper sends, never Micah. She arrives with two things in her satchel: a blank slip
+  of hotel paper and the only key to the lock she had a locksmith fit to the desk drawer.
   - Hand on the vanity: the open brass box (the card, the matchbook, the bluing already in it) and the bare paper
     water flower, the word inked inside.
   - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
@@ -343,9 +353,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Look on the clothes shows a torn red hem; hand pulls a length of red thread from it.
   - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
     Without the thread, it won't stay wrapped.
-  - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
-  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
-    for the drawer, and the door for all three; at the door she names the first step still to do.
+  - Join the flower and the box: the packed box.
+  - Hand on the closet opens it: her dresses in a row and, at the back, the safe standing half open. Use the packed
+    box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
+    shuts it and spins the dial. Hand on the open closet shuts it again (optional); she won't shut it on the box
+    while the safe still stands open.
+  - Use the blank slip on the writing desk: she writes the safe's combination as the three references Micah finds.
+    Use it on the drawer to put it in, then her key on the drawer to lock it (she keeps the key).
+  - Wrong joins and wrong items on the closet, safe or drawer get a hint in her voice. The drawer waits for the
+    safe, the call for the locked drawer, and the door for all three; at the door she names the first step still
+    to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
    hears him arguing with the clerk downstairs. From the window she sees him in the alley below, on a fruit crate,
@@ -381,21 +398,46 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   for the character) while Eleanor is in the bed, under the sheet. Micah's Act 2 satchel is already back.
 - They say this was probably a mistake and that they should never see each other again. Micah says he won't
   tell anyone where they can find her, and that he will give up the job.
+- Micah asks what she'll do now and where she'll go. She will get away: she has friends, and money enough; he
+  doesn't have to worry. The narration says Micah has a hunch it isn't the truth, but he is too ashamed to ask
+  more, too ashamed to be in that room at all, and she knows it; he can see it in her eyes. So he leaves.
 - Eleanor remains in bed against the pillows, covered by the white sheet. She does not rise; her lips move while
   she talks.
-  The scene then fades to Micah's office, the next morning.
+  The scene then fades to black: "Days later" appears for 3 seconds, then Micah's office fades in.
 
-#### Office, before the cathedral
+#### Office, days later
 
 - A bottle of whiskey and a cup are in the office. Micah raises the cup, drinks, and puts it down.
+- Micah's thoughts go back to the motel: he knew her answer was a lie and let it stand, too ashamed to ask; and
+  every night since he has wanted her back, not saved but wanted.
 - Micah chooses whether to take his wedding ring or leave it in the office; the original decision is saved.
 - A left-behind ring remains visible and can be collected on a later office visit without changing the original decision.
-- After the choice, Micah leaves for the cathedral steps.
+- After the choice, Micah decides to go back to the motel to find out where she went, and the scene moves to the
+  motel's back alley.
+
+#### Behind the motel, days later
+
+- The drop ladder is pulled up out of reach again, as before Micah hooked it down with the umbrella (the crate
+  stays under it). Micah won't climb up to her room: "Up the fire escape like a second-story man again? Nix.
+  Better brace the joe at the desk."
+- The fire escape and the main road are refused until the clerk has talked; the motel door leads to the lobby.
+
+#### Motel lobby, days later
+
+- Micah asks the clerk whether the woman is still upstairs. Gone, the clerk says: checked out.
+- Two rounds of questions (where she was headed, who picked her up, whether she paid or left a note) only make the
+  clerk more tense; he holds on to the register and tells Micah to beat it. Micah realises something happened.
+- "Nice tie, pal. Your wife's present?" "...What?" Micah grabs the tie and hauls the clerk's face down onto the
+  counter (new `micah_tie_pull` and `clerk_tie_pulled` sprites) and threatens him.
+- The clerk spills: two men took her, the same night, not an hour after Micah left; a big one and a young one. He
+  knows nothing else. Micah lets go, and walks out to the cathedral steps.
+- A notepad page, *The motel again*, records it.
 
 #### Outside of the church (cathedral steps)
 
 - Existing location.
-- Micah thinks that, even though he couldn't turn her in, he can't think of anything else but her.
+- Micah thinks that two men took her the night he walked out, and he didn't even ask where she'd go; still he
+  can't think of anything else but her.
 - After this thought, he walks up to the doors and enters the church.
 
 #### Inside the church
@@ -433,10 +475,13 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   connected triquetra with the motif plates: select Celtic traditions, whose index lists **A. R. Bell**.
   The author listings identify **Rites of the Old Isles, shelf C-17**. Select that entry.
   The volume is behind locked glass; Micah cannot simply take it from the shelves or ladder.
-- Micah has to threaten the librarian with the revolver (use the revolver on him; before asking about the symbol
-  Micah refuses to do it, and before the lookup he needs a precise title). Micah aims the revolver at him while
-  he requests the identified book. The librarian confirms that it describes ancient Celtic rituals and gives it
-  to him if he goes away. Micah stays in the library; the shaken librarian won't say another word, and the
+- Micah has to intimidate the librarian (before asking about the symbol Micah refuses to do it, and before the
+  lookup he needs a precise title). Either way he requests the identified book, the librarian confirms that it
+  describes ancient Celtic rituals and gives it to him if he goes away:
+  - **Hand on the librarian** (canonical): Micah steps in and grabs him by the collar, lifting him onto his toes
+    (one animation for both, the librarian actor hidden), holds him through the request, then lets him go.
+  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
+- Both routes set the same flags. Micah stays in the library; the shaken librarian won't say another word, and the
   player leaves through the exit to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -519,15 +564,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
   return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
-  Micah does not suspect Caleb of being involved. He reasons his way to him: Eleanor already found refuge at the
-  convent, and maybe not for the first time; the convent belongs to the Church, even though Mother Superior runs it
-  and Caleb runs the parish; so Caleb might know something. Both reasons must be offered before the choice
-  "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
-  in his sacristy; the established refuge is the convent.
+  Micah has a concrete lead on his brother from Eleanor's story at the motel: Tony told her Father Caleb drives
+  girls up to the convent after dark, and that's the one door the Club won't knock on. Caleb first brushes it off
+  (he drives the sisters' groceries and says their Mass). Micah's second reason: the convent belongs to the Church,
+  even though Mother Superior runs it and Caleb runs the parish; so Caleb might know something. Both reasons must
+  be offered before the choice "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb
+  hid Eleanor in his sacristy; the established refuge is the convent.
 - After Micah's plea, Caleb tells the truth about the Club. It runs a trafficking ring to keep its Thursday
   "spectacles" supplied with fresh girls: farm girls and immigrant girls taken off the trains at Union Station with
-  promises of work. Some escape and find the convent door; the sisters bring them to Caleb, and together they hide
-  them (new names, a ticket to a parish out of state). Caleb can't stop the traffic, so he keeps his mouth shut,
+  promises of work. Some escape to Caleb's church door; he drives them up to the convent after dark (the funny
+  business Tony saw), and together with the sisters he hides them (new names, a ticket to a parish out of state). Caleb can't stop the traffic, so he keeps his mouth shut,
   and in exchange the Club leaves the convent alone; if he talked, they would simply take other girls and come for
   the ones behind the convent walls. Micah calls him a hypocrite: he preaches repentance, and he could have gone
   to the press. Caleb half-concedes ("I confess it every week. It doesn't get lighter.").
@@ -550,14 +596,14 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   use the revolver again to threaten her.
   The sister will say "Are you crazy, sir?!"
   Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
-  Micah's madness is escalating with his sin (the librarian at gunpoint, now a nun in her own convent; later he
+  Micah's madness is escalating with his sin (the librarian roughed up, now a nun in her own convent; later he
   shoots the mobster and kills the old man). With the gun on her, Agatha's own repentance begins: she confesses
   that she went to Eleanor's cell past midnight and called it charity, that it was all her fault and that she
   failed her. Both versions keep "She's a performer." and send Micah to Harrington senior.
   - If Eleanor seduced her, Agatha still calls Eleanor a Jezebel ("She nearly had me fooled, the whore." before
     she breaks, then "Jezebel she is. But it was my fault.").
-  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits she
-    turned it round on Eleanor and put her out at first light, because Eleanor stopped her.
+  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits Eleanor tried to
+    tell her and she wouldn't let her finish, and that she turned it round on Eleanor and put her out at first light, because Eleanor stopped her.
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
   On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
   name - I'd start there."

@@ -132,10 +132,12 @@ BARTENDER: Only for people I like. What do you want?
     BARTENDER: ...Yeah. I figured you'd say that.
 + [(Say nothing.)]
     BARTENDER: Fine. The less I know, the longer I live.
-- BARTENDER: There's a convent up on the North Side. I sell the sisters their sacramental wine, and they don't ask where it comes from.
-BARTENDER: The Mother Superior owes me. Nobody from that Club goes near those nuns. Not even them.
+- BARTENDER: The convent. Up on the North Side, behind the iron spikes.
+BARTENDER: Funny business up there, see? Father Caleb pulls up after dark with a flivver full of skirts, young ones, and drives home alone. What kind of racket a padre's runnin', I don't wanna know.
+BARTENDER: But it's the one joint in this town the Club won't touch. They'll turn every flop and speak inside out lookin' for you. Not them walls.
+THOUGHT: She told me she knew where some of those girls had come from. She'd brought a few of them to the Club herself.
 ELEANOR: A convent. Me.
-BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you.
+BARTENDER: You want to stay alive, or you want to stay you? Pick one. Sal'll drive you. Ring the bell and keep your trap shut.
 ELEANOR: One more thing, Tony. If the Club ever gets me back, you'll hear. You hear everything.
 BARTENDER: And?
 ELEANOR: Then you pick up a telephone. Not the cops; half of them drink here. The Tribune city desk.
@@ -148,8 +150,8 @@ THOUGHT: She said Tony wouldn't take her money. That frightened her more than an
 -> END
 
 === interlude_agatha ===
-NUN: So. Tony's parcel. He said a lady. He didn't say what kind.
-NUN: I know that face. I know that perfume. Another Jezebel from that hideous Club, come to hide her paint behind our walls.
+NUN: Another one at the door after Compline. They always come at night, the poor lambs. Let me look at you.
+NUN: ...No. I know that face. I know that perfume. A Jezebel from that hideous Club, come to hide her paint behind our walls.
 + [I'm not here to sin, Sister. I'm here to hide.]
     ~ set_flag("interlude_agatha_sorry")
     NUN: Every sinner says that. It's the oldest prayer there is.
@@ -186,11 +188,10 @@ THOUGHT: And she saw what it was worth. One night, the way the Club had taught h
 THOUGHT: She'd bought every door she'd ever had that way. This one would have been the easiest.
 + [(Tell her the truth. All of it.)]
     ~ set_flag("eleanor_refused_abbess")
-    THOUGHT: She told me she put the thought away like a knife back in a drawer. Then she told Agatha what she was running from.
-    ELEANOR: There's a club on Hubbard Street, Mother. Judges, aldermen, my husband's father. They dress up in robes and antlers and call it the old religion.
-    ELEANOR: I'm the one on the stage. Painted, smiling, whatever they want. And when they wanted new girls, I brought them. I told them it was a party.
-    ELEANOR: I'm not sorry enough yet. I'd like to be. That's all I've got.
-    NUN: Child... oh, child.
+    THOUGHT: She told me she put the thought away like a knife back in a drawer. Then she tried to tell Agatha what she was running from. It wouldn't come.
+    ELEANOR: Mother, I... there's a... a club. In the city. I...
+    ELEANOR: They put me on a stage. Painted. I'm... I'm the one they paint, and then I...
+    NUN: I know... I know enough of that diabolical club, child. Hush. You needn't say another word.
     THOUGHT: Agatha took her hand. Then her face, both hands, the way you'd hold something you were afraid to drop. And she leaned in.
     ELEANOR: No, Mother. Not you too.
     NUN: I...
@@ -570,6 +571,40 @@ THOUGHT: Somebody upstairs, then. And somebody else had told him to keep her the
 CLERK: I told you, mister. Nobody goes up. Go home.
 -> END
 
+// Act 2, days after the motel night: Micah comes back to make sure Eleanor got away, and the clerk won't say how.
+=== motel_clerk_return ===
+{has_flag("motel_return_done"): -> motel_clerk_return.again}
+CLERK: You again. Rooms are still a dollar, and you still ain't getting one.
+MICAH: The dame upstairs. First floor, the room over the alley. She still there?
+CLERK: ...
+CLERK: Gone. Checked out.
+THOUGHT: Checked out. Nobody checks out of a joint like this. They just stop paying.
+* [She say where she was headed?]
+* [She leave in a cab? Somebody pick her up?]
+- CLERK: I don't know nothing about it, mister. I keep the book. I don't keep track.
+THOUGHT: His hands have found the register again. He's holding on to it like a life raft.
+* [A dame doesn't just evaporate. Did she pay up? Leave a note?]
+* [You saw her go. Who was she with?]
+- CLERK: I told you. Gone. That's all. Now beat it, before... just beat it.
+THOUGHT: Before what? He isn't scared of me. He's scared of something that already happened.
+MICAH: Nice tie, pal. Your wife's present?
+CLERK: ...What?
+CUE: tie
+CLERK: Agh! Lemme go!
+MICAH: Listen close, pal, 'cause I'm only asking once more. I left her upstairs. What happened to her?
+MICAH: Sing, or you'll be eating this counter till Friday, and Moretti's boys can have what's left of you.
+CLERK: Two men! Two men took her! The same night you was here. Not an hour after you blew.
+MICAH: What men? Whose?
+CLERK: I don't know! A big one and a young one. They didn't sign the book, mister. They went up, they came down with her, they drove off.
+CLERK: That's all I know. I swear on my mother. Nothing else.
+CUE: release
+~ set_flag("motel_return_done")
+THOUGHT: Two men, the night I left. While I was walking home feeling sorry for myself, they were walking her down those stairs.
+-> END
+= again
+CLERK: I told you everything, mister. Two men. Now please. Go.
+-> END
+
 === eleanor_fire_escape_opening ===
 // End of Act 1: the scene cuts on her question; eleanor_fire_escape repeats it after the First Interlude.
 ELEANOR: Not many fellas climb a fire escape in the rain, mister. Were you looking for someone?
@@ -626,6 +661,12 @@ MICAH: I won't tell anyone where they can find you. Not Teddy, not Moretti, not 
 MICAH: And I'm giving up the job. Teddy can keep his twenty a day.
 ELEANOR: He'll hate you for it.
 MICAH: He'll have to get in line.
+MICAH: What'll you do now? Where'll you go?
+ELEANOR: Away. Out of Chicago, before the week's out.
+ELEANOR: I have friends, Micah. And money enough to reach them. You don't have to worry about me.
+THOUGHT: Friends. Money. I have a hunch neither one is true.
+THOUGHT: I should ask which friends, and where, and how much. I don't. I'm too ashamed to ask. Too ashamed to be standing in this room at all.
+THOUGHT: And she knows it. I can see it in her eyes. She's letting me off the hook, and I let her.
 ELEANOR: Goodbye, Micah Jones.
 MICAH: Goodbye, Eleanor.
 -> END
@@ -719,6 +760,7 @@ CALEB: Six years. You look like a man who hasn't slept for most of them.
 MICAH: I didn't come to confess. I came to talk. There's a difference, isn't there?
 CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
 MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
+MICAH: The same night I walked out on her, two men walked her out of that flophouse. I didn't even ask where she'd go.
 MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
 MICAH: Right now, Caleb... I'm too far gone to be saved.
 CALEB: That's crap, Micah.
@@ -799,6 +841,18 @@ LIBRARIAN: Y-yes. Bell's book. C-17. A rare book. Someone asked for it just last
 LIBRARIAN: Take it. Take it and go, and please don't come back.
 ~ give_item("book")
 MICAH: Pleasure doing business. Late fees are on me.
+-> END
+
+=== librarian_collar ===
+MICAH: Let's try that again. Closer, this time.
+LIBRARIAN: Unhand me! This is a library!
+MICAH: Then keep your voice down. Bell. "Rites of the Old Isles." C-17. The book about this knot.
+LIBRARIAN: A triquetra. C-Celtic. Old. Older than the saints in Ireland.
+LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
+LIBRARIAN: Y-yes. Bell's book. C-17. A rare book. Someone asked for it just last month.
+LIBRARIAN: Let go of me and it's yours. Take it and go, and please don't come back.
+~ give_item("book")
+MICAH: See? We're getting along fine.
 -> END
 
 // ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
@@ -883,10 +937,9 @@ CALEB: Micah. Twice in one week. People will start to talk.
 MICAH: There's a club on Hubbard. No sign on the door, a man in a robe at the bell. They have Eleanor.
 CALEB: A club? Micah, what would a priest know about clubs?
 - (opts)
-* (hid) [Before they took her, Eleanor was hiding at the convent.]
-    MICAH: Tony at the Blue Lantern sent her to the sisters, and they didn't ask a single question.
-    MICAH: Doors don't open that easily the first time. Maybe she'd been there before.
-    CALEB: The sisters open their door to anybody who knocks. That's what the door is for.
+* (hid) [Tony told Eleanor you drive girls up to the convent after dark.]
+    MICAH: That's where he sent her to hide. The one door the Club won't knock on, he said. And you're the one with the car.
+    CALEB: I drive the sisters' groceries, and I drive up to say their Mass. That's all a priest's car is for.
     -> opts
 * (roof) [The convent answers to the Church. And you're the Church on this side of town. #short: The convent answers to the Church. And you're the Church.]
     CALEB: The convent is Mother Superior's house, not mine. I say Mass for the sisters. I don't keep their books.
@@ -897,7 +950,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     CALEB: I don't know anything about her. But I hear things. A priest always does.
     CALEB: That Club keeps its Thursdays. Spectacles, they call them. And spectacles need new faces. Fresh ones.
     CALEB: Girls off the trains at Union Station. Farm girls, girls off the boat. Somebody meets them with a smile and the promise of work in a nice house.
-    CALEB: Performers, the Club calls them afterwards. Some of them get away. They find the convent door, and the sisters bring them to me.
+    CALEB: Performers, the Club calls them afterwards. Some of them get away, to my church door. I drive them up to the convent after dark, and the sisters keep them till it's safe.
     CALEB: We hide them. A new name, a ticket, a parish in Milwaukee or a farm in Iowa that doesn't ask. Fourteen girls, so far.
     MICAH: Fourteen. And the ones who don't get away?
     CALEB: ...
@@ -1011,7 +1064,7 @@ MICAH: Yeah. You can say that, sister. Where's Eleanor? What goes on at that clu
 {
 - has_flag("eleanor_refused_abbess"):
     NUN: Put that thing down. Please. I'll tell you. God knows I owe her that much.
-    NUN: She's a performer. That's what they call them, at that Club. She told me so herself, in her cell. All of it, what they made her do, what she did.
+    NUN: She's a performer. That's what they call them, at that Club. She tried to tell me, in her cell. I wouldn't let her finish. I knew enough.
     NUN: And I'd gone to that cell past midnight, with a candle, and called it charity. When she stopped me, I turned it round on her and put her out at first light.
     NUN: It was my fault, Mr. Jones. All of it. She came to this house for shelter, and I failed her.
 - else:

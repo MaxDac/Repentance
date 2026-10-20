@@ -811,6 +811,57 @@ def build_show_photo():
     action_strip("micah_pocket_photo", back, [0.15, 0.15, 0.2, 0.3, 0.2], anchor=(FW / 2, FH - 3))
 
 
+# Act 2, back at the motel desk: Micah, facing right across the counter, reaches for the clerk's tie, closes his fist
+# on it and hauls it down to the desktop. (near arm (elbow, wrist, hand), lean, seconds); the last frame is held.
+TIE_REACH = ("pts", (0.17, 0.31, 0.13), (0.07, 0.24, 0.28), (0.05, 0.225, 0.32))
+TIE_GRAB = ("pts", (0.17, 0.31, 0.12), (0.07, 0.235, 0.27), (0.05, 0.22, 0.305))
+TIE_YANK = ("pts", (0.17, 0.38, 0.03), (0.07, 0.32, 0.17), (0.05, 0.305, 0.205))
+TIE_PULL_KEYS = [
+    (("swing", 4, 6, 10), 0.0, 0.15),
+    (TIE_REACH, 5.0, 0.18),
+    (TIE_GRAB, 5.0, 0.22),
+    (TIE_YANK, -4.0, 0.35),
+]
+# The clerk, facing right (the lobby flips him to face Micah): yanked forward by the tie and down onto the desktop,
+# face first, his hands slapping down either side. The counter hides him from the hips down, so those frames are cut
+# off below the desktop (CLERK_CUT rows above the feet) and the lobby draws him over it while he's down there.
+CLERK_YANKED = [(64, 56), (77, 38), (87, 27), (65, 74), (66, 91), (76, 47), (86, 50)]
+CLERK_DOWN = [(64, 56), (79, 52), (90, 55), (65, 74), (66, 91), (78, 60), (88, 60)]
+CLERK_CUT = 34
+
+
+def tie_pull_strips():
+    from PIL import Image
+    frames, seconds = [], []
+    for i, (arm, lean, duration) in enumerate(TIE_PULL_KEYS):
+        marks = {}
+        ps = pose(90, arms={1: arm, -1: ("side", 0, 0, 0)}, lean=lean, front_arms=(1,) if arm[0] == "pts" else (),
+                  marks=marks)
+        img = figure(MICAH, ps, FW, FH)
+        if i >= 2:  # the clerk's tie, balled in his fist and pulled taut towards the clerk
+            hx_, hy_ = (math.floor(v) for v in marks["hand1"])
+            for dx in range(1, min(6, img.width - 1 - hx_)):
+                img.putpixel((hx_ + dx, hy_ - (dx > 3)), (106, 44, 34, 255) if dx % 3 else (138, 64, 48, 255))
+        frames.append((img, (FW / 2, 18)))
+        seconds.append(duration)
+    action_strip("micah_tie_pull", frames, seconds, anchor=(FW / 2, FH - 3))
+
+    scaled = dict(CLERK, h=CLERK["h"] * SCALE)
+    stand = Image.new("RGBA", (192, FH))
+    stand.alpha_composite(figure(CLERK, pose(90, arms=_arms("down"), lean=4.0), FW, FH), (64, 0))
+    clip = []
+    face = profile_head(CLERK)
+    bent = [action_figure(scaled, k, head_sprite=face) for k in (CLERK_YANKED, CLERK_DOWN)]
+    for img, head in [(stand, (96, 18))] + bent:
+        img = img.copy()
+        px = img.load()
+        for y in range(FH - 3 - CLERK_CUT, FH):
+            for x in range(img.width):
+                px[x, y] = (0, 0, 0, 0)
+        clip.append((img, head))
+    action_strip("clerk_tie_pulled", clip, [0.15, 0.12, 0.3], anchor=(96, FH - 3))
+
+
 # Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,
 # then dips her fingers in the compact and lifts a pinch of powder to her nose: (hand height, reach, powder, nod, s).
 POWDER_KEYS = [
@@ -1186,6 +1237,63 @@ def kiss_strip():
     action_strip("micah_kiss", frames, seconds, anchor=(anchor_x, FH - 3))
 
 
+# In the library, Micah hauls the librarian up by the collar: stopped facing right COLLAR_GAP pixels short of him (the
+# librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, grabs the shirt collar under the bow tie with
+# his near hand and pulls him up onto his toes; the librarian turns to him, straightens out of his stoop and lifts his
+# hands. micah_collar ends on the held grab (kept through the dialogue); micah_collar_release lets go and steps back,
+# ending on both idle sprites exactly where they stood. Played on the player with the librarian actor hidden.
+# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, lift, his arms or None,
+# seconds)
+COLLAR_GAP, COLLAR_RISE, COLLAR_W = 46, 2, 136
+_LIB_IDLE = dict(arms=_arms("fold"), lean=9.0, nod=0.006)
+_GRIP_REACH = ((0.13, 0.31, 0.13), (0.1, 0.25, 0.25), (0.075, 0.235, 0.285))
+_GRIP = ((0.13, 0.30, 0.15), (0.09, 0.24, 0.27), (0.065, 0.225, 0.305))
+_HANDS_UP = ((0.17, 0.36, 0.02), (0.18, 0.25, 0.06), (0.175, 0.22, 0.07))
+_HANDS_HALF = ((0.16, 0.38, 0.04), (0.13, 0.32, 0.1), (0.12, 0.3, 0.11))
+COLLAR_KEYS = [
+    (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
+    (8, 80, 6.0, _GRIP_REACH, 50, 6.0, 0, _HANDS_HALF, 0.15),
+    (16, 90, 8.0, _GRIP, 70, 1.0, 2, _HANDS_UP, 0.15),
+    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.6),
+]
+COLLAR_RELEASE_KEYS = [
+    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.2),
+    (12, 80, 2.0, None, 60, 3.0, 0, _HANDS_HALF, 0.2),
+    (6, 70, 0.0, None, 45, 7.0, 0, None, 0.25),
+    (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
+]
+
+
+def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, lift, lib_arms):
+    from PIL import Image
+    mx0 = 20
+    anchor_x = mx0 + FW // 2
+    lx = anchor_x + COLLAR_GAP - NPC_W // 2
+    img = Image.new("RGBA", (COLLAR_W, FH))
+    if lib_arms is None:
+        lib_pose = pose(lib_yaw, **dict(_LIB_IDLE, lean=lib_lean))
+    else:
+        near, far = ("pts",) + lib_arms, ("pts",) + tuple((-x, y, z) for x, y, z in lib_arms)
+        # on his toes: heels up, feet pointing down
+        legs = {1: (2, 2, -35 if lift else 0), -1: (-2, 4, -35 if lift else -6)} if lift else None
+        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004,
+                        **({"legs": legs} if legs else {}))
+    lib = figure(LIBRARIAN, lib_pose, NPC_W, FH).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    img.alpha_composite(lib, (lx, -COLLAR_RISE - lift))
+    ps = pose(yaw, lean=lean)
+    if arm:
+        ps["arms"] = {1: ("pts",) + arm, -1: ("side", 0, 0, 0)}
+    img.alpha_composite(figure(MICAH, ps, FW, FH), (mx0 + step, 0))
+    return img, (anchor_x + step, 18)
+
+
+def collar_strips():
+    anchor = (20 + FW // 2, FH - 3)
+    for name, keys in (("micah_collar", COLLAR_KEYS), ("micah_collar_release", COLLAR_RELEASE_KEYS)):
+        frames = [collar_frame(*k[:-1]) for k in keys]
+        action_strip(name, frames, [k[-1] for k in keys], anchor=anchor)
+
+
 def inmate_seated_strip(spec, name):
     """seated_frame's pose (facing right, the same seat as micah_inmate_seated) with action-strip metadata."""
     ps = pose(90, legs={1: (88, 92, 0), -1: (86, 90, 0)}, arms={1: ("swing", 36, 4, 70), -1: ("swing", 30, 4, 74)})
@@ -1281,6 +1389,7 @@ def build():
     build_drinking()
     build_gin()
     build_show_photo()
+    tie_pull_strips()
     build_smoke()
     for name, spec, arms, *extra in NPCS:
         npc_strip(spec, name, arms, **(extra[0] if extra else {}))
@@ -1292,6 +1401,7 @@ def build():
     eleanor_drink_strip()
     eleanor_phone_strips()
     kiss_strip()
+    collar_strips()
     build_act3()
     build_storm()
 

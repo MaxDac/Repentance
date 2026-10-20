@@ -468,6 +468,8 @@ public partial class AutoPlay
         _prefer = new[] { "Leave the wedding ring" };
         await game.ChangeRoom("office", "act2");
         Check(gs.HasFlag("office_door_open"), "Micah opens the office door himself on his way out at the start of Act 2");
+        Check(game.Room?.Name == "MotelAlley" && gs.HasFlag("motel_return_done"), "from the office back to the motel, the clerk already asked");
+        await game.Perform(Verb.Walk, "street");
         Check(gs.HasFlag("ring_left_act2") && !gs.HasFlag("ring_taken_act2") && !gs.HasItem("faith_ring"),
             "leaving the ring records the original choice without granting it");
         Check(_crossOffers == offers, "initial confession never offers the cross even when ring was left");

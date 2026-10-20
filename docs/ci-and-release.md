@@ -1,5 +1,19 @@
 # CI and release
 
+## Pull requests
+
+The description lists the changes and the local suites run. Every PR that adds or changes an image (generated art,
+sprites, UI, icons) also shows it:
+
+- Before and after: the image from `main` (`git show main:<path>`) and from the branch; new images need only after.
+- Scale small pixel art up 3-4x with nearest-neighbour so it stays crisp. For overlays and sprites, preview them as
+  they appear in game: composited onto their room, or a recorded frame
+  ([Testing](testing.md#seeing-what-the-game-draws)).
+- Attach them with GitHub CLI 2.99 or later. Reference the local files in the body and pass the same paths, and `gh`
+  uploads them and rewrites the references:
+  `gh pr edit <pr> --body-file body.md --attach ./before.png --attach ./after.png`.
+- Keep preview files out of the repository.
+
 ## CI (`.github/workflows/ci.yml`)
 
 Runs on every pull request (a newer push cancels the older run) and every push to `main`. Godot 4.7.2 .NET and .NET

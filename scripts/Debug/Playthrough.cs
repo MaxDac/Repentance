@@ -196,11 +196,11 @@ public sealed partial class Playthrough : Harness
         }
         else
         {
-            _game.Hud.ShowTitle(true);
+            _game.ShowTitle(true);
             await _game.Hud.Fade(0, 0.8);
             await _game.Wait(3);
             await _game.Hud.Fade(1, 0.5);
-            _game.Hud.ShowTitle(false);
+            _game.ShowTitle(false);
         }
         await _game.NewGame();
         await WaitIdle();

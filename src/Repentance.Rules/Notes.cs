@@ -84,6 +84,9 @@ public static class Notes
             L("She can't go back. I promised I'd never tell where she went.")),
 
         // ---------------------------------------------------------------- Act 2
+        N("taken", "The motel again", "motel_return_done",
+            L("Back at the flophouse, days later. Her room's empty."),
+            L("Two men took her the night I left: a big one and a young one. The clerk knows nothing else.")),
         N("librarian", "The library", "librarian_refused",
             L("The librarian knew the knot on sight and showed me the door."),
             L("Find the book another way. The card catalogue, maybe.")),
@@ -100,7 +103,7 @@ public static class Notes
             L("The Master of Ceremonies, in his robes: \"She is with us... thanks to your efforts.\""),
             L("Then his brute threw me out on the pavement.")),
         N("caleb_convent", "Caleb", "caleb_club",
-            L("Eleanor hid at the convent once. The convent answers to the Church. Caleb might know."),
+            L("Tony saw Caleb drive girls up to the convent after dark. The convent answers to the Church. Caleb might know."),
             L("The Club traffics girls off the trains for its Thursdays. Caleb and the sisters hide the ones who run, and he keeps quiet so the Club leaves them be. Hypocrite."),
             L("Ask at the convent.")),
         N("harrington_senior", "The sister again", "nun_threatened",
@@ -168,7 +171,8 @@ public static class Notes
         (new[] { "convent_road", "convent_corridor" }, new[] { "alley_done" }),
         (new[] { "convent_cell" }, new[] { "nun_talked" }),
         (new[] { "motel_alley", "motel_lobby", "motel_fire_escape" }, new[] { "got_mirror", "convent_dead_end_done" }),
-        (new[] { "motel_night", "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "eleanor_found" }),
+        (new[] { "motel_night" }, new[] { "eleanor_found" }),
+        (new[] { "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "motel_return_done" }),
         (new[] { "club_hall" }, new[] { "librarian_refused", "catalogue_identified", "read_book", "card_decoded" }),
         (new[] { "street", "rose_house" }, new[] { "club_out" }),
         (new[] { "newspaper_morgue" }, new[] { "caleb_club", "nun_threatened" }),

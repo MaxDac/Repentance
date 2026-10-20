@@ -1031,7 +1031,8 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     fs = sp
     vol = col.get("hair_vol", {"short": 0.9, "bald": 0.2, "long": 3.0, "bob": 2.2, "slick": 0.5, "cropped": 0.3}[style])
     cropped = style == "cropped"  # short back and sides: close to the skull, ears and nape left bare
-    back_off, back_w = (0.1 + 0.004 * H, 0.003 * H) if cropped else (0.25 + 0.012 * H, 0.008 * H)
+    # cropped hair still reaches past the back of the skull, so no skin edge shows behind it in profile
+    back_off, back_w = (0.1 + 0.004 * H, 0.012 * H) if cropped else (0.25 + 0.012 * H, 0.008 * H)
     m, nx, ny, nz = c.ellipse((hx_ - back_off * fs, hy_ - 0.6), hrx + vol + back_w * abs(fs), hry + vol * 0.8)
     u = np.clip((c.X - hx_) / max(hrx, 1), -1, 1)
     front = hy_ - hry * (0.5 if style in ("long", "bob") else 0.64) + (0.5 if style == "slick" else 0)

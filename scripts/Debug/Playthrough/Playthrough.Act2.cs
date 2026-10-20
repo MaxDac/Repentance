@@ -20,6 +20,7 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("interlude1") && _game.Player.Character == "eleanor_play", "the player is Eleanor");
             Check(_game.Room?.GetNode<Sprite2D>("Background").Texture.ResourcePath.EndsWith("eleanor_room_interlude.png") == true,
                 "Room 507 is still in order the night she leaves");
+            Check(Gs.HasItem("eleanor_slip") && Gs.HasItem("eleanor_key"), "Eleanor brings a blank slip and her drawer key");
             // Puzzle 17: the brass box, the flower, the riddle and the thread, packed and locked in the closet safe
             await Do(Verb.Hand, "vanity");
             Check(Gs.HasItem("eleanor_box") && Gs.HasItem("pellet"), "the open brass box and the bare paper flower");
@@ -33,9 +34,20 @@ public sealed partial class Playthrough
             await Pace(0.6);
             await CombineAndWait("eleanor_flower", "eleanor_box");
             Check(Gs.HasItem("eleanor_box_packed") && Gs.HasFlag("interlude_box_packed"), "the flower in the box, the lid down");
-            await Do(Verb.UseItem, "closet", "eleanor_box_packed");
-            Check(Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"), "the box locked in the closet safe");
-            await Do(Verb.Hand, "desk_drawer");
+            await Do(Verb.Hand, "closet");
+            Check(Gs.HasFlag("interlude_closet_open"), "the closet opens on the safe, standing half open");
+            await Do(Verb.UseItem, "interlude_safe", "eleanor_box_packed");
+            Check(Gs.HasFlag("interlude_box_in_safe") && !Gs.HasFlag("interlude_safe_locked") && !Gs.HasItem("eleanor_box_packed"),
+                "the box put in the safe");
+            await Do(Verb.Hand, "interlude_safe");
+            Check(Gs.HasFlag("interlude_safe_locked"), "the safe shut on the box");
+            await Do(Verb.Hand, "closet");
+            Check(!Gs.HasFlag("interlude_closet_open"), "the closet shut again");
+            await Do(Verb.UseItem, "desk", "eleanor_slip");
+            Check(Gs.HasItem("eleanor_riddle") && !Gs.HasItem("eleanor_slip"), "the combination written as a riddle");
+            await Do(Verb.UseItem, "desk_drawer", "eleanor_riddle");
+            await Do(Verb.UseItem, "desk_drawer", "eleanor_key");
+            Check(Gs.HasFlag("interlude_drawer_locked") && !Gs.HasItem("eleanor_riddle"), "the riddle locked in the drawer with her key");
             await Do(Verb.Hand, "telephone");
             Check(Gs.HasFlag("interlude_phoned"), "Eleanor telephones Rizzo's");
             await Do(Verb.Walk, "exit");
@@ -80,7 +92,33 @@ public sealed partial class Playthrough
             Check(onFireEscape, "after the interlude, back on the fire escape for the rest of their talk and the kiss");
             Check(!Gs.HasFlag("interlude1") && Gs.HasItem("revolver"),
                 "later that night, in her motel room: Micah getting dressed, with his things");
-            await window;
+            bool daysLater = false;
+            await Until(() =>
+            {
+                daysLater |= _game.Hud.CaptionVisible && _game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
+                return window.IsCompleted && _game.Room?.Name == "MotelAlley" && !_game.Busy;
+            }, 600, 0.05);
+            await WaitIdle();
+            Check(daysLater, "\"Days later\" on black between the motel night and the office");
+            Check(Gs.HasFlag("act2_whiskey_drunk") && Gs.HasFlag("motel_return"), "the office, then back to the motel");
+            Check(!Gs.HasFlag("ladder_down"), "the drop ladder is pulled up again");
+            await Do(Verb.Hand, "drop_ladder");
+            Expect("MotelAlley", "Micah won't go up the fire escape again");
+            await Do(Verb.Walk, "street");
+            Expect("MotelAlley", "not away until he knows where she went");
+            await Do(Verb.Walk, "motel_door");
+            Expect("MotelLobby", "in at the front, to ask the clerk");
+            bool tie = false, pulled = false;
+            var ask = Do(Verb.Talk, "clerk");
+            await Until(() =>
+            {
+                tie |= _game.Player.PoseName == "micah_tie_pull";
+                pulled |= _game.Room?.FindActor("clerk")?.Poses?.Action == "clerk_tie_pulled";
+                return ask.IsCompleted;
+            }, 600, 0.05);
+            await ask;
+            Check(tie && pulled, "Micah hauls the clerk across the counter by his tie");
+            Check(Gs.HasFlag("motel_return_done"), "the clerk spills: two men took her");
             await Until(() => _game.Room?.Name == "ChicagoMap", 600);
             await WaitIdle();
             Check(!Story.Interlude.EleanorPlays(Gs.HasFlag) && !_game.Player.Character.StartsWith("eleanor"), "Micah's journal again");
@@ -97,8 +135,8 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("librarian_refused"), "the librarian won't help");
             await SolvePuzzle(() => Do(Verb.Hand, "desk"), PuzzleKind.Catalogue,
                 new[] { ("motif1", 1), ("entry2", 1) }, "catalogue", submit: false);
-            await Do(Verb.UseItem, "librarian", "revolver");
-            Check(Gs.HasItem("book"), "the book at gunpoint");
+            await Do(Verb.Hand, "librarian");
+            Check(Gs.HasItem("book"), "the book, by the collar");
             await Do(Verb.Walk, "exit");
             Expect("ChicagoMap", "out of the library");
         });

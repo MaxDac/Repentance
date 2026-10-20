@@ -39,6 +39,7 @@ public class StoryIntegrityTests
         ["eleanor_fire_escape"] = "MotelFireEscape: the rest of the fire-escape talk after the First Interlude, once",
         ["moc"] = "ClubHall: the first, unmasked visit, once; club_out is set when Micah is thrown out",
         ["motel_clerk"] = "redirects to motel_clerk.again once the first talk sets clerk_talked",
+        ["motel_clerk_return"] = "redirects to motel_clerk_return.again once the clerk has talked and motel_return_done is set",
         ["nun"] = "redirects to nun.again once the first talk sets nun_talked",
         ["nun_club"] = "ConventCorridor: once nun_club_asked is set the sister answers in C# and the knot is skipped (B1)",
         ["office_ring"] = "Office: Act 2 ring choice, once on the way out",
