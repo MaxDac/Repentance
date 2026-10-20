@@ -848,10 +848,10 @@ TIE_REACH = ("pts", (0.17, 0.31, 0.13), (0.07, 0.24, 0.28), (0.05, 0.225, 0.32))
 TIE_GRAB = ("pts", (0.17, 0.31, 0.12), (0.07, 0.235, 0.27), (0.05, 0.22, 0.305))
 TIE_YANK = ("pts", (0.17, 0.38, 0.03), (0.07, 0.32, 0.17), (0.05, 0.305, 0.205))
 TIE_PULL_KEYS = [
-    (("swing", 4, 6, 10), 0.0, 0.15),
-    (TIE_REACH, 5.0, 0.18),
-    (TIE_GRAB, 5.0, 0.22),
-    (TIE_YANK, -4.0, 0.35),
+    (("swing", 4, 6, 10), 0.0, 0.1),
+    (TIE_REACH, 5.0, 0.1),
+    (TIE_GRAB, 5.0, 0.12),
+    (TIE_YANK, -4.0, 0.2),
 ]
 # The clerk, facing right (the lobby flips him to face Micah): yanked forward by the tie and down onto the desktop,
 # face first, his hands slapping down either side. The counter hides him from the hips down, so those frames are cut
@@ -890,7 +890,7 @@ def tie_pull_strips():
             for x in range(img.width):
                 px[x, y] = (0, 0, 0, 0)
         clip.append((img, head))
-    action_strip("clerk_tie_pulled", clip, [0.15, 0.12, 0.3], anchor=(96, FH - 3))
+    action_strip("clerk_tie_pulled", clip, [0.08, 0.07, 0.2], anchor=(96, FH - 3))
 
 
 # Eleanor at the dressing table, facing right: she drinks the gin like Micah does at the bar, sets the glass down,

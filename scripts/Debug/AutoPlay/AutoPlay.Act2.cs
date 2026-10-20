@@ -348,13 +348,19 @@ public partial class AutoPlay
         await WaitIdle(game);
         Check(game.Room?.Name == "MotelLobby", "in at the front door");
         int tiePulls = _poseCounts.GetValueOrDefault("micah_tie_pull"), clerkPulls = _poseCounts.GetValueOrDefault("clerk_tie_pulled");
-        bool onCounter = false;
+        bool onCounter = false, overCounterStanding = false, speechClearsMicah = false;
         var said = new List<string>();
         // the talk runs on into the cathedral steps and Caleb; stop watching once Micah is out of the lobby
         _ = game.Perform(Verb.Talk, "clerk");
         await Until(() =>
         {
             Heard(said);
+            if (game.Room is Rooms.MotelLobby room && room.FindActor("clerk") is { } c)
+            {
+                overCounterStanding |= c.ZIndex > 0 && c.Poses?.Action != "clerk_tie_pulled";
+                speechClearsMicah |= c.Poses?.Action == "clerk_tie_pulled" && !c.Poses.Playing &&
+                    c.HeadPosition.Y < game.Player.HeadPosition.Y;
+            }
             if (!onCounter && game.Room is Rooms.MotelLobby lobby && lobby.FindActor("clerk") is { } clerk &&
                 clerk.Poses?.Action == "clerk_tie_pulled" && !clerk.Poses.Playing && game.Player.PoseName == "micah_tie_pull")
             {
@@ -367,6 +373,8 @@ public partial class AutoPlay
         Check(onCounter && _poseCounts.GetValueOrDefault("micah_tie_pull") == tiePulls + 1 &&
             _poseCounts.GetValueOrDefault("clerk_tie_pulled") == clerkPulls + 1,
             "\"Nice tie, pal\": Micah hauls the clerk across the counter by it");
+        Check(!overCounterStanding, "the clerk's standing figure never draws over the counter");
+        Check(speechClearsMicah, "pinned to the desk, the clerk's lines sit above Micah's head, not over his face");
         Check(said.Any(l => l.Contains("Two men took her")) && gs.HasFlag("motel_return_done"),
             "the clerk spills: two men took her, the night Micah left");
     }
