@@ -78,3 +78,5 @@ make the hem follow the legs (padding past each leg) rather than the hip width.
 - Shared painters (the mansion and motel bed figure) must stay identical across rooms; per-room differences go in
   parameters (sheet color), not copies.
 - Passing tests is not visual approval: look at the frames (see [Testing](testing.md#seeing-what-the-game-draws)).
+- Show changed images as before/after previews in the PR description
+  ([CI and release](ci-and-release.md#pull-requests)).
