@@ -31,12 +31,13 @@ public partial class Hud
             if (e is InputEventMouseButton { Pressed: true }) ShowInventory(false);
         };
         root.AddChild(_inventory);
-        _inventory.AddChild(new TextureRect
+        _case = new TextureRect
         {
             Texture = GD.Load<Texture2D>("res://assets/art/ui/inventory.png"),
             Position = InvPos,
             MouseFilter = Control.MouseFilterEnum.Stop,
-        });
+        };
+        _inventory.AddChild(_case);
 
         var normal = new StyleBoxFlat { BgColor = new Color("140c08"), BorderColor = new Color("3a2814") };
         normal.SetBorderWidthAll(1);
@@ -125,9 +126,22 @@ public partial class Hud
         }
     }
 
+    /// <summary>The case and its page buttons: once the cursor has been over it, leaving it closes the inventory.</summary>
+    public Rect2 InventorySurface =>
+        _case.GetGlobalRect().Merge(_previousPage.GetGlobalRect()).Merge(_nextPage.GetGlobalRect());
+
+    // hover-menu behaviour: the satchel button sits outside the case, so leaving only counts after entering
+    private void TrackInventoryHover(Vector2 mouse)
+    {
+        if (!_inventory.Visible || Wheel.IsOpen) return;
+        if (InventorySurface.HasPoint(mouse)) _cursorEnteredInventory = true;
+        else if (_cursorEnteredInventory) ShowInventory(false);
+    }
+
     public void ShowInventory(bool show)
     {
         if (show && (Game.Instance.Busy || !SatchelAllowed)) return;
+        if (show && !_inventory.Visible) _cursorEnteredInventory = false;
         _inventory.Visible = show;
         if (!show) ItemHovered?.Invoke(null);
     }
