@@ -48,6 +48,7 @@ class Canvas:
         self.ramps, self.dith, self.mats, self.parts = [], [], {}, {}
         self.ink = []
         self.shadow = np.zeros((h, w), bool)
+        self.flat = np.zeros((h, w), bool)  # unshaded: drawn in the base colour inside the silhouette (starched linen)
         self.blend_parts, self.blend_zone = (), np.zeros((h, w), bool)
         self.blend_w = np.zeros((h, w))  # 1 = shade as one mass with the back, fading to 0 towards the armpit
         self.seamless = ()  # parts that meet without the darker "behind" seam (e.g. bare torso and legs)
@@ -88,16 +89,18 @@ class Canvas:
         self.n[mask] = n[mask]
         self.part[mask] = p
         self.bias[mask] = 0
+        self.flat[mask] = False
         return mask
 
     def parts_mask(self, *names):
         ids = [self.parts[n] for n in names if n in self.parts]
         return np.isin(self.part, ids)
 
-    def recolor(self, mask, col, dither=True, bias=0):
+    def recolor(self, mask, col, dither=True, bias=0, flat=False):
         mask = mask & (self.mat >= 0)
         self.mat[mask] = self.m(col, dither)
         self.bias[mask] += bias
+        self.flat[mask] = flat
 
     def dot(self, x, y, col):
         self.ink.append((int(math.floor(x)), int(math.floor(y)), col))
@@ -171,6 +174,7 @@ class Canvas:
                              (pp[1:-1, :-2], bp[1:-1, :-2], sp_[1:-1, :-2]), (pp[1:-1, 2:], bp[1:-1, 2:], sp_[1:-1, 2:])):
             behind |= (nb > self.part) & ~(bl & nbl) & ~(sl & nsl)
         tone = np.where(filled & ~edge & behind, tone - 1, tone)
+        tone = np.where(filled & ~edge & self.flat, 3, tone)
         tone = np.clip(tone, 0, 4)
         out = np.zeros((self.h, self.w, 4), np.uint8)
         if shadow_box is not None:
@@ -1132,6 +1136,7 @@ def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
         throat = c.capsule(P(body([0, 0.14 + nod, 0.004])), P(body([0, 0.222, -0.004])), H * 0.046, H * 0.056)
         c.put(throat, coif, "coif", clip=~face)
         c.put(wrap, coif, "coif", clip=~face)
+        c.flat |= throat[0] & ~face & c.parts_mask("coif") & (c.Y > fy + fry)  # starched linen under the chin
         frame = c.ellipse((fx, fy + 0.6), frx + 1.6, fry + 1.4)[0] | ((c.Y > fy) & (np.abs(c.X - fx) < frx + 1.6))
         hood = c.ellipse((hx_ - 0.9 * sp, hy_ - 0.4), hrx + 2.4, hry + 2.0)
         c.put(hood, hc, "veil", clip=~frame & (c.Y < hy_ + hry * 0.55))
@@ -1356,7 +1361,7 @@ def _veil_back(c, col, P, body, H, cp, sp, nod):
     c.put(c.poly(pts), col["hat_col"], "veilback")
 
 
-def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dither=True, bias=0, x0=0.0):
+def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dither=True, bias=0, x0=0.0, flat=False):
     """Recolours a vertical band down the front of the body (lapels, shirt, tie, apron, buttons)."""
     if cp < -0.2:
         return
@@ -1371,17 +1376,18 @@ def _front_strip(c, P, body, H, y0, y1, w0, w1, parts, col, cp, sp, z=0.07, dith
             lo, hi = sorted((a[0], b[0]))
             lo, hi = lo - 0.0, hi + (0.0 if hi - lo > 0.6 else 0.6)
             out[row] |= (c.X[row] >= lo) & (c.X[row] <= hi + 0.5)
-    c.recolor(mask & out, col, dither=dither, bias=bias)
+    c.recolor(mask & out, col, dither=dither, bias=bias, flat=flat)
 
 
 def _decals(c, col, P, body, H, cp, sp, legs, ps):
     body_parts = ("torso", "coat", "hips")
     for d in col.get("decals", []):
         kind = d[0]
-        if kind == "strip":  # (strip, y0, y1, w0, w1, colour, parts?)
+        if kind == "strip":  # (strip, y0, y1, w0, w1, colour, parts?, "flat"?) - "flat" paints it unshaded
             _, y0, y1, w0, w1, colour = d[:6]
-            parts = d[6] if len(d) > 6 else body_parts
-            _front_strip(c, P, body, H, y0, y1, w0, w1, parts, colour, cp, sp)
+            parts = next((e for e in d[6:] if isinstance(e, tuple)), body_parts)
+            flat = "flat" in d[6:]
+            _front_strip(c, P, body, H, y0, y1, w0, w1, parts, colour, cp, sp, flat=flat)
         elif kind == "line":  # dark seam down the front
             _, y0, y1 = d[:3]
             seam = col["coat"]["col"] if col.get("coat") else col["torso"]
