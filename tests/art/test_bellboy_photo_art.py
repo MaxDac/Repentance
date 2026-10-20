@@ -56,7 +56,8 @@ class BellboyPhotoArtTests(unittest.TestCase):
         self.assertTrue(all(cards[2:]))
         drawn_x = min(x for x, _ in cards[2])
         shown_x = min(x for x, _ in cards[-1])
-        self.assertGreater(shown_x - drawn_x, 4)  # held out at arm's length towards the bellboy
+        self.assertGreater(shown_x - drawn_x, 4)  # held out towards the bellboy
+        self.assertLessEqual(shown_x - FRAME[0] // 2, 17)  # halfway to him, not in his face
         shown_y = sum(y for _, y in cards[-1]) / len(cards[-1])
         self.assertGreaterEqual(shown_y, 18)
         self.assertLessEqual(shown_y, 40)  # about his face, not down at his waist

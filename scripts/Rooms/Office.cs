@@ -139,7 +139,7 @@ public partial class Office : Room
         await teddy.PlayPose("teddy_wallet");
         await teddy.PlayPose("teddy_leave_notes");
         State.SetFlag("teddy_paid");
-        await Wait(0.2);
+        await Wait(0.1);
         teddy.SetPose(null);
         await Think("Twenty-two dollars. Pocket lint to him. A day's pay to me, and then some.");
     }
