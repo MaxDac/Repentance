@@ -70,7 +70,11 @@ godot_console --path . --headless --export-release "Windows Desktop" build\windo
 ### Android
 
 The `Android` preset (`build/android/Repentance.apk`) builds an arm64-v8a APK from Godot's prebuilt template (no
-Gradle, so no AAB / Play Store build). C# on Android is experimental in Godot 4.7 but works for this game. The package
+Gradle, so no AAB / Play Store build). C# on Android is experimental in Godot 4.7 but works for this game. Its prebuilt template only runs `net9.0`, so the
+three game projects switch to `net9.0` when Godot builds them for Android (`GodotTargetPlatform == android`): code
+must not use .NET 10-only APIs, and the .NET 10 SDK builds it without a separate .NET 9 install. Without an editor
+settings file (fresh CI runners), a headless import logs `EditorSettings not instantiated yet` for the Android
+plugin; `.github/actions/setup-godot` writes an empty one. The package
 is `com.maxdac.repentance`; the version name is the release version and the version code is
 `major*10000 + minor*100 + patch`, both patched in at export by `tools/package/android-export.sh`.
 
