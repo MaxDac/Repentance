@@ -44,15 +44,8 @@ runs:
 
     - name: Locate Godot
       shell: bash
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
       run: |
         godot="$(find ~/godot -type f -name 'Godot_v*_mono_linux.x86_64' | head -n1)"
         chmod +x "$godot"
         echo "GODOT=$godot" >> "$GITHUB_ENV"
         "$godot" --headless --version
-        # Without an editor settings file the Android export plugin logs "EditorSettings not instantiated yet" when
-        # a headless import quits, which the launchers count as an error. Desktops get one from opening the editor.
-        config=~/.config/godot/editor_settings-${INPUT_VERSION%.*}.tres
-        mkdir -p ~/.config/godot
-        [ -f "$config" ] || printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\n' > "$config"

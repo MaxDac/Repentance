@@ -9,6 +9,9 @@ GODOT_FLAGS="${GODOT_FLAGS:-}"
 
 # The same rule as CI: Game.Run catches script exceptions with GD.PushError, so a run can print its marker after one.
 ERROR_PATTERN='^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
+# Godot 4.7 bug, not ours: on Linux the Android export plugin reads an editor setting after a headless --import has
+# freed EditorSettings. Ignored in the import log only (docs/ci-and-release.md#android).
+IMPORT_NOISE='EditorSettings not instantiated yet when getting setting "export/android/shutdown_adb_on_exit"'
 
 check_godot() {
   local godot="$1" probe output status=0
@@ -72,7 +75,7 @@ build_and_import() {
     # shellcheck disable=SC2086
     "$godot" --headless $GODOT_FLAGS --path . --import 2>&1 | tee "$log" || status=$?
     if [ "$status" -ne 0 ]; then echo "Godot import failed (exit code $status); see $log." >&2; return 1; fi
-    if grep -nE "$ERROR_PATTERN" "$log" >&2; then
+    if grep -nE "$ERROR_PATTERN" "$log" | grep -vF "$IMPORT_NOISE" >&2; then
       echo "Godot import logged errors; see $log. Launch cancelled." >&2
       return 1
     fi)
