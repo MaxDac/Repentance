@@ -1130,7 +1130,8 @@ def cell_bed_art():
     def depth(y):
         return 0.92 + (y - 197) / (265 - 197) * (1.06 - 0.92)
 
-    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py))
+    # seated, the seat rounds up her back from the blanket to the waist
+    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.075, 0.47, 0.08))
     H = spec["h"] * SCALE
     thigh = 84
 

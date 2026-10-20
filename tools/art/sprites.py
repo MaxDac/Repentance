@@ -246,7 +246,7 @@ ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
 # and cuffs piped dark, bare feet, her hair down.
 PYJAMA = "e8e0cc"
-ELEANOR_PYJAMA = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.075, 0.47, 0.08)), high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
+ELEANOR_PYJAMA = dict(ELEANOR, **_CURVES, high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
                       pants=PYJAMA, coat=None, stockings=None, shoes=ELEANOR["skin"],
                       # loose cotton: a one-pixel swell spread over more rows, set a little higher; the open neck
                       # shows her throat; the waist curves in and out to fuller hips and seat
