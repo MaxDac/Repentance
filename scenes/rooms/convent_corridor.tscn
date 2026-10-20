@@ -75,6 +75,7 @@ y_sort_enabled = true
 [node name="Entrance" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "entrance"
+Door = true
 DisplayName = "front door"
 LookText = "The way I came in. The way out, too, if I had any sense."
 WalkTo = Vector2(42, 205)
@@ -91,6 +92,7 @@ shape = SubResource("Rect_1")
 [node name="CellDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "cell_door"
+Door = true
 DisplayName = "cell door"
 LookText = "A plain oak door at the end of the corridor. Eleanor's, if the sister was telling the truth."
 WalkTo = Vector2(410, 200)

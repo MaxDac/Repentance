@@ -30,28 +30,34 @@ public partial class Game
         if (target.Face != Facing.Auto) Player.Face(target.Face);
         else Player.FaceTowards(target.Bounds.GetCenter());
 
-        await Run(async () =>
+        // remembered so a room change from this action knows whether the player went through a door
+        _actionTarget = target;
+        _doorOpened = false;
+        try { await Run(() => Act(verb, target, item)); }
+        finally { if (_actionTarget == target) _actionTarget = null; }
+    }
+
+    private async Task Act(Verb verb, Hotspot target, string? item)
+    {
+        if (verb == Verb.UseItem && IsEleanor && !Story.Interlude.SatchelOpen(GameState.Instance.HasFlag))
         {
-            if (verb == Verb.UseItem && IsEleanor && !Story.Interlude.SatchelOpen(GameState.Instance.HasFlag))
+            await Say("Not with that.");
+            return;
+        }
+        if (Room != null && await Room.OnInteract(verb, target, item)) return;
+        if (verb is Verb.Walk or Verb.Hand && target.IsExit)
+        {
+            // Eleanor's scenes script their own way out; Micah's exits stay shut to her
+            if (IsEleanor)
             {
-                await Say("Not with that.");
+                await Say(Story.Interlude.BlockedExitLine(RoomScene));
                 return;
             }
-            if (Room != null && await Room.OnInteract(verb, target, item)) return;
-            if (verb is Verb.Walk or Verb.Hand && target.IsExit)
-            {
-                // Eleanor's scenes script their own way out; Micah's exits stay shut to her
-                if (IsEleanor)
-                {
-                    await Say(Story.Interlude.BlockedExitLine(RoomScene));
-                    return;
-                }
-                await ChangeRoom(target.ExitTo, target.ExitEntry);
-                return;
-            }
-            if (verb == Verb.Walk) return;
-            await DefaultResponse(verb, target, item);
-        });
+            await ChangeRoom(target.ExitTo, target.ExitEntry);
+            return;
+        }
+        if (verb == Verb.Walk) return;
+        await DefaultResponse(verb, target, item);
     }
 
     /// <summary>Where the player walks before acting on a hotspot: its WalkTo, or just below the middle of its shape.</summary>

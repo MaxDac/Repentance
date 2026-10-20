@@ -91,6 +91,7 @@ metadata/facing = 4
 [node name="Door" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "door"
+Door = true
 DisplayName = "door"
 LookText = "MORGUE, backwards from this side of the glass. The stairs up to the street."
 WalkTo = Vector2(52, 206)

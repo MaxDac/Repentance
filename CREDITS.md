@@ -10,6 +10,12 @@
   Samples, Electronic Music Studios, recorded by Lawrence Fritts; freely available and usable for any project without
   restrictions (https://theremin.music.uiowa.edu/MIS.html). Trimmed, downmixed and resampled by `tools/music`.
 - **GodotInk** by Paul Joannon, MIT License (`addons/GodotInk/LICENSE`).
+- **Chicago street map** (the Act 2 map screen, `tools/art/src/chicago_1920_fred_wild.png`): *Double Indexed Street
+  Map of Chicago*, Fred Wild Company, 1920; public domain. Scan by the American Geographical Society Library,
+  University of Wisconsin-Milwaukee, via Wikimedia Commons (`File:1920 Chicago map by Fred Wild.jpg`). Cropped to
+  downtown and reduced by `tools/art/chicago_map.py`.
+- **Caveat** font (handwriting on the map tags; used only by the art generator) by The Caveat Project Authors,
+  licensed under the SIL Open Font License 1.1 (`tools/art/src/OFL-Caveat.txt`).
 - **Ink** narrative scripting language by inkle Ltd, MIT License.
 - **Godot Engine**, MIT License.
 - The character art style takes inspiration from *Indiana Jones and the Fate of Atlantis* (LucasArts, 1992).

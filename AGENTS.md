@@ -20,6 +20,9 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 2. A planning session that implements its plan ends with a PR, unasked: commit, push, list suites run in the PR,
    watch checks and fix until `ci-ok` is green (`pr-and-ci`). Never merge; never call work done with red, pending
    or missing checks.
+3. A PR that adds or changes an image (generated art, sprites, UI, icons) shows it in the description: before and
+   after previews, scaled up nearest-neighbour, attached with `gh pr edit --attach`
+   ([CI and release](docs/ci-and-release.md#pull-requests)).
 
 ## Code rules
 

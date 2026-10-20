@@ -91,6 +91,7 @@ y_sort_enabled = true
 [node name="DoorLeft" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "door_left"
+Door = true
 DisplayName = "door to the kitchen"
 LookText = "Back to the kitchen passage."
 WalkTo = Vector2(44, 224)
@@ -105,6 +106,7 @@ shape = SubResource("Rect_1")
 [node name="DoorRight" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "door_right"
+Door = true
 DisplayName = "bedroom door"
 LookText = "Voices behind it. An old man's, and a woman's."
 WalkTo = Vector2(440, 224)
