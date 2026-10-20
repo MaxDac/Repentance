@@ -140,7 +140,7 @@ script = ExtResource("4_FlagSprite")
 ShowIfFlags = "interlude1,interlude_closet_open"
 
 [node name="InterludeSafeAjar" type="Sprite2D" parent="."]
-position = Vector2(82, 143)
+position = Vector2(81, 143)
 z_index = -4
 texture = ExtResource("15_eleanor_room_interlude_safe_ajar")
 centered = false

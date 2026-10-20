@@ -67,6 +67,17 @@ public class SoundSynthTests
     }
 
     [Fact]
+    public void SafeSoundsAreSofterThanASlamAndOverInTwoSeconds()
+    {
+        foreach (var safe in new[] { Sound.SafeOpen, Sound.SafeClose })
+        {
+            Assert.True(SoundSynth.BaseVolumeDb(safe) < SoundSynth.BaseVolumeDb(Sound.DoorSlam), $"{safe} is softer than a slam");
+            Assert.True(SoundSynth.Render(safe).Length <= 2 * SoundSynth.SampleRate, $"{safe} is over within two seconds");
+        }
+        Assert.NotEqual(SoundSynth.Render(Sound.SafeOpen), SoundSynth.Render(Sound.SafeClose));
+    }
+
+    [Fact]
     public void GunshotIsLouderAndLongerThanAFootstep()
     {
         double Energy(float[] s) => s.Sum(v => (double)v * v);
