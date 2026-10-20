@@ -17,12 +17,13 @@ The current save format is version 11.
 | `Ink` | Ink runtime state JSON (variables, visit counts) |
 | `PlaytimeSeconds` | Total play time |
 
-`SaveSystem` stores `autosave`, `slot1`-`slot3` as `user://saves/<slot>.json`, writing `<slot>.json.tmp` then
+`SaveSystem` stores `autosave`, `slot1`-`slot5` as `user://saves/<slot>.json`, writing `<slot>.json.tmp` then
 renaming. `Read` returns null for missing, corrupt, wrong-version or unknown-room files: the menu shows *Empty* for a
 missing file and *Incompatible* otherwise. `Latest` (title-screen *Continue*) is the newest readable save.
 
 - **Autosave** queued after `ChangeRoom` finishes `OnEnter`; written when the game is idle.
-- **Manual save** only between actions (`Game.CanSave`: a room, not busy, not on the title).
+- **Manual save** only between actions (`Game.CanSave`: a room, not busy, not on the title). Saving to a slot that
+  already holds a file (even an *Incompatible* one) asks *Overwrite Slot N?* first; *No* or Esc returns to the list.
 - **Load** fades out, runs `PuzzleMigration.Normalize`, restores `GameState`, Ink and playtime, loads the room,
   places the player exactly, fades in. `OnEnter` does not run.
 
