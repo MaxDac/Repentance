@@ -53,11 +53,12 @@ public class NotesTests
     }
 
     [Fact]
-    public void ClubCard_IsForSundayNight()
+    public void ClubCard_IsForThursdayNight()
     {
         var text = string.Join(" ", Notes.Get("crests")!.Lines.Select(l => l.Text));
-        Assert.Contains("The Club. Sunday, at the turning of the night.", text);
+        Assert.Contains("The Club. Thursday, at the turning of the night.", text);
         Assert.DoesNotContain("Saturday", text);
+        Assert.DoesNotContain("Sunday", text);
     }
 
     [Theory]
