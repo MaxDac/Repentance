@@ -28,7 +28,7 @@ public static class Interlude
         "interlude_riddle_in_drawer",
         "interlude_agatha_met", "interlude_agatha_sorry", "interlude_agatha_proud",
         "interlude_took_box", "interlude_took_scrap", "interlude_took_thread",
-        "interlude_took_bag", "interlude_bag_left", "interlude_combed", "interlude_pyjamas",
+        "interlude_took_bag", "interlude_bag_left", "interlude_pyjamas",
     };
     private static readonly string[] SecondBeats =
     {

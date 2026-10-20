@@ -202,7 +202,7 @@ public partial class AutoPlay
             combed |= game.Player.PoseName == "eleanor_comb";
             return game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake");
         }, step: 0.05);
-        Check(combed && gs.HasFlag("interlude_combed"), "she takes her comb and mirror out of the bag and combs her hair");
+        Check(combed, "she takes her comb and mirror out of the bag and combs her hair");
         Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == "eleanor_cell_sit",
             "when Agatha comes in, Eleanor sits awake on the bed in her pyjamas");
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,

@@ -156,7 +156,6 @@ public partial class ConventCell : Room
         await Game.WalkTo(BagSpot);
         Player.Face(Facing.Left);
         _combing = true;
-        State.SetFlag("interlude_combed");
         Refresh();
         await Player.PlayPose("eleanor_comb");
         await Say("A hundred strokes, the way my mother taught me. I lose count at forty, every night.");
