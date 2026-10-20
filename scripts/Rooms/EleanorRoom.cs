@@ -100,6 +100,11 @@ public partial class EleanorRoom : Room
             case ("desk_drawer", Verb.Kick):
                 await Say("Kicking it open would bring the house detective. The quiet way, then.");
                 return true;
+            case ("desk_drawer", Verb.Look) when State.HasFlag("eleanor_drawer_open"):
+                await Say(State.HasFlag("took_combination")
+                    ? "The left drawer, picked open. Empty now."
+                    : "The left drawer, picked open. A folded slip of hotel paper inside.");
+                return true;
 
             case ("paper", Verb.Hand):
                 State.SetFlag("took_combination");
@@ -116,6 +121,9 @@ public partial class EleanorRoom : Room
                 return true;
             case ("closet", Verb.Hand):
                 await Say("Silk, cedar, and steel at the back.");
+                return true;
+            case ("closet", Verb.Look) when State.HasFlag("closet_open"):
+                await Say("The walnut closet stands open. Silk, cedar, and the steel safe at the back.");
                 return true;
 
             case ("safe", Verb.Hand) when !State.HasFlag("safe_open"):
