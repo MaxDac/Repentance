@@ -207,12 +207,26 @@ public partial class AutoPlay
         await game.Wait(2);
         await Shot("motel_night");
         bool daysLater = false;
-        await Until(() =>
+        ulong captionStart = 0, captionOpaque = 0;
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater, step: 0.02);
+        double scale = Engine.TimeScale;
+        Engine.TimeScale = 1;
+        try
         {
-            daysLater |= game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
-            return game.Room?.Name == "Office";
-        }, step: 0.05);
+            captionStart = Time.GetTicksMsec();
+            await Until(() =>
+            {
+                bool shown = game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
+                daysLater |= shown;
+                if (shown && captionOpaque == 0 && game.Hud.CaptionAlpha >= 1) captionOpaque = Time.GetTicksMsec();
+                return game.Room?.Name == "Office";
+            }, step: 0.02);
+        }
+        finally { Engine.TimeScale = scale; }
         Check(daysLater, "\"Days later\" on black between her motel room and the office");
+        double captionFade = (captionOpaque - captionStart) / 1000.0;
+        Check(captionOpaque > 0 && captionFade is > 2.5 and < 3.6,
+            $"\"Days later\" fades in over 3s (took {captionFade:0.0}s)");
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");

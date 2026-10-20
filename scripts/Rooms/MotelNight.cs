@@ -16,6 +16,8 @@ public partial class MotelNight : Room
     private const string EmptyBed = "res://assets/art/rooms/motel_empty.png";
     /// <summary>The black card between the motel night and the office: Micah's journal skips the days in between.</summary>
     public const string DaysLater = "Days later";
+    /// <summary>Seconds for <see cref="DaysLater"/> to fade in on the black screen.</summary>
+    public const double DaysLaterFade = 3.0;
 
     private bool First => State.HasFlag("interlude1");
     private bool Second => State.HasFlag("interlude2");
@@ -68,7 +70,7 @@ public partial class MotelNight : Room
             await Think("I close the door on her softly. Rose, the boy, and now Eleanor. I'm getting good at doors.");
             await Wait(0.6);
             await Game.Hud.Fade(1, MotelFireEscape.NightFade);
-            Game.Hud.ShowCaption(DaysLater);
+            await Game.Hud.FadeCaptionIn(DaysLater, DaysLaterFade);
             await Wait(MotelFireEscape.NightCaption);
             Game.Hud.ShowCaption(null);
             await Game.ChangeRoom("office", "act2", fadeInSeconds: MotelFireEscape.NightFade);
