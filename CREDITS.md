@@ -5,6 +5,8 @@
 - **Silkscreen** font by Jason Kottke, licensed under the SIL Open Font License 1.1 (`assets/fonts/OFL-Silkscreen.txt`).
 - **Departure Mono** font (dialogue text) by Helena Zhang, licensed under the SIL Open Font License 1.1
   (`assets/fonts/OFL-DepartureMono.txt`).
+- **Poiret One** font (captions over black) by The Poiret One Project Authors (Denis Masharov), licensed under the
+  SIL Open Font License 1.1 (`assets/fonts/OFL-PoiretOne.txt`).
 - **Piano, alto saxophone and double bass recordings** (`assets/audio/piano/`, `assets/audio/sax/`,
   `assets/audio/bass/`; the hotel lobby and office music): University of Iowa Musical Instrument
   Samples, Electronic Music Studios, recorded by Lawrence Fritts; freely available and usable for any project without
