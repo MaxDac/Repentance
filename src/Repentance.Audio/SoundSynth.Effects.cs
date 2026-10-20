@@ -5,18 +5,52 @@ namespace Repentance;
 /// <summary>The recipe for each <see cref="Sound"/>, built from the blocks in SoundSynth.cs.</summary>
 public static partial class SoundSynth
 {
-    /// <summary>A shoe on the floor: heel strike, then a softer toe roll-off.</summary>
-    private static float[] Step(Random rng, double body, double q, double tau, double click, double thump)
+    /// <summary>How a floor answers a shoe: its resonance, how bright the heel click stays, how much it booms.</summary>
+    private readonly record struct FloorResponse(
+        double BodyHz, double BodyQ, double BodyTau, double Click, double Thump, double Muffle);
+
+    private static readonly FloorResponse Boards = new(BodyHz: 480, BodyQ: 2.2, BodyTau: 0.022, Click: 1.0, Thump: 0.35, Muffle: 0);
+    private static readonly FloorResponse Cobbles = new(BodyHz: 2100, BodyQ: 1.2, BodyTau: 0.008, Click: 1.15, Thump: 0.08, Muffle: 0);
+    private static readonly FloorResponse Rug = new(BodyHz: 280, BodyQ: 0.9, BodyTau: 0.02, Click: 0.55, Thump: 0.3, Muffle: 1400);
+
+    /// <summary>
+    /// A 1920s leather dress shoe: the hard stacked heel strikes with a sharp click, the floor answers, then the
+    /// leather sole pats down a moment later. A rug muffles the whole step but leaves the heel distinct.
+    /// </summary>
+    private static float[] Step(Random rng, FloorResponse floor)
     {
         var buf = Buffer(0.2);
-        double toe = Vary(rng, 0.05, 0.25);
-        foreach (var (start, amp) in new[] { (0.0, 1.0), (toe, 0.45) })
+        double click = floor.Click, pitch = Vary(rng, 1, 0.06);
+
+        // heel: a bright crack and the short ring of the hard heel block
+        Burst(buf, rng, 0, 0.0012, 0.9 * click, Biquad.HighPass(3000), attack: 0.0001);
+        foreach (var (hz, amp, tau) in new[] { (2350.0, 0.55, 0.011), (3400.0, 0.35, 0.007), (1650.0, 0.3, 0.014) })
+            Tone(buf, 0, hz * pitch, hz * pitch * 0.98, Vary(rng, tau, 0.15), amp * click, attack: 0.0001);
+        Burst(buf, rng, 0, Vary(rng, floor.BodyTau, 0.2), 0.6, Biquad.BandPass(Vary(rng, floor.BodyHz, 0.1), floor.BodyQ));
+        Tone(buf, 0, Vary(rng, 150, 0.1), 95, 0.018, floor.Thump);
+
+        // sole: the flat leather slapping down, softer and duller, no click
+        double sole = Vary(rng, 0.075, 0.3), level = Vary(rng, 0.42, 0.15);
+        Burst(buf, rng, sole, 0.006, level, Biquad.BandPass(Vary(rng, 1300, 0.15), 0.8), attack: 0.0004);
+        Burst(buf, rng, sole, 0.002, level * 0.45 * click, Biquad.HighPass(2000), attack: 0.0003);
+        Burst(buf, rng, sole, Vary(rng, floor.BodyTau, 0.2) * 0.7, level * 0.6,
+            Biquad.BandPass(Vary(rng, floor.BodyHz, 0.1), floor.BodyQ));
+        Tone(buf, sole, Vary(rng, 120, 0.1), 85, 0.012, floor.Thump * level);
+
+        if (floor.Muffle > 0)
         {
-            Burst(buf, rng, start, Vary(rng, tau, 0.2), amp, Biquad.BandPass(Vary(rng, body, 0.12), q));
-            if (click > 0) Burst(buf, rng, start, 0.0018, click * amp, Biquad.HighPass(3500));
-            Tone(buf, start, Vary(rng, 140, 0.1), 90, 0.02, thump * amp);
+            var lp = Biquad.LowPass(floor.Muffle);
+            var lp2 = Biquad.LowPass(floor.Muffle * 1.6);
+            for (int i = 0; i < buf.Length; i++) buf[i] = (float)lp2.Next(lp.Next(buf[i]));
         }
+        FadeTail(buf, 0.03);
         return buf;
+    }
+
+    private static void FadeTail(float[] buf, double seconds)
+    {
+        int n = Math.Min(buf.Length, At(seconds));
+        for (int i = 0; i < n; i++) buf[buf.Length - 1 - i] *= (float)i / n;
     }
 
     private static float[] Gunshot(Random rng)

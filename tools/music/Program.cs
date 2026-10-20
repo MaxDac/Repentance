@@ -13,14 +13,15 @@
 //     Renders a track exactly as the game does, repeated `loops` times (default 2, so the seam can be heard), to a
 //     16-bit stereo WAV (default <Track>.wav in the current folder), for listening to a change without the game.
 //
-//   dotnet run --project tools/music -- sound <Sound> [out.wav]
-//     Renders one sound effect exactly as the game does to a 16-bit mono WAV (default <Sound>.wav).
+//   dotnet run --project tools/music -- sound <Sound> [out.wav] [count]
+//     Renders one sound effect exactly as the game does to a 16-bit mono WAV (default <Sound>.wav). A count above 1
+//     plays it that many times in a row, cycling the variants with the game's pitch jitter, like a walk of footsteps.
 
 using Repentance;
 
 const string Mis = "https://theremin.music.uiowa.edu/sound%20files/MIS/";
 const string Usage =
-    "usage: dotnet run --project tools/music -- recordings | render <Track> [out.wav] [loops] | sound <Sound> [out.wav]";
+    "usage: dotnet run --project tools/music -- recordings | render <Track> [out.wav] [loops] | sound <Sound> [out.wav] [count]";
 
 // the chromatic scales each recorded instrument (other than the piano) is cut from: file, first and last note
 var scales = new Dictionary<Instrument, (string Url, string Low, string High)[]>
@@ -53,7 +54,7 @@ switch (args.FirstOrDefault())
         Render(track, args.Length >= 3 ? args[2] : $"{track}.wav", args.Length >= 4 ? int.Parse(args[3]) : 2);
         return 0;
     case "sound" when args.Length >= 2 && Enum.TryParse<Sound>(args[1], out var sound):
-        RenderSound(sound, args.Length >= 3 ? args[2] : $"{sound}.wav");
+        RenderSound(sound, args.Length >= 3 ? args[2] : $"{sound}.wav", args.Length >= 4 ? int.Parse(args[3]) : 1);
         return 0;
     default:
         Console.Error.WriteLine(Usage);
@@ -62,10 +63,22 @@ switch (args.FirstOrDefault())
         return 1;
 }
 
-void RenderSound(Sound sound, string path)
+void RenderSound(Sound sound, string path, int count)
 {
-    var s = SoundSynth.Render(sound);
-    int rate = SoundSynth.SampleRate;
+    int rate = SoundSynth.SampleRate, gap = (int)(0.45 * rate);
+    var s = count <= 1 ? SoundSynth.Render(sound) : new float[gap * (count - 1) + rate / 2];
+    var jitter = new Random(1);
+    for (int n = 0; n < count && count > 1; n++)
+    {
+        // as Sfx.Step: a random variant at a pitch between 0.94 and 1.06
+        var one = SoundSynth.Render(sound, n % SoundSynth.StepVariants);
+        double pitch = 0.94 + jitter.NextDouble() * 0.12;
+        for (int i = 0; gap * n + i < s.Length && i * pitch < one.Length - 1; i++)
+        {
+            double x = i * pitch; int k = (int)x;
+            s[gap * n + i] += (float)(one[k] + (one[k + 1] - one[k]) * (x - k));
+        }
+    }
     using (var w = new BinaryWriter(File.Create(path)))
     {
         w.Write("RIFF"u8); w.Write(36 + s.Length * 2); w.Write("WAVEfmt "u8); w.Write(16); w.Write((short)1);
