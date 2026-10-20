@@ -258,6 +258,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 ### End of Act 1 - Present day
 
 - Back in the attic, but it's dark and the lamp is on. Leo calls Daniel downstairs for dinner.
+- The screen fades to black. "End of Act One" fades in, then fades out to an empty black screen; "Act Two" fades
+  in, with "The next day" fading in below it two seconds later. Every act change uses the same cards (*End of
+  Act Two*, then *Act Three* / *That night*; *End of Act Three*, then *The next morning*).
 - Micah's 1927 inventory is put aside during the present-day scenes. When the journal picks up again, each act
   starts with a reset satchel: the notepad and lighter plus only what the rest of that act needs.
   - Act 2: revolver, lockpick, the brass box's card, the mirror, Eleanor's cloth, and Faith's ring and cross if he
@@ -721,7 +724,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 
 ### End of Act 2 - Present day, the attic
 
-- Dark again, the father is called for dinner.
+- Dark again, the father is called for dinner. "End of Act Two" fades out to black, then "Act Three" fades in,
+  and "That night" below it (as at the end of Act 1).
 
 ### Act 3 - Present day, bedroom
 

@@ -339,11 +339,7 @@ public partial class Attic : Room
         await Say("...");
         await Talk("dinner_call");
         await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act One");
-        await Wait(2.5);
-        Game.Hud.ShowCaption("Act Two - The next day");
-        await Wait(2.5);
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ActCards("End of Act One", "Act Two", "The next day");
         State.SetFlag("attic_night", false);
         State.SetStoryAct(2);
         State.GiveItem("journal");
@@ -371,11 +367,7 @@ public partial class Attic : Room
         await Say("...");
         await Talk("dinner_call2");
         await Game.Hud.Fade(1, 1.5);
-        Game.Hud.ShowCaption("End of Act Two");
-        await Wait(2.5);
-        Game.Hud.ShowCaption("Act Three - That night");
-        await Wait(2.5);
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.ActCards("End of Act Two", "Act Three", "That night");
         State.SetFlag("attic_night", false);
         State.SetStoryAct(3);
         await Game.ChangeRoom("bedroom", "start");
