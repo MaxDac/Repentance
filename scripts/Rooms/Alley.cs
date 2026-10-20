@@ -38,15 +38,12 @@ public partial class Alley : Room
     private bool InAct3 => State.HasFlag("alley3");
     private bool Dark => State.HasFlag("alley3_dark");
 
-    /// <summary>Act 1: the band rehearsing inside, far off through the open back door. Act 3: the door is shut.</summary>
-
     public override void _Ready()
     {
         base._Ready();
         _lamp = GetNodeOrNull<Sprite2D>("Lamp");
-        // the propped back door has one overlay under the lamp and one on it, so it reads whichever way the lamp flickers
-        foreach (var door in new[] { "DoorOpen", "Lamp/DoorOpenLit" })
-            if (GetNodeOrNull<Sprite2D>(door) is { } open) open.Visible = !InAct3;
+        // propped open in Act 1 until Sal and Tony go back in and shut it; shut in Act 3
+        ShowDoorOpen(!InAct3 && !State.HasFlag("alley_done"));
         if (!InAct3) return;
         // a reload mid-puzzle puts Sal back where the story left him
         if (FindActor("sal") is { } sal && State.HasFlag("alley3_sal_out"))
@@ -124,6 +121,12 @@ public partial class Alley : Room
             // back inside through the club's back door
             if (FindActor("sal") is { } sal) _ = sal.MoveTo(new Vector2(322, 198), 50);
             if (FindActor("bartender") is { } tony) await tony.MoveTo(new Vector2(338, 196), 45);
+            await Wait(0.3);
+            // they go in, kick the brick away and pull the door shut behind them
+            if (FindActor("sal") is { } salIn) salIn.Visible = false;
+            if (FindActor("bartender") is { } tonyIn) tonyIn.Visible = false;
+            Game.Sfx.Play(Sound.DoorClose);
+            ShowDoorOpen(false);
             await Wait(0.4);
             if (!await Player.PlayPose("micah_kneel_rise")) return;
             Player.SetPose(null);
@@ -139,7 +142,9 @@ public partial class Alley : Room
         {
             if (target.Id == "back_door" && verb == Verb.Look)
             {
-                await Say("Propped open on a brick. Light, smoke and a band going over the same sixteen bars, a long way down the hall.");
+                await Say(State.HasFlag("alley_done")
+                    ? "Shut. Through the steel, the band's still going over the same sixteen bars. Nobody's coming back out for me."
+                    : "Propped open on a brick. Light, smoke and a band going over the same sixteen bars, a long way down the hall.");
                 return true;
             }
             if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand) && State.HasFlag("alley_done"))
@@ -209,6 +214,14 @@ public partial class Alley : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>The propped back door has one overlay under the lamp and one on it, so it reads whichever way the lamp
+    /// flickers.</summary>
+    private void ShowDoorOpen(bool open)
+    {
+        foreach (var door in new[] { "DoorOpen", "Lamp/DoorOpenLit" })
+            if (GetNodeOrNull<Sprite2D>(door) is { } overlay) overlay.Visible = open;
     }
 
     /// <summary>One kick: from behind Micah, facing the screen, Sal drives his foot into Micah's belly, and Micah

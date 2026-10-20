@@ -264,6 +264,8 @@ public partial class AutoPlay
         await Until(() => game.Player.PoseName == "micah_kicked");
         await Shot("alley_kick");
         await Until(() => game.Hud.SpeechVisible);
+        int doorsShut = game.Sfx.Count(Sound.DoorClose);
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true, "the club's back door is propped open");
         Check(_poseCounts.GetValueOrDefault("sal_kick") == 2 && _poseCounts.GetValueOrDefault("micah_kicked") == 2 &&
             game.Sfx.Count(Sound.Thunk) - thunks == 2, "Sal kicks Micah in the belly twice, a thud each time");
         Check(game.Player.PoseName == "micah_kneel" && game.Room?.FindActor("sal")?.Poses?.Active == false,
@@ -279,6 +281,9 @@ public partial class AutoPlay
         Check(!game.Player.Poses.Active, "Micah stands before the player leaves the alley");
         Check(game.Room?.FindActor("sal")?.Visible == false && game.Room?.FindActor("bartender")?.Visible == false,
             "Sal and Tony have gone back inside");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false &&
+            game.Room?.GetNodeOrNull<Sprite2D>("Lamp/DoorOpenLit")?.Visible == false &&
+            game.Sfx.Count(Sound.DoorClose) == doorsShut + 1, "and shut the back door behind them");
         Check(game.Room?.FindHotspot("street")?.Visible == true, "the alley street exit is available");
         Check(game.Room?.FindHotspot("street")?.Bounds is { } exit && exit.Position.X < 10 && exit.End.X <= 100 &&
             exit.End.Y <= 192 && exit.Size.Y > 120, "the alley street exit covers the painted passage on the left");
