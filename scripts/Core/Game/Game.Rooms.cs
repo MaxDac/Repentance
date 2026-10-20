@@ -29,6 +29,17 @@ public partial class Game
         return $"room '{room}' has no entry marker '{entry}'";
     }
 
+    /// <summary>
+    /// The door the player is going through swings open (once per action): rooms whose door opens on screen call this
+    /// with the animation, and <see cref="ChangeRoom"/> calls it for any <see cref="Hotspot.Door"/> it leaves by.
+    /// </summary>
+    public void OpenDoor()
+    {
+        if (_doorOpened) return;
+        _doorOpened = true;
+        Sfx.Play(Sound.DoorOpen);
+    }
+
     public async Task ChangeRoom(string name, string entry, double fadeInSeconds = 0.35)
     {
         // a typo would otherwise leave the player on a grey screen; stay put and fail loudly instead
@@ -38,8 +49,12 @@ public partial class Game
             return;
         }
         _busy++;
+        // a player walking through a door hears it open as the screen fades and shut behind them in the new room
+        bool door = _actionTarget is { Door: true };
+        _actionTarget = null;
         try
         {
+            if (door) OpenDoor();
             await Hud.Fade(1, 0.35);
             LoadRoomScene(name);
             var marker = Room!.GetNodeOrNull<Node2D>($"Entries/{entry}");
@@ -47,8 +62,13 @@ public partial class Game
             Player.Teleport(Room.EntryPoint(entry), facing);
             if (!SkipRoomEnter) Room.OnArriving(entry);
             await Hud.Fade(0, fadeInSeconds);
+            if (door) Sfx.Play(Sound.DoorClose);
         }
-        finally { _busy--; }
+        finally
+        {
+            _busy--;
+            _doorOpened = false;
+        }
         if (SkipRoomEnter) return;
         await Room!.OnEnter(entry);
         // written once the player is back in control, so entry cutscenes have already set their flags

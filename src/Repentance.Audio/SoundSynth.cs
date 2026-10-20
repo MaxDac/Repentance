@@ -7,7 +7,7 @@ namespace Repentance;
 public enum Sound
 {
     StepWood, StepStone, StepCarpet,
-    Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, Bell,
+    Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, DoorOpen, DoorClose, Bell,
     Rain, Thunder,
 }
 
@@ -42,6 +42,7 @@ public static partial class SoundSynth
         Sound.StepWood or Sound.StepStone => -13f,
         Sound.StepCarpet => -11f,
         Sound.Rustle or Sound.Click => -6f,
+        Sound.DoorOpen or Sound.DoorClose => -8f,
         Sound.Rain => -14f,
         Sound.Gunshot or Sound.Whoosh or Sound.Thunder => 0f,
         _ => -3f,
@@ -70,6 +71,8 @@ public static partial class SoundSynth
             Sound.Scrape => Scrape(rng),
             Sound.Whoosh => Whoosh(rng),
             Sound.DoorSlam => DoorSlam(rng),
+            Sound.DoorOpen => DoorOpen(rng),
+            Sound.DoorClose => DoorClose(rng),
             Sound.Bell => Bell(rng),
             Sound.Rain => Rain(rng),
             Sound.Thunder => Thunder(rng),
