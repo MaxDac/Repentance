@@ -144,6 +144,7 @@ shape = SubResource("Rect_6")
 [node name="StreetDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "street_door"
+Door = true
 DisplayName = "entrance"
 LookText = "The way back out to the street, through the same unmarked door."
 WalkTo = Vector2(40, 226)

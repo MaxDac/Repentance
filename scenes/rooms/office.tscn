@@ -212,6 +212,7 @@ ShowIfFlags = "office_door_open"
 [node name="Door" type="Area2D" parent="Hotspots"]
 script = ExtResource("6_Hotspot")
 Id = "door"
+Door = true
 DisplayName = "door"
 LookText = "My door. My name on the glass, backwards from in here. Like my life."
 WalkTo = Vector2(58, 168)

@@ -113,6 +113,7 @@ public partial class OfficeStorm : Room
         State.SetFlag("storm_door_ajar");
         await Wait(0.12);
         Player.Face(Facing.Right);
+        Game.OpenDoor();
         await Player.PlayPose("micah_open_door");
         State.SetFlag("storm_door_ajar", false);
         State.SetFlag("storm_door_open");

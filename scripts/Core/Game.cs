@@ -31,6 +31,8 @@ public partial class Game : Node
     private string? _hoverItem;
     private int _busy;               // > 0 while a scripted sequence runs
     private int _actionId;
+    private Hotspot? _actionTarget;  // the hotspot the player's current action is on, until it changes room
+    private bool _doorOpened;
     private TaskCompletionSource? _skipSpeech;
     private bool _onTitle;
     private string _roomScene = "";

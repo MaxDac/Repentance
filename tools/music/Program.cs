@@ -12,11 +12,15 @@
 //   dotnet run --project tools/music -- render <Track> [out.wav] [loops]
 //     Renders a track exactly as the game does, repeated `loops` times (default 2, so the seam can be heard), to a
 //     16-bit stereo WAV (default <Track>.wav in the current folder), for listening to a change without the game.
+//
+//   dotnet run --project tools/music -- sound <Sound> [out.wav]
+//     Renders one sound effect exactly as the game does to a 16-bit mono WAV (default <Sound>.wav).
 
 using Repentance;
 
 const string Mis = "https://theremin.music.uiowa.edu/sound%20files/MIS/";
-const string Usage = "usage: dotnet run --project tools/music -- recordings | render <Track> [out.wav] [loops]";
+const string Usage =
+    "usage: dotnet run --project tools/music -- recordings | render <Track> [out.wav] [loops] | sound <Sound> [out.wav]";
 
 // the chromatic scales each recorded instrument (other than the piano) is cut from: file, first and last note
 var scales = new Dictionary<Instrument, (string Url, string Low, string High)[]>
@@ -48,10 +52,28 @@ switch (args.FirstOrDefault())
     case "render" when args.Length >= 2 && Enum.TryParse<Track>(args[1], out var track):
         Render(track, args.Length >= 3 ? args[2] : $"{track}.wav", args.Length >= 4 ? int.Parse(args[3]) : 2);
         return 0;
+    case "sound" when args.Length >= 2 && Enum.TryParse<Sound>(args[1], out var sound):
+        RenderSound(sound, args.Length >= 3 ? args[2] : $"{sound}.wav");
+        return 0;
     default:
         Console.Error.WriteLine(Usage);
         Console.Error.WriteLine($"tracks: {string.Join(", ", Enum.GetNames<Track>())}");
+        Console.Error.WriteLine($"sounds: {string.Join(", ", Enum.GetNames<Sound>())}");
         return 1;
+}
+
+void RenderSound(Sound sound, string path)
+{
+    var s = SoundSynth.Render(sound);
+    int rate = SoundSynth.SampleRate;
+    using (var w = new BinaryWriter(File.Create(path)))
+    {
+        w.Write("RIFF"u8); w.Write(36 + s.Length * 2); w.Write("WAVEfmt "u8); w.Write(16); w.Write((short)1);
+        w.Write((short)1); w.Write(rate); w.Write(rate * 2); w.Write((short)2); w.Write((short)16);
+        w.Write("data"u8); w.Write(s.Length * 2);
+        foreach (var v in s) w.Write((short)Math.Clamp(Math.Round(v * short.MaxValue), short.MinValue, short.MaxValue));
+    }
+    Console.WriteLine($"{Path.GetFullPath(path)}: {sound}, {s.Length / (double)rate:0.00} s");
 }
 
 void Render(Track track, string path, int loops)

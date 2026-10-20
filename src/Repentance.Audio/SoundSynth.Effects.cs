@@ -183,6 +183,45 @@ public static partial class SoundSynth
         return buf;
     }
 
+    /// <summary>A room door opening: the knob turns, the latch clicks free, the hinges creak as it swings.</summary>
+    private static float[] DoorOpen(Random rng)
+    {
+        var buf = Buffer(0.9);
+        Burst(buf, rng, 0, 0.012, 0.25, Biquad.BandPass(1400, 2));
+        Burst(buf, rng, 0.07, 0.0015, 0.7, Biquad.HighPass(2500));
+        Tone(buf, 0.07, 2300, 2250, 0.008, 0.35, attack: 0.0002);
+        Tone(buf, 0.07, 160, 130, 0.02, 0.3);
+        // the hinge: a rubbing squeak whose pitch wanders, swelling and fading
+        int s = At(0.14), n = At(0.65);
+        var wobble = Biquad.LowPass(18);
+        var body = Biquad.BandPass(900, 3);
+        double phase = 0;
+        for (int i = 0; i < n && s + i < buf.Length; i++)
+        {
+            double t = (double)i / n;
+            double env = Math.Sin(Math.PI * t) * Math.Sin(Math.PI * t);
+            double hz = 520 + 140 * t + 25 * Math.Sin(2 * Math.PI * 5 * t);
+            phase += 2 * Math.PI * hz / SampleRate;
+            double grain = Math.Clamp(0.6 + 8 * wobble.Next(Noise(rng)), 0.1, 1.3);
+            double squeak = Math.Sin(phase) + 0.4 * Math.Sin(2 * phase) + 0.2 * Math.Sin(3 * phase);
+            buf[s + i] += (float)(0.22 * env * grain * squeak + 0.12 * env * body.Next(Noise(rng)));
+        }
+        return buf;
+    }
+
+    /// <summary>A room door shutting: the wooden thud against the frame, then the latch catching.</summary>
+    private static float[] DoorClose(Random rng)
+    {
+        var buf = Buffer(0.5);
+        Burst(buf, rng, 0, 0.015, 0.2, Biquad.BandPass(700, 1), attack: 0.004);
+        Tone(buf, 0.02, 120, 75, 0.06, 1.0, attack: 0.002);
+        Burst(buf, rng, 0.02, 0.035, 0.7, Biquad.BandPass(260, 2));
+        Tone(buf, 0.02, 340, 320, 0.03, 0.25);
+        Burst(buf, rng, 0.045, 0.0015, 0.45, Biquad.HighPass(2800));
+        Tone(buf, 0.045, 2100, 2060, 0.008, 0.25, attack: 0.0002);
+        return buf;
+    }
+
     /// <summary>A two-tone door chime: a hammer strikes a high bar ("ding"), then a lower one a major third down ("dong").</summary>
     private static float[] Bell(Random rng)
     {
