@@ -79,6 +79,21 @@ class LibraryCollarArtTests(unittest.TestCase):
         self.assertGreater(min(gap(first, y) for y in range(26, 40)), 0)
         self.assertEqual(min(gap(held, y) for y in range(26, 40)), 0, "Micah's hand is on the librarian's collar")
 
+    def librarian_box(self, frame):
+        """The librarian is everything right of Micah's own sprite."""
+        anchor_x = int(self.meta["micah_collar"]["frames"][0]["anchor"][0])
+        return frame.getchannel("A").crop((anchor_x + sprites.FW // 2, 0, frame.width, frame.height)).getbbox()
+
+    def test_librarian_keeps_his_feet_on_the_floor(self):
+        floor = self.librarian_box(self.frames("micah_collar")[0])[3]
+        for name in NAMES:
+            for i, frame in enumerate(self.frames(name)):
+                self.assertEqual(self.librarian_box(frame)[3], floor, f"{name} frame {i}: Micah can't lift him")
+
+    def test_micah_drags_the_librarian_nearer(self):
+        first, held = self.frames("micah_collar")[0], self.frames("micah_collar")[-1]
+        self.assertLessEqual(self.librarian_box(held)[2], self.librarian_box(first)[2] - 8)
+
 
 if __name__ == "__main__":
     unittest.main()

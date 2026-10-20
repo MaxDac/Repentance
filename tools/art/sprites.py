@@ -1270,49 +1270,52 @@ def kiss_strip():
     action_strip("micah_kiss", frames, seconds, anchor=(anchor_x, FH - 3))
 
 
-# In the library, Micah hauls the librarian up by the collar: stopped facing right COLLAR_GAP pixels short of him (the
-# librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, grabs the shirt collar under the bow tie with
-# his near hand and pulls him up onto his toes; the librarian turns to him, straightens out of his stoop and lifts his
-# hands. micah_collar ends on the held grab (kept through the dialogue); micah_collar_release lets go and steps back,
-# ending on both idle sprites exactly where they stood. Played on the player with the librarian actor hidden.
-# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, lift, his arms or None,
-# seconds)
+# In the library, Micah grabs the librarian by the collar and drags him in: stopped facing right COLLAR_GAP pixels short
+# of him (the librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, takes a fistful of shirt collar
+# under the bow tie with his near hand and yanks him close, leaning back into the pull; the librarian, both feet still
+# on the floor, stumbles a step towards him, pitched forward off balance with his hands up. micah_collar ends on the
+# held grab (kept through the dialogue); micah_collar_release lets go and steps back while the librarian straightens
+# and steps back, ending on both idle sprites exactly where they stood. Played on the player with the librarian actor
+# hidden.
+# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, pull (pixels he is dragged
+# towards Micah), his arms or None, seconds)
 COLLAR_GAP, COLLAR_RISE, COLLAR_W = 46, 2, 136
 _LIB_IDLE = dict(arms=_arms("fold"), lean=9.0, nod=0.006)
 _GRIP_REACH = ((0.13, 0.31, 0.13), (0.1, 0.25, 0.25), (0.075, 0.235, 0.285))
-_GRIP = ((0.13, 0.30, 0.15), (0.09, 0.24, 0.27), (0.065, 0.225, 0.305))
+_GRIP_PULL = ((0.12, 0.35, 0.06), (0.09, 0.27, 0.17), (0.065, 0.25, 0.2))
+_GRIP = ((0.12, 0.37, 0.03), (0.09, 0.28, 0.13), (0.065, 0.26, 0.16))
 _HANDS_UP = ((0.17, 0.36, 0.02), (0.18, 0.25, 0.06), (0.175, 0.22, 0.07))
 _HANDS_HALF = ((0.16, 0.38, 0.04), (0.13, 0.32, 0.1), (0.12, 0.3, 0.11))
 COLLAR_KEYS = [
     (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
     (8, 80, 6.0, _GRIP_REACH, 50, 6.0, 0, _HANDS_HALF, 0.15),
-    (16, 90, 8.0, _GRIP, 70, 1.0, 2, _HANDS_UP, 0.15),
-    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.6),
+    (10, 90, 0.0, _GRIP_PULL, 70, 12.0, 6, _HANDS_UP, 0.12),
+    (10, 90, -3.0, _GRIP, 75, 14.0, 10, _HANDS_UP, 0.6),
 ]
 COLLAR_RELEASE_KEYS = [
-    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.2),
-    (12, 80, 2.0, None, 60, 3.0, 0, _HANDS_HALF, 0.2),
-    (6, 70, 0.0, None, 45, 7.0, 0, None, 0.25),
+    (10, 90, -3.0, _GRIP, 75, 14.0, 10, _HANDS_UP, 0.2),
+    (8, 80, 0.0, None, 60, 8.0, 5, _HANDS_HALF, 0.2),
+    (4, 70, 0.0, None, 45, 7.0, 2, None, 0.25),
     (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
 ]
 
 
-def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, lift, lib_arms):
+def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, pull, lib_arms):
     from PIL import Image
     mx0 = 20
     anchor_x = mx0 + FW // 2
-    lx = anchor_x + COLLAR_GAP - NPC_W // 2
+    lx = anchor_x + COLLAR_GAP - NPC_W // 2 - pull
     img = Image.new("RGBA", (COLLAR_W, FH))
     if lib_arms is None:
         lib_pose = pose(lib_yaw, **dict(_LIB_IDLE, lean=lib_lean))
     else:
         near, far = ("pts",) + lib_arms, ("pts",) + tuple((-x, y, z) for x, y, z in lib_arms)
-        # on his toes: heels up, feet pointing down
-        legs = {1: (2, 2, -35 if lift else 0), -1: (-2, 4, -35 if lift else -6)} if lift else None
-        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004,
-                        **({"legs": legs} if legs else {}))
+        # dragged off balance: a stumbling step towards Micah, both soles flat on the floor
+        stride = min(pull, 10)
+        legs = {1: (stride, 3, 0), -1: (-stride * 0.6, 5, 0)}
+        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004, legs=legs)
     lib = figure(LIBRARIAN, lib_pose, NPC_W, FH).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-    img.alpha_composite(lib, (lx, -COLLAR_RISE - lift))
+    img.alpha_composite(lib, (lx, -COLLAR_RISE))
     ps = pose(yaw, lean=lean)
     if arm:
         ps["arms"] = {1: ("pts",) + arm, -1: ("side", 0, 0, 0)}

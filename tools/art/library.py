@@ -251,8 +251,54 @@ def bookcase(img, x0, x1, shelf_top=14, seed=0):
     shadow(img, "rect", [x0, 0, x1, FLOOR], 0.1, 10)
 
 
+LEFT_CASE = (62, 128)  # the bookcase left of the chimney breast, beside the hall door
+HALL_DOOR = (16, 44, 54, 154)  # the door leaf (x0, y0, x1, y1) in paint coordinates, its foot on the floor line
+
+
+def hall_door(img):
+    """The hall door on the left wall: a moulded mahogany architrave with a cornice, a six-panel door lit from the
+    window across the room, a brass knob, escutcheon and kick plate."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = HALL_DOOR
+    # architrave and cornice
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1], fill=MAHOGANY_D)
+    d.rectangle([x0 - 4, y0 - 4, x1 + 4, y1], fill=MAHOGANY_L)
+    d.rectangle([x0 - 2, y0 - 2, x1 + 2, y1], fill=MAHOGANY)
+    d.line([(x1 + 3, y0 - 3), (x1 + 3, y1)], fill=hx("8a5238"))
+    d.rectangle([x0 - 8, y0 - 11, x1 + 8, y0 - 6], fill=MAHOGANY, outline=MAHOGANY_D)
+    d.line([(x0 - 7, y0 - 10), (x1 + 7, y0 - 10)], fill=hx("8a5238"))
+    d.rectangle([x0 - 9, y0 - 13, x1 + 9, y0 - 12], fill=GOLD)
+    d.line([(x0 - 6, y0 - 6), (x1 + 6, y0 - 6)], fill=hx("1e0d08"))
+    # the leaf
+    vgrad(img, (x0, y0, x1, y1), hx("5e2c1a"), hx("40200f"))
+    d.rectangle([x0, y0, x1, y1], outline=hx("1e0c07"))
+    d.line([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1)], fill=hx("7a4430"))
+    # six recessed panels: two short, two tall, two at the foot; lit on the lower left inner edges
+    mid = (x0 + x1) // 2
+    for py0, py1 in ((y0 + 5, y0 + 22), (y0 + 27, y0 + 70), (y0 + 75, y1 - 7)):
+        for px0, px1 in ((x0 + 4, mid - 2), (mid + 2, x1 - 4)):
+            d.rectangle([px0, py0, px1, py1], fill=hx("4a2414"), outline=hx("26110b"))
+            d.line([(px0 + 1, py1 - 1), (px1 - 1, py1 - 1)], fill=hx("6e3a24"))
+            d.line([(px1 - 1, py0 + 1), (px1 - 1, py1 - 1)], fill=hx("7e4630"))
+            d.rectangle([px0 + 2, py0 + 2, px1 - 2, py1 - 2], outline=hx("552a18"))
+    # brass knob and escutcheon on the right, the side the hinges aren't
+    kx, ky = x1 - 5, y0 + 64
+    d.rectangle([kx - 1, ky - 4, kx + 1, ky + 6], fill=BRASS_D)
+    d.line([(kx, ky - 3), (kx, ky + 5)], fill=BRASS)
+    d.ellipse([kx - 3, ky - 2, kx + 1, ky + 2], fill=BRASS, outline=BRASS_D)
+    d.point((kx - 1, ky - 1), fill=BRASS_L)
+    d.point((kx, ky + 4), fill=hx("140805"))
+    for hy in (y0 + 8, y1 - 16):
+        d.rectangle([x0, hy, x0 + 1, hy + 5], fill=BRASS_D)
+        d.point((x0 + 1, hy + 1), fill=BRASS)
+    # kick plate
+    d.rectangle([x0 + 2, y1 - 5, x1 - 2, y1 - 1], fill=BRASS_D)
+    d.line([(x0 + 2, y1 - 5), (x1 - 2, y1 - 5)], fill=BRASS_L)
+    d.line([(x0 + 3, y1 - 3), (x1 - 3, y1 - 3)], fill=BRASS)
+
+
 def shelves(img):
-    bookcase(img, 16, 128, 10, 2)
+    bookcase(img, *LEFT_CASE, 10, 2)
     bookcase(img, *RIGHT_CASE, 10, 7)
 
 
@@ -463,38 +509,129 @@ def desk_props(img):
     d.point((276, 157), fill=GOLD)
 
 
-def desk_mask():
-    """Opaque pixels of the desk and its props (paint coordinates): painted over two grounds, they agree."""
+def prop_mask(*painters):
+    """Opaque pixels of the painted props (paint coordinates): painted over two grounds, they agree."""
     grounds = []
     for col in ((255, 0, 255), (0, 255, 0)):
         g = Image.new("RGB", (W, H), col)
-        desk(g)
-        desk_props(g)
+        for p in painters:
+            p(g)
         grounds.append(np.asarray(g).astype(int))
     same = np.all(grounds[0] == grounds[1], axis=2)
     return Image.fromarray((same * 255).astype("uint8"), "L")
 
 
-def chairs(img):
+def desk_mask():
+    return prop_mask(desk, desk_props)
+
+
+# The two leather wing armchairs are real props too: build() cuts each out into library_armchair_{left,right}.png,
+# drawn by Y-sorted Sprite2Ds at the floor line of their front feet; their floor shadows stay in the background.
+ARMCHAIRS = {"left": (96, 142), "right": (346, 146)}  # (x0, top) of each chair in paint coordinates
+ARMCHAIR_W, ARMCHAIR_H = 41, 61  # paint footprint from (x0, top): the feet stand on the floor at top + ARMCHAIR_H - 1
+LEATHER = dict(deep=hx("28120e"), dark=hx("3a1c16"), shade=hx("54281e"), mid=hx("70332a"), lit=hx("8a4a38"),
+               high=hx("a65e44"), crease=hx("402019"))
+WALNUT_D, WALNUT, WALNUT_L = hx("29160e"), hx("5a3220"), hx("8a5a3a")
+BRASS_D, BRASS, BRASS_L = hx("6a4a1e"), hx("b08a48"), hx("e8c870")
+
+
+def armchair_box(side):
+    """Crop of a chair sprite in screen coordinates (x0, y0, x1, y1), exclusive."""
+    x0, top = ARMCHAIRS[side]
+    return x0 - 1, top + TOP - 1, x0 + ARMCHAIR_W + 1, top + TOP + ARMCHAIR_H + 1
+
+
+def armchair_sort(side):
+    """Sprite2D position in library.tscn: the middle of the front feet, where they meet the floor."""
+    x0, top = ARMCHAIRS[side]
+    return x0 + ARMCHAIR_W // 2, top + TOP + ARMCHAIR_H - 1
+
+
+def chair_shadows(img):
+    for x0, top in ARMCHAIRS.values():
+        foot = top + ARMCHAIR_H - 1
+        shadow(img, "ellipse", [x0 - 6, foot - 13, x0 + ARMCHAIR_W + 6, foot + 4], 0.28, 5)
+
+
+def armchair(img, x0, top):
+    """A buttoned oxblood leather wing armchair, front on and lit from the window on the right: an arched back with
+    deep diamond tufting, flared wings, rolled scroll arms studded with brass nailheads, a piped seat cushion, a
+    nailed apron and short turned walnut legs."""
     d = ImageDraw.Draw(img)
-    for x0, top in ((96, 142), (346, 146)):
-        x1, seat = x0 + 40, top + 31
-        shadow(img, "ellipse", [x0 - 6, seat + 17, x1 + 7, seat + 34], 0.25, 5)
-        for x, dx in ((x0 + 5, -3), (x1 - 5, 3)):
-            d.line([(x, seat + 5), (x + dx, seat + 31)], fill=hx("29160e"), width=3)
-            d.line([(x, seat + 6), (x + dx, seat + 28)], fill=hx("76503a"))
-        d.rounded_rectangle([x0 + 3, top, x1 - 3, seat], 5, fill=hx("3a1c16"), outline=hx("28120e"))
-        d.rounded_rectangle([x0 + 6, top + 3, x1 - 6, seat - 3], 4, fill=hx("70332a"), outline=hx("8a4a38"))
-        d.line([(x0 + 8, top + 7), (x1 - 8, top + 7)], fill=hx("864334"))
-        for x in (x0 + 14, x0 + 26):
-            for y in (top + 12, top + 23):
-                d.point((x, y), fill=hx("402019"))
-                d.point((x + 1, y + 1), fill=hx("94523e"))
-        d.rounded_rectangle([x0 + 4, seat - 2, x1 - 4, seat + 7], 2, fill=hx("76382c"), outline=hx("381a12"))
-        d.line([(x0 + 7, seat), (x1 - 7, seat)], fill=hx("a05a40"))
-        for x in (x0, x1 - 5):
-            d.rounded_rectangle([x, seat - 10, x + 5, seat + 8], 2, fill=hx("54281e"), outline=hx("2c160e"))
-            d.line([(x + 1, seat - 9), (x + 4, seat - 9)], fill=hx("9a5840"))
+    L = LEATHER
+    x1, seat = x0 + ARMCHAIR_W - 1, top + 31
+    foot = top + ARMCHAIR_H - 1
+    # turned walnut legs: a block under the apron, a bulb, a tapered foot on a brass cup; the back legs set in
+    for lx, lit in ((x0 + 9, False), (x1 - 9, True)):
+        d.rectangle([lx - 1, seat + 17, lx + 1, foot - 7], fill=WALNUT_D)
+    for lx, lit in ((x0 + 4, False), (x1 - 4, True)):
+        d.rectangle([lx - 2, seat + 19, lx + 2, seat + 21], fill=WALNUT, outline=WALNUT_D)
+        d.ellipse([lx - 2, seat + 22, lx + 2, seat + 26], fill=WALNUT, outline=WALNUT_D)
+        d.polygon([(lx - 1, seat + 26), (lx + 1, seat + 26), (lx + 1, foot - 1), (lx - 1, foot - 1)], fill=WALNUT_D)
+        hl = lx + (1 if lit else -1)
+        d.line([(hl, seat + 22), (hl, seat + 25)], fill=WALNUT_L)
+        d.line([(lx + (1 if lit else 0), seat + 27), (lx + (1 if lit else 0), foot - 2)], fill=WALNUT)
+        d.rectangle([lx - 2, foot - 1, lx + 2, foot], fill=BRASS_D)
+        d.point((lx + 1, foot - 1), fill=BRASS_L if lit else BRASS)
+    # the back: a camel-arched top, deep-buttoned, darker towards the seat
+    back = [(x0 + 7, seat), (x0 + 7, top + 6), (x0 + 12, top + 2), (x0 + 20, top), (x1 - 12, top + 2),
+            (x1 - 7, top + 6), (x1 - 7, seat)]
+    d.polygon(back, fill=L["mid"], outline=L["deep"])
+    vgrad(img, (x0 + 9, top + 18, x1 - 9, seat - 1), L["mid"], L["shade"])
+    d.line([(x0 + 13, top + 3), (x0 + 20, top + 1), (x1 - 13, top + 3)], fill=L["high"])
+    d.line([(x1 - 8, top + 7), (x1 - 8, seat - 2)], fill=L["lit"])
+    # diamond tufting: buttons in staggered rows, creases running between them
+    rows = [(top + 8, (x0 + 14, x0 + 20, x0 + 26)), (top + 14, (x0 + 11, x0 + 17, x0 + 23, x0 + 29)),
+            (top + 20, (x0 + 14, x0 + 20, x0 + 26)), (top + 26, (x0 + 11, x0 + 17, x0 + 23, x0 + 29))]
+    for (ya, xa), (yb, xb) in zip(rows, rows[1:]):
+        for bx in xa:
+            for cx in xb:
+                if abs(cx - bx) == 3:
+                    d.line([(bx, ya + 1), (cx, yb - 1)], fill=L["crease"])
+    for y, xs in rows:
+        for bx in xs:
+            d.point((bx, y), fill=L["deep"])
+            d.point((bx + 1, y - 1), fill=L["high"])
+    # flared wings either side of the back, the right one catching the window light
+    for side in (-1, 1):
+        ox, ix = (x0 + 1, x0 + 8) if side < 0 else (x1 - 1, x1 - 8)
+        wing = [(ix, top + 5), (ox, top + 8), (ox, top + 13), (ix + side, seat - 10), (ix, seat - 10)]
+        d.polygon(wing, fill=L["lit"] if side > 0 else L["shade"], outline=L["deep"])
+        d.line([(ix, top + 6), (ox + (-1 if side > 0 else 1), top + 9)], fill=L["high"] if side > 0 else L["mid"])
+    # seat cushion with piping along its front edge
+    d.rounded_rectangle([x0 + 6, seat - 4, x1 - 6, seat + 5], 2, fill=L["mid"], outline=L["deep"])
+    d.line([(x0 + 8, seat - 3), (x1 - 8, seat - 3)], fill=L["lit"])
+    d.line([(x0 + 7, seat + 3), (x1 - 7, seat + 3)], fill=L["high"])
+    d.line([(x0 + 7, seat + 4), (x1 - 7, seat + 4)], fill=L["dark"])
+    # apron below the seat, a row of nailheads along its top
+    d.rectangle([x0 + 3, seat + 6, x1 - 3, seat + 18], fill=L["dark"], outline=L["deep"])
+    vgrad(img, (x0 + 4, seat + 10, x1 - 4, seat + 17), L["shade"], L["dark"])
+    d.line([(x1 - 4, seat + 7), (x1 - 4, seat + 17)], fill=L["mid"])
+    for nx in range(x0 + 5, x1 - 3, 3):
+        d.point((nx, seat + 8), fill=BRASS)
+    for nx in range(x0 + 5, x1 - 3, 6):
+        d.point((nx + 1, seat + 8), fill=BRASS_L)
+    # rolled arms: a padded run from the wing to a scrolled front, nailheads down the front panel
+    for side in (-1, 1):
+        a0, a1 = (x0, x0 + 7) if side < 0 else (x1 - 7, x1)
+        lit = side > 0
+        d.rounded_rectangle([a0, seat - 12, a1, seat + 17], 3, fill=L["mid"] if lit else L["shade"], outline=L["deep"])
+        d.ellipse([a0, seat - 13, a1, seat - 6], fill=L["lit"] if lit else L["mid"], outline=L["deep"])
+        d.arc([a0 + 2, seat - 11, a1 - 2, seat - 8], 180, 450, fill=L["high"] if lit else L["lit"])
+        d.point(((a0 + a1) // 2, seat - 10), fill=L["deep"])
+        d.line([(a1 - 1 if lit else a0 + 1, seat - 5), (a1 - 1 if lit else a0 + 1, seat + 15)],
+               fill=L["high"] if lit else L["mid"])
+        for ny in range(seat - 4, seat + 17, 3):
+            d.point(((a0 + a1) // 2, ny), fill=BRASS_L if lit else BRASS)
+
+
+def chairs(img):
+    for x0, top in ARMCHAIRS.values():
+        armchair(img, x0, top)
+
+
+def side_table(img):
+    d = ImageDraw.Draw(img)
     # small walnut side table by the armchair: a crystal whisky decanter, a tumbler and two books laid flat
     shadow(img, "ellipse", [140, 208, 188, 218], 0.35, 3)
     for (ax, ay), (bx, by) in (((150, 183), (145, 213)), ((176, 183), (181, 213)), ((163, 186), (163, 215))):
@@ -549,16 +686,20 @@ def ladder(img):
     shadow(img, "ellipse", [LADDER_X - 40, 183, LADDER_X + 5, 189], 0.18, 3)
 
 
-def paint(include_desk=True):
+def paint(include_desk=True, include_chairs=True):
     img = Image.new("RGB", (W, H))
     shell(img)
+    hall_door(img)
     arched_window(img)
     fireplace(img)
     shelves(img)
     wall_dressing(img)
     mantle_items(img)
     parquet_floor(img)
-    chairs(img)
+    chair_shadows(img)
+    side_table(img)
+    if include_chairs:
+        chairs(img)
     desk_shadow(img)
     if include_desk:
         desk(img)
@@ -640,14 +781,21 @@ def build():
     base = paint()
     vignette(base, 0.32, tint=(120, 96, 70), blur=42)
     pal = palette_of(base, 128)
-    room = paint(include_desk=False)
+    room = paint(include_desk=False, include_chairs=False)
     vignette(room, 0.32, tint=(120, 96, 70), blur=42)
     px = pixelize(room, pal)
     save(px, "rooms", "library.png")
-    mask = Image.new("L", base.size, 0)
-    mask.paste(desk_mask(), (0, TOP))
-    x0, y0, x1, y1 = DESK_BOX
-    bx0, by0, bx1, by1 = mask.getbbox()
-    assert x0 <= bx0 and y0 <= by0 and bx1 <= x1 and by1 <= y1, f"desk {mask.getbbox()} outside {DESK_BOX}"
-    save(cut(pixelize(base, pal), mask).crop(DESK_BOX), "rooms", "library_desk.png")
+    lit = pixelize(base, pal)
+
+    def cut_prop(name, painters, box):
+        mask = Image.new("L", base.size, 0)
+        mask.paste(prop_mask(*painters), (0, TOP))
+        x0, y0, x1, y1 = box
+        bx0, by0, bx1, by1 = mask.getbbox()
+        assert x0 <= bx0 and y0 <= by0 and bx1 <= x1 and by1 <= y1, f"{name} {mask.getbbox()} outside {box}"
+        save(cut(lit, mask).crop(box), "rooms", f"library_{name}.png")
+
+    cut_prop("desk", (desk, desk_props), DESK_BOX)
+    for side, (x0, top) in ARMCHAIRS.items():
+        cut_prop(f"armchair_{side}", (lambda g, x0=x0, top=top: armchair(g, x0, top),), armchair_box(side))
     return px

@@ -43,6 +43,32 @@ class SceneImprovementsTests(unittest.TestCase):
                     Image.open(ROOT / "assets" / "art" / relative) as committed:
                 self.assert_image_equal(generated, committed)
 
+    def test_library_armchairs_are_props_placed_where_they_were_painted(self):
+        scene = (ROOT / "scenes" / "rooms" / "library.tscn").read_text()
+        for side, node in (("left", "ArmchairLeft"), ("right", "ArmchairRight")):
+            block = re.search(rf'\[node name="{node}" type="Sprite2D" parent="World"\](.*?)\n\n', scene, re.S).group(1)
+            x, y = map(int, re.search(r"position = Vector2\((-?\d+), (-?\d+)\)", block).groups())
+            ox, oy = map(int, re.search(r"offset = Vector2\((-?\d+), (-?\d+)\)", block).groups())
+            self.assertEqual((x, y), library.armchair_sort(side))
+            self.assertEqual((x + ox, y + oy), library.armchair_box(side)[:2])
+            with Image.open(self.generated / "rooms" / f"library_armchair_{side}.png") as chair:
+                self.assertEqual(chair.size, tuple(b - a for a, b in zip(library.armchair_box(side)[:2],
+                                                                         library.armchair_box(side)[2:])))
+
+    def test_library_exit_hotspot_covers_the_painted_hall_door(self):
+        scene = (ROOT / "scenes" / "rooms" / "library.tscn").read_text()
+        block = re.search(r'\[node name="Exit" type="Area2D" parent="Hotspots"\](.*?)\n\n\[node', scene, re.S).group(1)
+        shape_block = re.search(r'\[node name="Shape" type="CollisionShape2D" parent="Hotspots/Exit"\](.*?)\n\n', scene,
+                                re.S).group(1)
+        cx, cy = map(lambda v: int(float(v)), re.search(r"position = Vector2\(([-\d.]+), ([-\d.]+)\)", shape_block).groups())
+        w, h = map(int, re.search(r'id="Rect_1"\]\nsize = Vector2\((\d+), (\d+)\)', scene).groups())
+        x0, y0, x1, y1 = library.HALL_DOOR
+        self.assertIn('ExitTo = "chicago_map"', block)
+        self.assertLessEqual(cx - w // 2, x0)
+        self.assertGreaterEqual(cx + w // 2, x1)
+        self.assertLessEqual(cy - h // 2, y0 + library.TOP)
+        self.assertGreaterEqual(cy + h // 2, y1 + library.TOP)
+
     def test_motel_mirrors_have_rectangular_frames(self):
         image = Image.new("RGB", (480, 240))
         for box in ((126, 16, 160, 47), (210, 53, 254, 86)):
