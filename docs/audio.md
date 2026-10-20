@@ -17,6 +17,16 @@ For listening checks, `tools/run/game.sh` / `tools\run\game.ps1` uses real audio
 suites' dummy driver). Runtime errors are printed and logged to `logs/game.log` as warnings, so inspect the log
 when diagnosing audio; a clean launcher exit alone does not prove sound played.
 
+### Lost sound device
+
+If no output device can be opened at start (headset off or asleep, device held exclusively by another app), Godot logs
+`WASAPI: init_output_device error` and `All audio drivers failed, falling back to the dummy driver`, and stays silent
+for the whole run: it never retries a failed start. `AudioFallback.IsUnintended` (Godot-free) tells this fallback
+from a requested Dummy driver (`--audio-driver Dummy`, `--headless`); `Game.SoundLost` then makes the title and
+settings pages say so and offer **Restart sound**, which autosaves when the game can be saved and relaunches with
+the same arguments (`OS.SetRestartOnExit`); Continue picks the game up. A device lost mid-run (`WASAPI: Current
+output_device invalidated`) is reopened by Godot itself about once a second once Windows has a default device again.
+
 ## Sound effects
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
