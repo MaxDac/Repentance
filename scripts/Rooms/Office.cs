@@ -151,6 +151,7 @@ public partial class Office : Room
         if (player)
         {
             Player.Face(Facing.Right);
+            Game.OpenDoor();
             await Player.PlayPose("micah_open_door");
         }
         else if (FindActor("teddy") is { } teddy)

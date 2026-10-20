@@ -208,7 +208,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   first blows it out). He holds the lit cigarette while he thinks and, every 10 seconds while he talks, takes a drag
   (second strip: hand to mouth, the ember flares, a puff of smoke drifts off). The narration says he has
   hit a dead end.
-- A choice of leads follows. Micah turns each of the first three down, and a refused lead is not offered again:
+- A choice of leads follows. The leads are silent choices (Micah doesn't say them aloud), and the narration, not
+  Micah's voice, turns each of the first three down; a refused lead is not offered again:
   - back to the Blue Lantern and the mob: they would kill him;
   - more questions for Harrington: Micah doesn't like the man and, for a reason he can't name, doesn't want to see
     him until the job's done, if he ever wants it done;

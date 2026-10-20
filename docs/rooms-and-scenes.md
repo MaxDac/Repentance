@@ -40,6 +40,7 @@ interlude bench, checked by `WalkTest.HoleTests`).
 
 | Override | Use |
 |---|---|
+| `void OnArriving(string entry)` | Still black, before the fade-in: stage the arrival's first frame (a held pose). Skipped with `OnEnter` |
 | `Task OnEnter(string entry)` | Arrival cutscene. Guard one-shots with a flag (`seen_lobby`). Not replayed on load |
 | `Task<bool> OnInteract(Verb, Hotspot, string? item)` | Main handler. `switch (target.Id, verb)`; return `true` if handled |
 | `Task<bool> OnCombine(string item, string other)` | Room-only item combinations |
@@ -100,11 +101,15 @@ does not handle it. Scripted moves use `Game.ChangeRoom("<scene>", "<marker>")` 
 can check them. City travel goes through `chicago_map` (flag `on_map`). While the player is Eleanor (interludes),
 generic exits are closed (`Interlude.BlockedExitLine`) and held items refused: her rooms script their own way out.
 
+Set `Door = true` on a hotspot that is a real door to another room (not an archway, curtain, street or stair): the
+player going through it, by exit or scripted `ChangeRoom`, hears it open and shut ([Audio](audio.md#sound-effects)).
+
 ## Invariants (checked by tests)
 
 | Check | Test |
 |---|---|
 | Every exit and literal `ChangeRoom("room","entry")` targets an existing scene and marker | `SceneGraphTests` (unit) |
+| Every `Door` hotspot exits or is handled by a room script that changes room | `SceneGraphTests` |
 | Entry markers and explicit `WalkTo` points stand on the `WalkArea` polygon (allowlist `OffFloorEntries`, currently empty) | `SceneGraphTests` |
 | Every room is reachable from the attic | `SceneGraphTests` |
 | From every entry, every hotspot and exit is reachable without crossing a wall, at the right scale; exits land exactly on their entry | `--walk-test` (`walk` suite) |

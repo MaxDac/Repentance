@@ -302,7 +302,9 @@ CONCIERGE: Good evening, sir. Welcome to the Aurelian.
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
 * {has_item("photo") or knows_note("eleanor")} [Seen this lady?]
+    CUE: show_photo
     BELLBOY: Maybe I have, maybe I haven't. My memory works better when it's been fed.
+    CUE: pocket_photo
     ~ set_flag("bellboy_wants_money")
     -> bellboy.opts
 * [How's business?]
@@ -514,20 +516,20 @@ NUN: Then go with God. And remember that finding a thing is not the same as know
 THOUGHT: The road was empty. No Eleanor under the trees, no taxi pulling away, no footprints in the wet. Just me and the rain and the convent bell.
 THOUGHT: Going on four days she'd been gone from that cell. Four days is a long head start in a town this size. I'd hit a dead end, and I knew it.
 - (leads)
-* [Go back to the Blue Lantern and lean on Tony.]
-    MICAH: Sure. And Sal finishes the job he started in the alley.
-    MICAH: Tony said it plain: come back and they bury me. Moretti's boys don't bluff.
+* [(Go back to the Blue Lantern and lean on Tony.)]
+    THOUGHT: Back to the Blue Lantern? Sure, and let Sal finish the job he started in the alley.
+    THOUGHT: Tony had said it plain: come back and they bury me. Moretti's boys don't bluff.
     -> leads
-* [Go back to Harrington and ask what he left out.]
-    MICAH: Teddy Harrington. Hair oil and a handshake like a wet fish.
-    MICAH: No. I don't want to see that mug again until the job's done.
+* [(Go back to Harrington and ask what he left out.)]
+    THOUGHT: Teddy Harrington. Hair oil and a handshake like a wet fish.
+    THOUGHT: No. I didn't want to see that mug again until the job was done.
     THOUGHT: If I ever wanted it done. I didn't like that thought, so I put it back where I found it.
     -> leads
-* [Take it to the cops at the Chicago Avenue station.]
-    MICAH: And tell them what? A rich man's wife took a powder and the nuns won't talk?
-    MICAH: Half that precinct's on Moretti's payroll. The other half's on Harrington's.
+* [(Take it to the cops at the Chicago Avenue station.)]
+    THOUGHT: And tell them what? A rich man's wife took a powder and the nuns won't talk?
+    THOUGHT: Half that precinct was on Moretti's payroll. The other half was on Harrington's.
     -> leads
-+ [Call it a night. Back to the office.]
++ [(Call it a night. Back to the office.)]
     MICAH: Nothing for it. Back to the office, a bottle, and a long think.
     THOUGHT: Then I saw it, down the hill where the road bends: a tall sign buzzing amber and blue through the rain.
     INSET: motel

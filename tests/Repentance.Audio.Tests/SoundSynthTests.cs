@@ -36,6 +36,17 @@ public class SoundSynthTests
     }
 
     [Fact]
+    public void RoomDoorsAreQuieterThanASlamAndOverInASecond()
+    {
+        foreach (var door in new[] { Sound.DoorOpen, Sound.DoorClose })
+        {
+            Assert.True(SoundSynth.BaseVolumeDb(door) < SoundSynth.BaseVolumeDb(Sound.DoorSlam), $"{door} is softer than a slam");
+            Assert.True(SoundSynth.Render(door).Length <= SoundSynth.SampleRate, $"{door} is over within a second");
+        }
+        Assert.DoesNotContain(SoundSynth.CuesFor("*A car door slams.*"), c => c.Sound is Sound.DoorOpen or Sound.DoorClose);
+    }
+
+    [Fact]
     public void GunshotIsLouderAndLongerThanAFootstep()
     {
         double Energy(float[] s) => s.Sum(v => (double)v * v);
