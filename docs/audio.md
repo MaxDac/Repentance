@@ -1,6 +1,6 @@
 # Audio
 
-Sounds and music are synthesized at startup; the exceptions are a real grand piano, alto sax and double bass, recorded note by note
+Sounds are synthesized at startup and music when a room needs it; the exceptions are a real grand piano, alto sax and double bass, recorded note by note
 (see [Recorded instruments](#recorded-instruments)).
 
 | Part | Godot-free | Role |
@@ -79,10 +79,14 @@ background. It plays on the Music bus, so it follows the music volume; rain ambi
 A room returns its track from `Room.Music`; moving between rooms with the same track does not restart it, and
 moving between two tracks that share a score (`MusicSynth.SharesScore`, e.g. the speakeasy and the alley) carries
 on from the same moment. Tracks are
-about a minute, rendered one at a time on a single background worker queued in `Music._Ready` (a track a room asks
-for moves to the front of the queue; `--no-music` skips rendering and playback); rendering runs the loop twice and
-keeps the second
-pass so filters and reverb have no seam.
+about a minute, rendered only when needed, one at a time on a single background worker; rendering runs the loop
+twice and keeps the second pass so filters and reverb have no seam. `Music` keeps at most `CacheSize` (4) rendered
+tracks as 16-bit PCM (about 5 MB each), evicting the least recently used but never the playing one; the policy is
+the Godot-free `RenderCache`. A room asks for its track, which jumps ahead of everything else, then
+`Game.LoadRoomScene` prefetches the tracks of the rooms its visible exits lead to, so the next room usually starts
+with its music ready. A room whose track is not cached yet stays silent until the render finishes (about a second).
+After each render the worker runs a compacting GC to hand the float buffers back to the system. `--no-music` skips
+rendering and playback.
 
 A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening
 feedback echo, applied after the hall. Instruments: strings, organ stops, piano, muted trumpet, upright bass, drums

@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,22 +7,30 @@ namespace Repentance;
 
 /// <summary>
 /// Loops the room's synthesized background music (<see cref="MusicSynth"/>) on the "Music" bus, whose level follows
-/// <see cref="GameSettings.MusicVolume"/>. Tracks take a moment to render, so they are rendered one at a time on a
-/// background worker (a requested track jumps the queue) and start as soon as they are ready; the same track keeps
-/// playing from room to room, and through the pause menu. With <see cref="Enabled"/> off (<c>--no-music</c>) nothing
-/// is rendered or played, but the requested track is still tracked.
+/// <see cref="GameSettings.MusicVolume"/>. Tracks take a moment to render, so they are rendered only when needed, one
+/// at a time on a background worker: the track a room asks for first, then the tracks of the rooms next door
+/// (<see cref="Prefetch"/>). A track starts as soon as it is ready. Only <see cref="CacheSize"/> renders are kept,
+/// as 16-bit PCM, and the least recently used one is dropped (never the one playing). The same track keeps playing
+/// from room to room, and through the pause menu. With <see cref="Enabled"/> off (<c>--no-music</c>) nothing is
+/// rendered or played, but the requested track is still tracked.
 /// </summary>
 public partial class Music : Node
 {
     public const string BusName = "Music";
 
-    private readonly Dictionary<Track, TaskCompletionSource<float[]>> _renders = new();
-    // tracks still to render, in order; shared with the worker, so only touched under its lock
-    private readonly List<Track> _queue = new();
-    private readonly Dictionary<Track, AudioStreamWav> _streams = new();
+    /// <summary>Renders kept in memory: the track playing plus the guesses for the rooms next door.</summary>
+    public const int CacheSize = 4;
+
+    // main thread only: the worker just renders and hands its PCM back through _done
+    private readonly RenderCache<Track, AudioStreamWav> _cache = new(CacheSize);
+    // finished renders, handed from the worker to the main thread (Godot resources are made there)
+    private readonly ConcurrentQueue<(Track Track, byte[]? Pcm)> _done = new();
     private readonly Dictionary<Track, int> _counts = new();
     private AudioStreamPlayer _player = null!;
     private GameSettings? _settings;
+    private bool _exiting;
+    // where a track still rendering should start once it is ready (a shared score picking up where it was)
+    private float _startFrom;
 
     /// <summary>Whether music is rendered and played at all (off with <c>--no-music</c>, for suites that never check it).</summary>
     public bool Enabled { get; set; } = true;
@@ -48,35 +57,15 @@ public partial class Music : Node
 
     public override void _Ready()
     {
+        // finished renders are picked up even while the game is paused
+        ProcessMode = ProcessModeEnum.Always;
         _player = new AudioStreamPlayer { Name = "Player", Bus = BusName, ProcessMode = ProcessModeEnum.Always };
         AddChild(_player);
         if (!Enabled) return;
-        // the renders run on worker threads, so the instrument recordings are read here, on the main thread
+        // the renders run on a worker thread, so the instrument recordings are read here, on the main thread
         Recordings.Use(path => FileAccess.GetFileAsBytes($"res://{path}"));
         foreach (var instrument in Recordings.Instruments)
             foreach (var midi in Recordings.Needed(instrument).Keys) Recordings.Get(instrument, midi);
-        foreach (var track in System.Enum.GetValues<Track>())
-            _renders[track] = new TaskCompletionSource<float[]>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _queue.AddRange(_renders.Keys);
-        Task.Run(RenderQueue);
-    }
-
-    // One worker, so the boot doesn't keep every core (and the GC) busy rendering all the tracks at once.
-    private void RenderQueue()
-    {
-        while (true)
-        {
-            Track track;
-            lock (_queue)
-            {
-                if (_queue.Count == 0) return;
-                track = _queue[0];
-                _queue.RemoveAt(0);
-            }
-            var done = _renders[track];
-            try { done.SetResult(MusicSynth.Render(track)); }
-            catch (System.Exception ex) { done.SetException(ex); }
-        }
     }
 
     public void Bind(GameSettings settings)
@@ -90,7 +79,8 @@ public partial class Music : Node
     public override void _ExitTree()
     {
         if (_settings != null) _settings.Changed -= Apply;
-        lock (_queue) _queue.Clear();
+        _exiting = true;
+        _cache.ClearQueue();
     }
 
     private void Apply()
@@ -101,59 +91,88 @@ public partial class Music : Node
         AudioServer.SetBusMute(bus, percent <= 0);
     }
 
-    /// <summary>The track's render, moved to the front of the queue if it hasn't started yet.</summary>
-    private Task<float[]> RenderAsync(Track track)
+    /// <summary>
+    /// Renders these tracks in the background, after anything a room has asked for, so they are ready if the player
+    /// goes there next. Replaces the previous guesses; only as many as the cache can hold beside the current track.
+    /// </summary>
+    public void Prefetch(IEnumerable<Track> tracks)
     {
-        lock (_queue)
-            if (_queue.Remove(track)) _queue.Insert(0, track);
-        return _renders[track].Task;
+        if (!Enabled) return;
+        _cache.Prefetch(tracks);
+        StartWorker();
+    }
+
+    // One render at a time, so music never keeps every core (and the GC) busy at once. The next one starts when the
+    // main thread has kept this one.
+    private void StartWorker()
+    {
+        if (_exiting || !_cache.TryStartNext(out var track)) return;
+        Task.Run(() =>
+        {
+            byte[]? pcm = null;
+            try { pcm = MusicSynth.ToPcm16(MusicSynth.Render(track)); }
+            catch (System.Exception ex) { GD.PushError($"rendering {track}: {ex}"); }
+            _done.Enqueue((track, pcm));
+            // a render leaves a few hundred MB of float buffers behind; hand that memory back to the system now
+            System.GC.Collect(System.GC.MaxGeneration, System.GCCollectionMode.Aggressive, blocking: true, compacting: true);
+        });
+    }
+
+    public override void _Process(double delta)
+    {
+        while (_done.TryDequeue(out var done))
+        {
+            if (done.Pcm == null) _cache.Fail(done.Track);
+            else
+            {
+                var stream = ToStream(done.Pcm);
+                _cache.Finish(done.Track, stream);
+                if (Current == done.Track && !_player.Playing) Start(done.Track, stream, _startFrom);
+            }
+            StartWorker();
+        }
     }
 
     /// <summary>Starts (or, with null, stops) the background music; asking for the track already playing changes nothing.
     /// A track sharing the score of the one playing (the same band heard from elsewhere) picks up where it was.</summary>
-    public async void Play(Track? track)
+    public void Play(Track? track)
     {
         if (track == Current) return;
         float from = Current is { } previous && track is { } next && _player.Playing && MusicSynth.SharesScore(previous, next)
             ? _player.GetPlaybackPosition() : 0;
         Current = track;
         _player.Stop();
+        _cache.Pinned = track;
         if (track is not { } t) return;
         _counts[t] = Count(t) + 1;
         if (!Enabled) return;
-        if (!_streams.TryGetValue(t, out var stream))
+        if (_cache.TryGet(t, out var stream)) Start(t, stream, from);
+        else
         {
-            var samples = await RenderAsync(t);
-            if (!IsInsideTree()) return;
-            stream = _streams.GetValueOrDefault(t) ?? (_streams[t] = ToStream(samples));
+            _startFrom = from;
+            _cache.Request(t);
+            StartWorker();
         }
-        if (Current != t || _player.Playing) return;
+    }
+
+    private void Start(Track track, AudioStreamWav stream, float from)
+    {
         _player.Stream = stream;
-        _player.VolumeDb = MusicSynth.BaseVolumeDb(t);
+        _player.VolumeDb = MusicSynth.BaseVolumeDb(track);
         _player.Play(from);
     }
 
     /// <summary>Whether a track has finished rendering and is actually sounding.</summary>
     public bool Playing => _player.Playing;
 
-    private static AudioStreamWav ToStream(float[] stereo)
+    private static AudioStreamWav ToStream(byte[] pcm) => new()
     {
-        var bytes = new byte[stereo.Length * 2];
-        for (int i = 0; i < stereo.Length; i++)
-        {
-            short v = (short)Mathf.Clamp(Mathf.RoundToInt(stereo[i] * short.MaxValue), short.MinValue, short.MaxValue);
-            bytes[i * 2] = (byte)(v & 0xff);
-            bytes[i * 2 + 1] = (byte)((v >> 8) & 0xff);
-        }
-        return new AudioStreamWav
-        {
-            Format = AudioStreamWav.FormatEnum.Format16Bits,
-            MixRate = MusicSynth.SampleRate,
-            Stereo = true,
-            Data = bytes,
-            LoopMode = AudioStreamWav.LoopModeEnum.Forward,
-            LoopBegin = 0,
-            LoopEnd = stereo.Length / 2,
-        };
-    }
+        Format = AudioStreamWav.FormatEnum.Format16Bits,
+        MixRate = MusicSynth.SampleRate,
+        Stereo = true,
+        Data = pcm,
+        LoopMode = AudioStreamWav.LoopModeEnum.Forward,
+        LoopBegin = 0,
+        LoopEnd = pcm.Length / 4,
+    };
 }

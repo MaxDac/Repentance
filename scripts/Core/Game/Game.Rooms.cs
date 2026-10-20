@@ -1,4 +1,6 @@
 using Godot;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repentance;
@@ -89,6 +91,36 @@ public partial class Game
         if (Room.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
         else Sfx.SetAmbient(null);
         Music.Play(Room.Music);
+        Music.Prefetch(NeighbourMusic());
+    }
+
+    /// <summary>The music of the rooms this room's open exits lead to, so it is rendered before the player goes there.</summary>
+    private List<Track> NeighbourMusic()
+    {
+        var tracks = new List<Track>();
+        foreach (var exit in Room!.Hotspots.Where(h => h.Visible && h.ExitTo != "").Select(h => h.ExitTo).Distinct())
+            if (RoomMusic(exit) is { } track) tracks.Add(track);
+        return tracks;
+    }
+
+    /// <summary>
+    /// The music a room would play now, read from an instance of its script alone: building the whole scene would
+    /// load its art just to ask.
+    /// </summary>
+    private static Track? RoomMusic(string room)
+    {
+        var path = RoomScenePath(room);
+        if (!ResourceLoader.Exists(path)) return null;
+        var state = GD.Load<PackedScene>(path).GetState();
+        for (int i = 0; i < state.GetNodePropertyCount(0); i++)
+        {
+            if (state.GetNodePropertyName(0, i) != "script") continue;
+            if (state.GetNodePropertyValue(0, i).As<Script>()?.Call("new").As<Room>() is not { } probe) return null;
+            var track = probe.Music;
+            probe.Free();
+            return track;
+        }
+        return null;
     }
 
     /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>

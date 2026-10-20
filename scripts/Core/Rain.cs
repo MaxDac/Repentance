@@ -43,6 +43,11 @@ public partial class Rain : Node2D
     private readonly List<Splash> _splashes = new();
     private RandomNumberGenerator _rng = new();
     private float _splashDebt;
+    // this frame's pixels, as quads for one triangle-array draw (see Pixel)
+    private Vector2[] _points = System.Array.Empty<Vector2>();
+    private Color[] _colors = System.Array.Empty<Color>();
+    private int[] _indices = System.Array.Empty<int>();
+    private int _pixels;
 
     private const float SplashLife = 0.16f;
 
@@ -153,7 +158,40 @@ public partial class Rain : Node2D
     {
         var p = new Vector2(Mathf.Floor(x), Mathf.Floor(y));
         if (p.X < clip.Position.X || p.Y < clip.Position.Y || p.X >= clip.End.X || p.Y >= clip.End.Y) return;
-        DrawRect(new Rect2(p, Vector2.One), c);
+        Pixel(p, c);
+    }
+
+    // Every pixel of a frame goes into one triangle array, drawn in a single call: thousands of DrawRect calls a frame
+    // cost far more than the drawing. Unused quads at the end collapse to a point and draw nothing.
+    private void Pixel(Vector2 p, Color c)
+    {
+        if (_pixels * 4 == _points.Length)
+        {
+            int capacity = Mathf.Max(256, _pixels * 2);
+            System.Array.Resize(ref _points, capacity * 4);
+            System.Array.Resize(ref _colors, capacity * 4);
+            _indices = new int[capacity * 6];
+            for (int q = 0; q < capacity; q++)
+            {
+                int v = q * 4, i = q * 6;
+                _indices[i] = v; _indices[i + 1] = v + 1; _indices[i + 2] = v + 2;
+                _indices[i + 3] = v; _indices[i + 4] = v + 2; _indices[i + 5] = v + 3;
+            }
+        }
+        int at = _pixels++ * 4;
+        _points[at] = p;
+        _points[at + 1] = p + new Vector2(1, 0);
+        _points[at + 2] = p + Vector2.One;
+        _points[at + 3] = p + new Vector2(0, 1);
+        _colors[at] = _colors[at + 1] = _colors[at + 2] = _colors[at + 3] = c;
+    }
+
+    private void FlushPixels()
+    {
+        if (_pixels == 0) return;
+        System.Array.Clear(_points, _pixels * 4, _points.Length - _pixels * 4);
+        RenderingServer.CanvasItemAddTriangleArray(GetCanvasItem(), _indices, _points, _colors);
+        _pixels = 0;
     }
 
     public override void _Draw()
@@ -182,12 +220,13 @@ public partial class Rain : Node2D
         {
             var c = Tint with { A = Tint.A * (1f - s.Age / SplashLife) };
             var p = (Vector2)s.At;
-            if (s.Age < SplashLife * 0.5f) DrawRect(new Rect2(p, Vector2.One), c);
+            if (s.Age < SplashLife * 0.5f) Pixel(p, c);
             else
             {
-                DrawRect(new Rect2(p + new Vector2(-1, -1), Vector2.One), c);
-                DrawRect(new Rect2(p + new Vector2(1, -1), Vector2.One), c);
+                Pixel(p + new Vector2(-1, -1), c);
+                Pixel(p + new Vector2(1, -1), c);
             }
         }
+        FlushPixels();
     }
 }

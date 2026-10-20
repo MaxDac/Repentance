@@ -181,8 +181,11 @@ public partial class AutoPlay
         await Shot("club_hall_masked");
         await game.Perform(Verb.Walk, "exit");
         Check(game.Room?.Name == "ClubLounge", "into the lounge");
-        Check(game.Music.Current == Track.ClubStrings && game.Music.Count(Track.ClubStrings) == clubStarts && game.Music.Playing,
+        Check(game.Music.Current == Track.ClubStrings && game.Music.Count(Track.ClubStrings) == clubStarts,
             "the same strings carry on through the vestibule, hall and lounge without restarting");
+        // tracks render in the background, so the strings may still be on their way
+        await Until(() => game.Music.Playing);
+        Check(game.Music.Playing, "the strings are sounding in the lounge");
         await Shot("club_lounge");
         var stage = game.Perform(Verb.Walk, "stage_exit");
         await Until(() => game.Room?.Name == "ClubStage");
