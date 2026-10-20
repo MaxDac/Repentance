@@ -1,8 +1,9 @@
 """The Blue Lantern: a smoky mob-run speakeasy below a laundry."""
 from PIL import Image, ImageDraw
+import math
 import random
 from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
-                     text, save, cut, floor_boards)
+                     text, save, cut)
 
 FLOOR = 134
 BLUE = hx("4a8ae8")
@@ -51,15 +52,97 @@ def vestibule(img):
     shadow(img, "rect", [0, FLOOR - 6, 140, FLOOR], 0.4, 3)
 
 
+GOLD, GOLD_HI, GOLD_LO = hx("a08030"), hx("e0c068"), hx("5a4018")
+CURTAIN_TIE = 86  # height of the gold tie-back that gathers the drape
+
+
+def _drape_left(y):
+    """Left edge of the drape: hangs straight, is pulled in to the tie-back, then flares to the floor."""
+    if y <= CURTAIN_TIE:
+        t = max(0.0, (y - 14) / (CURTAIN_TIE - 14))
+        return 139 + 8 * t * t
+    t = (y - CURTAIN_TIE) / (FLOOR - CURTAIN_TIE)
+    return 147 - 6 * (1 - (1 - t) ** 2)
+
+
 def curtain(img):
     d = ImageDraw.Draw(img)
     d.rectangle([136, 0, 182, FLOOR], fill=hx("1a0c0c"))
-    for x in range(140, 180, 4):
-        c = hx("7a1420") if (x // 4) % 2 else hx("4a0a14")
-        d.rectangle([x, 8, x + 3, FLOOR], fill=c)
-    d.rectangle([134, 0, 184, 8], fill=hx("a08030"))
-    d.chord([150, 4, 170, 14], 0, 180, fill=hx("a08030"))
+    vgrad(img, (137, 14, 150, FLOOR), hx("140808"), hx("0a0404"))
+    # velvet drape: rounded folds that bunch at the tie-back
+    px = img.load()
+    rnd = random.Random(41)
+    hi, lo, deep = hx("9a2030"), hx("5a0c18"), hx("1a0408")
+    for y in range(10, FLOOR + 1):
+        xl, xr = _drape_left(y), 180.0
+        squeeze = 1.0 + 0.6 * max(0.0, 1 - abs(y - CURTAIN_TIE) / 30)
+        for x in range(int(round(xl)), int(xr) + 1):
+            u = (x - xl) / (xr - xl)
+            f = 0.5 + 0.5 * math.sin(2 * math.pi * u * 5.5 * squeeze + 0.6)
+            col = mix(deep, mix(lo, hi, f), 0.3 + 0.7 * f)
+            col = mul(col, 1.08 - 0.35 * (y - 10) / (FLOOR - 10))
+            if x - xl < 1.5 or xr - x < 1:
+                col = mul(col, 0.5)
+            n = rnd.randint(-3, 3)
+            px[x, y] = tuple(max(0, min(255, c + n)) for c in col)
+    # gold-braided hem
+    for x in range(int(_drape_left(FLOOR - 3)), 181):
+        d.point((x, FLOOR - 3), fill=GOLD_LO)
+        d.point((x, FLOOR - 2), fill=GOLD if x % 3 else GOLD_HI)
+    # tie-back cord and tassel
+    xl = int(_drape_left(CURTAIN_TIE))
+    d.line([(xl - 1, CURTAIN_TIE - 1), (181, CURTAIN_TIE + 1)], fill=GOLD_LO, width=2)
+    d.line([(xl - 1, CURTAIN_TIE - 1), (181, CURTAIN_TIE)], fill=GOLD)
+    for x in range(xl, 181, 3):
+        d.point((x, CURTAIN_TIE - 1 + (x - xl) * 2 // (181 - xl)), fill=GOLD_HI)
+    d.ellipse([xl - 3, CURTAIN_TIE - 1, xl + 1, CURTAIN_TIE + 3], fill=GOLD, outline=GOLD_LO)
+    d.polygon([(xl - 3, CURTAIN_TIE + 3), (xl + 1, CURTAIN_TIE + 3), (xl + 2, CURTAIN_TIE + 11),
+               (xl - 4, CURTAIN_TIE + 11)], fill=GOLD_LO)
+    for x in range(xl - 3, xl + 2, 2):
+        d.line([(x, CURTAIN_TIE + 4), (x, CURTAIN_TIE + 10)], fill=GOLD)
+    d.point((xl - 2, CURTAIN_TIE), fill=GOLD_HI)
     light(img, "rect", [140, 8, 150, FLOOR], hx("ff8060"), 0.15, 3)
+    pelmet(img)
+
+
+def pelmet(img):
+    """Brass rod with ball finials, a carved pelmet board and scalloped gold swags with fringe and tassels."""
+    d = ImageDraw.Draw(img)
+    d.rectangle([131, 1, 187, 3], fill=GOLD_LO)
+    d.line([(131, 1), (187, 1)], fill=GOLD_HI)
+    for x in (130, 188):
+        d.ellipse([x - 2, 0, x + 2, 4], fill=GOLD, outline=GOLD_LO)
+        d.point((x - 1, 1), fill=GOLD_HI)
+    # pelmet board with a moulded edge and a central cartouche
+    d.rectangle([134, 4, 184, 9], fill=GOLD)
+    d.line([(134, 4), (184, 4)], fill=GOLD_HI)
+    d.line([(134, 9), (184, 9)], fill=GOLD_LO)
+    for x in range(136, 184, 4):
+        d.point((x, 6), fill=GOLD_LO)
+        d.point((x + 1, 7), fill=mix(GOLD, GOLD_HI, 0.5))
+    d.polygon([(159, 4), (164, 7), (159, 10), (154, 7)], fill=hx("6a0e18"), outline=GOLD_LO)
+    d.point((159, 6), fill=GOLD_HI)
+    # three swags hanging between the tails
+    for i, (a, b) in enumerate(((134, 151), (151, 168), (168, 184))):
+        depth = 8 if i == 1 else 6
+        bbox = [a, 10 - depth, b, 10 + depth]
+        d.pieslice(bbox, 0, 180, fill=GOLD)
+        d.arc([a + 2, 10 - depth + 2, b - 2, 10 + depth - 2], 20, 160, fill=GOLD_HI)
+        d.arc([a + 4, 10 - depth + 3, b - 4, 10 + depth - 4], 30, 150, fill=GOLD_LO)
+        d.arc(bbox, 0, 180, fill=GOLD_LO)
+        cx = (a + b) / 2
+        for x in range(a + 1, b, 2):
+            t = (x - cx) / ((b - a) / 2)
+            y = 10 + depth * math.sqrt(max(0.0, 1 - t * t))
+            d.line([(x, y + 1), (x, y + 2)], fill=mix(GOLD, GOLD_HI, 0.4) if x % 4 == 1 else GOLD_LO)
+    # tasselled tails at the outer corners and between the swags
+    for x, top, length in ((134, 9, 13), (151, 10, 8), (168, 10, 8), (184, 9, 13)):
+        d.line([(x, top), (x, top + length - 5)], fill=GOLD_LO)
+        d.ellipse([x - 1, top + length - 6, x + 1, top + length - 4], fill=GOLD_HI)
+        d.polygon([(x - 1, top + length - 4), (x + 1, top + length - 4), (x + 2, top + length),
+                   (x - 2, top + length)], fill=GOLD)
+        d.line([(x - 2, top + length), (x + 2, top + length)], fill=GOLD_LO)
+    shadow(img, "rect", [136, 18, 182, 24], 0.35, 3)
 
 
 def main_room(img):
@@ -98,16 +181,66 @@ def stage(img):
 
 def piano(img):
     d = ImageDraw.Draw(img)
-    d.rectangle([240, 82, 288, 120], fill=hx("16100e"))
-    d.rectangle([240, 82, 288, 85], fill=hx("3a2a20"))
-    d.rectangle([243, 96, 285, 100], fill=hx("e8e4d8"))
-    for x in range(244, 285, 3):
-        d.line([(x, 96), (x, 98)], fill=hx("16100e"))
-    d.rectangle([244, 120, 247, 133], fill=hx("16100e"))
-    d.rectangle([281, 120, 284, 133], fill=hx("16100e"))
-    d.rectangle([258, 76, 270, 82], fill=hx("e0d8c0"))  # sheet music
-    d.rectangle([252, 118, 276, 124], fill=hx("2a1a14"))  # stool
-    light(img, "rect", [240, 82, 250, 120], hx("8090c0"), 0.2, 2)
+    body, edge, hi = hx("1c1310"), hx("0a0605"), hx("4a3628")
+    # cabinet, overhanging lid and plinth
+    d.rectangle([240, 84, 288, 130], fill=body)
+    d.rectangle([238, 81, 290, 84], fill=hx("2e2018"))
+    d.line([(238, 81), (290, 81)], fill=hx("6a4c34"))
+    d.line([(238, 84), (290, 84)], fill=edge)
+    d.rectangle([238, 129, 290, 133], fill=hx("140c0a"))
+    d.line([(238, 129), (290, 129)], fill=hi)
+    d.line([(240, 85), (240, 128)], fill=hi)
+    d.line([(288, 85), (288, 128)], fill=edge)
+    # carved upper panel with fretwork and the music desk holding the sheet music
+    d.rectangle([244, 86, 284, 94], outline=edge)
+    d.line([(245, 87), (283, 87)], fill=hi)
+    for x in range(248, 282, 6):
+        d.arc([x, 88, x + 5, 93], 180, 360, fill=hx("3a2a20"))
+    d.rectangle([255, 83, 273, 93], fill=hx("e0d8c0"))
+    d.line([(264, 83), (264, 93)], fill=hx("b0a888"))
+    for y in (85, 87, 89, 91):
+        d.line([(256, y), (263, y)], fill=hx("6a6050"))
+        d.line([(265, y), (272, y)], fill=hx("6a6050"))
+    for x, y in ((258, 86), (261, 88), (267, 84), (270, 90)):
+        d.point((x, y), fill=hx("1a1410"))
+    d.rectangle([252, 93, 276, 94], fill=hx("3a2a20"))
+    # brass candle sconces swung out from the cabinet sides
+    for x, s in ((243, -1), (285, 1)):
+        d.line([(x, 92), (x + 2 * s, 89)], fill=GOLD)
+        d.rectangle([x + 2 * s - 1, 87, x + 2 * s + 1, 89], fill=GOLD_HI)
+        d.line([(x + 2 * s, 84), (x + 2 * s, 86)], fill=hx("e8e0c8"))
+    # fallboard, keys and key slip
+    d.rectangle([241, 95, 287, 96], fill=hx("2e2018"))
+    d.rectangle([243, 97, 285, 102], fill=hx("e8e4d8"))
+    for x in range(246, 285, 3):
+        d.line([(x, 97), (x, 102)], fill=hx("a8a498"))
+    for i, x in enumerate(range(245, 284, 3)):
+        if i % 7 not in (2, 6):
+            d.rectangle([x, 97, x + 1, 99], fill=hx("0e0a08"))
+    d.line([(243, 102), (285, 102)], fill=hx("b0aca0"))
+    d.rectangle([241, 103, 287, 104], fill=hx("3a2a20"))
+    d.line([(241, 103), (287, 103)], fill=hx("6a4c34"))
+    # lower panels and pedals
+    for x0, x1 in ((244, 262), (266, 284)):
+        d.rectangle([x0, 107, x1, 124], outline=edge)
+        d.line([(x0 + 1, 108), (x1 - 1, 108)], fill=hi)
+        d.line([(x0 + 1, 108), (x0 + 1, 123)], fill=hi)
+        d.rectangle([x0 + 3, 110, x1 - 3, 121], outline=hx("2a1c16"))
+    for x in (259, 264, 269):
+        d.rectangle([x - 1, 126, x + 1, 127], fill=GOLD)
+        d.point((x - 1, 126), fill=GOLD_HI)
+    # stool: velvet seat, apron and turned legs
+    d.rectangle([251, 114, 277, 117], fill=hx("4a0c18"))
+    d.line([(251, 114), (277, 114)], fill=hx("8a2030"))
+    d.rectangle([252, 118, 276, 120], fill=hx("2a1a14"))
+    d.line([(252, 118), (276, 118)], fill=hx("5a3a26"))
+    for x in (253, 274):
+        d.line([(x, 121), (x, 133)], fill=hx("2a1a14"), width=2)
+        d.point((x, 125), fill=hx("5a3a26"))
+        d.point((x, 129), fill=hx("5a3a26"))
+    d.line([(254, 127), (274, 127)], fill=hx("1e120c"))
+    light(img, "rect", [240, 82, 250, 128], hx("8090c0"), 0.2, 2)
+    light(img, "rect", [255, 83, 273, 93], hx("fff0c0"), 0.15, 2)
 
 
 GLYPHS = {
@@ -243,12 +376,41 @@ def bar(img):
 
 def lanterns(img):
     d = ImageDraw.Draw(img)
+    glass, glass_lo, lead = hx("6aa8ff"), hx("3a6ac0"), hx("1a2a4a")
     for x in (210, 300, 380):
-        d.line([(x, 0), (x, 30)], fill=hx("101010"))
-        d.polygon([(x - 6, 30), (x + 6, 30), (x + 4, 44), (x - 4, 44)], fill=hx("6aa8ff"))
-        d.line([(x - 6, 30), (x + 6, 30)], fill=hx("202020"), width=2)
-        d.line([(x, 30), (x, 44)], fill=hx("2a4a8a"))
+        # chain links down to a brass canopy
+        for y in range(0, 24, 2):
+            d.point((x, y), fill=hx("2a2a2e") if (y // 2) % 2 else hx("5a5a60"))
+        d.polygon([(x - 3, 24), (x + 3, 24), (x + 5, 28), (x - 5, 28)], fill=GOLD_LO)
+        d.line([(x - 2, 24), (x + 2, 24)], fill=GOLD_HI)
+        d.rectangle([x - 7, 28, x + 7, 30], fill=GOLD)
+        d.line([(x - 7, 28), (x + 7, 28)], fill=GOLD_HI)
+        d.line([(x - 7, 30), (x + 7, 30)], fill=GOLD_LO)
+        # tapered shade of leaded panes, lit from the bulb inside
+        for y in range(31, 45):
+            hw = 6 - (y - 31) * 2 / 13
+            for px_ in range(int(round(x - hw)), int(round(x + hw)) + 1):
+                u = (px_ - (x - hw)) / (2 * hw)
+                glow = 1 - abs(u - 0.5) * 1.4
+                c = mix(glass_lo, glass, max(0.0, glow))
+                if y > 37:
+                    c = mix(c, hx("d8ecff"), max(0.0, glow - 0.3) * 0.8)
+                d.point((px_, y), fill=c)
+            d.point((int(round(x - hw)), y), fill=lead)
+            d.point((int(round(x + hw)), y), fill=lead)
+        for off in (-2, 2):
+            d.line([(x + off, 31), (x + off * 0.7, 44)], fill=lead)
+        d.line([(x - 6, 37), (x + 6, 37)], fill=lead)
+        d.point((x - 4, 33), fill=hx("e8f4ff"))
+        d.point((x - 4, 34), fill=hx("b0d4ff"))
+        # bulb, drip ring and finial
+        d.ellipse([x - 2, 39, x + 2, 44], fill=hx("fff6d8"))
+        d.rectangle([x - 5, 45, x + 5, 46], fill=GOLD)
+        d.line([(x - 5, 46), (x + 5, 46)], fill=GOLD_LO)
+        d.rectangle([x - 1, 47, x + 1, 48], fill=GOLD_LO)
+        d.point((x, 49), fill=GOLD)
         light(img, "ellipse", [x - 40, 0, x + 40, 90], BLUE, 0.45, 14)
+        light(img, "ellipse", [x - 6, 36, x + 6, 48], hx("fff0c0"), 0.35, 3)
 
 
 def tables(img):
@@ -341,11 +503,76 @@ def runner(img):
     light(img, "ellipse", [180, RUG_BACK - 10, 300, RUG_BACK + 50], hx("8090c0"), 0.15, 10)
 
 
+def _h(*v):
+    """Deterministic hash of integers to [0, 1)."""
+    n = 0x9E3779B1
+    for i in v:
+        n = (n ^ (i & 0xFFFFFFFF)) * 0x85EBCA6B & 0xFFFFFFFF
+        n ^= n >> 13
+    return (n * 0xC2B2AE35 & 0xFFFFFFFF) / 2 ** 32
+
+
+def planks(img):
+    """Worn floorboards in the room's perspective: grain, knots, staggered butt joints, nail heads and scuffs."""
+    px = img.load()
+    vx, vy = RUG_VP
+    y1 = H - 1
+    front = y1 - vy
+    spacing, length = 14, 64
+    c1, c2, seam = hx("2e1e16"), hx("1e140e"), hx("0c0604")
+    for y in range(FLOOR, H):
+        depth = front * front / (y - vy) - front  # floor units from the front edge, about 1 per pixel up close
+        scale = (y - vy) / front
+        for x in range(W):
+            xf = vx + (x - vx) / scale
+            i = math.floor(xf / spacing)
+            u = xf / spacing - i
+            offset = _h(i, 1) * length
+            j = math.floor((depth + offset) / length)
+            v = (depth + offset) / length - j
+            tone = _h(i, j, 2)
+            c = mix(c1, c2, tone)
+            # grain running along the board, wavering with the plank's own figure
+            g = math.sin((u * 5 + 0.6 * math.sin(v * 7 + tone * 6)) * math.pi * (2 + int(tone * 3)))
+            if g > 0.8:
+                c = mul(c, 0.82)
+            elif g < -0.9:
+                c = mul(c, 1.12)
+            # knots
+            ku, kv = _h(i, j, 3), _h(i, j, 4)
+            kd = ((u - (0.25 + 0.5 * ku)) * spacing) ** 2 + ((v - (0.2 + 0.6 * kv)) * length / 3) ** 2
+            if _h(i, j, 5) < 0.35 and kd < 6:
+                c = mul(c, 0.55 if kd < 1.5 else 0.75)
+            # board edges, butt joints and the nail heads beside them
+            if u * spacing < 1.0:
+                c = seam
+            elif u * spacing > spacing - 0.8:
+                c = mul(c, 1.25)
+            row = (front / (y - vy)) ** 2
+            if v * length < 1.2 * row:
+                c = seam
+            elif 1.2 * row <= v * length < 1.2 * row + 1.0 and min(abs(u - 0.25), abs(u - 0.75)) * spacing < 0.6:
+                c = hx("4a3a2c")
+            px[x, y] = c
+    noise(img, (0, FLOOR, W - 1, H - 1), 5, 33)
+    # foot-worn track between the door, the curtain and the bar, and old spills
+    light(img, "polygon", [(30, 150), (470, 150), (480, 200), (10, 210)], hx("6a4a30"), 0.12, 10)
+    rnd = random.Random(19)
+    for _ in range(9):
+        x, y = rnd.randint(10, 470), rnd.randint(FLOOR + 6, H - 6)
+        w = rnd.randint(6, 18)
+        shadow(img, "ellipse", [x - w, y - w // 5, x + w, y + w // 5], 0.35, 2)
+    d = ImageDraw.Draw(img)
+    for _ in range(40):
+        x, y = rnd.randint(0, W - 8), rnd.randint(FLOOR + 2, H - 2)
+        d.line([(x, y), (x + rnd.randint(2, 6), y + rnd.choice((0, 0, 1)))], fill=hx("3e2a1e"))
+    shadow(img, "rect", [0, FLOOR, W - 1, FLOOR + 8], 0.5, 4)
+
+
 def paint():
     img = Image.new("RGB", (W, H))
     main_room(img)
-    floor_boards(img, FLOOR, H - 1, (300, -300), 16, hx("2a1c16"), hx("1e140e"), hx("0e0806"), 9)
-    noise(img, (0, FLOOR, W - 1, H - 1), 5, 33)
+    planks(img)
     d = ImageDraw.Draw(img)
     runner(img)
     # the corners stay black with spilled beer
