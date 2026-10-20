@@ -246,10 +246,15 @@ ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
 # and cuffs piped dark, bare feet, her hair down.
 PYJAMA = "e8e0cc"
-ELEANOR_PYJAMA = dict(ELEANOR, **_CURVES, high_neck=None, torso=PYJAMA, collar=PYJAMA, sleeves=PYJAMA, cuff="3a3040",
+ELEANOR_PYJAMA = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.075, 0.47, 0.08)), high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
                       pants=PYJAMA, coat=None, stockings=None, shoes=ELEANOR["skin"],
-                      decals=_vee(0.27, 0.03, "f4eee0") + [("buttons", 0.29, 0.45, 3, "3a3040", True),
-                                                           ("belt", 0.44, "d4cab2")])
+                      # loose cotton: a one-pixel swell spread over more rows, set a little higher; the open neck
+                      # shows her throat; the waist curves in and out to fuller hips and seat
+                      bust_peak=((-3, 0), (-2, 0), (-1, 1), (0, 1), (1, 1), (2, 1), (3, 0), (4, 0)), bust_y=0.278,
+                      neckline=0.23, hipw=0.1,
+                      profile=ELEANOR_FIGURE["profile"][:5] + [(0.40, 0.05, -0.036, 0.048), (0.47, 0.098, -0.09, 0.05),
+                                                               (0.53, 0.086, -0.082, 0.046)],
+                      decals=_vee(0.29, 0.03, ELEANOR["skin"], top=0.22) + [("buttons", 0.30, 0.45, 3, "3a3040", True)])
 
 
 def _fuller(spec, k=1.1):

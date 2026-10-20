@@ -388,10 +388,10 @@ def figure(spec, ps, fw=56, fh=80):
             shape[0] = shape[0] | cap[0]
         c.put(tuple(shape), torso, "torso")
         if col.get("rear"):  # rounded seat swelling out at the back of the near hip, easing into the thighs
-            side, back, ry = (*col["rear"], 0.525)[:3]
+            side, back, ry, rh = (*col["rear"], 0.525, 0.055)[:4] if len(col["rear"]) < 3 else (*col["rear"], 0.055)[:4]
             rc = P(body([side, ry, -back]))
             rx = H * math.sqrt((hipw * 0.62 * cp) ** 2 + (0.03 * sp) ** 2)
-            c.put(c.ellipse((rc[0], rc[1]), rx, H * 0.055), torso, "torso", cast=False, clip=c.mat < 0)
+            c.put(c.ellipse((rc[0], rc[1]), rx, H * rh), torso, "torso", cast=False, clip=c.mat < 0)
         if col.get("bust") and spec.get("profile") and abs(sp) > 0.3:
             # turned to the side: the same small bust in every frame, one pixel proud of the chest line for three
             # rows, whatever the yaw or stride, kept in front of an arm hanging at her side
