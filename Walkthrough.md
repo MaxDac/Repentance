@@ -326,9 +326,11 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
    the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
    long as she wanted. She walks out again before the morning. The choice is saved:
-   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tells Agatha what she is
-     running from: the Club, the rites, and her own part in them. Agatha, moved, reaches for her; Eleanor stops her
-     gently. Ashamed, Agatha turns it round on her and puts her out at first light.
+   - **Tell her the truth** (`eleanor_refused_abbess`): Eleanor puts the thought away and tries to tell Agatha what
+     she is running from. Ashamed and frightened, she stammers out only that there is a club and that she is on its
+     stage, painted, before Agatha cuts in ("I know... I know enough of that diabolical club..."). No other detail of
+     the Club is given here. Agatha reaches for her; Eleanor stops her gently. Ashamed, Agatha turns it round on her
+     and puts her out at first light.
    - **Seduce her**: Agatha goes along with it at first; at the last moment she turns back, cursing Eleanor for a
      demon, and leaves. Nothing is shown.
    The Club's strings replace the convent piano from the knock until Agatha walks out.
@@ -581,8 +583,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   failed her. Both versions keep "She's a performer." and send Micah to Harrington senior.
   - If Eleanor seduced her, Agatha still calls Eleanor a Jezebel ("She nearly had me fooled, the whore." before
     she breaks, then "Jezebel she is. But it was my fault.").
-  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits she
-    turned it round on Eleanor and put her out at first light, because Eleanor stopped her.
+  - If Eleanor told her the truth (`eleanor_refused_abbess`), the word Jezebel is never said: Agatha admits Eleanor tried to
+    tell her and she wouldn't let her finish, and that she turned it round on Eleanor and put her out at first light, because Eleanor stopped her.
 - The conversation ends with Micah not saying anything, putting away the revolver, and getting out.
   On the way out Micah thinks: "Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's
   name - I'd start there."
