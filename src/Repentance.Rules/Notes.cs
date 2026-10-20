@@ -84,6 +84,9 @@ public static class Notes
             L("She can't go back. I promised I'd never tell where she went.")),
 
         // ---------------------------------------------------------------- Act 2
+        N("taken", "The motel again", "motel_return_done",
+            L("Back at the flophouse, days later. Her room's empty."),
+            L("Two men took her the night I left: a big one and a young one. The clerk knows nothing else.")),
         N("librarian", "The library", "librarian_refused",
             L("The librarian knew the knot on sight and showed me the door."),
             L("Find the book another way. The card catalogue, maybe.")),
@@ -168,7 +171,8 @@ public static class Notes
         (new[] { "convent_road", "convent_corridor" }, new[] { "alley_done" }),
         (new[] { "convent_cell" }, new[] { "nun_talked" }),
         (new[] { "motel_alley", "motel_lobby", "motel_fire_escape" }, new[] { "got_mirror", "convent_dead_end_done" }),
-        (new[] { "motel_night", "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "eleanor_found" }),
+        (new[] { "motel_night" }, new[] { "eleanor_found" }),
+        (new[] { "church_exterior", "church_interior", "chicago_map", "library" }, new[] { "motel_return_done" }),
         (new[] { "club_hall" }, new[] { "librarian_refused", "catalogue_identified", "read_book", "card_decoded" }),
         (new[] { "street", "rose_house" }, new[] { "club_out" }),
         (new[] { "newspaper_morgue" }, new[] { "caleb_club", "nun_threatened" }),

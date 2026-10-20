@@ -181,8 +181,3 @@ def build():
         text(card, (305, y), words, hx("383244"), size=12, mirror=True)
     text(card, (240, 25), "Warmth reveals reversed writing", gold, size=8)
     save(card, "ui", "card_reversed.png")
-    marker = Image.new("RGBA", (64, 28))
-    d = ImageDraw.Draw(marker)
-    d.rectangle([0, 0, 63, 27], fill=hx("352821", 230), outline=gold)
-    text(marker, (32, 14), "HOTEL", gold, size=8)
-    save(marker, "rooms", "map_hotel.png")
