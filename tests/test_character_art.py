@@ -519,6 +519,36 @@ class CharacterArtTests(unittest.TestCase):
                 pixels = frame[frame[..., 3] > 0][:, :3].astype(int)
                 self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any())
 
+    def test_recovery_rolls_onto_hands_and_knees_then_rises_like_the_alley(self):
+        keys = sprites.recover_keys()
+        down = lambda j: j[1][0] > j[0][0] and j[0][1] - j[1][1] < 0.55 * np.hypot(*np.subtract(j[1], j[0]))
+        self.assertTrue(any(down(j) and j[3][1] >= 84 for j in keys), "he goes over onto his hands and knees")
+        alley = [sprites.KNEEL_PUSH, sprites.KNEEL_BACK, sprites.KNEE_UP, sprites.PUSH_OFF]
+        shifted = [[(x + sprites.RECOVER_SHIFT, y) for x, y in grounded_joints(k)] for k in alley]
+        for key in shifted:
+            self.assertIn(key, keys, "from his hands and knees he gets up as in the alley")
+        for i, joints in enumerate(keys[1:], 1):
+            with self.subTest(key=i):
+                hip, shoulder, head = joints[:3]
+                self.assertGreaterEqual(shoulder[0], hip[0], "once sitting up, the trunk never leans back")
+                self.assertGreaterEqual(head[0], shoulder[0] - 1, "the head stays over or ahead of the shoulders")
+        upright = keys[keys.index(shifted[1]):]
+        hips = [j[0][1] for j in upright]
+        self.assertEqual(hips, sorted(hips, reverse=True), "once kneeling up, the hips only rise")
+        self.assertLessEqual(abs(keys[-1][0][0] - 96), 4, "he finishes over the idle frame's feet")
+
+    def test_recovery_has_no_red_tie_streak_between_lying_and_turning_to_idle(self):
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+        red = np.array([int(tie[i:i + 2], 16) for i in (0, 2, 4)])
+        clip = json.loads((ART / "sprites" / "micah_recover.json").read_text())
+        strip = Image.open(ART / "sprites" / "micah_recover.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        for i in range(1, len(clip["frames"]) - 2):
+            with self.subTest(frame=i):
+                frame = np.array(strip.crop((i * width, 0, (i + 1) * width, height)))
+                pixels = frame[frame[..., 3] > 0][:, :3].astype(int)
+                self.assertFalse((np.abs(pixels - red).sum(axis=1) < 30).any())
+
     def test_kneeling_micah_is_on_knees_and_forearms_without_a_red_tie_streak(self):
         hip, shoulder, head, knee, ankle, elbow, hand = sprites.KNEEL
         self.assertLess(knee[1] - hip[1], 20)
