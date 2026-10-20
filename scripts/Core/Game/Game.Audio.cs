@@ -10,8 +10,18 @@ public partial class Game
     public bool? SoundLostOverride { get; set; }
 
     // The process's own arguments: Godot's OS.GetCmdlineArgs() leaves out the engine options it consumed, such as
-    // --audio-driver and --headless.
-    private static string[] LaunchArgs => System.Environment.GetCommandLineArgs().Skip(1).ToArray();
+    // --audio-driver and --headless. On Linux .NET doesn't see Godot's argv, so read it from /proc.
+    private static string[] LaunchArgs
+    {
+        get
+        {
+            const string proc = "/proc/self/cmdline";
+            var argv = System.IO.File.Exists(proc)
+                ? System.IO.File.ReadAllText(proc).TrimEnd('\0').Split('\0')
+                : System.Environment.GetCommandLineArgs();
+            return argv.Skip(1).ToArray();
+        }
+    }
 
     /// <summary>Every real audio driver failed at start, so the game is silent until it is relaunched
     /// (see <see cref="AudioFallback"/>).</summary>
@@ -30,6 +40,8 @@ public partial class Game
 
     private void ReportSoundLost()
     {
-        if (SoundLost) GD.Print("No audio output device could be opened at start; sound is off until the game restarts.");
+        if (SoundLost)
+            GD.Print("No audio output device could be opened at start; sound is off until the game restarts. Launch args: ",
+                string.Join(' ', LaunchArgs));
     }
 }
