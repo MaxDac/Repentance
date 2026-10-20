@@ -63,8 +63,10 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "filing");
         Check(gs.HasFlag("cabinet_open"), "the filing cabinet's middle drawer slides open on the picks");
         await Shot("office_cabinet");
+        int doorsOpened = game.Sfx.Count(Sound.DoorOpen), doorsClosed = game.Sfx.Count(Sound.DoorClose);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Office", "can't leave without the gun, the picks and the money");
+        Check(game.Sfx.Count(Sound.DoorOpen) == doorsOpened, "a door Micah doesn't go through stays quiet");
         await game.Perform(Verb.Hand, "revolver");
         await game.Perform(Verb.Hand, "dollar");
         await game.Perform(Verb.Hand, "lockpick");
@@ -78,6 +80,8 @@ public partial class AutoPlay
         await MouseTest(game);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Lobby", "entered the lobby");
+        Check(game.Sfx.Count(Sound.DoorOpen) == doorsOpened + 1 && game.Sfx.Count(Sound.DoorClose) == doorsClosed + 1,
+            "the office door opens once and shuts once behind Micah");
         Check(game.Music.Current == Track.LobbyPiano, "the house pianist plays in the Aurelian lobby");
 
         await Shot("lobby");
@@ -248,6 +252,7 @@ public partial class AutoPlay
             "the gin is offered only after Tony names the bathtub gin");
         int thunks = game.Sfx.Count(Sound.Thunk);
         await Until(() => game.Room?.Name == "Alley");
+        Check(game.Player.PoseName == "micah_kneel", "Micah is already on his knees when the alley fades in");
         Check(_offerLog.Skip(barOffers).Where(o => o.Knot == "bartender").Count(o => o.Options.Any(l => l.StartsWith("Bathtub?"))) == 1 &&
             CashRules.Balance(gs.HasFlag) == 9, "one gin, charged once");
         Check(game.Room?.Name == "Alley", "the bartender has Sal throw Micah out back");
@@ -436,6 +441,8 @@ public partial class AutoPlay
         await Shot("motel_closeup");
         Check(_offered.TryGetValue("convent_dead_end", out var deadEnd) && deadEnd.Length == 1 && deadEnd[0].Contains("office"),
             "the mob, Harrington and the cops are refused before the office");
+        Check(deadEnd != null && deadEnd.All(o => o.StartsWith('(')),
+            "the leads are silent choices: the narration, not Micah, answers them");
         await Until(() => game.Room is Rooms.MotelAlley && !game.Busy);
         Check(gs.HasFlag("convent_dead_end_done") && gs.HasFlag("seen_motel_alley") && !gs.HasFlag("eleanor_found") &&
             !game.Hud.InsetVisible && game.Player.PoseName == null, "down the hill to the motel's back alley");

@@ -75,6 +75,7 @@ y_sort_enabled = true
 [node name="BackDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "back_door"
+Door = true
 DisplayName = "back door"
 LookText = "The back door to the yard. Moonlight through the glass."
 WalkTo = Vector2(52, 222)
@@ -89,6 +90,7 @@ shape = SubResource("Rect_1")
 [node name="BaizeDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "baize_door"
+Door = true
 DisplayName = "oak door"
 LookText = "Oak boards and iron strap hinges: the line between the servants and the served."
 WalkTo = Vector2(432, 222)
@@ -146,6 +148,7 @@ shape = SubResource("Rect_5")
 [node name="CellarDoor" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "cellar_door"
+Door = true
 DisplayName = "cellar trapdoor"
 LookText = "A trapdoor in the flags with an iron ring. The cellar, where the deliveries went."
 WalkTo = Vector2(306, 248)
