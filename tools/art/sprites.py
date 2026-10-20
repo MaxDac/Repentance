@@ -204,7 +204,7 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
 _STAGE_HAIR = dict(hair_front=0.34, hair_bulge=0.0, hair_front_w=0.7,
                    hair_front_root=0.07,  # the lock joins the hair behind the neck in profile
-                   hair_back=0.40, hair_back_width=1.12, hair_back_trim=0.72, hair_back_shade=-1, hair_unified=True)
+                   hair_back=0.40, hair_back_width=1.12, hair_back_trim=0.72, hair_unified=True)
 ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"],
                          "skin": "ecc4a2", "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
