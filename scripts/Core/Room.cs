@@ -199,6 +199,12 @@ public partial class Room : Node2D
 
     protected virtual void OnRefresh() { }
 
+    /// <summary>
+    /// Called while the screen is still black, after the player is placed and before the fade-in: stage the first
+    /// frame of an arrival cutscene (a pose, a position) so it is already in place when the room appears.
+    /// </summary>
+    public virtual void OnArriving(string entry) { }
+
     /// <summary>Called after the room fades in. <paramref name="entry"/> is the entry marker used.</summary>
     public virtual Task OnEnter(string entry) => Task.CompletedTask;
 
