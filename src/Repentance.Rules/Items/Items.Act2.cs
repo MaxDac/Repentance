@@ -54,5 +54,11 @@ public static partial class Items
             "The pellet with the riddle round it, tied in red. A reporter will know to drown it. Theodore's men won't look twice."),
         new("eleanor_box_packed", "packed brass box", "res://assets/art/items/brass_box.png",
             "The brass box, shut on everything. The card, the matchbook, the bluing, the flower. It belongs in the safe."),
+        new("eleanor_slip", "blank slip of paper", "res://assets/art/items/eleanor_slip.png",
+            "A slip of Aurelian notepaper, still blank. The safe's combination goes on it, in words nobody else would count."),
+        new("eleanor_riddle", "slip of paper", "res://assets/art/items/combination.png",
+            "Three lines of Sunday school in my own hand. The Twelve, December, the day He rested. It goes in the drawer."),
+        new("eleanor_key", "little brass key", "res://assets/art/items/eleanor_key.png",
+            "The only key to the lock I had fitted to the desk drawer. It goes where I go."),
     };
 }

@@ -43,6 +43,23 @@ def riddle_scrap(d, im):
         d.line([(7, y), (x1, y - 1)], fill=INK)
 
 
+def eleanor_slip(d, im):
+    # a blank slip of hotel paper, the Aurelian's gilt rule along the top
+    d.polygon([(4, 5), (27, 3), (28, 20), (5, 21)], fill=PAPER)
+    d.line([(5, 7), (27, 5)], fill=GOLD)
+
+
+def eleanor_key(d, im):
+    # a small brass drawer key, the bow cut like a lily
+    d.ellipse([4, 7, 13, 16], fill=BRASS)
+    d.ellipse([7, 10, 10, 13], fill=(0, 0, 0, 0))
+    d.point((8, 7), fill=BRASS_L)
+    d.rectangle([12, 11, 26, 12], fill=BRASS)
+    d.line([(13, 11), (25, 11)], fill=BRASS_L)
+    d.rectangle([21, 13, 22, 16], fill=BRASS_D)
+    d.rectangle([24, 13, 26, 15], fill=BRASS_D)
+
+
 def red_thread(d, im):
     # a loose loop of red silk thread
     d.arc([4, 4, 22, 20], 20, 340, fill=RED, width=2)
@@ -98,7 +115,7 @@ def hairpin(d, im):
 
 
 ICONS = (("eleanor_box", eleanor_box), ("pellet", pellet), ("riddle_scrap", riddle_scrap),
-         ("red_thread", red_thread), ("compact", compact), ("lipstick", lipstick), ("puff", puff),
+         ("red_thread", red_thread), ("eleanor_slip", eleanor_slip), ("eleanor_key", eleanor_key), ("compact", compact), ("lipstick", lipstick), ("puff", puff),
          ("puff_powdered", puff_powdered), ("hairpin", hairpin))
 
 

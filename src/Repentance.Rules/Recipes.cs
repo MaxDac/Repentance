@@ -87,6 +87,10 @@ public static class Recipes
         new("red_thread", "pellet", "Thread round a bare pellet. It needs the riddle wrapped round it first."),
         new("red_thread", "riddle_scrap", "The thread's to tie the riddle round something. The little pellet."),
         new("red_thread", "eleanor_box", "The box locks on its own. The thread's for the flower."),
+        new("eleanor_riddle", "eleanor_box", "The combination doesn't go in with what it guards. It goes in the drawer."),
+        new("eleanor_riddle", "eleanor_box_packed", "The combination doesn't go in with what it guards. It goes in the drawer."),
+        new("eleanor_slip", "riddle_scrap", "Two slips, two riddles. One for the flower, one for the safe. The desk first."),
+        new("eleanor_key", "eleanor_box", "That key's for the desk drawer, not the box."),
         new("compact", "lipstick", "Powder first, then the mouth. And I'll need the puff for the powder."),
         new("puff", "lipstick", "The puff's for powder, not for lips."),
     };

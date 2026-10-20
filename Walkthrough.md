@@ -85,7 +85,9 @@ described here (other verbs, flavour lines) is left to the implementation.
 #### Eleanor's room at the hotel (room 507)
 
 - New location: a luxurious but lived-in hotel room, ransacked, everything upside down.
-- There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it.
+- There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it. It is no hotel lock:
+  Eleanor had a locksmith fit it, and it is damn hard; it snaps one of his picks before it gives (the lockpick
+  stays in the inventory).
 - Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
   "Those who sat at His table. The days of the month He was born. The day He rested."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
@@ -342,7 +344,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    Eleanor leaves the convent the next morning.
 
 - **Puzzle 17 - The brass box:** she builds the insurance Micah finds later, and locks it away herself. Her lines
-  name its reader as whoever the paper sends, never Micah.
+  name its reader as whoever the paper sends, never Micah. She arrives with two things in her satchel: a blank slip
+  of hotel paper and the only key to the lock she had a locksmith fit to the desk drawer.
   - Hand on the vanity: the open brass box (the card, the matchbook, the bluing already in it) and the bare paper
     water flower, the word inked inside.
   - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
@@ -350,9 +353,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Look on the clothes shows a torn red hem; hand pulls a length of red thread from it.
   - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
     Without the thread, it won't stay wrapped.
-  - Join the flower and the box, then use the packed box on the closet: it goes in the safe, locked.
-  - Wrong joins and wrong items on the closet get a hint in her voice. The drawer waits for the safe, the call
-    for the drawer, and the door for all three; at the door she names the first step still to do.
+  - Join the flower and the box: the packed box.
+  - Hand on the closet opens it: her dresses in a row and, at the back, the safe standing half open. Use the packed
+    box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
+    shuts it and spins the dial. Hand on the open closet shuts it again (optional); she won't shut it on the box
+    while the safe still stands open.
+  - Use the blank slip on the writing desk: she writes the safe's combination as the three references Micah finds.
+    Use it on the drawer to put it in, then her key on the drawer to lock it (she keeps the key).
+  - Wrong joins and wrong items on the closet, safe or drawer get a hint in her voice. The drawer waits for the
+    safe, the call for the locked drawer, and the door for all three; at the door she names the first step still
+    to do.
 5. **The motel room.** She takes a room in sight of the convent (the motel with an empty bed and a bare chair) and watches from the
    window for four days. On the fourth evening she sees Micah, a day after his beating, arrive at the convent door, come out again and light a cigarette in the road, then
    hears him arguing with the clerk downstairs. From the window she sees him in the alley below, on a fruit crate,

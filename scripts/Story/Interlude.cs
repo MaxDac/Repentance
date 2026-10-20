@@ -24,6 +24,8 @@ public static class Interlude
     private static readonly string[] FirstBeats =
     {
         "interlude_box_packed", "interlude_safe_locked", "interlude_drawer_locked", "interlude_phoned",
+        "interlude_closet_open", "interlude_box_in_safe", "interlude_riddle_written",
+        "interlude_riddle_in_drawer",
         "interlude_agatha_met", "interlude_agatha_sorry", "interlude_agatha_proud",
         "interlude_took_box", "interlude_took_scrap", "interlude_took_thread",
     };

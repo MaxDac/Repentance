@@ -1,7 +1,8 @@
 """The Aurelian, room 507: the room Eleanor had the night she vanished. Luxurious, lived in, and turned upside down.
 
 Overlays: the closet thrown open (with the wall safe), the safe door open, the brass box inside it, and the
-lockpicked desk drawer with the slip of paper."""
+lockpicked desk drawer with the slip of paper. For the First Interlude: the tidy closet opened, its safe standing half
+open, and the brass box put inside."""
 import math
 import random
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
@@ -736,7 +737,7 @@ def _closet_carcass(img):
         d.line([(fx - 2, fy - 2), (fx + 1, fy - 2)], fill=hx("6b4428"))
 
 
-def wall_safe(img, opened=False, box=False):
+def wall_safe(img, opened=False, box=False, ajar=False):
     """The wall safe sunk into the back of the closet: a bolted steel door with hinges, a maker's plate, a ticked
     combination dial scratched raw by whoever tried it, and a spoked handle. Open, it shows a shelved steel box and
     the inside of the door with its locking bolts."""
@@ -750,6 +751,19 @@ def wall_safe(img, opened=False, box=False):
     R.line(img, (X0 - 2, Y0 - 2, Z), (X1 + 2, Y0 - 2, Z), SEAM)
     R.line(img, (X1 + 2, Y0 - 2, Z), (X1 + 2, Y1 + 2, Z), SEAM)
     bolt_ys = (Y0 + 6, (Y0 + Y1) / 2, Y1 - 6)
+    if ajar:
+        # the door left standing half open on its left hinge, waiting for the box
+        R.quad(img, [(X0, Y0, Z - 0.5), (X1, Y0, Z - 0.5), (X1, Y1, Z - 0.5), (X0, Y1, Z - 0.5)], CAVITY)
+        if box:
+            R.box(img, X0 + 8, X1 - 4, Y0, Y0 + 8, Z - 0.4, Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
+            px, py = R.P((X0 + X1) / 2 + 2, Y0 + 4, Z + 0.3)
+            d.point((px, py), fill=hx("6a5020"))
+        ex, ez = X0 + 6, Z + 16
+        R.quad(img, [(X0, Y0, Z), (ex, Y0, ez), (ex, Y1, ez), (X0, Y1, Z)], STEEL, STEEL_L)
+        # the dial on the door's face, turned half away
+        cx, cy = R.P(X0 + 3, (Y0 + Y1) / 2, Z + 8.5)
+        d.ellipse([cx - 2, cy - 4, cx + 2, cy + 4], fill=STEEL_D, outline=GOLD)
+        return
     if not opened:
         x0, y0 = (round(v) for v in R.P(X0, Y1, Z + 0.5))
         x1, y1 = (round(v) for v in R.P(X1, Y0, Z + 0.5))
@@ -840,7 +854,7 @@ def wall_safe(img, opened=False, box=False):
         R.line(img, (X0, hy, Z + 0.5), (X0, hy + 3, Z + 0.5), hx("b4b8c0"), 2)
 
 
-def closet(img, opened=False, safe_open=False, box=False, tidy=False):
+def closet(img, opened=False, safe_open=False, box=False, tidy=False, ajar=False):
     X0, X1, Z0, Z1 = CL_X0, CL_X1, CL_Z0, CL_Z1
     a, b = R.P(X0, 0, Z1), R.P(X1, 0, Z1)
     shadow(img, "rect", [a[0] - 2, a[1] - 3, b[0] + 10, a[1] + 3], 0.4, 3)
@@ -892,20 +906,24 @@ def closet(img, opened=False, safe_open=False, box=False, tidy=False):
     R.quad(img, [(X0 + 3, 4, Z0 + 2), (X1 - 3, 4, Z0 + 2), (X1 - 3, 100, Z0 + 2), (X0 + 3, 100, Z0 + 2)], hx("2a1a10"))
     R.line(img, (X0 + 4, 88, Z0 + 12), (X1 - 4, 88, Z0 + 12), GOLD_D, 2)
     d = ImageDraw.Draw(img)
-    for (x, col, h) in ((X0 + 10, LILAC, 40), (X1 - 12, IVORY, 36), (X0 + 24, NAVY, 42)):
+    # the night she left her dresses still hang in a row; after the old man's men, three are left on the rail
+    hanging = (((X0 + 9, LILAC, 40), (X0 + 18, NAVY, 42), (X0 + 27, IVORY, 38), (X1 - 18, LILAC, 36),
+                (X1 - 10, NAVY, 40)) if tidy else ((X0 + 10, LILAC, 40), (X1 - 12, IVORY, 36), (X0 + 24, NAVY, 42)))
+    for (x, col, h) in hanging:
         rx, ry = R.P(x, 88, Z0 + 12)
         d.line([(rx, ry - 2), (rx + 1, ry - 2), (rx, ry + 2)], fill=STEEL_L)
         d.line([(rx - 6, ry + 5), (rx, ry + 2), (rx + 6, ry + 5)], fill=STEEL_L)
         spr = dress(12, h, col, bow=False)
         _stamp(img, spr, rx - spr.width / 2 + 0.5, ry + 3)
-    # clothes yanked off their hangers, heaped at the bottom
-    hx_, hy = R.P(X0 + 4, 4, Z1 - 4)
-    heap = _crumple(dress(9, 26, (hx("8a6a8a"), hx("5a3e5a"), hx("b096b0"), hx("3e2a3e"), hx("1a101a")), bow=False)
-                    .rotate(90, expand=True), 1.2, 9)
-    _stamp(img, heap, hx_ - 1, hy - heap.height + 2)
-    slip = _crumple(dress(7, 16, IVORY, bow=False).rotate(-90, expand=True), 1, 6, 1.0)
-    _stamp(img, slip, hx_ + 16, hy - slip.height + 3)
-    wall_safe(img, safe_open, box)
+    if not tidy:
+        # clothes yanked off their hangers, heaped at the bottom
+        hx_, hy = R.P(X0 + 4, 4, Z1 - 4)
+        heap = _crumple(dress(9, 26, (hx("8a6a8a"), hx("5a3e5a"), hx("b096b0"), hx("3e2a3e"), hx("1a101a")), bow=False)
+                        .rotate(90, expand=True), 1.2, 9)
+        _stamp(img, heap, hx_ - 1, hy - heap.height + 2)
+        slip = _crumple(dress(7, 16, IVORY, bow=False).rotate(-90, expand=True), 1, 6, 1.0)
+        _stamp(img, slip, hx_ + 16, hy - slip.height + 3)
+    wall_safe(img, safe_open, box, ajar)
     # both doors flung wide, their inner faces panelled like the fronts
     for x in (X0, X1):
         R.quad(img, [(x, 6, Z1), (x, 6, Z1 + 24), (x, 100, Z1 + 24), (x, 100, Z1)], DOOR_WOOD, DOOR_LINE)
@@ -1325,7 +1343,7 @@ def tidy_floor(img, bench=True):
     d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
 
 def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True,
-          phone=True):
+          phone=True, ajar=False):
     img = Image.new("RGB", (W, H))
     hotel.shell(img)
     crooked_painting(img, 0 if tidy else -6)
@@ -1333,7 +1351,7 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     hotel.door(img)
     window_night(img, tidy)
     sconces(img)
-    closet(img, closet_open, safe_open, box, tidy)
+    closet(img, closet_open, safe_open, box, tidy, ajar)
     desk(img, drawer_open, paper, tidy)
     if tidy:
         hotel.bed(img)
@@ -1419,4 +1437,14 @@ def build():
     phone.putalpha(mask)
     save(phone.crop(box), "rooms", "eleanor_room_interlude_telephone.png")
     print(f"  eleanor_room_interlude_telephone.png at {box[:2]}, size {(box[2] - box[0], box[3] - box[1])}")
+    # Puzzle 17: her closet opened on the safe she left standing half open, the box put in it, the door shut on it
+    tstates = {
+        "closet_open": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True), tpal),
+        "safe_ajar": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True, ajar=True), tpal),
+        "safe_box": pixelize(paint(tidy=True, bench=False, phone=False, closet_open=True, ajar=True, box=True), tpal),
+    }
+    for name, under in (("closet_open", room), ("safe_ajar", tstates["closet_open"]), ("safe_box", tstates["safe_ajar"])):
+        box = _bbox(under, tstates[name])
+        save(tstates[name].crop(box), "rooms", f"eleanor_room_interlude_{name}.png")
+        print(f"  eleanor_room_interlude_{name}.png at {box[:2]}")
     return px
