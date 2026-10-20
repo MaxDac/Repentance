@@ -313,13 +313,18 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    the room is in her name, the hotel keeps a guest's things, a hotel safe can't be forced quietly, and if they
    catch her they search her first. The riddles keep Theodore's men out; somebody sent there on purpose, with a
    whole night, gets in.
-2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He owes the sisters for the
-   sacramental wine and sends her to the convent. Before Sal drives her, she asks Tony to hold the switch: if the
+2. **The Blue Lantern.** Colour only. Tony questions her; her answers are colour. He sends her to the convent
+   for what he has seen of it, not for any debt: funny business, Father Caleb driving young girls up there after
+   dark and going home alone, a padre's racket Tony doesn't want to know about. Whatever it is, it's the one place
+   in town the Club won't touch. He has no line to the sisters: she is to ring the bell and keep quiet. Micah's
+   narration adds that Eleanor knew where some of those girls had come from: she had brought a few to the Club
+   herself. Micah hears all of this from her at the motel, so his brother's name is in it before Act 2. Before Sal drives her, she asks Tony to hold the switch: if the
    Club gets her back, he calls the Tribune city desk (not the cops: half of them drink at his bar) and says
    "Room 507, the Aurelian. The drawer, then the safe." He agrees: it is leverage on the old man. Micah's
    narration adds that she didn't know, telling him at the motel, that he had already emptied the safe (the
    Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
-3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) calls her "another Jezebel from that
+3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) first takes her for another of the girls who
+   come to the door at night; then she knows the face and the perfume and calls her "a Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
 4. **Convent cell, that night.** After a knock, Agatha comes into the cell past midnight. She sincerely believes
    she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
@@ -546,15 +551,16 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
   return after refusal, but never during the first confession or after acceptance.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
-  Micah does not suspect Caleb of being involved. He reasons his way to him: Eleanor already found refuge at the
-  convent, and maybe not for the first time; the convent belongs to the Church, even though Mother Superior runs it
-  and Caleb runs the parish; so Caleb might know something. Both reasons must be offered before the choice
-  "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb hid her
-  in his sacristy; the established refuge is the convent.
+  Micah has a concrete lead on his brother from Eleanor's story at the motel: Tony told her Father Caleb drives
+  girls up to the convent after dark, and that's the one door the Club won't knock on. Caleb first brushes it off
+  (he drives the sisters' groceries and says their Mass). Micah's second reason: the convent belongs to the Church,
+  even though Mother Superior runs it and Caleb runs the parish; so Caleb might know something. Both reasons must
+  be offered before the choice "They have her, Caleb. If you know anything, tell me." Micah does not claim Caleb
+  hid Eleanor in his sacristy; the established refuge is the convent.
 - After Micah's plea, Caleb tells the truth about the Club. It runs a trafficking ring to keep its Thursday
   "spectacles" supplied with fresh girls: farm girls and immigrant girls taken off the trains at Union Station with
-  promises of work. Some escape and find the convent door; the sisters bring them to Caleb, and together they hide
-  them (new names, a ticket to a parish out of state). Caleb can't stop the traffic, so he keeps his mouth shut,
+  promises of work. Some escape to Caleb's church door; he drives them up to the convent after dark (the funny
+  business Tony saw), and together with the sisters he hides them (new names, a ticket to a parish out of state). Caleb can't stop the traffic, so he keeps his mouth shut,
   and in exchange the Club leaves the convent alone; if he talked, they would simply take other girls and come for
   the ones behind the convent walls. Micah calls him a hypocrite: he preaches repentance, and he could have gone
   to the press. Caleb half-concedes ("I confess it every week. It doesn't get lighter.").
