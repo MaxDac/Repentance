@@ -29,7 +29,7 @@ The solution splits by concern; all projects share `Directory.Build.props` (null
 | Project | Contents | References |
 |---|---|---|
 | `Repentance.csproj` | The Godot game: `scripts/` (framework, rooms, story, UI, debug) | Rules, Audio, Godot, Ink |
-| `src/Repentance.Rules` | `Items*`, `Verbs`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather` | - |
+| `src/Repentance.Rules` | `Items*`, `Verbs`, `SaveData`, `PuzzleRules`, `SwipeGesture`, `Endings`, `Recipes`, `Notes`, `MicahKit`, `InkScan`, `RainWeather`, `RainPanes` | - |
 | `src/Repentance.Audio` | `SoundSynth*`, `MusicSynth*`, `Recordings` | - |
 | `tests/Repentance.Rules.Tests` | xunit: items, recipes, notes, puzzles, rain, endings, saves | Rules |
 | `tests/Repentance.Audio.Tests` | xunit: sound and music synthesis | Audio |
