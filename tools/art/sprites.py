@@ -246,15 +246,17 @@ ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
 # and cuffs piped dark, bare feet, her hair down.
 PYJAMA = "e8e0cc"
-ELEANOR_PYJAMA = dict(ELEANOR, **_CURVES, high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
+ELEANOR_PYJAMA = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.04, 0.52)), high_neck=None, torso=PYJAMA, collar=None,
+                      sleeves=PYJAMA, cuff="3a3040",
                       pants=PYJAMA, coat=None, stockings=None, shoes=ELEANOR["skin"],
                       # loose cotton: a one-pixel swell over four rows, starting a row below the bust line so the
                       # upper chest stays flat; the open neck shows her throat; the waist curves in and out to fuller
                       # hips and seat
                       bust_peak=((-1, 0), (0, 1), (1, 1), (2, 1), (3, 1), (4, 0)), bust_y=0.278,
                       neckline=0.23, hipw=0.1,
-                      profile=ELEANOR_FIGURE["profile"][:5] + [(0.40, 0.05, -0.036, 0.048), (0.47, 0.098, -0.09, 0.05),
-                                                               (0.53, 0.086, -0.082, 0.046)],
+                      # the chest sits a pixel further in than her dress figure's, the seat a pixel closer
+                      profile=ELEANOR_FIGURE["profile"][:4] + [(0.31, 0.095, -0.052, 0.055), (0.40, 0.05, -0.036, 0.048),
+                                                               (0.47, 0.098, -0.075, 0.05), (0.53, 0.086, -0.068, 0.046)],
                       decals=_vee(0.29, 0.03, ELEANOR["skin"], top=0.22) + [("buttons", 0.30, 0.45, 3, "3a3040", True)])
 
 
@@ -1293,7 +1295,8 @@ _BAG_FLOOR_Y = 1.0 - 0.095 * 1.92 - 0.03
 BAG_DOWN_KEYS = [
     (4, {1: (12, 16, 0), -1: (4, 12, -4)}, (0.07, 0.62, 0.08), True, 0.12),
     (8, {1: (26, 40, 0), -1: (12, 32, -6)}, (0.065, _BAG_FLOOR_Y - 0.05, 0.15), True, 0.14),
-    (10, {1: (45, 75, 0), -1: (24, 60, -8)}, (0.065, _BAG_FLOOR_Y - 0.08, 0.15), False, 0.16),
+    # a deep crouch, so her hand comes right down onto the handles rather than drawing them up to her thigh
+    (22, {1: (80, 130, 0), -1: (50, 110, -8)}, (0.065, _BAG_FLOOR_Y - 0.03, 0.15), False, 0.16),
     (6, {1: (18, 28, 0), -1: (8, 22, -6)}, None, False, 0.14),
 ]
 
@@ -1319,8 +1322,8 @@ def _bag_idle(spec, opened=False):
 # hand and with her hand drawn back over it.
 BAG_LIFT_KEYS = [
     BAG_DOWN_KEYS[2][:3] + (2,),
-    (9, {1: (38, 62, 0), -1: (20, 50, -7)}, (0.065, _BAG_FLOOR_Y - 0.07, 0.15), 5),
-    (8.5, {1: (32, 50, 0), -1: (16, 40, -6)}, (0.065, _BAG_FLOOR_Y - 0.06, 0.15), 8),
+    (17, {1: (62, 100, 0), -1: (38, 84, -8)}, (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 5),
+    (12, {1: (44, 70, 0), -1: (25, 56, -7)}, (0.065, _BAG_FLOOR_Y - 0.06, 0.15), 8),
 ]
 
 
@@ -1418,7 +1421,7 @@ def eleanor_bag_strips():
     bag_open = bag_floor_sprites()["duffle_bag_open"]
     frames, seconds = [(_bag_idle(spec), head)], [0.2]
     reach = [(8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2),  # bends to it, opens it, reaches in
-             (10, BAG_DOWN_KEYS[2][1], (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 0.45),
+             (10, {1: (45, 75, 0), -1: (24, 60, -8)}, (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 0.45),
              (8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2)]
     for lean, legs, target, duration in reach:
         frames.append((_bag_frame(spec, lean, legs, target, False, opened=True), head))

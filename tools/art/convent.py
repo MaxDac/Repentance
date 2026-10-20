@@ -1131,7 +1131,7 @@ def cell_bed_art():
         return 0.92 + (y - 197) / (265 - 197) * (1.06 - 0.92)
 
     # seated, the seat rounds up her back from the blanket to the waist
-    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.075, 0.47, 0.08))
+    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.057, 0.47, 0.08))
     H = spec["h"] * SCALE
     thigh = 84
 
@@ -1173,7 +1173,7 @@ def cell_bed_art():
 CELL_SIT_CHEST = {49: 56, 50: 56, 51: 55, 52: 54, 53: 53, 54: 52, 55: 52}
 # Rising for Agatha: (lean, thigh, knee, arms, seat depth, seconds) after the seated frame; the last is her pyjama
 # idle frame. Bent over, the pyjama seat sits closer in (no extra rounded rear), or it would puff out behind her.
-CELL_RISE_KEYS = [(22, 70, 95, "push", 0.07, 0.2), (20, 50, 70, 4, 0.07, 0.18), (9, 22, 30, 2, 0.08, 0.16),
+CELL_RISE_KEYS = [(22, 70, 95, "push", 0.055, 0.2), (20, 50, 70, 4, 0.055, 0.18), (9, 22, 30, 2, 0.065, 0.16),
                   (None, 0, 0, 0, None, 0.3)]
 
 
