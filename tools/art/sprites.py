@@ -1237,6 +1237,63 @@ def kiss_strip():
     action_strip("micah_kiss", frames, seconds, anchor=(anchor_x, FH - 3))
 
 
+# In the library, Micah hauls the librarian up by the collar: stopped facing right COLLAR_GAP pixels short of him (the
+# librarian's WalkTo, his feet COLLAR_RISE pixels higher), he steps in, grabs the shirt collar under the bow tie with
+# his near hand and pulls him up onto his toes; the librarian turns to him, straightens out of his stoop and lifts his
+# hands. micah_collar ends on the held grab (kept through the dialogue); micah_collar_release lets go and steps back,
+# ending on both idle sprites exactly where they stood. Played on the player with the librarian actor hidden.
+# (Micah step in, his yaw, lean, near arm (elbow, wrist, hand) or None, librarian yaw, lean, lift, his arms or None,
+# seconds)
+COLLAR_GAP, COLLAR_RISE, COLLAR_W = 46, 2, 136
+_LIB_IDLE = dict(arms=_arms("fold"), lean=9.0, nod=0.006)
+_GRIP_REACH = ((0.13, 0.31, 0.13), (0.1, 0.25, 0.25), (0.075, 0.235, 0.285))
+_GRIP = ((0.13, 0.30, 0.15), (0.09, 0.24, 0.27), (0.065, 0.225, 0.305))
+_HANDS_UP = ((0.17, 0.36, 0.02), (0.18, 0.25, 0.06), (0.175, 0.22, 0.07))
+_HANDS_HALF = ((0.16, 0.38, 0.04), (0.13, 0.32, 0.1), (0.12, 0.3, 0.11))
+COLLAR_KEYS = [
+    (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
+    (8, 80, 6.0, _GRIP_REACH, 50, 6.0, 0, _HANDS_HALF, 0.15),
+    (16, 90, 8.0, _GRIP, 70, 1.0, 2, _HANDS_UP, 0.15),
+    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.6),
+]
+COLLAR_RELEASE_KEYS = [
+    (16, 90, 6.0, _GRIP, 75, -1.0, 3, _HANDS_UP, 0.2),
+    (12, 80, 2.0, None, 60, 3.0, 0, _HANDS_HALF, 0.2),
+    (6, 70, 0.0, None, 45, 7.0, 0, None, 0.25),
+    (0, PLAYER_IDLE_YAW, 0.0, None, 35, 9.0, 0, None, 0.2),
+]
+
+
+def collar_frame(step, yaw, lean, arm, lib_yaw, lib_lean, lift, lib_arms):
+    from PIL import Image
+    mx0 = 20
+    anchor_x = mx0 + FW // 2
+    lx = anchor_x + COLLAR_GAP - NPC_W // 2
+    img = Image.new("RGBA", (COLLAR_W, FH))
+    if lib_arms is None:
+        lib_pose = pose(lib_yaw, **dict(_LIB_IDLE, lean=lib_lean))
+    else:
+        near, far = ("pts",) + lib_arms, ("pts",) + tuple((-x, y, z) for x, y, z in lib_arms)
+        # on his toes: heels up, feet pointing down
+        legs = {1: (2, 2, -35 if lift else 0), -1: (-2, 4, -35 if lift else -6)} if lift else None
+        lib_pose = pose(lib_yaw, arms={1: near, -1: far}, lean=lib_lean, nod=-0.004,
+                        **({"legs": legs} if legs else {}))
+    lib = figure(LIBRARIAN, lib_pose, NPC_W, FH).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    img.alpha_composite(lib, (lx, -COLLAR_RISE - lift))
+    ps = pose(yaw, lean=lean)
+    if arm:
+        ps["arms"] = {1: ("pts",) + arm, -1: ("side", 0, 0, 0)}
+    img.alpha_composite(figure(MICAH, ps, FW, FH), (mx0 + step, 0))
+    return img, (anchor_x + step, 18)
+
+
+def collar_strips():
+    anchor = (20 + FW // 2, FH - 3)
+    for name, keys in (("micah_collar", COLLAR_KEYS), ("micah_collar_release", COLLAR_RELEASE_KEYS)):
+        frames = [collar_frame(*k[:-1]) for k in keys]
+        action_strip(name, frames, [k[-1] for k in keys], anchor=anchor)
+
+
 def inmate_seated_strip(spec, name):
     """seated_frame's pose (facing right, the same seat as micah_inmate_seated) with action-strip metadata."""
     ps = pose(90, legs={1: (88, 92, 0), -1: (86, 90, 0)}, arms={1: ("swing", 36, 4, 70), -1: ("swing", 30, 4, 74)})
@@ -1344,6 +1401,7 @@ def build():
     eleanor_drink_strip()
     eleanor_phone_strips()
     kiss_strip()
+    collar_strips()
     build_act3()
     build_storm()
 

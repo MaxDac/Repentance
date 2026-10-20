@@ -475,10 +475,13 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   connected triquetra with the motif plates: select Celtic traditions, whose index lists **A. R. Bell**.
   The author listings identify **Rites of the Old Isles, shelf C-17**. Select that entry.
   The volume is behind locked glass; Micah cannot simply take it from the shelves or ladder.
-- Micah has to threaten the librarian with the revolver (use the revolver on him; before asking about the symbol
-  Micah refuses to do it, and before the lookup he needs a precise title). Micah aims the revolver at him while
-  he requests the identified book. The librarian confirms that it describes ancient Celtic rituals and gives it
-  to him if he goes away. Micah stays in the library; the shaken librarian won't say another word, and the
+- Micah has to intimidate the librarian (before asking about the symbol Micah refuses to do it, and before the
+  lookup he needs a precise title). Either way he requests the identified book, the librarian confirms that it
+  describes ancient Celtic rituals and gives it to him if he goes away:
+  - **Hand on the librarian** (canonical): Micah steps in and grabs him by the collar, lifting him onto his toes
+    (one animation for both, the librarian actor hidden), holds him through the request, then lets him go.
+  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
+- Both routes set the same flags. Micah stays in the library; the shaken librarian won't say another word, and the
   player leaves through the exit to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -593,7 +596,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   use the revolver again to threaten her.
   The sister will say "Are you crazy, sir?!"
   Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
-  Micah's madness is escalating with his sin (the librarian at gunpoint, now a nun in her own convent; later he
+  Micah's madness is escalating with his sin (the librarian roughed up, now a nun in her own convent; later he
   shoots the mobster and kills the old man). With the gun on her, Agatha's own repentance begins: she confesses
   that she went to Eleanor's cell past midnight and called it charity, that it was all her fault and that she
   failed her. Both versions keep "She's a performer." and send Micah to Harrington senior.

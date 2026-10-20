@@ -91,8 +91,8 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
 16. **Library, by day**: ask the librarian about the knot (shown full screen). He wants to know where
    the mirror came from; Micah won't say, so neither will he. Consult the desk catalogue: match the
    Celtic triquetra and select Bell's *Rites of the Old Isles*, C-17. The restricted shelves are locked.
-   Micah uses the revolver on the librarian to obtain that book. He hands
-   over a book of Celtic rituals, and the library is off limits from then on.
+   Micah grabs the librarian by the collar (or, if the player prefers, pulls the revolver on him) to obtain
+   that book. He hands over a book of Celtic rituals, and the library is off limits from then on.
 17. **Office**: read the book's concealed-ink instructions, warm the hotel card on the radiator and combine
    it with the mirror. Order the reflected fragments lily, leaf, feather to obtain the Club address.
    The steps can be discovered in a different order; all three clues remain available.

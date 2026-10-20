@@ -843,6 +843,18 @@ LIBRARIAN: Take it. Take it and go, and please don't come back.
 MICAH: Pleasure doing business. Late fees are on me.
 -> END
 
+=== librarian_collar ===
+MICAH: Let's try that again. Closer, this time.
+LIBRARIAN: Unhand me! This is a library!
+MICAH: Then keep your voice down. Bell. "Rites of the Old Isles." C-17. The book about this knot.
+LIBRARIAN: A triquetra. C-Celtic. Old. Older than the saints in Ireland.
+LIBRARIAN: Groves and wells and fires on the hilltops. Rites nobody has any business remembering.
+LIBRARIAN: Y-yes. Bell's book. C-17. A rare book. Someone asked for it just last month.
+LIBRARIAN: Let go of me and it's yours. Take it and go, and please don't come back.
+~ give_item("book")
+MICAH: See? We're getting along fine.
+-> END
+
 // ---------------------------------------------------------------- ACT 2: AFTER THE CLUB
 
 === street_choice ===
