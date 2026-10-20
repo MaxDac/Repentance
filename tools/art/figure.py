@@ -974,12 +974,35 @@ def _cloak(c, cloak, body, P, legs, H, sw, cp, sp):
                 c.bias[iy, ix] += 1
 
 
+def _unify_long_hair(c):
+    """Crown and mane shaded as one mass: one normal field over their union, one flat ramp, wavy strands on top, so
+    the hair behind the head is never a second colour beside the crown. The front locks are left alone."""
+    crown = getattr(c, "crown", None)
+    if crown is None or "hairback" not in c.parts:
+        return
+    u = (crown & c.parts_mask("hair")) | c.parts_mask("hairback")
+    ys, xs = np.nonzero(u)
+    cx, cy = (xs.min() + xs.max() + 1) / 2, (ys.min() + ys.max() + 1) / 2
+    rx, ry = (xs.max() - xs.min() + 1) / 2, (ys.max() - ys.min() + 1) / 2
+    nx = np.clip((c.X - cx) / rx, -1, 1) * 0.8
+    ny = np.clip((c.Y - cy) / ry, -1, 1) * 0.8
+    n = np.stack([nx, ny, np.sqrt(np.clip(1 - nx * nx - ny * ny, 0, 1)) + 0.05], -1)
+    n /= np.linalg.norm(n, axis=-1, keepdims=True)
+    c.n[u] = n[u]
+    c.part[u] = c.parts["hair"]
+    c.bias[u] = 0
+    stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
+    c.bias[u & stripe] -= 1
+
+
 def _long_hair_back(c, col, P, body, H, cp, sp, nod):
-    """Voluminous wavy mane falling to the shoulder blades (drawn behind the head)."""
+    """Voluminous wavy mane falling to the shoulder blades (drawn behind the head). hair_back_trim narrows only its
+    back: the front edge beside the neck, where locks brought forward hang from, stays put."""
     hc = P(body([0, 0.15 + nod, -0.03]))
-    rx = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2) * col.get("hair_back_width", 1.0)
+    full = H * math.sqrt((0.115 * cp) ** 2 + (0.09 * sp) ** 2) * col.get("hair_back_width", 1.0)
+    rx = full * col.get("hair_back_trim", 1.0)
     extension = H * (col.get("hair_back", 0.29) - 0.29) / 2
-    center = (hc[0] - 0.045 * H * sp, hc[1] + extension)
+    center = (hc[0] - 0.045 * H * sp + (full - rx) * float(np.clip(sp * 3, -1, 1)), hc[1] + extension)
     ry = H * 0.14 + extension
     m, nx, ny, nz = c.ellipse(center, rx, ry)
     wave = np.sin(c.Y / 1.7) * 0.9
@@ -990,9 +1013,13 @@ def _long_hair_back(c, col, P, body, H, cp, sp, nod):
         # In profile/3-4 the mane must stay behind the jaw, never under the chin.
         hx0, hy0 = P(body([0, 0.077 + nod, 0.0]))[:2]
         keep &= ~(((c.X - hx0) * math.copysign(1.0, sp) > -1.5) & (c.Y > hy0 + 1))
-    c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False)
+    unified = col.get("hair_unified", False)
+    c.put((keep, nx, ny, nz), col["hair"], "hairback", cast=False, dither=not unified)
     upper = c.parts_mask("hairback") & (c.Y < P(body([0, 0.20 + nod, 0]))[1])
     c.bias[upper] += col.get("hair_back_shade", 0)
+    if unified:
+        c.seamless = tuple(c.seamless) + ("hair", "hairback")
+        _unify_long_hair(c)
 
 
 def _hair_front(c, col, P, body, H, cp, sp, nod):
@@ -1027,6 +1054,16 @@ def _hair_front(c, col, P, body, H, cp, sp, nod):
     c.put((lock, nx, ny, nz), col["hair"], "hair", cast=False)
     stripe = (np.floor(c.X * 2 + np.round(2 * np.sin(c.Y / 2.1))) % 5 == 0)
     c.bias[lock & stripe] -= 1
+    bust = getattr(c, "bust_px", None)
+    if bust is not None:  # no lone pixel of the bust's tip left poking out in front of a lock lying over it
+        f, bump = bust[0], bust[1]
+        for y in np.nonzero(bump.any(1))[0]:
+            xs = np.nonzero(lock[y])[0]
+            if len(xs):
+                lead = xs.max() if f > 0 else xs.min()
+                trim = bump[y] & ((np.arange(c.w) - lead) * f > 0)
+                c.mat[y, trim] = -1
+                bump[y, trim] = False
 
 
 def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
@@ -1081,6 +1118,9 @@ def _hair(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):
     if fringe is not None:  # combed-down strands: darker partings running down to the cut
         hm = c.parts_mask("hair") & fringe & (c.Y > hy_ - hry * 0.95)
         c.bias[hm & (np.floor(c.X) % 3 == 0)] -= 1
+    if style == "long" and col.get("hair_unified"):
+        c.crown = c.parts_mask("hair")
+        _unify_long_hair(c)
 
 
 def _hat(c, col, P, body, H, hx_, hy_, hrx, hry, cp, sp, nod):

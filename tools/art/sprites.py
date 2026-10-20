@@ -73,8 +73,10 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
                   ("belt", 0.42, "d8d0c0")])
 # Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
-# figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat.
+# figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat. Her mane is
+# trimmed at the back (its front edge beside the neck kept) and falls past her shoulder blades.
 ELEANOR_HEAD = dict(skin="ecc4a2", face_w=0.056, jaw_w=0.044, hair_vol=1.6, hair_side=0.85, hair_back_width=0.85,
+                    hair_back_trim=0.72, hair_back=0.40, hair_unified=True,
                     fringe=0.3, front_gaze=True, full_jaw=True, small_lips=True, eye_white="f4eee6", chin_cut=1, level_eyes=True,
                     hair="4a2a1c", hair_style="long", soft_face=True, lips="a8504a", eye="2a1810", brow="2e1a12")
 # In profile her torso is slim and flat: a near-straight back from nape to waist, the front straight down from the
@@ -202,7 +204,7 @@ MASKED_WOMAN_B = dict(MASKED_WOMAN, hair="7a3a22", skin="e2b494", sleeves="e2b49
 _STAGE_HEAD = dict(full_jaw=True, hair="4a2a1c", hair_style="long", lips="a83e3c", eye="3a2416", brow="2e1a12", mask=None)
 _STAGE_HAIR = dict(hair_front=0.34, hair_bulge=0.0, hair_front_w=0.7,
                    hair_front_root=0.07,  # the lock joins the hair behind the neck in profile
-                   hair_back=0.32, hair_back_width=1.12, hair_back_shade=-1)
+                   hair_back=0.40, hair_back_width=1.12, hair_back_trim=0.72, hair_unified=True)
 ELEANOR_STAGE_CLOTHED = {**MASKED_WOMAN, **ELEANOR_FIGURE, **_STAGE_HEAD, **_STAGE_HAIR, "h": MASKED_WOMAN["h"],
                          "skin": "ecc4a2", "sleeves": "ecc4a2", "torso": "781f27",
                          "coat": dict(MASKED_WOMAN["coat"], col="781f27"),
