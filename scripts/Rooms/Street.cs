@@ -8,6 +8,11 @@ public partial class Street : Room
 {
     public override Track? Music => Track.StreetTraffic;
 
+    public override void OnArriving(string entry)
+    {
+        if (entry == "thrown_out") Player.SetPose("micah_supine");
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "thrown_out") await Game.Run(ThrownOut);
@@ -16,7 +21,6 @@ public partial class Street : Room
     /// <summary>Act 2: Bruno dumps Micah on the pavement outside the Club. He thinks about Rose and Tommy, then chooses.</summary>
     private async Task ThrownOut()
     {
-        Player.SetPose("micah_supine");
         await Wait(1.2);
         await Think("The pavement on Hubbard Street is cold under my back, and it doesn't ask questions. I like that in a pavement.");
         // after his first line, his face from above, flat on the pavement, while he argues with himself; gone before he gets up

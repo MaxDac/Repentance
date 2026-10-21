@@ -11,6 +11,11 @@ public partial class ChurchExterior : Room
 {
     public override Track? Music => Track.StreetTraffic;
 
+    public override void OnArriving(string entry)
+    {
+        if (entry == "beaten") Player.SetPose("micah_supine");
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "beaten")
@@ -44,7 +49,6 @@ public partial class ChurchExterior : Room
     /// <summary>Act 3: on the cathedral steps, beaten. Keep going for Eleanor, or give up and go to Rose.</summary>
     private async Task Beaten()
     {
-        Player.SetPose("micah_supine");
         await Wait(1.5);
         await Think("Cathedral steps. Somebody has a sense of humour. Probably Bruno. Probably not.");
         // after his first line, his face from above, flat on the stones, while he argues with himself; gone before he gets up
