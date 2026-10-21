@@ -7,7 +7,7 @@ import math
 import random
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import (W, FULL_H, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, palette_of, pixelize, save,
-                     text, floor_boards)
+                     text, floor_boards, cut)
 
 H = FULL_H
 
@@ -208,6 +208,18 @@ ROSE_UPPER = (32, 91, 169, 224, 283, 353, 412)  # over the doors at 48, 240 and 
 ROSE_UPPER_LIT = (169, 412)
 ROSE_UPPER_Y = (34, 84)
 ROSE_LAMP_X = 125
+ROSE_LAMP_TOP, ROSE_LAMP_FOOT = 92, 256  # the foot is also the lamp's y-sort baseline
+
+
+def rose_lamp_mask():
+    """The lamp post's own pixels, so the scene can y-sort it in front of whoever walks behind it."""
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    street_lamp(ImageDraw.Draw(layer), ROSE_LAMP_X, ROSE_LAMP_TOP, ROSE_LAMP_FOOT)
+    return layer.getchannel("A").point(lambda v: 255 if v else 0)
+
+
+def rose_lamp_box():
+    return rose_lamp_mask().getbbox()
 
 
 def paint_rose(opened=False):
@@ -312,7 +324,7 @@ def paint_rose(opened=False):
     for x0, y0 in ((222, 110), (410, 120)):
         light(img, "rect", [x0 + 1, y0 - 14, x0 + 35, y0 - 1], hx("e8b060"), 0.4, 3)
     # the lamp post, painted over the glow so the iron stays crisp and the lantern keeps its own light
-    street_lamp(ImageDraw.Draw(img), ROSE_LAMP_X, 92, 256)
+    street_lamp(ImageDraw.Draw(img), ROSE_LAMP_X, ROSE_LAMP_TOP, ROSE_LAMP_FOOT)
     for box in ([270, 112, 330, 190], [340, 114, 400, 190],
                 *([wx - 8, ROSE_UPPER_Y[0] - 8, wx + 40, ROSE_UPPER_Y[1] + 8] for wx in ROSE_UPPER_LIT)):
         light(img, "rect", box, hx("d89040"), 0.35, 10)
@@ -328,6 +340,9 @@ def build_rose():
     px = pixelize(base, pal)
     save(px, "rooms", "rose_house.png")
     overlay(opened, px, pal, (190, 100, 300, 230), "rose_house_door")
+    mask, box = rose_lamp_mask(), rose_lamp_box()
+    save(cut(px, mask).crop(box), "rooms", "rose_house_lamp.png")
+    print("rose_house_lamp at", box[:2])
     return px
 
 

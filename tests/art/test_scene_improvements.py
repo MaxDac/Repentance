@@ -55,6 +55,17 @@ class SceneImprovementsTests(unittest.TestCase):
                 self.assertEqual(chair.size, tuple(b - a for a, b in zip(library.armchair_box(side)[:2],
                                                                          library.armchair_box(side)[2:])))
 
+    def test_rose_lamp_is_a_prop_placed_where_it_was_painted(self):
+        scene = (ROOT / "scenes" / "rooms" / "rose_house.tscn").read_text()
+        block = re.search(r'\[node name="Lamp" type="Sprite2D" parent="World"\](.*?)(\n\n|$)', scene, re.S).group(1)
+        x, y = map(int, re.search(r"position = Vector2\((-?\d+), (-?\d+)\)", block).groups())
+        ox, oy = map(int, re.search(r"offset = Vector2\((-?\d+), (-?\d+)\)", block).groups())
+        box = act2_rooms.rose_lamp_box()
+        self.assertEqual(y, act2_rooms.ROSE_LAMP_FOOT)
+        self.assertEqual((x + ox, y + oy), box[:2])
+        with Image.open(self.generated / "rooms" / "rose_house_lamp.png") as lamp:
+            self.assertEqual(lamp.size, (box[2] - box[0], box[3] - box[1]))
+
     def test_library_exit_hotspot_covers_the_painted_hall_door(self):
         scene = (ROOT / "scenes" / "rooms" / "library.tscn").read_text()
         block = re.search(r'\[node name="Exit" type="Area2D" parent="Hotspots"\](.*?)\n\n\[node', scene, re.S).group(1)
