@@ -630,6 +630,7 @@ public partial class AutoPlay
         await game.Wait(1);
         await Shot("club_hall_brute");
         await Until(() => game.Room?.Name == "Street");
+        Check(game.Player.PoseName == "micah_supine", "Micah is already flat on the pavement when the street fades in");
         Check(game.Music.Current == Track.StreetTraffic, "the strings give way to traffic out on the street");
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("The pavement on Hubbard Street", StringComparison.Ordinal));
         Check(!game.Hud.InsetVisible, "Micah's first line on the pavement comes before his close-up");

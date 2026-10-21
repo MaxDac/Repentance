@@ -237,6 +237,7 @@ public partial class AutoPlay
         await game.Wait(1);
         await Shot("club_stage_brute");
         await Until(() => game.Room?.Name == "ChurchExterior");
+        Check(game.Player.PoseName == "micah_supine", "Micah is already flat on the steps when the cathedral fades in");
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("Cathedral steps.", StringComparison.Ordinal));
         Check(!game.Hud.InsetVisible, "Micah's first line on the steps comes before his close-up");
         await Until(() => game.Hud.InsetVisible);
