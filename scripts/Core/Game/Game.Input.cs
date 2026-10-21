@@ -15,6 +15,18 @@ public partial class Game
     public override void _UnhandledInput(InputEvent e)
     {
         if (IsPaused) return;
+        if (TheEndHeld && EndReturnsToTitle && e switch
+            {
+                InputEventKey { Pressed: true, Echo: false } => true,
+                InputEventMouseButton { Pressed: true } => true,
+                InputEventScreenTouch { Pressed: true } => true,
+                _ => false,
+            })
+        {
+            GetViewport().SetInputAsHandled();
+            DismissTheEnd();
+            return;
+        }
         if (e.IsActionPressed("ui_cancel"))
         {
             GetViewport().SetInputAsHandled();

@@ -450,6 +450,61 @@ public partial class AutoPlay
             "ending 1: Eleanor goes back to bed, and Micah to Rose");
         Check(_poseCounts.GetValueOrDefault("eleanor_mansion_return") == returns + 1, "ending 1: her climb back into bed plays");
         await TheEnd("ending_1 (Eleanor's bed)");
+        await TheEndReturnsToTitle(game);
+    }
+
+    /// <summary>
+    /// A bare hold, outside the story: with the player's setting it leaves for the title after
+    /// <see cref="Game.TheEndSeconds"/> or on a key; a load or a new game releases it without leaving.
+    /// </summary>
+    private async Task TheEndHoldTest(Game game)
+    {
+        game.EndReturnsToTitle = true;
+        try
+        {
+            var timed = game.HoldTheEnd();
+            await game.Wait(Game.TheEndSeconds - 2);
+            Check(!timed.IsCompleted, "\"The End\" stays up for a while");
+            await Until(() => timed.IsCompleted, 6);
+            Check(timed.IsCompleted && timed.Result, "\"The End\" leaves for the title by itself");
+            var keyed = game.HoldTheEnd();
+            await game.Wait(0.5);
+            PressKey(Key.Shift);
+            await Until(() => keyed.IsCompleted, 2);
+            Check(keyed.IsCompleted && keyed.Result, "a key leaves \"The End\" for the title");
+            var released = game.HoldTheEnd();
+            game.ReleaseTheEnd();
+            await Until(() => released.IsCompleted, 2);
+            Check(released.IsCompleted && !released.Result, "a load or a new game lets \"The End\" go without the title");
+        }
+        finally
+        {
+            game.ReleaseTheEnd();
+            game.EndReturnsToTitle = false;
+        }
+        var held = game.HoldTheEnd();
+        await game.Wait(Game.TheEndSeconds + 2);
+        PressKey(Key.Shift);
+        await game.Wait(0.5);
+        Check(!held.IsCompleted, "automated runs keep \"The End\" up");
+        game.ReleaseTheEnd();
+    }
+
+    /// <summary>The last ending, with the player's setting: a click on "The End" goes back to the title screen.</summary>
+    private async Task TheEndReturnsToTitle(Game game)
+    {
+        Click(new Vector2(240, 135));
+        await game.Wait(1);
+        Check(game.TheEndHeld && game.Hud.CaptionText == "The End", "a click keeps \"The End\" in automated runs");
+        game.EndReturnsToTitle = true;
+        Click(new Vector2(240, 135));
+        await Until(() => game.Hud.TitleVisible && game.Hud.Menu.IsOpen, 10);
+        Check(game.Hud.TitleVisible && game.Hud.Menu.IsOpen, "a click on \"The End\" returns to the title menu");
+        Check(!game.TheEndHeld && game.Room == null, "the finished story is unloaded behind the title");
+        Check(!game.Hud.CaptionVisible, "\"The End\" is gone from the title screen");
+        Check(game.Music.Current == null, "no room music on the title after the end");
+        await Shot("the_end_title");
+        game.EndReturnsToTitle = false;
     }
 
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>

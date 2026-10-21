@@ -21,20 +21,73 @@ public partial class Game
         finally { _busy--; }
     }
 
-    private TaskCompletionSource? _theEnd;
+    private TaskCompletionSource<bool>? _theEnd;
 
-    /// <summary>Keeps the final caption up (and the game busy) until a load or a new game replaces the story.</summary>
-    public Task HoldTheEnd()
+    /// <summary>How long "The End" stays up before the game returns to the title by itself (game seconds).</summary>
+    public const double TheEndSeconds = 10;
+
+    /// <summary>
+    /// Whether a held "The End" leaves for the title on a click, a key or <see cref="TheEndSeconds"/>. Automated runs
+    /// turn it off so the caption stays up for their checks and for the next seeded ending.
+    /// </summary>
+    public bool EndReturnsToTitle { get; set; } = true;
+
+    public bool TheEndHeld => _theEnd != null;
+
+    /// <summary>
+    /// Keeps the final caption up (and the game busy). True when the player leaves it for the title (a click, a key or
+    /// the timeout); false when a load, a new game or a test replaces the story first.
+    /// </summary>
+    public async Task<bool> HoldTheEnd()
     {
-        _theEnd = new TaskCompletionSource();
-        return _theEnd.Task;
+        ReleaseTheEnd();
+        var hold = new TaskCompletionSource<bool>();
+        _theEnd = hold;
+        _ = TimeOutTheEnd(hold);
+        bool toTitle = await hold.Task;
+        if (_theEnd == hold) _theEnd = null;
+        return toTitle;
+    }
+
+    private async Task TimeOutTheEnd(TaskCompletionSource<bool> hold)
+    {
+        const double step = 0.25;
+        for (double t = 0; t < TheEndSeconds; t += step)
+        {
+            if (hold.Task.IsCompleted) return;
+            if (!EndReturnsToTitle) t = -step;
+            await Wait(step);
+        }
+        hold.TrySetResult(true);
+    }
+
+    /// <summary>The player leaves a held "The End" for the title (ignored while <see cref="EndReturnsToTitle"/> is off).</summary>
+    public void DismissTheEnd()
+    {
+        if (EndReturnsToTitle) _theEnd?.TrySetResult(true);
     }
 
     /// <summary>Lets a held "The End" go (a load, a new game, or the autoplay test seeding its next ending).</summary>
     public void ReleaseTheEnd()
     {
-        _theEnd?.TrySetResult();
+        _theEnd?.TrySetResult(false);
         _theEnd = null;
+    }
+
+    /// <summary>
+    /// After "The End": blocks input and autosave at once, then, once the epilogue's scripted chain has unwound,
+    /// unloads the story and opens the title screen.
+    /// </summary>
+    public void LeaveStoryForTitle()
+    {
+        _onTitle = true;
+        _ = ReturnToTitleWhenIdle();
+    }
+
+    private async Task ReturnToTitleWhenIdle()
+    {
+        while (Busy) await Wait(0.05);
+        await ReturnToTitle();
     }
 
     /// <summary>Raised when <see cref="Run"/> swallows an exception, so automated runs can fail on it.</summary>

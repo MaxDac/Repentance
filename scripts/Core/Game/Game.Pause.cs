@@ -53,14 +53,20 @@ public partial class Game
                 await LoadGame(save);
                 break;
             case { Action: MenuAction.QuitToTitle }:
-                _busy++;
-                try { await Hud.Fade(1, 0.5); }
-                finally { _busy--; }
-                UnloadRoom();
-                Sfx.SetAmbient(null);
-                Music.Play(null);
-                await TitleScreen();
+                await ReturnToTitle();
                 break;
         }
+    }
+
+    /// <summary>Fades out, unloads the story's room and its sound, and opens the title screen.</summary>
+    private async Task ReturnToTitle()
+    {
+        _busy++;
+        try { await Hud.Fade(1, 0.5); }
+        finally { _busy--; }
+        UnloadRoom();
+        Sfx.SetAmbient(null);
+        Music.Play(null);
+        await TitleScreen();
     }
 }
