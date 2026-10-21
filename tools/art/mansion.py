@@ -137,7 +137,7 @@ def panel_door(d, x0, y0, x1, y1, col, knob_left=False, frame=None, frame_w=4):
 BELL = (318, 62, 344, 92)
 BIN_HOME = (396, 172, 446, 210)
 BIN_MOVED = (306, 172, 356, 210)
-DOOR = (250, 120, 288, 206)  # a low service door at yard level, so its lintel is within Micah's reach
+DOOR = (250, 125, 288, 206)  # a low service door at yard level, so its lintel is within Micah's reach
 STONE, STONE_L, STONE_D = hx("c8bc9e"), hx("e4dabe"), hx("7e735e")
 BRICK, MORTAR = hx("8a4634"), hx("5a3a30")
 UPPER_Y = (40, 80)

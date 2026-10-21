@@ -14,7 +14,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(38, 86)
+size = Vector2(38, 81)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
 size = Vector2(62, 18)
@@ -101,7 +101,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(269.0, 163.0)
+position = Vector2(269.0, 165.5)
 shape = SubResource("Rect_1")
 
 [node name="Lintel" type="Area2D" parent="Hotspots"]
@@ -116,7 +116,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Lintel"]
-position = Vector2(269.0, 110.0)
+position = Vector2(269.0, 115.0)
 shape = SubResource("Rect_2")
 
 [node name="Wire" type="Area2D" parent="Hotspots"]
@@ -239,7 +239,7 @@ ShowIfFlags = "bell_wedged"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(248, 118)
+position = Vector2(248, 123)
 texture = ExtResource("12_mansion_exterior_door")
 centered = false
 script = ExtResource("4_FlagSprite")
