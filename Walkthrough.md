@@ -88,15 +88,19 @@ described here (other verbs, flavour lines) is left to the implementation.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it. It is no hotel lock:
   Eleanor had a locksmith fit it, and it is damn hard; it snaps one of his picks before it gives (the lockpick
   stays in the inventory).
-- Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Those who sat at His table. The days of the month He was born. The day He rested."
+- Inside, there's a sheet of paper with a riddle in Eleanor's hand. Nothing Micah says or notes ties it to the safe
+  until the safe is open:
+  "Rightly He chose His Apostles; but first He left to stay in the desert to be tempted for a certain amount of
+  days, He through whom all things were rightly made in the week of creation."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
-  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
-  counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
-  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
-  settings can be reset or retried. When the safe opens, Micah finds it strange that a woman like Eleanor would
-  bring Christ into it ("Strange, a dame like her bringin' Christ into it.").
+  its graphical controls, not the safe itself. The dial runs 0 to 49, and the clue card only says it turns both
+  ways and to listen for the tumblers. The riddle gives **12** (the apostles), **40** (the days of temptation in
+  the desert) and **7** (the week of creation); "Rightly ... left ... rightly" gives the directions. Each stop that
+  is right, counting from the first, drops a tumbler, and a wrong attempt says how many fell: the solution is
+  **right 12 / left 40 / right 7**. The paper remains readable; wrong settings can be reset or retried. When the
+  safe opens, Micah reads it back ("Twelve apostles, forty days in the desert, and seven days of creation.") and
+  finds it strange that a woman like Eleanor would bring Christ into it ("Strange, a dame like her bringin' Christ
+  into it.").
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
     perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
@@ -376,7 +380,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
     shuts it and spins the dial. Hand on the open closet shuts it again (optional); she won't shut it on the box
     while the safe still stands open.
-  - Use the blank slip on the writing desk: she writes the safe's combination as the three references Micah finds.
+  - Use the blank slip on the writing desk: she writes the safe's combination as the riddle Micah finds.
     Use it on the drawer to put it in, then her key on the drawer to lock it (she keeps the key).
   - Wrong joins and wrong items on the closet, safe or drawer get a hint in her voice. The drawer waits for the
     safe, the call for the locked drawer, the bag for the call, and the door for all of them; at the door she names

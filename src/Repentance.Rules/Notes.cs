@@ -45,11 +45,10 @@ public static class Notes
         N("night_bolt", "Room 507", "seen_hotel_linen",
             L("Linen room door to 507: night bolt, shot from the corridor side."),
             L("The transom's open an inch. Something with a hook could reach that bolt.")),
-        N("safe_riddle", "The safe", "took_combination",
-            L("Slip of paper from her room:"),
-            L("Those who sat at His table. The days of the month He was born. The day He rested."),
-            L("No directions given."),
-            L("Right 12, left 31, right 7. It opened.", "safe_open")),
+        N("safe_riddle", "Eleanor's slip", "took_combination",
+            L("Slip of paper from her locked drawer:"),
+            L("Rightly He chose His Apostles; but first He left to stay in the desert to be tempted for a certain amount of days, He through whom all things were rightly made in the week of creation."),
+            L("It opened her safe: right 12, left 40, right 7.", "safe_open")),
         new NoteDef("brass_box", "The brass box", new[] { "opened_brass_box", "seen_blue_lantern_front", "club_lead" }, new[]
         {
             L("A perfumed card, blank but for two letters. Her perfume."),
