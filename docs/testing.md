@@ -62,7 +62,11 @@ and GC busy, and on a slow runner that stalls frames in timing-sensitive checks.
 assert that music plays, so they keep it on.
 Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` first: if C# still holds a pending
 `SceneTreeTimer` at quit, Godot aborts at shutdown ("Leaked unsafe reference", `!rc_owner`). Await timers through
-`Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`.
+`Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`. `Finish` then waits for any music render still running
+(`Music.StopRendering`; its worker forces a full GC) and runs the GC, waiting for pending finalizers: Godot's
+shutdown disposes only the wrappers C# still holds, so one collected but not yet finalized leaks its object ("RID
+allocations of type GodotShape2D were leaked") or is finalized mid-teardown. Dispose wrappers of scene-owned
+resources you only read, as `Hotspot.ShapeRect` does.
 A local pass does not cover exported builds; see [What only CI runs](#what-only-ci-runs).
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses
@@ -110,6 +114,9 @@ matching local export command.
 markers and exit codes, `WaitIdle`/`Until`/`Observe`, synthetic mouse and
 keyboard input (`Viewport.PushInput`), screenshots to `screenshots/`, a wiped per-suite save folder, and shared
 puzzle/satchel helpers. Put new shared helpers here, not in `AutoPlay`.
+
+`game.Wait`, `WaitIdle` and `Until` count game seconds, which the clock scales; `Observe` counts real seconds. Wait
+with `Observe` for anything timed in real time, such as the touch long press (`TouchPointer.HoldSeconds`).
 
 ### `Playthrough` (`--playthrough`, `--film`)
 

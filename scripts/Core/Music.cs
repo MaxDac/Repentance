@@ -29,6 +29,8 @@ public partial class Music : Node
     private AudioStreamPlayer _player = null!;
     private GameSettings? _settings;
     private bool _exiting;
+    // the render running on the worker, if any (main thread only)
+    private Task? _render;
     // where a track still rendering should start once it is ready (a shared score picking up where it was)
     private float _startFrom;
 
@@ -83,6 +85,17 @@ public partial class Music : Node
         _cache.ClearQueue();
     }
 
+    /// <summary>
+    /// Starts no more renders and waits for the one running, so no render (and the GC it forces) runs on while Godot
+    /// shuts down; call just before quitting.
+    /// </summary>
+    public void StopRendering()
+    {
+        _exiting = true;
+        _cache.ClearQueue();
+        _render?.Wait();
+    }
+
     private void Apply()
     {
         int percent = _settings?.MusicVolume ?? GameSettings.DefaultMusicVolume;
@@ -107,7 +120,7 @@ public partial class Music : Node
     private void StartWorker()
     {
         if (_exiting || !_cache.TryStartNext(out var track)) return;
-        Task.Run(() =>
+        _render = Task.Run(() =>
         {
             byte[]? pcm = null;
             try { pcm = MusicSynth.ToPcm16(MusicSynth.Render(track)); }
