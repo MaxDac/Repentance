@@ -345,9 +345,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    come to the door at night; then she knows the face and the perfume and calls her "a Jezebel from that
    hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
 4. **Convent cell, that night.** She walks in and sets her bag down in front of the nightstand
-   (`interlude_bag_left`). Hand on the nightstand or the bed: she opens the bag, takes out her comb and little
-   mirror and combs her hair (`eleanor_comb`). The scene fades to black; Micah's narration says she put the comb and
-   mirror in the nightstand drawer and left them there (the ones Micah finds in Act 1). When the knock comes she is
+   (`interlude_bag_left`). Hand on the bag (the `bag` hotspot, shown once it is down): she opens it, takes out her
+   comb and little mirror and combs her hair (`eleanor_comb`); Hand on the bed or the nightstand only points her to
+   the bag. The scene fades slowly to black and holds it for a second (the comb and mirror stay in the cell: the
+   ones Micah finds in the nightstand drawer in Act 1). When the knock comes she is
    sitting up on the edge of the bed by the pillow, awake, in her pyjamas (`eleanor_pyjama_play`, the
    `eleanor_cell_sit` pose). As the knock fades in she gets up off the bed (`eleanor_cell_rise`) and stands in front
    of it for the visit. After the knock, Agatha comes into the cell past midnight. She sincerely believes
