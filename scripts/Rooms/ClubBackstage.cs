@@ -6,7 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// The Club's dressing room, behind the stage (Second Interlude). Eleanor, in a short pink gown, alone at a mirror
 /// ringed with bulbs, with a glass of gin and a line of powder waiting "as always". She has to put the face on
-/// (Puzzle 18): face powder and a puff, then the lipstick, then a pin for the curl, each one a step back into the
+/// (Puzzle 18): her compact and lipstick from the dressing table, face powder and a puff, then the lipstick, then a pin
+/// for the curl, each one a step back into the
 /// life she wants to leave. When it's on, the stage door opens and the old man, unmasked, walks in. Taking his gin
 /// plays her drink strip; refusing is saved ("eleanor_refused_drugs") and the scene cuts to black on "Noooo!". Either
 /// way the journal goes back to Micah on the Club stage.
@@ -26,6 +27,10 @@ public partial class ClubBackstage : Room
         // the door is only ever open while he comes through it
         State.SetFlag("backstage_door_ajar", false);
         State.SetFlag("backstage_door_open", false);
+        // saves from before the compact and lipstick lay on the table: whatever she holds or has used is off it
+        if (State.HasItem("compact") || State.HasItem("puff_powdered") || State.HasFlag("interlude_powdered"))
+            State.SetFlag("interlude_took_compact");
+        if (State.HasItem("lipstick") || State.HasFlag("interlude_lips")) State.SetFlag("interlude_took_lipstick");
         base._Ready();
     }
 
@@ -87,7 +92,36 @@ public partial class ClubBackstage : Room
                 await Say("Not for him. Nothing of mine is for him. Not anymore.");
                 return true;
             case ("table", Verb.Look):
-                await Say("A glass of gin, already poured. A silver saucer beside it. He's thought of everything, as always.");
+                await Say("A glass of gin, already poured. A silver saucer beside it, the powder cut in a line, the razor laid across. He's thought of everything, as always.");
+                return true;
+            case ("compact", Verb.Look):
+                await Say("My compact, open on its little mirror. Gold, like the cage. He bought me that too.");
+                return true;
+            case ("compact", Verb.Hand):
+                State.SetFlag("interlude_took_compact");
+                State.GiveItem("compact");
+                await Say("The puff's gone from it. Somebody borrowed it. Nobody gives anything back here.");
+                await Think("She held it the way you hold the key to a house you're afraid to go home to.");
+                return true;
+            case ("lipstick", Verb.Look):
+                await Say("My lipstick, the cap off, waiting. Red, the only colour he lets me wear.");
+                return true;
+            case ("lipstick", Verb.Hand):
+                State.SetFlag("interlude_took_lipstick");
+                State.GiveItem("lipstick");
+                await Say("Gold case, red mouth. Another of his presents.");
+                return true;
+            case ("perfume", Verb.Look):
+                await Say("Rose water in cut glass. It never covers the smoke, or the smell of him.");
+                return true;
+            case ("perfume", Verb.Hand):
+                await Say("No. He likes me to smell of roses. Tonight I won't give him even that.");
+                return true;
+            case ("hairbrush", Verb.Look):
+                await Say("A silver hairbrush and a comb. Somebody else's. Everything here is somebody else's.");
+                return true;
+            case ("hairbrush", Verb.Hand):
+                await Say("My hair's done. They did it before they left me here. All it wants is a pin.");
                 return true;
             case ("rack", Verb.Look):
                 await Say("Black silk, dozens of gowns, for the members' wives. I used to think a dress like that would keep me safe.");
@@ -133,7 +167,7 @@ public partial class ClubBackstage : Room
     private const string Order = "Face powder first. Then the mouth. Then the hair. The face they paid for, one piece at a time.";
 
     /// <summary>
-    /// Puzzle 18: the makeup comes off the ledge, then goes on in order. Every step is a choice she half makes: she
+    /// Puzzle 18: the makeup comes off the ledge (the compact and lipstick hotspots), then goes on in order. Every step is a choice she half makes: she
     /// wants out, and she paints herself back in.
     /// </summary>
     private async Task Mirror(Verb verb, string? item)
@@ -153,17 +187,9 @@ public partial class ClubBackstage : Room
         }
         if (verb == Verb.Hand)
         {
-            if (State.HasFlag("interlude_took_makeup"))
-            {
-                await Say(Order);
-                return;
-            }
-            State.SetFlag("interlude_took_makeup");
-            State.GiveItem("compact");
-            State.GiveItem("lipstick");
-            await Say("My compact and my lipstick. Gold cases, both of them. He bought me both.");
-            await Think("She held them the way you hold the key to a house you're afraid to go home to.");
-            await Say("The puff's gone from the compact. Somebody borrowed it. Nobody gives anything back here.");
+            await Say(State.HasFlag("interlude_took_compact") && State.HasFlag("interlude_took_lipstick")
+                ? Order
+                : "The glass won't put my face on for me. What I need is on the ledge, under the bulbs.");
             return;
         }
 

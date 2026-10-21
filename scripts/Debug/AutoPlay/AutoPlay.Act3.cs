@@ -82,7 +82,16 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "table");
         Check(game.Room?.Name == "ClubBackstage" && gs.Inventory.Count == 0, "the gin table waits too, and gives nothing");
         await game.Perform(Verb.Hand, "mirror");
-        Check(gs.HasItem("compact") && gs.HasItem("lipstick"), "her compact and lipstick from the ledge");
+        Check(gs.Inventory.Count == 0, "the mirror gives nothing: the makeup is on the table");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("Compact")?.Visible == true && game.Room?.GetNodeOrNull<Sprite2D>("Lipstick")?.Visible == true,
+            "her compact and lipstick lie on the dressing table");
+        await game.Perform(Verb.Hand, "compact");
+        Check(gs.HasItem("compact") && game.Room?.GetNodeOrNull<Sprite2D>("Compact")?.Visible == false
+            && game.Room?.FindHotspot("compact")?.Visible == false && game.Room?.GetNodeOrNull<Sprite2D>("Lipstick")?.Visible == true,
+            "the compact leaves the table, the lipstick stays");
+        await game.Perform(Verb.Hand, "lipstick");
+        Check(gs.HasItem("lipstick") && game.Room?.GetNodeOrNull<Sprite2D>("Lipstick")?.Visible == false
+            && game.Room?.FindHotspot("lipstick")?.Visible == false, "the lipstick leaves the table");
         await game.Perform(Verb.UseItem, "mirror", "lipstick");
         Check(gs.HasItem("lipstick") && !gs.HasFlag("interlude_lips"), "no lipstick on a bare face");
         await game.Perform(Verb.UseItem, "mirror", "compact");
@@ -95,7 +104,7 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "mirror");
         await game.Perform(Verb.Hand, "rack");
         await game.Perform(Verb.Hand, "screens");
-        Check(gs.Inventory.Count == 4, "the ledge, the rail and the screen give nothing twice");
+        Check(gs.Inventory.Count == 4, "the mirror, the rail and the screen give nothing twice");
         await CombineAndWait("puff", "compact");
         Check(gs.HasItem("puff_powdered") && !gs.HasItem("puff") && !gs.HasItem("compact"), "the puff in the face powder");
         await game.Perform(Verb.UseItem, "mirror", "hairpin");

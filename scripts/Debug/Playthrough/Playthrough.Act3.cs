@@ -33,8 +33,9 @@ public sealed partial class Playthrough
             Expect("ClubBackstage", "the Order's men take her to the Club's dressing room");
             Check(_game.Player.Character == "eleanor_gown_play", "Eleanor in the pink gown");
             // Puzzle 18: the face they paid for, before the old man will talk
-            await Do(Verb.Hand, "mirror");
-            Check(Gs.HasItem("compact") && Gs.HasItem("lipstick"), "her compact and lipstick from the ledge");
+            await Do(Verb.Hand, "compact");
+            await Do(Verb.Hand, "lipstick");
+            Check(Gs.HasItem("compact") && Gs.HasItem("lipstick"), "her compact and lipstick from the dressing table");
             await Do(Verb.Look, "rack");
             await Do(Verb.Hand, "rack");
             await Do(Verb.Hand, "screens");
