@@ -46,7 +46,7 @@ centered = false
 
 [node name="DrawerOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(131, 144)
+position = Vector2(130, 145)
 texture = ExtResource("5_drawer")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -54,7 +54,7 @@ ShowIfFlags = "took_clipping_top"
 
 [node name="SpikeTaken" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(304, 119)
+position = Vector2(303, 117)
 texture = ExtResource("6_spike")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -62,7 +62,7 @@ ShowIfFlags = "took_clipping_bottom"
 
 [node name="PasteGone" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(428, 128)
+position = Vector2(426, 124)
 texture = ExtResource("7_paste")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -70,7 +70,7 @@ ShowIfFlags = "paste_out"
 
 [node name="MapPin" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(259, 79)
+position = Vector2(248, 86)
 texture = ExtResource("8_pin")
 centered = false
 script = ExtResource("4_FlagSprite")

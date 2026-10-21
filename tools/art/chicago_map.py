@@ -87,16 +87,34 @@ def paper_mask():
 
 
 @lru_cache(maxsize=1)
-def ink_coverage():
-    """How much printer's ink lies on each screen pixel of the print area (0..1), area-averaged from the scan."""
+def scan_ink():
+    """Printer's ink in every scan pixel (0..1), levelled against the paper and the blackest ink of the whole sheet."""
     with Image.open(SRC) as scan:
         src = np.asarray(scan.convert("L"), np.float32)
     white, black = np.percentile(src, 80), np.percentile(src, 2)
-    ink = np.clip((white - src) / (white - black), 0, 1)
-    x0, y0, x1, y1 = PRINT
-    small = Image.fromarray((ink * 255).astype(np.uint8)).resize((x1 - x0, y1 - y0), Image.Resampling.BOX)
+    return Image.fromarray((np.clip((white - src) / (white - black), 0, 1) * 255).astype(np.uint8))
+
+
+def ink_in(box, size):
+    """How much ink lies on each pixel when the scan's box (None for all of it) is printed at size, area-averaged."""
+    ink = scan_ink()
+    small = (ink.crop(box) if box else ink).resize(size, Image.Resampling.BOX)
     cov = np.asarray(small, np.float32) / 255.0
     return np.clip(cov * 1.35, 0, 1) ** 0.85
+
+
+def scan_point(screen):
+    """Where a point on the location-select screen's print lies on the scan."""
+    x0, y0, x1, y1 = PRINT
+    sw, sh = scan_ink().size
+    return ((screen[0] - x0) * sw / (x1 - x0), (screen[1] - y0) * sh / (y1 - y0))
+
+
+@lru_cache(maxsize=1)
+def ink_coverage():
+    """How much printer's ink lies on each screen pixel of the print area (0..1), area-averaged from the scan."""
+    x0, y0, x1, y1 = PRINT
+    return ink_in(None, (x1 - x0, y1 - y0))
 
 
 @lru_cache(maxsize=1)
