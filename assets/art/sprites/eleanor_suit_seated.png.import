@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcnpyd2irgks"
-path="res://.godot/imported/eleanor_suit_seated.png-bd87e496e2e27a73b1f01ead30469434.ctex"
+path="res://.godot/imported/eleanor_suit_seated.png-0aed49a1005f834459f80f1f8b7b0c47.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/sprites/eleanor_suit_seated.png"
-dest_files=["res://.godot/imported/eleanor_suit_seated.png-bd87e496e2e27a73b1f01ead30469434.ctex"]
+dest_files=["res://.godot/imported/eleanor_suit_seated.png-0aed49a1005f834459f80f1f8b7b0c47.ctex"]
 
 [params]
 

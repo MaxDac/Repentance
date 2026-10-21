@@ -526,6 +526,8 @@ public partial class AutoPlay
             "the dread played through the whole mansion, bedroom included, and stops once out of it");
         Check(HeardLog.Any(l => l.Contains("Oh my God, Micah.")) && !HeardLog.Any(l => l.Contains("She watches the windows go.")),
             "ending 2: convinced Eleanor cries out when the house goes");
+        Check(game.Room?.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("/eleanor_suit.png") == true,
+            "ending 2: Eleanor, who gave in, in the black suit");
         await game.Wait(3);
         await Shot("ending_together");
         await TheEnd("ending_2");
@@ -534,8 +536,6 @@ public partial class AutoPlay
             "ending 2: Daniel's journal puts the telling in the car, not a motel on the road; no weary-road dress beat");
         Check(HeardLog.Any(l => l.Contains("At the gate she fetched her duffle from the Club's car") && l.Contains("a black suit")),
             "ending 2: Micah says how Eleanor got from the sheet into the black suit");
-        Check(game.Room?.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("/eleanor_suit.png") == true,
-            "ending 2: Eleanor, who gave in, in the black suit");
         HeardLog = null;
     }
 }
