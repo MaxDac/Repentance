@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Repentance;
 
@@ -78,16 +79,38 @@ public static partial class SoundSynth
         for (int i = 0; i < n; i++) buf[buf.Length - 1 - i] *= (float)i / n;
     }
 
+    /// <summary>Walls, floor, ceiling and furniture of a bedroom-sized room: the first copies of a shot, 3-35 ms late.</summary>
+    private static readonly (double Delay, double Level)[] RoomTaps =
+        { (0.0031, 0.4), (0.0058, 0.34), (0.0087, 0.28), (0.0123, 0.23), (0.0161, 0.19), (0.0207, 0.15), (0.0266, 0.11), (0.0342, 0.08) };
+
+    /// <summary>
+    /// A revolver fired indoors: the hammer falls, the muzzle blast arrives as a shock wave (N-wave plus a crack of
+    /// broadband noise) over a low thump, all too loud for the microphone, then the room's walls answer at once and
+    /// ring on in a dark, diffuse tail.
+    /// </summary>
     private static float[] Gunshot(Random rng)
     {
-        var buf = Buffer(1.6);
-        Burst(buf, rng, 0, 0.004, 1.0, Biquad.HighPass(800));
-        Burst(buf, rng, 0, 0.05, 0.9, Biquad.LowPass(2200));
-        Tone(buf, 0, 110, 42, 0.16, 0.9);
-        // the shot rolling off the walls
-        Burst(buf, rng, 0.012, 0.4, 0.5, Biquad.LowPass(700), attack: 0.01);
-        Burst(buf, rng, 0.17, 0.05, 0.28, Biquad.LowPass(1400));
-        Burst(buf, rng, 0.31, 0.06, 0.14, Biquad.LowPass(900));
+        const double shot = 0.01;
+        var blast = Buffer(0.25);
+        NWave(blast, shot, 0.0016, 1.0);
+        Burst(blast, rng, shot, 0.0025, 0.9, Biquad.HighPass(2000));
+        Burst(blast, rng, shot, 0.012, 1.1, Biquad.BandPass(800, 0.6));
+        // the blast's low body, noise rather than a pitched glide
+        var body = Buffer(0.25);
+        Burst(body, rng, shot, 0.02, 1, Biquad.LowPass(180, 0.9), attack: 0.0006);
+        Burst(body, rng, shot, 0.04, 0.5, Biquad.LowPass(90), attack: 0.002);
+        Normalize(body);
+        for (int i = 0; i < blast.Length; i++) blast[i] += 0.9f * body[i];
+        Saturate(blast, 2.5);
+        // the hammer, before the powder: too quiet to be squashed
+        var hammer = Buffer(0.25);
+        Burst(hammer, rng, 0, 0.0008, 0.09, Biquad.BandPass(3600, 2.5));
+        Burst(hammer, rng, 0.0004, 0.002, 0.05, Biquad.BandPass(1900, 3));
+        for (int i = 0; i < blast.Length; i++) blast[i] += hammer[i];
+
+        var room = Reflections(blast, RoomTaps, 0.04);
+        var buf = Reverb(room, rt60: 0.85, size: 0.9, damping: 0.5, mix: 0.22, tail: 1.3);
+        FadeTail(buf, 0.2);
         return buf;
     }
 
@@ -440,33 +463,83 @@ public static partial class SoundSynth
     }
 
     /// <summary>
-    /// A storm overhead: the sharp crack of the strike, then a long low rumble that rolls in waves and dies away.
+    /// A strike a few hundred metres away, heard through a window. The lightning channel is a tortuous path from the
+    /// ground up into the cloud and across it; every few metres of it bangs at once, and each bang (an N-wave) reaches
+    /// the ear later, quieter, longer and duller the further away it is. The near channel arrives as a ripping crack,
+    /// stretches of the path at the same distance swell into rolls, and the far cloud is a low rumble that dies away.
     /// </summary>
     private static float[] Thunder(Random rng)
     {
-        const double seconds = 4.2;
+        const double seconds = 4.5, speedOfSound = 343, step = 2.5;
+        var channel = new List<(double X, double Y, double Z)>();
+        (double X, double Y, double Z) p = (140, 30, 0), drift = (0, 0, 0);
+        (double, double, double)[] waypoints = { (170, -40, 650), (520, 260, 760), (980, 120, 820) };
+        foreach (var (wx, wy, wz) in waypoints)
+            while (channel.Count < 5000)
+            {
+                double dx = wx - p.X, dy = wy - p.Y, dz = wz - p.Z, left = Math.Sqrt(dx * dx + dy * dy + dz * dz);
+                if (left < step * 2) break;
+                // smoothed jitter keeps the kinks a few tens of metres long, like a real channel
+                drift = (0.9 * drift.X + 0.45 * Noise(rng), 0.9 * drift.Y + 0.45 * Noise(rng), 0.9 * drift.Z + 0.45 * Noise(rng));
+                double ux = dx / left + drift.X, uy = dy / left + drift.Y, uz = dz / left + drift.Z;
+                double norm = Math.Sqrt(ux * ux + uy * uy + uz * uz);
+                p = (p.X + step * ux / norm, p.Y + step * uy / norm, p.Z + step * uz / norm);
+                channel.Add(p);
+            }
+
+        double nearest = double.MaxValue;
+        foreach (var (x, y, z) in channel) nearest = Math.Min(nearest, Math.Sqrt(x * x + y * y + z * z));
+        // the further the bang, the more of its highs the air has eaten: one band per distance
+        double[] bandEdges = { 260, 450, 750, double.MaxValue };
+        double[] bandCutoffs = { 6000, 2400, 1000, 420 };
+        var bands = new float[bandEdges.Length][];
+        for (int b = 0; b < bands.Length; b++) bands[b] = Buffer(seconds);
+        var density = new double[At(seconds)];
+        const double start = 0.015;
+        for (int k = 0; k < channel.Count; k++)
+        {
+            var (x, y, z) = channel[k];
+            double d = Math.Sqrt(x * x + y * y + z * z), t = start + (d - nearest) / speedOfSound;
+            if (t >= seconds - 0.05) continue;
+            // spreading and the air both take their share; the channel thins out into branches at the far end
+            double fade = Math.Min(1, 4.0 * (channel.Count - k) / channel.Count);
+            double amp = Math.Pow(nearest / d, 1.6) * fade * Vary(rng, 1, 0.5);
+            double length = Vary(rng, 0.0015 + 0.02 * (d - nearest) / 800, 0.35);
+            int band = Array.FindIndex(bandEdges, edge => d < edge);
+            NWave(bands[band], t, length, amp);
+            density[At(t)] += amp;
+        }
+
         var buf = Buffer(seconds);
-        Burst(buf, rng, 0, 0.012, 0.7, Biquad.HighPass(900));
-        Burst(buf, rng, 0.004, 0.09, 0.8, Biquad.LowPass(1600));
-        Tone(buf, 0, 70, 38, 0.6, 0.6, attack: 0.01);
-        var lp = Biquad.LowPass(220);
-        var lp2 = Biquad.LowPass(220);
-        var rolls = Biquad.LowPass(2.2);
-        double brown = 0;
+        for (int b = 0; b < bands.Length; b++)
+        {
+            var lp = Biquad.LowPass(bandCutoffs[b]);
+            for (int i = 0; i < buf.Length; i++) buf[i] += (float)lp.Next(bands[b][i]);
+        }
+        Saturate(buf, 1.8);
+
+        // the air itself shaking: deep rumble that swells and fades with how much of the channel is arriving
+        var swell = Biquad.LowPass(3);
+        var deep = Biquad.LowPass(110);
+        var deeper = Biquad.LowPass(110);
+        double brown = 0, peakEnv = 0;
+        var env = new double[buf.Length];
+        for (int i = 0; i < buf.Length; i++) peakEnv = Math.Max(peakEnv, env[i] = Math.Max(0, swell.Next(density[i])));
+        var rumble = Buffer(seconds);
         for (int i = 0; i < buf.Length; i++)
         {
-            double t = (double)i / SampleRate;
-            brown = Math.Clamp(brown * 0.995 + 0.08 * Noise(rng), -1, 1);
-            double roll = Math.Clamp(0.55 + 9 * rolls.Next(Noise(rng)), 0.15, 1.4);
-            double env = Math.Min(1, t / 0.08) * Math.Exp(-t / 1.3) * Math.Clamp((seconds - t) / 0.6, 0, 1);
-            buf[i] += (float)(1.6 * env * roll * lp2.Next(lp.Next(brown)));
+            brown = Math.Clamp(brown * 0.997 + 0.06 * Noise(rng), -1, 1);
+            rumble[i] = (float)(Math.Sqrt(env[i] / peakEnv) * deeper.Next(deep.Next(brown)));
         }
-        for (int i = 0; i < 6; i++)
-        {
-            double start = 0.15 + rng.NextDouble() * 1.6;
-            Burst(buf, rng, start, 0.05 + rng.NextDouble() * 0.12, 0.25 * (1 - start / 2.2), Biquad.LowPass(500));
-        }
-        return buf;
+        Normalize(rumble);
+        // through the glass and into the room
+        var window = Biquad.LowPass(3800);
+        var glass = Biquad.Peaking(140, 3, 0.8);
+        for (int i = 0; i < buf.Length; i++) buf[i] = (float)glass.Next(window.Next(0.75 * buf[i] + 0.5 * rumble[i]));
+
+        var room = Reverb(buf, rt60: 0.6, size: 1.1, damping: 0.6, mix: 0.25, tail: 0.3);
+        FadeTail(room, 0.8);
+        return room;
     }
 
     /// <summary>Steady rain with scattered drops, crossfaded onto itself so it loops without a seam.</summary>
