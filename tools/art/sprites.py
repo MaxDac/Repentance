@@ -400,12 +400,14 @@ def npc_standing(spec, arms):
 def fall_strip(spec, name, final_name, arms, wound=False):
     """Drop onto both knees, pitch forward, and settle face-down; the last frame is also saved alone as final_name,
     the texture held afterwards, so there's no jump at the end. wound: shot in the stomach, the clothes soaked from
-    the first kneeling frame on and a pool of blood spreading on the ground under the body at the end."""
+    the first kneeling frame on and a pool of blood spreading on the ground under the body at the end.
+    Kneeling side-on only the coat shows; pitching forward and face-down the shirt front faces the ground, so neither
+    shows a pale shirt streak along the back nor a skirt shaded apart from the coat."""
     from PIL import Image, ImageDraw, ImageChops
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
     for i, joints in enumerate(KNEES_PRONE):
-        img, head = action_figure(scaled, joints)
+        img, head = action_figure(scaled, joints, plain_chest=i == 0, chest_down=i > 0)
         if wound:
             hip, shoulder = grounded_joints(joints)[:2]
             wx, wy = hip + (shoulder - hip) * 0.45
