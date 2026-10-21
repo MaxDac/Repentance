@@ -48,6 +48,11 @@ public partial class ConventCorridor : Room
         {
             await Wait(0.6);
             await Think("Incense, floor wax and cold stone. Every convent smells like my mother's disappointment.");
+            if (FindActor("nun") is { } nun)
+            {
+                await Game.WalkTo(nun.WalkTo);
+                Player.FaceTowards(nun.Position);
+            }
             await Talk("nun");
         });
     }

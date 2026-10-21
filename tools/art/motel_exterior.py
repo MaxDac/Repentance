@@ -405,39 +405,141 @@ def ground(img):
         d.line([(x, y), (x + 2, y)], fill=hx("c8c0b0"))
 
 
+def can_body(d, x0, x1, top, g, rnd):
+    """A galvanized ash can: a cylinder lit from the caged lamp up on the left, fine vertical corrugations, two
+    rolled bands that curve round it, a rim at the top and a foot ring, rust bleeding down from the bands."""
+    zinc_d, zinc_l = hx("2a2c30"), hx("8a8e94")
+    for x in range(x0, x1 + 1):
+        u = (x - x0) / (x1 - x0)
+        f = max(0.0, min(1.0, 0.5 + 0.5 * math.cos((u - 0.3) * math.pi * 1.1)))
+        c = mix(zinc_d, zinc_l, f)
+        if (x - x0) % 3 == 1:
+            c = mul(c, 1.12)
+        elif (x - x0) % 3 == 2:
+            c = mul(c, 0.86)
+        d.line([(x, top), (x, g)], fill=c)
+    # the rolled bands and the foot ring curve with the drum
+    for ry in (top + 8, g - 8, g - 2):
+        for x in range(x0 + 1, x1):
+            u = (x - x0) / (x1 - x0)
+            yy = ry + round(1.5 * math.sin(u * math.pi))
+            d.point((x, yy), fill=mix(hx("5a5e64"), hx("c4c8ce"), max(0.0, 1 - abs(u - 0.3) * 1.6)))
+            d.point((x, yy + 1), fill=hx("26282c"))
+    # rust: streaks bleeding down from under each band, and a bloom at the foot where the rain sits
+    for _ in range(3):
+        rx = rnd.randint(x0 + 3, x1 - 3)
+        ry = rnd.choice((top + 10, g - 6))
+        body = mix(zinc_d, zinc_l, max(0.0, min(1.0, 0.5 + 0.5 * math.cos(((rx - x0) / (x1 - x0) - 0.3) * math.pi * 1.1))))
+        for k in range(rnd.randint(2, 5)):
+            d.point((rx, ry + k), fill=mix(body, hx("6a4e34"), 0.6 - k * 0.08))
+    for x in range(x0 + 1, x1):
+        if rnd.random() < 0.45:
+            d.point((x, g - 1), fill=rnd.choice((hx("5a4430"), hx("4a3a2a"))))
+    # a dent: a dark crease with a bright lip below it
+    dx, dy = rnd.randint(x0 + 5, x1 - 9), rnd.randint(top + 13, g - 13)
+    d.line([(dx, dy), (dx + 4, dy + 1)], fill=hx("1e2024"))
+    d.line([(dx + 1, dy + 2), (dx + 4, dy + 2)], fill=hx("b4b8be"))
+    # the rain running down the lit side
+    for k in range(top + 2, g - 3, 4):
+        if rnd.random() < 0.7:
+            d.point((x0 + 5, k), fill=hx("d8dce4"))
+    # side handles: a bracket riveted to the drum and a wire loop hanging from it
+    for hx0, sgn in ((x0, -1), (x1, 1)):
+        d.rectangle([min(hx0, hx0 + sgn), top + 10, max(hx0, hx0 + sgn), top + 13], fill=hx("4a4e54"))
+        d.point((hx0 + sgn * 2, top + 11), fill=hx("a4a8ae"))
+        d.line([(hx0 + sgn * 2, top + 11), (hx0 + sgn * 3, top + 14), (hx0 + sgn * 2, top + 16)],
+               fill=hx("6a6e74"))
+    # the rim
+    d.ellipse([x0 - 1, top - 2, x1 + 1, top + 2], outline=hx("a8acb2"))
+
+
+def ribbed_lid(d, box, handle=True):
+    """A galvanized lid seen from just above: a rim, two pressed rings, and the bar handle on top."""
+    x0, y0, x1, y1 = box
+    d.ellipse(box, fill=hx("7a7e84"), outline=hx("2a2c30"))
+    d.ellipse([x0 + 2, y0 + 1, x1 - 2, y1 - 1], outline=hx("9a9ea4"))
+    d.ellipse([x0 + 6, y0 + 2, x1 - 6, y1 - 2], outline=hx("5a5e64"))
+    if handle:
+        cx = (x0 + x1) // 2
+        d.line([(cx - 4, y0 + 2), (cx + 4, y0 + 2)], fill=hx("2a2c30"))
+        d.rectangle([cx - 3, y0 - 1, cx + 3, y0], fill=hx("a4a8ae"))
+        d.point((cx - 4, y0 + 1), fill=hx("5a5e64"))
+        d.point((cx + 4, y0 + 1), fill=hx("5a5e64"))
+
+
+def cabbage_leaf(d, x, y, flip=1):
+    d.polygon([(x, y), (x + 4 * flip, y - 3), (x + 8 * flip, y - 1), (x + 6 * flip, y + 2), (x + 1 * flip, y + 2)],
+              fill=hx("7a9a4a"))
+    d.line([(x + flip, y), (x + 6 * flip, y - 1)], fill=hx("c8e09a"))
+    d.point((x + 4 * flip, y + 1), fill=hx("3a5226"))
+
+
 def trash_cans(img):
-    d = ImageDraw.Draw(img)
+    rnd = random.Random(408)
     for i, (x0, top) in enumerate(CANS):
         x1, g = x0 + 22, 200 + i
         shadow(img, "ellipse", [x0 - 4, g - 3, x1 + 8, g + 3], 0.6, 2)
-        for x in range(x0, x1 + 1):
-            u = (x - x0) / (x1 - x0)
-            f = 0.5 + 0.5 * math.cos((u - 0.3) * math.pi * 1.1)
-            d.line([(x, top), (x, g)], fill=mix(hx("2a2c30"), hx("8a8e94"), max(0.0, min(1.0, f))))
-        for ry in (top + 8, g - 8):
-            d.line([(x0 + 1, ry), (x1 - 1, ry)], fill=hx("a8acb2"))
-            d.line([(x0 + 1, ry + 1), (x1 - 1, ry + 1)], fill=hx("2e3034"))
-        d.rectangle([x0 - 1, top - 2, x1 + 1, top], fill=hx("9a9ea4"))
-        d.rectangle([x0 - 2, top + 10, x0, top + 14], fill=hx("6a6e74"))
-        d.rectangle([x1, top + 10, x1 + 2, top + 14], fill=hx("6a6e74"))
-    # the first wears its lid, a dent in it holding rain; the second's lid lies against it, the rubbish spills
+    d = ImageDraw.Draw(img)
+    for i, (x0, top) in enumerate(CANS):
+        can_body(d, x0, x0 + 22, top, 200 + i, rnd)
+    # the first wears its lid, a dent in it holding rain that shows the sky
     x0, top = CANS[0]
-    d.ellipse([x0 - 2, top - 6, x0 + 24, top + 1], fill=hx("7a7e84"), outline=hx("2a2c30"))
-    d.ellipse([x0 + 6, top - 4, x0 + 16, top - 1], fill=hx("3a4258"))
-    d.rectangle([x0 + 9, top - 8, x0 + 13, top - 6], fill=hx("5a5e64"))
+    ribbed_lid(d, [x0 - 2, top - 6, x0 + 24, top + 1])
+    d.ellipse([x0 + 13, top - 4, x0 + 21, top - 1], fill=hx("3a4258"))
+    d.point((x0 + 15, top - 3), fill=hx("8a9ab8"))
+    # the second's lid lies against it; the can is crammed: a sodden newspaper, cabbage, a bottle neck
     x0, top = CANS[1]
     d.ellipse([x0, top - 3, x0 + 22, top + 2], fill=hx("16161a"))
     d.polygon([(x0 + 3, top), (x0 + 8, top - 8), (x0 + 15, top - 5), (x0 + 20, top)], fill=hx("8a8270"))
-    d.ellipse([x0 + 24, 186, x0 + 34, 204], fill=hx("6a6e74"), outline=hx("a4a8ae"))
-    for x, y, c in ((x0 - 6, 206, hx("8a8270")), (x0 + 6, 208, hx("5a4030"))):
-        d.ellipse([x - 4, y - 2, x + 4, y + 2], fill=c)
+    for k, yy in enumerate(range(top - 5, top, 2)):  # newsprint columns on the paper
+        d.line([(x0 + 7 + k, yy), (x0 + 13, yy)], fill=hx("5a5648"))
+    d.line([(x0 + 8, top - 8), (x0 + 15, top - 5)], fill=hx("b8b09a"))
+    cabbage_leaf(d, x0 + 13, top - 2)
+    cabbage_leaf(d, x0 + 6, top - 1, -1)
+    d.line([(x0 + 17, top - 1), (x0 + 19, top - 9)], fill=hx("1e3a22"), width=2)  # a bottle neck
+    d.point((x0 + 19, top - 10), fill=hx("7ab88a"))
+    # the lid on the cobbles, leaning on the can: seen nearly edge-on, with its rings and the handle
+    lx0, ly0, lx1, ly1 = x0 + 24, 186, x0 + 34, 204
+    d.ellipse([lx0, ly0, lx1, ly1], fill=hx("6a6e74"), outline=hx("a4a8ae"))
+    d.ellipse([lx0 + 2, ly0 + 3, lx1 - 2, ly1 - 3], outline=hx("4a4e54"))
+    d.ellipse([lx0 + 4, ly0 + 6, lx1 - 4, ly1 - 6], outline=hx("8a8e94"))
+    d.rectangle([lx1, ly0 + 7, lx1 + 1, ly1 - 7], fill=hx("4a4e54"))
+    # rubbish spilled on the stones: a crumpled paper, cabbage leaves, an orange peel, a tin on its side
+    d.ellipse([x0 - 10, 204, x0 - 2, 208], fill=hx("8a8270"))
+    d.line([(x0 - 8, 205), (x0 - 4, 207)], fill=hx("5a5648"))
+    cabbage_leaf(d, x0 + 4, 207)
+    cabbage_leaf(d, x0 - 22, 206, -1)
+    d.line([(x0 + 15, 206), (x0 + 18, 205)], fill=hx("d8903a"))
+    d.rectangle([x0 - 32, 203, x0 - 26, 207], fill=hx("6a6e74"))
+    d.ellipse([x0 - 33, 203, x0 - 31, 207], fill=hx("a4a8ae"))
+    d.line([(x0 - 30, 205), (x0 - 27, 205)], fill=hx("8a3a28"))
 
 
 def crate_at(img, pos):
     x0, y0 = pos
     s = CRATE_SIZE
     shadow(img, "rect", [x0 - 2, y0 + s - 2, x0 + s + 4, y0 + s + 3], 0.6, 2)
-    fruit_crate(ImageDraw.Draw(img), x0, y0, s, seed=5)
+    d = ImageDraw.Draw(img)
+    fruit_crate(d, x0, y0, s, seed=5)
+    # the rain on it: the top rim shines, the bottom slat is soaked dark where it stands in the wet
+    for x in range(x0 + 2, x0 + s - 1, 3):
+        d.point((x, y0), fill=hx("c8a878"))
+    for x in range(x0 + 1, x0 + s):
+        d.point((x, y0 + s - 1), fill=hx("2e1e0e"))
+        if (x - x0) % 4 == 1:
+            d.point((x, y0 + s - 2), fill=hx("4a3218"))
+    # the hand-hole cut through the top slat
+    d.rectangle([x0 + 10, y0 + 6, x0 + 16, y0 + 7], fill=hx("120a04"))
+    d.line([(x0 + 10, y0 + 8), (x0 + 16, y0 + 8)], fill=hx("a8845a"))
+    # what's left of a grower's paper label, torn, on the bottom slat
+    lx, ly = x0 + 5, y0 + 19
+    d.polygon([(lx, ly), (lx + 7, ly), (lx + 6, ly + 4), (lx + 3, ly + 3), (lx, ly + 4)], fill=hx("c8b88a"))
+    d.line([(lx + 1, ly + 1), (lx + 5, ly + 1)], fill=hx("a83a22"))
+    d.point((lx + 3, ly + 2), fill=hx("3a6a3a"))
+    # straw and a cabbage leaf left in the bottom, showing over the near rim
+    for k in range(4):
+        d.line([(x0 + 4 + k * 5, y0 + 3), (x0 + 6 + k * 5, y0 + 1)], fill=hx("b89a4a"))
+    cabbage_leaf(d, x0 + 17, y0 + 3)
 
 
 def lighting(img, far_box, lowered):
