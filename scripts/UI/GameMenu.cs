@@ -11,8 +11,8 @@ public enum MenuAction { Resume, NewGame, Load, QuitToTitle }
 public readonly record struct MenuResult(MenuAction Action, SaveData? Save = null);
 
 /// <summary>
-/// Title menu (Continue / New game / Load) and Esc pause menu (Resume / Save / Load / Quit to title),
-/// including the save-slot list. Runs while the tree is paused.
+/// Title menu (Continue / New game / Load / Settings / Quit game) and Esc pause menu (Resume / Save / Load /
+/// Settings / Quit to title / Quit to desktop), including the save-slot list. Runs while the tree is paused.
 /// </summary>
 public partial class GameMenu : Control
 {
@@ -129,8 +129,15 @@ public partial class GameMenu : Control
             ("Settings", true, SettingsPage),
         };
         AddRestartSound(rows);
+        if (CanQuit) rows.Add((QuitGameLabel, true, Game.Instance.QuitGame));
         Page("", 142, null, rows.ToArray());
     }
+
+    public const string QuitGameLabel = "Quit game";
+    public const string QuitToDesktopLabel = "Quit to desktop";
+
+    /// <summary>Phone apps are left with the system's home or back gesture, so only desktop builds offer quitting.</summary>
+    private static bool CanQuit => !OS.HasFeature("mobile");
 
     public const string RestartSoundLabel = "Restart sound";
     public const string SoundLostText = "No sound device was found, so the game is silent.";
@@ -146,12 +153,25 @@ public partial class GameMenu : Control
 
     private void PausePage()
     {
-        Page("Paused", -1, () => Finish(new MenuResult(MenuAction.Resume)),
+        var rows = new List<(string, bool, Action)>
+        {
             ("Resume", true, () => Finish(new MenuResult(MenuAction.Resume))),
             ("Save game", Game.Instance.CanSave, () => SlotsPage(saving: true)),
             ("Load game", true, () => SlotsPage(saving: false)),
             ("Settings", true, SettingsPage),
-            ("Quit to title", true, () => Finish(new MenuResult(MenuAction.QuitToTitle))));
+            ("Quit to title", true, () => Finish(new MenuResult(MenuAction.QuitToTitle))),
+        };
+        if (CanQuit) rows.Add((QuitToDesktopLabel, true, ConfirmQuitPage));
+        Page("Paused", -1, () => Finish(new MenuResult(MenuAction.Resume)), rows.ToArray());
+    }
+
+    /// <summary>Asks before closing the game from play; No or Esc returns to the pause menu.</summary>
+    private void ConfirmQuitPage()
+    {
+        _status.Text = "";
+        Page("Quit without saving?", -1, PausePage,
+            ("Yes, quit", true, Game.Instance.QuitGame),
+            ("No", true, PausePage));
     }
 
     private void SettingsPage()
