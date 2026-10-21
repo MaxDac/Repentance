@@ -82,7 +82,7 @@ script = ExtResource("4_FlagSprite")
 HideIfFlags = "cellar_lit"
 
 [node name="BarrelLit" type="Sprite2D" parent="World"]
-position = Vector2(303, 239)
+position = Vector2(304, 239)
 texture = ExtResource("14_barrel_lit")
 centered = false
 offset = Vector2(0, -42)
@@ -91,7 +91,7 @@ ShowIfFlags = "cellar_lit"
 HideIfFlags = "barrel_open,cellar_fire"
 
 [node name="BarrelOpen" type="Sprite2D" parent="World"]
-position = Vector2(303, 239)
+position = Vector2(304, 239)
 texture = ExtResource("17_barrel_open")
 centered = false
 offset = Vector2(0, -42)

@@ -137,7 +137,7 @@ def panel_door(d, x0, y0, x1, y1, col, knob_left=False, frame=None, frame_w=4):
 BELL = (318, 62, 344, 92)
 BIN_HOME = (396, 172, 446, 210)
 BIN_MOVED = (306, 172, 356, 210)
-DOOR = (250, 98, 288, 196)
+DOOR = (250, 120, 288, 206)  # a low service door at yard level, so its lintel is within Micah's reach
 STONE, STONE_L, STONE_D = hx("c8bc9e"), hx("e4dabe"), hx("7e735e")
 BRICK, MORTAR = hx("8a4634"), hx("5a3a30")
 UPPER_Y = (40, 80)
@@ -551,16 +551,6 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
         d.line([(dx0 + 10, dy0 + 8), (dx0 + 16, dy0 + 14)], fill=hx("4a5a7a"))
         d.line([((dx0 + dx1) // 2, dy0 + 6), ((dx0 + dx1) // 2, dy0 + 22)], fill=hx("2e4a36"))
         d.rectangle([dx0 + 13, dy1 - 30, dx1 - 13, dy1 - 27], fill=hx("b89a50"))  # letter plate
-    # worn steps down to the yard, and a boot scraper
-    for i in range(3):
-        y = dy1 + i * 4
-        x0_, x1_ = dx0 - 9 - i * 3, dx1 + 9 + i * 3
-        d.rectangle([x0_, y, x1_, y + 4], fill=mix(hx("aaa292"), hx("7a7466"), i / 3))
-        d.line([(x0_, y), (x1_, y)], fill=hx("cec6b4"))
-        d.line([(x0_ + 4, y + 2), (x0_ + 10, y + 2)], fill=hx("8a8476"))
-    d.rectangle([dx1 + 14, dy1 + 6, dx1 + 22, dy1 + 9], fill=hx("1a1a1c"))
-    d.line([(dx1 + 15, dy1 + 6), (dx1 + 15, dy1 + 11)], fill=hx("1a1a1c"))
-    d.line([(dx1 + 21, dy1 + 6), (dx1 + 21, dy1 + 11)], fill=hx("1a1a1c"))
     # the servants' lamp on its bracket, left of the door
     lx, ly = dx0 - 22, dy0 - 2
     d.line([(lx - 6, ly - 10), (lx, ly - 10), (lx, ly - 6)], fill=hx("1a1816"), width=2)
@@ -616,6 +606,18 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
     d = ImageDraw.Draw(img)
     for i in range(3):
         d.line([(226 - i, 239 + i * 3), (238 - i, 239 + i * 3)], fill=hx("6a5a40"))
+    # one worn step out onto the flags, dished in the middle by the delivery boys, and a boot scraper
+    sx0, sx1 = dx0 - 10, dx1 + 10
+    d.rectangle([sx0, dy1, sx1, dy1 + 5], fill=hx("9a9282"))
+    d.line([(sx0, dy1), (sx1, dy1)], fill=hx("cec6b4"))
+    d.line([(sx0, dy1 + 5), (sx1, dy1 + 5)], fill=hx("4a463e"))
+    d.line([(sx1, dy1), (sx1, dy1 + 5)], fill=hx("6a6458"))
+    d.line([(dx0 + 6, dy1 + 1), (dx1 - 6, dy1 + 1)], fill=hx("b4ac9a"))
+    d.line([(dx0 + 10, dy1 + 2), (dx1 - 10, dy1 + 2)], fill=hx("867e70"))
+    d.line([(sx0 + 3, dy1 + 3), (sx0 + 8, dy1 + 3)], fill=hx("7a7466"))
+    d.rectangle([dx1 + 14, dy1 - 2, dx1 + 22, dy1 + 1], fill=hx("1a1a1c"))
+    d.line([(dx1 + 15, dy1 - 2), (dx1 + 15, dy1 + 4)], fill=hx("1a1a1c"))
+    d.line([(dx1 + 21, dy1 - 2), (dx1 + 21, dy1 + 4)], fill=hx("1a1a1c"))
     # garden wall, gate piers with ball finials and the gate itself
     bricks(img, (0, 140, FX - 1, 212), mul(BRICK, 0.9), MORTAR, 78, h=4, w=11)
     d.rectangle([0, 136, FX - 1, 140], fill=STONE)
