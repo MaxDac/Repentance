@@ -111,6 +111,9 @@ markers and exit codes, `WaitIdle`/`Until`/`Observe`, synthetic mouse and
 keyboard input (`Viewport.PushInput`), screenshots to `screenshots/`, a wiped per-suite save folder, and shared
 puzzle/satchel helpers. Put new shared helpers here, not in `AutoPlay`.
 
+`game.Wait`, `WaitIdle` and `Until` count game seconds, which the clock scales; `Observe` counts real seconds. Wait
+with `Observe` for anything timed in real time, such as the touch long press (`TouchPointer.HoldSeconds`).
+
 ### `Playthrough` (`--playthrough`, `--film`)
 
 Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick choices. Beats:

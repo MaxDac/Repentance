@@ -265,7 +265,8 @@ public partial class AutoPlay
         await WaitIdle(game);
         var window = new Vector2(400, 80);
         Touch(window, true);
-        for (int i = 0; i < 100 && !game.Hud.Wheel.IsOpen; i++) await game.Wait(0.02);
+        // The hold is a physical gesture timed in real seconds; game.Wait would scale with the test clock.
+        for (int i = 0; i < 100 && !game.Hud.Wheel.IsOpen; i++) await Observe(0.02);
         Check(game.Hud.Wheel.IsOpen && !game.Busy, "a long press opens the verb wheel without clicking first");
         Touch(window, false);
         await game.Wait(0.1);
@@ -286,8 +287,8 @@ public partial class AutoPlay
         for (int i = 0; i < 50 && !pad.IsOpen; i++) await game.Wait(0.02);
         Check(pad.IsOpen && pad.Page == pad.PageCount - 1, "the NOTES touch button opens the notepad");
         var at = new Vector2(240, 130);
+        // The first step drags past the slop in the same frame, so a slow frame can never turn it into a long press.
         Touch(at, true);
-        await game.Wait(0.05);
         for (int i = 1; i <= 6; i++)
         {
             TouchDrag(at + new Vector2(i * 10, 0));
