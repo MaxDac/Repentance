@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs the test suites from a clean slate and prints a summary. Exits non-zero if any suite fails.
-# Suites: unit, art, autoplay, settings, pause, walk, playthrough, resume-act2, resume-act3, or all (the default).
+# Suites: unit, art, launcher, autoplay, settings, pause, walk, playthrough, resume-act2, resume-act3, or all (the default).
+# launcher runs the launchers' own regression tests (harness.sh).
 # resume-act2/resume-act3 are fresh launches that load the checkpoints a playthrough run kept (run it first).
 # Unless --no-clean is given, every generated file is deleted first and the project is rebuilt and reimported.
 # Godot logs go to logs/<suite>.log; a Godot suite passes only with its marker and no ERROR lines.
@@ -11,7 +12,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 set +e
 
-ORDER=(unit art autoplay settings pause walk playthrough resume-act2 resume-act3)
+ORDER=(unit art launcher autoplay settings pause walk playthrough resume-act2 resume-act3)
 # Godot suites: user args and pass marker (case statements, since macOS ships bash 3.2 without associative arrays).
 suite_arg() {
   case "$1" in
@@ -32,8 +33,8 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --no-clean) clean=0 ;;
     --godot) godot_arg="$2"; shift ;;
-    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-    all|unit|art|autoplay|settings|pause|walk|playthrough|resume-act2|resume-act3) wanted+=("$1") ;;
+    -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
+    all|unit|art|launcher|autoplay|settings|pause|walk|playthrough|resume-act2|resume-act3) wanted+=("$1") ;;
     *) echo "Unknown suite or option '$1'." >&2; exit 2 ;;
   esac
   shift
@@ -74,6 +75,9 @@ for s in "${selected[@]}"; do
       py="$(find_python)" &&
         (cd "$ROOT" && "$py" -m unittest discover -s tests/art -v &&
           "$py" -m unittest discover -s tests -p test_character_art.py -v) ;;
+    launcher)
+      echo "== launcher"
+      bash "$ROOT/tools/run/harness.sh" ;;
     *)
       # Not --headless: AutoPlay captures viewport screenshots, which need a real renderer (use xvfb-run in CI).
       # suite_arg may print several arguments (no spaces inside any), so it is split on purpose.

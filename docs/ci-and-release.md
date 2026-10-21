@@ -36,7 +36,7 @@ Runs on every pull request (a newer push cancels the older run) and every push t
 
 | Job | What it does |
 |---|---|
-| `unit-tests` | `tools/run/test.sh unit --no-clean` and the launcher tests (`tests/test_run_scripts.py`) |
+| `unit-tests` | `tools/run/test.sh unit --no-clean` and `tools/run/test.sh launcher --no-clean` (`tests/test_run_scripts.py`, Bash and pwsh) |
 | `art-tests` | `tools/run/test.sh art --no-clean` (Python 3.14, Pillow, NumPy) |
 | `godot-tests (<suite>)` | `autoplay`, `settings`, `pause`, `walk`, `playthrough` under xvfb; uploads logs/screenshots on failure |
 | `export (linux / windows)` | Exports both presets as the release does; checks the .NET data folder; builds the AppImage and the Windows installer (`tools/package/`); the Linux build runs `--walk-test` from the AppImage; checks the icon frames in the `.exe`; validates, installs and uninstalls the desktop entry |

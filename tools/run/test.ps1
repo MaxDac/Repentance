@@ -3,6 +3,7 @@
     Runs the test suites from a clean slate and prints a summary. Exits non-zero if any suite fails.
 .DESCRIPTION
     Suites: unit (xunit, including the story-integrity and exhaustive Ink-walk tests), art (Python),
+    launcher (the launchers' own regression tests, via harness.ps1),
     autoplay, settings, pause, walk, playthrough, resume-act2, resume-act3 (Godot runs). 'all' runs every one.
     resume-act2/resume-act3 are fresh launches that load the checkpoints a playthrough run kept (run it first).
     Unless -NoClean is given, every generated file is deleted first and the project is rebuilt and reimported.
@@ -12,7 +13,7 @@
     tools\run\test.ps1 -Suite unit, playthrough -NoClean
 #>
 param(
-    [ValidateSet('all', 'unit', 'art', 'autoplay', 'settings', 'pause', 'walk', 'playthrough', 'resume-act2', 'resume-act3')]
+    [ValidateSet('all', 'unit', 'art', 'launcher', 'autoplay', 'settings', 'pause', 'walk', 'playthrough', 'resume-act2', 'resume-act3')]
     [string[]]$Suite = @('all'),
     [switch]$NoClean,
     [string]$Godot
@@ -28,7 +29,7 @@ $godotSuites = [ordered]@{
     'resume-act2' = @{ Args = @('--playthrough', '--resume=act2'); Marker = 'RESUME OK' }
     'resume-act3' = @{ Args = @('--playthrough', '--resume=act3'); Marker = 'RESUME OK' }
 }
-$order = @('unit', 'art') + @($godotSuites.Keys)
+$order = @('unit', 'art', 'launcher') + @($godotSuites.Keys)
 $selected = if ($Suite -contains 'all') { $order } else { $order | Where-Object { $Suite -contains $_ } }
 $needsGodot = @($selected | Where-Object { $godotSuites.Contains($_) }).Count -gt 0
 
@@ -65,6 +66,12 @@ foreach ($s in $selected) {
                 $ok = $LASTEXITCODE -eq 0
                 & $py[0] @pyArgs -m unittest discover -s tests -p test_character_art.py -v
                 $ok = $ok -and $LASTEXITCODE -eq 0
+            }
+            'launcher' {
+                Write-Host '== launcher' -ForegroundColor Cyan
+                # A separate process: harness.ps1 exits with the tests' status.
+                & (Get-Process -Id $PID).Path -NoProfile -File (Join-Path $PSScriptRoot 'harness.ps1')
+                $ok = $LASTEXITCODE -eq 0
             }
             default {
                 $g = $godotSuites[$s]

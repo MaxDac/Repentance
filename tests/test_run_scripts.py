@@ -10,9 +10,28 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+WINDOWS = os.name == "nt"
 
 
-@unittest.skipUnless(shutil.which("bash"), "Bash is required")
+def find_bash():
+    """Bash for the .sh launchers. On Windows, Git Bash: System32\\bash.exe is the WSL launcher."""
+    if os.environ.get("LAUNCHER_TEST_BASH"):
+        return os.environ["LAUNCHER_TEST_BASH"]
+    if not WINDOWS:
+        return shutil.which("bash")
+    roots = [os.environ.get(v) for v in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)", "LOCALAPPDATA")]
+    git = shutil.which("git")
+    candidates = [Path(r) / "Git" / "bin" / "bash.exe" for r in roots if r]
+    candidates += [Path(r) / "Programs" / "Git" / "bin" / "bash.exe" for r in roots if r]
+    if git:
+        candidates.append(Path(git).resolve().parents[1] / "bin" / "bash.exe")
+    return next((str(c) for c in candidates if c.is_file()), None)
+
+
+BASH = find_bash()
+
+
+@unittest.skipUnless(BASH, "Bash is required (Git Bash on Windows)")
 class LauncherTests(unittest.TestCase):
     shell = "bash"
 
@@ -95,11 +114,40 @@ sys.exit(int(os.environ["GAME_EXIT"]))
 """,
         )
 
+    def shebang(self):
+        if WINDOWS:
+            # Git Bash runs shebang scripts, given a POSIX path (C:\x\python.exe -> /c/x/python.exe).
+            drive, rest = os.path.splitdrive(sys.executable)
+            return f"#!/{drive[0].lower()}{rest.replace(os.sep, '/')}"
+        return f"#!{sys.executable}"
+
     def write_executable(self, name, body):
+        if WINDOWS and self.shell == "pwsh":
+            # PowerShell can't run a shebang script; a .cmd wrapper runs the body kept outside PATH.
+            bodies = self.root / "bodies"
+            bodies.mkdir(exist_ok=True)
+            script = bodies / f"{name}.py"
+            script.write_text(body, encoding="utf-8")
+            path = self.bin / f"{name}.cmd"
+            path.write_text(f'@"{sys.executable}" "{script}" %*\r\n@exit /b %ERRORLEVEL%\r\n', encoding="utf-8")
+            return path
         path = self.bin / name
-        path.write_text(f"#!{sys.executable}\n{body}", encoding="utf-8")
+        path.write_text(f"{self.shebang()}\n{body}", encoding="utf-8")
         path.chmod(0o755)
         return path
+
+    def rename_engine(self, name):
+        engine = self.bin / (name + self.engine.suffix)
+        self.engine.rename(engine)
+        return engine
+
+    def found(self, path):
+        """A path as the launcher prints one it discovered (Git Bash prints POSIX paths)."""
+        if WINDOWS and self.shell == "bash":
+            return subprocess.run(
+                [BASH, "-c", 'cygpath -u "$1"', "_", str(path)], capture_output=True, text=True, check=True
+            ).stdout.strip()
+        return str(path)
 
     def run_launcher(self, script="film.sh", *args, cwd=None):
         if self.shell == "pwsh":
@@ -110,13 +158,13 @@ sys.exit(int(os.environ["GAME_EXIT"]))
             command = ["pwsh", "-NoProfile", "-File"]
             args = tuple(options.get(arg, arg) for arg in args)
         else:
-            command = ["bash"]
+            command = [BASH]
         return subprocess.run(
             [*command, str(self.project / "tools" / "run" / script), *args],
             env=self.env,
             capture_output=True,
             text=True,
-            timeout=20,
+            timeout=60,
             cwd=cwd,
         )
 
@@ -153,8 +201,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
 
     def test_explicit_path_takes_precedence_over_environment(self):
         self.env["GODOT"] = "/missing/editor"
-        engine = self.bin / "editor with spaces"
-        self.engine.rename(engine)
+        engine = self.rename_engine("editor with spaces")
         result = self.run_launcher("film.sh", "--no-clean", "--godot", str(engine))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(f"Godot: {engine}", result.stdout)
@@ -170,24 +217,26 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.write_executable("godot_console", 'print("standard editor")\n')
         result = self.run_launcher("film.sh", "--no-clean")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn(f"Godot: {self.engine}", result.stdout)
+        self.assertIn(f"Godot: {self.found(self.engine)}", result.stdout)
         self.assertIn("Cannot use Godot", result.stdout + result.stderr)
 
     def test_discovery_checks_install_folder_after_path(self):
         if self.shell == "pwsh":
             self.skipTest("PowerShell's install-folder fallback is Windows-specific")
-        self.engine.write_text(f"#!{sys.executable}\nprint('standard editor')\n")
+        # A real Godot installed on this machine must not win the search.
+        self.env["LOCALAPPDATA"] = str(self.root / "localappdata")
+        self.engine.write_text(f"{self.shebang()}\nprint('standard editor')\n")
         installed = self.home / "godot" / "Godot_v4_test_mono_linux.x86_64"
         installed.parent.mkdir()
-        shutil.copy(self.bin / "dotnet", installed)
         installed.write_text(
-            f"#!{sys.executable}\n"
+            f"{self.shebang()}\n"
             "print('REPENTANCE GODOT OK')\nprint('FILM OK')\n",
             encoding="utf-8",
         )
+        installed.chmod(0o755)
         result = self.run_launcher("film.sh", "--no-clean")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn(f"Godot: {installed}", result.stdout)
+        self.assertIn(f"Godot: {self.found(installed)}", result.stdout)
 
     def test_import_errors_stop_all_launchers_even_after_zero_exit(self):
         for script, args in (("film.sh", ()), ("test.sh", ("pause",)), ("game.sh", ())):
@@ -361,8 +410,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertEqual((self.project / "logs" / "game.log").read_text(), "")
 
     def test_game_supports_engine_path_with_spaces_and_another_working_directory(self):
-        engine = self.bin / "editor with spaces"
-        self.engine.rename(engine)
+        engine = self.rename_engine("editor with spaces")
         self.env["GODOT"] = "/missing/editor"
         result = self.run_launcher(
             "game.sh", "--no-clean", "--godot", str(engine), cwd=self.home

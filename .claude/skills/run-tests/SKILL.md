@@ -13,7 +13,11 @@ tools\run\test.ps1 -Suite unit, playthrough     # first run: clean reset, build,
 tools\run\test.ps1 -Suite unit -NoClean         # later runs: skip generated-file deletion
 ```
 
-Godot suites always build/import, even with `-NoClean`; `unit` runs xunit only.
+`test.ps1` / `test.sh` is the single entry point; no suite means `all` (unit, art, launcher and every Godot suite).
+Launcher changes: `-Suite launcher` or `tools\run\harness.ps1` / `tools/run/harness.sh` (extra args go to unittest,
+e.g. `-k film`); they test Bash (Git Bash on Windows) and pwsh, no Godot needed.
+Godot suites always build/import, even with `-NoClean`; `unit` runs xunit only. Exports, packaging and Android run
+only in CI (`docs/testing.md`, "What only CI runs").
 Logs: `logs/<suite>.log`, `logs/import.log`. Failure = bad exit, missing marker or logged error.
 
 ## Read a failure

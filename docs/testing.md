@@ -2,8 +2,14 @@
 
 ## Quick reference
 
+One entry point runs every local suite: `tools\run\test.ps1` (Windows) or `tools/run/test.sh` (Linux, macOS, Git
+Bash). With no suite it runs `all`: unit tests (including story integrity and the Ink walk), art, launcher and every
+Godot end-to-end suite, then prints a summary. `harness.ps1` / `harness.sh` run just the launcher tests.
+
 ```powershell
+tools\run\test.ps1                           # everything, from a clean slate (~15 min)
 tools\run\test.ps1 -Suite unit, walk         # some suites (first run clean)
+tools\run\harness.ps1 -k film                # launcher tests only; extra arguments go to unittest
 tools\run\test.ps1 -Suite unit -NoClean      # skip deletion of generated files
 tools\run\film.ps1 -Speed 4 -Ending 5        # watch the game play itself
 tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, straight to the ending
@@ -11,13 +17,14 @@ tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, straight to the 
 
 ```bash
 tools/run/test.sh unit walk --no-clean
+tools/run/harness.sh -k film
 tools/run/film.sh --speed 4 --ending 5
 tools/run/film.sh -s hyper --from ending --ending 8
 tools/run/film.sh --ending prison-caleb-visits   # endings by title too; see film.sh --help
 ```
 
 Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
-all suites from a clean slate (~10 min). Do not do this or run film mode unless requested.
+all suites from a clean slate (~15 min). Do not do this or run film mode unless requested.
 
 | Change | Suites |
 |---|---|
@@ -30,7 +37,8 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 | Art generators or `assets/art` | `art` |
 | Music scores, `assets/audio/{piano,sax,bass}`, `tools/music` | `unit, playthrough` (listen first with `tools/music render`, see [Audio](audio.md#music-tool)) |
 | Settings menu / pause | `settings` / `pause` |
-| CI, launchers, export presets | no additional suites; validate the changed tooling, then CI |
+| Launchers (`tools/run/`) | `launcher` |
+| CI, export presets, `tools/package` | no local suite; validate the changed tooling, then CI ([CI only](#what-only-ci-runs)) |
 
 ## Suites
 
@@ -38,6 +46,7 @@ all suites from a clean slate (~10 min). Do not do this or run film mode unless 
 |---|---|---|---|
 | `unit` | `dotnet test` on each `tests/*.Tests` project | Godot-free rules, scene graph, story integrity, Ink walk | exit code |
 | `art` | Python `unittest` in `tests/` | Generated art matches the generators and contracts | exit code |
+| `launcher` | `harness.ps1` / `harness.sh` (`tests/test_run_scripts.py`) | Game, test and film launchers, Bash and PowerShell, against fake Godot/dotnet; no Godot needed | exit code |
 | `playthrough` | `--playthrough` | Canonical story, every ending, save/load after every beat, sound/music coverage | `PLAYTHROUGH OK` |
 | `resume-act2`, `resume-act3` | `--playthrough --resume=act2\|act3` | A fresh launch loads a checkpoint `playthrough` kept and plays on to "The End" (run `playthrough` first) | `RESUME OK` |
 | `autoplay` | `--autoplay` | Targeted regressions: puzzles, wrong items, mouse, wheel, inventory, notepad, poses, dialogue variants, seeded endings; screenshots | `AUTOPLAY OK` |
@@ -54,7 +63,7 @@ assert that music plays, so they keep it on.
 Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` first: if C# still holds a pending
 `SceneTreeTimer` at quit, Godot aborts at shutdown ("Leaked unsafe reference", `!rc_owner`). Await timers through
 `Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`.
-A local pass does not cover CI's other suites or exported builds.
+A local pass does not cover exported builds; see [What only CI runs](#what-only-ci-runs).
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses
 xvfb).
@@ -77,7 +86,23 @@ real sound and player data, without automation or a timeout, and wait for you to
 output; no test marker is required. Runtime error lines are reported as warnings (like film); nonzero exits
 fail, and build/import errors prevent launch. This is not a test-suite pass.
 
-`tests/test_run_scripts.py` tests the launchers themselves (run in CI's unit job).
+`tests/test_run_scripts.py` tests the launchers themselves: the `launcher` suite, or `harness.ps1` / `harness.sh`
+directly (CI's unit job runs it on Linux). It runs on Windows, Linux and macOS, each test through Bash and through
+PowerShell 7 (`pwsh`); a missing shell skips its tests. On Windows, Bash is Git Bash, never the WSL `bash.exe`
+stub; set `LAUNCHER_TEST_BASH` to choose another.
+
+## What only CI runs
+
+Every local suite above also runs in CI ([CI and release](ci-and-release.md#ci-githubworkflowsciyml)). These
+checks run only in CI, because they need export templates, packaging tools or a clean Windows machine:
+
+- `export (linux / windows)`: exports both presets, builds the AppImage and Windows installer, runs `--walk-test`
+  from the AppImage, checks the `.exe` icon and the desktop entry.
+- `android-export`: a debug-signed APK with the C# assembly inside.
+- `windows-installer`: silent install, shortcut and uninstall checks.
+
+For changes touching these, push and watch CI (`pr-and-ci` skill); [Export](ci-and-release.md#export) shows the
+matching local export command.
 
 ## The harness (`scripts/Debug/`)
 
@@ -192,7 +217,8 @@ Add allowlist entries only with a reason. Tests reject stale entries.
 
 - `tests/art/` (Pillow, NumPy): committed PNGs match their generators; lighting, geometry, overlay composition.
 - `tests/test_character_art.py`: sprite sheet sizes, strips, alpha, determinism.
-- `tests/test_run_scripts.py`: launcher argument parsing, cleaning, pass rules.
+- `tests/test_run_scripts.py` (`launcher` suite): launcher argument parsing, cleaning, pass rules, Godot discovery,
+  ending titles.
 
 ## Seeing what the game draws
 
