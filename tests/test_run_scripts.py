@@ -104,7 +104,9 @@ sys.exit(int(os.environ["GAME_EXIT"]))
     def run_launcher(self, script="film.sh", *args, cwd=None):
         if self.shell == "pwsh":
             script = script.replace(".sh", ".ps1")
-            options = {"--no-clean": "-NoClean", "--godot": "-Godot"}
+            options = {
+                "--no-clean": "-NoClean", "--godot": "-Godot", "--ending": "-Ending", "--from": "-From",
+            }
             command = ["pwsh", "-NoProfile", "-File"]
             args = tuple(options.get(arg, arg) for arg in args)
         else:
@@ -247,6 +249,36 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertIn("--film=1 --ending=2 --from=act1", self.trace.read_text())
         self.assertTrue((self.project / "logs" / "film_1x.log").exists())
 
+    def test_film_ending_titles_map_to_numbers(self):
+        for ending, number in (
+            ("walk-away", "1"), ("spare-the-old-man", "1-oldman"), ("Give-Up", "1-steps"),
+            ("escape-together", "2"), ("escape-alone", "3"), ("prison-eleanor-visits", "4"),
+            ("prison-caleb-visits", "5"), ("turn-himself-in", "6"), ("last-entry", "7"),
+            ("eleanor-burns-the-house", "8"), ("eleanor-confesses", "9"),
+            ("she-leaves-by-the-car", "10"), ("SHE-VISITS-ONCE", "11"), ("1-oldman", "1-oldman"), ("10", "10"),
+        ):
+            with self.subTest(ending=ending):
+                result = self.run_launcher("film.sh", "--ending", ending, "--no-clean")
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn(
+                    f"--film=1 --ending={number} --from=act1",
+                    self.trace.read_text().splitlines()[-1],
+                )
+
+    def test_film_rejects_give_up_from_act3(self):
+        result = self.run_launcher("film.sh", "--ending", "give-up", "--from", "act3", "--no-clean")
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertFalse(self.trace.exists() and "--film" in self.trace.read_text())
+
+    def test_bash_film_help_lists_ending_titles(self):
+        if self.shell != "bash":
+            self.skipTest("Bash help")
+        result = self.run_launcher("film.sh", "--help")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("1-steps   give-up", result.stdout)
+        self.assertIn("11        she-visits-once", result.stdout)
+        self.assertNotIn("source ", result.stdout)
+
     def test_bash_named_film_speeds(self):
         if self.shell != "bash":
             self.skipTest("Bash named speed syntax")
@@ -275,8 +307,8 @@ sys.exit(int(os.environ["GAME_EXIT"]))
             ("4",), ("hyper",), ("--speed",), ("-s",), ("--speed=",),
             ("--speed", "3"), ("-s", "bad"), ("--speed", "--no-clean"),
             ("--ending",), ("--from",), ("--godot",),
-            ("--ending", "all"), ("--from", "bad"),
-            ("--from", "act3", "--ending", "1-steps"),
+            ("--ending", "all"), ("--ending", "the-end"), ("--from", "bad"),
+            ("--from", "act3", "--ending", "1-steps"), ("--from", "act3", "--ending", "give-up"),
         ):
             with self.subTest(args=args):
                 result = self.run_launcher("film.sh", *args)

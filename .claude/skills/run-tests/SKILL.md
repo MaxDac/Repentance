@@ -37,8 +37,9 @@ It must not edit files, retry with other options or fix failures.
 Never run two launchers in the same worktree at once (shared `logs/`, `.godot/`, test user data); run them in
 sequence, all but the first with `-NoClean`.
 
-Film: `tools\run\film.ps1 -Speed 1|2|4|8|16|60|hyper -Ending 1-11|1-oldman|1-steps -From act1|interlude1|act2|interlude2|act3|ending`
-(bash: `tools/run/film.sh --speed hyper --from ending --ending 8 --no-clean`).
+Film: `tools\run\film.ps1 -Speed 1|2|4|8|16|60|hyper -Ending 1-11|1-oldman|1-steps|<title> -From act1|interlude1|act2|interlude2|act3|ending`
+(bash: `tools/run/film.sh --speed hyper --from ending --ending 8 --no-clean`). Ending titles (e.g. `give-up`,
+`she-visits-once`) are listed by `film.sh --help` / `Get-Help tools\run\film.ps1 -Parameter Ending`.
 Bash speed is optional (default 1x); use `--speed <s>`, `-s <s>` or `--speed=<s>`, not a positional speed.
 
 Normal interactive play: `tools/run/game.sh` / `tools\run\game.ps1`. These clean generated files (never player

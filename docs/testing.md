@@ -13,6 +13,7 @@ tools\run\film.ps1 -Speed hyper -From ending -Ending 8   # 60x, straight to the 
 tools/run/test.sh unit walk --no-clean
 tools/run/film.sh --speed 4 --ending 5
 tools/run/film.sh -s hyper --from ending --ending 8
+tools/run/film.sh --ending prison-caleb-visits   # endings by title too; see film.sh --help
 ```
 
 Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
@@ -126,10 +127,23 @@ viewer input except Space (pause), F11 / Alt+Enter, and Esc (prints `FILM STOPPE
 the test save/settings files. Log: `logs/film_<speed>x.log` (`..._from_<chapter>.log` with `--from`); `ERROR:`
 lines are warnings here (no audio device logs errors).
 
-Launchers: `film.ps1 -Speed <s> -Ending <n> -From <chapter>`;
-`film.sh --speed <s> --ending <n> --from <chapter>`. Bash also accepts `-s <s>` and `--speed=<s>`.
+Launchers: `film.ps1 -Speed <s> -Ending <n|title> -From <chapter>`;
+`film.sh --speed <s> --ending <n|title> --from <chapter>`. Bash also accepts `-s <s>` and `--speed=<s>`.
 Speed is optional and defaults to 1x in both launchers; Bash no longer accepts positional speed (`film.sh 4`).
-Ending/chapter options are unchanged.
+The launchers also take each ending by a case-insensitive title and pass Godot the number; the table is in
+`film.sh --help` and `Get-Help tools\run\film.ps1 -Parameter Ending`:
+
+| Number | Title | Number | Title |
+|---|---|---|---|
+| 1 | `walk-away` | 5 | `prison-caleb-visits` |
+| 1-oldman | `spare-the-old-man` | 6 | `turn-himself-in` |
+| 1-steps | `give-up` | 7 | `last-entry` |
+| 2 | `escape-together` | 8 | `eleanor-burns-the-house` |
+| 3 | `escape-alone` | 9 | `eleanor-confesses` |
+| 4 | `prison-eleanor-visits` | 10 | `she-leaves-by-the-car` |
+| | | 11 | `she-visits-once` |
+
+Numbers follow [Branches and endings](story-overview.md#branches-and-endings).
 ## Unit tests (`tests/*.Tests`)
 
 Three `net10.0` xunit projects, sharing `tests/Directory.Build.props`: `Repentance.Rules.Tests` and
