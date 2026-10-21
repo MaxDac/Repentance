@@ -139,7 +139,7 @@ public sealed partial class Playthrough
                 yield return "(Leave her.)";
                 break;
             case "5":
-                // two clumsy lines lose her (4 + 0 + 0 + 0): the footsteps on the landing, and Micah leaves her to them
+                // three clumsy lines lose her (4 + 0 + 0 + 0): the footsteps on the landing, and Micah leaves her to them
                 yield return "Shoot him";
                 yield return "I didn't come all this way";
                 yield return "Theodore's a coward";

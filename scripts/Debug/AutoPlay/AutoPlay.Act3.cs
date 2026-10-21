@@ -485,6 +485,9 @@ public partial class AutoPlay
         await game.Perform(Verb.UseItem, "barrel", MicahKit.LighterId);
         await game.Perform(Verb.Hand, "barrel");
         Check(gs.HasFlag("barrel_open") && !gs.HasFlag("cellar_fire"), "the whiskey runs out over the floor");
+        var kickOpen = await Spoken(() => game.Perform(Verb.Kick, "barrel"));
+        Check(kickOpen.Contains("It's running. Let it.") && !kickOpen.Any(l => l.Contains("I knock the spigot")),
+            "a kick at the running barrel doesn't open it a second time");
         await ReloadCheckpoint("the cellar mid-escape, whiskey running");
         Check(game.Room?.Name == "MansionCellar" && gs.HasFlag("barrel_open") && gs.HasItem("lantern_lit") && !gs.HasFlag("cellar_fire"),
             "a save with the whiskey running restores the open barrel and the lantern in hand");

@@ -109,6 +109,29 @@ public class SceneGraphTests
     [Fact]
     public void RoomScenes_AreFound() => Assert.True(Rooms.Value.Count > 20, $"only {Rooms.Value.Count} room scenes parsed");
 
+    /// <summary>RoomName is the save-slot title: the street outside the Club is Hubbard Street, and State Street is
+    /// only the Blue Lantern's florist front.</summary>
+    [Fact]
+    public void RoomNames_PutTheStreetsInTheRightPlaces()
+    {
+        string RoomName(string file) => Regex.Match(File.ReadAllText(Path.Combine(Root.Value, "scenes", "rooms", file)),
+            @"\nRoomName = ""([^""]*)""").Groups[1].Value;
+        Assert.Equal("Hubbard Street", RoomName("street.tscn"));
+        var stateStreet = Directory.GetFiles(Path.Combine(Root.Value, "scenes", "rooms"), "*.tscn")
+            .Where(f => RoomName(Path.GetFileName(f)).Contains("State Street"))
+            .Select(Path.GetFileNameWithoutExtension);
+        Assert.Equal(new[] { "blue_lantern_front" }, stateStreet);
+    }
+
+    /// <summary>On the motel return Eleanor's window is dark: no hotspot in the alley calls it lit.</summary>
+    [Fact]
+    public void MotelAlley_NeverCallsHerWindowLit()
+    {
+        var text = File.ReadAllText(Path.Combine(Root.Value, "scenes", "rooms", "motel_alley.tscn"));
+        Assert.DoesNotContain("DisplayName = \"lit window\"", text);
+        Assert.DoesNotContain("past a lit window", text);
+    }
+
     [Fact]
     public void EveryRoomHasEntries() =>
         Assert.Empty(Rooms.Value.Values.Where(r => r.Entries.Count == 0).Select(r => r.Name));

@@ -20,7 +20,7 @@ size = Vector2(24, 80)
 
 [node name="Street" type="Node2D"]
 script = ExtResource("1_Street")
-RoomName = "State Street"
+RoomName = "Hubbard Street"
 Floor = 1
 FarY = 172
 NearY = 240

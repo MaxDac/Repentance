@@ -289,8 +289,8 @@ carries them to the Tribune, they come out at Micah's trial, or Eleanor asks him
 Eleanor's testimony at her trial in ending 9 and the old man's Thursday book she mails to the Tribune in ending 8.
 Endings 2 and 3 keep the papers as Micah's private insurance. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
-Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving is easy, Micah.
-Forgetting is the part you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
+Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving's the easy part, Micah.
+Forgetting is what you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
 Micah throws Eleanor's perfumed cloth in the street before ringing, then offers coffee with "Nothing you owe me.";
 the journal places renewed vows a year later, and Daniel sees their photograph from that day (a sepia print on a
 cream card).

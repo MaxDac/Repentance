@@ -152,7 +152,7 @@ described here (other verbs, flavour lines) is left to the implementation.
   can order one: "Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal." It costs $1,
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
   empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
-  calls Micah back: "You know what, I think I don't really like you at all", gestures to Sal (the bodyguard at
+  calls Micah back: "On second thought, I don't like you. Not one bit.", gestures to Sal (the bodyguard at
   the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
   beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
   the same blackout.
@@ -185,8 +185,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Inside are the convent corridor and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
 - In the corridor, Sister Agatha interrogates Micah: what he's doing here and what he wants with Eleanor.
-  She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "you would be better off finishing the
-  search now, and never having anything to do with that Jezebel". Micah asks what she means; she retreats, telling
+  She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "You would do better to end the search
+  here, and have nothing more to do with that Jezebel." Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
 - In the cell, the night stand has a drawer holding a comb and a little mirror.
 - **Puzzle 4 - Waxed mirror:** take the mirror, whose wooden back is covered in wax. Inspecting it and the
@@ -572,7 +572,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   "Don't get into trouble again." appears along the panel's bottom edge, Micah answers only "...", then the panel is
   removed and the scene continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
-  Keep her third-appeal reply: "Forgiving is easy, Micah. Forgetting is the part you keep asking for."
+  Keep her third-appeal reply: "Forgiving's the easy part, Micah. Forgetting is what you keep asking for."
 - If Micah leaves without insisting at least three times, Rose answers: "You're running away again. It was always
   too hard for you... too hard on you. Don't bother ringing this bell again, Micah Jones." She then shuts the door
   on him straight away, not harshly but decisively; Micah thinks: "The door shut. Not hard. Just once, and for good."
@@ -605,8 +605,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   to the press. Caleb half-concedes ("I confess it every week. It doesn't get lighter.").
 - Micah's brother will tell him that the Convent is probably the best way to ask. He will advise Micah not to go there,
   to give up this foolish search.
-  Micah will answer "There's little left for me to do, at this point."
-  The brother will say "You know that that's not the case."
+  Micah will answer "There isn't much left for me to do."
+  The brother will say "You know that isn't true."
   Caleb teaches that repentance is for anyone, at any time in their life, and that the Lord forgives whoever truly
   repents. When Micah insists he is too far gone, Caleb rebukes him harshly: thinking himself beyond salvation is
   pride, arrogant and self-serving. He closes with the prodigal son.
@@ -620,8 +620,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 
 - Micah will interrogate the sister about the club and Eleanor. She will say she knows nothing, Micah will have to
   use the revolver again to threaten her.
-  The sister will say "Are you crazy, sir?!"
-  Micah: "Yes, at this point, you can say so, sister. Where's Eleanor? What's with the club?"
+  The sister will say "Are you crazy?!"
+  Micah: "Yeah. You can say that, sister. Where's Eleanor? What goes on at that club?"
   Micah's madness is escalating with his sin (the librarian roughed up, now a nun in her own convent; later he
   shoots the mobster and kills the old man). With the gun on her, Agatha's own repentance begins: she confesses
   that she went to Eleanor's cell past midnight and called it charity, that it was all her fault and that she
