@@ -31,7 +31,7 @@ size = Vector2(24, 18)
 [node name="ClubVestibule" type="Node2D"]
 script = ExtResource("1_Room")
 RoomName = "Club Vestibule"
-Floor = 1
+Floor = 3
 FarY = 200
 NearY = 262
 FarScale = 0.92

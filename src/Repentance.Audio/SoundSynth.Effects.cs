@@ -5,27 +5,37 @@ namespace Repentance;
 /// <summary>The recipe for each <see cref="Sound"/>, built from the blocks in SoundSynth.cs.</summary>
 public static partial class SoundSynth
 {
-    /// <summary>How a floor answers a shoe: its resonance, how bright the heel click stays, how much it booms.</summary>
+    /// <summary>
+    /// How a floor answers a shoe: its resonance, how bright the heel click stays, how much it booms, and how much
+    /// of the step comes back off the walls of a hard hall.
+    /// </summary>
     private readonly record struct FloorResponse(
-        double BodyHz, double BodyQ, double BodyTau, double Click, double Thump, double Muffle);
+        double BodyHz, double BodyQ, double BodyTau, double Click, double Thump, double Muffle, double Echo = 0);
 
     private static readonly FloorResponse Boards = new(BodyHz: 480, BodyQ: 2.2, BodyTau: 0.022, Click: 1.0, Thump: 0.35, Muffle: 0);
-    private static readonly FloorResponse Cobbles = new(BodyHz: 2100, BodyQ: 1.2, BodyTau: 0.008, Click: 1.15, Thump: 0.08, Muffle: 0);
-    private static readonly FloorResponse Rug = new(BodyHz: 280, BodyQ: 0.9, BodyTau: 0.02, Click: 0.55, Thump: 0.3, Muffle: 1400);
+    private static readonly FloorResponse Cobbles = new(BodyHz: 1700, BodyQ: 0.7, BodyTau: 0.007, Click: 1.1, Thump: 0.1, Muffle: 0);
+    private static readonly FloorResponse Rug = new(BodyHz: 280, BodyQ: 0.9, BodyTau: 0.016, Click: 0.7, Thump: 0.25, Muffle: 1400);
+    private static readonly FloorResponse Marble = new(BodyHz: 1000, BodyQ: 0.8, BodyTau: 0.012, Click: 0.95, Thump: 0.15, Muffle: 0, Echo: 0.42);
+
+    /// <summary>Delays (s) and levels of the reflections a marble hall sends back; irregular so they smear, not flutter.</summary>
+    private static readonly (double Delay, double Level)[] HallTaps =
+        { (0.047, 1.0), (0.071, 0.8), (0.103, 0.62), (0.131, 0.5), (0.173, 0.36), (0.229, 0.24), (0.29, 0.14) };
 
     /// <summary>
     /// A 1920s leather dress shoe: the hard stacked heel strikes with a sharp click, the floor answers, then the
-    /// leather sole pats down a moment later. A rug muffles the whole step but leaves the heel distinct.
+    /// leather sole pats down a moment later. A rug muffles the whole step but leaves the heel distinct; a marble
+    /// hall sends it back softly off the walls.
     /// </summary>
     private static float[] Step(Random rng, FloorResponse floor)
     {
         var buf = Buffer(0.2);
         double click = floor.Click, pitch = Vary(rng, 1, 0.06);
 
-        // heel: a bright crack and the short ring of the hard heel block
+        // heel: a bright crack and the knock of the hard heel block - wide noise bands, never a pitched ring,
+        // which would sound like metal
         Burst(buf, rng, 0, 0.0012, 0.9 * click, Biquad.HighPass(3000), attack: 0.0001);
-        foreach (var (hz, amp, tau) in new[] { (2350.0, 0.55, 0.011), (3400.0, 0.35, 0.007), (1650.0, 0.3, 0.014) })
-            Tone(buf, 0, hz * pitch, hz * pitch * 0.98, Vary(rng, tau, 0.15), amp * click, attack: 0.0001);
+        Burst(buf, rng, 0, Vary(rng, 0.005, 0.15), 0.7 * click, Biquad.BandPass(2600 * pitch, 0.6), attack: 0.0001);
+        Burst(buf, rng, 0, Vary(rng, 0.008, 0.15), 0.8 * click, Biquad.BandPass(1100 * pitch, 0.7), attack: 0.0002);
         Burst(buf, rng, 0, Vary(rng, floor.BodyTau, 0.2), 0.6, Biquad.BandPass(Vary(rng, floor.BodyHz, 0.1), floor.BodyQ));
         Tone(buf, 0, Vary(rng, 150, 0.1), 95, 0.018, floor.Thump);
 
@@ -44,7 +54,22 @@ public static partial class SoundSynth
             for (int i = 0; i < buf.Length; i++) buf[i] = (float)lp2.Next(lp.Next(buf[i]));
         }
         FadeTail(buf, 0.03);
-        return buf;
+        return floor.Echo > 0 ? Hall(buf, floor.Echo) : buf;
+    }
+
+    /// <summary>The dry step plus its reflections off a hard hall, each duller than the one before.</summary>
+    private static float[] Hall(float[] dry, double echo)
+    {
+        var wet = Buffer(0.55);
+        Array.Copy(dry, wet, dry.Length);
+        foreach (var (delay, level) in HallTaps)
+        {
+            var lp = Biquad.LowPass(3200 - 1600 * delay / HallTaps[^1].Delay);
+            int s = At(delay), n = Math.Min(dry.Length, wet.Length - s);
+            for (int i = 0; i < n; i++) wet[s + i] += (float)(echo * level * lp.Next(dry[i]));
+        }
+        FadeTail(wet, 0.05);
+        return wet;
     }
 
     private static void FadeTail(float[] buf, double seconds)

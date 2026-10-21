@@ -48,7 +48,7 @@ size = Vector2(34, 74)
 [node name="Lobby" type="Node2D"]
 script = ExtResource("1_Lobby")
 RoomName = "Aurelian Hotel"
-Floor = 1
+Floor = 3
 FarY = 176
 NearY = 262
 FarScale = 0.86
