@@ -91,7 +91,7 @@ public partial class MansionCellar : Room
             case ("barrel", Verb.Hand or Verb.Kick) when !Escaping:
                 await Say("I could use a drink. That's exactly why I won't. Eleanor's upstairs.");
                 return true;
-            case ("barrel", Verb.Hand) when Open:
+            case ("barrel", Verb.Hand or Verb.Kick) when Open:
                 await Say("It's running. Let it.");
                 return true;
             case ("barrel", Verb.Hand or Verb.Kick):

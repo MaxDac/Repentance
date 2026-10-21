@@ -193,7 +193,7 @@ shape = SubResource("CrateShape")
 script = ExtResource("3_Hotspot")
 Id = "fire_escape"
 DisplayName = "fire escape"
-LookText = "An iron fire escape clinging to the brick. The first landing runs past a lit window."
+LookText = "An iron fire escape clinging to the brick. The first landing runs past a first-floor window."
 WalkTo = Vector2(330, 214)
 Face = 2
 monitoring = false
@@ -238,7 +238,7 @@ shape = SubResource("LadderShape")
 [node name="Window" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
 Id = "window"
-DisplayName = "lit window"
+DisplayName = "first-floor window"
 LookText = "A window on the first floor, lit behind a thin curtain. Somebody's still up."
 WalkTo = Vector2(336, 214)
 Face = 2

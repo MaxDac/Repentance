@@ -285,6 +285,9 @@ public class StoryIntegrityTests
     [InlineData("Prohibition never made it past the front desk", "the library is the public library where Rose works")]
     [InlineData("nobody trusted the help to touch", "the library is the public library where Rose works")]
     [InlineData("One glass would steady my hands", "the library side table holds a glass of water, not liquor")]
+    [InlineData("sat on the edge of the cot", "Agatha stops a step short of the bed and stays standing")]
+    [InlineData("left them on Tuesday", "on Tuesday Eleanor dined at the Aurelian; the Club meets on Thursdays")]
+    [InlineData("runs past a lit window", "on the motel return Eleanor's window is dark")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
         var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
@@ -311,6 +314,21 @@ public class StoryIntegrityTests
         Assert.DoesNotContain("walks around with more than a day's pay", text);
         Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", text);
         Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", Code.Value.Single(kv => kv.Key.EndsWith("Rooms/Office.cs")).Value);
+    }
+
+    [Theory]
+    [InlineData("On second thought, I don't like you. Not one bit.")]
+    [InlineData("You would do better to end the search here, and have nothing more to do with that Jezebel.")]
+    [InlineData("Forgiving's the easy part, Micah. Forgetting is what you keep asking for.")]
+    [InlineData("There isn't much left for me to do.")]
+    [InlineData("You know that isn't true.")]
+    [InlineData("Are you crazy?!")]
+    [InlineData("Yeah. You can say that, sister. Where's Eleanor? What goes on at that club?")]
+    public void WalkthroughQuotesThePerformedLine(string line)
+    {
+        var text = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
+        Assert.Contains($"\"{line}", text);
+        Assert.Contains(line, InkText);
     }
 
     [Fact]

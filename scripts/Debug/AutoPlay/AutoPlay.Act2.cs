@@ -391,6 +391,11 @@ public partial class AutoPlay
             game.Room?.FindHotspot("drop_ladder")?.Visible == true && game.Room?.FindHotspot("ladder")?.Visible != true,
             "back at the motel alley, the drop ladder pulled up out of reach again");
         await Shot("motel_return_alley");
+        var escapeLook = await Spoken(() => game.Perform(Verb.Look, "fire_escape"));
+        var windowLook = await Spoken(() => game.Perform(Verb.Look, "window"));
+        Check(escapeLook.Count > 0 && !escapeLook.Any(l => l.Contains("lit")) && windowLook.Any(l => l.Contains("Dark")) &&
+              game.Room?.FindHotspot("window")?.DisplayName == "first-floor window",
+            "on the return her window is dark: neither the fire escape nor the window calls it lit");
         var refusal = await Spoken(() => game.Perform(Verb.Hand, "drop_ladder"));
         Check(game.Room?.Name == "MotelAlley" && refusal.Any(l => l.Contains("brace the joe at the desk")),
             "Micah won't go up the fire escape: better ask the clerk");

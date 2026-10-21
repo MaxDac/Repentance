@@ -188,7 +188,7 @@ NUN: You're awake. I thought you would be. A troubled soul doesn't sleep. I've c
 }
 ELEANOR: It's past midnight, Mother. The priest hears confessions on Saturdays.
 NUN: The priest isn't here. I am. Let me help you carry it.
-THOUGHT: She set the candle on the night stand and sat on the edge of the cot, closer than a confessor sits. Her hands didn't know where to go.
+THOUGHT: She set the candle on the night stand and stopped a step short of the cot, closer than a confessor stands. Her hands didn't know where to go.
 THOUGHT: Eleanor told me she saw it straight away. Not a nun's look. A lonely woman's, one who'd never let herself name what she wanted.
 THOUGHT: And she saw what it was worth. One night, the way the Club had taught her, and Agatha would keep her behind these walls as long as she liked. No Club, no old man. Nobody comes into a convent.
 THOUGHT: She'd bought every door she'd ever had that way. This one would have been the easiest.

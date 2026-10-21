@@ -37,7 +37,7 @@ public partial class ClubBackstage : Room
             await Wait(0.6);
             await Think("The dressing room behind the stage. Bulbs round the mirror, and a pink gown that wouldn't keep a cat warm.");
             await Think("They had left her alone with the mirror. Nobody had to tell her what for. He would come when she looked like herself.");
-            await Think("Her compact and her lipstick waited on the ledge under the bulbs, where she had left them on Tuesday. A lifetime ago.");
+            await Think("Her compact and her lipstick waited on the ledge under the bulbs, where she had left them before she ran. A lifetime ago.");
         });
     }
 
