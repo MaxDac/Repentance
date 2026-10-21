@@ -30,4 +30,4 @@ Reference: `docs/ci-and-release.md`.
 8. Done only when every check, including `ci-ok`, is green. Never merge, or report success, while a check is red,
    pending or missing.
 
-A new CI job goes into `ci-ok`'s `needs`, not the branch ruleset.
+A new CI job goes into `ci-ok`'s `needs` and into the ruleset's required checks (`docs/ci-and-release.md`).

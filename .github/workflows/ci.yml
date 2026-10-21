@@ -290,7 +290,7 @@ jobs:
           }
           Write-Output 'install and uninstall OK'
 
-  # The single check to require on main (branch protection / ruleset): green only when every job above passed.
+  # Required on main with every job above (ruleset "main protection"): green only when every job above passed.
   ci-ok:
     if: always()
     needs: [unit-tests, art-tests, godot-tests, export, android-export, windows-installer]

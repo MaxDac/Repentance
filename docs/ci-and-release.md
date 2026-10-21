@@ -44,8 +44,18 @@ Runs on every pull request (a newer push cancels the older run) and every push t
 | `windows-installer` | On Windows: silently installs the installer, checks files, Start Menu shortcut and uninstall entry, then uninstalls and checks nothing is left |
 | `ci-ok` | Green only if every job above succeeded |
 
-`ci-ok` is the only required check on `main` (ruleset "main protection"). New jobs go in `ci-ok`'s `needs`, not the
-ruleset.
+The ruleset "main protection" requires every job above by its check name (one per matrix entry, e.g.
+`godot-tests (walk)`) as well as `ci-ok`. A new job goes in `ci-ok`'s `needs` **and** in the ruleset: GitHub
+otherwise shows its failure but still allows the merge. Every job runs on every PR (no path filters, no job-level
+`if:`), so a required check can never be left pending. To list the required checks:
+
+```powershell
+gh api repos/MaxDac/Repentance/rulesets --jq '.[] | "\(.id) \(.name)"'
+gh api repos/MaxDac/Repentance/rulesets/<id> --jq '.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context'
+```
+
+To add one, PUT the ruleset back with the new `{context, integration_id: 15368}` (GitHub Actions) appended to
+`required_status_checks`, keeping the other rules.
 
 ```powershell
 gh pr checks --watch
