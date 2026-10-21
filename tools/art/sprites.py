@@ -10,6 +10,7 @@ side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 from .common import save
 import json
 import math
+import numpy as np
 from pathlib import Path
 from . import common
 from .figure import figure as _figure, pose, walk_pose, sheet, action_figure, grounded_joints, _walk_leg
@@ -71,7 +72,8 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  shoes="141414",
                  decals=_vee(0.30, 0.03, "ebe6d8", "2a1818") +
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
-                  ("belt", 0.42, "d8d0c0")])
+                  ("belt", 0.42, "d8d0c0")],
+                 apron=dict(col="e7e0d0", tie="d8d0c0"))
 # Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
 # figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat. Her mane is
 # trimmed at the back (its front edge beside the neck kept) and falls past her shoulder blades.
@@ -428,29 +430,27 @@ def fall_strip(spec, name, final_name, arms, wound=False):
 
 
 def shoulder_shot_strip(spec, name, final_name, arms):
-    """Shot in the near shoulder while facing right: the hit snaps him back with both hands clutching it, the legs
-    give way straight down under him, he sits down hard and goes over onto his back. Blood soaks the shoulder from the
-    hit on, and pools on the ground under it once he's down. The last frame is saved alone as final_name."""
-    from PIL import Image, ImageDraw, ImageChops
+    """Shot in the near shoulder while facing right: the hit snaps him back with the struck arm hanging limp, the legs
+    give way straight down under him, he sits down hard, the far hand coming across to press on the wound, and goes
+    over onto his back. Blood soaks the shoulder from the hit on, and pools on the ground under it once he's down. The
+    last frame is saved alone as final_name."""
+    from PIL import Image, ImageDraw
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
-    for joints in SHOULDER_SHOT:
-        img, head = action_figure(scaled, joints)
-        hip, shoulder = grounded_joints(joints)[:2]
+    keys = list(zip(SHOULDER_SHOT, SHOULDER_SHOT_FAR))
+    poses = [keys[0]]
+    for (a, fa), (b, fb) in zip(keys, keys[1:]):
+        poses += [tween(a, b, fa, fb, 0.5), (b, fb)]
+    for joints, far in poses:
         # the wound sits just below the shoulder joint, towards the hip
-        wx, wy = shoulder + (hip - shoulder) * 0.1
-        stain = Image.new("RGBA", img.size)
-        ImageDraw.Draw(stain).ellipse([wx - 3, wy - 3, wx + 3, wy + 3], fill=(138, 18, 22, 255))
-        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
-        img.alpha_composite(stain)
-        frames.append((img, head))
+        frames.append(action_figure(scaled, joints, far_arm=far, wound=0.1, shirt_collar="ebe6d8"))
     down, head = frames[-1]
     pool = Image.new("RGBA", down.size)
     wx = grounded_joints(SHOULDER_SHOT[-1])[1][0] + 2
     ImageDraw.Draw(pool).ellipse([wx - 8, 88, wx + 7, 93], fill=(104, 12, 16, 255))
     pool.alpha_composite(down)
     frames[-1] = (pool, head)
-    action_strip(name, frames, [0.1, 0.24, 0.16, 0.2, 0.3])
+    action_strip(name, frames, [0.1, 0.12, 0.12, 0.08, 0.08, 0.1, 0.1, 0.3])
     action_strip(final_name, [frames[-1]], [1])
     return frames
 
@@ -629,14 +629,40 @@ KNEES_PRONE = [
     [(67, 76), (88, 62), (103, 58), (60, 88), (42, 91), (98, 78), (110, 90)],
     HARRINGTON_PRONE,
 ]
-# Shot in the shoulder facing right: thrown back with the hands clutching the wound, knees folding straight down,
-# sitting down hard, then flat on his back (head to the left, like REST) with the hands still on the shoulder.
+# Shot in the near shoulder facing right: thrown back by the hit, the struck arm hanging limp, knees folding straight
+# down, sitting down hard, then flat on his back (head to the left, like REST). The far hand starts across the chest
+# at the hit and is pressed on the wound from the sit on (SHOULDER_SHOT_FAR: the far arm's elbow and hand).
 SHOULDER_SHOT = [
-    [(64, 57), (61, 34), (58, 19), (66, 74), (66, 91), (70, 44), (62, 37)],
-    [(64, 68), (60, 46), (56, 32), (80, 76), (78, 91), (69, 55), (61, 49)],
-    [(64, 82), (58, 58), (54, 44), (82, 80), (97, 91), (66, 68), (58, 61)],
-    [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (54, 75), (45, 78)],
+    [(64, 57), (61, 34), (58, 19), (66, 74), (66, 91), (57, 46), (56, 59)],
+    [(64, 68), (60, 46), (56, 32), (80, 76), (78, 91), (57, 59), (57, 71)],
+    [(64, 82), (58, 58), (54, 44), (82, 80), (97, 91), (55, 71), (53, 83)],
+    [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (55, 88), (67, 89)],
 ]
+SHOULDER_SHOT_FAR = [((63, 47), (66, 41)), ((66, 57), (63, 50)), ((67, 66), (59, 60)), ((55, 79), (45, 82))]
+# Each joint's parent, for in-betweens that turn limbs about their joints instead of shrinking them.
+_PARENT = [None, 0, 1, 0, 3, 1, 5]
+
+
+def tween(a, b, far_a, far_b, s):
+    """A pose part-way (s) from a to b: the hip slides, every limb turns and stretches about its parent joint."""
+    def chain(pa, pb, parents):
+        out = []
+        for i, par in enumerate(parents):
+            if par is None:
+                out.append(tuple(np.array(pa[i], float) * (1 - s) + np.array(pb[i], float) * s))
+                continue
+            va, vb = np.subtract(pa[i], pa[par]), np.subtract(pb[i], pb[par])
+            ta, tb = math.atan2(va[1], va[0]), math.atan2(vb[1], vb[0])
+            t = ta + ((tb - ta + math.pi) % (2 * math.pi) - math.pi) * s
+            r = np.hypot(*va) * (1 - s) + np.hypot(*vb) * s
+            out.append((out[par][0] + r * math.cos(t), out[par][1] + r * math.sin(t)))
+        return out
+    joints = chain(a, b, _PARENT)
+    joints[4] = tuple(np.array(a[4], float) * (1 - s) + np.array(b[4], float) * s)  # the foot stays on the floor
+    far = chain([a[1], *far_a], [b[1], *far_b], [None, 0, 1])
+    # the far arm hangs from the shoulder as it moves with the body
+    shift = np.subtract(joints[1], far[0])
+    return joints, [tuple(np.add(p, shift)) for p in far[1:]]
 SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]

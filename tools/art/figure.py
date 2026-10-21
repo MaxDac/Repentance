@@ -1918,8 +1918,32 @@ def _draped_skirt(c, col, waist, hip, knee, across, length, floor=92.5):
         c.bias[m & c.capsule(np.array(a, float), np.array(b, float), 0.5, 0.6)[0]] -= 1
 
 
+def _apron(c, apron, hip, knee, ankle, up, across, floor=92.5):
+    """A waist apron in an action frame: tied at the belt, wrapping the front and side of the hips, lying along the
+    front of the thigh and falling with gravity past the knee, with its string across the waist."""
+    col = apron["col"]
+    belt = hip + up * apron.get("belt", 6.0)
+    thigh = knee - hip
+    t = thigh / np.linalg.norm(thigh)
+    n = max((np.array([-t[1], t[0]]), np.array([t[1], -t[0]])), key=lambda v: v[0] - v[1])  # the thigh's front/top
+    fall = t + np.array([0.0, 1.0])
+    fall /= np.linalg.norm(fall)
+    ext = np.linalg.norm(ankle - knee) * apron.get("below_knee", 0.35)
+
+    def ground(p):
+        return np.array([p[0], min(p[1], floor)])
+    hem_front = ground(knee + n * 3.8 + fall * ext)
+    hem_back = ground(knee - n * 1.8 + fall * ext * 0.85)
+    pts = [belt - across * 3, belt + across * 6, hip + across * 6.5, knee + n * 3.8, hem_front, hem_back,
+           knee - n * 1.8, hip - across * 2.5]
+    m = c.put(c.poly(pts, curve=0.2), col, "apron")
+    c.bias[m & c.capsule(hip + across * 2, hem_front - n * 2, 0.5, 0.6)[0]] -= 1  # a fold down the front
+    if apron.get("tie"):
+        c.put(c.capsule(belt - across * 5, belt + across * 6, 0.8, 0.8), apron["tie"], "apron_tie", dither=False)
+
+
 def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None,
-                  toes_tucked=False):
+                  toes_tucked=False, far_arm=None, wound=None, shirt_collar=None):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
     hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
@@ -1929,12 +1953,21 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     head_sprite: (image, neck point) of ready-made head art pasted upright on the neck instead of painting the head;
     the shoulder and collar are then one rounded mass of coat.
     toes_tucked: kneeling with the shins raised off the floor behind, so the feet stand upright on their tucked toes
-    (heel up, sole facing back) instead of lying along the shin."""
+    (heel up, sole facing back) instead of lying along the shin.
+    far_arm: (elbow, hand) of the far arm reaching across the chest, its forearm and hand drawn over the body and the
+    wound, instead of shadowing the near arm behind it.
+    wound: where between the shoulder (0) and the hip (1) a gunshot has soaked the clothes red.
+    shirt_collar: colour of an open shirt collar at the base of the neck, which then rises from the back of the
+    shoulder, with the near arm hung level with the back."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
     points = grounded_joints(joints, fw)
     hip, shoulder, head, knee, ankle, elbow, hand = points[:7]
+    shift = points[0] - np.array(joints[0], float)
+    far_arm = [np.array(p, float) + shift for p in far_arm] if far_arm else None
+    sleeve = spec.get("sleeves", spec["torso"])
+    fore = spec.get("forearm", sleeve)
     far_leg = points[7:11] if len(points) >= 11 else None
     up = shoulder - hip
     up /= np.linalg.norm(up)
@@ -1967,9 +2000,11 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
                 limb(ankle + off + (-2, -2), np.array([ankle[0] + off[0] - 1, 91.0]), 2, 1.5, spec["shoes"], part)
             else:
                 limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
-        if far:
-            limb(shoulder + off, elbow + off, 3 * ak, 2.5 * ak, spec.get("sleeves", torso), "fararm")
-            limb(elbow + off, hand + off, 2.5 * ak, 2 * ak, spec.get("sleeves", torso), "fararm")
+        if far and far_arm:
+            limb(shoulder + off, far_arm[0], 3 * ak, 2.5 * ak, sleeve, "fararm")
+        elif far:
+            limb(shoulder + off, elbow + off, 3 * ak, 2.5 * ak, sleeve, "fararm")
+            limb(elbow + off, hand + off, 2.5 * ak, 2 * ak, fore, "fararm")
     waist = hip + up * 10
     limb(hip, waist, 6, 5, torso, "torso")
     limb(waist, shoulder, 5, 6, torso, "torso")
@@ -1992,6 +2027,9 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
                 pts = [waist - across * 5, hip - across * 6, tail - across * 5,
                        tail + across * 5, hip + across * 6, waist + across * 5]
             c.put(c.poly(pts), coat["col"], "coat")
+    apron = spec.get("apron")
+    if apron:
+        _apron(c, apron, hip, knee, ankle, up, across)
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
     if not spec.get("cloak") and not chest_down and not drape and not plain_chest:
         shirt = shoulder - up * 5
@@ -2000,8 +2038,8 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         if tie:
             limb(shoulder - up * 2, shoulder - up * 9, 0.7, 0.6, tie, "tie")
     hk = max(ak, 0.7)
-    limb(shoulder + across * (0 if chest_down else 2), elbow, 3.2 * ak, 2.7 * ak, spec.get("sleeves", torso), "arm")
-    limb(elbow, hand - (hand - elbow) * 0.12, 2.7 * ak, 2 * ak, spec.get("sleeves", torso), "arm")
+    limb(shoulder + across * (0 if chest_down else -0.5 if shirt_collar else 2), elbow, 3.2 * ak, 2.7 * ak, sleeve, "arm")
+    limb(elbow, hand - (hand - elbow) * 0.12, 2.7 * ak, 2 * ak, fore, "arm")
     limb(hand - (hand - elbow) * 0.12, hand, 2 * hk, 1.7 * hk, skin, "hand")
     if spec.get("cloak"):
         points = [shoulder - across * 8, hip - across * 10, knee - across * 6,
@@ -2025,9 +2063,30 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         limb(shoulder, neck, 2.3, 2, torso if chest_down else spec.get("collar", torso), "collar")
         limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")
     else:
-        neck = shoulder + head_axis * 0.25
-        limb(shoulder, neck, 2.3, 2, skin, "neck")
+        if shirt_collar:  # the neck rises from the top of the back, out of an open white shirt collar, to the head
+            base = shoulder - across * 1.5 + head_axis * 0.25
+            neck = shoulder - across * 1.5 + head_axis * 0.55
+            limb(base - head_axis * 0.06, base + head_axis * 0.08, 2.7, 2.5, shirt_collar, "collar")
+            limb(base + head_axis * 0.08, neck, 2.0, 1.9, skin, "neck")
+        else:
+            neck = shoulder + head_axis * 0.25
+            limb(shoulder, neck, 2.3, 2, skin, "neck")
     img = c.render(shadow_box=((fw / 2, 94), 36, 1.2))
+    if wound is not None:
+        from PIL import ImageChops
+        wx, wy = shoulder + (hip - shoulder) * wound
+        stain = Image.new("RGBA", img.size)
+        ImageDraw.Draw(stain).ellipse([wx - 3, wy - 3, wx + 3, wy + 3], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+        img.alpha_composite(stain)
+    if far_arm:  # the far forearm and hand cross in front of the body, pressed over the wound
+        fe, fhand = far_arm
+        hk = max(ak, 0.7)
+        fc = Canvas(fw, fh)
+        wrist = fhand - (fhand - fe) * 0.12
+        fc.put(fc.capsule(fe, wrist, 2.5 * ak, 2 * ak), fore, "fararm", dither=fore != skin)
+        fc.put(fc.capsule(wrist, fhand, 2 * hk, 1.7 * hk), skin, "hand", dither=False)
+        img.alpha_composite(fc.render())
     if head_sprite is not None:
         art, (bx, by) = head_sprite
         img.alpha_composite(art, (round(neck[0] - bx), round(neck[1] - by)))
