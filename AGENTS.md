@@ -21,7 +21,8 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
    watch checks and fix until `ci-ok` is green (`pr-and-ci`). Never merge; never call work done with red, pending
    or missing checks.
 3. Before opening a PR, list the open PRs. If any title does not start with `[NoStack]`, stack on them: rebase onto
-   the top of that stack and target its branch, not `main` ([CI and release](docs/ci-and-release.md#stacked-pull-requests)).
+   the top of that stack and target its branch, not `main`. Then register it in the native GitHub stack with `gh api`
+   (append to the stack, or create one from the bottom PR) ([CI and release](docs/ci-and-release.md#stacked-pull-requests)).
 4. A PR that adds or changes an image (generated art, sprites, UI, icons) shows it in the description: before and
    after previews, scaled up nearest-neighbour, attached with `gh pr edit --attach`
    ([CI and release](docs/ci-and-release.md#pull-requests)).

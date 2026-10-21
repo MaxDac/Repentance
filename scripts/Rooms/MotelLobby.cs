@@ -54,7 +54,7 @@ public partial class MotelLobby : Room
                 return true;
             case ("clerk", Verb.UseItem) when item == "photo":
                 await ShowPhoto("clerk");
-                await Say("clerk", "I told you. I never saw nobody.");
+                await Say("clerk", State.HasFlag("clerk_talked") ? "I told you. I never saw nobody." : "Never saw her.");
                 await PocketPhoto();
                 await Think("He looked at the photograph for half a second, then he looked at the stairs. That was answer enough.");
                 return true;

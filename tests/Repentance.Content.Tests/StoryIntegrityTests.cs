@@ -277,6 +277,14 @@ public class StoryIntegrityTests
     [InlineData("the motel on the road", "the motel is down the hill from the convent")]
     [InlineData("The Club took her back tonight", "the Order took Eleanor the motel night, before the daylight Club visit")]
     [InlineData("I don't have a car", "Micah owns the Ford Eleanor changes in (endings 2 and 10)")]
+    [InlineData("Sit up, child", "Eleanor is already sitting up at the knock, and stands for Agatha's visit")]
+    [InlineData("The only vanity allowed", "the comb is Eleanor's own, from her duffle, not the convent's")]
+    [InlineData("Three floors of fire escape", "Harrington's office is one floor up the fire escape")]
+    [InlineData("three floors of iron", "Harrington's office is one floor up the fire escape")]
+    [InlineData("good Scotch and two books for show", "the library is the public library where Rose works")]
+    [InlineData("Prohibition never made it past the front desk", "the library is the public library where Rose works")]
+    [InlineData("nobody trusted the help to touch", "the library is the public library where Rose works")]
+    [InlineData("One glass would steady my hands", "the library side table holds a glass of water, not liquor")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
         var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
@@ -303,6 +311,15 @@ public class StoryIntegrityTests
         Assert.DoesNotContain("walks around with more than a day's pay", text);
         Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", text);
         Assert.Contains("Pocket lint to him. A day's pay to me, and then some.", Code.Value.Single(kv => kv.Key.EndsWith("Rooms/Office.cs")).Value);
+    }
+
+    [Fact]
+    public void WalkthroughQuotesTheDressingRoomOrderHint()
+    {
+        var text = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
+        Assert.DoesNotContain("(\"Powder first.", text);
+        Assert.Contains("(\"Face powder first. Then the mouth. Then the hair.\")", text);
+        Assert.Contains("\"Face powder first. Then the mouth. Then the hair.", Code.Value.Single(kv => kv.Key.EndsWith("Rooms/ClubBackstage.cs")).Value);
     }
 
     [Fact]

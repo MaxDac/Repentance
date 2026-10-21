@@ -22,6 +22,13 @@ of the stack (the newest open PR whose branch no other open PR targets), open th
 `main`, and say `Stacked on #N` in the description. With no such PR, target `main`. Prefix a PR's title with
 `[NoStack]` to keep later work from stacking on it.
 
+Register the chain as a native GitHub stack too, so it can be reviewed and squash-merged as one. Find the
+stack of the PR below (`gh api repos/MaxDac/Repentance/stacks?pull_request=<below>`); if it has one, append the new
+PR (`gh api --method POST repos/MaxDac/Repentance/stacks/<stack>/add -F 'pull_requests[]=<new>'`), otherwise
+create one listing every PR of the chain, bottom first (`gh api --method POST repos/MaxDac/Repentance/stacks
+-F 'pull_requests[]=<bottom>' -F 'pull_requests[]=<new>'`). Check the result lists every PR bottom to top
+([Stacks REST API](https://github.github.com/gh-stack/reference/rest-api/)).
+
 ## CI (`.github/workflows/ci.yml`)
 
 Runs on every pull request (a newer push cancels the older run) and every push to `main`. Godot 4.7.2 .NET and .NET

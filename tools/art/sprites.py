@@ -10,6 +10,7 @@ side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 from .common import save
 import json
 import math
+import numpy as np
 from pathlib import Path
 from . import common
 from .figure import figure as _figure, pose, walk_pose, sheet, action_figure, grounded_joints, _walk_leg
@@ -71,7 +72,8 @@ BARTENDER = dict(h=64, sw=0.14, waist=0.092, hipw=0.1, skin="d7a786", hair="3a2a
                  shoes="141414",
                  decals=_vee(0.30, 0.03, "ebe6d8", "2a1818") +
                  [("strip", 0.42, 0.82, 0.078, 0.098, "e7e0d0", ("torso", "hips", "leg1", "leg-1")),
-                  ("belt", 0.42, "d8d0c0")])
+                  ("belt", 0.42, "d8d0c0")],
+                 apron=dict(col="e7e0d0", tie="d8d0c0"))
 # Eleanor's head as first drawn: long wavy brown hair and her soft face. Every Eleanor shares it and her slender
 # figure: narrow sloping shoulders, slim arms, a bust and a small waist curving out to the hips and seat. Her mane is
 # trimmed at the back (its front edge beside the neck kept) and falls past her shoulder blades.
@@ -246,14 +248,17 @@ ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
 # and cuffs piped dark, bare feet, her hair down.
 PYJAMA = "e8e0cc"
-ELEANOR_PYJAMA = dict(ELEANOR, **_CURVES, high_neck=None, torso=PYJAMA, collar=None, sleeves=PYJAMA, cuff="3a3040",
+ELEANOR_PYJAMA = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.04, 0.52)), high_neck=None, torso=PYJAMA, collar=None,
+                      sleeves=PYJAMA, cuff="3a3040",
                       pants=PYJAMA, coat=None, stockings=None, shoes=ELEANOR["skin"],
-                      # loose cotton: a one-pixel swell spread over more rows, set a little higher; the open neck
-                      # shows her throat; the waist curves in and out to fuller hips and seat
-                      bust_peak=((-3, 0), (-2, 0), (-1, 1), (0, 1), (1, 1), (2, 1), (3, 0), (4, 0)), bust_y=0.278,
+                      # loose cotton: a one-pixel swell over four rows, starting a row below the bust line so the
+                      # upper chest stays flat; the open neck shows her throat; the waist curves in and out to fuller
+                      # hips and seat
+                      bust_peak=((-1, 0), (0, 1), (1, 1), (2, 1), (3, 1), (4, 0)), bust_y=0.278,
                       neckline=0.23, hipw=0.1,
-                      profile=ELEANOR_FIGURE["profile"][:5] + [(0.40, 0.05, -0.036, 0.048), (0.47, 0.098, -0.09, 0.05),
-                                                               (0.53, 0.086, -0.082, 0.046)],
+                      # the chest sits a pixel further in than her dress figure's, the seat a pixel closer
+                      profile=ELEANOR_FIGURE["profile"][:4] + [(0.31, 0.095, -0.052, 0.055), (0.40, 0.05, -0.036, 0.048),
+                                                               (0.47, 0.098, -0.075, 0.05), (0.53, 0.086, -0.068, 0.046)],
                       decals=_vee(0.29, 0.03, ELEANOR["skin"], top=0.22) + [("buttons", 0.30, 0.45, 3, "3a3040", True)])
 
 
@@ -425,29 +430,27 @@ def fall_strip(spec, name, final_name, arms, wound=False):
 
 
 def shoulder_shot_strip(spec, name, final_name, arms):
-    """Shot in the near shoulder while facing right: the hit snaps him back with both hands clutching it, the legs
-    give way straight down under him, he sits down hard and goes over onto his back. Blood soaks the shoulder from the
-    hit on, and pools on the ground under it once he's down. The last frame is saved alone as final_name."""
-    from PIL import Image, ImageDraw, ImageChops
+    """Shot in the near shoulder while facing right: the hit snaps him back with the struck arm hanging limp, the legs
+    give way straight down under him, he sits down hard, the far hand coming across to press on the wound, and goes
+    over onto his back. Blood soaks the shoulder from the hit on, and pools on the ground under it once he's down. The
+    last frame is saved alone as final_name."""
+    from PIL import Image, ImageDraw
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
-    for joints in SHOULDER_SHOT:
-        img, head = action_figure(scaled, joints)
-        hip, shoulder = grounded_joints(joints)[:2]
+    keys = list(zip(SHOULDER_SHOT, SHOULDER_SHOT_FAR))
+    poses = [keys[0]]
+    for (a, fa), (b, fb) in zip(keys, keys[1:]):
+        poses += [tween(a, b, fa, fb, 0.5), (b, fb)]
+    for joints, far in poses:
         # the wound sits just below the shoulder joint, towards the hip
-        wx, wy = shoulder + (hip - shoulder) * 0.1
-        stain = Image.new("RGBA", img.size)
-        ImageDraw.Draw(stain).ellipse([wx - 3, wy - 3, wx + 3, wy + 3], fill=(138, 18, 22, 255))
-        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
-        img.alpha_composite(stain)
-        frames.append((img, head))
+        frames.append(action_figure(scaled, joints, far_arm=far, wound=0.1, shirt_collar="ebe6d8"))
     down, head = frames[-1]
     pool = Image.new("RGBA", down.size)
     wx = grounded_joints(SHOULDER_SHOT[-1])[1][0] + 2
     ImageDraw.Draw(pool).ellipse([wx - 8, 88, wx + 7, 93], fill=(104, 12, 16, 255))
     pool.alpha_composite(down)
     frames[-1] = (pool, head)
-    action_strip(name, frames, [0.1, 0.24, 0.16, 0.2, 0.3])
+    action_strip(name, frames, [0.1, 0.12, 0.12, 0.08, 0.08, 0.1, 0.1, 0.3])
     action_strip(final_name, [frames[-1]], [1])
     return frames
 
@@ -626,14 +629,40 @@ KNEES_PRONE = [
     [(67, 76), (88, 62), (103, 58), (60, 88), (42, 91), (98, 78), (110, 90)],
     HARRINGTON_PRONE,
 ]
-# Shot in the shoulder facing right: thrown back with the hands clutching the wound, knees folding straight down,
-# sitting down hard, then flat on his back (head to the left, like REST) with the hands still on the shoulder.
+# Shot in the near shoulder facing right: thrown back by the hit, the struck arm hanging limp, knees folding straight
+# down, sitting down hard, then flat on his back (head to the left, like REST). The far hand starts across the chest
+# at the hit and is pressed on the wound from the sit on (SHOULDER_SHOT_FAR: the far arm's elbow and hand).
 SHOULDER_SHOT = [
-    [(64, 57), (61, 34), (58, 19), (66, 74), (66, 91), (70, 44), (62, 37)],
-    [(64, 68), (60, 46), (56, 32), (80, 76), (78, 91), (69, 55), (61, 49)],
-    [(64, 82), (58, 58), (54, 44), (82, 80), (97, 91), (66, 68), (58, 61)],
-    [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (54, 75), (45, 78)],
+    [(64, 57), (61, 34), (58, 19), (66, 74), (66, 91), (57, 46), (56, 59)],
+    [(64, 68), (60, 46), (56, 32), (80, 76), (78, 91), (57, 59), (57, 71)],
+    [(64, 82), (58, 58), (54, 44), (82, 80), (97, 91), (55, 71), (53, 83)],
+    [(66, 83), (43, 83), (29, 83), (84, 83), (104, 83), (55, 88), (67, 89)],
 ]
+SHOULDER_SHOT_FAR = [((63, 47), (66, 41)), ((66, 57), (63, 50)), ((67, 66), (59, 60)), ((55, 79), (45, 82))]
+# Each joint's parent, for in-betweens that turn limbs about their joints instead of shrinking them.
+_PARENT = [None, 0, 1, 0, 3, 1, 5]
+
+
+def tween(a, b, far_a, far_b, s):
+    """A pose part-way (s) from a to b: the hip slides, every limb turns and stretches about its parent joint."""
+    def chain(pa, pb, parents):
+        out = []
+        for i, par in enumerate(parents):
+            if par is None:
+                out.append(tuple(np.array(pa[i], float) * (1 - s) + np.array(pb[i], float) * s))
+                continue
+            va, vb = np.subtract(pa[i], pa[par]), np.subtract(pb[i], pb[par])
+            ta, tb = math.atan2(va[1], va[0]), math.atan2(vb[1], vb[0])
+            t = ta + ((tb - ta + math.pi) % (2 * math.pi) - math.pi) * s
+            r = np.hypot(*va) * (1 - s) + np.hypot(*vb) * s
+            out.append((out[par][0] + r * math.cos(t), out[par][1] + r * math.sin(t)))
+        return out
+    joints = chain(a, b, _PARENT)
+    joints[4] = tuple(np.array(a[4], float) * (1 - s) + np.array(b[4], float) * s)  # the foot stays on the floor
+    far = chain([a[1], *far_a], [b[1], *far_b], [None, 0, 1])
+    # the far arm hangs from the shoulder as it moves with the body
+    shift = np.subtract(joints[1], far[0])
+    return joints, [tuple(np.add(p, shift)) for p in far[1:]]
 SIT = [(64, 83), (57, 58), (54, 43), (84, 81), (99, 91), (47, 75), (42, 91)]
 CROUCH = [(64, 70), (59, 47), (57, 32), (82, 75), (84, 91), (70, 63), (78, 75)]
 HALF_UP = [(64, 62), (64, 36), (64, 21), (75, 76), (78, 91), (74, 53), (77, 65)]
@@ -662,6 +691,37 @@ PUSH_OFF = [(46, 66), (57, 44), (63, 30), (54, 79), (41, 87), (60, 56), (63, 69)
             (60, 72), (65, 88), (63, 90), (70, 91)]
 NEARLY_UP = [(42, 58), (46, 35), (49, 20), (44, 74), (41, 91), (48, 47), (51, 58),
              (50, 74), (55, 88), (53, 90), (60, 91)]
+# Getting up off his back after a beating (micah_recover), facing right. Unlike the other keys these are screen
+# positions in the strip's frame, where REST lies once grounded: nothing stays planted from lying to standing, so each
+# frame is placed rather than grounded on its near ankle. He lifts his head and shoulders onto the near elbow, sits up
+# hunched with a hand behind and the knees drawn up, leans forward over his feet onto the near hand, tips his weight
+# off the seat onto hands and feet, and drops forward onto his knees, his feet going back onto their tucked toes.
+# From there he gets up as in the alley, RECOVER_SHIFT along from the kneel-rise keys, then rises over the front foot
+# and brings the back one in under him, so he stands where the idle frame does.
+PROPPED = [(60, 83), (40, 73), (43, 60), (79, 80), (98, 84), (33, 86), (45, 91)]
+SIT_UP = [(61, 83), (64, 60), (70, 47), (77, 70), (88, 88), (56, 73), (50, 90),
+          (75, 72), (86, 88), (84, 90), (91, 91)]
+HUNCH = [(62, 82), (76, 63), (85, 54), (78, 69), (86, 88), (84, 76), (94, 90),
+         (76, 71), (84, 88), (82, 90), (89, 91)]
+TIP = [(69, 75), (88, 64), (97, 57), (82, 72), (83, 88), (94, 77), (101, 90),
+       (80, 74), (81, 88), (79, 90), (86, 91)]
+ROLL = [(76, 73), (95, 66), (105, 61), (87, 85), (73, 87), (102, 78), (107, 90)]
+RECOVER_SHIFT = -28
+RISE_OVER = [(88, 59), (93, 36), (97, 21), (82, 75), (74, 88), (95, 48), (98, 59),
+             (93, 74), (94, 88), (92, 90), (99, 91)]
+STEP_IN = [(93, 57), (96, 34), (99, 19), (95, 74), (93, 89), (97, 47), (99, 58),
+           (95, 74), (94, 88), (92, 90), (99, 91)]
+
+
+def recover_keys():
+    """micah_recover's keys after the held REST frame, in the strip's screen space."""
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def kneeling(joints):
+        return [(float(x) + RECOVER_SHIFT, float(y)) for x, y in grounded_joints(joints)]
+    return [PROPPED, SIT_UP, HUNCH, TIP, ROLL, kneeling(KNEEL_PUSH), kneeling(between(KNEEL_PUSH, KNEEL_BACK)),
+            kneeling(KNEEL_BACK), kneeling(KNEE_UP), kneeling(PUSH_OFF), RISE_OVER, STEP_IN]
 
 
 def with_far_leg(joints):
@@ -713,9 +773,7 @@ def action_sequences(spec, name):
         falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
-        recovery, times = sequence([REST, SIT, CROUCH, HALF_UP, UPRIGHT], standing,
-                                   [0.28, 0.3, 0.28, 0.22, 0.12])
-        action_strip("micah_recover", recovery, times)
+        recover_strip(spec, scaled, standing)
         kneel_rise_strip(spec, scaled, standing)
         crouch_strips(spec, scaled, standing)
     if name == "micah_no_tie":
@@ -742,25 +800,54 @@ def profile_head(spec):
     return head, ((min(neck) + max(neck) + 1) / 2, collar)
 
 
+def rise_figure(scaled, joints):
+    """A frame of Micah getting up, facing right. Bent over the floor, the trunk hides the shirt and tie; sitting or
+    upright, only the coat shows side-on, hanging with gravity (the shirt front faces the way he looks). A foot behind
+    its knee stands on tucked toes."""
+    hip, shoulder, knee, ankle = joints[0], joints[1], joints[3], joints[4]
+    down = shoulder[0] > hip[0] and -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder)
+    tucked = ankle[1] < 91 and ankle[0] < knee[0]
+    if down:
+        return action_figure(scaled, joints, chest_down=True, toes_tucked=tucked)
+    return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=tucked)
+
+
+def turning_frame(spec):
+    """Standing, halfway between the walk sheet's profile and the idle sheet's 3/4 view, so a rise turns to idle."""
+    from PIL import Image
+    turning = Image.new("RGBA", (192, FH))
+    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
+    return turning, (96, 18)
+
+
 def kneel_rise_strip(spec, scaled, standing):
     """Micah getting up off his hands and knees after the beating (micah_kneel_rise), from the held micah_kneel frame
     to the idle sheet frame, by way of the walk sheet's profile frame so he turns to the idle pose standing up."""
-    from PIL import Image
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
-
-    def paint(joints):
-        hip, shoulder = joints[0], joints[1]
-        if -(shoulder[1] - hip[1]) < 0.55 * math.dist(hip, shoulder):
-            return kneeling_figure(scaled, joints)
-        # upright, the shirt front faces the way he looks, so only the coat shows side-on, hanging with gravity
-        return action_figure(scaled, joints, plain_chest=True, coat_drape=True, toes_tucked=joints[4][1] < 91)
-    turning = Image.new("RGBA", (192, FH))
-    turning.alpha_composite(figure(spec, pose((90 + PLAYER_IDLE_YAW) / 2), FW, FH), (64, 0))
     keys = [KNEEL, between(KNEEL, KNEEL_PUSH), KNEEL_PUSH, between(KNEEL_PUSH, KNEEL_BACK), KNEEL_BACK, KNEE_UP,
             PUSH_OFF, NEARLY_UP]
-    frames = [paint(k) for k in keys] + [(turning, (96, 18)), standing]
+    frames = [rise_figure(scaled, k) for k in keys] + [turning_frame(spec), standing]
     action_strip("micah_kneel_rise", frames, [0.13, 0.07, 0.1, 0.08, 0.12, 0.15, 0.12, 0.1, 0.11, 0.12])
+
+
+def recover_strip(spec, scaled, standing):
+    """Micah getting up off his back after a beating (micah_recover), from the held micah_supine frame to the idle
+    sheet frame: sitting up, rolling forward onto his hands and knees, then up as in micah_kneel_rise."""
+    from PIL import Image
+
+    def placed(joints):
+        # action_figure grounds the near ankle; move the frame back so the joints land where they are given
+        img, head = rise_figure(scaled, joints)
+        dx = round(joints[4][0] - (img.width / 2 + 2))
+        out = Image.new("RGBA", img.size)
+        out.alpha_composite(img.crop((max(0, -dx), 0, img.width - max(0, dx), img.height)), (max(0, dx), 0))
+        return out, (head[0] + dx, head[1])
+
+    frames = [action_figure(scaled, REST)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
+    action_strip("micah_recover", frames, [0.3, 0.22, 0.2, 0.16, 0.12, 0.12, 0.1, 0.07, 0.1, 0.15, 0.12, 0.1, 0.09,
+                                           0.11, 0.12])
+
 
 
 def crouch_strips(spec, scaled, standing, name="micah"):
@@ -1234,7 +1321,8 @@ _BAG_FLOOR_Y = 1.0 - 0.095 * 1.92 - 0.03
 BAG_DOWN_KEYS = [
     (4, {1: (12, 16, 0), -1: (4, 12, -4)}, (0.07, 0.62, 0.08), True, 0.12),
     (8, {1: (26, 40, 0), -1: (12, 32, -6)}, (0.065, _BAG_FLOOR_Y - 0.05, 0.15), True, 0.14),
-    (10, {1: (45, 75, 0), -1: (24, 60, -8)}, (0.065, _BAG_FLOOR_Y - 0.08, 0.15), False, 0.16),
+    # a deep crouch, so her hand comes right down onto the handles rather than drawing them up to her thigh
+    (22, {1: (80, 130, 0), -1: (50, 110, -8)}, (0.065, _BAG_FLOOR_Y - 0.03, 0.15), False, 0.16),
     (6, {1: (18, 28, 0), -1: (8, 22, -6)}, None, False, 0.14),
 ]
 
@@ -1253,6 +1341,43 @@ def _bag_frame(spec, lean, legs, target, carried, opened=False):
 
 def _bag_idle(spec, opened=False):
     return figure(spec, pose(PLAYER_IDLE_YAW, duffle=BAG_AT, duffle_z=BAG_Z, duffle_open=opened), FW, FH)
+
+
+# Lifting it off the floor (eleanor_bag_up only): (lean, legs, hand target, pixels the bag has risen). Her reach stops
+# short of the floor, so the bag is the one on the floor in the hand-on-the-handles frame, raised, hidden above her
+# hand and with her hand drawn back over it.
+BAG_LIFT_KEYS = [
+    BAG_DOWN_KEYS[2][:3] + (2,),
+    (17, {1: (62, 100, 0), -1: (38, 84, -8)}, (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 5),
+    (12, {1: (44, 70, 0), -1: (25, 56, -7)}, (0.065, _BAG_FLOOR_Y - 0.06, 0.15), 8),
+]
+
+
+def _bag_lift_frames(spec):
+    import numpy as np
+    from PIL import Image
+    lean, legs, target = BAG_DOWN_KEYS[2][:3]
+    floor = np.asarray(_bag_frame(spec, lean, legs, target, False)).astype(int)
+
+    def body(lean, legs, target):  # the same pose with no bag at all
+        ps = pose(PLAYER_IDLE_YAW, lean=lean, legs=legs, arms={1: ("reach", target, 0, 0), -1: ("swing", 4, 6, 10)},
+                  front_arms=(1,))
+        return np.asarray(figure(spec, ps, FW, FH)).astype(int)
+
+    bag = (np.abs(floor - body(lean, legs, target)).sum(axis=2) > 0) & (floor[..., 3] == 255)
+    out = []
+    for lean, legs, target, dy in BAG_LIFT_KEYS:
+        b = body(lean, legs, target)
+        skin = (b[..., 3] == 255) & (b[..., 0] - b[..., 2] > 40) & (b[..., 0] > 150)
+        hand = np.nonzero(skin[55:])[0].max() + 55  # the bottom of her hand on the handles
+        f = b.copy()
+        for y, x in zip(*np.nonzero(bag)):
+            if y - dy >= hand - 1:
+                f[y - dy, x] = floor[y, x]
+        skin[:hand - 5] = False
+        f[skin] = b[skin]
+        out.append(Image.fromarray(f.astype(np.uint8), "RGBA"))
+    return out
 
 
 def bag_floor_sprites():
@@ -1312,12 +1437,17 @@ def eleanor_bag_strips():
     seconds.append(0.12)
     frames = _padded(frames)
     action_strip("eleanor_bag_down", frames, seconds, anchor=(FW / 2, FH - 3))
-    action_strip("eleanor_bag_up", frames[::-1], seconds[::-1], anchor=(FW / 2, FH - 3))
+    # taking it back is the same frames backwards, with three more where the bag leaves the floor: she grips it, it
+    # comes up off the floor, then to her shin, before the knee-height frame
+    up, up_seconds = frames[::-1], seconds[::-1]
+    lifts = _padded([(img, head) for img in _bag_lift_frames(spec)])
+    action_strip("eleanor_bag_up", up[:3] + lifts + up[3:], up_seconds[:3] + [0.14, 0.12, 0.12] + up_seconds[3:],
+                 anchor=(FW / 2, FH - 3))
 
     bag_open = bag_floor_sprites()["duffle_bag_open"]
     frames, seconds = [(_bag_idle(spec), head)], [0.2]
     reach = [(8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2),  # bends to it, opens it, reaches in
-             (10, BAG_DOWN_KEYS[2][1], (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 0.45),
+             (10, {1: (45, 75, 0), -1: (24, 60, -8)}, (0.065, _BAG_FLOOR_Y - 0.04, 0.15), 0.45),
              (8, BAG_DOWN_KEYS[1][1], BAG_DOWN_KEYS[1][2], 0.2)]
     for lean, legs, target, duration in reach:
         frames.append((_bag_frame(spec, lean, legs, target, False, opened=True), head))

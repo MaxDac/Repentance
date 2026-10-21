@@ -91,7 +91,7 @@ All three go through `PuzzleScreen.Step`, so pause blocks them like the pad butt
 | `PuzzleKind` | Screen | Rule in `PuzzleRules` |
 |---|---|---|
 | `Lift` | `LiftMazeScreen` (staff lift maze) | lift maze |
-| `Safe` | `SafeScreen` (room 507: 3 stops, direction + number) | `Safe` |
+| `Safe` | `SafeScreen` (room 507: 3 stops, direction + number 0-49) | `Safe` |
 | `Catalogue` | `CatalogueScreen` (motif then author, no Submit) | catalogue |
 | `Cipher` | `CipherScreen` (feather, lily, leaf) | cipher |
 | `Crests` | `CrestsScreen` (sun, moon, star) | crests |

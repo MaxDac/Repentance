@@ -53,6 +53,15 @@ public class NotesTests
     }
 
     [Fact]
+    public void HarringtonRoad_OfficeWindowIsDark()
+    {
+        var note = Notes.Get("harrington_road")!;
+        var text = string.Join(" ", Notes.Lines(note, Has(new[] { "seen_harrington_road" })));
+        Assert.Contains("The office window is dark.", text);
+        Assert.DoesNotContain("is lit", text);
+    }
+
+    [Fact]
     public void ClubCard_IsForThursdayNight()
     {
         var text = string.Join(" ", Notes.Get("crests")!.Lines.Select(l => l.Text));

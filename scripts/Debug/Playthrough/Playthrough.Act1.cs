@@ -61,7 +61,7 @@ public sealed partial class Playthrough
             await Do(Verb.Hand, "paper");
             await Do(Verb.Hand, "closet");
             await SolvePuzzle(() => Do(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-                new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+                new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 4), ("n2", 7) }, "safe_dial");
             await Do(Verb.Hand, "brass_box");
             Check(Gs.HasItem("brass_box"), "the brass box from the safe");
             await Do(Verb.Walk, "exit");

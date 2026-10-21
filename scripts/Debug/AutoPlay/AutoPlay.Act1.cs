@@ -149,20 +149,30 @@ public partial class AutoPlay
             "the searched room's telephone lies on the floor, off the vanity");
         var deadAir = await Spoken(() => game.Perform(Verb.Hand, "fallen_telephone"));
         Check(deadAir.Any(l => l.StartsWith("Dead air.")), "the fallen telephone is dead air");
+        var drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(!drawerLook.Any(l => l.StartsWith("The left drawer, picked open.")), "the locked drawer doesn't look picked");
         await game.Perform(Verb.Hand, "desk_drawer");
         Check(!gs.HasFlag("eleanor_drawer_open"), "the drawer is locked");
         await game.Perform(Verb.UseItem, "desk_drawer", "lockpick");
         Check(gs.HasFlag("eleanor_drawer_open"), "lockpicked the drawer");
+        drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(drawerLook.Contains("The left drawer, picked open. A folded slip of hotel paper inside."), "the picked drawer shows the slip");
         await Shot("eleanor_drawer");
         await game.Perform(Verb.Hand, "paper");
         Check(gs.HasItem("combination"), "got the combination");
+        drawerLook = await Spoken(() => game.Perform(Verb.Look, "desk_drawer"));
+        Check(drawerLook.Contains("The left drawer, picked open. Empty now."), "the picked drawer is empty after the slip");
+        var closetLook = await Spoken(() => game.Perform(Verb.Look, "closet"));
+        Check(!closetLook.Any(l => l.StartsWith("The walnut closet stands open.")), "the shut closet doesn't look open");
         await game.Perform(Verb.Hand, "closet");
         Check(gs.HasFlag("closet_open"), "opened the closet");
+        closetLook = await Spoken(() => game.Perform(Verb.Look, "closet"));
+        Check(closetLook.Contains("The walnut closet stands open. Silk, cedar, and the steel safe at the back."), "the open closet shows the safe");
         int safeOpens = game.Sfx.Count(Sound.SafeOpen);
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         Check(game.Sfx.Count(Sound.SafeOpen) == safeOpens, "a dial left unsolved stays quiet");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 4), ("n2", 7) }, "safe_dial");
         Check(gs.HasFlag("safe_open") && game.Sfx.Count(Sound.SafeOpen) == safeOpens + 1, "opened the safe, heard it open");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");
@@ -471,6 +481,9 @@ public partial class AutoPlay
         Check(!gs.HasItem("umbrella"), "Micah won't take the clerk's umbrella before talking to him");
         await game.Perform(Verb.Walk, "stairs");
         Check(game.Room is Rooms.MotelLobby, "the clerk keeps Micah off the stairs");
+        var photoFirst = await Spoken(() => game.Perform(Verb.UseItem, "clerk", "photo"));
+        Check(photoFirst.Contains("Never saw her.") && !photoFirst.Contains("I told you. I never saw nobody.") && !gs.HasFlag("clerk_talked"),
+            "the photo before talking gets a first denial, not a repeat");
         var clerkTalk = game.Perform(Verb.Talk, "clerk");
         await Until(() => game.Player.PoseName == "micah_show_photo_back" || clerkTalk.IsCompleted);
         Check(game.Player.PoseName == "micah_show_photo_back" && game.Player.Facing == Facing.Up,

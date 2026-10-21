@@ -57,6 +57,12 @@ public partial class ClubStage : Room
         await Think("Three of them around her, like pall-bearers: a stag, a boar and a wolf.");
         await Think("She looked like a doll somebody had wound up and set down. Whoever lived behind those eyes had gone out and left the lights on.");
         await Wait(1.0);
+        await LightsOut();
+    }
+
+    /// <summary>Act 2's last page: the fade, and Daniel in the dark attic. The lounge archway runs it too.</summary>
+    private async Task LightsOut()
+    {
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.HideCloseUp(0);
         await Wait(1.0);
@@ -84,6 +90,15 @@ public partial class ClubStage : Room
         await Unmask();
         await Talk("harrington_unmask");
         await Talk("club_caught");
+        await KnockedOut();
+    }
+
+    /// <summary>
+    /// Bruno puts Micah down from behind and dumps him on the cathedral steps. The lounge archway runs it too, so
+    /// there is no walking out of the Club past him.
+    /// </summary>
+    private async Task KnockedOut()
+    {
         Game.Hud.HideCloseUp();
         State.SetFlag("brute_stage");
         if (FindActor("brute") is { } brute)
@@ -120,6 +135,12 @@ public partial class ClubStage : Room
                 return true;
             case ("leader" or "harrington" or "ritual1" or "ritual2" or "audience", Verb.Talk):
                 await Say("Silence. The only sound in the room is the spotlight humming.");
+                return true;
+            case ("lounge_exit", Verb.Walk or Verb.Hand) when State.StoryAct >= 3:
+                await KnockedOut();
+                return true;
+            case ("lounge_exit", Verb.Walk or Verb.Hand):
+                await LightsOut();
                 return true;
         }
         return false;

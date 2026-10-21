@@ -19,9 +19,15 @@ Reference: `docs/ci-and-release.md`.
    `gh pr create --base <base>`. Description: changes, the PR it stacks on (`Stacked on #N`), and local suites
    were run. If any image changed, add before/after previews to the description (see "Pull requests" in
    `docs/ci-and-release.md`).
-6. Watch: `gh pr checks --watch`. On failure read the failed log and artifacts (commands in
+6. When stacked, register the PR in the native GitHub stack (REST via `gh api`, not the `gh stack` extension):
+   `gh api repos/MaxDac/Repentance/stacks?pull_request=<base-pr>`. If the base PR is in a stack, append only the new
+   PR: `gh api --method POST repos/MaxDac/Repentance/stacks/<stack>/add -F 'pull_requests[]=<new-pr>'`. Otherwise
+   create it bottom to top with every PR of the chain:
+   `gh api --method POST repos/MaxDac/Repentance/stacks -F 'pull_requests[]=<bottom-pr>' -F 'pull_requests[]=<new-pr>'`.
+   Check that the returned `pull_requests` list the whole chain in order.
+7. Watch: `gh pr checks --watch`. On failure read the failed log and artifacts (commands in
    `docs/ci-and-release.md`); fix, push, repeat.
-7. Done only when every check, including `ci-ok`, is green. Never merge, or report success, while a check is red,
+8. Done only when every check, including `ci-ok`, is green. Never merge, or report success, while a check is red,
    pending or missing.
 
 A new CI job goes into `ci-ok`'s `needs`, not the branch ruleset.

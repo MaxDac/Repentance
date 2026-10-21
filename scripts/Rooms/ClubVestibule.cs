@@ -68,6 +68,9 @@ public partial class ClubVestibule : Room
             case ("slot" or "inner_door", Verb.UseItem):
                 await Say("The slot is for summonses, not my pocket litter.");
                 return true;
+            case ("slot" or "inner_door", Verb.Walk or Verb.Hand) when State.HasFlag("vestibule_passed"):
+                await GoThrough();
+                return true;
             case ("slot" or "inner_door", Verb.Walk or Verb.Hand):
                 await Say("Locked. It doesn't open for a hand - only for a card through the slot.");
                 return true;
@@ -115,6 +118,12 @@ public partial class ClubVestibule : Room
         State.SetFlag("vestibule_passed");
         await Wait(0.6);
         await Think("The card slides back out of the slot, like change. The door swings in.");
+        await GoThrough();
+    }
+
+    /// <summary>Through the open inner door to the hall; the door runs it too once the card has passed.</summary>
+    private async Task GoThrough()
+    {
         if (FindHotspot("inner_door") is { } door) await Game.WalkTo(door.WalkTo + new Vector2(0, -4));
         await Game.ChangeRoom("club_hall", "from_street");
     }

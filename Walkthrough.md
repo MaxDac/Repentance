@@ -88,15 +88,19 @@ described here (other verbs, flavour lines) is left to the implementation.
 - There is a locked desk drawer, which Micah opens using the lockpick from the inventory on it. It is no hotel lock:
   Eleanor had a locksmith fit it, and it is damn hard; it snaps one of his picks before it gives (the lockpick
   stays in the inventory).
-- Inside, there's a sheet of paper with the safe combination, written as three references instead of numbers:
-  "Those who sat at His table. The days of the month He was born. The day He rested."
+- Inside, there's a sheet of paper with a riddle in Eleanor's hand. Nothing Micah says or notes ties it to the safe
+  until the safe is open:
+  "Rightly He chose His Apostles; but first He left to stay in the desert to be tempted for a certain amount of
+  days, He through whom all things were rightly made in the week of creation."
 - **Puzzle 3 - Safe dial:** open the closet to reveal the safe. Hand or use the combination on the safe opens
-  its graphical controls, not the safe itself. The references give **12** (the apostles), **31** (December) and
-  **7** (the day of rest); the paper gives no directions, so the player has to try them. Each stop that is right,
-  counting from the first, drops a tumbler, and a wrong attempt says how many fell, so the directions can be found
-  by trying each one: the solution is **right 12 / left 31 / right 7**. The paper remains readable; wrong
-  settings can be reset or retried. When the safe opens, Micah finds it strange that a woman like Eleanor would
-  bring Christ into it ("Strange, a dame like her bringin' Christ into it.").
+  its graphical controls, not the safe itself. The dial runs 0 to 49, and the clue card only says it turns both
+  ways and to listen for the tumblers. The riddle gives **12** (the apostles), **40** (the days of temptation in
+  the desert) and **7** (the week of creation); "Rightly ... left ... rightly" gives the directions. Each stop that
+  is right, counting from the first, drops a tumbler, and a wrong attempt says how many fell: the solution is
+  **right 12 / left 40 / right 7**. The paper remains readable; wrong settings can be reset or retried. When the
+  safe opens, Micah reads it back ("Twelve apostles, forty days in the desert, and seven days of creation.") and
+  finds it strange that a woman like Eleanor would bring Christ into it ("Strange, a dame like her bringin' Christ
+  into it.").
 - Inside the safe there is a brass box. Micah opens it in the inventory with the hand, revealing:
   - a perfumed business card, blank except for two letters among the decorations. It carries Eleanor's own
     perfume (Micah can't know otherwise): "A business card, only two letters in it; the same perfume that
@@ -345,7 +349,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    mirror and combs her hair (`eleanor_comb`). The scene fades to black; Micah's narration says she put the comb and
    mirror in the nightstand drawer and left them there (the ones Micah finds in Act 1). When the knock comes she is
    sitting up on the edge of the bed by the pillow, awake, in her pyjamas (`eleanor_pyjama_play`, the
-   `eleanor_cell_sit` pose). After the knock, Agatha comes into the cell past midnight. She sincerely believes
+   `eleanor_cell_sit` pose). As the knock fades in she gets up off the bed (`eleanor_cell_rise`) and stands in front
+   of it for the visit. After the knock, Agatha comes into the cell past midnight. She sincerely believes
    she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
    she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
    the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
@@ -375,7 +380,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
     shuts it and spins the dial. Hand on the open closet shuts it again (optional); she won't shut it on the box
     while the safe still stands open.
-  - Use the blank slip on the writing desk: she writes the safe's combination as the three references Micah finds.
+  - Use the blank slip on the writing desk: she writes the safe's combination as the riddle Micah finds.
     Use it on the drawer to put it in, then her key on the drawer to lock it (she keeps the key).
   - Wrong joins and wrong items on the closet, safe or drawer get a hint in her voice. The drawer waits for the
     safe, the call for the locked drawer, the bag for the call, and the door for all of them; at the door she names
@@ -537,7 +542,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
   questions about his life, why he abandoned his wife and son. He recalls Rose's empty desk at the library: he was
   glad she wasn't there, yet she hasn't left his mind since.
-- His recovery is shown through sitting, a supported crouch, and standing rather than an instantaneous pose swap.
+- His recovery is shown through sitting up, rolling forward onto his hands and knees, and getting up off his knees
+  as in the alley, rather than an instantaneous pose swap.
   The player is then presented with two choices:
   - Go find his wife.
   - Push forward.
@@ -776,7 +782,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - Hand on the costume rail: a swansdown puff in a member's wife's gown pocket.
   - Hand on the painted screens: a hairpin clipped to the silk.
   - Join the puff and the compact, then use them on the mirror, in order: the face powder, the lipstick, the
-    hairpin. Out of order, she says so ("Powder first. Then the mouth. Then the hair."). Look on the mirror
+    hairpin. Out of order, she says so ("Face powder first. Then the mouth. Then the hair."). Look on the mirror
     repeats the order. Nothing is taken from the gin table.
   - The finished face lands on the sad note; then the old man comes in by the door, "Sit down, my dear. We have a
     few minutes", and the choice above.

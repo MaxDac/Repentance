@@ -15,6 +15,9 @@ size = Vector2(34, 52)
 [sub_resource type="RectangleShape2D" id="Rect_8"]
 size = Vector2(176, 76)
 
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(24, 80)
+
 [node name="Street" type="Node2D"]
 script = ExtResource("1_Street")
 RoomName = "State Street"
@@ -101,6 +104,21 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/ParkedCar"]
 position = Vector2(330.0, 230.0)
 shape = SubResource("Rect_8")
+
+[node name="Street" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "street"
+DisplayName = "street"
+LookText = "Hubbard Street, running off into the fog. Anywhere but that door."
+WalkTo = Vector2(6, 214)
+Face = 3
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Street"]
+position = Vector2(12, 200)
+shape = SubResource("Rect_9")
 
 [node name="StreetFront" type="Sprite2D" parent="World"]
 position = Vector2(0, 250)

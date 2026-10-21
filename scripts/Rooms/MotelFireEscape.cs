@@ -37,24 +37,32 @@ public partial class MotelFireEscape : Room
             await TheNight();
             return;
         }
-        await Game.Run(async () =>
+        await Game.Run(OnTheLanding);
+    }
+
+    /// <summary>Act 1's last page: her opening words, the fade, and Daniel in the attic at night. The ladder and Eleanor run it too.</summary>
+    private async Task OnTheLanding()
+    {
+        if (!State.HasFlag("eleanor_found"))
         {
-            if (!State.HasFlag("eleanor_found"))
-            {
-                await Wait(0.8);
-                await Think("A woman on the iron landing, under the dripping window. Alone in the rain, like she'd been expecting company. I know the face. I've carried it in my pocket for two days.");
-                if (FindActor("eleanor") is { } eleanor)
-                    await Game.WalkTo(eleanor.Position + TalkingDistance);
-                Player.Face(Facing.Right);
-                await Talk("eleanor_fire_escape_opening");
-                State.SetFlag("eleanor_found");
-            }
-            await Game.Hud.Fade(1, FadeOut);
-            Player.Stop();
-            await Wait(1.0);
-            State.SetFlag("attic_night");
-            await Game.ChangeRoom("attic", "night", fadeInSeconds: 1.2);
-        });
+            await Wait(0.8);
+            await Think("A woman on the iron landing, under the dripping window. Alone in the rain, like she'd been expecting company. I know the face. I've carried it in my pocket for two days.");
+            if (FindActor("eleanor") is { } eleanor)
+                await Game.WalkTo(eleanor.Position + TalkingDistance);
+            Player.Face(Facing.Right);
+            await Talk("eleanor_fire_escape_opening");
+            State.SetFlag("eleanor_found");
+        }
+        await ToTheAttic();
+    }
+
+    private async Task ToTheAttic()
+    {
+        await Game.Hud.Fade(1, FadeOut);
+        Player.Stop();
+        await Wait(1.0);
+        State.SetFlag("attic_night");
+        await Game.ChangeRoom("attic", "night", fadeInSeconds: 1.2);
     }
 
     /// <summary>After the First Interlude: the rest of their talk, the kiss, and "Later that night".</summary>
@@ -69,15 +77,21 @@ public partial class MotelFireEscape : Room
                     Player.Teleport(eleanor.Position + TalkingDistance, Facing.Right);
                 await Wait(0.6);
                 await Talk("eleanor_fire_escape");
-                await Game.Hud.Fade(1, NightFade);
-                Player.Stop();
             }
             finally { Player.Speed = speed; }
-            Game.Hud.ShowCaption("Later that night");
-            await Wait(NightCaption);
-            Game.Hud.ShowCaption(null);
-            await Game.ChangeRoom("motel_night", "start", fadeInSeconds: NightFade);
+            await LaterThatNight();
         });
+    }
+
+    /// <summary>"Later that night", into her room. Her window and door run it too, in case the cutscene stopped short.</summary>
+    private async Task LaterThatNight()
+    {
+        await Game.Hud.Fade(1, NightFade);
+        Player.Stop();
+        Game.Hud.ShowCaption("Later that night");
+        await Wait(NightCaption);
+        Game.Hud.ShowCaption(null);
+        await Game.ChangeRoom("motel_night", "start", fadeInSeconds: NightFade);
     }
 
     public override async Task OnCue(string cue)
@@ -105,8 +119,15 @@ public partial class MotelFireEscape : Room
     {
         switch (target.Id, verb)
         {
+            case ("ladder", Verb.Walk or Verb.Hand) when State.StoryAct < 2:
+            case ("eleanor", Verb.Talk) when State.StoryAct < 2 && !State.HasFlag("eleanor_found"):
+                await OnTheLanding();
+                return true;
             case ("ladder", Verb.Walk or Verb.Hand):
                 await Say("Not now. Not after that climb.");
+                return true;
+            case ("window" or "door", Verb.Hand or Verb.Walk) when State.StoryAct >= 2:
+                await LaterThatNight();
                 return true;
             case ("window" or "door", Verb.Hand or Verb.Walk):
                 await Say("Her room. Not mine to walk into.");

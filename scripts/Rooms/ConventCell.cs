@@ -7,7 +7,7 @@ namespace Repentance.Rooms;
 /// Eleanor's cell at the convent: a bed, a lampstand, a book and a nightstand. In the drawer, a comb and a little
 /// waxed mirror. Warming and cleaning its back reveals the symbol; Micah won't leave until he has found it.
 /// In the First Interlude Eleanor sets her duffle down in front of the nightstand, combs her hair from it, and leaves
-/// the comb and mirror in the drawer: Agatha finds her sitting up on the bed in her pyjamas.
+/// the comb and mirror in the drawer: Agatha's knock finds her sitting up on the bed in her pyjamas, and she gets up.
 /// </summary>
 public partial class ConventCell : Room
 {
@@ -29,6 +29,9 @@ public partial class ConventCell : Room
 
     /// <summary>Where she sits up on the edge of the bed by the pillow when Agatha knocks (tools/art/convent.py CELL_SIT_AT).</summary>
     private static readonly Vector2 SitAt = new(364, 236);
+
+    /// <summary>Where she stands in front of the bed once she has got up for Agatha (printed by convent.py cell_rise_strip).</summary>
+    private static readonly Vector2 StandAt = new(344, 213);
 
     /// <summary>While she combs her hair the open bag is drawn into her strip, so the one on the floor steps aside.</summary>
     private bool _combing;
@@ -148,7 +151,7 @@ public partial class ConventCell : Room
     /// <summary>
     /// Her first night (hand on the nightstand or the bed): she opens the duffle, takes out her comb and little mirror
     /// and combs her hair out. Over black the comb and mirror go in the drawer; when Agatha knocks she is sitting up on
-    /// the edge of the bed in her pyjamas, awake.
+    /// the edge of the bed in her pyjamas, awake, and gets up to meet her.
     /// </summary>
     private async Task FirstNight()
     {
@@ -171,18 +174,22 @@ public partial class ConventCell : Room
         // the Club follows her to the convent: its strings play for Agatha's visit only
         Game.Music.Play(Track.ClubStrings);
         await Game.Hud.Fade(0, 0.6);
+        // she gets up off the bed for her; the strip ends on her idle frame where she now stands
+        await Player.PlayPose("eleanor_cell_rise");
+        Player.Teleport(StandAt, Facing.Left);
+        Player.SetPose(null);
         var agatha = FindActor("nun");
         if (agatha != null)
         {
             agatha.Position = AgathaDoor;
             AgathaIn(true);
-            await agatha.MoveTo(AgathaByTheBed, 32);
+            await agatha.MoveTo(AgathaByTheBed, 44);
             agatha.FaceLeft(false);
         }
         await Talk("interlude_agatha_night");
         if (agatha != null)
         {
-            await agatha.MoveTo(AgathaDoor, 44);
+            await agatha.MoveTo(AgathaDoor, 56);
             AgathaIn(false);
         }
         Game.Music.Play(Music);

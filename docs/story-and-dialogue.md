@@ -97,7 +97,7 @@ new ItemDef("photo", "photograph", "res://assets/art/items/photo.png", "...descr
   `Recipes`, and wrong pairs with a hint to `Refusals`. Recipes are symmetric.
 - Combinations with staging (room change, image, puzzle screen): `Story.CombineScripts.TryCombine`, which runs first.
 - Puzzle screens are opened with `await Game.Hud.Puzzle.Open(PuzzleKind.X)` (returns `false` on cancel); answers
-  live in `PuzzleRules` (e.g. safe: directions `0,1,0`, numbers `12,31,7`). Puzzles are untimed and retryable.
+  live in `PuzzleRules` (e.g. safe: directions `0,1,0`, numbers `12,40,7`). Puzzles are untimed and retryable.
 - Changed saved puzzle progress: follow [migration/versioning rules](saves-and-settings.md#changing-the-format).
 
 ### Riddles and ordered steps
@@ -111,7 +111,7 @@ alarm bell instead validate their ordered settings in their puzzle screens throu
 |---|---|---|
 | 17, Room 507 (`EleanorRoom`) | box packed (`interlude_box_packed`) -> closet opened (`interlude_closet_open`) -> box in the half-open safe (`interlude_box_in_safe`) -> safe shut (`interlude_safe_locked`) -> combination written on her blank slip at the desk (`interlude_riddle_written`) -> riddle in the drawer (`interlude_riddle_in_drawer`) -> drawer locked with her key (`interlude_drawer_locked`) -> call on the vanity telephone (`interlude_phoned`) -> her packed duffle taken from the foot of the bed (`interlude_took_bag`) | the closet, safe and drawer say what comes first; the telephone and door name the first missing step (the door last asks for the bag); the slip and key are restored from progress on entering |
 | 18, dressing room (`ClubBackstage`) | powder (`interlude_powdered`) -> lipstick (`interlude_lips`) -> hairpin (`interlude_made_up`) | lipstick on a bare face, or the hairpin before the mouth, is refused and kept |
-| Safe, Room 507 (`PuzzleKind.Safe`) | directions right, left, right; numbers 12, 31, 7 (`PuzzleRules.Safe`) | the handle says how many tumblers fell; nothing is used up |
+| Safe, Room 507 (`PuzzleKind.Safe`) | directions right, left, right; numbers 12, 40, 7 on a 0-49 dial (`PuzzleRules.Safe`) | the handle says how many tumblers fell; nothing is used up |
 | Alarm bell (`MansionExterior`, `PuzzleKind.Bell`) | plan: hold the hammer, tie it, release the hand (`PuzzleRules.Bell`) | any other plan (cutting the wire would ring the gong) stops before he touches it |
 
 Room numbers on the service-lift note follow `LiftMaze.Width` (501 to 513); `NotesTests` checks it.

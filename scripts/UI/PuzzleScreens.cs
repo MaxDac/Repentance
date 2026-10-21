@@ -205,16 +205,15 @@ public sealed class LiftMazeScreen : PuzzleScreen
     }
 }
 
-/// <summary>Issue #53: Eleanor's paper gives references, not numbers, and no directions; each right stop drops a tumbler.</summary>
+/// <summary>Issue #53: a three-stop dial; each right stop drops a tumbler. The clue card says nothing of Eleanor's paper.</summary>
 public sealed class SafeScreen : PuzzleScreen
 {
+    private const int DialSize = 50;
     private readonly int[] _numbers = new int[3];
 
     public override string Title => "ROOM 507 - SAFE";
     public override string SubmitText => "Turn handle";
-    public override string Clue => GameState.Instance.HasItem("combination")
-        ? "Eleanor's paper:\n\n1. Those who sat at His table.\n2. The days of the month He was born.\n3. The day He rested.\n\nNo directions written down. The dial turns both ways; listen for the tumblers."
-        : "The desk drawer may hold whatever opens this. Close this panel to investigate.";
+    public override string Clue => "A three-stop dial, 0 to 49.\n\nIt turns both ways. Listen for the tumblers.";
 
     protected override void Build()
     {
@@ -224,9 +223,9 @@ public sealed class SafeScreen : PuzzleScreen
             int y = 64 + i * 44;
             Label($"STOP {i + 1}", 26, y - 16, 100);
             Button($"d{i}", "", 24, y, 72, () => Settings[index] = 1 - Settings[index]);
-            Button($"m{i}", "-1", 104, y, 34, () => _numbers[index] = (_numbers[index] + 39) % 40);
-            Button($"n{i}", "", 146, y, 50, () => _numbers[index] = (_numbers[index] + 1) % 40);
-            Button($"t{i}", "+10", 204, y, 44, () => _numbers[index] = (_numbers[index] + 10) % 40);
+            Button($"m{i}", "-1", 104, y, 34, () => _numbers[index] = (_numbers[index] + DialSize - 1) % DialSize);
+            Button($"n{i}", "", 146, y, 50, () => _numbers[index] = (_numbers[index] + 1) % DialSize);
+            Button($"t{i}", "+10", 204, y, 44, () => _numbers[index] = (_numbers[index] + 10) % DialSize);
         }
     }
 
