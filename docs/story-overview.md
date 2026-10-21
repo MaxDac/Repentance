@@ -21,9 +21,10 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
 3. **Linen room**: the corridor door to 507 is night-bolted from the far side and has no keyhole. Take a wire
    hanger from the rack and the pliers from the housekeeping cart, combine them into a wire hook (the pliers
    go back on the cart) and use the hook on the door to lift the bolt through the transom.
-   **Room 507**: the room has been turned upside down. Pick the locked desk drawer for the safe combination,
-   open the closet and decode the paper's references (apostles, December, the day of rest: 12, 31, 7). It gives
-   no directions; each right stop drops a tumbler, and the dial opens at right 12 / left 31 / right 7. Micah
+   **Room 507**: the room has been turned upside down. Pick the locked desk drawer for Eleanor's riddle,
+   open the closet and decode it (apostles, the days in the desert, the week of creation: 12, 40, 7; "rightly ...
+   left ... rightly" for the directions). Each right stop drops a tumbler, and the dial opens at right 12 / left 40
+   / right 7. Micah
    finds it strange that a dame like her would bring Christ into it.
    Then take the brass box.
    Open it in the satchel with the hand: a

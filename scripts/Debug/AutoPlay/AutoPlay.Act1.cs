@@ -171,7 +171,7 @@ public partial class AutoPlay
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         Check(game.Sfx.Count(Sound.SafeOpen) == safeOpens, "a dial left unsolved stays quiet");
         await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 3), ("n1", 1), ("n2", 7) }, "safe_dial");
+            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 4), ("n2", 7) }, "safe_dial");
         Check(gs.HasFlag("safe_open") && game.Sfx.Count(Sound.SafeOpen) == safeOpens + 1, "opened the safe, heard it open");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");

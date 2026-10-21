@@ -26,7 +26,7 @@ public static partial class Items
         new("lockpick", "lockpicks", "res://assets/art/items/lockpick.png",
             "A roll of lockpicks. A souvenir from a burglar I once let off easy. He said I'd need them more than him."),
         new("combination", "slip of paper", "res://assets/art/items/combination.png",
-            "Hotel stationery, in Eleanor's hand: \"Those who sat at His table. The days of the month He was born. The day He rested.\" No directions."),
+            "Hotel stationery, in Eleanor's hand: \"Rightly He chose His Apostles; but first He left to stay in the desert to be tempted for a certain amount of days, He through whom all things were rightly made in the week of creation.\""),
         new("brass_box", "brass box", "res://assets/art/items/brass_box.png",
             "A little brass box, engraved with lilies. Something slides around inside."),
         new("card", "business card", "res://assets/art/items/card.png",

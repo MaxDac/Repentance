@@ -57,7 +57,7 @@ public static partial class Items
         new("eleanor_slip", "blank slip of paper", "res://assets/art/items/eleanor_slip.png",
             "A slip of Aurelian notepaper, still blank. The safe's combination goes on it, in words nobody else would count."),
         new("eleanor_riddle", "slip of paper", "res://assets/art/items/combination.png",
-            "Three lines of Sunday school in my own hand. The Twelve, December, the day He rested. It goes in the drawer."),
+            "Sunday school in my own hand. His Apostles, His days in the desert, His week of creation. It goes in the drawer."),
         new("eleanor_key", "little brass key", "res://assets/art/items/eleanor_key.png",
             "The only key to the lock I had fitted to the desk drawer. It goes where I go."),
     };

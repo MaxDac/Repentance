@@ -109,10 +109,10 @@ public partial class EleanorRoom : Room
             case ("paper", Verb.Hand):
                 State.SetFlag("took_combination");
                 State.GiveItem("combination");
-                await Say("A slip of hotel paper in her hand. Three lines of Sunday school. Nobody writes that down unless it opens something.");
+                await Say("A slip of hotel paper in her hand. Sunday school, of all things. Funny what a dame locks up.");
                 return true;
             case ("paper", Verb.Look):
-                await Say("Three riddles in Eleanor's handwriting. No numbers, no right or left. She didn't trust paper with anything plain.");
+                await Say("Scripture in Eleanor's handwriting, more or less. She didn't trust paper with anything plain.");
                 return true;
 
             case ("closet", Verb.Hand) when !State.HasFlag("closet_open"):
@@ -131,7 +131,7 @@ public partial class EleanorRoom : Room
                 if (!await Game.Hud.Puzzle.Open(PuzzleKind.Safe)) return true;
                 Game.Sfx.Play(Sound.SafeOpen);
                 State.SetFlag("safe_open");
-                await Say("Twelve apostles. Thirty-one days of December. The seventh day. The tumblers fell like dominoes.");
+                await Say("Twelve apostles, forty days in the desert, and seven days of creation. The tumblers fell like dominoes.");
                 await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
                 await Say("Somebody's been at the dial since. Scratched it raw and never got the door open.");
                 return true;
@@ -195,7 +195,7 @@ public partial class EleanorRoom : Room
         State.SetFlag("interlude_box_in_safe");
         State.SetFlag("interlude_safe_locked");
         Game.Sfx.Play(Sound.SafeClose);
-        await Say("Swing the door to, and spin the dial. The Twelve at His table. December. The day He rested.");
+        await Say("Swing the door to, and spin the dial. His Apostles. His days in the desert. His week of creation.");
         await Say("Let Theodore's men scratch at it all night. They never could count past their fingers.");
     }
 
@@ -319,7 +319,7 @@ public partial class EleanorRoom : Room
             case ("desk_drawer", Verb.UseItem) when item == "eleanor_riddle" && !State.HasFlag("interlude_riddle_in_drawer"):
                 State.TakeItem("eleanor_riddle");
                 State.SetFlag("interlude_riddle_in_drawer");
-                await Say("Three lines of Sunday school on hotel paper, into the drawer. My grandmother would be proud.");
+                await Say("Sunday school on hotel paper, into the drawer. My grandmother would be proud.");
                 return true;
             case ("desk_drawer", Verb.UseItem) when item == "eleanor_slip":
                 await Say("A blank slip won't open anything. The combination goes on it first, at the desk.");
@@ -428,8 +428,8 @@ public partial class EleanorRoom : Room
                 State.TakeItem("eleanor_slip");
                 State.SetFlag("interlude_riddle_written");
                 State.GiveItem("eleanor_riddle");
-                await Say("Pencil, my best Sunday hand. The Twelve at His table. The days of December. The day He rested.");
-                await Say("No numbers, no right or left. Anybody who doesn't know his Bible can stare at it all night.");
+                await Say("Pencil, my best Sunday hand. Rightly He chose His Apostles; but first He left for the desert... and the week of creation.");
+                await Say("Not a number on it. Anybody who doesn't know his Bible can stare at it all night.");
                 return true;
             case ("desk", Verb.UseItem) when item == "eleanor_riddle":
                 await Say("Written. It goes in the drawer, under lock and key.");
