@@ -104,7 +104,8 @@ tracks as 16-bit PCM (about 5 MB each), evicting the least recently used but nev
 the Godot-free `RenderCache`. A room asks for its track, which jumps ahead of everything else, then
 `Game.LoadRoomScene` prefetches the tracks of the rooms its visible exits lead to, so the next room usually starts
 with its music ready. A room whose track is not cached yet stays silent until the render finishes (about a second).
-After each render the worker runs a compacting GC to hand the float buffers back to the system. `--no-music` skips
+After each render the worker runs a compacting GC to hand the float buffers back to the system. Automated runs call
+`Music.StopRendering` before quitting, so no render or GC runs on while Godot shuts down. `--no-music` skips
 rendering and playback.
 
 A piece's optional `Distance` puts the band somewhere else: a band-pass, a narrower stereo image and a darkening

@@ -62,7 +62,11 @@ and GC busy, and on a slow runner that stalls frames in timing-sensitive checks.
 assert that music plays, so they keep it on.
 Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` first: if C# still holds a pending
 `SceneTreeTimer` at quit, Godot aborts at shutdown ("Leaked unsafe reference", `!rc_owner`). Await timers through
-`Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`.
+`Timers.Wait`, not `ToSignal(GetTree().CreateTimer(...))`. `Finish` then waits for any music render still running
+(`Music.StopRendering`; its worker forces a full GC) and runs the GC, waiting for pending finalizers: Godot's
+shutdown disposes only the wrappers C# still holds, so one collected but not yet finalized leaks its object ("RID
+allocations of type GodotShape2D were leaked") or is finalized mid-teardown. Dispose wrappers of scene-owned
+resources you only read, as `Hotspot.ShapeRect` does.
 A local pass does not cover exported builds; see [What only CI runs](#what-only-ci-runs).
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses

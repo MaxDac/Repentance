@@ -53,6 +53,11 @@ public abstract class Harness
         GD.Print(_failures.Count == 0 ? $"{Marker} OK" : $"{Marker} FAILED:\n  " + string.Join("\n  ", _failures));
         Engine.TimeScale = 1;
         Timers.ReleasePending();
+        _game.Music.StopRendering();
+        // At shutdown Godot disposes the wrappers C# still holds, but skips any the GC collected and has not yet
+        // finalized: their objects leak, or their finalizers run while the engine is torn down. Finalize them now.
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
         _game.GetTree().Quit(_failures.Count == 0 ? 0 : 1);
     }
 

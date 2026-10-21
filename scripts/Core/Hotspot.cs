@@ -36,10 +36,10 @@ public partial class Hotspot : Area2D
     {
         foreach (var child in GetChildren())
         {
-            if (child is CollisionShape2D cs && cs.Shape != null && !cs.Disabled)
+            if (child is CollisionShape2D { Disabled: false } cs && ShapeRect(cs) is { } rect)
             {
                 var local = cs.GlobalTransform.AffineInverse() * point;
-                if (cs.Shape.GetRect().HasPoint(local)) return true;
+                if (rect.HasPoint(local)) return true;
             }
             else if (child is CollisionPolygon2D cp && !cp.Disabled)
             {
@@ -59,8 +59,8 @@ public partial class Hotspot : Area2D
             foreach (var child in GetChildren())
             {
                 Rect2 cr;
-                if (child is CollisionShape2D cs && cs.Shape != null)
-                    cr = cs.GlobalTransform * cs.Shape.GetRect();
+                if (child is CollisionShape2D cs && ShapeRect(cs) is { } rect)
+                    cr = cs.GlobalTransform * rect;
                 else if (child is CollisionPolygon2D cp && cp.Polygon.Length > 0)
                 {
                     cr = new Rect2(cp.GlobalTransform * cp.Polygon[0], Vector2.Zero);
@@ -74,4 +74,15 @@ public partial class Hotspot : Area2D
     }
 
     public string Title => DisplayName != "" ? DisplayName : Id;
+
+    /// <summary>
+    /// The shape's rectangle, or null without a shape. The C# wrapper is disposed at once: kept, it would hold the
+    /// scene's shape until the GC finalizes it, and one finalized late leaks the shape at exit ("RID allocations of
+    /// type GodotShape2D were leaked").
+    /// </summary>
+    private static Rect2? ShapeRect(CollisionShape2D cs)
+    {
+        using var shape = cs.Shape;
+        return shape?.GetRect();
+    }
 }
