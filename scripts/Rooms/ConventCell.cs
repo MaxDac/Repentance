@@ -183,13 +183,13 @@ public partial class ConventCell : Room
         {
             agatha.Position = AgathaDoor;
             AgathaIn(true);
-            await agatha.MoveTo(AgathaByTheBed, 32);
+            await agatha.MoveTo(AgathaByTheBed, 44);
             agatha.FaceLeft(false);
         }
         await Talk("interlude_agatha_night");
         if (agatha != null)
         {
-            await agatha.MoveTo(AgathaDoor, 44);
+            await agatha.MoveTo(AgathaDoor, 56);
             AgathaIn(false);
         }
         Game.Music.Play(Music);
