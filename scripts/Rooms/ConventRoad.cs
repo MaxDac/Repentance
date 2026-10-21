@@ -25,11 +25,14 @@ public partial class ConventRoad : Room
             return;
         }
         if (State.HasFlag("eleanor_found")) return;
-        await Game.Run(async () =>
-        {
-            if (!State.HasFlag("convent_dead_end_done")) await DeadEnd();
-            await Game.ChangeRoom("motel_alley", "start");
-        });
+        await Game.Run(DownTheHill);
+    }
+
+    /// <summary>Out of leads: the cigarette if he hasn't had it, then down the hill to the motel. The road runs it too.</summary>
+    private async Task DownTheHill()
+    {
+        if (!State.HasFlag("convent_dead_end_done")) await DeadEnd();
+        await Game.ChangeRoom("motel_alley", "start");
     }
 
     private async Task DeadEnd()
@@ -66,6 +69,11 @@ public partial class ConventRoad : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
+        if (target.Id == "road" && verb is Verb.Walk or Verb.Hand)
+        {
+            await DownTheHill();
+            return true;
+        }
         if (target.Id != "door") return false;
         if (verb == Verb.Look)
         {

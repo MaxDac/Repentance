@@ -18,11 +18,13 @@ title screen). Use direct Godot room arguments for bounded diagnostics; normal-p
    floor polygon, entry facing metadata and exports.
 3. Handle specific gated cases before generic ones; return `false` for unhandled actions.
 4. Connect exits with `ExitTo`/`ExitEntry` or literal `Game.ChangeRoom("room", "entry")`. Keep every room reachable.
+   A cutscene that leaves on its own ends in a method an exit hotspot also calls in that state (a manual failsafe);
+   list scripted exit hotspots in `SceneGraphTests.ScriptedExits`.
 5. Use `story-change` for dialogue/flags/items and playthrough beats; update debug kits/notes if needed.
 6. For incompatible saved room/entry changes follow `docs/saves-and-settings.md`, "Changing the format".
 7. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, walk`; add `playthrough` for story and `art` for art.
 
 ## When tests fail
 
-`SceneGraphTests` reports invalid targets, off-floor points or unreachable rooms.
+`SceneGraphTests` reports invalid targets, off-floor points, unreachable rooms or rooms with no way out.
 `logs/walk.log` names runtime movement failures; fix the polygon, target or marker, not the test.

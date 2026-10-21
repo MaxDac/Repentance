@@ -67,20 +67,31 @@ public partial class MotelNight : Room
             await Think("Her room, up the fire escape. A buzzing sign, a cracked basin, her stockings over the chair.");
             await Think("I'm buttoning my shirt in the dark like a thief. Rose's face keeps turning up behind my eyes.");
             await Talk("motel_night");
-            await Think("I close the door on her softly. Rose, the boy, and now Eleanor. I'm getting good at doors.");
-            await Wait(0.6);
-            await Game.Hud.Fade(1, MotelFireEscape.NightFade);
-            await Game.Hud.FadeCaptionIn(DaysLater, DaysLaterFade);
-            await Wait(MotelFireEscape.NightCaption);
-            Game.Hud.ShowCaption(null);
-            await Game.ChangeRoom("office", "act2", fadeInSeconds: MotelFireEscape.NightFade);
+            await OutTheDoor();
         });
+    }
+
+    /// <summary>Micah closes her door behind him; "Days later", his office. The door runs it too, in case the scene stopped short.</summary>
+    private async Task OutTheDoor()
+    {
+        await Think("I close the door on her softly. Rose, the boy, and now Eleanor. I'm getting good at doors.");
+        await Wait(0.6);
+        await Game.Hud.Fade(1, MotelFireEscape.NightFade);
+        await Game.Hud.FadeCaptionIn(DaysLater, DaysLaterFade);
+        await Wait(MotelFireEscape.NightCaption);
+        Game.Hud.ShowCaption(null);
+        await Game.ChangeRoom("office", "act2", fadeInSeconds: MotelFireEscape.NightFade);
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
         if (First) return await FirstInteract(verb, target);
         if (Second) return await SecondInteract(verb, target);
+        if (target.Id == "door" && verb is Verb.Walk or Verb.Hand)
+        {
+            await OutTheDoor();
+            return true;
+        }
         return false;
     }
 
@@ -166,6 +177,10 @@ public partial class MotelNight : Room
             case ("door", Verb.Walk or Verb.Hand) when !State.HasFlag("interlude_goons_in"):
                 await TheDoorGoesIn();
                 await Talk("interlude_goons");
+                await TheyTakeHer();
+                await Story.Interlude.Taken();
+                return true;
+            case ("door", Verb.Walk or Verb.Hand):
                 await TheyTakeHer();
                 await Story.Interlude.Taken();
                 return true;

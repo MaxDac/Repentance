@@ -129,11 +129,38 @@ public partial class Alley : Room
             ShowDoorOpen(false);
             await Wait(0.4);
             if (!await Player.PlayPose("micah_kneel_rise")) return;
-            Player.SetPose(null);
-            Player.Face(Facing.Right);
-            await Think("A convent. Of all the places to hide a woman like that.");
-            State.SetFlag("alley_done");
+            await OnHisFeet();
         });
+    }
+
+    /// <summary>Act 1: Micah up off the gravel, alone in the alley. The street exit runs it too, in case the cutscene
+    /// stopped short.</summary>
+    private async Task OnHisFeet()
+    {
+        if (FindActor("sal") is { } sal) sal.Visible = false;
+        if (FindActor("bartender") is { } tony) tony.Visible = false;
+        ShowDoorOpen(false);
+        Player.SetPose(null);
+        Player.Face(Facing.Right);
+        await Think("A convent. Of all the places to hide a woman like that.");
+        State.SetFlag("alley_done");
+    }
+
+    /// <summary>Act 3, Tony told: out of the alley, to the office in the storm. The street exit runs it too.</summary>
+    private async Task AfterTheShot()
+    {
+        Player.SetPose(null);
+        await Game.WalkTo(StreetMouth);
+        // first the office, in the storm, alone with the bottle; then the Gold Coast
+        await Game.ChangeRoom("office_storm", "window");
+    }
+
+    /// <summary>Act 3, the gun lowered: out of the alley and out of the story. The street exit runs it too.</summary>
+    private async Task WalkAway()
+    {
+        Player.SetPose(null);
+        await Game.WalkTo(StreetMouth);
+        await Act3.End();
     }
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
@@ -147,8 +174,9 @@ public partial class Alley : Room
                     : "Propped open on a brick. Light, smoke and a band going over the same sixteen bars, a long way down the hall.");
                 return true;
             }
-            if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand) && State.HasFlag("alley_done"))
+            if (target.Id == "street" && (verb is Verb.Walk or Verb.Hand))
             {
+                if (!State.HasFlag("alley_done")) await OnHisFeet();
                 // Micah sleeps off the beating and goes up to the convent the evening after
                 if (!State.HasFlag("seen_convent_exterior"))
                 {
@@ -165,6 +193,18 @@ public partial class Alley : Room
         bool salOut = State.HasFlag("alley3_sal_out"), salDown = State.HasFlag("alley3_sal_down");
         switch (target.Id, verb)
         {
+            case ("street", Verb.Look):
+                await Say("The street. Out there, the whole city's minding its own business.");
+                return true;
+            case ("street", Verb.Walk or Verb.Hand) when State.HasFlag(Endings.WalkedAway):
+                await WalkAway();
+                return true;
+            case ("street", Verb.Walk or Verb.Hand) when State.HasFlag("shot_bartender"):
+                await AfterTheShot();
+                return true;
+            case ("street", Verb.Walk or Verb.Hand):
+                await Say("Not without Tony telling me where she is. He knows. They always know.");
+                return true;
             case ("street_lamp", Verb.Hand or Verb.Kick) when !Dark:
                 await Say(verb == Verb.Kick ? "*CLANG*" : "I give the post a good shake. The bulb rattles in its cage...");
                 State.SetFlag("alley3_dark");
@@ -293,8 +333,7 @@ public partial class Alley : Room
             Player.SetPose(null);
             await Wait(0.6);
             await Think("I walk away. Down the alley, past the dead lamp, out into the street. Nobody follows.");
-            await Game.WalkTo(StreetMouth);
-            await Act3.End();
+            await WalkAway();
             return;
         }
         await Say("*BANG*");
@@ -306,8 +345,6 @@ public partial class Alley : Room
         Player.SetPose(null);
         await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
         await Think("I shot a man tonight. My hand doesn't shake. That's what scares me.");
-        await Game.WalkTo(StreetMouth);
-        // first the office, in the storm, alone with the bottle; then the Gold Coast
-        await Game.ChangeRoom("office_storm", "window");
+        await AfterTheShot();
     }
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventRoad.cs" id="1_ConventRoad"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_road.png" id="2_convent_road"]
@@ -13,6 +13,9 @@ size = Vector2(120, 36)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(62, 124)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(24, 60)
 
 [node name="ConventRoad" type="Node2D"]
 script = ExtResource("1_ConventRoad")
@@ -103,3 +106,19 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Window"]
 position = Vector2(360, 102)
 shape = SubResource("Rect_3")
+
+[node name="Road" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "road"
+DisplayName = "road down the hill"
+LookText = "The road back down the hill, toward the neon and whatever's left of the night."
+WalkTo = Vector2(6, 246)
+Face = 3
+ShowIfFlags = "convent_departed"
+ClickPriority = -1
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Road"]
+position = Vector2(12, 236)
+shape = SubResource("Rect_4")

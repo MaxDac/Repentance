@@ -104,6 +104,11 @@ generic exits are closed (`Interlude.BlockedExitLine`) and held items refused: h
 Set `Door = true` on a hotspot that is a real door to another room (not an archway, curtain, street or stair): the
 player going through it, by exit or scripted `ChangeRoom`, hears it open and shut ([Audio](audio.md#sound-effects)).
 
+A cutscene that leaves the room on its own (in `OnEnter`, or after a dialogue) ends in a method of its own, and an
+exit hotspot calls the same method in the same state, so the player can leave by hand if the cutscene stops short:
+`Game.Run` logs an exception and hands control back mid-scene. List a scripted exit hotspot in
+`SceneGraphTests.ScriptedExits`.
+
 ## Invariants (checked by tests)
 
 | Check | Test |
@@ -112,6 +117,7 @@ player going through it, by exit or scripted `ChangeRoom`, hears it open and shu
 | Every `Door` hotspot exits or is handled by a room script that changes room | `SceneGraphTests` |
 | Entry markers and explicit `WalkTo` points stand on the `WalkArea` polygon (allowlist `OffFloorEntries`, currently empty) | `SceneGraphTests` |
 | Every room is reachable from the attic | `SceneGraphTests` |
+| Every room has a way out: an `ExitTo` or `Door` hotspot, or one in `ScriptedExits` that its script handles (allowlist `NoManualExit`, with reasons) | `SceneGraphTests` |
 | From every entry, every hotspot and exit is reachable without crossing a wall, at the right scale; exits land exactly on their entry | `--walk-test` (`walk` suite) |
 | Floor clicks, clamping, interruption, facing, clicks ignored while busy | `--walk-test` |
 

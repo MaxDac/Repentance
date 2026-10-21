@@ -28,6 +28,13 @@ public partial class Street : Room
         await Think("Maybe that's the joke. Maybe it's easier to save somebody you don't owe anything to.");
         Game.Hud.HideCloseUp();
         if (!await Player.PlayPose("micah_recover")) return;
+        await Choose();
+    }
+
+    /// <summary>On his feet: Rose, or push on. The street exit runs it too, in case the cutscene stopped short.</summary>
+    private async Task Choose()
+    {
+        Game.Hud.HideCloseUp(0);
         Player.SetPose(null);
         Player.Face(Facing.Down);
         await Wait(0.5);
@@ -36,5 +43,16 @@ public partial class Street : Room
             await Game.ChangeRoom("rose_house", "start");
         else
             await Game.ChangeRoom("chicago_map", "start");
+    }
+
+    public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
+    {
+        switch (target.Id, verb)
+        {
+            case ("street", Verb.Walk or Verb.Hand):
+                await Choose();
+                return true;
+        }
+        return false;
     }
 }

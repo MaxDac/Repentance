@@ -98,8 +98,6 @@ WalkTo = Vector2(50, 192)
 Face = 2
 ExitTo = "convent_road"
 ExitEntry = "street"
-ShowIfFlags = "alley_done"
-HideIfFlags = "alley3"
 monitoring = false
 monitorable = false
 

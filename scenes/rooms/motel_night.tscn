@@ -167,7 +167,6 @@ DisplayName = "door"
 LookText = "The motel door, number six. The chain's off."
 WalkTo = Vector2(40, 200)
 Face = 2
-ShowIfFlags = "interlude2"
 monitoring = false
 monitorable = false
 
