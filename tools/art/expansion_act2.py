@@ -3,11 +3,14 @@ Procession (puzzle 14), plus the inventory icons those puzzles hand out.
 
 Like act2_rooms, each room is painted once per state; overlays are crops of the state variant pixelized with the base
 palette, so they line up pixel-exactly when placed at the top-left printed by build()."""
+import math
 import random
-from PIL import Image, ImageDraw, ImageChops
+import numpy as np
+from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import W, FULL_H, hx, mix, mul, vgrad, noise, light, shadow, vignette, palette_of, pixelize, save, text
 from .act2_rooms import overlay
 from .items import _icon, invitation
+from . import chicago_map
 
 H = FULL_H
 FLOOR = 190
@@ -19,19 +22,89 @@ DRAWERS = "ABCDEFGHIJKL"  # three cabinets, four rows, filed row by row: H is th
 CAB_X = (92, 132, 172)
 CAB_Y = (98, 122, 146, 170)
 MAP_BOX = (224, 34, 334, 120)
-LASALLE = (262, 82)  # where the Harrington Building sits on the Loop map
+# The Loop on the 1920 Fred Wild street map the location-select screen prints (source-scan pixels): the river's
+# branches to the north and west, Grant Park and the lake shore to the east, Congress Street to the south.
+LOOP_SRC = (830, 500, 1380, 930)
+
+
+def _on_loop_map(scan_pt):
+    x0, y0, x1, y1 = MAP_BOX
+    sx0, sy0, sx1, sy1 = LOOP_SRC
+    return (round(x0 + (scan_pt[0] - sx0) * (x1 - x0) / (sx1 - sx0)),
+            round(y0 + (scan_pt[1] - sy0) * (y1 - y0) / (sy1 - sy0)))
+
+
+# the Harrington Building on LaSalle Street, the same spot the location-select map pins
+LASALLE = _on_loop_map(chicago_map.scan_point(chicago_map.MARKERS["harrington"][0]))
+
+MANILA = ("d6c290", "c4ae7a", "e0d0a4", "b8a06c", "ccb888")
+
+
+def _folders(d, x, y):
+    """Hanging files seen from above in the pulled-out drawer: each folder's top edge, back to front, its tab up."""
+    rnd = random.Random(1309)
+    rows = list(range(y + 1, y + 12, 2))
+    for i, fy in enumerate(rows):
+        t = i / (len(rows) - 1)
+        lx, rx = round(x + 2 - 3 * t), round(x + 36 + 3 * t)
+        depth = 0.62 + 0.38 * t  # the back of the drawer is in the cabinet's shadow
+        col = mul(hx(MANILA[i % len(MANILA)]), depth)
+        harrington = i == 3
+        if harrington:
+            # Harrington's file, pulled up from the others: a clipping's corner showing over its lip
+            d.rectangle([lx + 9, fy - 4, lx + 20, fy - 1], fill=hx("ece4cc"), outline=hx("7a7260"))
+            d.line([(lx + 11, fy - 3), (lx + 18, fy - 3)], fill=hx("3a3a34"))
+            d.point((lx + 15, fy - 2), fill=hx("8a8270"))
+            fy -= 2
+        d.rectangle([lx, fy, rx, fy + 1], fill=col)
+        d.line([(lx, fy), (rx, fy)], fill=mul(col, 1.18))
+        d.line([(lx, fy + 2), (rx, fy + 2)], fill=mul(col, 0.42))
+        # creases where the folder's sides bend over the hanging rods, and dog-ears
+        for cx in (lx + 1, rx - 1):
+            d.point((cx, fy + 1), fill=mul(col, 0.7))
+        d.point((lx + rnd.randint(4, 30), fy), fill=mul(col, 0.8))
+        # the tab, staggered left/middle/right down the drawer, a typed label strip on it
+        tx = lx + 3 + (i % 3) * 11
+        tab = hx("f2ead2") if harrington else mul(col, 1.08)
+        d.rectangle([tx, fy - 2, tx + 7, fy - 1], fill=tab)
+        d.line([(tx, fy - 2), (tx + 7, fy - 2)], fill=mul(tab, 1.1))
+        d.point((tx - 1, fy - 1), fill=mul(col, 0.6))
+        d.point((tx + 8, fy - 1), fill=mul(col, 0.6))
+        d.line([(tx + 2, fy - 1), (tx + 5, fy - 1)], fill=hx("a01e1a") if harrington else mul(col, 0.45))
+    # a pressboard guide card at the front, its index tab taller than the folders
+    gy = rows[-1] + 2
+    d.rectangle([x - 1, gy, x + 39, gy + 1], fill=hx("6a8478"))
+    d.line([(x - 1, gy), (x + 39, gy)], fill=hx("8aa496"))
+    d.rectangle([x + 28, gy - 3, x + 35, gy], fill=hx("7a9488"), outline=hx("3a4a40"))
+    d.point((x + 31, gy - 2), fill=hx("e8e0c8"))
+    d.point((x + 32, gy - 2), fill=hx("e8e0c8"))
 
 
 def _drawer(d, img, x, y, letter, opened):
     if opened:
-        # pulled out a hand's width: the dark well, folder tabs riffled, the front hanging lower
-        d.rectangle([x + 1, y - 2, x + 37, y + 8], fill=hx("0e0e0a"))
-        for i, fx in enumerate(range(x + 4, x + 35, 5)):
-            d.rectangle([fx, y - 1 + (i % 2), fx + 3, y + 6], fill=hx("b8aa82") if i % 3 else hx("d8cca8"))
-        d.rectangle([x - 2, y + 8, x + 40, y + 30], fill=hx("6a6a5a"), outline=hx("1a1a14"))
-        d.rectangle([x + 15, y + 12, x + 23, y + 18], fill=hx("e8e0c8"), outline=hx("2a2a20"))
-        text(img, (x + 19, y + 15), letter, hx("1a1a14"), size=8)
-        d.rectangle([x + 13, y + 22, x + 25, y + 24], fill=hx("b0aa90"))
+        # pulled out on its runners: the empty slot in the cabinet, steel side walls, the folders seen from above,
+        # and the front hanging lower and nearer
+        d.rectangle([x + 1, y, x + 37, y + 22], fill=hx("0e0e0a"), outline=hx("1a1a14"))
+        d.line([(x + 2, y + 1), (x + 36, y + 1)], fill=hx("26261e"))
+        d.polygon([(x + 1, y - 1), (x + 37, y - 1), (x + 40, y + 13), (x - 2, y + 13)], fill=hx("2a2a22"))
+        for side, sx0, sx1 in ((-1, x + 1, x - 2), (1, x + 37, x + 40)):
+            d.line([(sx0, y - 1), (sx1, y + 13)], fill=hx("8a8a76") if side < 0 else hx("4a4a3e"))
+            d.line([(sx0 - side, y - 1), (sx1 - side, y + 13)], fill=hx("6a6a5a"))
+        d.line([(x + 1, y - 1), (x + 37, y - 1)], fill=hx("5a5a4c"))
+        _folders(d, x, y)
+        fy = y + 14
+        d.rectangle([x - 2, fy, x + 40, fy + 22], fill=hx("6a6a5a"), outline=hx("1a1a14"))
+        d.line([(x - 1, fy + 1), (x + 39, fy + 1)], fill=hx("9a9a86"))
+        d.line([(x - 1, fy + 2), (x - 1, fy + 21)], fill=hx("80806e"))
+        d.line([(x + 39, fy + 2), (x + 39, fy + 21)], fill=hx("4a4a3e"))
+        d.line([(x - 1, fy + 21), (x + 39, fy + 21)], fill=hx("4a4a3e"))
+        # brass card holder with the letter, and the pull with its lit upper lip
+        d.rectangle([x + 14, fy + 3, x + 24, fy + 10], fill=hx("a08a40"), outline=hx("3a2a0c"))
+        d.rectangle([x + 15, fy + 4, x + 23, fy + 9], fill=hx("ece4cc"))
+        text(img, (x + 19, fy + 7), letter, hx("1a1a14"), size=8)
+        d.rectangle([x + 12, fy + 14, x + 26, fy + 17], fill=hx("4a4a3e"), outline=hx("1a1a14"))
+        d.line([(x + 13, fy + 14), (x + 25, fy + 14)], fill=hx("c8c4b0"))
+        d.line([(x + 13, fy + 15), (x + 25, fy + 15)], fill=hx("8a8676"))
         return
     d.rectangle([x + 1, y, x + 37, y + 22], fill=hx("5a5a4c"), outline=hx("22221a"))
     d.line([(x + 2, y + 1), (x + 36, y + 1)], fill=hx("7a7a68"))
@@ -42,52 +115,194 @@ def _drawer(d, img, x, y, letter, opened):
 
 def _loop_map(d, img, pin):
     x0, y0, x1, y1 = MAP_BOX
-    d.rectangle([x0 - 4, y0 - 4, x1 + 4, y1 + 4], fill=hx("3a2614"), outline=hx("140a04"))
-    d.rectangle([x0, y0, x1, y1], fill=hx("d4c8a2"))
-    for gx in range(x0 + 4, x1, 7):
-        d.line([(gx, y0), (gx, y1)], fill=hx("b8aa82"))
-    for gy in range(y0 + 3, y1, 6):
-        d.line([(x0, gy), (x1, gy)], fill=hx("b8aa82"))
-    # LaSalle Street runs heavier through the middle of the Loop
-    d.line([(LASALLE[0], y0), (LASALLE[0], y1)], fill=hx("8a7a58"))
-    # the lake to the east, the river across the top and down the west side
-    d.polygon([(x1 - 12, y0), (x1, y0), (x1, y1), (x1 - 8, y1)], fill=hx("6a88a0"))
-    d.line([(x0, y0 + 14), (x0 + 18, y0 + 16), (x1 - 12, y0 + 18)], fill=hx("587890"), width=3)
-    d.line([(x0 + 18, y0 + 16), (x0 + 16, y1)], fill=hx("587890"), width=3)
+    w, h = x1 - x0 + 1, y1 - y0 + 1
+    # the frame: dark oak, mitred at the corners, a lit inner bevel along the top and left, a gilt slip
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 5], fill=hx("3a2614"), outline=hx("140a04"))
+    d.line([(x0 - 4, y0 - 4), (x1 + 4, y0 - 4)], fill=hx("6a4a2a"))
+    d.line([(x0 - 4, y0 - 4), (x0 - 4, y1 + 4)], fill=hx("5a3c22"))
+    d.line([(x0 - 4, y1 + 4), (x1 + 4, y1 + 4)], fill=hx("1e1208"))
+    d.line([(x1 + 4, y0 - 4), (x1 + 4, y1 + 4)], fill=hx("24160a"))
+    for (ax, ay), (bx, by) in (((x0 - 4, y0 - 4), (x0 - 1, y0 - 1)), ((x1 + 4, y0 - 4), (x1 + 1, y0 - 1)),
+                               ((x0 - 4, y1 + 4), (x0 - 1, y1 + 1)), ((x1 + 4, y1 + 4), (x1 + 1, y1 + 1))):
+        d.line([(ax, ay), (bx, by)], fill=hx("1a0e06"))
+    d.rectangle([x0 - 1, y0 - 1, x1 + 1, y1 + 1], outline=hx("8a7438"))
+    d.line([(x0 - 1, y0 - 1), (x1 + 1, y0 - 1)], fill=hx("c8a858"))
+    # the sheet: aged paper, browner towards the frame, the lake washed blue-grey, the street map printed on it
+    rng = np.random.default_rng(1327)
+    ys, xs = np.mgrid[0:h, 0:w]
+    edge = np.minimum.reduce([xs, w - 1 - xs, ys, h - 1 - ys]).astype(np.float32)
+    age = np.clip(1 - edge / 9.0, 0, 1) ** 2 + rng.normal(0, 0.05, (h, w))
+    t = np.clip(age * 0.7, 0, 1)[..., None]
+    col = np.array(hx("d8cca4"), np.float32) * (1 - t) + np.array(hx("a8925e"), np.float32) * t
+    lake = Image.new("L", (w, h), 0)
+    sx0, sy0, sx1, sy1 = LOOP_SRC
+    shore = [(np.subtract(_on_loop_map(p), (x0, y0))) for p in chicago_map.SHORE if sy0 - 100 <= p[1] <= sy1 + 100]
+    ImageDraw.Draw(lake).polygon([tuple(p) for p in shore] + [(w, h), (w, 0)], fill=255)
+    lake = np.asarray(lake.filter(ImageFilter.GaussianBlur(0.8)), np.float32)[..., None] / 255.0
+    col = col * (1 - lake * 0.6) + np.array(hx("7e98a8"), np.float32) * lake * 0.6
+    col += rng.normal(0, 2.0, (h, w, 1))
+    ink = chicago_map.ink_in(LOOP_SRC, (w, h))[..., None] * (0.82 - t * 0.2) * (1 - lake * 0.45)
+    col = col * (1 - ink) + np.array(hx("2a2016"), np.float32) * ink
+    img.paste(Image.fromarray(col.clip(0, 255).astype(np.uint8)), (x0, y0))
+    # stories the desk has followed: a scatter of coloured map tacks
     rnd = random.Random(1327)
-    for _ in range(46):
-        px, py = rnd.randint(x0 + 22, x1 - 16), rnd.randint(y0 + 22, y1 - 4)
-        d.point((px, py), fill=hx(rnd.choice(("8a1a1a", "1a2a6a", "1a1a1a", "2a5a2a"))))
+    for _ in range(14):
+        while True:
+            px, py = rnd.randint(x0 + 6, x1 - 18), rnd.randint(y0 + 8, y1 - 6)
+            if abs(px - LASALLE[0]) > 8 or abs(py - LASALLE[1]) > 8:
+                break
+        c = hx(rnd.choice(("b82a2c", "2c4c9c", "2e7a44", "26262a")))
+        d.point((px + 1, py + 1), fill=hx("4a3a24"))
+        d.rectangle([px - 1, py - 1, px, py], fill=c)
+        d.point((px - 1, py - 1), fill=mix(c, hx("ffffff"), 0.55))
     if pin:
         # the mended clipping pinned up beside a fat red pin on LaSalle
         cx, cy = LASALLE
-        d.rectangle([cx + 2, cy - 3, cx + 18, cy + 9], fill=hx("ece4cc"), outline=hx("6a6050"))
-        d.line([(cx + 4, cy), (cx + 16, cy)], fill=hx("2a2a2a"))
-        for ly in (cy + 3, cy + 5, cy + 7):
+        d.rectangle([cx + 3, cy - 2, cx + 18, cy + 9], fill=hx("4a3a24"))
+        d.rectangle([cx + 2, cy - 3, cx + 17, cy + 8], fill=hx("ece4cc"), outline=hx("6a6050"))
+        d.rectangle([cx + 4, cy - 1, cx + 8, cy + 3], fill=hx("6a6458"))
+        d.line([(cx + 10, cy - 1), (cx + 15, cy - 1)], fill=hx("2a2a2a"))
+        d.line([(cx + 10, cy + 1), (cx + 15, cy + 1)], fill=hx("6a6252"))
+        d.line([(cx + 2, cy + 4), (cx + 17, cy + 4)], fill=hx("c8b878"))
+        for ly in (cy + 6, cy + 7):
             d.line([(cx + 4, ly), (cx + 15, ly)], fill=hx("8a8270"))
-        d.line([(cx + 2, cy + 3), (cx + 18, cy + 3)], fill=hx("c8b878"))
-        d.line([(cx, cy), (cx + 6, cy - 1)], fill=hx("2a2a2a"))
-        d.ellipse([cx - 3, cy - 3, cx + 2, cy + 2], fill=hx("d02020"), outline=hx("6a0a0a"))
-        d.point((cx - 2, cy - 2), fill=hx("ff8a7a"))
-    # brass plate under the frame
-    d.rectangle([254, 126, 304, 134], fill=hx("a08a40"), outline=hx("4a3a14"))
-    text(img, (279, 130), "THE LOOP", hx("2a2010"), size=8)
+        d.line([(cx + 1, cy + 1), (cx + 5, cy + 2)], fill=hx("4a3a24"))
+        d.line([(cx, cy), (cx + 4, cy)], fill=hx("b4b8bc"))
+        d.ellipse([cx - 4, cy - 4, cx + 1, cy + 1], fill=hx("d02020"), outline=hx("6a0a0a"))
+        d.point((cx - 3, cy - 3), fill=hx("ff8a7a"))
+        d.point((cx - 2, cy - 3), fill=hx("f4c0b0"))
+    # the glass: a long glint across the top corner and a duller one low down
+    light(img, "polygon", [(x0 + 66, y0), (x0 + 76, y0), (x0 + 40, y1), (x0 + 34, y1)], hx("f0f0e0"), 0.13, 1)
+    light(img, "polygon", [(x0 + 82, y0), (x0 + 85, y0), (x0 + 50, y1), (x0 + 48, y1)], hx("f0f0e0"), 0.08, 0)
+    _plaque(d, img)
+
+
+PLAQUE = (248, 128, 300, 138)
+
+
+def _plaque(d, img):
+    """A cast brass plate screwed to the wall: bevelled edge, an engraved border, the name cut in and lit below."""
+    x0, y0, x1, y1 = PLAQUE
+    d.rectangle([x0 + 1, y0 + 1, x1 + 1, y1 + 1], fill=hx("1a1408"))
+    d.rectangle([x0, y0, x1, y1], fill=hx("a88c3e"), outline=hx("3a2a0c"))
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=hx("ecd488"))
+    d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("d8bc6a"))
+    d.line([(x0 + 1, y1 - 1), (x1 - 1, y1 - 1)], fill=hx("6a5420"))
+    d.line([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1)], fill=hx("6a5420"))
+    # tarnish gathered in the corners, a polished streak where the cleaner's rag goes
+    for px_, py_ in ((x0 + 2, y1 - 2), (x1 - 2, y1 - 2), (x1 - 3, y1 - 2), (x0 + 2, y0 + 2)):
+        d.point((px_, py_), fill=hx("6a6a3a"))
+    d.line([(x0 + 14, y0 + 2), (x0 + 30, y0 + 2)], fill=hx("c8ac5c"))
+    # engraved border, with a slot-headed screw in each end
+    d.rectangle([x0 + 5, y0 + 2, x1 - 5, y1 - 2], outline=hx("6a5420"))
+    d.line([(x0 + 6, y1 - 1), (x1 - 5, y1 - 1)], fill=hx("c8ac5c"))
+    for sx in (x0 + 2, x1 - 3):
+        sy = (y0 + y1) // 2 - 1
+        d.rectangle([sx, sy, sx + 1, sy + 1], fill=hx("8a7a50"))
+        d.point((sx, sy), fill=hx("e8dca8"))
+        d.point((sx + 1, sy + 1), fill=hx("3a2a0c"))
+    cx, cy = (x0 + x1) // 2 + 1, (y0 + y1) // 2 + 1
+    text(img, (cx, cy + 1), "THE LOOP", hx("e4cc80"), size=8)
+    text(img, (cx, cy), "THE LOOP", hx("2a1e08"), size=8)
 
 
 SPIKE_X = 314
 DESK_Y = 156  # top of the layout desk: about belt height on Micah standing in front of it
 
 
-def _sheet(d, x0, y, col, edge="6a6050"):
-    """A sheet of copy stuck flat on the spike, a little askew, typed lines across it and the hole the spike made."""
-    d.polygon([(x0, y), (x0 + 21, y - 2), (x0 + 22, y + 4), (x0 + 1, y + 6)], fill=hx(col), outline=hx(edge))
-    for k in (2, 4):
-        d.line([(x0 + 3, y + k), (x0 + 8, y + k - 1)], fill=hx("8a8270"))
-        d.line([(x0 + 13, y + k - 1), (x0 + 19, y + k - 2)], fill=hx("8a8270"))
-    d.point((SPIKE_X, y + 1), fill=hx("2a2a24"))
+def _sheet(d, x0, y, col, rnd, pencil=False):
+    """A sheet of dead copy rammed down on the spike, seen a little from above: a skewed slab of paper with a lit
+    near edge, a curled corner, typed lines across it, sometimes a blue-pencil slash, and the hole the spike made."""
+    c = hx(col)
+    tilt = rnd.choice((-1, 0, 1))
+    pts = [(x0, y + 1 + tilt), (x0 + 24, y - tilt), (x0 + 25, y + 4 - tilt), (x0 + 1, y + 5 + tilt)]
+    d.polygon(pts, fill=c, outline=mul(c, 0.55))
+    d.line([(x0 + 1, y + 5 + tilt), (x0 + 25, y + 4 - tilt)], fill=mul(c, 1.12))
+    d.line([(x0 + 1, y + 6 + tilt), (x0 + 25, y + 5 - tilt)], fill=mul(c, 0.45))
+    for k in (2, 3):
+        for a, b in ((3, 9), (12, 21)):
+            if rnd.random() < 0.85:
+                d.line([(x0 + a, y + k + tilt), (x0 + b, y + k)], fill=mul(c, 0.66))
+    if pencil:
+        d.line([(x0 + 4, y + 4 + tilt), (x0 + 10, y + 1 + tilt)], fill=hx("3a5a9a"))
+    corner = rnd.choice((x0, x0 + 23))
+    d.point((corner + 1, y + tilt - (0 if corner == x0 else -1)), fill=mul(c, 1.2))
+    d.point((corner + 1, y + 1 + tilt), fill=mul(c, 0.7))
+    d.point((SPIKE_X, y + 2), fill=hx("1a1a18"))
 
 
-def _spike_stand(d, taken):
+def _crumple(d, rnd, cx, cy, r, col):
+    """A ball of crumpled copy: a lumpy outline, facets lit from the lamp above-left, creases and typed flecks."""
+    c = hx(col)
+    pts = []
+    for k in range(10):
+        a = k * 6.2832 / 10 + rnd.uniform(-0.2, 0.2)
+        rr = r * rnd.uniform(0.78, 1.08)
+        pts.append((cx + rr * math.cos(a), cy + rr * 0.86 * math.sin(a)))
+    d.polygon(pts, fill=mul(c, 0.82), outline=mul(c, 0.4))
+    # the lit upper-left facets and the shadowed underside
+    d.polygon([pts[5], pts[6], pts[7], (cx, cy)], fill=mul(c, 1.12))
+    d.polygon([pts[4], pts[5], (cx, cy)], fill=c)
+    d.polygon([pts[7], pts[8], (cx + 1, cy)], fill=mul(c, 0.95))
+    d.polygon([pts[1], pts[2], pts[3], (cx, cy + 1)], fill=mul(c, 0.62))
+    # creases run in from the edge to the knot of the fold
+    for k in (0, 3, 6, 8):
+        px_, py_ = pts[k]
+        d.line([(round(px_), round(py_)), (round((px_ + cx) / 2), round((py_ + cy) / 2))], fill=mul(c, 0.55))
+    for _ in range(2):
+        tx, ty = cx + rnd.randint(-r + 2, r - 3), cy + rnd.randint(-r // 2, r // 2)
+        d.line([(tx, ty), (tx + 2, ty)], fill=mul(c, 0.5))
+    d.point((round(pts[6][0]) + 1, round(pts[6][1]) + 1), fill=mul(c, 1.25))
+
+
+def _wastebasket(d, img):
+    """A woven wire basket under the stand, near full: crumpled copy heaped above the rim and showing through the
+    mesh, a torn sheet hanging over the front, and a ball that missed lying on the linoleum."""
+    rnd = random.Random(1341)
+    top, bot, lx0, lx1, bx0, bx1 = 166, FLOOR + 6, 302, 330, 306, 326
+    shadow(img, "ellipse", [300, bot - 3, 336, bot + 4], 0.55, 2)
+    d = ImageDraw.Draw(img)
+    d.ellipse([lx0, top - 3, lx1, top + 3], fill=hx("161612"))
+    # paper heaped in the mouth, the back ones darker under the stand's shadow
+    for cx, cy, r, col in ((309, 162, 5, "a8a08a"), (322, 161, 5, "b0a890"), (315, 160, 6, "d4ccb4"),
+                           (326, 164, 4, "c8c0a4"), (306, 165, 4, "d8d0b8")):
+        _crumple(d, rnd, cx, cy, r, col)
+    # the body: dark inside, paper crowding the mesh, then the wires woven across it
+    body = [(lx0, top), (lx1, top), (bx1, bot), (bx0, bot)]
+    inner = Image.new("RGB", img.size, hx("24241e"))
+    di = ImageDraw.Draw(inner)
+    for _ in range(9):
+        px_, py_ = rnd.randint(lx0, lx1), rnd.randint(top + 2, bot - 8)
+        di.ellipse([px_ - 4, py_ - 3, px_ + 4, py_ + 3], fill=hx(rnd.choice(("6a6656", "7e7866", "5a564a"))))
+    for k in range(-40, 40, 4):
+        di.line([(lx0 + k, top), (lx0 + k + 34, bot)], fill=hx("6e6e62"))
+        di.line([(lx1 - k, top), (lx1 - k - 34, bot)], fill=hx("4e4e46"))
+    for y in range(top + 6, bot, 7):
+        di.line([(0, y), (W, y)], fill=hx("5a5a50"))
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).polygon(body, fill=255)
+    img.paste(inner, (0, 0), m)
+    shadow(img, "polygon", [(lx1 - 9, top), (lx1, top), (bx1, bot), (bx1 - 7, bot)], 0.35, 1)
+    light(img, "polygon", [(lx0, top), (lx0 + 6, top), (bx0 + 5, bot), (bx0, bot)], hx("e0c890"), 0.12, 1)
+    d = ImageDraw.Draw(img)
+    d.line(body + [body[0]], fill=hx("1a1a14"))
+    # a rolled rim round the mouth and a band round the foot
+    d.arc([lx0, top - 3, lx1, top + 3], 0, 180, fill=hx("8a8a7e"), width=2)
+    d.arc([lx0, top - 3, lx1, top + 3], 200, 340, fill=hx("4a4a42"))
+    d.line([(lx0 + 2, top + 2), (lx0 + 8, top + 3)], fill=hx("c8c8b8"))
+    d.rectangle([bx0, bot - 3, bx1, bot - 1], fill=hx("44443c"), outline=hx("1a1a14"))
+    d.line([(bx0 + 1, bot - 3), (bx1 - 1, bot - 3)], fill=hx("6e6e62"))
+    # a torn sheet caught on the rim, hanging down the front
+    d.polygon([(312, top), (320, top + 1), (319, top + 9), (316, top + 8), (313, top + 10)], fill=hx("ccc4aa"),
+              outline=hx("6a6050"))
+    d.line([(314, top + 3), (318, top + 3)], fill=hx("7a7462"))
+    d.line([(314, top + 5), (317, top + 5)], fill=hx("7a7462"))
+    d.line([(312, top + 1), (320, top + 1)], fill=hx("e8e0c8"))
+    # the one that missed
+    _crumple(d, rnd, 343, FLOOR + 5, 4, "cec6ac")
+
+
+def _spike_stand(d, img, taken):
     sx = SPIKE_X
     # a small oak stand, lit along its front edge, the wastebasket underneath
     d.rectangle([292, 150, 340, 156], fill=hx("5a3c24"), outline=hx("1e1208"))
@@ -96,38 +311,43 @@ def _spike_stand(d, taken):
     for lx in (296, 332):
         d.rectangle([lx, 156, lx + 4, FLOOR + 4], fill=hx("3a2614"), outline=hx("1e1208"))
         d.line([(lx + 1, 157), (lx + 1, FLOOR + 3)], fill=hx("5a3c24"))
-    d.polygon([(304, 166), (328, 166), (325, FLOOR + 6), (307, FLOOR + 6)], fill=hx("4a4a42"), outline=hx("1a1a14"))
-    d.line([(304, 167), (328, 167)], fill=hx("6a6a60"))
-    for x in range(308, 326, 4):
-        d.line([(x, 169), (x, FLOOR + 4)], fill=hx("2e2e28"))
-    d.ellipse([306, 160, 316, 168], fill=hx("c8c0a8"), outline=hx("6a6050"))
-    d.ellipse([314, 162, 324, 169], fill=hx("b8b098"), outline=hx("5a5242"))
-    # the spike: a cast-iron foot, a steel collar, and a needle of polished steel lit on the lamp side
-    d.ellipse([302, 144, 326, 153], fill=hx("1a1a18"), outline=hx("0a0a08"))
-    d.ellipse([305, 144, 323, 149], fill=hx("3a3a36"))
-    d.arc([305, 144, 323, 149], 190, 290, fill=hx("7a7a72"))
-    d.rectangle([sx - 2, 140, sx + 3, 145], fill=hx("5a5a54"), outline=hx("1a1a18"))
-    d.line([(sx - 1, 141), (sx - 1, 144)], fill=hx("9a9a92"))
-    d.line([(sx, 140), (sx, 102)], fill=hx("d4d4cc"))
-    d.line([(sx + 1, 140), (sx + 1, 104)], fill=hx("5a5a54"))
-    d.point((sx, 101), fill=hx("a8a8a0"))
-    d.point((sx, 100), fill=hx("f4f4ec"))
-    # dead copy, rammed down to the foot
-    for y, x0, c in ((136, 303, "c0b89c"), (132, 304, "d0c8ae"), (128, 303, "c8c0a8")):
-        _sheet(d, x0, y, c)
+    _wastebasket(d, img)
+    d = ImageDraw.Draw(img)
+    # the spike: a domed cast-iron foot on a felt pad, a turned steel collar, and a long needle lit on the lamp side
+    d.ellipse([305, 148, 327, 153], fill=hx("2a4a2a"))
+    d.ellipse([306, 144, 326, 152], fill=hx("161614"), outline=hx("060604"))
+    d.ellipse([308, 143, 324, 149], fill=hx("34342e"))
+    d.ellipse([311, 142, 321, 146], fill=hx("484842"))
+    d.arc([308, 143, 324, 149], 185, 280, fill=hx("9a9a90"))
+    d.arc([311, 142, 321, 146], 190, 260, fill=hx("c0c0b6"))
+    d.point((310, 149), fill=hx("6a6a64"))
+    d.rectangle([sx - 2, 138, sx + 2, 142], fill=hx("6a6a64"), outline=hx("1a1a18"))
+    d.line([(sx - 1, 139), (sx - 1, 141)], fill=hx("c4c4bc"))
+    d.line([(sx - 3, 142), (sx + 3, 142)], fill=hx("2a2a28"))
+    d.line([(sx, 138), (sx, 108)], fill=hx("dcdcd4"))
+    d.line([(sx + 1, 138), (sx + 1, 110)], fill=hx("4e4e48"))
+    d.point((sx, 107), fill=hx("a8a8a0"))
+    d.point((sx, 106), fill=hx("fafaf2"))
+    # a day's dead copy rammed down to the foot: galleys, carbons, a yellow flimsy, blue-pencilled leads
+    rnd = random.Random(1323)
+    stack = ((136, "bab29a", False), (134, "d2caae", True), (132, "c6ccd0", False), (130, "e0d49c", False),
+             (128, "cec6aa", True), (126, "d8d0b8", False))
+    for y, c, pencil in stack:
+        _sheet(d, sx - 12 + rnd.randint(-2, 1), y, c, rnd, pencil)
     if taken:
         return
-    # the torn bottom half of the Harrington clipping on top: ragged edge up, the photo caption, the address line
-    x0, y = 304, 123
-    d.polygon([(x0, y), (x0 + 21, y - 2), (x0 + 22, y + 5), (x0 + 1, y + 7)], fill=hx("ece4cc"), outline=hx("8a8270"))
-    for i, tx in enumerate(range(x0 + 1, x0 + 21, 2)):
-        d.point((tx, round(y - 2 * (tx - x0) / 21) - 1 - (i % 2)), fill=hx("ece4cc"))
+    # the torn bottom half of the Harrington clipping on top: ragged edge up, the photo, the caption, the address
+    x0, y = sx - 11, 121
+    d.polygon([(x0, y), (x0 + 22, y - 2), (x0 + 23, y + 5), (x0 + 1, y + 7)], fill=hx("ece4cc"), outline=hx("8a8270"))
+    for i, tx in enumerate(range(x0 + 1, x0 + 22, 2)):
+        d.point((tx, round(y - 2 * (tx - x0) / 22) - 1 - (i % 2)), fill=hx("ece4cc"))
+    d.line([(x0 + 1, y + 7), (x0 + 23, y + 5)], fill=hx("4a4436"))
     d.rectangle([x0 + 3, y + 1, x0 + 8, y + 4], fill=hx("6a6458"))
     d.line([(x0 + 4, y + 2), (x0 + 7, y + 2)], fill=hx("9a9282"))
-    d.line([(x0 + 10, y + 1), (x0 + 19, y)], fill=hx("2a2a2a"))
-    d.line([(x0 + 10, y + 3), (x0 + 18, y + 2)], fill=hx("6a6252"))
-    d.line([(x0 + 3, y + 6), (x0 + 18, y + 4)], fill=hx("8a8270"))
-    d.point((sx, y + 2), fill=hx("2a2a24"))
+    d.line([(x0 + 10, y + 1), (x0 + 20, y)], fill=hx("2a2a2a"))
+    d.line([(x0 + 10, y + 3), (x0 + 19, y + 2)], fill=hx("6a6252"))
+    d.line([(x0 + 3, y + 6), (x0 + 19, y + 4)], fill=hx("8a8270"))
+    d.point((sx, y + 2), fill=hx("1a1a18"))
 
 
 def _layout_desk(d, paste):
@@ -375,7 +595,7 @@ def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
     # archive boxes and bound editions stacked on the cabinets
     _archive_stacks(d, img)
     _loop_map(d, img, pin)
-    _spike_stand(d, spike)
+    _spike_stand(d, img, spike)
     _layout_desk(d, paste)
     _ceiling_lamp(d)
     light(img, "polygon", [(234, 38), (266, 38), (420, H - 1), (80, H - 1)], hx("c8a868"), 0.22, 18)
@@ -393,13 +613,19 @@ def build_morgue():
     blend = base
     for img in v.values():
         blend = Image.blend(blend, img, 0.4)
-    pal = palette_of(blend, 124)
+    # the printed map would soak up most of a shared palette; give it its own share so the room keeps its colours
+    rest = blend.copy()
+    rest.paste(blend.getpixel((MAP_BOX[0] - 12, MAP_BOX[1] + 20)), MAP_BOX)
+    pal = palette_of(rest, 108) + palette_of(blend.crop(MAP_BOX), 28)
+    pal += [hx(c) for c in ("b82a2c", "2c4c9c", "2e7a44", "d02020", "ff8a7a", "6a0a0a",
+                                     "a88c3e", "ecd488", "d8bc6a", "6a5420", "c8ac5c", "3a2a0c")]
     px = pixelize(base, pal)
     save(px, "rooms", "newspaper_morgue.png")
-    overlay(v["drawer"], px, pal, (126, 140, 178, 182), "newspaper_morgue_drawer")
-    overlay(v["spike"], px, pal, (298, 112, 330, 136), "newspaper_morgue_spike")
+    overlay(v["drawer"], px, pal, (122, 136, 182, 184), "newspaper_morgue_drawer")
+    overlay(v["spike"], px, pal, (298, 112, 334, 136), "newspaper_morgue_spike")
     overlay(v["paste"], px, pal, (424, 124, 452, 160), "newspaper_morgue_paste")
-    overlay(v["pin"], px, pal, (254, 74, 284, 96), "newspaper_morgue_pin")
+    lx, ly = LASALLE
+    overlay(v["pin"], px, pal, (lx - 6, ly - 6, lx + 21, ly + 12), "newspaper_morgue_pin")
     return px
 
 
