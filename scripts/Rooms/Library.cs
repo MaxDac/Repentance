@@ -109,11 +109,22 @@ public partial class Library : Room
         await Game.ChangeRoom("chicago_map", "start");
     }
 
+    /// <summary>True while the micah_collar strips draw the librarian, so his actor must stay hidden.</summary>
+    private bool _collaring;
+
+    /// <summary>A flag set mid-grab re-shows actors by their ShowIfFlags; keep the librarian off while the strip draws him.</summary>
+    protected override void OnRefresh()
+    {
+        base.OnRefresh();
+        if (_collaring && FindActor("librarian") is { } librarian) librarian.Visible = false;
+    }
+
     /// <summary>Micah drags him in by the collar, holds him through the request, then lets him go.</summary>
     private async Task GrabCollar(Hotspot target)
     {
         var librarian = FindActor("librarian");
         Player.Teleport(target.Position + CollarSpot, Facing.Right);
+        _collaring = true;
         if (librarian != null) librarian.Visible = false;
         try
         {
@@ -125,6 +136,7 @@ public partial class Library : Room
         finally
         {
             Player.SetPose(null);
+            _collaring = false;
             if (librarian != null) librarian.Visible = true;
         }
         await Think("Roughing up a librarian in broad daylight. Mother would be so proud.");

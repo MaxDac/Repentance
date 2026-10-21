@@ -525,9 +525,10 @@ def desk_mask():
     return prop_mask(desk, desk_props)
 
 
-# The two leather wing armchairs are real props too: build() cuts each out into library_armchair_{left,right}.png,
-# drawn by Y-sorted Sprite2Ds at the floor line of their front feet; their floor shadows stay in the background.
-ARMCHAIRS = {"left": (96, 142), "right": (346, 146)}  # (x0, top) of each chair in paint coordinates
+# The leather wing armchair is a real prop too: build() cuts it out into library_armchair_left.png, drawn by a
+# Y-sorted Sprite2D at the floor line of its front feet; its floor shadow stays in the background. The walk area has a
+# hole under it, so Micah walks around it.
+ARMCHAIRS = {"left": (96, 142)}  # (x0, top) of each chair in paint coordinates
 ARMCHAIR_W, ARMCHAIR_H = 41, 61  # paint footprint from (x0, top): the feet stand on the floor at top + ARMCHAIR_H - 1
 LEATHER = dict(deep=hx("28120e"), dark=hx("3a1c16"), shade=hx("54281e"), mid=hx("70332a"), lit=hx("8a4a38"),
                high=hx("a65e44"), crease=hx("402019"))
