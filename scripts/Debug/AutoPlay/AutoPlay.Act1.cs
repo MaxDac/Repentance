@@ -321,6 +321,8 @@ public partial class AutoPlay
         Click(game.Room!.FindHotspot("door")!.Bounds.GetCenter(), MouseButton.Left);
         await Until(() => game.Room is Rooms.ConventCorridor && gs.HasFlag("nun_talked") && !game.Busy);
         Check(game.Room?.Name == "ConventCorridor" && gs.HasFlag("nun_talked"), "the nun questions Micah in the corridor");
+        Check(game.Room?.FindActor("nun") is { } sister && game.Player.Position.DistanceTo(sister.WalkTo) < 3,
+            "Micah walks up to the nun before she questions him");
         Check(game.Music.Current == Track.ConventPiano, "the piano plays in the convent corridor");
         int pianoStarts = game.Music.Count(Track.ConventPiano);
         await game.Perform(Verb.Walk, "entrance");
