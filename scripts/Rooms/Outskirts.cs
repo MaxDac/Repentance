@@ -13,6 +13,18 @@ public partial class Outskirts : Room
     /// <summary>Eleanor walks out of the city free in ending 8: the rain has stopped.</summary>
     protected override bool RainStopped => State.HasFlag("ending_8");
 
+    public override void _Ready()
+    {
+        base._Ready();
+        if (!State.HasFlag("eleanor_rides") || FindActor("eleanor") is not { } eleanor) return;
+        // out of the sheet and into what she packed in her duffle for running: white if she held out, else a black suit
+        string outfit = Endings.EleanorFreeOutfit(State.HasFlag);
+        eleanor.SetTexture(GD.Load<Texture2D>($"res://assets/art/sprites/{outfit}.png"), eleanor.Frames);
+        eleanor.LookText = outfit == "eleanor_white"
+            ? "Eleanor, in a white dress and her pearls, looking back at the city."
+            : "Eleanor, in a black suit, the skirt above the knee, looking back at the city.";
+    }
+
     public override async Task OnEnter(string entry)
     {
         if (entry == "ending")

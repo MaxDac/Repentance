@@ -103,6 +103,15 @@ public class EndingsTests
     }
 
     [Fact]
+    public void FreeEleanorWearsWhiteOnlyIfSheHeldOut()
+    {
+        Assert.Equal("eleanor_white", Endings.EleanorFreeOutfit(Flags(Abbess, Drugs)));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags(Abbess, "eleanor_convinced")));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags(Drugs)));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags()));
+    }
+
+    [Fact]
     public void EleanorFollowsWhenConvincedOrWornOut()
     {
         Assert.True(Endings.EleanorFollows(Flags("eleanor_convinced")));

@@ -1321,7 +1321,7 @@ THOUGHT: Her hand is cold and small in mine. For the first time in years I know 
 // ---------------------------------------------------------------- ACT 3: ENDINGS
 
 === ending_together ===
-THOUGHT: At the gate she fetched her black dress from the Club's car. She changed in mine while I drove, and left the sheet somewhere on the road behind us.
+THOUGHT: At the gate she fetched her duffle from the Club's car, packed long ago for running. She changed in mine while I drove: a black suit, the skirt above the knee. The sheet's somewhere on the road behind us.
 ELEANOR: So this is where Chicago ends.
 MICAH: It doesn't end. It just runs out of streetlights.
 ELEANOR: Where are we going?
@@ -1354,7 +1354,7 @@ THOUGHT: Free. That's the word for it. Free as a dog nobody wants.
 -> END
 
 === prison_eleanor ===
-THOUGHT: Six months of grey walls and grey soup. Today, a visitor. The guard says she wore her best hat.
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. The guard says she came in a black suit, like a widow.
 ELEANOR: Hello, Micah.
 MICAH: You came. The guard bet me a cigarette you wouldn't.
 ELEANOR: They said a lot of things about you. In court, mostly.
@@ -1415,7 +1415,7 @@ THOUGHT: She doesn't take my hand. She just comes, holding the sheet round her l
 
 // Ending 10: the edge of the city, the car, and Eleanor walking away from it.
 === ending_weary_road ===
-THOUGHT: At the gate she took her black dress off the back seat of the Club's car, and changed in mine on the way. The sheet's somewhere behind us on the road. She still wouldn't look at me.
+THOUGHT: At the gate she took her duffle, packed for running, off the back seat of the Club's car, and changed in mine on the way: a plain white dress, and her pearls. The sheet's somewhere behind us on the road. She still wouldn't look at me.
 MICAH: West, then. Until the money runs out, or the road does.
 ELEANOR: ...
 ELEANOR: I told you all of it in the car, Micah. The motel, after you'd gone. The old man's gin. You know everything now.
@@ -1435,7 +1435,7 @@ ELEANOR: Go home, Micah. Find yours.
 
 // Ending 11: Joliet; Eleanor visits once, and only to say goodbye.
 === prison_eleanor_peace ===
-THOUGHT: Six months of grey walls and grey soup. Today, a visitor. No hat, a plain grey coat, like a woman on her way to early Mass.
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. No hat, a plain white dress and her pearls, like a woman on her way to early Mass.
 ELEANOR: Hello, Micah.
 MICAH: Eleanor. I didn't think you'd come.
 ELEANOR: Neither did I. I nearly turned round at the gate.
@@ -1514,7 +1514,7 @@ THOUGHT: She said it was the first time anybody had touched her forehead without
 // Ending 8: Eleanor alone at the edge of the city, leaving it.
 === ending_eleanor_alone ===
 THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
-THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
+THOUGHT: At the gate stood the Club's car, the duffle she'd packed for running still on the back seat. In the dark she put on a white dress and her pearls, and left the sheet and the cook's coat in the ditch.
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
 THOUGHT: The old man's Thursday book was in a brown envelope under her arm, addressed to the city desk of the Tribune. The first mailbox past the city limits would do.
 ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.

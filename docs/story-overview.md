@@ -241,13 +241,17 @@ How each decision is made:
   (`eleanor_burned`).
 - **Shoot him**: if Eleanor held out, she is too worn out to argue: "Let's get out of here, quick." (`eleanor_weary`).
   No persuasion: she follows him to the kitchen in silence, and the escape decides between endings 10 and 11.
-  On the road to ending 10 she has changed back into the black dress from the Club's car at the gate.
+  On the road to ending 10 she has changed into the white dress and pearls from the duffle she'd packed for running,
+  left on the back seat of the Club's car at the gate.
   Otherwise the persuasion: four turns, each with a possessive, a rational, a positive and a clumsy line worth 4, 2,
   1 and 0 points. Having given in at least once in the interludes, Eleanor answers the possessive, old-man voice best;
   10 points or more after four turns convince her (`eleanor_convinced`). One clumsy line can be overcome, two can't
   ([Eleanor's persuasion](eleanor-persuasion.md)). Turning himself in is offered on the first turn only (`repented`),
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
   on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
+- **Eleanor's escape outfits**: once out of the sheet she wears what she packed in her duffle. Held out
+  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11): a white dress with her pearls. Gave in (endings 2, 4): a black
+  skirt suit cut above the knee, no pearls. In prison (ending 9) she wears the inmate grey.
 - **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
   give Micah something to bargain with and keep him out of prison.
 

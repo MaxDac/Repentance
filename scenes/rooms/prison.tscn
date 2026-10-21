@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Prison.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/prison.png" id="2_bg"]
@@ -6,7 +6,8 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="4_FlagSprite"]
 [ext_resource type="Script" path="res://scripts/Core/Voice.cs" id="6_Voice"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/micah_inmate_seated.png" id="10_micah_inmate_seated"]
-[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_seated.png" id="11_eleanor_seated"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_suit_seated.png" id="11_eleanor_suit_seated"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_white_seated.png" id="16_eleanor_white_seated"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/caleb_seated.png" id="12_caleb_seated"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/prison_table.png" id="13_prison_table"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/rose_seated.png" id="14_rose_seated"]
@@ -78,11 +79,19 @@ ShowIfFlags = "ending_9"
 
 [node name="Eleanor" type="Sprite2D" parent="."]
 position = Vector2(284, 222)
-texture = ExtResource("11_eleanor_seated")
+texture = ExtResource("11_eleanor_suit_seated")
 centered = false
 offset = Vector2(-32, -96)
 script = ExtResource("4_FlagSprite")
-ShowIfFlags = "eleanor_visits"
+ShowIfFlags = "ending_4"
+
+[node name="EleanorWhite" type="Sprite2D" parent="."]
+position = Vector2(284, 222)
+texture = ExtResource("16_eleanor_white_seated")
+centered = false
+offset = Vector2(-32, -96)
+script = ExtResource("4_FlagSprite")
+ShowIfFlags = "ending_11"
 
 [node name="Caleb" type="Sprite2D" parent="."]
 position = Vector2(284, 222)

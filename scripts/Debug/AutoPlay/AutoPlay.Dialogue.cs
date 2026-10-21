@@ -158,7 +158,7 @@ public partial class AutoPlay
                     "responsibility and secret lines accompany only the death report");
                 Check(!lines.Contains("The sky over the Gold Coast is still orange.", StringComparison.Ordinal),
                     "next-morning dialogue does not retain the same-night sky");
-                Check(lines.Contains("At the gate she fetched her black dress from the Club's car.", StringComparison.Ordinal) == together,
+                Check(lines.Contains("At the gate she fetched her duffle from the Club's car", StringComparison.Ordinal) == together,
                     $"the sheet-to-dress line plays only when Eleanor rides along: together={together}");
             }
             // Agatha's gunpoint confession quotes only what the played night scene had her say.
