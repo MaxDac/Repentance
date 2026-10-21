@@ -34,7 +34,7 @@ interlude bench, checked by `WalkTest.HoleTests`).
 | `RoomName` | "" | Title shown in saves |
 | `PlayerCharacter` | `micah` | Player sheet (`daniel` in the attic prologue) |
 | `ShowPlayer` | true | False for screens like `chicago_map` |
-| `Floor` | `Wood` | Footstep sound: `Wood`, `Stone`, `Carpet` |
+| `Floor` | `Wood` | Footstep sound: `Wood`, `Stone` (outdoor, rough flags), `Carpet`, `Marble` (indoor hall, echoes) |
 
 ## Room hooks
 

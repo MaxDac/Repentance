@@ -9,10 +9,15 @@ public enum Sound
     StepWood, StepStone, StepCarpet,
     Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, DoorOpen, DoorClose, Bell,
     Rain, Thunder, TinOpen, SafeOpen, SafeClose,
+    // new sounds go last: each sound's value seeds its noise, so inserting one would change the others
+    StepMarble,
 }
 
-/// <summary>What the floor of a room is made of; picks the footstep sound.</summary>
-public enum FloorSurface { Wood, Stone, Carpet }
+/// <summary>
+/// What the floor of a room is made of; picks the footstep sound. Scenes store the number, so new floors go last.
+/// Stone is outdoor cobbles and rough flags; Marble is a polished indoor hall floor.
+/// </summary>
+public enum FloorSurface { Wood, Stone, Carpet, Marble }
 
 /// <summary>A sound to play <see cref="Delay"/> seconds after the line that asked for it.</summary>
 public readonly record struct SoundCue(Sound Sound, double Delay);
@@ -33,13 +38,14 @@ public static partial class SoundSynth
     {
         FloorSurface.Stone => Sound.StepStone,
         FloorSurface.Carpet => Sound.StepCarpet,
+        FloorSurface.Marble => Sound.StepMarble,
         _ => Sound.StepWood,
     };
 
     /// <summary>Playback level of each sound relative to the Effects bus, in dB.</summary>
     public static float BaseVolumeDb(Sound sound) => sound switch
     {
-        Sound.StepWood or Sound.StepStone => -13f,
+        Sound.StepWood or Sound.StepStone or Sound.StepMarble => -13f,
         Sound.StepCarpet => -11f,
         Sound.Rustle or Sound.Click => -6f,
         Sound.DoorOpen or Sound.DoorClose => -8f,
@@ -61,6 +67,7 @@ public static partial class SoundSynth
             Sound.StepWood => Step(rng, Boards),
             Sound.StepStone => Step(rng, Cobbles),
             Sound.StepCarpet => Step(rng, Rug),
+            Sound.StepMarble => Step(rng, Marble),
             Sound.Gunshot => Gunshot(rng),
             Sound.Knock => Knock(rng),
             Sound.Clang => Clang(rng),

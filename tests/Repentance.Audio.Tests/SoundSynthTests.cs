@@ -52,7 +52,7 @@ public class SoundSynthTests
         double Brightness(float[] s) =>
             Enumerable.Range(1, s.Length - 1).Sum(i => Math.Pow(s[i] - s[i - 1], 2)) / s.Sum(v => (double)v * v);
         int ms(double m) => (int)(m * SoundSynth.SampleRate / 1000);
-        foreach (var step in new[] { Sound.StepWood, Sound.StepStone, Sound.StepCarpet })
+        foreach (var step in new[] { Sound.StepWood, Sound.StepStone, Sound.StepCarpet, Sound.StepMarble })
             for (int v = 0; v < SoundSynth.StepVariants; v++)
             {
                 var s = SoundSynth.Render(step, v);
@@ -62,8 +62,54 @@ public class SoundSynthTests
                 Assert.True(sole > 0.15 && sole > gapLevel * 1.5, $"{step}/{v}: the sole lands after the heel ({sole} vs {gapLevel})");
             }
         double wood = Brightness(SoundSynth.Render(Sound.StepWood)), stone = Brightness(SoundSynth.Render(Sound.StepStone)),
-            carpet = Brightness(SoundSynth.Render(Sound.StepCarpet));
+            carpet = Brightness(SoundSynth.Render(Sound.StepCarpet)), marble = Brightness(SoundSynth.Render(Sound.StepMarble));
         Assert.True(stone > wood && wood > carpet * 2, $"brightness stone {stone}, wood {wood}, carpet {carpet}");
+        Assert.True(stone > marble && marble > carpet, $"brightness stone {stone}, marble {marble}, carpet {carpet}");
+    }
+
+    [Fact]
+    public void HeelsKnockWithoutAMetallicRing()
+    {
+        // a pitched ring shows as a narrow spike above the spectrum around it; a knock spreads across a wide band
+        static double Peakiness(float[] s)
+        {
+            int n = 441;
+            var mags = new List<double>();
+            for (double hz = 800; hz <= 5200; hz += 10)
+            {
+                double re = 0, im = 0;
+                for (int i = 0; i < n; i++)
+                {
+                    double w = 0.5 - 0.5 * Math.Cos(2 * Math.PI * i / (n - 1)), a = 2 * Math.PI * hz * i / SoundSynth.SampleRate;
+                    re += s[i] * w * Math.Cos(a);
+                    im -= s[i] * w * Math.Sin(a);
+                }
+                mags.Add(Math.Sqrt(re * re + im * im));
+            }
+            // 1000-5000 Hz, each against the mean of its +-200 Hz neighbourhood
+            return Enumerable.Range(20, mags.Count - 40).Max(k => mags[k] / mags.Skip(k - 20).Take(41).Average());
+        }
+        foreach (var step in new[] { Sound.StepWood, Sound.StepStone, Sound.StepCarpet, Sound.StepMarble })
+        {
+            // the old sine-partial heel scored about 3.6; a noise knock about 2.2-2.4
+            double p = Enumerable.Range(0, SoundSynth.StepVariants).Average(v => Peakiness(SoundSynth.Render(step, v)));
+            Assert.True(p < 3.0, $"{step}: the heel rings like metal (spectral spike {p:F2} x its neighbourhood)");
+        }
+    }
+
+    [Fact]
+    public void MarbleHallsEchoTheStep()
+    {
+        static double Rms(float[] s, double from, double to) =>
+            Math.Sqrt(s[(int)(from * SoundSynth.SampleRate)..(int)(to * SoundSynth.SampleRate)].Average(v => (double)v * v));
+        for (int v = 0; v < SoundSynth.StepVariants; v++)
+        {
+            float[] marble = SoundSynth.Render(Sound.StepMarble, v), stone = SoundSynth.Render(Sound.StepStone, v);
+            Assert.True(marble.Length > stone.Length, "the hall rings on after the step");
+            double tail = Rms(marble, 0.2, 0.35), body = Rms(marble, 0, 0.15);
+            Assert.True(tail > body * 0.04, $"marble/{v}: the reflections are audible ({tail} vs step {body})");
+            Assert.True(tail < body * 0.5, $"marble/{v}: the echo stays below the step ({tail} vs step {body})");
+        }
     }
 
     [Fact]
@@ -147,6 +193,7 @@ public class SoundSynthTests
         Assert.True(SoundSynth.PercentToDb(0) <= -60f);
         Assert.Equal(Sound.StepStone, SoundSynth.StepFor(FloorSurface.Stone));
         Assert.Equal(Sound.StepCarpet, SoundSynth.StepFor(FloorSurface.Carpet));
+        Assert.Equal(Sound.StepMarble, SoundSynth.StepFor(FloorSurface.Marble));
         Assert.Equal(Sound.StepWood, SoundSynth.StepFor(FloorSurface.Wood));
     }
 }

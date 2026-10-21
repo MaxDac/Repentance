@@ -31,11 +31,15 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
 `Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`, `SafeOpen`,
-`SafeClose`.
+`SafeClose`, `StepMarble` (new sounds go last: each sound's number seeds its noise).
 
-- **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`). Every step is a 1920s
-  leather dress shoe: the hard heel's sharp click, the floor's answer (boards ring hollow, cobbles stay dry and
-  bright), then the leather sole patting down; carpet muffles it but keeps the heel distinct.
+- **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`, `Marble`; scenes store
+  the number, so new floors go last). Every step is a 1920s leather dress shoe: the hard heel's sharp click, the
+  floor's answer (boards ring hollow, cobbles stay dry and bright), then the leather sole patting down; carpet
+  muffles it but keeps the heel distinct. The heel is wide-band noise, never sine partials, which ring like metal
+  (`SoundSynthTests` checks the heel spectrum has no narrow spike). `Marble` is a polished indoor hall floor (the
+  Aurelian lobby, the church, the club vestibule): a firm step plus a few duller reflections off the walls over
+  the next 0.3 s; `Stone` is outdoor cobbles and rough flags.
 - **Room 507's safe**: `SafeOpen` (dial, tumblers, bolts, hinge) when Micah solves the safe puzzle; `SafeClose`
   (door, bolts, dial spun) when Eleanor locks it in the First Interlude. Not tied to cue words.
 - **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
