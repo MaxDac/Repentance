@@ -7,6 +7,9 @@ $LogDir = Join-Path $Root 'logs'
 
 # The same rule as CI: Game.Run catches script exceptions with GD.PushError, so a run can print its marker after one.
 $ErrorPattern = '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
+# Godot 4.7 bug, not ours: on Linux the Android export plugin reads an editor setting after a headless --import has
+# freed EditorSettings. Ignored in the import log only (docs/ci-and-release.md#android).
+$ImportNoise = 'EditorSettings not instantiated yet when getting setting "export/android/shutdown_adb_on_exit"'
 
 function Test-Godot([string]$Godot) {
     $probe = Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())
@@ -96,7 +99,8 @@ function Build-And-Import([string]$Godot) {
             }
         }
         finally { $ErrorActionPreference = $eap }
-        $errors = Get-Content $log | Select-String -CaseSensitive -Pattern $ErrorPattern
+        $errors = Get-Content $log | Select-String -CaseSensitive -Pattern $ErrorPattern |
+            Where-Object { -not $_.Line.Contains($ImportNoise) }
         if ($errors) { throw "Godot import logged errors; see $log. Launch cancelled.`n$($errors -join "`n")" }
     }
     finally { Pop-Location }

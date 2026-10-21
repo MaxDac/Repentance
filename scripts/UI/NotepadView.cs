@@ -8,7 +8,7 @@ namespace Repentance;
 
 /// <summary>
 /// Full-screen reader for Micah's notepad: one note per page, newest page first, turned with the arrow buttons,
-/// the arrow keys or the mouse wheel. N, Escape or the close button put it away.
+/// the arrow keys, the mouse wheel or a sideways drag (a swipe on a touch screen). N, Escape or the close button put it away.
 /// </summary>
 public partial class NotepadView : Control
 {
@@ -25,6 +25,8 @@ public partial class NotepadView : Control
     private TextureRect _sketch = null!;
     private Button _prev = null!, _next = null!, _close = null!;
     private TaskCompletionSource? _closed;
+    private SwipeGesture? _swipe;
+    private const float SwipeStep = 40;
 
     public bool IsOpen => Visible;
     public int Page { get; private set; }
@@ -45,9 +47,26 @@ public partial class NotepadView : Control
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         GuiInput += e =>
         {
-            if (e is not InputEventMouseButton { Pressed: true } mb) return;
-            if (mb.ButtonIndex == MouseButton.WheelUp) Turn(-1);
-            else if (mb.ButtonIndex == MouseButton.WheelDown) Turn(1);
+            switch (e)
+            {
+                case InputEventMouseButton { ButtonIndex: MouseButton.Left } left:
+                    _swipe = left.Pressed ? new SwipeGesture(left.Position.X, left.Position.Y, SwipeStep) : null;
+                    break;
+                case InputEventMouseMotion motion when _swipe != null:
+                    // drag the page aside like paper: leftward brings the next page
+                    if (_swipe.Next(motion.Position.X, motion.Position.Y) is { X: not 0 } step)
+                    {
+                        Turn(-step.X);
+                        _swipe = null;
+                    }
+                    break;
+                case InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.WheelUp }:
+                    Turn(-1);
+                    break;
+                case InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.WheelDown }:
+                    Turn(1);
+                    break;
+            }
             AcceptEvent();
         };
 

@@ -129,6 +129,7 @@ public partial class Hud : CanvasLayer
 
         // children draw in the order they are added: keep this sequence when adding new layers
         BuildSatchel();
+        BuildTouchButtons();
         BuildInventory(root);
         BuildHoverLayer(root);
         BuildChoices(root);
@@ -209,6 +210,7 @@ public partial class Hud : CanvasLayer
         _cursor.Position = MousePos.Floor() - (_cursor.Texture.GetSize() / 2).Floor();
         _cursorItem.Position = MousePos.Floor() + new Vector2(4, 4);
         _hoverLayer.Visible = _interface.Visible;
+        UpdateTouchButtons();
     }
 
     /// <summary>Label shown just above the cursor ("Trunk", "Use crowbar on trunk").</summary>

@@ -165,14 +165,16 @@ public partial class GameMenu : Control
                 _status.Text = settings.SetNudity(!settings.NudityEnabled) ? "" : "Couldn't save settings.";
                 SettingsPage();
             }),
-            ($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
+        };
+        // a phone is always full screen
+        if (!OS.HasFeature("mobile"))
+            rows.Add(($"Full screen: {(settings.Fullscreen ? "On" : "Off")}", true, () =>
             {
                 _status.Text = settings.SetFullscreen(!settings.Fullscreen) ? "" : "Couldn't save settings.";
                 SettingsPage();
-            }),
-            ($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)),
-            ($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)),
-        };
+            }));
+        rows.Add(($"{EffectsLabel}: {settings.EffectsVolume}%", true, () => StepEffects(up: true)));
+        rows.Add(($"{MusicLabel}: {settings.MusicVolume}%", true, () => StepMusic(up: true)));
         AddRestartSound(rows);
         rows.Add(("Back", true, () => { _status.Text = ""; back(); }));
         Page("Settings", -1, back, rows.ToArray());

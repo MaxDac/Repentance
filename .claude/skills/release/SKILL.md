@@ -1,6 +1,6 @@
 ---
 name: release
-description: Launch and monitor the Repentance Release workflow that exports Linux and Windows builds with Godot and publishes a GitHub Release. Use when asked to release, publish, cut a version, or ship a build.
+description: Launch and monitor the Repentance Release workflow that exports Linux, Windows and Android builds with Godot and publishes a GitHub Release. Use when asked to release, publish, cut a version, or ship a build.
 ---
 
 # Releasing Repentance
@@ -41,5 +41,5 @@ build or publish releases by hand.
    gh release view v0.1.0 --json url,isPrerelease,assets --jq '{url, isPrerelease, assets: [.assets[].name]}'
    ```
 6. On failure, show the failing step: `gh run view <id> --log-failed`. Common causes: tag already exists, unit test
-   failure, or the export check `data_Repentance_*` missing (C# assemblies not exported; `Repentance.sln` must exist).
+   failure, or the export check `data_Repentance_*` missing (C# assemblies not exported; `Repentance.sln` must exist). Android job: `RELEASE_KEYSTORE_*` / `RELEASE_KEY_ALIAS` secrets missing, or no `Repentance.dll` in the APK.
    Do not delete tags or releases unless the user asks.

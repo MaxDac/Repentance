@@ -211,6 +211,14 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertIn("exit code 3", result.stderr)
         self.assert_no_game()
 
+    def test_android_plugin_shutdown_noise_does_not_block_launch(self):
+        self.env["IMPORT_ERROR"] = (
+            'ERROR: EditorSettings not instantiated yet when getting setting "export/android/shutdown_adb_on_exit".'
+        )
+        result = self.run_launcher("film.sh", "--no-clean")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Film finished.", result.stdout)
+
     def test_import_warnings_do_not_block_launch(self):
         self.env["IMPORT_ERROR"] = "WARNING: harmless warning"
         result = self.run_launcher("film.sh", "--no-clean")

@@ -100,3 +100,16 @@ All three go through `PuzzleScreen.Step`, so pause blocks them like the pad butt
 
 New puzzle: rule in `PuzzleRules` (+ unit test), a screen class in `PuzzleScreens.cs`, a `PuzzleKind` value, art in
 `tools/art/puzzles.py`, and a call from the room or `Story.StoryPuzzles`.
+
+## Touch
+
+`emulate_mouse_from_touch` is off; `TouchInput` (`scripts/Core/`, a Game child that runs while paused) turns the first
+finger into the mouse and key events the rest of the UI already handles, so no control needs touch code of its own.
+`TouchPointer` (`src/Repentance.Rules/`, Godot-free, unit-tested) decides: a tap is a left click, holding still for
+`HoldSeconds` (0.45s) within `Slop` (6px) is a right press that the finger then drags and releases, and moving first is a
+left drag (puzzle swipes, the notepad's page swipe). Events are injected with `Viewport.PushInput`. The Android back
+button is Esc (`quit_on_go_back=false`).
+
+`TouchInput.UsingTouch` turns on with any touch and off on real mouse motion. While on, the Hud (`Hud.Touch.cs`)
+hides the crosshair and shows **MENU** (Esc) and **NOTES** (N, once the notepad is carried) bottom left; AutoPlay's
+`TouchTest` drives them. On `mobile` the window-mode controller leaves the window alone and Settings drops *Full screen*.

@@ -79,6 +79,7 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "filing");
         Check(!gs.HasFlag("cabinet_open"), "the emptied cabinet drawer stays shut");
         await NotepadTest(game);
+        await TouchTest(game);
         await MouseTest(game);
         await game.Perform(Verb.Walk, "door");
         Check(game.Room?.Name == "Lobby", "entered the lobby");

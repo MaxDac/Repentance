@@ -2,6 +2,8 @@
   <!-- Godot-free story rules and data: items, notes, recipes, puzzles, endings, save data, Ink scan. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <!-- Godot 4.7's prebuilt Android template only runs net9.0 (docs/ci-and-release.md#android). -->
+    <TargetFramework Condition="'$(GodotTargetPlatform)' == 'android'">net9.0</TargetFramework>
     <RootNamespace>Repentance</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

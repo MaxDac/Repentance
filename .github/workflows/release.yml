@@ -137,8 +137,50 @@ jobs:
           path: packages/*
           if-no-files-found: error
 
+  # Signed APK (arm64) with the release keystore from the RELEASE_KEYSTORE_* / RELEASE_KEY_* secrets.
+  android:
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          export-templates: 'true'
+      - name: Android SDK
+        run: tools/package/android-sdk.sh
+
+      - name: Build C# and import assets
+        run: |
+          set -euo pipefail
+          dotnet build Repentance.csproj
+          "$GODOT" --headless --path . --import
+
+      - name: Export Android (release-signed)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.RELEASE_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/release.keystore"
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
+          mkdir -p packages
+          tools/package/android-export.sh release \
+            "packages/Repentance-${{ needs.version.outputs.tag }}-android-arm64.apk" "${{ needs.version.outputs.version }}"
+          rm -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: packages/*.apk
+          if-no-files-found: error
+
   release:
-    needs: [version, export]
+    needs: [version, export, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -176,6 +218,8 @@ jobs:
           \`\`\`
 
           The Windows installer is not code-signed, so SmartScreen may warn: choose "More info", then "Run anyway".
+
+          Android (arm64): open the \`.apk\` on the phone and allow installing from that app when asked.
           EOF
           )"
           gh release create "$TAG" dist/* \

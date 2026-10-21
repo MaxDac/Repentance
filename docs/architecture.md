@@ -33,7 +33,7 @@ flowchart TD
 | Layer | Folder | Godot? | Role |
 |---|---|---|---|
 | Framework | `scripts/Core/` | yes | `Game`, `Room`, `Hotspot`, `Actor`, `Player`, state, dialogue, saves, audio playback |
-| Rules and data | `src/Repentance.Rules/` (`Items`, `Verbs`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `SwipeGesture`, `Endings`, `SaveData`, `InkScan`, `RainWeather`, `RainPanes`) | **no** | Pure C# class library, unit-tested |
+| Rules and data | `src/Repentance.Rules/` (`Items`, `Verbs`, `Notes`, `MicahKit`, `Recipes`, `PuzzleRules`, `SwipeGesture`, `TouchPointer`, `Endings`, `SaveData`, `InkScan`, `RainWeather`, `RainPanes`) | **no** | Pure C# class library, unit-tested |
 | Synthesis | `src/Repentance.Audio/` (`SoundSynth`, `MusicSynth`, `Recordings`) | **no** | Pure C# class library, shared with `tools/music` and unit-tested |
 | Story glue | `scripts/Story/` | yes | Item verbs, combinations and puzzles valid in any room; interludes |
 | Rooms | `scripts/Rooms/` + `scenes/rooms/` | yes | One script and one scene per location (38 rooms) |

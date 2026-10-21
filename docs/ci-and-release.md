@@ -40,6 +40,7 @@ Runs on every pull request (a newer push cancels the older run) and every push t
 | `art-tests` | `tools/run/test.sh art --no-clean` (Python 3.14, Pillow, NumPy) |
 | `godot-tests (<suite>)` | `autoplay`, `settings`, `pause`, `walk`, `playthrough` under xvfb; uploads logs/screenshots on failure |
 | `export (linux / windows)` | Exports both presets as the release does; checks the .NET data folder; builds the AppImage and the Windows installer (`tools/package/`); the Linux build runs `--walk-test` from the AppImage; checks the icon frames in the `.exe`; validates, installs and uninstalls the desktop entry |
+| `android-export` | Exports the `Android` preset to an APK signed with a throwaway debug key (`tools/package/android-*.sh`); checks the C# assembly is inside and the signature verifies; uploads `android-apk` (7 days) to sideload for testing |
 | `windows-installer` | On Windows: silently installs the installer, checks files, Start Menu shortcut and uninstall entry, then uninstalls and checks nothing is left |
 | `ci-ok` | Green only if every job above succeeded |
 
@@ -69,6 +70,7 @@ exports both presets, and publishes a GitHub Release with:
 | `Repentance-vX.Y.Z-windows-x86_64-setup.exe` | Per-user installer (no admin): `%LOCALAPPDATA%\Programs\Repentance`, Start Menu and desktop shortcuts, uninstaller in Apps & features. Unsigned, so SmartScreen warns. |
 | `Repentance-vX.Y.Z-linux-x86_64.AppImage` | Single-file Linux build with the desktop entry and icons inside |
 | `Repentance-vX.Y.Z-windows-x86_64.zip`, `Repentance-vX.Y.Z-linux-x86_64.zip` | Portable builds |
+| `Repentance-vX.Y.Z-android-arm64.apk` | Release-signed Android APK (arm64, Android 7+); sideloaded, not on the Play Store |
 
 Packaging scripts (also run by CI's `export` job): `tools/package/windows-installer.sh <export dir> <X.Y.Z> <out>`
 (NSIS script `dist/windows/Repentance.nsi`; needs `makensis`) and `tools/package/appimage.sh <export dir> <out>`
@@ -93,6 +95,38 @@ Exporting needs `Repentance.sln`: without it Godot exits 0 but leaves out the C#
 New-Item -ItemType Directory -Force build\windows | Out-Null
 godot_console --path . --headless --export-release "Windows Desktop" build\windows\Repentance.exe
 ```
+
+### Android
+
+The `Android` preset (`build/android/Repentance.apk`) builds an arm64-v8a APK from Godot's prebuilt template (no
+Gradle, so no AAB / Play Store build). C# on Android is experimental in Godot 4.7 but works for this game. Its prebuilt template only runs `net9.0`, so the
+three game projects switch to `net9.0` when Godot builds them for Android (`GodotTargetPlatform == android`): code
+must not use .NET 10-only APIs, and the .NET 10 SDK builds it without a separate .NET 9 install. On Linux a headless
+`--import` logs `EditorSettings not instantiated yet ... shutdown_adb_on_exit` as Godot quits (an engine bug in the
+Android plugin); the launchers ignore that one line in the import log. The package
+is `com.maxdac.repentance`; the version name is the release version and the version code is
+`major*10000 + minor*100 + patch`, both patched in at export by `tools/package/android-export.sh`.
+
+Exporting needs JDK 17 and the Android SDK packages `platform-tools`, `build-tools;35.0.1` and `platforms;android-35`,
+set in Godot's *Editor Settings > Export > Android* (`tools/package/android-sdk.sh` does both on a Linux runner). Signing
+comes from environment variables, so `export_presets.cfg` holds no keys:
+
+| Variable | Release workflow source |
+|---|---|
+| `GODOT_ANDROID_KEYSTORE_RELEASE_PATH` | secret `RELEASE_KEYSTORE_BASE64`, decoded to a temporary file |
+| `GODOT_ANDROID_KEYSTORE_RELEASE_USER` | secret `RELEASE_KEY_ALIAS` |
+| `GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD` | secret `RELEASE_KEYSTORE_PASSWORD` (Godot needs the key password to match; `RELEASE_KEY_PASSWORD` is the same) |
+
+Lose the keystore and installed copies can no longer be updated, only uninstalled and reinstalled: keep a backup
+outside the repository. CI uses `GODOT_ANDROID_KEYSTORE_DEBUG_*` with a key it generates. Local debug build and install:
+
+```bash
+tools/package/android-sdk.sh     # Linux; on Windows set the two editor settings by hand
+tools/package/android-export.sh debug build/android/Repentance.apk
+adb install -r build/android/Repentance.apk
+```
+
+Touch controls (`TouchInput`, `TouchPointer`, `Hud.Touch`) are described in [UI](ui.md#touch).
 
 ### The game icon
 
