@@ -195,16 +195,43 @@ public partial class AutoPlay
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
         var prefer = _prefer;
         _prefer = new[] { "(Seduce her." };
-        bool combed = false, sat = false, rose = false;
-        var night = game.Perform(Verb.Hand, "bed");
+        _ = game.Perform(Verb.Hand, "bed");
+        await Until(() => game.Hud.SpeechVisible || game.Hud.ThoughtVisible, 30, 0.05);
+        Check(game.Player.PoseName != "eleanor_comb" && game.Hud.SpeechText.Contains("bag"),
+            "a hand on the bed sends Eleanor to her bag; the night doesn't start");
+        await WaitIdle(game);
+        Check(game.Room?.GetNodeOrNull<Area2D>("Hotspots/Bag")?.Visible == true, "her duffle is a hotspot in the cell");
+        bool combed = false, sat = false, rose = false, thoughtOverBlack = false;
+        double nightScale = Engine.TimeScale;
+        ulong blackAt = 0, knockAt = 0;
+        var night = game.Perform(Verb.Hand, "bag");
         await Until(() =>
         {
-            combed |= game.Player.PoseName == "eleanor_comb";
+            if (!combed && game.Player.PoseName == "eleanor_comb")
+            {
+                combed = true;
+                // real time from here to the knock, so the black can be measured
+                Engine.TimeScale = 1;
+            }
             sat |= game.Player.PoseName == "eleanor_cell_sit";
             rose |= game.Player.PoseName == "eleanor_cell_rise";
+            if (combed && knockAt == 0 && game.Hud.FadeAlpha >= 0.99f)
+            {
+                if (blackAt == 0) blackAt = Time.GetTicksMsec();
+                thoughtOverBlack |= game.Hud.ThoughtVisible;
+                if (game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Knock"))
+                {
+                    knockAt = Time.GetTicksMsec();
+                    Engine.TimeScale = nightScale;
+                }
+            }
             return game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("You're awake");
-        }, step: 0.05);
-        Check(combed, "she takes her comb and mirror out of the bag and combs her hair");
+        }, step: 0.02);
+        Engine.TimeScale = nightScale;
+        double black = (knockAt - blackAt) / 1000.0;
+        Check(combed, "she takes her comb and mirror out of the duffle and combs her hair");
+        Check(knockAt > 0 && Math.Abs(black - Rooms.ConventCell.BlackHoldSeconds) < 0.4 && !thoughtOverBlack,
+            $"after combing, about a second of black and no narration before Agatha knocks ({black:0.00}s)");
         Check(sat && rose, "at the knock Eleanor sits awake on the bed in her pyjamas, then gets up");
         Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == null,
             "when Agatha talks to her, Eleanor stands in her pyjamas");

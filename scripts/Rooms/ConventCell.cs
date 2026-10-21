@@ -6,8 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Eleanor's cell at the convent: a bed, a lampstand, a book and a nightstand. In the drawer, a comb and a little
 /// waxed mirror. Warming and cleaning its back reveals the symbol; Micah won't leave until he has found it.
-/// In the First Interlude Eleanor sets her duffle down in front of the nightstand, combs her hair from it, and leaves
-/// the comb and mirror in the drawer: Agatha's knock finds her sitting up on the bed in her pyjamas, and she gets up.
+/// In the First Interlude Eleanor sets her duffle down in front of the nightstand and, from the bag, combs her hair
+/// with her comb and mirror: Agatha's knock finds her sitting up on the bed in her pyjamas, and she gets up.
 /// </summary>
 public partial class ConventCell : Room
 {
@@ -32,6 +32,9 @@ public partial class ConventCell : Room
 
     /// <summary>Where she stands in front of the bed once she has got up for Agatha (printed by convent.py cell_rise_strip).</summary>
     private static readonly Vector2 StandAt = new(344, 213);
+
+    /// <summary>After combing: a slow fade to black, then only a second of it before Agatha knocks.</summary>
+    public const double BlackFadeSeconds = 2.0, BlackHoldSeconds = 1.0;
 
     /// <summary>While she combs her hair the open bag is drawn into her strip, so the one on the floor steps aside.</summary>
     private bool _combing;
@@ -149,9 +152,9 @@ public partial class ConventCell : Room
     }
 
     /// <summary>
-    /// Her first night (hand on the nightstand or the bed): she opens the duffle, takes out her comb and little mirror
-    /// and combs her hair out. Over black the comb and mirror go in the drawer; when Agatha knocks she is sitting up on
-    /// the edge of the bed in her pyjamas, awake, and gets up to meet her.
+    /// Her first night (hand on the duffle): she opens it, takes out her comb and little mirror and combs her hair out.
+    /// A slow fade to black, a second of it, and Agatha knocks: she is sitting up on the edge of the bed in her
+    /// pyjamas, awake, and gets up to meet her.
     /// </summary>
     private async Task FirstNight()
     {
@@ -162,14 +165,13 @@ public partial class ConventCell : Room
         Refresh();
         await Player.PlayPose("eleanor_comb");
         await Say("A hundred strokes, the way my mother taught me. I lose count at forty, every night.");
-        await Game.Hud.Fade(1, 1.2);
+        await Game.Hud.Fade(1, BlackFadeSeconds);
         _combing = false;
-        await Think("She put the comb and the little mirror away in the nightstand drawer, and lay down in her nightclothes. She left them there when she went.");
         State.SetFlag("interlude_pyjamas");
         Player.SetCharacter("eleanor_pyjama_play");
         Player.Teleport(SitAt, Facing.Left);
         Player.SetPose("eleanor_cell_sit");
-        await Wait(0.6);
+        await Wait(BlackHoldSeconds);
         await Say("nun", "*Knock, knock*");
         // the Club follows her to the convent: its strings play for Agatha's visit only
         Game.Music.Play(Track.ClubStrings);
@@ -204,9 +206,17 @@ public partial class ConventCell : Room
     {
         switch (target.Id, verb)
         {
-            case ("bed", Verb.Hand or Verb.Walk):
-            case ("nightstand" or "drawer", Verb.Hand):
+            case ("bag", Verb.Hand):
                 await FirstNight();
+                return true;
+            case ("bed", Verb.Hand):
+                await Say("Not like this. My comb and my little mirror first; they're in my bag.");
+                return true;
+            case ("nightstand" or "drawer", Verb.Hand):
+                await Say("Nothing in the drawer. What I need is in my bag.");
+                return true;
+            case ("bag", Verb.Kick):
+                await Say("Everything I own is in there. I'd only be kicking myself.");
                 return true;
             case ("exit", Verb.Walk or Verb.Hand):
                 await Say("The corridor's dark, and somebody in it is still awake. I can feel it.");

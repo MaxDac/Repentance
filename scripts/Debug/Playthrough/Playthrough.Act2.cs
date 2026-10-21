@@ -70,7 +70,7 @@ public sealed partial class Playthrough
         {
             Check(RainsHere(), "rain on Eleanor's cell window before Agatha's visit");
             bool dried = false;
-            var night = Do(Verb.Hand, "bed");
+            var night = Do(Verb.Hand, "bag");
             await Until(() =>
             {
                 dried |= Gs.HasFlag(Endings.RefusedAbbess) && _game.Room is Rooms.ConventCell && DryHere();

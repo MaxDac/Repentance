@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -34,6 +34,9 @@ size = Vector2(15, 12)
 
 [sub_resource type="RectangleShape2D" id="Rect_8"]
 size = Vector2(22, 45)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(24, 18)
 
 [node name="ConventCell" type="Node2D"]
 script = ExtResource("1_ConventCell")
@@ -215,6 +218,22 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Mirror"]
 position = Vector2(333, 189)
 shape = SubResource("Rect_7")
+
+[node name="Bag" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "bag"
+DisplayName = "duffle bag"
+LookText = "My duffle. Everything I own that the Club didn't give me, and a few things it did."
+WalkTo = Vector2(312, 215)
+Face = 3
+ClickPriority = 3
+ShowIfFlags = "interlude1,interlude_bag_left"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bag"]
+position = Vector2(306, 209)
+shape = SubResource("Rect_9")
 
 [node name="Window" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
