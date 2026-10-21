@@ -125,7 +125,9 @@ flags (`can_walk_away`, `can_spare`) that
 `Act3.UpdateGates` sets from `Endings` helpers just before the knot. For the bedroom branches, Eleanor's two refusals
 (`eleanor_refused_abbess`, `eleanor_refused_drugs`) are combined through `Endings.EleanorHeldOut`, which needs both.
 `ClubBackstage` also reads `eleanor_refused_drugs` directly, to play the blackout instead of the ordinary departure.
-The full branch map is in [Story overview](story-overview.md#branches-and-endings).
+The full branch map is in [Story overview](story-overview.md#branches-and-endings). Eleanor's persuasion is not a
+single choice but a weighted score over four turns: see [Eleanor's persuasion](eleanor-persuasion.md) before changing
+its lines.
 
 To add a branch: set a new flag from the choice, add the gate helper to `Endings` if the choice is conditional, give
 `Endings.Resolve` a case in the right priority (and `EndingsTests` a row), route the scene in `Act3.End`, add a

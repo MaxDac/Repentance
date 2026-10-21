@@ -178,7 +178,7 @@ public class InkWalkTests
         }
         walk.Offered.UnionWith(choices);
         walk.Shown.UnionWith(story.currentChoices.Select(c => InkScan.ShownLabel(c.text, c.tags ?? new List<string>())));
-        string key = $"{repeats}|{story.state.currentPathString}|{string.Join("|", choices)}|{string.Join(",", walk.World.Flags.Order())}|{string.Join(",", walk.World.Items.Order())}|{story.variablesState["pushes"]}|{story.variablesState["persuade_ok"]}";
+        string key = $"{repeats}|{story.state.currentPathString}|{string.Join("|", choices)}|{string.Join(",", walk.World.Flags.Order())}|{string.Join(",", walk.World.Items.Order())}|{story.variablesState["pushes"]}|{story.variablesState["persuade_score"]}";
         if (!seen.Add(key)) return;
         string state = story.state.ToJson();
         var world = walk.World;

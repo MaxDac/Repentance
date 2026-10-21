@@ -121,29 +121,30 @@ public sealed partial class Playthrough
             case "11":
                 yield return "Shoot him";
                 break;
-            // Eleanor's four turns: only the four right lines in a row convince her (see Walkthrough.md)
+            // Eleanor's four turns: the lines' points must reach the threshold (see docs/eleanor-persuasion.md);
+            // possessive 4 + rational 2 + possessive 4 + positive 1 = 11
             case "2":
             case "4":
                 yield return "Shoot him";
-                yield return "we don't stay in this city";
+                yield return "I didn't come all this way";
                 yield return "lend you out again";
-                yield return "walk through that door";
+                yield return "Then be mine instead";
                 yield return "decide it yourself";
                 break;
             case "3":
-                // one wrong line breaks the chain; she's left on the third turn, as soon as Micah may
+                // she's left on the third turn, as soon as Micah may
                 yield return "Shoot him";
                 yield return "They'll pin it on you";
                 yield return "Forget Theodore";
                 yield return "(Leave her.)";
                 break;
             case "5":
-                // four turns without her, then the footsteps on the landing, and Micah leaves her to them
+                // two clumsy lines lose her (4 + 0 + 0 + 0): the footsteps on the landing, and Micah leaves her to them
                 yield return "Shoot him";
                 yield return "I didn't come all this way";
                 yield return "Theodore's a coward";
                 yield return "A singer";
-                yield return "I love you";
+                yield return "finishing the job";
                 yield return "(Leave her to them.)";
                 break;
             case "6":
@@ -157,7 +158,7 @@ public sealed partial class Playthrough
                 yield return "Shoot him";
                 yield return "I didn't come all this way";
                 yield return "Forget Theodore";
-                yield return "I'll look after you";
+                yield return "Then be mine instead";
                 yield return "(Shoot Eleanor.)";
                 break;
         }

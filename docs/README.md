@@ -21,6 +21,7 @@ Watch-only film: `tools/run/film.sh` (1x by default), or `--speed 4` / `-s 4`; s
 | [Rooms and scenes](rooms-and-scenes.md) | Room scene layout, room scripts, entries/exits, adding a room, scene invariants |
 | [Story and dialogue](story-and-dialogue.md) | Ink conventions, `DialogueManager`, flags, items, acts, interludes, puzzles, endings |
 | [Story overview](story-overview.md) | Spoiler recap; authoritative spec: [Walkthrough](../Walkthrough.md) |
+| [Eleanor's persuasion](eleanor-persuasion.md) | The bedroom persuasion: every line, its type and weight, the threshold, the Ink logic |
 | [UI](ui.md) | `Hud`, speech, choices, satchel, close-ups, verb wheel, menus, notepad, puzzle screens |
 | [Audio](audio.md) | Synthesized sound effects and music |
 | [Saves and settings](saves-and-settings.md) | Save format and versioning, slots, migration, `settings.cfg` |

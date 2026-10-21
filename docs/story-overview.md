@@ -163,8 +163,8 @@ From here the story follows Walkthrough.md:
    ends this opportunity; skipping remains possible and preserves the prison endings.
 33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
-   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving: four turns, and only
-   the four right lines in a row convince her (see `Walkthrough.md`). On the first turn he can lower the gun and
+   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1). Then talk Eleanor into leaving: four turns of four lines, each line
+   typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can lower the gun and
    leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
    If Eleanor told Agatha the truth and refused the old man: after the Our Father the player is Eleanor in the sheet, with the
@@ -220,7 +220,7 @@ flowchart TD
     shot -- no --> persuade["Persuasion: four turns"]
     persuade -- "Turn yourself in (turn 1)" --> E6["6: prison, Rose visits"]
     persuade -- "Shoot Eleanor (turn 4) / footsteps" --> E7["7: murder and/or suicide"]
-    persuade -- "Leave her / four right lines / footsteps: leave" --> escape["Escape: optional cellar fire"]
+    persuade -- "Leave her / 10+ points / footsteps: leave" --> escape["Escape: optional cellar fire"]
     escape -- "evidence or fire" --> free{"Convinced?"}
     escape -- "neither" --> jail{"Convinced?"}
     free -- yes --> E2["2: out of town with Eleanor"]
@@ -242,8 +242,10 @@ How each decision is made:
 - **Shoot him**: if Eleanor held out, she is too worn out to argue: "Let's get out of here, quick." (`eleanor_weary`).
   No persuasion: she follows him to the kitchen in silence, and the escape decides between endings 10 and 11.
   On the road to ending 10 she has changed back into the black dress from the Club's car at the gate.
-  Otherwise the persuasion: four turns, and only the four right lines in a row convince her (`eleanor_convinced`);
-  one wrong line breaks the chain for good. Turning himself in is offered on the first turn only (`repented`),
+  Otherwise the persuasion: four turns, each with a possessive, a rational, a positive and a clumsy line worth 4, 2,
+  1 and 0 points. Having given in at least once in the interludes, Eleanor answers the possessive, old-man voice best;
+  10 points or more after four turns convince her (`eleanor_convinced`). One clumsy line can be overcome, two can't
+  ([Eleanor's persuasion](eleanor-persuasion.md)). Turning himself in is offered on the first turn only (`repented`),
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
   on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
 - **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
