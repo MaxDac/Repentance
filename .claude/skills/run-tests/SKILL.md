@@ -13,7 +13,11 @@ tools\run\test.ps1 -Suite unit, playthrough     # first run: clean reset, build,
 tools\run\test.ps1 -Suite unit -NoClean         # later runs: skip generated-file deletion
 ```
 
-Godot suites always build/import, even with `-NoClean`; `unit` runs xunit only.
+`test.ps1` / `test.sh` is the single entry point; no suite means `all` (unit, art, launcher and every Godot suite).
+Launcher changes: `-Suite launcher` or `tools\run\harness.ps1` / `tools/run/harness.sh` (extra args go to unittest,
+e.g. `-k film`); they test Bash (Git Bash on Windows) and pwsh, no Godot needed.
+Godot suites always build/import, even with `-NoClean`; `unit` runs xunit only. Exports, packaging and Android run
+only in CI (`docs/testing.md`, "What only CI runs").
 Logs: `logs/<suite>.log`, `logs/import.log`. Failure = bad exit, missing marker or logged error.
 
 ## Read a failure
@@ -37,8 +41,9 @@ It must not edit files, retry with other options or fix failures.
 Never run two launchers in the same worktree at once (shared `logs/`, `.godot/`, test user data); run them in
 sequence, all but the first with `-NoClean`.
 
-Film: `tools\run\film.ps1 -Speed 1|2|4|8|16|60|hyper -Ending 1-11|1-oldman|1-steps -From act1|interlude1|act2|interlude2|act3|ending`
-(bash: `tools/run/film.sh --speed hyper --from ending --ending 8 --no-clean`).
+Film: `tools\run\film.ps1 -Speed 1|2|4|8|16|60|hyper -Ending 1-11|1-oldman|1-steps|<title> -From act1|interlude1|act2|interlude2|act3|ending`
+(bash: `tools/run/film.sh --speed hyper --from ending --ending 8 --no-clean`). Ending titles (e.g. `give-up`,
+`she-visits-once`) are listed by `film.sh --help` / `Get-Help tools\run\film.ps1 -Parameter Ending`.
 Bash speed is optional (default 1x); use `--speed <s>`, `-s <s>` or `--speed=<s>`, not a positional speed.
 
 Normal interactive play: `tools/run/game.sh` / `tools\run\game.ps1`. These clean generated files (never player

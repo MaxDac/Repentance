@@ -28,9 +28,9 @@ jobs:
       # Includes StoryIntegrityTests and InkWalkTests; the project downloads the Ink compiler (GodotInk.props).
       - name: Unit tests
         run: tools/run/test.sh unit --no-clean
+      # Bash and PowerShell launchers against fakes (tools/run/harness.sh); the runner has pwsh.
       - name: Launcher regression tests
-        shell: pwsh
-        run: python3 -m unittest discover -s tests -p test_run_scripts.py -v
+        run: tools/run/test.sh launcher --no-clean
 
   art-tests:
     runs-on: ubuntu-latest
