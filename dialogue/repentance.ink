@@ -15,7 +15,13 @@ EXTERNAL take_item(id)
 EXTERNAL set_flag(flag)
 
 VAR pushes = 0
-VAR persuade_ok = true
+// Eleanor's persuasion (docs/eleanor-persuasion.md): every line scores by type; the total after four turns decides.
+VAR persuade_score = 0
+CONST PERSUADE_POSSESSIVE = 4
+CONST PERSUADE_RATIONAL = 2
+CONST PERSUADE_POSITIVE = 1
+CONST PERSUADE_CLUMSY = 0
+CONST PERSUADE_THRESHOLD = 10
 
 -> END
 
@@ -1161,23 +1167,33 @@ CUE: door
 THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. I know where I'm going.
 -> END
 
-// Four turns, and only one line on each turn reaches her: all four in a row and she comes. A wrong line breaks the
-// chain for good (persuade_ok), but she still answers, colder each time. "(Leave her.)" is offered from the third turn,
-// "(Shoot Eleanor.)" on the fourth. If the fourth turn ends without her, eleanor_refused sends MansionBedroom to the
-// footsteps and eleanor_footsteps.
+// Eleanor's persuasion: four turns, four lines on each, one of each type. Every line adds its type's points to
+// persuade_score; after the fourth turn PERSUADE_THRESHOLD or more convinces her. She only gets here having given in
+// at least once in the interludes, so the possessive, earthly lines (the old man's way) reach her best. One clumsy line
+// can be overcome, two can't. The full logic, every line and the arithmetic are in docs/eleanor-persuasion.md: keep
+// it in step. "(Leave her.)" is offered from the third turn, "(Shoot Eleanor.)" on the fourth. If the fourth turn ends
+// without her, eleanor_refused sends MansionBedroom to the footsteps and eleanor_footsteps.
 === eleanor_persuade ===
-~ persuade_ok = true
+~ persuade_score = 0
 ELEANOR: You... you killed him. Micah, what have you done?
 MICAH: Get dressed. We're leaving.
 ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
+// turn 1
 * [I didn't come all this way to leave you here, Eleanor.]
-    ~ persuade_ok = false
-    ELEANOR: Every man who ever bought me a drink said something like that, Micah. Then he went home.
+    ~ persuade_score += PERSUADE_POSSESSIVE
+    ELEANOR: All this way. For me.
+    ELEANOR: He used to say that. That he'd come all the way back from the lake, just for me.
+    THOUGHT: She hears it. The way she must have heard it from him.
 * [Then we don't stay in this city. We're out of it tonight.]
+    ~ persuade_score += PERSUADE_RATIONAL
     ELEANOR: Out of it. You say it like it's a door you can just walk through.
+* [We'll find somewhere quiet. Somewhere nobody knows your name.]
+    ~ persuade_score += PERSUADE_POSITIVE
+    ELEANOR: Nobody knowing my name. That's a nice dream, Micah. I stopped having it.
 * [You can't stay here. Not now. They'll pin it on you.]
-    ~ persuade_ok = false
+    ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: They'll pin it on whoever they like. They always do.
+    THOUGHT: Wrong thing to say. She's talking to the carpet now, not to me.
 * [(Lower the gun. Leave her, and turn yourself in.)]
     ~ set_flag("repented")
     THOUGHT: The gun weighs nothing now. It's the rest of me that's heavy.
@@ -1187,62 +1203,71 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     MICAH: Then I'll keep walking until I find one.
     THOUGHT: I came here to save somebody. All this time, I had the wrong one in mind.
     -> END
+// turn 2
 - ELEANOR: Theodore will be here by morning. He'll know what to do. He always does.
-{not persuade_ok:
-    THOUGHT: She's talking to the carpet now, not to me.
-}
-* [Forget Theodore. You've got me now.]
-    ~ persuade_ok = false
-    ELEANOR: Got you. That's what they all say, right before they've got me.
+* [Whatever comes in the morning, you won't face it alone.]
+    ~ persuade_score += PERSUADE_POSITIVE
+    ELEANOR: Alone is the one thing I've never been allowed to be, Micah.
 * [Theodore's a coward. I'll handle him.]
-    ~ persuade_ok = false
+    ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: With that? You'd have to shoot every Harrington in Chicago. There are more of them than bullets.
-* [He'll take you back like he always does. And lend you out again on Thursdays. #short: He'll take you back. And lend you out again on Thursdays.]
-    {persuade_ok:
-        ELEANOR: ...
-        ELEANOR: Yes. He will. He'll even say he's sorry about it.
-    - else:
-        ELEANOR: You don't have to tell me what he does. I was there.
+    {persuade_score + PERSUADE_POSSESSIVE * 2 >= PERSUADE_THRESHOLD:
+        THOUGHT: Wrong thing to say. She's talking to the carpet now, not to me.
     }
+* [Forget Theodore. You've got me now.]
+    ~ persuade_score += PERSUADE_POSSESSIVE
+    ELEANOR: Got you.
+    ELEANOR: That's what they all say. And somehow I always end up believing it.
+    THOUGHT: She doesn't pull away. I don't like why.
+* [He'll take you back like he always does. And lend you out again on Thursdays. #short: He'll take you back. And lend you out again on Thursdays.]
+    ~ persuade_score += PERSUADE_RATIONAL
+    ELEANOR: ...
+    ELEANOR: Yes. He will. He'll even say he's sorry about it.
+// turn 3
 - ELEANOR: And what would I do out there? I don't know how to be anything but theirs.
-{not persuade_ok:
+{persuade_score + PERSUADE_POSSESSIVE * 2 < PERSUADE_THRESHOLD:
     THOUGHT: Her eyes keep going to the other door. I'm losing her.
 }
-* [You'll be with me. I'll look after you.]
-    ~ persuade_ok = false
-    ELEANOR: Look after me. Like he did. Like his son does.
-* [You don't have to know tonight. You only have to walk through that door. #short: You only have to walk through that door tonight.]
-    {persuade_ok:
-        ELEANOR: One door.
-        ELEANOR: I've walked through a lot of doors, Micah. I never once picked which.
-    - else:
-        ELEANOR: Doors. This house is all doors, and every one of them opens onto him.
-    }
 * [You can be anything you like. A singer. A nurse. Anything.]
-    ~ persuade_ok = false
+    ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: The Club said that too, the first night. Anything I liked.
+    {persuade_score + PERSUADE_POSSESSIVE >= PERSUADE_THRESHOLD:
+        THOUGHT: Wrong thing to say. She's talking to the carpet now, not to me.
+    }
+* [You'd find work, like anybody. Out there nobody owns you.]
+    ~ persuade_score += PERSUADE_RATIONAL
+    ELEANOR: Work. I suppose I'd learn. I learned everything else.
+* [Then be mine instead. I'll look after you.]
+    ~ persuade_score += PERSUADE_POSSESSIVE
+    ELEANOR: Yours, instead of theirs.
+    ELEANOR: At least it would be one man's.
+    {persuade_score + PERSUADE_POSSESSIVE >= PERSUADE_THRESHOLD:
+        THOUGHT: I sound like him. She's listening anyway. Maybe because of it.
+    }
+* [You don't have to know tonight. You only have to walk through that door. #short: You only have to walk through that door tonight.]
+    ~ persuade_score += PERSUADE_POSITIVE
+    ELEANOR: One door.
+    ELEANOR: I've walked through a lot of doors, Micah. I never once picked which.
 * [(Leave her.)]
     -> leave
+// turn 4
 - ELEANOR: Why do you even care, Micah? What do you want from me?
-{not persuade_ok:
+{persuade_score + PERSUADE_POSSESSIVE < PERSUADE_THRESHOLD:
     THOUGHT: Further away with every word. Somewhere I can't follow, in the same room.
 }
-* [I love you, Eleanor.]
-    ~ persuade_ok = false
-    ELEANOR: No, you don't. You love the girl in the photograph. She doesn't live here anymore.
-* [Every time I've seen you, you've said you can't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
-    ~ persuade_ok = false
-    ELEANOR: I say a lot of things, Micah. To a lot of men.
 * [Nothing. Come or stay, it's yours to decide. But decide it yourself, for once. #short: Nothing. Come or stay, but decide it yourself, for once.]
-    {persuade_ok:
-        ELEANOR: ...
-        ELEANOR: Nobody ever asked me. Not once. Not him, not Theodore, not the nuns.
-        ELEANOR: You mean it. God help you, you actually mean it.
-        ~ set_flag("eleanor_convinced")
-        -> eleanor_comes
-    - else:
-        ELEANOR: Then I've decided. I'm staying, Micah. Go.
-    }
+    ~ persuade_score += PERSUADE_POSITIVE
+    ELEANOR: Nobody ever asked me. Not once. Not him, not Theodore, not the nuns.
+* [Theodore paid me to find you. I'm only finishing the job.]
+    ~ persuade_score += PERSUADE_CLUMSY
+    ELEANOR: So I'm a job. Twenty dollars a day, and expenses.
+* [Every time I've seen you, you've said you can't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
+    ~ persuade_score += PERSUADE_RATIONAL
+    ELEANOR: I did say it. I say a lot of things, to a lot of men. That one I meant.
+* [You. I've wanted you since the first time I saw your photograph.]
+    ~ persuade_score += PERSUADE_POSSESSIVE
+    ELEANOR: There it is. No speeches. Just wanting.
+    ELEANOR: At least you're honest about it. They never were.
 * [(Leave her.)]
     -> leave
 * [(Shoot Eleanor.)]
@@ -1250,8 +1275,17 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     THOUGHT: She won't come. She'll stay here with him, on his carpet, in his house, for the rest of her life.
     THOUGHT: Then let the rest of her life be short. The gun comes up again before the rest of me can stop it.
     -> END
-- ~ set_flag("eleanor_refused")
-ELEANOR: Please, Micah. Just go. Before they come.
+- ~ temp convinced = persuade_score >= PERSUADE_THRESHOLD
+{convinced:
+    ELEANOR: ...
+    ELEANOR: You talk like them, Micah. Like every man who ever wanted me.
+    ELEANOR: God help me, maybe that's why I believe you.
+    ~ set_flag("eleanor_convinced")
+    -> eleanor_comes
+}
+~ set_flag("eleanor_refused")
+ELEANOR: Then I've decided. I'm staying, Micah.
+ELEANOR: Please. Just go. Before they come.
 -> END
 
 = leave

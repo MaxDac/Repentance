@@ -455,7 +455,7 @@ public partial class AutoPlay
         await confront;
         await WaitIdle(game);
         Check(Offered("oldman_taunt", "Our Father") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
-        Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along after the four right lines");
+        Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along, convinced by enough points");
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");
         Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("escaping"), "no going back through the baize door during the escape");

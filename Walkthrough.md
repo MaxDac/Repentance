@@ -939,19 +939,14 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
       the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
       documents), and Micah keeps the revolver. The fire or the documents give ending 10, neither gives ending 11.
-    - Eleanor always gets four turns, each with three lines for Micah. Only one line per turn is right, and only
-      the four right lines in a row convince her. A wrong line silently breaks the chain: the conversation goes on,
-      but she slips away (Micah's thoughts hint at it), and a right line after a wrong one no longer reaches her.
-      The only way to convince her:
-      1. "Then we don't stay in this city. We're out of it tonight."
-      2. "He'll take you back like he always does. And lend you out again on Thursdays."
-      3. "You don't have to know tonight. You only have to walk through that door."
-      4. "Nothing. Come or stay, it's yours to decide. But decide it yourself, for once."
-    - The wrong lines: "I didn't come all this way to leave you here, Eleanor." / "You can't stay here. Not now.
-      They'll pin it on you." (turn 1); "Forget Theodore. You've got me now." / "Theodore's a coward. I'll handle
-      him." (turn 2); "You'll be with me. I'll look after you." / "You can be anything you like. A singer. A nurse.
-      Anything." (turn 3); "I love you, Eleanor." / "Every time I've seen you, you've said you can't go back there.
-      Now you don't have to." (turn 4).
+    - Eleanor always gets four turns, each with four lines for Micah, one of each type. Every line scores points,
+      and after the fourth turn a total of at least 10 out of 16 convinces her (`eleanor_convinced`):
+      possessive 4, rational 2, positive 1, clumsy 0. The persuasion only happens when Eleanor gave in at least once in
+      the interludes, so she answers the possessive, earthly way of the men who already own her, the old man's way.
+      One clumsy line can be overcome, two can't, and at least one possessive line is needed. Eleanor answers each
+      line in character, and Micah's thoughts hint when a line drew her in or when she is out of reach.
+      Every line, its type, its reply, the arithmetic and the Ink implementation are in
+      [Eleanor's persuasion](docs/eleanor-persuasion.md), which must be kept in step with the Ink.
     - On the first turn he can instead lower the gun, leave her and walk out to turn himself in (ending 6), whatever
       evidence he carries.
     - After two turns, "(Leave her.)" is offered (turns 3 and 4): Eleanor lets him go and he escapes alone.

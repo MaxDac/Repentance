@@ -60,7 +60,7 @@ public partial class AutoPlay
         Seed(act3Flags, act3Items, Convinces.Prepend("Shoot him").ToArray());
         await game.ChangeRoom("mansion_bedroom", "start");
         Check(gs.HasFlag("eleanor_convinced") && !Offered("eleanor_footsteps", "Leave her to them"),
-            "Eleanor convinced by the four right lines, before any footsteps");
+            "Eleanor convinced by enough points (11), before any footsteps");
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_4"), "ending 4: prison, Eleanor visits");
@@ -70,10 +70,10 @@ public partial class AutoPlay
 
         // 3: the house burns, Eleanor stays behind
         Seed(act3Flags.Append("cellar_lit"), act3Items,
-            Convinces.Take(3).Prepend("Shoot him").Append("I love you").Append("(Leave her to them.)").ToArray());
+            OneShort.Prepend("Shoot him").Append("(Leave her to them.)").ToArray());
         await game.ChangeRoom("mansion_bedroom", "start");
         Check(!gs.HasFlag("eleanor_convinced") && Offered("eleanor_footsteps", "Leave her to them"),
-            "three right lines and a wrong fourth aren't enough: Eleanor stays, and the footsteps come");
+            "one point short of the threshold (9) isn't enough: Eleanor stays, and the footsteps come");
         await game.Perform(Verb.Walk, "cellar_door");
         await game.Perform(Verb.Hand, "barrel");
         await game.Perform(Verb.Hand, "hung_lantern");
@@ -91,16 +91,16 @@ public partial class AutoPlay
         await Shot("ending_alone");
         await TheEnd("ending_3", nextMorning);
 
-        // Signed evidence alone preserves both outskirts outcomes without a fire.
+        // Signed evidence alone preserves both outskirts outcomes without a fire. Convinced: one clumsy line forgiven,
+        // exactly on the threshold; not convinced: two clumsy lines lose her, even with two possessive ones.
         foreach (bool convinced in new[] { false, true })
         {
-            // not convinced: one wrong first line, then the right ones; the chain stays broken
-            var lines = convinced ? Convinces : Convinces.Skip(1).Prepend("They'll pin it on you");
+            var lines = convinced ? OneClumsyForgiven : TwoClumsy;
             Seed(act3Flags.Append(Endings.TookDocuments), act3Items.Append("documents"),
                 lines.Prepend("Shoot him").Append("(Leave her to them.)").ToArray());
             await game.ChangeRoom("mansion_bedroom", "start");
             Check(gs.HasFlag(Endings.EleanorConvinced) == convinced,
-                convinced ? "documents-only route preserves Eleanor's decision" : "one wrong line breaks the chain for good");
+                convinced ? "one clumsy line is forgiven (10 points)" : "two clumsy lines lose her (8 points)");
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() => game.Room?.Name == "Outskirts");
             string ending = convinced ? "ending_2" : "ending_3";
@@ -609,13 +609,28 @@ public partial class AutoPlay
         }
     }
 
-    /// <summary>The only way to convince Eleanor: these four lines, one per turn, in a row.</summary>
+    /// <summary>
+    /// Eleanor's persuasion (docs/eleanor-persuasion.md): one line per turn, scored possessive 4, rational 2,
+    /// positive 1, clumsy 0; 10 or more convinces her. Possessive, rational, possessive, positive: 11.
+    /// </summary>
     private static readonly string[] Convinces =
-        { "we don't stay in this city", "lend you out again", "walk through that door", "decide it yourself" };
+        { "I didn't come all this way", "lend you out again", "Then be mine instead", "decide it yourself" };
 
-    /// <summary>A wrong line on each of Eleanor's four turns.</summary>
+    /// <summary>Clumsy, possessive, possessive, rational: exactly 10, the one clumsy line forgiven.</summary>
+    private static readonly string[] OneClumsyForgiven =
+        { "They'll pin it on you", "Forget Theodore", "Then be mine instead", "can't go back there" };
+
+    /// <summary>Clumsy, clumsy, possessive, possessive: 8, two clumsy lines are too many.</summary>
+    private static readonly string[] TwoClumsy =
+        { "They'll pin it on you", "Theodore's a coward", "Then be mine instead", "wanted you since" };
+
+    /// <summary>Rational, rational, possessive, positive: 9, one point short.</summary>
+    private static readonly string[] OneShort =
+        { "out of it tonight", "lend you out again", "Then be mine instead", "decide it yourself" };
+
+    /// <summary>Possessive, then clumsy on every other turn: 4, far from enough.</summary>
     private static readonly string[] Refuses =
-        { "I didn't come all this way", "Theodore's a coward", "A singer", "I love you" };
+        { "I didn't come all this way", "Theodore's a coward", "A singer", "finishing the job" };
 
     private int _seedLog;
 
