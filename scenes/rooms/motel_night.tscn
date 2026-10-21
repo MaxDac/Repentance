@@ -113,10 +113,11 @@ HideIfFlags = "interlude1,interlude2"
 position = Vector2(110, 194)
 centered = false
 
-[node name="BedRails" type="Sprite2D" parent="."]
-z_index = 1
+[node name="BedRails" type="Sprite2D" parent="World"]
+position = Vector2(0, 185)
 texture = ExtResource("5_rails")
 centered = false
+offset = Vector2(0, -185)
 
 [node name="Bed" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")
