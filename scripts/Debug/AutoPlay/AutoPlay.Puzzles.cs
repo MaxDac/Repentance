@@ -116,9 +116,11 @@ public partial class AutoPlay
         Check(await lift, "swiping cell by cell solves the lift maze");
 
         var alignment = game.Hud.Puzzle.Open(PuzzleKind.Alignment);
+        PuzzleClick("flip");
+        PuzzleClick("rotate");
         PuzzleClick("rotate");
         PuzzleDrag(new Vector2(110, 110), Enumerable.Repeat("right", 6));
-        for (int i = 0; i < 3; i++) PuzzleKey("down");
+        for (int i = 0; i < 9; i++) PuzzleKey("down");
         PuzzleClick("submit");
         await AwaitTest(alignment, "swipes and arrow keys slide the tracing");
         Check(await alignment, "swipes and arrow keys solve the auditor's index");

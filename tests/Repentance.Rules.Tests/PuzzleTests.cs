@@ -116,18 +116,32 @@ public class PuzzleTests
     }
 
     [Fact]
-    public void AlignmentHasExactlyOneTransformMatchingAllThreeMarks()
+    public void AlignmentHasExactlyOneTransformMatchingTheNote()
     {
-        var solutions = new List<(int Rotation, int X, int Y)>();
+        var solutions = new List<(int Rotation, bool Flipped, int X, int Y)>();
+        var fits = new List<(int Rotation, bool Flipped, int X, int Y)>();
+        int nearMisses = 0;
         for (int turn = 0; turn < 4; turn++)
-            for (int x = 0; x <= 10; x++)
-                for (int y = 0; y <= 10; y++)
-                    if (PuzzleRules.Alignment(turn, x, y)) solutions.Add((turn, x, y));
-        Assert.Equal((1, 6, 3), Assert.Single(solutions));
-        Assert.False(PuzzleRules.Alignment(0, 6, 3));
-        Assert.False(PuzzleRules.Alignment(1, -1, 3));
-        Assert.False(PuzzleRules.Alignment(4, 6, 3));
-        Assert.Throws<ArgumentOutOfRangeException>(() => PuzzleRules.Transform(new GridPoint(), 4, 0, 0));
+            foreach (bool flipped in new[] { false, true })
+                for (int x = 0; x <= 10; x++)
+                    for (int y = 0; y <= 10; y++)
+                    {
+                        if (PuzzleRules.Alignment(turn, flipped, x, y)) solutions.Add((turn, flipped, x, y));
+                        if (PuzzleRules.AlignmentFits(turn, flipped, x, y)) fits.Add((turn, flipped, x, y));
+                        int covered = PuzzleRules.TracingMarks.Count(p =>
+                            PuzzleRules.AccountMarks.Contains(PuzzleRules.Transform(p, turn, flipped, x, y)));
+                        if (covered == PuzzleRules.TracingMarks.Count - 1) nearMisses++;
+                    }
+        Assert.Equal((2, true, 6, 9), Assert.Single(solutions));
+        Assert.Equal(2, fits.Count);
+        var decoy = Assert.Single(fits, f => f != (2, true, 6, 9));
+        Assert.False(PuzzleRules.AlignmentReadsAsNote(decoy.Rotation, decoy.Flipped, decoy.X, decoy.Y));
+        Assert.True(nearMisses >= 10, $"only {nearMisses} placements cover four of the five dots");
+        Assert.False(PuzzleRules.AlignmentFits(0, false, 0, 0));
+        Assert.False(PuzzleRules.Alignment(2, false, 6, 9));
+        Assert.False(PuzzleRules.Alignment(2, true, -1, 9));
+        Assert.False(PuzzleRules.Alignment(4, true, 6, 9));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PuzzleRules.Transform(new GridPoint(), 4, false, 0, 0));
     }
 
     [Fact]

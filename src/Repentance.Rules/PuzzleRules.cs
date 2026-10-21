@@ -136,13 +136,26 @@ public static class PuzzleRules
     public static bool Pair(string first, string second, string a, string b) =>
         (first == a && second == b) || (first == b && second == a);
 
-    public static IReadOnlyList<GridPoint> AccountMarks { get; } =
-        Array.AsReadOnly(new[] { new GridPoint(6, 3), new GridPoint(6, 5), new GridPoint(3, 3) });
-    public static IReadOnlyList<GridPoint> TracingMarks { get; } =
-        Array.AsReadOnly(new[] { new GridPoint(0, 0), new GridPoint(2, 0), new GridPoint(0, 3) });
-
-    public static GridPoint Transform(GridPoint p, int rotation, int x, int y)
+    /// <summary>The register page: unlabelled account dots, two of which hold the whole index figure.</summary>
+    public static IReadOnlyList<GridPoint> AccountMarks { get; } = Array.AsReadOnly(new[]
     {
+        new GridPoint(0, 6), new GridPoint(5, 6), new GridPoint(6, 5), new GridPoint(6, 7), new GridPoint(6, 8),
+        new GridPoint(6, 9), new GridPoint(7, 5), new GridPoint(7, 6), new GridPoint(8, 5), new GridPoint(8, 7),
+        new GridPoint(8, 9), new GridPoint(9, 6), new GridPoint(9, 7), new GridPoint(10, 5), new GridPoint(10, 7),
+    });
+
+    /// <summary>The index's punched holes: BANK, JUDGE, CAPTAIN, then two blank holes.</summary>
+    public static IReadOnlyList<GridPoint> TracingMarks { get; } = Array.AsReadOnly(new[]
+    {
+        new GridPoint(3, 3), new GridPoint(0, 0), new GridPoint(2, 2), new GridPoint(1, 3), new GridPoint(2, 4),
+    });
+
+    public const int Bank = 0, Judge = 1, Captain = 2;
+
+    /// <summary>Turns the index over (mirrored left to right) when flipped, then a quarter-turn per rotation, then slides it.</summary>
+    public static GridPoint Transform(GridPoint p, int rotation, bool flipped, int x, int y)
+    {
+        if (flipped) p = new GridPoint(-p.X, p.Y);
         var turned = rotation switch
         {
             0 => p,
@@ -154,9 +167,22 @@ public static class PuzzleRules
         return new GridPoint(turned.X + x, turned.Y + y);
     }
 
-    public static bool Alignment(int rotation, int x, int y) =>
-        rotation is >= 0 and < 4 && x is >= 0 and <= 10 && y is >= 0 and <= 10 &&
-        TracingMarks.Select(p => Transform(p, rotation, x, y)).SequenceEqual(AccountMarks);
+    private static bool InRange(int rotation, int x, int y) =>
+        rotation is >= 0 and < 4 && x is >= 0 and <= 10 && y is >= 0 and <= 10;
+
+    /// <summary>Every hole of the index sits on an account dot, whatever the labels say.</summary>
+    public static bool AlignmentFits(int rotation, bool flipped, int x, int y) =>
+        InRange(rotation, x, y) && TracingMarks.All(p => AccountMarks.Contains(Transform(p, rotation, flipped, x, y)));
+
+    /// <summary>The note: BANK above JUDGE, CAPTAIN left of BANK.</summary>
+    public static bool AlignmentReadsAsNote(int rotation, bool flipped, int x, int y)
+    {
+        GridPoint Mark(int i) => Transform(TracingMarks[i], rotation, flipped, x, y);
+        return Mark(Bank).Y < Mark(Judge).Y && Mark(Captain).X < Mark(Bank).X;
+    }
+
+    public static bool Alignment(int rotation, bool flipped, int x, int y) =>
+        AlignmentFits(rotation, flipped, x, y) && AlignmentReadsAsNote(rotation, flipped, x, y);
 }
 
 public static class PuzzleMigration

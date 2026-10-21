@@ -137,7 +137,7 @@ public sealed partial class Playthrough
                 await Do(Verb.Hand, "documents");
                 await Do(Verb.Hand, "drawer_left");
                 await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
-                    new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+                    new[] { ("flip", 1), ("rotate", 2), ("right", 6), ("down", 9) }, "audit_alignment");
                 Check(Gs.HasFlag(Endings.TookDocuments), "the signed payoff sheets");
             }
             var confront = Do(Verb.Walk, "door_right");
