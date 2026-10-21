@@ -71,6 +71,8 @@ await Game.Run(async () =>
 
 - Player and NPC sheet formats: [Art pipeline: Asset contracts](art-pipeline.md#asset-contracts).
   Player row 0: 3/4 idle, side walk x8, 3/4 talk. Row 1: front idle, walk x6, talk A/B. Row 2: back idle, walk x6.
+  Rows 0 and 1 face right; row 0 flips facing left, row 1 when his last sideways move or turn was left.
+  Row 1 is turned 3/4 unless the spec sets `front_yaw` (Micah's outfits face the camera).
 - Outfits: `ResolvePlayerCharacter` picks `micah_masked` (flag `masked`), `micah_no_tie` (`bell_wedged`) or
   Eleanor's sheet during interludes. A pose `micah_x` uses the outfit's own copy when it exists.
 - Pose playback and metadata: [Art pipeline: Action strips and poses](art-pipeline.md#action-strips-and-poses).

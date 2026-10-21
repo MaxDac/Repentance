@@ -6,9 +6,10 @@ namespace Repentance;
 
 /// <summary>
 /// The playable character (Micah, or Daniel in the prologue). Sprite sheet (64x96 frames, 10 columns, painted by
-/// tools/art/figure.py): row 0: 3/4 idle, side walk x8, 3/4 talk · row 1 front 3/4: idle, walk x6, talk A, talk B ·
-/// row 2 back 3/4: idle, walk x6. Horizontal frames face right and are flipped for left. Position is the feet, which sit
-/// <see cref="Baseline"/> pixels above the bottom of each frame.
+/// tools/art/figure.py): row 0: 3/4 idle, side walk x8, 3/4 talk · row 1 front (Micah faces the camera, others turn 3/4):
+/// idle, walk x6, talk A, talk B · row 2 back 3/4: idle, walk x6. Horizontal and front frames face right and are flipped
+/// for left; the front row follows the last sideways direction, so walking down-left turns him left. Position is the
+/// feet, which sit <see cref="Baseline"/> pixels above the bottom of each frame.
 /// </summary>
 public partial class Player : Node2D, ISpeaker
 {
@@ -24,6 +25,8 @@ public partial class Player : Node2D, ISpeaker
 
     private Sprite2D _sprite = null!;
     private Facing _facing = Facing.Right;
+    /// <summary>The last sideways direction he moved or turned, which the front row is mirrored to follow.</summary>
+    private bool _leftward;
     private readonly Queue<Vector2> _path = new();
     private TaskCompletionSource<bool>? _walkDone;
     private double _animTime;
@@ -174,6 +177,7 @@ public partial class Player : Node2D, ISpeaker
     public void Face(Facing f)
     {
         if (f != Facing.Auto) _facing = f;
+        if (f is Facing.Left or Facing.Right) _leftward = f == Facing.Left;
         UpdateFrame();
     }
 
@@ -181,7 +185,11 @@ public partial class Player : Node2D, ISpeaker
     {
         var d = p - GlobalPosition;
         if (Mathf.Abs(d.X) >= Mathf.Abs(d.Y) * 0.6f) Face(d.X < 0 ? Facing.Left : Facing.Right);
-        else Face(d.Y < 0 ? Facing.Up : Facing.Down);
+        else
+        {
+            if (Mathf.Abs(d.X) > 1f) _leftward = d.X < 0;
+            Face(d.Y < 0 ? Facing.Up : Facing.Down);
+        }
     }
 
     public void Teleport(Vector2 p, Facing f = Facing.Auto)
@@ -205,6 +213,8 @@ public partial class Player : Node2D, ISpeaker
             {
                 if (Mathf.Abs(dir.X) >= Mathf.Abs(dir.Y) * 0.8f) _facing = dir.X < 0 ? Facing.Left : Facing.Right;
                 else _facing = dir.Y < 0 ? Facing.Up : Facing.Down;
+                // a nearly vertical leg keeps the turn of the last one rather than flickering on a pixel of drift
+                if (Mathf.Abs(dir.X) > 0.5f && Mathf.Abs(dir.X) >= Mathf.Abs(dir.Y) * 0.15f) _leftward = dir.X < 0;
             }
             var len = dir.Length();
             var stepLen = step * (1f - 0.4f * Mathf.Abs(dir.Y) / Mathf.Max(len, 0.0001f));
@@ -273,7 +283,7 @@ public partial class Player : Node2D, ISpeaker
                     : (_talking && (int)(_animTime * 7) % 2 == 0 ? 9 : 0);
                 break;
         }
-        _sprite.FlipH = _facing == Facing.Left;
+        _sprite.FlipH = _facing == Facing.Left || (_facing == Facing.Down && _leftward);
         _sprite.Frame = row * Cols + col;
     }
 }
