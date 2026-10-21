@@ -32,7 +32,8 @@ public static class Interlude
     };
     private static readonly string[] SecondBeats =
     {
-        "interlude_goons_in", "interlude_took_makeup", "interlude_took_puff", "interlude_took_pin",
+        "interlude_goons_in", "interlude_took_compact", "interlude_took_lipstick",
+        "interlude_took_puff", "interlude_took_pin",
         "interlude_powdered", "interlude_lips", "interlude_made_up", "interlude_door_kicked",
         "backstage_door_ajar", "backstage_door_open",
     };

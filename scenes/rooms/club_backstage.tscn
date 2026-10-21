@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ClubBackstage.cs" id="1_ClubBackstage"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage.png" id="2_club_backstage"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/Core/FlagSprite.cs" id="6_FlagSprite"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_door_ajar.png" id="7_door_ajar"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_door_open.png" id="8_door_open"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_lipstick.png" id="9_lipstick"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_compact.png" id="10_compact"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(60, 122)
@@ -16,13 +18,25 @@ size = Vector2(60, 122)
 size = Vector2(96, 84)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(136, 30)
+size = Vector2(44, 44)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
 size = Vector2(90, 94)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
 size = Vector2(84, 112)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(16, 18)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(20, 20)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(18, 16)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(22, 10)
 
 [node name="ClubBackstage" type="Node2D"]
 script = ExtResource("1_ClubBackstage")
@@ -54,6 +68,22 @@ texture = ExtResource("8_door_open")
 centered = false
 script = ExtResource("6_FlagSprite")
 ShowIfFlags = "backstage_door_open"
+
+[node name="Lipstick" type="Sprite2D" parent="."]
+position = Vector2(290, 128)
+z_index = -9
+texture = ExtResource("9_lipstick")
+centered = false
+script = ExtResource("6_FlagSprite")
+HideIfFlags = "interlude_took_lipstick"
+
+[node name="Compact" type="Sprite2D" parent="."]
+position = Vector2(325, 127)
+z_index = -9
+texture = ExtResource("10_compact")
+centered = false
+script = ExtResource("6_FlagSprite")
+HideIfFlags = "interlude_took_compact"
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
@@ -102,16 +132,78 @@ shape = SubResource("Rect_2")
 script = ExtResource("3_Hotspot")
 Id = "table"
 DisplayName = "gin and powder"
-LookText = "A glass of gin and a silver saucer on the dressing table."
-WalkTo = Vector2(246, 196)
+LookText = "A bottle of gin, a glass poured, and a silver saucer with a line of powder on it."
+WalkTo = Vector2(240, 196)
 Face = 2
 ClickPriority = 1
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Table"]
-position = Vector2(280, 150)
+position = Vector2(240, 130)
 shape = SubResource("Rect_3")
+
+[node name="Lipstick" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "lipstick"
+DisplayName = "lipstick"
+LookText = "Her lipstick, in a gold case, standing uncapped on the ledge."
+WalkTo = Vector2(306, 190)
+Face = 2
+ClickPriority = 2
+HideIfFlags = "interlude_took_lipstick"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Lipstick"]
+position = Vector2(298, 137)
+shape = SubResource("Rect_6")
+
+[node name="Compact" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "compact"
+DisplayName = "compact"
+LookText = "Her powder compact, open, a gold case with its little mirror propped up."
+WalkTo = Vector2(320, 190)
+Face = 2
+ClickPriority = 2
+HideIfFlags = "interlude_took_compact"
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Compact"]
+position = Vector2(334, 137)
+shape = SubResource("Rect_7")
+
+[node name="Perfume" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "perfume"
+DisplayName = "perfume"
+LookText = "A rose-glass perfume atomiser with a tasselled bulb."
+WalkTo = Vector2(312, 190)
+Face = 2
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Perfume"]
+position = Vector2(316, 138)
+shape = SubResource("Rect_8")
+
+[node name="Hairbrush" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "hairbrush"
+DisplayName = "hairbrush"
+LookText = "A silver-backed hairbrush and a tortoiseshell comb."
+WalkTo = Vector2(281, 202)
+Face = 2
+ClickPriority = 2
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Hairbrush"]
+position = Vector2(276, 147)
+shape = SubResource("Rect_9")
 
 [node name="Rack" type="Area2D" parent="Hotspots"]
 script = ExtResource("3_Hotspot")

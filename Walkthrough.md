@@ -779,7 +779,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - **Puzzle 18 - The face they paid for:** the doll's face Micah sees on stage, put on by hand. Every step is a beat
   of her conflict, and it is sad: the silk, the money and the safety she has against the rot under them and the
   wish to run, with the old man's gentle, possessive pressure to stay.
-  - Hand on the mirror: her compact of face powder (no puff) and a lipstick.
+  - Hand on the compact and the lipstick on the dressing table: her compact of face powder (no puff) and her
+    lipstick, each gone from the table once taken. The perfume and the hairbrush beside them are only looked at.
   - Hand on the costume rail: a swansdown puff in a member's wife's gown pocket.
   - Hand on the painted screens: a hairpin clipped to the silk.
   - Join the puff and the compact, then use them on the mirror, in order: the face powder, the lipstick, the

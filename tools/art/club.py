@@ -1159,8 +1159,17 @@ def costume_rail(img):
     noise(img, (x0, y0, x1, FLOOR), 3, 3521)
 
 
-def dressing_table(img):
-    """The dressing table: a mirror ringed by bulbs, gin bottle and glass, a powder compact, sticks of greasepaint."""
+LIPSTICK_X = 292  # Eleanor's lipstick on the dressing table, left edge
+COMPACT_X = 334  # her open compact, centre
+# overlay crops of the two things she takes, in scene coordinates; the background is painted without them
+BACKSTAGE_LIPSTICK_BOX = (LIPSTICK_X - 2, 114 - 16 + TOP, LIPSTICK_X + 15, 114 + 4 + TOP)
+BACKSTAGE_COMPACT_BOX = (COMPACT_X - 9, 114 - 17 + TOP, COMPACT_X + 10, 114 + 5 + TOP)
+
+
+def dressing_table(img, compact=True, lipstick=True):
+    """The dressing table: a mirror ringed by bulbs; the old man's gin, glass and saucer of powder; a hairbrush and
+    comb, Eleanor's lipstick, a perfume atomiser and her open compact. The lipstick and compact can be left off,
+    for the background she takes them from."""
     d = ImageDraw.Draw(img)
     x0, x1 = BACKSTAGE_TABLE
     mx0, mx1, my0, my1 = BACKSTAGE_MIRROR
@@ -1223,45 +1232,67 @@ def dressing_table(img):
     d.rectangle([tx + 1, top - 3, tx + 6, top - 1], fill=hx("b8d4cc"))
     d.rectangle([tx + 1, top, tx + 7, top + 1], fill=hx("6a8088"))
     d.point((tx + 1, top - 8), fill=hx("ffffff"))
-    # a silver-backed hairbrush lying bristles down, a tortoiseshell comb beside it
-    bx = x0 + 52
-    d.rounded_rectangle([bx, top + 1, bx + 12, top + 5], 2, fill=hx("b8b8c0"), outline=hx("4a4a54"))
-    d.line([(bx + 2, top + 2), (bx + 9, top + 2)], fill=hx("f0f0f4"))
-    d.rectangle([bx + 12, top + 2, bx + 20, top + 4], fill=hx("a8a8b0"), outline=hx("4a4a54"))
+    # the old man's saucer: silver, a line of powder cut on it, a razor blade laid across the rim
+    sx = tx + 12
+    d.ellipse([sx, top - 1, sx + 14, top + 3], fill=hx("9a9aa4"), outline=hx("44444e"))
+    d.ellipse([sx + 2, top, sx + 12, top + 2], fill=hx("c8c8d0"))
+    d.line([(sx + 2, top - 1), (sx + 6, top - 1)], fill=hx("f0f0f4"))
+    d.line([(sx + 3, top + 1), (sx + 9, top + 1)], fill=hx("fcfaf6"))
+    d.point((sx + 10, top + 1), fill=hx("e8e4de"))
+    d.rectangle([sx + 9, top - 2, sx + 15, top - 1], fill=hx("d8dce4"), outline=hx("5a5e68"))
+    d.point((sx + 10, top - 2), fill=hx("ffffff"))
+    # a silver-backed hairbrush lying bristles down, a tortoiseshell comb tucked in front of it
+    bx = sx + 22
+    d.rounded_rectangle([bx, top, bx + 12, top + 4], 2, fill=hx("b8b8c0"), outline=hx("4a4a54"))
+    d.line([(bx + 2, top + 1), (bx + 9, top + 1)], fill=hx("f0f0f4"))
+    d.point((bx + 6, top + 2), fill=hx("80808c"))
+    d.rectangle([bx + 12, top + 1, bx + 19, top + 3], fill=hx("a8a8b0"), outline=hx("4a4a54"))
     for k in range(bx + 1, bx + 12, 2):
-        d.point((k, top + 6), fill=hx("2a1a14"))
-    cbx = bx + 24
-    d.rectangle([cbx, top + 2, cbx + 14, top + 3], fill=hx("8a4a1a"), outline=hx("3a1a0a"))
-    for k in range(cbx + 1, cbx + 14, 2):
-        d.line([(k, top + 4), (k, top + 5)], fill=hx("6a3410"))
-    d.point((cbx + 4, top + 2), fill=hx("c8843a"))
-    # a lipstick, its cap off: a brass tube and a red bullet
-    lx = x1 - 54
-    d.rectangle([lx, top - 6, lx + 3, top + 1], fill=hx("c8a040"), outline=hx("4a3412"))
-    d.polygon([(lx, top - 7), (lx + 3, top - 10), (lx + 3, top - 7)], fill=hx("c8203a"), outline=hx("6a0e1a"))
-    d.rectangle([lx + 5, top - 2, lx + 8, top + 1], fill=hx("c8a040"), outline=hx("4a3412"))
+        d.point((k, top + 5), fill=hx("2a1a14"))
+    d.line([(bx + 2, top + 6), (bx + 12, top + 6)], fill=hx("8a4a1a"))
+    d.point((bx + 5, top + 6), fill=hx("c8843a"))
+    if lipstick:
+        # her lipstick, standing uncapped: a fluted gold case, the red bullet worn to a slant, the cap lying by it
+        lx = LIPSTICK_X
+        d.rectangle([lx, top - 8, lx + 4, top + 1], fill=hx("c8a040"), outline=hx("4a3412"))
+        d.line([(lx + 1, top - 7), (lx + 1, top)], fill=hx("f8e090"))
+        d.line([(lx + 3, top - 7), (lx + 3, top)], fill=hx("a07a28"))
+        d.line([(lx + 1, top - 4), (lx + 3, top - 4)], fill=hx("6a4a18"))
+        d.rectangle([lx + 1, top - 10, lx + 3, top - 8], fill=hx("e0c060"), outline=hx("6a4a18"))
+        d.polygon([(lx + 1, top - 11), (lx + 3, top - 14), (lx + 3, top - 11)], fill=hx("d02040"),
+                  outline=hx("6a0e1a"))
+        d.point((lx + 2, top - 12), fill=hx("ff6a80"))
+        d.rectangle([lx + 6, top - 2, lx + 12, top + 1], fill=hx("c8a040"), outline=hx("4a3412"))
+        d.line([(lx + 7, top - 1), (lx + 11, top - 1)], fill=hx("f8e090"))
+        d.line([(lx + 12, top - 1), (lx + 12, top)], fill=hx("6a4a18"))
     # a perfume atomiser: a faceted rose bottle, a gilt neck, a tasselled rubber bulb on its tube
-    ax = x1 - 46
+    ax = LIPSTICK_X + 16
     d.polygon([(ax, top - 6), (ax + 3, top - 10), (ax + 7, top - 10), (ax + 10, top - 6), (ax + 9, top + 1),
                (ax + 1, top + 1)], fill=hx("d8909c"), outline=hx("6a3040"))
     d.line([(ax + 3, top - 8), (ax + 2, top - 1)], fill=hx("f4d0d8"))
+    d.line([(ax + 5, top - 5), (ax + 5, top)], fill=hx("b06878"))
     d.rectangle([ax + 4, top - 13, ax + 6, top - 10], fill=hx("d8b050"), outline=hx("4a3412"))
     d.line([(ax + 6, top - 12), (ax + 9, top - 14), (ax + 12, top - 12)], fill=hx("4a2a2a"))
     d.ellipse([ax + 11, top - 13, ax + 16, top - 8], fill=hx("a01e2e"), outline=hx("4a0e14"))
     d.point((ax + 12, top - 12), fill=hx("e85a6a"))
     d.line([(ax + 14, top - 8), (ax + 15, top - 4)], fill=hx("d8b050"))
-    # the powder compact: open, its mirror lid propped up, the pan of powder, a little white heap tipped out
-    cx = x1 - 22
-    d.ellipse([cx - 7, top - 2, cx + 7, top + 3], fill=hx("c8a050"), outline=hx("4a3412"))
-    d.ellipse([cx - 5, top - 1, cx + 5, top + 2], fill=hx("f0e0d0"))
-    d.chord([cx - 7, top - 14, cx + 7, top - 1], 180, 360, fill=hx("a87a28"), outline=hx("3a2408"))
-    d.chord([cx - 5, top - 12, cx + 5, top - 2], 180, 360, fill=hx("4a5668"))
-    d.line([(cx - 3, top - 4), (cx + 1, top - 10)], fill=hx("e8f0f8"))
-    d.point((cx + 3, top - 6), fill=hx("c8d0dc"))
-    hx0 = cx + 10
-    d.polygon([(hx0, top + 3), (hx0 + 3, top), (hx0 + 4, top - 1), (hx0 + 6, top), (hx0 + 9, top + 3)],
-              fill=hx("f4f2ee"), outline=hx("b8b4b0"))
-    d.point((hx0 + 4, top), fill=hx("ffffff"))
+    d.point((ax + 15, top - 3), fill=hx("f0d070"))
+    if compact:
+        # her compact: open, a gold case with an engraved rim, the lid's little mirror propped up, a pan of face
+        # powder with no puff in it
+        cx = COMPACT_X
+        d.ellipse([cx - 7, top - 2, cx + 7, top + 3], fill=hx("c8a050"), outline=hx("4a3412"))
+        d.ellipse([cx - 5, top - 1, cx + 5, top + 2], fill=hx("f0dcc8"))
+        d.arc([cx - 4, top - 1, cx + 4, top + 2], 200, 340, fill=hx("d8bca4"))
+        d.point((cx - 6, top + 1), fill=hx("f8e090"))
+        d.point((cx + 6, top + 1), fill=hx("8a6a28"))
+        d.chord([cx - 7, top - 15, cx + 7, top - 1], 180, 360, fill=hx("a87a28"), outline=hx("3a2408"))
+        d.chord([cx - 5, top - 13, cx + 5, top - 2], 180, 360, fill=hx("4a5668"))
+        for ex in range(cx - 6, cx + 7, 3):
+            d.point((ex, top - 2 - round(12 * (1 - ((ex - cx) / 7) ** 2) ** 0.5)), fill=hx("e8c870"))
+        d.line([(cx - 3, top - 4), (cx + 1, top - 10)], fill=hx("e8f0f8"))
+        d.point((cx + 3, top - 6), fill=hx("c8d0dc"))
+        d.point((cx - 1, top - 3), fill=hx("f8d0c0"))
     noise(img, (x0 - 4, top, x1 + 4, FLOOR), 3, 3530)
 
 
@@ -1392,13 +1423,13 @@ def backstage_rug(img):
 BACKSTAGE_DOOR_BOX = (BACKSTAGE_DOOR[0] - 10, 22 + TOP, BACKSTAGE_DOOR[1] + 22, FLOOR + 20 + TOP)
 
 
-def backstage_scene(door="shut"):
+def backstage_scene(door="shut", makeup=True):
     img = Image.new("RGB", (W, H))
     backstage_wall(img)
     backstage_door(img, door)
     costume_rail(img)
     dressing_screen(img)
-    dressing_table(img)
+    dressing_table(img, compact=makeup, lipstick=makeup)
     backstage_stool(img)
     backstage_rug(img)
     shadow(img, "rect", [0, 0, 18, H - 1], 0.3, 10, hx("20090c"))
@@ -1415,16 +1446,22 @@ def build():
     lounge = lounge_scene()
     stage = stage_scene()
     backstage = backstage_scene()
+    # one palette for the dressing room and its overlays, taken with the makeup on the table
+    pal = palette_of(backstage, 128)
     out = {
         "club_hall.png": pixelize(hall, n=128),
         "club_lounge.png": pixelize(lounge, n=128),
         "club_stage.png": pixelize(stage, n=128),
-        "club_backstage.png": pixelize(backstage, n=128),
+        "club_backstage.png": pixelize(backstage_scene(makeup=False), pal),
     }
     for name, img in out.items():
         save(img, "rooms", name)
+    # Eleanor's lipstick and compact, each vanishing from the table when she takes it
+    full = pixelize(backstage, pal)
+    for name, box in (("lipstick", BACKSTAGE_LIPSTICK_BOX), ("compact", BACKSTAGE_COMPACT_BOX)):
+        save(full.crop(box), "rooms", f"club_backstage_{name}.png")
+        print(f"club_backstage_{name}.png at {box[:2]}")
     # the stage door opening for the old man in the Second Interlude, on the room's own palette
-    pal = palette_of(backstage, 128)
     for state in ("ajar", "open"):
         save(pixelize(backstage_scene(state), pal).crop(BACKSTAGE_DOOR_BOX), "rooms", f"club_backstage_door_{state}.png")
     return out["club_hall.png"]
