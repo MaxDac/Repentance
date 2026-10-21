@@ -345,7 +345,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    mirror and combs her hair (`eleanor_comb`). The scene fades to black; Micah's narration says she put the comb and
    mirror in the nightstand drawer and left them there (the ones Micah finds in Act 1). When the knock comes she is
    sitting up on the edge of the bed by the pillow, awake, in her pyjamas (`eleanor_pyjama_play`, the
-   `eleanor_cell_sit` pose). After the knock, Agatha comes into the cell past midnight. She sincerely believes
+   `eleanor_cell_sit` pose). As the knock fades in she gets up off the bed (`eleanor_cell_rise`) and stands in front
+   of it for the visit. After the knock, Agatha comes into the cell past midnight. She sincerely believes
    she has come to hear Eleanor's confession and quiet a troubled soul; the hour says she has other motives, which
    she won't admit even to herself (she is drawn to women). Micah's narration shows Eleanor seeing the opportunity:
    the Club's old trick, making the connection the depraved way, would buy her the convent's protection for as
@@ -537,7 +538,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - Micah is on the pavement, supine. Narrating voice, which is really Micah's thought, will ask himself what is he doing,
   questions about his life, why he abandoned his wife and son. He recalls Rose's empty desk at the library: he was
   glad she wasn't there, yet she hasn't left his mind since.
-- His recovery is shown through sitting, a supported crouch, and standing rather than an instantaneous pose swap.
+- His recovery is shown through sitting up, rolling forward onto his hands and knees, and getting up off his knees
+  as in the alley, rather than an instantaneous pose swap.
   The player is then presented with two choices:
   - Go find his wife.
   - Push forward.

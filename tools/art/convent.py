@@ -1131,7 +1131,7 @@ def cell_bed_art():
         return 0.92 + (y - 197) / (265 - 197) * (1.06 - 0.92)
 
     # seated, the seat rounds up her back from the blanket to the waist
-    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.075, 0.47, 0.08))
+    spec = dict(ELEANOR_PYJAMA, h=ELEANOR_PYJAMA["h"] * depth(floor_y) / depth(py), rear=(0.035, 0.057, 0.47, 0.08))
     H = spec["h"] * SCALE
     thigh = 84
 
@@ -1153,6 +1153,73 @@ def cell_bed_art():
     fy = round(hip[1] - (base_y - (sole(knee) - 0.5) * H)) - y0
     img = Image.new("RGBA", (w, h))
     img.alpha_composite(Image.fromarray(fig, "RGBA"), (fx, fy))
+    # the upper chest slopes evenly from her throat down to the bust instead of jutting out at the collar: each row's
+    # front outline pixel steps back to (row: column, as seen)
+    a = np.asarray(img).copy()
+    for y, x in CELL_SIT_CHEST.items():
+        front = np.nonzero(a[y, :, 3] == 255)[0].min()
+        if x > front:
+            edge = a[y, front].copy()
+            a[y, front:x] = 0
+            a[y, x] = edge
+    img = Image.fromarray(a, "RGBA")
     head = (fx + FW // 2, round(fy + base_y - (sole(knee) - 0.06) * H))
-    action_strip("eleanor_cell_sit", [(ImageOps.mirror(img), (w - head[0], head[1]))], [1.0],
-                 anchor=(w - (px - x0), py - y0))
+    anchor = (w - (px - x0), py - y0)
+    action_strip("eleanor_cell_sit", [(ImageOps.mirror(img), (w - head[0], head[1]))], [1.0], anchor=anchor)
+    cell_rise_strip(img, (w - head[0], head[1]), anchor, spec)
+
+
+# Room pixels (in the sitting box, as seen) of the front of her upper chest, collar to bust, on the sitting sprite.
+CELL_SIT_CHEST = {49: 56, 50: 56, 51: 55, 52: 54, 53: 53, 54: 52, 55: 52}
+# Rising for Agatha: (lean, thigh, knee, arms, seat depth, seconds) after the seated frame; the last is her pyjama
+# idle frame. Bent over, the pyjama seat sits closer in (no extra rounded rear), or it would puff out behind her.
+CELL_RISE_KEYS = [(22, 70, 95, "push", 0.055, 0.2), (20, 50, 70, 4, 0.055, 0.18), (9, 22, 30, 2, 0.065, 0.16),
+                  (None, 0, 0, 0, None, 0.3)]
+
+
+def cell_rise_strip(seated, seated_head, anchor, seat_spec):
+    """eleanor_cell_rise: from eleanor_cell_sit (frame 0, exactly) she leans forward with her hands pushing on the
+    blanket and stands up in front of the bed, her feet where they were, ending on the pyjama sheet's idle frame.
+    Prints the room point the idle frame stands at (ConventCell.StandAt)."""
+    import numpy as np
+    from PIL import ImageOps
+    from .sprites import ELEANOR_PYJAMA, figure, pose, FW, FH, action_strip, PLAYER_IDLE_YAW, SCALE
+    x0, y0 = CELL_SIT_BOX[:2]
+    w, h = seated.size
+    spec = dict(ELEANOR_PYJAMA, h=seat_spec["h"])  # standing, without the seat's rounded rear on the blanket
+    H = spec["h"] * SCALE
+
+    def feet(a):
+        m = a[..., 3] == 255
+        yb = np.nonzero(m.any(1))[0].max()
+        return np.nonzero(m[yb - 1:yb + 1].any(0))[0].mean(), yb
+
+    sx, sy = feet(np.asarray(seated))
+    frames, seconds = [(ImageOps.mirror(seated), seated_head)], [0.8]
+    stand_at = None
+    for lean, thigh, knee, arms, seat, duration in CELL_RISE_KEYS:
+        if lean is None:
+            ps, sp = pose(PLAYER_IDLE_YAW), spec
+        else:
+            if arms == "push":  # hands pressing on the blanket beside her hips as she leans off it
+                arm = {s: ("pts", (s * 0.118, 0.37, -0.02), (s * 0.13, 0.47, 0.04), (s * 0.13, 0.5, 0.06))
+                       for s in (1, -1)}
+            else:
+                arm = {s: ("swing", arms, 8, 14) for s in (1, -1)}
+            ps = pose(PLAYER_IDLE_YAW, lean=lean, arms=arm, legs={1: (thigh, knee, 0), -1: (thigh - 4, knee - 4, 0)})
+            profile = spec["profile"][:-2] + [(0.47, 0.098, -seat, 0.05), (0.53, 0.086, -seat * 0.91, 0.046)]
+            sp = dict(spec, rear=None, profile=profile)
+        f = np.asarray(ImageOps.mirror(figure(sp, ps, FW, FH))).copy()
+        if lean is not None:
+            f[f[..., 3] < 255] = 0  # the floor shadow only under her idle frame, as the sheet draws it
+        fx, fy = feet(f)
+        ox, oy = round(sx - fx), round(sy - fy)
+        img = Image.new("RGBA", (w, h))
+        img.alpha_composite(Image.fromarray(f, "RGBA"), (ox, oy))
+        top = np.nonzero((np.asarray(img)[..., 3] == 255).any(1))[0].min()
+        frames.append((ImageOps.mirror(img), (w - (ox + FW // 2), round(top + 0.06 * H))))
+        seconds.append(duration)
+        if lean is None:
+            stand_at = (x0 + ox + FW / 2, y0 + oy + FH - 3)
+    action_strip("eleanor_cell_rise", frames, seconds, anchor=anchor)
+    print(f"  eleanor_cell_rise: she stands at {stand_at} (ConventCell.StandAt)")
