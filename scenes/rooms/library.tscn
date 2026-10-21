@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/Library.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library.png" id="2_library"]
@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" path="res://assets/art/sprites/librarian.png" id="92_librarian"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library_desk.png" id="4_desk"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/library_armchair_left.png" id="5_armchair_left"]
-[ext_resource type="Texture2D" path="res://assets/art/rooms/library_armchair_right.png" id="6_armchair_right"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 122)
@@ -57,6 +56,14 @@ centered = false
 color = Color(0.3, 0.9, 0.4, 0.35)
 polygon = PackedVector2Array(12, 174, 180, 174, 180, 242, 300, 242, 300, 222, 182, 222, 182, 174, 468, 174, 468, 262, 12, 262)
 
+[node name="Armchair" type="Polygon2D" parent="WalkArea"]
+color = Color(0.9, 0.3, 0.3, 0.35)
+polygon = PackedVector2Array(92, 218, 141, 218, 141, 235, 92, 235)
+
+[node name="SideTable" type="Polygon2D" parent="WalkArea"]
+color = Color(0.9, 0.3, 0.3, 0.35)
+polygon = PackedVector2Array(142, 236, 179, 236, 179, 247, 142, 247)
+
 [node name="Entries" type="Node2D" parent="."]
 
 [node name="start" type="Marker2D" parent="Entries"]
@@ -77,12 +84,6 @@ offset = Vector2(-64, -76)
 [node name="ArmchairLeft" type="Sprite2D" parent="World"]
 position = Vector2(116, 232)
 texture = ExtResource("5_armchair_left")
-centered = false
-offset = Vector2(-21, -61)
-
-[node name="ArmchairRight" type="Sprite2D" parent="World"]
-position = Vector2(366, 236)
-texture = ExtResource("6_armchair_right")
 centered = false
 offset = Vector2(-21, -61)
 

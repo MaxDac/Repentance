@@ -43,9 +43,12 @@ class SceneImprovementsTests(unittest.TestCase):
                     Image.open(ROOT / "assets" / "art" / relative) as committed:
                 self.assert_image_equal(generated, committed)
 
-    def test_library_armchairs_are_props_placed_where_they_were_painted(self):
+    def test_library_armchair_is_a_prop_placed_where_it_was_painted(self):
         scene = (ROOT / "scenes" / "rooms" / "library.tscn").read_text()
-        for side, node in (("left", "ArmchairLeft"), ("right", "ArmchairRight")):
+        self.assertEqual(set(library.ARMCHAIRS), {"left"})
+        self.assertNotIn("ArmchairRight", scene)
+        self.assertFalse((ROOT / "assets" / "art" / "rooms" / "library_armchair_right.png").exists())
+        for side, node in (("left", "ArmchairLeft"),):
             block = re.search(rf'\[node name="{node}" type="Sprite2D" parent="World"\](.*?)\n\n', scene, re.S).group(1)
             x, y = map(int, re.search(r"position = Vector2\((-?\d+), (-?\d+)\)", block).groups())
             ox, oy = map(int, re.search(r"offset = Vector2\((-?\d+), (-?\d+)\)", block).groups())

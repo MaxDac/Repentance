@@ -531,8 +531,11 @@ public partial class AutoPlay
         await Shot("library_day");
         Check(game.Room?.HotspotAt(new Vector2(35, 130))?.Id == "exit" && game.Room.HotspotAt(new Vector2(95, 120))?.Id == "shelves_left",
             "the painted hall door is the way out, the bookcase beside it is just shelves");
-        Check(game.Room?.GetNodeOrNull<Sprite2D>("World/ArmchairLeft") != null && game.Room.GetNodeOrNull<Sprite2D>("World/ArmchairRight") != null,
-            "the armchairs are Y-sorted props, not painted into the background");
+        Check(game.Room?.GetNodeOrNull<Sprite2D>("World/ArmchairLeft") != null && game.Room.GetNodeOrNull<Sprite2D>("World/ArmchairRight") == null,
+            "the armchair is a Y-sorted prop, not painted into the background, and the window chair is gone");
+        Check(game.Room?.Walk is { } libraryWalk && !libraryWalk.Contains(new Vector2(116, 228)) && !libraryWalk.Contains(new Vector2(162, 242))
+            && !CrossesRect(new Vector2(60, 228), libraryWalk.FindPath(new Vector2(60, 228), new Vector2(160, 228)), new Rect2(93, 219, 47, 15)),
+            "Micah walks around the armchair and the side table, not through them");
         await game.Perform(Verb.UseItem, "librarian", "revolver");
         Check(!gs.HasFlag("library_banned"), "no gun before asking");
         await game.Perform(Verb.Hand, "librarian");
@@ -571,6 +574,9 @@ public partial class AutoPlay
         Check(game.Player.PoseName == "micah_collar" && _poseCounts.GetValueOrDefault("micah_collar") == grabs + 1 &&
             librarian?.Visible == false, "Micah grabs the librarian by the collar (one strip for both, the actor hidden)");
         await Shot("library_collar");
+        await Until(() => game.Player.PoseName == "micah_collar_release" || grab.IsCompleted);
+        Check(gs.HasFlag("librarian_threatened") && game.Player.PoseName == "micah_collar_release" && librarian?.Visible == false,
+            "the librarian's actor stays hidden after a flag changes mid-grab, so he isn't drawn twice");
         await grab;
         Check(_poseCounts.GetValueOrDefault("micah_collar_release") == releases + 1 && game.Player.PoseName == null,
             "Micah lets the librarian go");
@@ -816,5 +822,17 @@ public partial class AutoPlay
         Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false, "the Club is back on the map");
         await game.Perform(Verb.Walk, "church");
         Check(gs.HasFlag("church_before_club"), "Caleb's last warning before the Club");
+    }
+
+    /// <summary>Whether a walk from <paramref name="from"/> along <paramref name="path"/> steps inside <paramref name="box"/>.</summary>
+    private static bool CrossesRect(Vector2 from, List<Vector2> path, Rect2 box)
+    {
+        foreach (var to in path)
+        {
+            for (int s = 0; s <= 16; s++)
+                if (box.HasPoint(from.Lerp(to, s / 16f))) return true;
+            from = to;
+        }
+        return false;
     }
 }
