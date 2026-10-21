@@ -106,7 +106,7 @@ public partial class HarringtonOffice : Room
                 return true;
 
             case ("window", Verb.Walk or Verb.Hand) when !HasEverything:
-                await Say("Not yet. I didn't climb three floors of iron to go home with a cigar.");
+                await Say("Not yet. I didn't climb that fire escape to go home with a cigar.");
                 return true;
             case ("window", Verb.Walk or Verb.Hand):
                 State.SetFlag("harrington_done");

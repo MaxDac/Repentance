@@ -115,7 +115,7 @@ public static class Notes
             L("Harrington Building, LaSalle Street, in the Loop.", "harrington_located")),
         N("harrington_road", "Harrington Building", "seen_harrington_road",
             L("Round the back: a watchman with a stick and a telephone inside."),
-            L("The fire-escape ladder is up, held by a spring catch. The office window is lit.")),
+            L("The fire-escape ladder is up, held by a spring catch. The office window is dark.")),
         N("crests", "The procession", "drawer_right_open",
             L("In the old man's locked drawer, a black card: \"The Club. Thursday, at the turning of the night.\""),
             L("Procession crests, left to right: raven, lion, stag."),

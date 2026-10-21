@@ -778,7 +778,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - Hand on the costume rail: a swansdown puff in a member's wife's gown pocket.
   - Hand on the painted screens: a hairpin clipped to the silk.
   - Join the puff and the compact, then use them on the mirror, in order: the face powder, the lipstick, the
-    hairpin. Out of order, she says so ("Powder first. Then the mouth. Then the hair."). Look on the mirror
+    hairpin. Out of order, she says so ("Face powder first. Then the mouth. Then the hair."). Look on the mirror
     repeats the order. Nothing is taken from the gin table.
   - The finished face lands on the sad note; then the old man comes in by the door, "Sit down, my dear. We have a
     few minutes", and the choice above.
