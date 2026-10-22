@@ -209,7 +209,7 @@ THOUGHT: She'd bought every door she'd ever had that way. This one would have be
     NUN: I won't. Hush, now. I won't.
     THOUGHT: The candle shook. Agatha didn't let go. Eleanor said she'd done this a hundred times, for a hundred men, and she knew to the second when it would turn.
     NUN: No.
-    NUN: No! Get thee behind me! You are no girl. You are a demon in a girl's skin, sent here to try me!
+    NUN: No! Begone, Satan! You are no girl. You are a demon in a girl's skin, sent here to try me!
     ELEANOR: I didn't send for you, Mother. You came.
     NUN: Out of my house at first light. And may God have more mercy on you than I can.
     THOUGHT: She told me she laughed, after the door slammed. Then she cried, and she didn't know which of them she was crying for.
@@ -972,7 +972,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     CALEB: And half the men who'd set the type drink at that Club on Thursdays.
     MICAH: So you pray, and you keep quiet. And you preach repentance to me.
     MICAH: You're a hypocrite, Caleb.
-    CALEB: I know what I am. I confess it every week. It doesn't get lighter.
+    CALEB: I know what I am. I confess the silence every week, and I mean to break it the day it won't bury the girls we hid. That day hasn't come.
     CALEB: If anybody knows anything about Eleanor, it's the sisters. The convent is the best place to ask.
     -> rest
 - (rest)
@@ -1155,9 +1155,10 @@ THOUGHT: He's got nothing left to tell anybody. The rain's already washing him t
 THOUGHT: Nobody saw. Nobody but God, Caleb would say. Tonight that's one too many.
 -> END
 
-// After Tony: Micah at Caleb's church, past midnight, with Tony's blood on his cuff. Caleb hears it and asks the only
-// penance a priest can't give himself: walk to the police with him. Going on to the mansion first is the promise
-// the Our Father needs (Endings.CanSpareOldMan).
+// After Tony: Micah at Caleb's church, past midnight, with Tony's blood on his cuff. Caleb hears his confession and
+// absolves him once he is sorry and promises no more blood. Then, as his brother and not as a penance (a confessor may
+// urge it, never impose it), he asks him to walk to the police with him. Going on to the mansion first is the promise
+// the Our Father needs (Endings.CanSpareOldMan). See docs/theology.md.
 === caleb_tony ===
 CALEB: Micah? It's past midnight. What... There's blood on your cuff.
 MICAH: It's Tony's. The bartender at the Blue Lantern. I shot him, Caleb. Twice.
@@ -1166,7 +1167,15 @@ CALEB: ...
 INSET: church
 CALEB: Kneel down, Micah. Not for me. Say it the way Ma taught us.
 MICAH: Bless me, Father, for I have sinned. I killed a man tonight. To save my own skin.
-CALEB: God doesn't turn away a contrite heart. I believe that. But absolution isn't a place to hide, brother. Not from the law, and not from Tony's mother.
+CALEB: Are you sorry for it? Not scared, Micah. Sorry.
+MICAH: I'm sorry. God help me, I'm sorry.
+CALEB: Then no more blood. Not tonight, not for her, not for anybody. Promise me.
+MICAH: No more blood. I promise.
+CALEB: And his mother. Whatever you can do for her, as long as you live, you do it.
+MICAH: I will.
+CALEB: For your penance, pray for Tony, and for his mother, every night you've got.
+CALEB: Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti.
+CALEB: That's between you and God now, and it's done. This next part isn't your penance. I'm asking as your brother.
 CALEB: The station on Maxwell Street is open all night. I'll walk you there myself. Tonight, while you still mean it.
 * [(Turn yourself in.)]
     ~ set_flag("surrendered_tony")
@@ -1635,11 +1644,12 @@ ELEANOR: How is he? Micah.
     ELEANOR: It's better this way.
 }
 CALEB: Do you repent of these sins, Eleanor? Truly?
-ELEANOR: Every one but the last. God help me, Father, I can't be sorry for the last one.
-CALEB: Then be sorry that it came to it. That's enough to begin with. The rest is His.
+ELEANOR: I was afraid of him. And I wanted him dead. God help me, I can't tell you which hand held the candlestick.
+CALEB: Then don't sort it. Be sorry for every part of you that wanted him dead, and leave the sorting to God.
+ELEANOR: ...I am, Father. For all of it. And I won't call that part good.
 CALEB: Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti.
 ELEANOR: Amen.
-THOUGHT: She said it was the first time anybody had touched her forehead without wanting something for it.
+THOUGHT: She said it was the first time anybody had raised a hand over her without wanting something for it.
 -> END
 
 // Ending 8: Eleanor alone at the edge of the city, leaving it.
@@ -1754,7 +1764,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_9"):
     DANIEL: Wait. This isn't Micah's writing. It's signed... Father Caleb Jones.
-    DANIEL: "My brother kept these pages honestly, as far as he knew. What he could not know, I have added from her own confession, at her asking. She said someone should write it down who wouldn't make her prettier than she was."
+    DANIEL: "My brother kept these pages honestly, as far as he knew. What he could not know, I have added from what she told the court, and what she told me again plainly afterwards, and asked me to set down. She said someone should write it down who wouldn't make her prettier than she was."
     {
     - has_flag("killed_tony"):
         DANIEL: "My brother serves his own sentence at Joliet, for a bartender called Tony; he walked in and gave himself up the morning after. Eleanor Harrington serves hers across the yard. I visit them both, the same Sunday. I am not sure which of them is freer."
@@ -1800,7 +1810,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     {has_flag("shot_bartender"):
         DANIEL: "We left Chicago the week after that cup of coffee, Rose and Tommy and me. Tony knew my face, and the men he pours for never forget one. A man doesn't bring that to his wife's door."
         INSET: vows
-        DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, in a little white church downstate. Caleb came down on the train to say the words. Tommy stood up for me. He has her eyes and, God help him, my chin."
+        DANIEL: "A year since that cup of coffee. Rose and I said our promises again at St. Anne's, a wooden Catholic church downstate. Caleb came down on the train and blessed us. Tommy stood up for me. He has her eyes and, God help him, my chin."
     - else:
         INSET: vows
         DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
@@ -1811,7 +1821,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after that coffee. He said he owed fourteen girls that walk."
         DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
     }
-    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's, to his confessional. What he could tell me without breaking the seal, I wrote in, and the rest I guessed."
+    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
     DANIEL: Maybe Leo would like to read it some day.
@@ -1866,14 +1876,15 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "He shot Mr. Harrington on his own carpet. He shot the girl he had gone to save. Then he turned the revolver on himself. The papers called it a lovers' quarrel. It was not."
     - else:
         DANIEL: "He shot Mr. Harrington on his own carpet. The girl he had gone to save would not go with him, and there were men on the stairs. He turned the revolver on himself, in front of her. She lived. The papers called it a madman's grief. It was not."
+        DANIEL: "She heard him ask forgiveness before the end. I don't know what that word weighed. God does."
     }
     {
     - has_flag("confessed_tony"):
-        DANIEL: "Earlier that night he had killed a bartender called Tony behind the Blue Lantern, and knelt in my church to confess it, and promised me he would give himself up. I let him go to that house first. God forgive me, I let him go."
+        DANIEL: "Earlier that night a bartender named Tony was found behind the Blue Lantern. What else I know of it, I may not write."
     - has_flag("killed_tony"):
         DANIEL: "Earlier that night he had killed a bartender called Tony behind the Blue Lantern, a man who had already told him everything he wanted. I learned it from the police, afterwards."
     }
-    DANIEL: "I prayed for him every day of his life, and I could not make him turn back. Finishing his journal is the only thing that eases the pain."
+    DANIEL: "I prayed for him every day of his life, and I could not make him turn back. I pray for his soul still. Finishing his journal is the only thing that eases the pain."
     DANIEL: "If you are reading this, whoever you are, and whenever: do not walk in my brother's footsteps. It is never too late to turn around, until it is."
     DANIEL: ...
     DANIEL: I don't know if this is good for anyone else, but I'll respect Caleb's decision.
@@ -1891,14 +1902,14 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: "Tony had a mother in Cicero. I write to her every month. She sends them back unopened. Caleb says that's not for her to answer. It's for me to send."
     DANIEL: "Rose comes on the first Sunday. She doesn't say she forgives me. Last month she brought Tommy."
-    DANIEL: There's a note pinned to the page, in another hand: "She came to my confessional, months after. What I could tell without breaking the seal, I have written in for him. - C."
+    DANIEL: There's a note pinned to the page, in another hand: "She came to me months after, and told me all of it, and asked me to write it in. I have, for him. - C."
     DANIEL: So that's whose hand it was.
     DANIEL: ...A killer who walked himself into a cell. I don't know what to call that. Caleb would.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_13"):
     DANIEL: "Omaha. A rented room over a feed store, with one window, and it looks east. I keep the blind down."
     DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and she's still in that house. The Club's car still pulls up at that door, and I'm in Omaha."
-    DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to his confessional in the spring, and what he could tell me without breaking the seal, he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to him in the spring, and told him, and asked him to pass it on, and he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
     DANIEL: "I never wrote to Rose. Better she thinks I'm at the bottom of the lake. Better for Tommy."
     DANIEL: "The revolver's on the washstand. Six in the cylinder. I only ever needed the one."
     DANIEL: So he found out in the end. From his brother's letters, in a room in Omaha.
@@ -1906,11 +1917,11 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: ...Jesus, Micah.
 - has_flag("ending_14"):
     DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
-    DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, in my confessional, the spring after."
+    DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, the spring after, on the church steps, and asked me to set it down."
     DANIEL: "He went to the Harrington house past midnight, for her, with a key a bartender had told him of. There was a bell on the kitchen door that the bartender had not told him of. It rang, and he heard them coming, and he could have run."
     DANIEL: "He went in. Two of the Club's men were waiting in the dark at the cook's table. They shot him on the kitchen tiles before he could finish her name."
-    DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I hear her confession, and I can do nothing else, and God forgive me, it is not enough."
-    DANIEL: "He died walking toward her and not away. That is not repentance. But it was the right direction, and I hold on to it."
+    DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I see her at Mass on Sundays, and I can do nothing else, and God forgive me, it is not enough."
+    DANIEL: "He died walking toward her and not away. That is not repentance. But it was the right direction, and I hold on to it. I say Mass for him, and leave the rest to God's mercy."
     DANIEL: ...
     DANIEL: He never got to the end of the road. Caleb walked the last of it for him, on paper.
     DANIEL: I'll put the journal back. Maybe in a couple of years I'll give it to Leo...

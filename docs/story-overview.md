@@ -369,7 +369,8 @@ and includes seeded regressions; its wall-clock duration must not be advertised 
 ## Scripture
 
 Biblical grounding added to existing conversations. Lines are paraphrases or thematic applications; links are to
-the public-domain KJV. Writing rules: [Story and dialogue](story-and-dialogue.md#voice-and-scripture).
+the public-domain KJV. Writing rules: [Story and dialogue](story-and-dialogue.md#voice-and-scripture). Catholic and
+Protestant readings of these lines and of the endings: [Theology](theology.md).
 
 | Existing conversation and placement | Biblical grounding | Implemented addition |
 |---|---|---|
