@@ -30,8 +30,9 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
   across the diagram, one step per cell.
 - Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be
   combined with an item on another page.
-- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers
-  *Continue* (most recent save), *New game*, *Load game* and *Settings*.
+- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*, *Quit to desktop*
+  (asks *Quit without saving?* first). The title screen offers *Continue* (most recent save), *New game*, *Load game*,
+  *Settings* and *Quit game*. The quit entries are not offered on Android.
 
 ### Touch (Android)
 

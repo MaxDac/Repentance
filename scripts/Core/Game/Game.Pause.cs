@@ -22,6 +22,21 @@ public partial class Game
 
     public Task WaitUntilResumed() => _resume?.Task ?? Task.CompletedTask;
 
+    /// <summary>Test hook: called instead of closing the game when a menu quits.</summary>
+    public Action? QuitOverride { get; set; }
+
+    /// <summary>Closes the game from the title's Quit game or the pause menu's Quit to desktop.</summary>
+    public void QuitGame()
+    {
+        if (QuitOverride != null)
+        {
+            QuitOverride();
+            return;
+        }
+        Timers.ReleasePending();
+        GetTree().Quit();
+    }
+
     private async Task PauseMenu()
     {
         _actionId++;
