@@ -132,6 +132,43 @@ public class SoundSynthTests
         Assert.True(SoundSynth.BaseVolumeDb(Sound.Gunshot) > SoundSynth.BaseVolumeDb(Sound.StepStone));
     }
 
+    private static double Rms(float[] s, double from, double to) =>
+        Math.Sqrt(s[(int)(from * SoundSynth.SampleRate)..(int)(to * SoundSynth.SampleRate)].Average(v => (double)v * v));
+
+    private static double Brightness(float[] s, double from, double to)
+    {
+        var part = s[(int)(from * SoundSynth.SampleRate)..(int)(to * SoundSynth.SampleRate)];
+        return Enumerable.Range(1, part.Length - 1).Sum(i => Math.Pow(part[i] - part[i - 1], 2)) / part.Sum(v => (double)v * v);
+    }
+
+    [Fact]
+    public void GunshotHitsAtOnceThenTheRoomRingsAway()
+    {
+        var shot = SoundSynth.Render(Sound.Gunshot);
+        int peak = Array.IndexOf(shot, shot.MaxBy(Math.Abs));
+        Assert.True(peak < SoundSynth.SampleRate / 50, $"the blast comes at once, after the hammer (peak at {peak} samples)");
+        double blast = Rms(shot, 0, 0.03), room = Rms(shot, 0.15, 0.4);
+        Assert.True(room > blast * 0.01, $"the room answers ({room} vs blast {blast})");
+        Assert.True(room < blast * 0.2, $"the room stays well below the blast ({room} vs blast {blast})");
+        // a diffuse tail only fades: no late burst like a discrete echo
+        for (double t = 0.05; t < 0.8; t += 0.05)
+            Assert.True(Rms(shot, t, t + 0.05) <= Rms(shot, t - 0.05, t) * 1.1, $"the tail swells again at {t:F2} s");
+    }
+
+    [Fact]
+    public void ThunderCracksBrightThenRollsLow()
+    {
+        var thunder = SoundSynth.Render(Sound.Thunder);
+        double crack = Brightness(thunder, 0, 0.3), rumble = Brightness(thunder, 1.5, 3);
+        Assert.True(crack > rumble * 3, $"the near channel cracks brighter than the far rumble ({crack} vs {rumble})");
+        Assert.True(Rms(thunder, 0, 0.4) > Rms(thunder, 1, 3), "the crack is the loudest part");
+        // the channel's stretches at one distance arrive together and swell into rolls
+        int rolls = 0;
+        for (double t = 0.8; t < 3; t += 0.2)
+            if (Rms(thunder, t, t + 0.2) > Rms(thunder, t - 0.2, t) * 1.15) rolls++;
+        Assert.True(rolls >= 1, "the rumble rolls instead of fading evenly");
+    }
+
     [Theory]
     [InlineData("*BANG*", Sound.Gunshot)]
     [InlineData("*CLANG*", Sound.Clang)]
