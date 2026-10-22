@@ -1,12 +1,16 @@
 ---
 name: run-tests
-description: Build, import, run and test Repentance (Godot 4.7 .NET) locally, pick the right test suites for a change, run film mode (any speed, ending or start chapter), or capture what the game draws. Use when asked to run, test, verify, debug a failing suite, play/watch the film, or look at the screen.
+description: Build, import, run and test Repentance (Godot 4.7 .NET) locally ONLY when the user explicitly asks - run a suite, film mode (any speed, ending or start chapter), or capture what the game draws - and pick which suites cover a change. Never run tests on your own before a PR; CI runs them all (see pr-and-ci). Use when the user asks to run, test, play/watch the film, or look at the screen.
 ---
 
 # Running and testing Repentance
 
+**Policy (`docs/testing.md`, "Local test policy"):** CI runs every suite on every PR. Run a suite, `dotnet test`,
+the harness, film or frame capture only when the user explicitly asks for it. Before a PR the only local check is
+`dotnet build -v q -clp:ErrorsOnly`. A failing CI check is read from its log (`pr-and-ci`), not rerun here.
+
 Reference: `docs/testing.md` (suite selection, pass rule, harness, film and frame capture).
-Pick only matching suites from its "Quick reference" table. Do not run all suites or film unless asked.
+When asked, pick only matching suites from its "Quick reference" table. Do not run all suites or film unless asked.
 
 ```powershell
 tools\run\test.ps1 -Suite unit, playthrough     # first run: clean reset, build, import
@@ -22,10 +26,13 @@ Logs: `logs/<suite>.log`, `logs/import.log`. Failure = bad exit, missing marker 
 
 ## Read a failure
 
+CI failures: `docs/ci-and-release.md`, "Reading a CI failure" (filtered `gh run view --log-failed`, artifacts).
+For a run the user asked for:
+
 1. Open `logs/<suite>.log`; search for `FAIL`, `ERROR:`, `SCRIPT ERROR:`, `USER ERROR:`, `Unhandled exception`.
 2. Playthrough and AutoPlay name the beat or check that failed; a timeout means a dead end (missing exit, item or
    choice). A run that logged an error fails even if it printed its marker.
-3. xunit: rerun one class:
+3. xunit, if the user wants a rerun: one class,
    `dotnet test tests/Repentance.Content.Tests --filter FullyQualifiedName~StoryIntegrityTests`.
 4. Art: `py -3.14 -m unittest discover -s tests\art -v`.
 

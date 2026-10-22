@@ -188,8 +188,8 @@ click or refusal walks her past him to the door.
    regression in `scripts/Debug/AutoPlay/AutoPlay.ActN.cs` for anything that could break quietly. Shared input and
    puzzle helpers live in `scripts/Debug/Harness.cs`.
 4. Check [save compatibility](saves-and-settings.md#changing-the-format).
-5. Run `dotnet build`, `tools\run\test.ps1 -Suite unit, playthrough` (add `autoplay` if you touched AutoPlay or
-   `Harness.cs`).
+5. Run `dotnet build`. CI runs `unit` and `playthrough` (and `autoplay`, which covers AutoPlay and `Harness.cs`);
+   run them locally only on request ([Local test policy](testing.md#local-test-policy)).
 
 The unit tests that guard the story (`StoryIntegrityTests`, `InkWalkTests`) and their allowlists are described in
 [Testing](testing.md#story-tests-and-allowlists). Agents: `.claude/skills/story-change/SKILL.md`.

@@ -38,9 +38,9 @@ Follow `docs/audio.md` ("Music", "Recorded instruments", "Music tool"). Always u
    dotnet run --project tools/music -- render LobbyPiano <session folder>/lobby_piano.wav
    ```
 
-   Iterate on the score with the user before running the slow suites. For in-game listening use
+   Iterate on the score with the user before pushing. For in-game listening, when the user asks, use
    `tools\run\game.ps1`.
 4. Update the track's row in `docs/audio.md` and its `MusicSynthTests` fact (range, form, rhythm).
-5. Run `dotnet test tests/Repentance.Audio.Tests --filter MusicSynthTests` (seams, loudness, ranges, recordings).
-6. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, playthrough, autoplay` (every track must play in
-   the playthrough; autoplay checks room music).
+5. Run `dotnet build -v q -clp:ErrorsOnly`. CI runs `MusicSynthTests` (seams, loudness, ranges, recordings) in
+   `unit`, plus `playthrough` (every track must play) and `autoplay` (room music); run them locally only if the
+   user asks (`docs/testing.md`, "Local test policy").

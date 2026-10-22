@@ -14,12 +14,13 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
 
 ## Workflow
 
-1. Select local suites from [Testing](docs/testing.md#quick-reference): docs need none; C# needs `dotnet build`
-   then `unit`. First launcher run clean, later `-NoClean`. Never the full clean suite or film mode unless asked.
-   Run launchers through a subagent on the cheapest model that reports only results (`run-tests` skill).
-2. A planning session that implements its plan ends with a PR, unasked: commit, push, list suites run in the PR,
-   watch checks and fix until `ci-ok` is green (`pr-and-ci`). Never merge; never call work done with red, pending
-   or missing checks.
+1. **CI runs the tests, not agents** ([Testing](docs/testing.md#local-test-policy)). CI runs every suite, so before a
+   PR the only local check is a quiet compile, `dotnet build -v q -clp:ErrorsOnly`, for C# or Ink changes (docs need
+   nothing). Never run a test suite, `test.ps1`/`test.sh`, `dotnet test`, the harness or film mode unless the user
+   explicitly asks; then use the `run-tests` skill (cheapest-model subagent that reports only results).
+2. A planning session that implements its plan ends with a PR, unasked: commit, push, watch checks and fix until
+   `ci-ok` is green (`pr-and-ci`). Diagnose failures from the CI logs and artifacts, filtered to the failing lines;
+   do not reproduce them locally unless asked. Never merge; never call work done with red, pending or missing checks.
 3. Before opening a PR, list the open PRs. If any title does not start with `[NoStack]`, stack on them: rebase onto
    the top of that stack and target its branch, not `main`. Then register it in the native GitHub stack with `gh api`
    (append to the stack, or create one from the bottom PR) ([CI and release](docs/ci-and-release.md#stacked-pull-requests)).

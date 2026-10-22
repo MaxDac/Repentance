@@ -135,7 +135,8 @@ exit hotspot calls the same method in the same state, so the player can leave by
    `scripts/Debug/Playthrough/` (see [Story and dialogue](story-and-dialogue.md)). If a debug start there needs
    items or notes, update `MicahKit.DebugItems` / `Notes.DebugStartFlags`.
 6. Check [save compatibility](saves-and-settings.md#changing-the-format) if saved room/entry identifiers change.
-7. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, walk`; add `playthrough` for story and `art` for art.
+7. Run `dotnet build`. CI runs `unit` and `walk` (plus `playthrough` for story and `art` for art); run them locally
+   only on request ([Local test policy](testing.md#local-test-policy)).
 
 Agents: `.claude/skills/add-room/SKILL.md`.
 

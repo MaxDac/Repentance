@@ -1,5 +1,21 @@
 # Testing
 
+## Local test policy
+
+CI runs every suite on every pull request ([CI and release](ci-and-release.md#ci-githubworkflowsciyml)), so agents
+do not repeat them locally:
+
+- Before a PR, the only local check is a quiet compile for C# or Ink changes:
+  `dotnet build -v q -clp:ErrorsOnly`. Docs and config changes need nothing.
+- Test suites, `test.ps1` / `test.sh`, `dotnet test` (even one `--filter`ed class), `harness`, film mode and frame
+  capture run only when the user explicitly asks. Claude Code prompts before running them.
+- A failing check is diagnosed from its CI log and artifacts, read filtered to the failing lines
+  ([Reading a CI failure](ci-and-release.md#reading-a-ci-failure)), then fixed and pushed; CI is the rerun.
+- Tools that are not tests stay available when a task needs them: `tools/music render` to listen, art generation,
+  `dotnet build`.
+
+People running the game by hand are not bound by this; the rest of this page describes every suite and launcher.
+
 ## Quick reference
 
 One entry point runs every local suite: `tools\run\test.ps1` (Windows) or `tools/run/test.sh` (Linux, macOS, Git
@@ -23,8 +39,9 @@ tools/run/film.sh -s hyper --from ending --ending 8
 tools/run/film.sh --ending prison-caleb-visits   # endings by title too; see film.sh --help
 ```
 
-Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
-all suites from a clean slate (~15 min). Do not do this or run film mode unless requested.
+CI runs every suite on every PR; agents run them locally only on request ([policy](#local-test-policy)). With no
+`-Suite`, the launcher runs all suites from a clean slate (~15 min). The table shows which suites cover a change:
+the CI checks to watch, and what to run when a local run is requested.
 
 | Change | Suites |
 |---|---|

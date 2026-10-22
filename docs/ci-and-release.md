@@ -2,7 +2,8 @@
 
 ## Pull requests
 
-The description lists the changes and the local suites run. Every PR that adds or changes an image (generated art,
+The description lists the changes and says what ran locally (normally `dotnet build` only; tests run in CI, see
+[Local test policy](testing.md#local-test-policy)). Every PR that adds or changes an image (generated art,
 sprites, UI, icons) also shows it:
 
 - Before and after: the image from `main` (`git show main:<path>`) and from the branch; new images need only after.
@@ -59,11 +60,23 @@ To add one, PUT the ruleset back with the new `{context, integration_id: 15368}`
 
 ```powershell
 gh pr checks --watch
-gh run view <run-id> --log-failed
+```
+
+### Reading a CI failure
+
+CI is where tests run ([Local test policy](testing.md#local-test-policy)), so a red check is diagnosed from its
+logs, not by rerunning the suite locally. Full logs are large; read only the failing lines:
+
+```powershell
+gh pr checks --json name,bucket,link --jq '.[] | select(.bucket=="fail")'
+gh run view <run-id> --log-failed | Select-String -Pattern 'FAIL|ERROR:|SCRIPT ERROR:|USER ERROR:|Unhandled exception|error CS|##\[error\]' -Context 3,3
 gh run download <run-id> -n godot-tests-<suite> -D ci-logs   # export jobs: export-<platform>
 ```
 
-Artifacts are uploaded on failure. Fix, push and watch again until `ci-ok` succeeds.
+Bash: `gh run view <run-id> --log-failed | grep -nE -C3 'FAIL|ERROR:|Unhandled exception|error CS|##\[error\]'`.
+Artifacts (`logs/<suite>.log`, screenshots) are uploaded on failure; search them the same way. When a log is too
+long to read cheaply, hand it to a subagent on the cheapest model that reports only the failing lines. Fix, push
+and watch again until `ci-ok` succeeds; the new run is the retest.
 
 Launcher changes are covered by the isolated Python regressions (Bash and PowerShell), including normal play's
 cleanup and marker-free exit handling. `game.sh` / `game.ps1` runs interactive source-project builds, not a CI
