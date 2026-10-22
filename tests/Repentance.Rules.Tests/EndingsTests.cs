@@ -66,8 +66,64 @@ public class EndingsTests
     [InlineData(9, true)]
     [InlineData(10, true)]
     [InlineData(11, true)]
+    [InlineData(12, true)]
+    [InlineData(13, false)]
+    [InlineData(14, false)]
     public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
         Assert.Equal(keeps, Endings.KeepsJournal(ending));
+
+    [Theory]
+    // turning himself in at Caleb's church, or after the Our Father; with or without the papers
+    [InlineData(12, "shot_bartender", "killed_tony", "surrendered_tony")]
+    [InlineData(12, "shot_bartender", "killed_tony", "confessed_tony", "spared_oldman")]
+    [InlineData(12, "shot_bartender", "killed_tony", "confessed_tony", "spared_oldman", "took_documents")]
+    // Eleanor's coda returning to bed after the prayer is 12 too; striking him is still hers
+    [InlineData(12, Abbess, Drugs, "killed_tony", "confessed_tony", "spared_oldman")]
+    [InlineData(8, Abbess, Drugs, "killed_tony", "confessed_tony", "spared_oldman", "eleanor_struck", "eleanor_burned")]
+    [InlineData(9, Abbess, Drugs, "killed_tony", "confessed_tony", "spared_oldman", "eleanor_struck")]
+    // straight to the mansion after killing Tony: the shoot endings are unchanged
+    [InlineData(3, "killed_tony", "shot_oldman", "mansion_exploded")]
+    [InlineData(5, "killed_tony", "shot_oldman")]
+    [InlineData(6, "killed_tony", "confessed_tony", "repented")]
+    // Tony left alive changes no outcome
+    [InlineData(1, "shot_bartender", "spared_oldman")]
+    public void KillingTonyEndsInPrisonWhenMicahRepents(int ending, params string[] flags) =>
+        Assert.Equal(ending, Endings.Resolve(Flags(flags)));
+
+    [Fact]
+    public void AfterKillingTonyTheOurFatherAlsoNeedsTheConfession()
+    {
+        var items = Flags("faith_ring", "cross");
+        string[] gates = { "rose_wait", "church_before_office" };
+        Assert.True(Endings.CanSpareOldMan(Flags(gates), items));
+        Assert.False(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony"]), items));
+        Assert.True(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony", "confessed_tony"]), items));
+        // the confession doesn't replace the other gates
+        Assert.False(Endings.CanSpareOldMan(Flags("church_before_office", "killed_tony", "confessed_tony"), items));
+        Assert.False(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony", "confessed_tony"]), Flags("faith_ring")));
+    }
+
+    [Fact]
+    public void OnlyALiveTonyWantsRevenge()
+    {
+        Assert.False(Endings.TonyWantsRevenge(Flags()));
+        Assert.True(Endings.TonyWantsRevenge(Flags("shot_bartender")));
+        Assert.False(Endings.TonyWantsRevenge(Flags("shot_bartender", "killed_tony")));
+        Assert.False(Endings.TonyWantsRevenge(Flags("warned_tony")));
+    }
+
+    [Theory]
+    [InlineData(13, "warned_tony", "alarm_ran")]
+    [InlineData(14, "warned_tony", "alarm_stayed")]
+    // the bell stops the night at the kitchen door: nothing Micah could have set before it changes that
+    [InlineData(13, "warned_tony", "alarm_ran", Abbess, Drugs, "church_act3_return", "rose_wait")]
+    [InlineData(14, "warned_tony", "alarm_stayed", Abbess, Drugs, "eleanor_convinced")]
+    // a warning shot with the alarm found in time changes no outcome
+    [InlineData(1, "warned_tony", "spared_oldman")]
+    [InlineData(5, "warned_tony", "shot_oldman")]
+    [InlineData(8, "warned_tony", Abbess, Drugs, "spared_oldman", "eleanor_struck", "eleanor_burned")]
+    public void TheAlarmDecidesBeforeEverythingElse(int ending, params string[] flags) =>
+        Assert.Equal(ending, Endings.Resolve(Flags(flags)));
 
     private const string Abbess = "eleanor_refused_abbess", Drugs = "eleanor_refused_drugs";
 
@@ -100,6 +156,15 @@ public class EndingsTests
         Assert.False(Endings.EleanorHeldOut(Flags(Abbess)));
         Assert.False(Endings.EleanorHeldOut(Flags(Drugs)));
         Assert.False(Endings.EleanorHeldOut(Flags()));
+    }
+
+    [Fact]
+    public void FreeEleanorWearsWhiteOnlyIfSheHeldOut()
+    {
+        Assert.Equal("eleanor_white", Endings.EleanorFreeOutfit(Flags(Abbess, Drugs)));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags(Abbess, "eleanor_convinced")));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags(Drugs)));
+        Assert.Equal("eleanor_suit", Endings.EleanorFreeOutfit(Flags()));
     }
 
     [Fact]

@@ -33,6 +33,8 @@ public abstract class Harness
     protected bool Begin(Game game, string saveSuite, bool applyClock = true)
     {
         _game = game;
+        // keep "The End" up for the checks and the next seeded ending instead of leaving for the title
+        game.EndReturnsToTitle = false;
         Game.SequenceFailed += OnSequenceFailed;
         if (applyClock && !ApplyClock(out var clockError))
         {

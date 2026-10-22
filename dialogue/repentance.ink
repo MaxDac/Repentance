@@ -770,6 +770,7 @@ CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
 MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
 MICAH: The same night I walked out on her, two men walked her out of that flophouse. I didn't even ask where she'd go.
 MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
+INSET: church
 MICAH: Right now, Caleb... I'm too far gone to be saved.
 CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
@@ -783,6 +784,7 @@ CALEB: Then start there. He remembers the rest.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
+INSET: none
 -> END
 
 === caleb ===
@@ -975,6 +977,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     -> rest
 - (rest)
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
+INSET: church
 MICAH: There isn't much left for me to do.
 CALEB: You know that isn't true.
 CALEB: Repentance isn't for saints at the end of their lives, Micah. It's for anyone, any day they still draw breath.
@@ -985,6 +988,7 @@ CALEB: You've always been arrogant, Micah. Always the one who had to carry every
 CALEB: Despair is just another way of putting yourself first. If you're past saving, you never have to change.
 CALEB: The prodigal thought he was past it too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
+INSET: none
 -> END
 
 === office_ring ===
@@ -1102,10 +1106,25 @@ BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, to
 THOUGHT: The revolver weighs more than it did this morning. Tony's sweating. So am I.
 * [(Shoot him in the shoulder.)]
     ~ set_flag("shot_bartender")
+* [(Fire into the wall by his head.)]
+    ~ set_flag("warned_tony")
 * {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
     MICAH: ...You're right, Tony. It's not worth it. None of it is.
     ~ set_flag("walked_away")
 - -> END
+
+// The warning shot: a brick by Tony's ear, not Tony. Scared and unhurt, he gives the house and the key, but not the
+// alarm on the kitchen door; MansionExterior rings it if Micah opens the door without spotting it first.
+=== bartender_miss ===
+BARTENDER: Jesus, Mary and Joseph! You're crazy! You're actually crazy!
+MICAH: That was the wall, Tony. I've got five more, and you've only got the one head. Where is she?
+BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
+BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday. There's a key on the lintel over the door.
+BARTENDER: Just walk right in like the delivery boys do, Jones. Nobody'll even look up.
+THOUGHT: He says it too quick, and he won't look at me. Tony never could keep a straight face on a short pour.
+MICAH: You never saw me tonight, Tony.
+BARTENDER: Saw who? I've been inside all night, polishing glasses. Ask anybody.
+-> END
 
 === bartender_shot ===
 BARTENDER: AAAAH! My shoulder! You shot me, you crazy son of a...
@@ -1113,7 +1132,69 @@ MICAH: I've got five more, Tony. And you've got another shoulder. Where is she?
 BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
 BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday.
 BARTENDER: There's a key on the lintel over the kitchen door. Just walk in like the delivery boys do.
+MICAH: And?
+BARTENDER: And... there's a bell. A burglar alarm, wired to that door. The old man had it put in after the Feds came sniffing. Open it cold and it rings the whole house awake.
+BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
+BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
+-> END
+
+// Micah uses the revolver on Tony, on his back in the alley after the first shot: he finishes him so he can't tell
+// the mob. Alley fires the shot between this knot and bartender_dead.
+=== bartender_kill ===
+THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
+BARTENDER: Jones? What are you... no. No, no, I told you! I told you everything!
+MICAH: You did, Tony. That's the trouble. You'll tell them everything too.
+BARTENDER: I won't! On my mother, I won't say a--
+-> END
+
+=== bartender_dead ===
+~ set_flag("killed_tony")
+THOUGHT: The second shot is louder than the first. Or I'm listening harder.
+THOUGHT: He's got nothing left to tell anybody. The rain's already washing him toward the drain, like everything else in this alley.
+THOUGHT: Nobody saw. Nobody but God, Caleb would say. Tonight that's one too many.
+-> END
+
+// After Tony: Micah at Caleb's church, past midnight, with Tony's blood on his cuff. Caleb hears it and asks the only
+// penance a priest can't give himself: walk to the police with him. Going on to the mansion first is the promise
+// the Our Father needs (Endings.CanSpareOldMan).
+=== caleb_tony ===
+CALEB: Micah? It's past midnight. What... There's blood on your cuff.
+MICAH: It's Tony's. The bartender at the Blue Lantern. I shot him, Caleb. Twice.
+MICAH: The second time he was on his back in the rain, and he'd already told me everything. He knew my face. I told myself he'd send them after Rose and Tommy.
+CALEB: ...
+INSET: church
+CALEB: Kneel down, Micah. Not for me. Say it the way Ma taught us.
+MICAH: Bless me, Father, for I have sinned. I killed a man tonight. To save my own skin.
+CALEB: God doesn't turn away a contrite heart. I believe that. But absolution isn't a place to hide, brother. Not from the law, and not from Tony's mother.
+CALEB: The station on Maxwell Street is open all night. I'll walk you there myself. Tonight, while you still mean it.
+* [(Turn yourself in.)]
+    ~ set_flag("surrendered_tony")
+    MICAH: All right. Walk with me, Caleb. I don't trust my legs.
+    CALEB: Then lean on me. I'm used to it.
+* [Not yet. Eleanor's still in that house.]
+    ~ set_flag("confessed_tony")
+    MICAH: After her, I'll walk in there on my own two feet. I swear it.
+    CALEB: On your own two feet. I'll be on the station steps at sunrise, Micah. Don't make me wait for nothing.
+- INSET: none
+-> END
+
+// The alarm, on the warning-shot route: Tony left the bell out. Running is ending 13 (Outskirts); going in anyway is
+// ending 14 (the kitchen ambush).
+=== alarm_footsteps ===
+THOUGHT: Feet on the back stairs. Heavy ones, and more than one pair. Nobody in this house sleeps in slippers.
+THOUGHT: "Walk right in like the delivery boys." Tony knew. He sent me to ring the doorbell.
++ [(Run.)]
+    ~ set_flag("alarm_ran")
++ [(Stay. She's in there.)]
+    ~ set_flag("alarm_stayed")
+- -> END
+
+// Ending 14: the Club's two men in the Harrington kitchen, waiting at the cook's table. MansionKitchen fires the shots.
+=== kitchen_ambush ===
+THOUGHT: Two of them, at the cook's table, with the light off. Like they've been waiting for me all week.
+GUNMAN: Bell's for the delivery boys, pal. You don't look like a delivery boy.
+MICAH: I'm here for Eleanor Har...
 -> END
 
 === harrington_eleanor ===
@@ -1164,7 +1245,11 @@ CUE: step
 HARRINGTON: You'll be back. They always come back, Mr. Jones. Every one of them.
 MICAH: ...but deliver us from evil.
 CUE: door
-THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. I know where I'm going.
+{has_flag("killed_tony"):
+    THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. Caleb's waiting on the station steps at sunrise, and I promised him my own two feet.
+- else:
+    THOUGHT: Further than I've got since France. He's still talking when I reach the door. Let him. I know where I'm going.
+}
 -> END
 
 // Eleanor's persuasion: four turns, four lines on each, one of each type. Every line adds its type's points to
@@ -1321,7 +1406,7 @@ THOUGHT: Her hand is cold and small in mine. For the first time in years I know 
 // ---------------------------------------------------------------- ACT 3: ENDINGS
 
 === ending_together ===
-THOUGHT: At the gate she fetched her black dress from the Club's car. She changed in mine while I drove, and left the sheet somewhere on the road behind us.
+THOUGHT: At the gate she fetched her duffle from the Club's car, packed long ago for running. She changed in mine while I drove: a black suit, the skirt above the knee. The sheet's somewhere on the road behind us.
 ELEANOR: So this is where Chicago ends.
 MICAH: It doesn't end. It just runs out of streetlights.
 ELEANOR: Where are we going?
@@ -1353,8 +1438,16 @@ MICAH: She wouldn't come with me. Even with him on the carpet and the whole Club
 THOUGHT: Free. That's the word for it. Free as a dog nobody wants.
 -> END
 
+// Ending 13: he ran from the alarm, and Eleanor's still in that house.
+=== ending_out ===
+THOUGHT: The last fence post. The last streetlight. I didn't stop for any of them.
+MICAH: A bell, and some feet on the stairs. That's all it took. I heard them coming and I ran.
+MICAH: She's still in that house. Thursdays, the old man said. Every Thursday.
+MICAH: I'm out. Out of the job, out of the city. Chicago can have what's left of Micah Jones. I'm not coming back for it.
+-> END
+
 === prison_eleanor ===
-THOUGHT: Six months of grey walls and grey soup. Today, a visitor. The guard says she wore her best hat.
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. The guard says she came in a black suit, like a widow.
 ELEANOR: Hello, Micah.
 MICAH: You came. The guard bet me a cigarette you wouldn't.
 ELEANOR: They said a lot of things about you. In court, mostly.
@@ -1399,6 +1492,38 @@ ROSE: I'll try. That's all I can promise. I'll try.
 THOUGHT: She doesn't touch the glass between us. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
 -> END
 
+// Ending 12: Micah killed Tony and turned himself in for it, from Caleb's church or after the Our Father. Caleb walked
+// him in, and visits.
+=== prison_caleb_tony ===
+THOUGHT: A year of grey walls and grey soup. Today, my brother, in his collar, the same as every first Sunday.
+CALEB: Micah.
+MICAH: Father. Still the only man in Chicago who visits a murderer on purpose.
+CALEB: I walked you in through that door. I'm not going to stop walking now.
+{has_flag("spared_oldman"):
+MICAH: The old man?
+CALEB: Alive, and still talking, I'm told. To anybody who'll listen.
+{has_flag("took_documents"):
+    CALEB: But not to the grand jury. The papers you handed in with your confession did the talking there. The girls' names, the trains, the prices. The Club's finished, Micah. No more Thursdays.
+    MICAH: Then one thing I did that night was worth doing.
+- else:
+    MICAH: And the Club?
+    CALEB: Thursdays, the same as ever. I'm sorry, brother.
+}
+- else:
+MICAH: Eleanor?
+CALEB: Back in the big house on the Gold Coast. Nobody went for her that night.
+MICAH: Nobody. Not me, either. I picked this instead.
+CALEB: You picked right. It doesn't feel right. That's how you know.
+}
+MICAH: Tony had a mother. In Cicero. I write to her every month. She sends them back unopened.
+CALEB: Keep writing. That's not for her to answer. It's for you to send.
+MICAH: And Rose?
+CALEB: She asked me to bring you this.
+THOUGHT: A drawing in crayon. A man in a hat, behind bars that look like a fence, and a boy waving through them.
+MICAH: He's got her eyes. And God help him, my chin.
+THOUGHT: Life, the judge said, and Caleb in the back row said Amen like it was a Sunday. I've got the time. I'm using it.
+-> END
+
 // ---------------------------------------------------------------- ELEANOR'S OWN WAY (endings 8 to 11)
 // Only when she refused both Agatha and the old man (Endings.EleanorHeldOut).
 
@@ -1415,7 +1540,7 @@ THOUGHT: She doesn't take my hand. She just comes, holding the sheet round her l
 
 // Ending 10: the edge of the city, the car, and Eleanor walking away from it.
 === ending_weary_road ===
-THOUGHT: At the gate she took her black dress off the back seat of the Club's car, and changed in mine on the way. The sheet's somewhere behind us on the road. She still wouldn't look at me.
+THOUGHT: At the gate she took her duffle, packed for running, off the back seat of the Club's car, and changed in mine on the way: a plain white dress, and her pearls. The sheet's somewhere behind us on the road. She still wouldn't look at me.
 MICAH: West, then. Until the money runs out, or the road does.
 ELEANOR: ...
 ELEANOR: I told you all of it in the car, Micah. The motel, after you'd gone. The old man's gin. You know everything now.
@@ -1435,7 +1560,7 @@ ELEANOR: Go home, Micah. Find yours.
 
 // Ending 11: Joliet; Eleanor visits once, and only to say goodbye.
 === prison_eleanor_peace ===
-THOUGHT: Six months of grey walls and grey soup. Today, a visitor. No hat, a plain grey coat, like a woman on her way to early Mass.
+THOUGHT: Six months of grey walls and grey soup. Today, a visitor. No hat, a plain white dress and her pearls, like a woman on her way to early Mass.
 ELEANOR: Hello, Micah.
 MICAH: Eleanor. I didn't think you'd come.
 ELEANOR: Neither did I. I nearly turned round at the gate.
@@ -1500,9 +1625,15 @@ ELEANOR: The Club's finished. They say the building's for sale.
 CALEB: I know. I read every word.
 THOUGHT: He didn't tell her how many years he had kept the same words behind his teeth. She knew it anyway. She said it was in his hands.
 ELEANOR: How is he? Micah.
-CALEB: He's with his wife now.
-ELEANOR: ...
-ELEANOR: It's better this way.
+{has_flag("killed_tony"):
+    CALEB: Here. The men's wing, across the yard. He turned himself in the morning after that night, for a bartender he killed.
+    ELEANOR: ...
+    ELEANOR: Then he stopped running. It's better this way.
+- else:
+    CALEB: He's with his wife now.
+    ELEANOR: ...
+    ELEANOR: It's better this way.
+}
 CALEB: Do you repent of these sins, Eleanor? Truly?
 ELEANOR: Every one but the last. God help me, Father, I can't be sorry for the last one.
 CALEB: Then be sorry that it came to it. That's enough to begin with. The rest is His.
@@ -1514,10 +1645,14 @@ THOUGHT: She said it was the first time anybody had touched her forehead without
 // Ending 8: Eleanor alone at the edge of the city, leaving it.
 === ending_eleanor_alone ===
 THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
-THOUGHT: At the gate stood the Club's car, her black dress still on the back seat. She put it on in the dark, and left the sheet and the cook's coat in the ditch.
+THOUGHT: At the gate stood the Club's car, the duffle she'd packed for running still on the back seat. In the dark she put on a white dress and her pearls, and left the sheet and the cook's coat in the ditch.
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
 THOUGHT: The old man's Thursday book was in a brown envelope under her arm, addressed to the city desk of the Tribune. The first mailbox past the city limits would do.
-ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
+{has_flag("killed_tony"):
+    ELEANOR: Serve your time, Micah Jones. I'll write to you one day, and tell you what became of me. It might even be good news.
+- else:
+    ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
+}
 ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
 -> END
@@ -1598,17 +1733,36 @@ THOUGHT: A glass of gin on the dressing table, and beside it, on a silver saucer
 DANIEL: The last entry. The handwriting's different. Shakier.
 {
 - has_flag("ending_8"):
-    DANIEL: "A letter came to Rose's house today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "A letter came to Joliet today, where I serve my time for Tony. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    - has_flag("shot_bartender"):
+        DANIEL: "We left Chicago the week after that coffee. Tony knew my face, and the men he pours for never forget one. A man doesn't bring that to his wife's door."
+        DANIEL: "A letter came today, sent on by Caleb to the house downstate. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    - else:
+        DANIEL: "A letter came to Rose's house today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    }
     DANIEL: "The motel, the Order's men, the old man's gin she wouldn't drink. And what she did with his candlestick after I'd gone. I've copied it all into the pages before these, in her words. I owed her that much."
     DANIEL: "The Harrington house burned to the cellar the night I left it. The papers said a gas main. Nobody ever asked me, and I never said."
     DANIEL: "A week later the Tribune printed the old man's Thursday book, page by page: the girls, the trains, the men who paid. She had mailed it to them on her way out of the city. The Club never opened on a Thursday again."
-    DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
+    {has_flag("killed_tony"):
+        DANIEL: "Rose knows. I passed her the letter through the visiting-room glass. She read it twice, and folded it, and kept it."
+    - else:
+        DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
+    }
     DANIEL: ...So that's whose hand it was. Hers, copied out by his.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_9"):
     DANIEL: Wait. This isn't Micah's writing. It's signed... Father Caleb Jones.
     DANIEL: "My brother kept these pages honestly, as far as he knew. What he could not know, I have added from her own confession, at her asking. She said someone should write it down who wouldn't make her prettier than she was."
-    DANIEL: "Micah drinks coffee now, and goes to Mass with his wife. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "My brother serves his own sentence at Joliet, for a bartender called Tony; he walked in and gave himself up the morning after. Eleanor Harrington serves hers across the yard. I visit them both, the same Sunday. I am not sure which of them is freer."
+    - has_flag("shot_bartender"):
+        DANIEL: "Micah drinks coffee now, and goes to Mass with his wife, in a town downstate. The bartender he shot, Tony, knew his face, and the men Tony pours for looked for him all winter. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    - else:
+        DANIEL: "Micah drinks coffee now, and goes to Mass with his wife. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    }
     DANIEL: "At her trial she named the Club, and the girls, and the trains, in open court. The Club's Thursdays ended with her testimony. She did, in one afternoon, what I had not the courage to do in all my years of silence. My brother called me a hypocrite for it. He was right."
     DANIEL: "Whoever reads this: she said no, twice, when no was the hardest word in Chicago. Remember that about her, if you remember anything."
     DANIEL: ...So that's whose hand it was. Caleb's.
@@ -1616,7 +1770,15 @@ DANIEL: The last entry. The handwriting's different. Shakier.
 - has_flag("ending_10"):
     DANIEL: "A year, near enough, since the prairie road. I haven't had a drink since that night. Some days that's the only thing I've done right. Some days it's enough."
     DANIEL: "She told me the rest of it in the car that night, the motel and the old man's gin, before she got out and walked off down the road. I wrote it in the way she said it. She went looking for her peace. I hope she found it."
-    DANIEL: "I'm looking for mine. I write to Rose every Sunday, and every Sunday I sit at the back of Caleb's church. She hasn't written back yet. I'll keep writing."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "And Tony. I went back and put a second bullet in him, on his back in that alley, so he couldn't tell anybody my name. Nobody's come for me. I hear every car that slows down outside."
+        DANIEL: "I'm looking for my peace, but I know where it starts, and it starts at a police station. I write to Rose every Sunday. Every Sunday I sit at the back of a church where nobody knows me, and I don't go up for Communion. Not yet."
+    - has_flag("shot_bartender"):
+        DANIEL: "I'm looking for mine, though not in Chicago. Tony knows my face, and the men he pours for never forget one. I write to Rose every Sunday, care of Caleb, and every Sunday I sit at the back of a church in a town with one street. She hasn't written back yet. I'll keep writing."
+    - else:
+        DANIEL: "I'm looking for mine. I write to Rose every Sunday, and every Sunday I sit at the back of Caleb's church. She hasn't written back yet. I'll keep writing."
+    }
     {has_flag("took_documents"):
         DANIEL: "I did what she asked with the old man's papers. I left them on the city desk at the Tribune, in an envelope with no name on it. The Club's Thursdays ended that winter."
     }
@@ -1625,12 +1787,24 @@ DANIEL: The last entry. The handwriting's different. Shakier.
 - has_flag("ending_11"):
     DANIEL: "She came once, and never again. I didn't expect her to. She told me the rest of it across the parlour table, the motel and the old man's gin, and I wrote it in that same night, so I wouldn't lose a word."
     DANIEL: "She said she hoped I'd find my peace. I'm trying. The Our Father every morning, start to finish. Caleb on the first Sunday of the month. A letter to Rose every week. Two came back. The third one, she kept."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "They tried me for the old man. Then somebody found Tony behind the Blue Lantern, and they tried me for him too. I didn't deny it. Some things you can't say the Our Father over until you've said them out loud."
+    - has_flag("shot_bartender"):
+        DANIEL: "Tony's friends have friends in here. A man in the yard told me Tony sends his regards, and asks after my shoulder. I sleep with my back to the wall."
+    }
     DANIEL: "Peace isn't a place you get to, Caleb says. It's a direction. I'm facing it, at least."
     DANIEL: ...So that's whose hand it was. Micah's, from across a prison table.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_1"):
-    INSET: vows
-    DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
+    {has_flag("shot_bartender"):
+        DANIEL: "We left Chicago the week after that cup of coffee, Rose and Tommy and me. Tony knew my face, and the men he pours for never forget one. A man doesn't bring that to his wife's door."
+        INSET: vows
+        DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, in a little white church downstate. Caleb came down on the train to say the words. Tommy stood up for me. He has her eyes and, God help him, my chin."
+    - else:
+        INSET: vows
+        DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
+    }
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
     INSET: none
     {has_flag("took_documents"):
@@ -1645,9 +1819,15 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
     DANIEL: "She always comes back, and I always open the door. The bottle is the only one in this house that never lies to me."
     DANIEL: "She told me the rest of it in the car that night, the motel and the old man's gin. I wrote it down the way she said it. It's the only part of her I ever really had."
+    {has_flag("killed_tony"):
+        DANIEL: "And Tony, on his back in that alley, with my second bullet in him. She never asked what took me so long getting to the Gold Coast. I never said."
+    }
     DANIEL: He got the girl. And then the girl got him.
 - has_flag("ending_3"):
     DANIEL: "I see her every night. On the ceiling. At the bottom of the glass. The old man on the carpet, and the look on her face."
+    {has_flag("killed_tony"):
+        DANIEL: "Tony's up there with them. On his back in the rain, asking me why. He'd told me everything."
+    }
     DANIEL: "One bullet left in the revolver. I always was bad at keeping things."
     {has_flag("mansion_exploded"):
         DANIEL: "What happened to her after the motel, I put together from what the Club's men said in court. She wasn't there to say it herself."
@@ -1661,6 +1841,12 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "Rose came again today. She brought Tommy's drawings. She doesn't say she forgives me, and I don't ask her to."
     DANIEL: "I said the whole Our Father this morning, start to finish, the way Ma taught us. Caleb says I sound like a choirboy with a hangover."
     DANIEL: "I made a lot of awful choices, but now I know, I returned to the faith..."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "I told that cop about Tony too. He wrote it down without looking up. Two men dead by my hand, and the second one only to cover up the first. Caleb says the Lord forgives that. Tony's mother doesn't, and I don't ask her to."
+    - has_flag("shot_bartender"):
+        DANIEL: "Tony's friends have friends in here. A man in the yard told me Tony sends his regards, and asks after my shoulder. I sleep with my back to the wall, and I say my prayers facing it."
+    }
     {has_flag("took_documents"):
         DANIEL: "I gave that cop the old man's papers along with my confession. The girls' names were in them, and the prices, and the trains. They read them out at my trial."
         DANIEL: "The papers called it a scandal for a week. The Club never opened its doors on a Thursday again. That's the one thing I did in that house I'm not sorry for."
@@ -1681,15 +1867,63 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     - else:
         DANIEL: "He shot Mr. Harrington on his own carpet. The girl he had gone to save would not go with him, and there were men on the stairs. He turned the revolver on himself, in front of her. She lived. The papers called it a madman's grief. It was not."
     }
+    {
+    - has_flag("confessed_tony"):
+        DANIEL: "Earlier that night he had killed a bartender called Tony behind the Blue Lantern, and knelt in my church to confess it, and promised me he would give himself up. I let him go to that house first. God forgive me, I let him go."
+    - has_flag("killed_tony"):
+        DANIEL: "Earlier that night he had killed a bartender called Tony behind the Blue Lantern, a man who had already told him everything he wanted. I learned it from the police, afterwards."
+    }
     DANIEL: "I prayed for him every day of his life, and I could not make him turn back. Finishing his journal is the only thing that eases the pain."
     DANIEL: "If you are reading this, whoever you are, and whenever: do not walk in my brother's footsteps. It is never too late to turn around, until it is."
     DANIEL: ...
     DANIEL: I don't know if this is good for anyone else, but I'll respect Caleb's decision.
     DANIEL: I'll put the journal back. Maybe in a couple of years I'll give it to Leo...
+- has_flag("ending_12"):
+    DANIEL: "A year in Joliet. Life, the judge said. Caleb in the back row said Amen, like it was a Sunday."
+    DANIEL: "I killed a man who'd already told me everything, so he couldn't tell anybody else. There's no prettier way to write it, so I won't try."
+    {has_flag("spared_oldman"):
+        DANIEL: "I said the Our Father in the old man's bedroom with a gun in my hand, and walked out without the Amen. I finished it on the station steps at sunrise, with Caleb holding my arm."
+    - else:
+        DANIEL: "I never got to the Gold Coast. Caleb walked me to the station on Maxwell Street that same night, holding my arm like we were boys crossing State Street."
+    }
+    {has_flag("took_documents"):
+        DANIEL: "The old man's papers went in with my confession. The grand jury read every name. The Club's Thursdays are over, and that's the one debt I paid in full."
+    }
+    DANIEL: "Tony had a mother in Cicero. I write to her every month. She sends them back unopened. Caleb says that's not for her to answer. It's for me to send."
+    DANIEL: "Rose comes on the first Sunday. She doesn't say she forgives me. Last month she brought Tommy."
+    DANIEL: There's a note pinned to the page, in another hand: "She came to my confessional, months after. What I could tell without breaking the seal, I have written in for him. - C."
+    DANIEL: So that's whose hand it was.
+    DANIEL: ...A killer who walked himself into a cell. I don't know what to call that. Caleb would.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_13"):
+    DANIEL: "Omaha. A rented room over a feed store, with one window, and it looks east. I keep the blind down."
+    DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and she's still in that house. The Club's car still pulls up at that door, and I'm in Omaha."
+    DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to his confessional in the spring, and what he could tell me without breaking the seal, he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    DANIEL: "I never wrote to Rose. Better she thinks I'm at the bottom of the lake. Better for Tommy."
+    DANIEL: "The revolver's on the washstand. Six in the cylinder. I only ever needed the one."
+    DANIEL: So he found out in the end. From his brother's letters, in a room in Omaha.
+    DANIEL: That's the last line. The rest of the page is blank.
+    DANIEL: ...Jesus, Micah.
+- has_flag("ending_14"):
+    DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
+    DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, in my confessional, the spring after."
+    DANIEL: "He went to the Harrington house past midnight, for her, with a key a bartender had told him of. There was a bell on the kitchen door that the bartender had not told him of. It rang, and he heard them coming, and he could have run."
+    DANIEL: "He went in. Two of the Club's men were waiting in the dark at the cook's table. They shot him on the kitchen tiles before he could finish her name."
+    DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I hear her confession, and I can do nothing else, and God forgive me, it is not enough."
+    DANIEL: "He died walking toward her and not away. That is not repentance. But it was the right direction, and I hold on to it."
+    DANIEL: ...
+    DANIEL: He never got to the end of the road. Caleb walked the last of it for him, on paper.
+    DANIEL: I'll put the journal back. Maybe in a couple of years I'll give it to Leo...
 - else:
     DANIEL: "Rose. Tommy. I know you won't come, and I don't blame you. I'd have stayed away from me too."
     DANIEL: "Tommy, be a better man than your father. It isn't a high bar. Rose, I'm sorry. I always was. I just never said it right."
     DANIEL: "They took my belt. They left me the sheets."
+    {
+    - has_flag("killed_tony"):
+        DANIEL: "They tried me for the old man, and then for Tony. I didn't deny either. There was nobody left to lie for."
+    - has_flag("shot_bartender"):
+        DANIEL: "Tony's friends have friends in here. A man in the yard told me Tony sends his regards. I don't sleep much."
+    }
     {has_flag("ending_4"):
         DANIEL: "Eleanor comes on Sundays. She told me the rest of it across the parlour table, a little every week. The motel. The old man's gin. I wrote it in. Somebody should."
     - else:
@@ -1698,7 +1932,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11") && not has_flag("ending_12") && not has_flag("ending_13") && not has_flag("ending_14"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END

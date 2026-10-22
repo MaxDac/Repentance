@@ -5,6 +5,7 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
 
 ## Controls
 
+- At launch a verse (Luke 15:7) fades in over black before the title screen; any key, click or tap skips it.
 - **Left click** on the floor to walk. Left click on an object does the obvious thing: talk to people,
   go through exits, look at everything else. A character drawn in front of an object is the one you point at.
   On the map of Chicago, hovering a place shows its description at the bottom and a left click goes there.
@@ -30,8 +31,10 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
   across the diagram, one step per cell.
 - Use the satchel's **< / >** page buttons when carrying more than twelve items. A held item can be
   combined with an item on another page.
-- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*. The title screen offers
-  *Continue* (most recent save), *New game*, *Load game* and *Settings*.
+- **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*, *Quit to desktop*
+  (asks *Quit without saving?* first). The title screen offers *Continue* (most recent save), *New game*, *Load game*,
+  *Settings* and *Quit game*. The quit entries are not offered on Android.
+- When the story ends on *The End*, a click, a key or ten seconds return to the title screen.
 
 ### Touch (Android)
 

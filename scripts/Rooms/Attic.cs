@@ -373,7 +373,7 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    private int EndingNumber() => Enumerable.Range(1, 11).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
+    private int EndingNumber() => Enumerable.Range(1, Endings.Count).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
 
     /// <summary>
     /// After Act 3: Daniel reads the last entry. He keeps the journal for Leo if Micah found his way back
@@ -388,14 +388,17 @@ public partial class Attic : Room
             await Game.WalkTo(new Vector2(384, 224));
             Player.Face(Facing.Right);
             State.TakeItem("journal");
-            if (!State.HasFlag("ending_7"))
+            // Caleb's endings already have Daniel putting it back for Leo
+            if (!State.HasFlag("ending_7") && !State.HasFlag("ending_14"))
                 await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
         }
         await Wait(0.6);
         await Game.Hud.Fade(1, 2.0);
         Game.Hud.ShowCaption("The End");
-        // the story is over: keep the game on the caption until a load or a new game
-        await Game.HoldTheEnd();
+        // the story is over: a click, a key or a few seconds take the game back to the title (a load or a new game,
+        // or a test seeding its next ending, lets the caption go first)
+        bool toTitle = await Game.HoldTheEnd();
         Game.Hud.ShowCaption(null);
+        if (toTitle) Game.LeaveStoryForTitle();
     });
 }

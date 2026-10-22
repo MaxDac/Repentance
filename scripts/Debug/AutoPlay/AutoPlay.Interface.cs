@@ -150,6 +150,7 @@ public partial class AutoPlay
         var saved = SaveSystem.Read(SaveSystem.ManualSlot(0));
         Check(saved is { Room: "lobby", RoomTitle: "Aurelian Hotel" } && saved.Inventory.Contains("brass_box"), "saved to slot 1 from the menu");
         await OverwriteTest(game);
+        await QuitToDesktopTest(game);
         PressKey(Key.Escape);
         await game.Wait(0.1);
         Check(!game.Hud.Menu.IsOpen && !game.GetTree().Paused, "Esc resumes the game");
@@ -200,6 +201,33 @@ public partial class AutoPlay
     }
 
     /// <summary>Shows the title menu: Continue/Load are only offered once a save exists.</summary>
+    /// <summary>Quit to desktop asks first: No returns to the pause menu, Yes closes the game (hooked here).</summary>
+    private async Task QuitToDesktopTest(Game game)
+    {
+        var menu = game.Hud.Menu;
+        int quits = 0;
+        game.QuitOverride = () => quits++;
+        try
+        {
+            Check(menu.Press(GameMenu.QuitToDesktopLabel), "pause menu offers Quit to desktop");
+            await Observe(0.1);
+            Check(menu.HasEntry("Yes, quit") && menu.HasEntry("No") && quits == 0, "Quit to desktop asks for confirmation");
+            await Shot("quit_confirm");
+            Check(menu.Press("No"), "quit confirmation offers No");
+            await Observe(0.1);
+            Check(menu.HasEntry("Resume") && quits == 0, "No returns to the pause menu without quitting");
+            menu.Press(GameMenu.QuitToDesktopLabel);
+            await Observe(0.1);
+            Check(menu.Press("Yes, quit"), "quit confirmation offers Yes, quit");
+            await Observe(0.1);
+            Check(quits == 1, "Yes, quit closes the game");
+        }
+        finally { game.QuitOverride = null; }
+        menu.Press("No");
+        await Observe(0.1);
+        Check(menu.HasEntry("Resume"), "back on the pause menu after the hooked quit");
+    }
+
     private async Task TitleMenuTest(Game game, bool expectSaves)
     {
         game.ShowTitle(true);
@@ -207,6 +235,12 @@ public partial class AutoPlay
         var menu = game.Hud.Menu.OpenTitle();
         await game.Hud.Fade(0, 0.1);
         await Shot(expectSaves ? "title_with_saves" : "title_new");
+        int quits = 0;
+        game.QuitOverride = () => quits++;
+        Check(game.Hud.Menu.Press(GameMenu.QuitGameLabel), "title offers Quit game");
+        await Observe(0.1);
+        game.QuitOverride = null;
+        Check(quits == 1, "Quit game closes the game without asking");
         bool canContinue = game.Hud.Menu.Press("Continue");
         Check(canContinue == expectSaves, expectSaves ? "title offers Continue once saved" : "title hides Continue without saves");
         if (!canContinue) game.Hud.Menu.Press("New game");
@@ -330,15 +364,17 @@ public partial class AutoPlay
         Check(overlap > 0 && wrong == 0, $"{what} ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
     }
 
-    private void CheckPortraitSpeech(Game game, bool right)
+    private void CheckPortraitSpeech(Game game, bool right, CloseUp? closeUp = null)
     {
+        closeUp ??= CloseUps.FireEscape;
         var panel = game.Hud.InsetRect;
         var speech = game.Hud.SpeechRect;
         float divider = panel.Position.X + panel.Size.X / 2;
-        Check(game.Hud.CurrentCloseUp == CloseUps.FireEscape && game.Hud.SpeechVisible &&
+        var speaker = right ? closeUp.RightSpeaker : closeUp.LeftSpeaker;
+        Check(game.Hud.CurrentCloseUp == closeUp && game.Hud.SpeechVisible &&
             speech.Position.X >= (right ? divider : panel.Position.X) &&
             speech.End.X <= (right ? panel.End.X : divider),
-            right ? "Eleanor's subtitle stays beneath the right portrait" : "Micah's subtitle stays beneath the left portrait");
+            $"{speaker}'s subtitle stays beneath the {(right ? "right" : "left")} portrait of the {closeUp.Id} close-up");
         Check(speech.Position.Y > panel.Position.Y + panel.Size.Y * 0.7f && speech.End.Y < panel.End.Y,
             "portrait speech wraps below the face and inside the frame");
     }

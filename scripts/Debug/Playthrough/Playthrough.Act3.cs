@@ -92,9 +92,56 @@ public sealed partial class Playthrough
             }
             await tony;
             await WaitIdle();
+            if (AlarmRoute)
+            {
+                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && Gs.HasFlag("alley3_tony_inside"),
+                    "the warning shot: Tony talks, and goes back inside unhurt");
+                await Do(Verb.Walk, "street");
+                Expect("OfficeStorm", "back to the office, in the storm");
+                return;
+            }
             Check(Gs.HasFlag("shot_bartender"), "Tony shot in the shoulder");
+            Expect("Alley", "Tony on his back, and Micah still in the alley");
+            if (KillRoute)
+            {
+                await Do(Verb.UseItem, "bartender", "revolver");
+                await WaitIdle();
+                Check(Gs.HasFlag(Endings.KilledTony), "the second shot: Tony can't tell anyone now");
+                await Do(Verb.Walk, "street");
+                await WaitIdle();
+                Expect("ChicagoMap", "the map, one last time");
+                Check(new[] { "blue_lantern", "church", "mansion" }.All(id => _game.Room?.FindHotspot(id)?.Visible == true) &&
+                      new[] { "office", "library", "club" }.All(id => _game.Room?.FindHotspot(id)?.Visible != true),
+                    "only the Blue Lantern, the church and the mansion are left on the map");
+                var church = Do(Verb.Walk, "church");
+                bool closeUp = false;
+                bool Watching(bool done)
+                {
+                    closeUp |= _game.Hud.CurrentCloseUp == CloseUps.Church && _game.Hud.SpeechVisible &&
+                        _game.Hud.SpeechText.StartsWith("Bless me, Father");
+                    return done;
+                }
+                if (_route == "12")
+                {
+                    await Until(() => Watching(_game.Room?.Name == "Prison"), 300, 0.05);
+                    Check(closeUp, "the brothers' close-up for Micah's confession");
+                    Expect("Prison", "Micah turns himself in at Caleb's side");
+                    Check(Gs.HasFlag(Endings.SurrenderedTony), "surrendered at the church");
+                    await TheEnd();
+                    over = true;
+                    return;
+                }
+                await Until(() => Watching(church.IsCompleted), 600, 0.05);
+                await church;
+                await WaitIdle();
+                Check(closeUp && !_game.Hud.InsetVisible, "the brothers' close-up for Micah's confession, gone as he leaves");
+                Check(Gs.HasFlag(Endings.ConfessedTony), "confessed to Caleb, and promised the station at sunrise");
+                Expect("OfficeStorm", "on from the church to the office, in the storm");
+                return;
+            }
+            await Do(Verb.Walk, "street");
             Expect("OfficeStorm", "back to the office, in the storm");
-        }, roundTrip: _route != "1");
+        }, roundTrip: _route is not ("1" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>
         {
@@ -109,13 +156,37 @@ public sealed partial class Playthrough
         if (over) return;
         await Beat("mansion_exterior", async () =>
         {
+            if (AlarmRoute)
+            {
+                // Tony left the bell out: the key from the lintel, straight into the lock, without a look at the door
+                await Do(Verb.Hand, "lintel");
+                Check(Gs.HasItem("kitchen_key") && !Gs.HasFlag("alarm_noticed"), "the key, and the bell still unseen");
+                var door = Do(Verb.Hand, "door");
+                if (_route == "13")
+                {
+                    await Until(() => _game.Room?.Name == "Outskirts", 300);
+                    Expect("Outskirts", "Micah runs, and drives out of Chicago");
+                    Check(Gs.HasFlag(Endings.AlarmRan) && Gs.HasFlag("alarm_noticed"), "the bell rang, and Micah ran");
+                }
+                else
+                {
+                    await Until(() => _game.Room?.Name == "MansionKitchen", 300);
+                    Expect("MansionKitchen", "Micah goes in after the bell");
+                    Check(Gs.HasFlag(Endings.AlarmStayed) && _game.Room?.FindActor("gunman")?.Visible == true
+                        && _game.Room?.FindActor("gunman_b")?.Visible == true, "the Club's two men wait at the cook's table");
+                }
+                await TheEnd();
+                over = true;
+                return;
+            }
             await Do(Verb.Look, "door");
             await Do(Verb.Hand, "lintel");
             await Do(Verb.Hand, "bin");
             await SolvePuzzle(() => Do(Verb.Hand, "bell"), PuzzleKind.Bell, new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
             await Do(Verb.Hand, "door");
             Expect("MansionKitchen", "in through the kitchen");
-        });
+        }, roundTrip: !AlarmRoute);
+        if (over) return;
         await Beat("mansion_cellar", async () =>
         {
             await Do(Verb.Walk, "cellar_door");
@@ -131,16 +202,25 @@ public sealed partial class Playthrough
         bool free = _route is "2" or "3" or "10";
         await Beat("mansion_study", async () =>
         {
-            if (free)
+            if (free || _route == "12-oldman")
             {
                 await Do(Verb.Hand, "drawer_right");
                 await Do(Verb.Hand, "documents");
                 await Do(Verb.Hand, "drawer_left");
                 await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
-                    new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+                    new[] { ("flip", 1), ("rotate", 2), ("right", 6), ("down", 9) }, "audit_alignment");
                 Check(Gs.HasFlag(Endings.TookDocuments), "the signed payoff sheets");
             }
             var confront = Do(Verb.Walk, "door_right");
+            if (_route == "12-oldman")
+            {
+                await Until(() => _game.Room?.Name == "Prison", 300);
+                Expect("Prison", "after the prayer, Caleb at the station steps");
+                Check(Gs.HasFlag(Endings.SparedOldMan) && Gs.HasFlag("caleb_visits"), "spared the old man, and Caleb visits");
+                await TheEnd();
+                over = true;
+                return;
+            }
             if (_route == "1-oldman")
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);

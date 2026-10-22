@@ -12,7 +12,8 @@
 #   tools/run/film.sh -s hyper --from ending --ending 8
 #
 # Endings: pass the number or the title (case-insensitive). The numbers are the ones used in docs/story-overview.md
-# ("Branches and endings") and by the playthrough routes; 1-oldman and 1-steps are other routes to ending 1.
+# ("Branches and endings") and by the playthrough routes; 1-oldman and 1-steps are other routes to ending 1,
+# 12-oldman another route to ending 12.
 #   Number    Title                    Ending
 #   1         walk-away                Micah lowers the gun on Tony; coffee with Rose
 #   1-oldman  spare-the-old-man        He prays the Our Father and spares the old man; coffee with Rose
@@ -27,6 +28,10 @@
 #   9         eleanor-confesses        Eleanor strikes the old man; Rose, then she confesses to Caleb in prison
 #   10        she-leaves-by-the-car    Eleanor follows after the shot, evidence or fire; she leaves him by the car
 #   11        she-visits-once          Eleanor follows after the shot, nothing taken; prison, she visits once
+#   12        kill-tony-surrender      He kills Tony, confesses to Caleb and turns himself in; prison, Caleb visits
+#   12-oldman kill-tony-pray           He kills Tony, confesses, spares the old man, then gives himself up
+#   13        alarm-run                A warning shot; the unseen alarm rings and he runs; out of Chicago, alone
+#   14        alarm-ambush             A warning shot; the unseen alarm rings and he goes in; shot in the kitchen
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 # Keep in step with the table above and with film.ps1.
@@ -45,6 +50,10 @@ ending_number() {
     9|eleanor-confesses) echo 9 ;;
     10|she-leaves-by-the-car) echo 10 ;;
     11|she-visits-once) echo 11 ;;
+    12|kill-tony-surrender) echo 12 ;;
+    12-oldman|kill-tony-pray) echo 12-oldman ;;
+    13|alarm-run) echo 13 ;;
+    14|alarm-ambush) echo 14 ;;
     *) return 1 ;;
   esac
 }
@@ -67,14 +76,14 @@ while [ $# -gt 0 ]; do
     --ending=*) ending="${1#*=}" ;;
     --from=*) from="${1#*=}" ;;
     --no-clean) clean=0 ;;
-    -h|--help) sed -n '2,29p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,34p' "$0"; exit 0 ;;
     *) echo "Unknown argument '$1'. Use --speed <value> or -s <value> (default: 1); see --help." >&2; exit 2 ;;
   esac
   shift
 done
 case "$speed" in 1|2|4|8|16|60|hyper) ;; *) echo "--speed / -s must be 1, 2, 4, 8, 16, 60 or hyper." >&2; exit 2 ;; esac
 if ! ending="$(ending_number "$ending")"; then
-  echo "--ending must be an ending number (1-11, 1-oldman, 1-steps) or its title; see --help." >&2; exit 2
+  echo "--ending must be an ending number (1-14, 1-oldman, 1-steps, 12-oldman) or its title; see --help." >&2; exit 2
 fi
 case "$from" in act1|interlude1|act2|interlude2|act3|ending) ;; *) echo "--from must be act1, interlude1, act2, interlude2, act3 or ending." >&2; exit 2 ;; esac
 if [ "$from" = act3 ] && [ "$ending" = 1-steps ]; then

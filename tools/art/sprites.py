@@ -2,8 +2,9 @@
 
 Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
   row 0  facing right           : 3/4 idle, side walk 1-8, 3/4 talk
-  row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
+  row 1  front view, turned right: idle, walk 1-6, talk A, talk B (spec "front_yaw", default 3/4; Micah faces the camera)
   row 2  back 3/4 view           : idle, walk 1-6
+Horizontal and front frames face screen-right; Player flips them for left (the front row when walking down-left).
 NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view facing screen-right, then walk 1-8 in
 side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 """
@@ -24,6 +25,7 @@ NPC_W = 56
 SCALE = 1.2  # FOTA-sized: about a third of the play area tall
 STRIDE_FRAMES = 8
 PLAYER_IDLE_YAW = 55
+FRONT_YAW = 16  # a player sheet's front row, unless its spec sets "front_yaw"
 
 
 def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
@@ -36,7 +38,7 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
 # black hair, so the brown fedora stands out against it
 MICAH_HEAD = dict(skin="d09670", hair="141010", hair_style="cropped", brow="100c0c", stubble="8e6c52",
                   face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2",
-                  clean_jaw=True)
+                  clean_jaw=True, front_yaw=4)  # walking at the camera he faces it, his tie down the middle
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
              brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35,
              torso="ae8848", collar="e3d7bf", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
@@ -178,7 +180,7 @@ WATCHMAN = dict(h=69, sw=0.16, hw=0.058, skin="c89a7c", hair="4a3a2c", hat="cap"
 MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_col="16141a", mask=("bauta", "ece6d4"),
                   torso="16141a", collar="16141a", sleeves="16141a", cloak=dict(col="16141a", hem=0.96),
                   pants="16141a", shoes="0e0c10", decals=[])
-MICAH_MASKED = dict(MASKED_MAN, decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
+MICAH_MASKED = dict(MASKED_MAN, front_yaw=MICAH_HEAD["front_yaw"], decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
 # The inner circle and some of the members wear carved beasts' faces instead of the white mask, after the animals
 # of Celtic folklore: aged wood and bone, antler-grey and ochre against the black cowl. The stag, horned like
 # Cernunnos, leads the rite; the boar and the wolf stand with him. Bear, raven and hare walk among the guests.
@@ -192,7 +194,7 @@ MASKED_HARE = dict(MASKED_MAN, h=64, sw=0.134, mask=("animal", "hare", "ccae7e",
 # carved face held against his chest.
 LEADER_UNMASKED = dict(MASKED_STAG, skin=HARRINGTON["skin"], hair=HARRINGTON["hair"], hair_style="bald", old=True,
                        eye=HARRINGTON["eye"], brow=HARRINGTON["brow"], mask=None, hat="cowl_down",
-                       held_mask=(1, "c4a676", "d4cab4"))
+                       held_mask=(1, "c4a676", "d4cab4", 1.8))  # as large as his own face
 # The women of the club: short, strapless black-fringed dresses above the knee, bare shoulders and arms, sheer
 # stockings and a black domino mask.
 MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.056, skin="ecc6a6",
@@ -243,6 +245,19 @@ ELEANOR_GOWN = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.051, 0.52)), torso="
 ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
                       coat=None, stockings=None, shoes="2a2a2e",
                       decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
+# Out of the sheet, from the duffle she had packed for running (Act 3 endings). Eleanor who held out both times walks
+# out in white: her own dress's cut, bodice, sash and pleats, with her pearls, her long hair as always.
+WHITE = "ece6da"
+ELEANOR_WHITE = dict(ELEANOR, torso=WHITE, coat=dict(ELEANOR["coat"], col=WHITE), stockings="d8c0ae", shoes="cfc6b8",
+                     decals=[("belt", 0.465, "c4baa8"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "c4baa8"), ("pleats", 0.53),
+                             ("strand", 0.212, 0.25, 0.036, "fffcf4", "9c8e78", 0.058)])
+# Eleanor who gave in: a black tailleur, the jacket buttoned to the hip over a skirt cut above the knee, her usual
+# dark stockings, no pearls, and her own long hair.
+SUIT_BLACK = "141218"
+ELEANOR_SUIT = {**ELEANOR,
+               "torso": SUIT_BLACK, "coat": dict(col=SUIT_BLACK, top=0.42, hem=0.70, flare=0.008),
+               "shoes": "0c0a0c",
+               "decals": [("line", 0.24, 0.52), ("buttons", 0.30, 0.46, 3, "3a3640"), ("belt", 0.52, "0a090d")]}
 
 
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
@@ -273,11 +288,21 @@ def _fuller(spec, k=1.1):
     return out
 
 
-ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC, ELEANOR_PYJAMA_NPC = map(
-    _fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE, ELEANOR_PYJAMA))
+(ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC, ELEANOR_PYJAMA_NPC, ELEANOR_WHITE_NPC,
+ ELEANOR_SUIT_NPC) = map(_fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE, ELEANOR_PYJAMA, ELEANOR_WHITE,
+                                  ELEANOR_SUIT))
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
 GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
             pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
+# The two Club men waiting in the Harrington kitchen when the alarm rings (ending 14): one in a charcoal overcoat and
+# fedora, one in a grey suit and flat cap. Both draw and aim like Micah, in profile.
+GUNMAN_A = dict(BRUTE, h=69, skin="d4a484", hair="241c16", hat="fedora", hat_col="26262a", band="0e0e10",
+                brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35, torso="34343a",
+                coat=dict(col="34343a", top=0.40, hem=0.72, flare=0.03), pants="242428", shoes="0e0e10",
+                decals=_vee(0.31, 0.03, "e6e0d4", "4a1418"))
+GUNMAN_B = dict(GOON, h=67, skin="c48e6c", hair="161210", hat="cap", hat_col="4c463c", torso="5c564c",
+                coat=dict(BRUTE["coat"], col="5c564c"), pants="4c463c", shoes="16120e",
+                decals=_vee(0.31, 0.03, "e0dace", "263040"))
 
 
 def _arms(kind_r, kind_l=None):
@@ -286,6 +311,10 @@ def _arms(kind_r, kind_l=None):
                 "fold": ("fold", 0, 0, 0), "cover": ("cover", 0, 0, 0), "side": ("side", 0, 0, 0),
                 "clutch": ("clutch", 0, 0, 0)}[k]
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
+
+
+def front_yaw(spec):
+    return spec.get("front_yaw", FRONT_YAW)
 
 
 def player_sheet(spec, name, arms=None, props=None):
@@ -300,10 +329,11 @@ def player_sheet(spec, name, arms=None, props=None):
     side = [figure(spec, held(pose(PLAYER_IDLE_YAW)), FW, FH)]
     side += [figure(spec, held(walk_pose(90, i)), FW, FH) for i in range(STRIDE_FRAMES)]
     side += [figure(spec, held(pose(PLAYER_IDLE_YAW, mouth=1, nod=nod)), FW, FH)]
-    front = [figure(spec, held(pose(16)), FW, FH)]
-    front += [figure(spec, held(walk_pose(16, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
+    fy = front_yaw(spec)
+    front = [figure(spec, held(pose(fy)), FW, FH)]
+    front += [figure(spec, held(walk_pose(fy, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
-    front += [figure(spec, held(pose(16, mouth=1)), FW, FH), figure(spec, held(pose(16, mouth=2, nod=nod)), FW, FH)]
+    front += [figure(spec, held(pose(fy, mouth=1)), FW, FH), figure(spec, held(pose(fy, mouth=2, nod=nod)), FW, FH)]
     back = [figure(spec, held(pose(164)), FW, FH)]
     back += [figure(spec, held(walk_pose(164, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
@@ -348,7 +378,9 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET_NPC, _arms("clutch")),
-        ("goon", GOON, _arms("fold")), ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
+        ("eleanor_white", ELEANOR_WHITE_NPC, _arms("down")), ("eleanor_suit", ELEANOR_SUIT_NPC, _arms("down")),
+        ("goon", GOON, _arms("fold")), ("gunman_a", GUNMAN_A, _arms("down")), ("gunman_b", GUNMAN_B, _arms("down")),
+        ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
 
 
 def supine_frame(spec, name, wound=None):
@@ -393,12 +425,14 @@ def npc_standing(spec, arms):
 def fall_strip(spec, name, final_name, arms, wound=False):
     """Drop onto both knees, pitch forward, and settle face-down; the last frame is also saved alone as final_name,
     the texture held afterwards, so there's no jump at the end. wound: shot in the stomach, the clothes soaked from
-    the first kneeling frame on and a pool of blood spreading on the ground under the body at the end."""
+    the first kneeling frame on and a pool of blood spreading on the ground under the body at the end.
+    Kneeling side-on only the coat shows; pitching forward and face-down the shirt front faces the ground, so neither
+    shows a pale shirt streak along the back nor a skirt shaded apart from the coat."""
     from PIL import Image, ImageDraw, ImageChops
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
     for i, joints in enumerate(KNEES_PRONE):
-        img, head = action_figure(scaled, joints)
+        img, head = action_figure(scaled, joints, plain_chest=i == 0, chest_down=i > 0)
         if wound:
             hip, shoulder = grounded_joints(joints)[:2]
             wx, wy = hip + (shoulder - hip) * 0.45
@@ -429,11 +463,12 @@ def fall_strip(spec, name, final_name, arms, wound=False):
     return frames
 
 
-def shoulder_shot_strip(spec, name, final_name, arms):
+def shoulder_shot_strip(spec, name, final_name, arms, dead_name=None):
     """Shot in the near shoulder while facing right: the hit snaps him back with the struck arm hanging limp, the legs
     give way straight down under him, he sits down hard, the far hand coming across to press on the wound, and goes
     over onto his back. Blood soaks the shoulder from the hit on, and pools on the ground under it once he's down. The
-    last frame is saved alone as final_name."""
+    last frame is saved alone as final_name. dead_name: the same body after a second shot through the head, saved alone,
+    with a wound in the temple and the pool spread under his head."""
     from PIL import Image, ImageDraw
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
@@ -452,6 +487,24 @@ def shoulder_shot_strip(spec, name, final_name, arms):
     frames[-1] = (pool, head)
     action_strip(name, frames, [0.1, 0.12, 0.12, 0.08, 0.08, 0.1, 0.1, 0.3])
     action_strip(final_name, [frames[-1]], [1])
+    if dead_name:
+        from PIL import ImageChops
+        body = down
+        hx, hy = grounded_joints(SHOULDER_SHOT[-1])[2]
+        # shot through the temple from above: a small dark wound, a trickle running down off the head to the floor
+        stain = Image.new("RGBA", body.size)
+        sd = ImageDraw.Draw(stain)
+        sd.ellipse([hx - 5, hy - 3, hx - 1, hy + 1], fill=(128, 14, 20, 255))
+        sd.ellipse([hx - 4, hy - 2, hx - 2, hy], fill=(70, 6, 10, 255))
+        sd.line([(hx - 3, hy + 1), (hx - 4, hy + 8)], fill=(128, 14, 20, 255), width=2)
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), body.getchannel("A")))
+        body = body.copy()
+        body.alpha_composite(stain)
+        # the pool spreads out round the head and runs back under the shoulder's
+        pool = Image.new("RGBA", down.size)
+        ImageDraw.Draw(pool).ellipse([hx - 14, 87, wx + 9, 94], fill=(104, 12, 16, 255))
+        pool.alpha_composite(body)
+        action_strip(dead_name, [(pool, head)], [1])
     return frames
 
 
@@ -564,6 +617,25 @@ def aim_lower_strip(spec, name):
     fw = FW + 32
     frames = [(figure(spec, _aim_level_pose(i), fw, FH), (FW / 2 + 16, 18)) for i in range(len(AIM_LEVELS))]
     action_strip(name, frames, [1] * len(frames), anchor=(fw / 2, FH - 3))
+    return frames
+
+
+# Standing over a man on the ground: the arm straightens out from the level aim and points down past the belt, the
+# shoulders lean in after it and the head tips to look down the barrel. (upper arm, forearm from straight down, lean,
+# nod) per frame; the last is held for the shot.
+AIM_DOWN = [(16, 94, -2.0, 0.0), (28, 78, 1.0, 0.004), (38, 62, 3.0, 0.008), (45, 48, 5.0, 0.012)]
+
+
+def aim_down_strip(spec, name, held_name):
+    """From aim_frame's level aim to the revolver pointed down at the ground a step ahead, the arm locked straight;
+    the last frame is also saved alone as held_name."""
+    fw = FW + 32
+    frames = []
+    for upper, a, lean, nod in AIM_DOWN:
+        ps = dict(_aim_pose(upper, a - upper), lean=lean, nod=nod)
+        frames.append((figure(spec, ps, fw, FH), (FW / 2 + 16, 18)))
+    action_strip(name, frames, [0.12, 0.12, 0.12, 0.3], anchor=(fw / 2, FH - 3))
+    action_strip(held_name, [frames[-1]], [1], anchor=(fw / 2, FH - 3))
     return frames
 
 
@@ -1686,6 +1758,46 @@ def struck_strip(spec, name, final_name, arms):
     return frames
 
 
+def gunned_down_strip(spec, name, final_name):
+    """Shot in the chest from in front while facing right: thrown back off his feet and flat on his back, head to the
+    left (FALL, as in the masked collapse). The coat is soaked across the chest from the hit on, and blood pools under
+    him once he's down. The first frame is the player's idle, so the strip starts without a jump; the last is also
+    saved alone as final_name."""
+    from PIL import Image, ImageDraw, ImageChops
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    stand = Image.new("RGBA", (192, FH))
+    stand.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
+
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def wounded(joints, r):
+        img, head = action_figure(scaled, joints)
+        hip, shoulder = grounded_joints(joints)[:2]
+        wx, wy = hip + (shoulder - hip) * 0.7
+        stain = Image.new("RGBA", img.size)
+        ImageDraw.Draw(stain).ellipse([wx - r, wy - r, wx + r, wy + r], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+        img.alpha_composite(stain)
+        return img, head, wx
+
+    keys = []
+    for a, b in zip(FALL, FALL[1:]):
+        keys += [a, between(a, b)]
+    frames = [(stand, (96, 18))]
+    for i, joints in enumerate(keys[1:]):
+        img, head, _ = wounded(joints, min(2.5 + i * 0.5, 5))
+        frames.append((img, head))
+    down, head, wx = wounded(REST, 5.5)
+    pool = Image.new("RGBA", down.size)
+    ImageDraw.Draw(pool).ellipse([wx - 14, 87, wx + 12, 94], fill=(104, 12, 16, 255))
+    pool.alpha_composite(down)
+    frames.append((pool, head))
+    action_strip(name, frames, [0.08] * (len(frames) - 1) + [0.4])
+    action_strip(final_name, [frames[-1]], [1])
+    return frames
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -1698,6 +1810,7 @@ def build():
     aim_frame(MICAH, "micah_aim")
     aim_lower_strip(MICAH, "micah_aim_lower")
     aim_back_strip(MICAH, "micah_aim_back")
+    aim_down_strip(MICAH, "micah_aim_down", "micah_aim_down_held")
     aim_self_frame(MICAH, "micah_aim_self")
     draw_strip(MICAH, "micah_draw")
     action_sequences(MICAH, "micah")
@@ -1720,6 +1833,7 @@ def build():
     player_sheet(ELEANOR, "eleanor_play")
     player_sheet(ELEANOR_GOWN, "eleanor_gown_play")
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
+    player_sheet(ELEANOR_WHITE, "eleanor_white_play")
     eleanor_drink_strip()
     eleanor_phone_strips()
     eleanor_bag_sheets()
@@ -1746,7 +1860,7 @@ def build_no_tie():
 
 def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
-    shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
+    shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"), dead_name="bartender_dead")
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
     fall_strip(dict(ELEANOR_SHEET_NPC, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
@@ -1754,9 +1868,14 @@ def build_act3():
     eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     inmate_seated_strip(ELEANOR_INMATE_NPC, "eleanor_inmate_seated")
-    seated_frame(ELEANOR_NPC, "eleanor_seated", flip=True)
+    seated_frame(ELEANOR_WHITE_NPC, "eleanor_white_seated", flip=True)
+    seated_frame(ELEANOR_SUIT_NPC, "eleanor_suit_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)
+    for spec, name in ((GUNMAN_A, "gunman_a"), (GUNMAN_B, "gunman_b")):
+        draw_strip(spec, f"{name}_draw")
+        aim_frame(spec, f"{name}_aim")
+    gunned_down_strip(MICAH, "micah_gunned_down", "micah_gunned_dead")
 
 
 # ---------------------------------------------------------------------------------------------------------------------

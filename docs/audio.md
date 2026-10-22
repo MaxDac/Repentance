@@ -31,7 +31,8 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
 `Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`, `SafeOpen`,
-`SafeClose`, `StepMarble` (new sounds go last: each sound's number seeds its noise).
+`SafeClose`, `StepMarble`, `AlarmBell` (new sounds go last: each sound's number seeds its noise). `AlarmBell` is the
+Harringtons' burglar alarm, an electric bell drummed 18 times a second for 3.6 s; rooms play it directly.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`, `Marble`; scenes store
   the number, so new floors go last). Every step is a 1920s leather dress shoe: the hard heel's sharp click, the
@@ -42,6 +43,15 @@ output_device invalidated`) is reopened by Godot itself about once a second once
   the next 0.3 s; `Stone` is outdoor cobbles and rough flags.
 - **Room 507's safe**: `SafeOpen` (dial, tumblers, bolts, hinge) when Micah solves the safe puzzle; `SafeClose`
   (door, bolts, dial spun) when Eleanor locks it in the First Interlude. Not tied to cue words.
+- **Gunshot**: a revolver fired indoors. The hammer ticks, then the muzzle blast arrives as a shock wave (an
+  N-wave: instant rise, straight fall through zero) with a crack of broadband noise over a low noise thump, all
+  driven through `tanh` like a bang too loud for the microphone. Close reflections off the walls (3-35 ms) feed a
+  diffuse Schroeder reverb (`SoundSynth.Acoustics.cs`), so the room rings away instead of echoing in discrete bursts.
+- **Thunder**: a strike a few hundred metres away, heard through the office window. The lightning channel is a
+  tortuous random walk from the ground up into the cloud and across it; every 2.5 m of it emits an N-wave that
+  arrives later (distance / 343 m/s), quieter, longer and duller the further away it is. The near channel gives the
+  ripping crack, stretches at one distance swell into rolls, and the far cloud is a low rumble that dies away.
+  `SoundSynthTests` checks the gunshot's tail only fades and the thunder's crack is brighter than its rolling rumble.
 - **Doors**: when the player's action on a hotspot marked `Door` changes room (an `ExitTo` exit or the room
   script's `ChangeRoom`), `DoorOpen` plays as the screen fades out and `DoorClose` once the new room has faded in.
   A door that opens on screen first (the office) calls `Game.OpenDoor()` with its animation; it sounds once per action.

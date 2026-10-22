@@ -370,16 +370,19 @@ public sealed class BellScreen : WheelScreen
 public sealed class AlignmentScreen : PuzzleScreen
 {
     private int _x, _y, _rotation;
+    private bool _flipped;
     private static readonly string[] Marks = { "B", "J", "C" };
 
     public override string Title => "HARRINGTON - AUDITOR'S INDEX";
     public override string SubmitText => "Read accounts";
-    public override string Clue => "Gold: register\nBlue: index\nB: BANK / J: JUDGE\nC: CAPTAIN\nBANK above JUDGE.\nCAPTAIN left of BANK.";
+    public override string Clue =>
+        "Gold: account dots\nBlue: index holes\nB: BANK / J: JUDGE\nC: CAPTAIN\n\nEvery hole on a dot.\nBANK above JUDGE.\nCAPTAIN left of BANK.";
 
     protected override void Build()
     {
         DirectionPad(233, 106, Move);
         Button("rotate", "Rotate", 205, 140, 56, () => _rotation = (_rotation + 1) % 4);
+        Button("flip", "Flip", 205, 166, 56, () => _flipped = !_flipped);
     }
 
     private void Move(int x, int y)
@@ -389,9 +392,16 @@ public sealed class AlignmentScreen : PuzzleScreen
     }
 
     public override (bool, string) Check() =>
-        (PuzzleRules.Alignment(_rotation, _x, _y), "Match all three labelled marks to identify the signed sheets.");
+        (PuzzleRules.Alignment(_rotation, _flipped, _x, _y),
+            PuzzleRules.AlignmentFits(_rotation, _flipped, _x, _y)
+                ? "Every hole sits on a dot, but the marks don't read as the note says."
+                : "Every hole of the index must sit on an account dot.");
 
-    public override void Reset() => _x = _y = _rotation = 0;
+    public override void Reset()
+    {
+        _x = _y = _rotation = 0;
+        _flipped = false;
+    }
 
     private static Vector2 GridPosition(GridPoint p) => new(40 + p.X * 14, 56 + p.Y * 14);
 
@@ -404,20 +414,17 @@ public sealed class AlignmentScreen : PuzzleScreen
             Text(canvas, new Vector2(37 + i * 14, 50), i.ToString());
             Text(canvas, new Vector2(24, 59 + i * 14), i.ToString());
         }
-        for (int i = 0; i < 3; i++)
+        foreach (var dot in PuzzleRules.AccountMarks) canvas.DrawCircle(GridPosition(dot), 4, Gold);
+        for (int i = 0; i < PuzzleRules.TracingMarks.Count; i++)
         {
-            var p = GridPosition(PuzzleRules.AccountMarks[i]);
-            canvas.DrawCircle(p, 5, Gold);
-            Text(canvas, p + new Vector2(5, -5), Marks[i]);
-            var mark = PuzzleRules.Transform(PuzzleRules.TracingMarks[i], _rotation, _x, _y);
-            if (mark.X is >= 0 and <= 10 && mark.Y is >= 0 and <= 10)
-            {
-                var position = GridPosition(mark);
-                canvas.DrawArc(position, 6, 0, Mathf.Tau, 16, Blue, 2);
-                Text(canvas, position + new Vector2(-10, 12), Marks[i], Blue);
-            }
+            var mark = PuzzleRules.Transform(PuzzleRules.TracingMarks[i], _rotation, _flipped, _x, _y);
+            if (mark.X is < 0 or > 10 || mark.Y is < 0 or > 10) continue;
+            var position = GridPosition(mark);
+            canvas.DrawArc(position, 6, 0, Mathf.Tau, 16, Blue, 2);
+            if (i < Marks.Length) Text(canvas, position + new Vector2(5, -5), Marks[i], Blue);
         }
-        Text(canvas, new Vector2(203, 180), $"Offset {_x},{_y}");
-        Text(canvas, new Vector2(203, 192), $"Turn {_rotation * 90}");
+        Text(canvas, new Vector2(203, 46), $"Offset {_x},{_y}");
+        Text(canvas, new Vector2(203, 58), $"Turn {_rotation * 90}");
+        Text(canvas, new Vector2(203, 70), _flipped ? "Face down" : "Face up");
     }
 }

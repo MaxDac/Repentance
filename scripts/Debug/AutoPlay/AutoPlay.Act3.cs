@@ -333,6 +333,9 @@ public partial class AutoPlay
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;
         Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
+        Check(game.Room?.Name == "Alley", "shot, Tony lies there, and the next move is Micah's");
+        await game.Perform(Verb.Walk, "street");
+        await WaitIdle(game);
         Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm", "shot Tony in the shoulder, back to the office in the storm");
 
         // ---- the office in the storm: the confession, the demon in the window, the hat, and out to the mansion
@@ -432,7 +435,7 @@ public partial class AutoPlay
             "both audit clues survive save/load without granting evidence");
         await CancelPuzzle(() => CombineAndWait("audit_tracing", "audit_folder"), PuzzleKind.Alignment, "audit_identified", "audit_alignment");
         await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
-            new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+            new[] { ("flip", 1), ("rotate", 2), ("right", 6), ("down", 9) }, "audit_alignment");
         Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "index identifies signed payoff sheets");
         var confront = game.Perform(Verb.Walk, "door_right");
         await Until(() => game.Room?.Name == "MansionBedroom");
@@ -526,14 +529,16 @@ public partial class AutoPlay
             "the dread played through the whole mansion, bedroom included, and stops once out of it");
         Check(HeardLog.Any(l => l.Contains("Oh my God, Micah.")) && !HeardLog.Any(l => l.Contains("She watches the windows go.")),
             "ending 2: convinced Eleanor cries out when the house goes");
+        Check(game.Room?.FindActor("eleanor")?.Texture?.ResourcePath.EndsWith("/eleanor_suit.png") == true,
+            "ending 2: Eleanor, who gave in, in the black suit");
         await game.Wait(3);
         await Shot("ending_together");
         await TheEnd("ending_2");
         Check(HeardLog.Any(l => l.Contains("She told me the rest of it in the car that night")) &&
               !HeardLog.Any(l => l.Contains("motel on the road")) && !HeardLog.Any(l => l.Contains("changed in mine on the way")),
             "ending 2: Daniel's journal puts the telling in the car, not a motel on the road; no weary-road dress beat");
-        Check(HeardLog.Any(l => l.Contains("At the gate she fetched her black dress from the Club's car.")),
-            "ending 2: Micah says how Eleanor got from the sheet back into her black dress");
+        Check(HeardLog.Any(l => l.Contains("At the gate she fetched her duffle from the Club's car") && l.Contains("a black suit")),
+            "ending 2: Micah says how Eleanor got from the sheet into the black suit");
         HeardLog = null;
     }
 }

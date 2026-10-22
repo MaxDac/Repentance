@@ -62,7 +62,7 @@ public static class Interlude
             && (room is "speakeasy" or "convent_corridor" or "convent_cell" || (room == "eleanor_room" && has("interlude_took_bag"))))
             return EleanorBag.Sheet;
         if (has("interlude1") || has("interlude2")) return "eleanor_play";
-        if (has("eleanor_epilogue") && room == "outskirts") return "eleanor_play";
+        if (has("eleanor_epilogue") && room == "outskirts") return Endings.EleanorFreeOutfit(has) + "_play";
         return null;
     }
 

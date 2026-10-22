@@ -66,8 +66,30 @@ public partial class Game
             return;
         }
 
-        if (Array.IndexOf(args, "--skip-title") < 0) await TitleScreen();
+        if (Array.IndexOf(args, "--skip-title") < 0)
+        {
+            await Epigraph();
+            await TitleScreen();
+        }
         else await NewGame();
+    }
+
+    /// <summary>The verse shown over black once per launch, between Godot's boot splash and the title.</summary>
+    public static readonly string[] EpigraphLines =
+        { "Joy shall be in heaven", "over one sinner that repenteth.", "Luke 15:7" };
+    public const double EpigraphFade = 2.0;
+    public const double EpigraphHold = 2.5;
+
+    /// <summary>True while the launch epigraph plays; any key, click or tap skips it.</summary>
+    public bool OnEpigraph { get; private set; }
+
+    /// <summary>The launch epigraph over black, with the title's rain already falling under it.</summary>
+    public async Task Epigraph()
+    {
+        OnEpigraph = true;
+        Sfx.SetAmbient(Sound.Rain);
+        await Hud.ShowVerses(EpigraphLines, EpigraphFade, EpigraphHold);
+        OnEpigraph = false;
     }
 
     private async Task TitleScreen()

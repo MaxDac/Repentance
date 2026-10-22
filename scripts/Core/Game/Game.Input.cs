@@ -15,6 +15,28 @@ public partial class Game
     public override void _UnhandledInput(InputEvent e)
     {
         if (IsPaused) return;
+        if (TheEndHeld && EndReturnsToTitle && e switch
+            {
+                InputEventKey { Pressed: true, Echo: false } => true,
+                InputEventMouseButton { Pressed: true } => true,
+                InputEventScreenTouch { Pressed: true } => true,
+                _ => false,
+            })
+        {
+            GetViewport().SetInputAsHandled();
+            DismissTheEnd();
+            return;
+        }
+        if (OnEpigraph)
+        {
+            if (e is InputEventMouseButton { Pressed: true } ||
+                e is InputEventKey { Pressed: true, Echo: false } key && key.Keycode is not (Key.Alt or Key.Shift or Key.Ctrl or Key.Meta))
+            {
+                GetViewport().SetInputAsHandled();
+                Hud.SkipVerses();
+            }
+            return;
+        }
         if (e.IsActionPressed("ui_cancel"))
         {
             GetViewport().SetInputAsHandled();

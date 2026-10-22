@@ -56,16 +56,19 @@ the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
   click.
 - **Captions and fades**: `Fade(alpha, seconds)`, chapter captions with an optional second line under them
   (`ShowCaptionSub`, the interlude titles), caption fades (`FadeCaptionIn`, `FadeCaptionSubIn`, `FadeCaptionOut`)
-  and the act-change cards over black (`ActCards`), verse lines that fade in one by one.
-- **GameMenu** (runs while paused): title (Continue, New game, Load game, Settings), pause (Resume, Save, Load,
-  Settings, Quit to title), slots (autosave + 3; unreadable = *Incompatible*, missing = *Empty*), settings.
+  and the act-change cards over black (`ActCards`), verse lines that fade in one by one (`ShowVerses`;
+  `SkipVerses` cuts them short). At launch, after Godot's boot splash, `Game.Epigraph` shows Luke 15:7 this way
+  under the title's rain before the title; any key, click or tap skips it. It is not replayed by *Quit to title*.
+- **GameMenu** (runs while paused): title (Continue, New game, Load game, Settings, Quit game), pause (Resume, Save,
+  Load, Settings, Quit to title, Quit to desktop with a *Quit without saving?* confirmation; the quit entries are
+  hidden on mobile), slots (autosave + 3; unreadable = *Incompatible*, missing = *Empty*), settings.
 - **NotepadView**: one page per unlocked note, newest first; arrows, mouse wheel; N/Esc/X closes.
 
 ## Close-ups
 
 `CloseUp` = id, texture under `assets/art/ui/` (or a function of settings) and fade times. Catalog: `stage`
-(`stage_closeup` with nudity on, `stage_closeup_clothed` off), `rose`, `beaten`, `fire_escape` (two portraits),
-`heraldry`, `motel`, and `vows` (`vows_photo`, ending 1's epilogue). `Photo = true` (`vows`) places the picture
+(`stage_closeup` with nudity on, `stage_closeup_clothed` off), `rose`, `beaten`, `fire_escape` and `church` (two
+portraits), `heraldry`, `motel`, and `vows` (`vows_photo`, ending 1's epilogue). `Photo = true` (`vows`) places the picture
 32 px from the left edge, vertically centred, with speech beside it.
 
 ```csharp

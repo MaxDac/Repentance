@@ -80,6 +80,7 @@ public partial class AutoPlay : Harness
             if (_failures.Count != 0) return;
 #endif
             var gs = GameState.Instance;
+            await EpigraphTest(game);
             await ContentSettingsTest(game);
             if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
             bool autosave = game.AutosaveEnabled;
@@ -87,6 +88,7 @@ public partial class AutoPlay : Harness
             await StoryDialogueTest(game);
             await PuzzleRecoveryTest(game);
             await ActThreePuzzleRecoveryTest(game);
+            await TheEndHoldTest(game);
             foreach (var slot in SaveSystem.AllSlots) SaveSystem.Delete(slot);
             gs.Reset();
             DialogueManager.Instance.ResetInk();

@@ -101,10 +101,11 @@ class CharacterArtTests(unittest.TestCase):
                            ("micah_no_tie", sprites.MICAH_NO_TIE)):
             image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
             poses = [(0, i + 1, sprites.walk_pose(90, i)) for i in range(8)]
-            for row, yaw in ((1, 16), (2, 164)):
+            front = sprites.front_yaw(spec)
+            for row, yaw in ((1, front), (2, 164)):
                 poses.append((row, 0, sprites.pose(yaw)))
                 poses += [(row, i + 1, sprites.walk_pose(yaw, i * 8 / 6, amp=0.8)) for i in range(6)]
-            poses += [(1, 7, sprites.pose(16, mouth=1)), (1, 8, sprites.pose(16, mouth=2, nod=0.004))]
+            poses += [(1, 7, sprites.pose(front, mouth=1)), (1, 8, sprites.pose(front, mouth=2, nod=0.004))]
             for row, column, ps in poses:
                 with self.subTest(character=name, row=row, column=column):
                     frame = image.crop((column * 64, row * 96, (column + 1) * 64, (row + 1) * 96))
@@ -409,6 +410,18 @@ class CharacterArtTests(unittest.TestCase):
         self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "sal_out.png").tobytes())
         self.assertFalse((ART / "sprites" / "sal_supine.png").exists(), "the old on-his-back pose is gone")
 
+    def test_struck_down_coats_show_no_shirt_along_the_back(self):
+        shirt = (0xe3, 0xd7, 0xbf)
+        for name in ("sal_knockout", "harrington_fall"):
+            with self.subTest(name):
+                clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+                pixels = np.array(Image.open(ART / "sprites" / f"{name}.png").convert("RGBA"))
+                width = clip["width"]
+                for i in range(1, len(clip["frames"])):
+                    frame = pixels[:, i * width:(i + 1) * width]
+                    shown = (frame[..., 3] > 0) & np.all(frame[..., :3] == shirt, axis=-1)
+                    self.assertFalse(shown.any(), f"frame {i}: kneeling and face-down only the coat shows")
+
     def test_sal_kicks_from_his_idle_pose_and_back(self):
         clip = json.loads((ART / "sprites" / "sal_kick.json").read_text())
         image = Image.open(ART / "sprites" / "sal_kick.png")
@@ -649,6 +662,24 @@ class CharacterArtTests(unittest.TestCase):
         xs = np.nonzero(front)[1]
         self.assertTrue((xs <= 30).any() and (xs >= 34).any(), "the strand rounds both sides of the neck")
         self.assertFalse(near(frame(2, 0), pearl).any(), "no pearls seen from behind")
+
+    def test_eleanor_escape_outfits_white_with_pearls_or_a_black_suit(self):
+        rgb = lambda h: np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)])
+        def front(name):
+            image = np.array(Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")).astype(int)[:, :56]
+            return lambda col, tol=20: (np.abs(image[..., :3] - rgb(col)).sum(axis=2) < tol) & (image[..., 3] == 255)
+        usual, white, suit = front("eleanor"), front("eleanor_white"), front("eleanor_suit")
+        hair = sprites.ELEANOR["hair"]
+        self.assertGreater(white(sprites.WHITE).sum(), 200, "the white dress is white")
+        self.assertGreater(white("fffcf4").sum(), 20, "her pearls over the white dress")
+        self.assertEqual(white(hair, 30).sum(), usual(hair, 30).sum(), "the white dress keeps her own long hair")
+        self.assertGreater(suit(sprites.SUIT_BLACK).sum(), 200, "a black suit")
+        self.assertLessEqual(suit("fffcf4").sum() + suit("f2eee4").sum(), 2, "no pearls with the suit")
+        self.assertEqual(suit(hair, 30).sum(), usual(hair, 30).sum(), "the suit keeps her own long hair")
+        stockings = sprites.ELEANOR["stockings"]
+        self.assertEqual(sprites.ELEANOR_SUIT["stockings"], stockings, "her usual stockings with the suit")
+        self.assertGreater(suit(stockings).sum(), 1.5 * usual(stockings).sum(),
+                           "the skirt is cut above the knee, showing more leg than her usual dress")
 
     def test_motel_foreground_is_a_transparent_rail_layer(self):
         rails = Image.open(ART / "rooms" / "motel_night_rails.png")
