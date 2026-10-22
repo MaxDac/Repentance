@@ -476,6 +476,12 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   be Thy name... and then nothing. I can't get past it." Caleb answers: "Then start there. He remembers the rest."
 - Micah replies "I'll think about that", then says that coming here was a mistake, and walks out. The scene moves
   to the map.
+- The greeting and Micah's story of Eleanor play over the room. When the talk turns to salvation, with Micah's
+  "Right now, Caleb... I'm too far gone to be saved.", the brothers' two-portrait close-up comes up, the same
+  full-size panel as the fire escape's: Micah on the left, Father Caleb on the right, both in the candlelit brick
+  nave of Caleb's picture. Micah's portrait is a new picture (his fire-escape portrait cut out and set in front of
+  the church), not a change to the fire-escape one. Each line sits along the panel's bottom edge under its
+  speaker's portrait. The panel goes after Caleb's "Micah, wait-", before Micah walks out.
 
 #### Map of Chicago
 
@@ -613,6 +619,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   repents. When Micah insists he is too far gone, Caleb rebukes him harshly: thinking himself beyond salvation is
   pride, arrogant and self-serving. He closes with the prodigal son.
   Micah will say nothing and get out.
+- The choices and Caleb's story of the Club play over the room. The brothers' close-up from the first visit
+  returns for the sermon on repentance: it comes up after "Give up this foolish search", with Micah's "There isn't
+  much left for me to do.", and goes after the prodigal son, before Micah's silent thought and walk out.
 
 #### Map of Chicago
 
@@ -898,7 +907,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   loud.
 - **The church:** Caleb sees the blood on Micah's cuff, and Micah confesses (`caleb_tony`). Caleb absolves him, but
   says absolution isn't a place to hide, from the law or from Tony's mother, and offers to walk him to the station
-  on Maxwell Street:
+  on Maxwell Street. Micah's first words about Tony play over the room; the brothers' close-up comes up with
+  Caleb's "Kneel down, Micah." and stays through the confession and the choice, going before Micah leaves:
   - **"(Turn yourself in.)":** `surrendered_tony`; fade, *End of Act Three*, ending 12.
   - **"Not yet. Eleanor's still in that house.":** `confessed_tony`; Micah promises to walk in on his own two feet
     after her, and goes on through the office in the storm to the mansion. With the confession, the Our Father is

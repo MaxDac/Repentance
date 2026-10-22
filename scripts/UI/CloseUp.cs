@@ -61,6 +61,13 @@ public static class CloseUps
         LeftSpeaker = "micah", RightSpeaker = "eleanor",
     };
 
+    /// <summary>The brothers in the cathedral nave, Micah on the left and Father Caleb on the right, for the heavy
+    /// talks: salvation in Act 2, repentance after the Club, and Micah's confession after Tony.</summary>
+    public static readonly CloseUp Church = new("church", "church_closeup")
+    {
+        LeftSpeaker = "micah", RightSpeaker = "caleb",
+    };
+
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,
     /// stag and moon.</summary>
     public static readonly CloseUp Heraldry = new("heraldry", "heraldry_closeup");
@@ -72,7 +79,7 @@ public static class CloseUps
     private static readonly Dictionary<string, CloseUp> ById = new()
     {
         [Stage.Id] = Stage, [Rose.Id] = Rose, [Beaten.Id] = Beaten, [FireEscape.Id] = FireEscape, [Heraldry.Id] = Heraldry,
-        [Motel.Id] = Motel, [Vows.Id] = Vows,
+        [Motel.Id] = Motel, [Vows.Id] = Vows, [Church.Id] = Church,
     };
 
     public static CloseUp Get(string id) =>

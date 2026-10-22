@@ -770,6 +770,7 @@ CALEB: Not as much as you'd like. Sit. The pews don't charge by the hour.
 MICAH: There's a woman. I was paid to find her. I found her, and then I let her go.
 MICAH: The same night I walked out on her, two men walked her out of that flophouse. I didn't even ask where she'd go.
 MICAH: And I can't stop thinking about her. Or about what I did this week. What I let happen.
+INSET: church
 MICAH: Right now, Caleb... I'm too far gone to be saved.
 CALEB: That's crap, Micah.
 CALEB: Forgive my language, Lord. But it is. No one is beyond salvation. Nobody. Not even you.
@@ -783,6 +784,7 @@ CALEB: Then start there. He remembers the rest.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
+INSET: none
 -> END
 
 === caleb ===
@@ -975,6 +977,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     -> rest
 - (rest)
 CALEB: But don't go, Micah. Give up this foolish search. Whatever she is to you, it isn't worth it.
+INSET: church
 MICAH: There isn't much left for me to do.
 CALEB: You know that isn't true.
 CALEB: Repentance isn't for saints at the end of their lives, Micah. It's for anyone, any day they still draw breath.
@@ -985,6 +988,7 @@ CALEB: You've always been arrogant, Micah. Always the one who had to carry every
 CALEB: Despair is just another way of putting yourself first. If you're past saving, you never have to change.
 CALEB: The prodigal thought he was past it too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
+INSET: none
 -> END
 
 === office_ring ===
@@ -1159,6 +1163,7 @@ CALEB: Micah? It's past midnight. What... There's blood on your cuff.
 MICAH: It's Tony's. The bartender at the Blue Lantern. I shot him, Caleb. Twice.
 MICAH: The second time he was on his back in the rain, and he'd already told me everything. He knew my face. I told myself he'd send them after Rose and Tommy.
 CALEB: ...
+INSET: church
 CALEB: Kneel down, Micah. Not for me. Say it the way Ma taught us.
 MICAH: Bless me, Father, for I have sinned. I killed a man tonight. To save my own skin.
 CALEB: God doesn't turn away a contrite heart. I believe that. But absolution isn't a place to hide, brother. Not from the law, and not from Tony's mother.
@@ -1171,7 +1176,8 @@ CALEB: The station on Maxwell Street is open all night. I'll walk you there myse
     ~ set_flag("confessed_tony")
     MICAH: After her, I'll walk in there on my own two feet. I swear it.
     CALEB: On your own two feet. I'll be on the station steps at sunrise, Micah. Don't make me wait for nothing.
-- -> END
+- INSET: none
+-> END
 
 // The alarm, on the warning-shot route: Tony left the bell out. Running is ending 13 (Outskirts); going in anyway is
 // ending 14 (the kitchen ambush).

@@ -114,17 +114,27 @@ public sealed partial class Playthrough
                       new[] { "office", "library", "club" }.All(id => _game.Room?.FindHotspot(id)?.Visible != true),
                     "only the Blue Lantern, the church and the mansion are left on the map");
                 var church = Do(Verb.Walk, "church");
+                bool closeUp = false;
+                bool Watching(bool done)
+                {
+                    closeUp |= _game.Hud.CurrentCloseUp == CloseUps.Church && _game.Hud.SpeechVisible &&
+                        _game.Hud.SpeechText.StartsWith("Bless me, Father");
+                    return done;
+                }
                 if (_route == "12")
                 {
-                    await Until(() => _game.Room?.Name == "Prison", 300);
+                    await Until(() => Watching(_game.Room?.Name == "Prison"), 300, 0.05);
+                    Check(closeUp, "the brothers' close-up for Micah's confession");
                     Expect("Prison", "Micah turns himself in at Caleb's side");
                     Check(Gs.HasFlag(Endings.SurrenderedTony), "surrendered at the church");
                     await TheEnd();
                     over = true;
                     return;
                 }
+                await Until(() => Watching(church.IsCompleted), 600, 0.05);
                 await church;
                 await WaitIdle();
+                Check(closeUp && !_game.Hud.InsetVisible, "the brothers' close-up for Micah's confession, gone as he leaves");
                 Check(Gs.HasFlag(Endings.ConfessedTony), "confessed to Caleb, and promised the station at sunrise");
                 Expect("OfficeStorm", "on from the church to the office, in the storm");
                 return;

@@ -65,8 +65,8 @@ the screen). Cursor: `assets/art/ui/cursor.png`; a held item shows as a
 ## Close-ups
 
 `CloseUp` = id, texture under `assets/art/ui/` (or a function of settings) and fade times. Catalog: `stage`
-(`stage_closeup` with nudity on, `stage_closeup_clothed` off), `rose`, `beaten`, `fire_escape` (two portraits),
-`heraldry`, `motel`, and `vows` (`vows_photo`, ending 1's epilogue). `Photo = true` (`vows`) places the picture
+(`stage_closeup` with nudity on, `stage_closeup_clothed` off), `rose`, `beaten`, `fire_escape` and `church` (two
+portraits), `heraldry`, `motel`, and `vows` (`vows_photo`, ending 1's epilogue). `Photo = true` (`vows`) places the picture
 32 px from the left edge, vertically centred, with speech beside it.
 
 ```csharp

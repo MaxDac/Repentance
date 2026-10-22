@@ -301,6 +301,29 @@ public partial class AutoPlay
     }
 
     /// <summary>
+    /// Caleb on the Club: the choices and Caleb's story of the Club play over the room; the brothers' close-up comes
+    /// up when the talk turns to repentance and goes before Micah's silent walk out.
+    /// </summary>
+    private async Task CalebClubCloseUp(Game game)
+    {
+        var talk = game.Perform(Verb.Walk, "church");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Micah. Twice in one week."));
+        Check(!game.Hud.InsetVisible, "Caleb greets Micah over the room");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("I don't know anything about her."));
+        Check(!game.Hud.InsetVisible, "Caleb tells of the Club over the room");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "There isn't much left for me to do.");
+        CheckPortraitSpeech(game, right: false, CloseUps.Church);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "You know that isn't true.");
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Shot("church_repentance");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("The prodigal thought"));
+        Check(game.Hud.CurrentCloseUp == CloseUps.Church, "the brothers' close-up stays to the prodigal son");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("No answer for that"));
+        Check(!game.Hud.InsetVisible, "the close-up is gone before Micah's silent walk out");
+        await talk;
+    }
+
+    /// <summary>
     /// After the First Interlude: Micah is already in front of Eleanor on the landing; she repeats her Act 1 question,
     /// the two-portrait close-up, the compensation choice, the slow approach and the kiss, then a 3-second fade.
     /// </summary>
@@ -496,6 +519,21 @@ public partial class AutoPlay
         await game.Wait(2);
         await Shot("church_act2");
         // the whole caleb_act2 conversation plays out here: about two minutes of game time
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("My kid brother"), timeout: 120);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Hello, Caleb"), timeout: 60);
+        Check(!game.Hud.InsetVisible, "the brothers' greeting plays over the room");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("There's a woman."), timeout: 60);
+        Check(!game.Hud.InsetVisible, "Micah tells of Eleanor over the room");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Right now, Caleb"), timeout: 60);
+        CheckPortraitSpeech(game, right: false, CloseUps.Church);
+        await Shot("church_salvation_micah");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "That's crap, Micah.", timeout: 60);
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Shot("church_salvation_caleb");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Micah, wait-", timeout: 180);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Church, "the brothers' close-up stays to Caleb's last word");
+        await Until(() => game.Room?.Name == "ChicagoMap" || !game.Hud.InsetVisible, timeout: 60);
+        Check(!game.Hud.InsetVisible, "the close-up goes when Micah walks out");
         await Until(() => game.Room?.Name == "ChicagoMap", timeout: 240);
         Check(game.Music.Current == null, "the organ stops on the map");
         Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
@@ -687,7 +725,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "ChicagoMap", "no use going back to the Club");
 
         // ---- Caleb points to the convent; the sister, and the revolver
-        await game.Perform(Verb.Walk, "church");
+        await CalebClubCloseUp(game);
         Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
         Check(_offered.TryGetValue("caleb_club", out var calebLast) && calebLast.Length == 1 && calebLast[0].StartsWith("They have her, Caleb"),
             "Micah presses Caleb with both reasons before asking him outright");
