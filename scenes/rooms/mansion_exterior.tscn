@@ -14,13 +14,13 @@
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(38, 98)
+size = Vector2(38, 81)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(62, 14)
+size = Vector2(62, 18)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
-size = Vector2(40, 34)
+size = Vector2(40, 48)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
 size = Vector2(32, 34)
@@ -94,14 +94,14 @@ script = ExtResource("3_Hotspot")
 Id = "door"
 Door = true
 DisplayName = "kitchen door"
-LookText = "The service door. Green paint, a brass handle, three worn steps."
+LookText = "The service door. Green paint, a brass handle, one worn step."
 WalkTo = Vector2(269, 222)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(269.0, 147.0)
+position = Vector2(269.0, 165.5)
 shape = SubResource("Rect_1")
 
 [node name="Lintel" type="Area2D" parent="Hotspots"]
@@ -116,7 +116,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Lintel"]
-position = Vector2(269.0, 89.0)
+position = Vector2(269.0, 115.0)
 shape = SubResource("Rect_2")
 
 [node name="Wire" type="Area2D" parent="Hotspots"]
@@ -131,7 +131,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Wire"]
-position = Vector2(313.0, 111.0)
+position = Vector2(314.0, 118.0)
 shape = SubResource("Rect_3")
 
 [node name="Bell" type="Area2D" parent="Hotspots"]
@@ -239,7 +239,7 @@ ShowIfFlags = "bell_wedged"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(248, 96)
+position = Vector2(248, 123)
 texture = ExtResource("12_mansion_exterior_door")
 centered = false
 script = ExtResource("4_FlagSprite")

@@ -297,6 +297,93 @@ def _cellar_fire(img, em, cx, cy, t):
     img.paste(out)
 
 
+def _kitchen_stair(img, rnd):
+    """The kitchen stair down from the trapdoor: a dark hollow under it with the cook's sacks, crocks and broom, a far
+    stringer, nine treads on riser boards (worn pale where feet land, nailed at the ends, one split and patched), a
+    near stringer bolted at each tread, and a handrail on square balusters ending in a newel post at the floor."""
+    def near(y):  # the near stringer's top edge
+        return 70 + (y - 22) * 92 / 182
+
+    def rail(x):  # the handrail runs parallel to the stringer, a little over 30 px above it
+        return 22 + (x - 72) * 182 / 92 - 32
+
+    shadow(img, "polygon", [(22, 26), (114, 204), (0, 204), (0, 70)], 0.55, 6)
+    d = ImageDraw.Draw(img)
+    # stored under the stair: a corn broom against the wall, two burlap sacks, a pair of stoneware crocks
+    d.line([(10, 118), (22, 196)], fill=hx("6a4a2a"), width=2)
+    d.polygon([(18, 188), (27, 188), (31, 204), (14, 204)], fill=hx("b0904a"), outline=hx("5a4420"))
+    for x in (19, 22, 25, 28):
+        d.line([(x, 190), (x + (x - 22) // 3, 203)], fill=hx("806428"))
+    d.rectangle([18, 189, 27, 190], fill=hx("6a2a1a"))
+    for x0, top, col in ((30, 172, hx("8a7650")), (50, 180, hx("7a6646"))):
+        d.polygon([(x0 + 3, top + 6), (x0 + 8, top), (x0 + 13, top), (x0 + 17, top + 6), (x0 + 21, 203),
+                   (x0, 203)], fill=col, outline=hx("3a2e1a"))
+        d.line([(x0 + 6, top + 6), (x0 + 15, top + 6)], fill=hx("4a3a20"))  # the tie
+        for y in range(top + 10, 203, 4):  # coarse weave
+            d.line([(x0 + 3, y), (x0 + 18, y + 1)], fill=mul(col, 0.86))
+        d.line([(x0 + 4, top + 12), (x0 + 3, 200)], fill=mul(col, 1.15))
+    for x0, h in ((74, 16), (86, 12)):
+        d.rectangle([x0, 204 - h, x0 + 9, 203], fill=hx("b8a880"), outline=hx("4a4030"))
+        d.rectangle([x0, 204 - h, x0 + 9, 204 - h + 3], fill=hx("6a4a2a"))  # the brown glazed shoulder
+        d.line([(x0 + 2, 206 - h), (x0 + 2, 202)], fill=hx("e0d4b0"))
+    # the far stringer
+    d.polygon([(19, 22), (25, 22), (117, 204), (111, 204)], fill=hx("4a3420"))
+    d.line([(25, 22), (117, 204)], fill=hx("6a4a2e"))
+    for i in range(9):
+        ty, tx0 = 34 + i * 19, 24 + i * 10
+        tx1 = tx0 + 46
+        if i:  # the riser board under the previous tread's nosing, two planks wide
+            d.rectangle([tx0, ty - 11, tx1, ty - 1], fill=hx("7a5838"))
+            d.line([(tx0, ty - 11), (tx1, ty - 11)], fill=hx("2a1c10"))
+            d.line([(tx0, ty - 10), (tx1, ty - 10)], fill=hx("4a3420"))
+            d.line([(tx0, ty - 6), (tx1, ty - 6)], fill=hx("5a4028"))
+            d.line([(tx0, ty - 1), (tx1, ty - 1)], fill=hx("4a3420"))
+            for gx in (tx0 + 9, tx0 + 23, tx0 + 37):
+                d.line([(gx, ty - 9), (gx + rnd.choice((-1, 0, 1)), ty - 2)], fill=hx("6a4c30"))
+        d.rectangle([tx0, ty, tx1, ty + 4], fill=hx("9a7648"))
+        d.line([(tx0, ty), (tx1, ty)], fill=hx("d8b07a"))  # the rounded nosing catching the light
+        d.line([(tx0 + 14, ty + 1), (tx0 + 32, ty + 1)], fill=hx("c09a66"))  # worn pale where feet land
+        d.line([(tx0 + 18, ty + 2), (tx0 + 28, ty + 2)], fill=hx("b08a5a"))
+        for _ in range(3):  # grain
+            gx = rnd.randint(tx0 + 2, tx1 - 10)
+            d.line([(gx, ty + 3), (gx + rnd.randint(4, 9), ty + 3)], fill=hx("6a4e30"))
+        for nx in (tx0 + 2, tx1 - 2):
+            d.point((nx, ty + 2), fill=hx("2a2420"))
+        if i == 5:  # a split tread, patched with a cleat
+            d.line([(tx0 + 30, ty + 1), (tx0 + 40, ty + 3)], fill=hx("2a1c10"))
+            d.rectangle([tx0 + 34, ty + 5, tx0 + 41, ty + 6], fill=hx("6a5a40"))
+        d.rectangle([tx0, ty + 5, tx1, ty + 7], fill=hx("2a1c10"))
+    # the near stringer, its top edge lit, a bolt where each tread lands
+    d.polygon([(67, 22), (73, 22), (165, 204), (159, 204)], fill=hx("5a4028"))
+    d.line([(67, 22), (159, 204)], fill=hx("8a6a44"))
+    d.line([(73, 22), (165, 204)], fill=hx("2a1c10"))
+    for i in range(9):
+        ty = 34 + i * 19
+        bx = int(near(ty)) + 2
+        d.point((bx, ty + 3), fill=hx("1a1614"))
+        d.point((bx - 1, ty + 2), fill=hx("9a8a70"))
+    # square balusters up from the stringer to the handrail, then the newel post at the foot
+    for i in range(9):
+        ty = 34 + i * 19
+        bx = int(near(ty)) + 1
+        top = int(rail(bx)) + 2
+        d.rectangle([bx, top, bx + 1, ty], fill=hx("6a4a2e"))
+        d.line([(bx, top), (bx, ty)], fill=hx("9a7448"))
+        d.rectangle([bx - 1, top + 3, bx + 2, top + 4], fill=hx("4a3420"))
+        d.rectangle([bx - 1, ty - 4, bx + 2, ty - 3], fill=hx("4a3420"))
+    nx0, ntop = 159, 160
+    d.rectangle([nx0, ntop, nx0 + 6, 204], fill=hx("5a4028"), outline=hx("2a1c10"))
+    d.line([(nx0 + 1, ntop + 1), (nx0 + 1, 203)], fill=hx("8a6a44"))
+    d.rectangle([nx0 - 1, ntop - 4, nx0 + 7, ntop], fill=hx("6a4a2e"), outline=hx("2a1c10"))  # its cap
+    d.rectangle([nx0 + 2, ntop - 7, nx0 + 4, ntop - 4], fill=hx("6a4a2e"))  # a turned finial
+    d.line([(72, int(rail(72))), (nx0 + 1, int(rail(nx0 + 1)))], fill=hx("5a3c24"), width=4)
+    d.line([(72, int(rail(72)) - 1), (nx0, int(rail(nx0)) - 1)], fill=hx("b89060"))
+    d.line([(72, int(rail(72)) + 2), (nx0, int(rail(nx0)) + 2)], fill=hx("2a1c10"))
+    for k in range(3):  # a web strung between the top balusters
+        d.line([(near(34) + 2, rail(near(34)) + 6 + k * 6), (near(53) + 2, rail(near(53)) + 10 + k * 5)],
+               fill=hx("8a8478"))
+
+
 def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=False, pool=False, lantern_down=False,
                  fire_t=None):
     """lit hangs the lantern on the stair nail; lantern_down takes it back off (Micah carries it, so the light stays).
@@ -330,19 +417,8 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
     d.rectangle([20, 18, 102, 22], fill=hx("4a3424"))
     d.polygon([(98, 0), (120, 0), (112, 18), (102, 18)], fill=hx("5a4430"))  # the raised flap
     # ---- the wooden kitchen stair coming down on the left ----
-    for i in range(9):
-        ty = 34 + i * 19
-        tx0 = 24 + i * 10
-        d.rectangle([tx0, ty, tx0 + 46, ty + 4], fill=hx("8a6a44"))
-        d.line([(tx0, ty), (tx0 + 46, ty)], fill=hx("b08a5a"))
-        d.rectangle([tx0, ty + 5, tx0 + 46, ty + 7], fill=hx("3a2a1a"))
-    d.line([(22, 22), (114, 204)], fill=hx("5a4028"), width=4)  # stringers
-    d.line([(70, 22), (162, 204)], fill=hx("5a4028"), width=4)
-    d.line([(80, 8), (170, 156)], fill=hx("6a4a2e"), width=2)  # handrail and its posts
-    for k in range(4):
-        t = (k + 1) / 5
-        rx, ry = 80 + 90 * t, 8 + 148 * t
-        d.line([(rx, ry), (rx, ry + 34)], fill=hx("4a3420"), width=2)
+    _kitchen_stair(img, rnd)
+    d = ImageDraw.Draw(img)
     # ---- the brick pier with the lantern hook ----
     bricks(img, (166, 24, 192, CFL), hx("8a5a40"), hx("3a2a22"), 1502, h=5, w=9)
     d = ImageDraw.Draw(img)
