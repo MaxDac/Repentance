@@ -410,6 +410,18 @@ class CharacterArtTests(unittest.TestCase):
         self.assertEqual(final.tobytes(), Image.open(ART / "sprites" / "sal_out.png").tobytes())
         self.assertFalse((ART / "sprites" / "sal_supine.png").exists(), "the old on-his-back pose is gone")
 
+    def test_struck_down_coats_show_no_shirt_along_the_back(self):
+        shirt = (0xe3, 0xd7, 0xbf)
+        for name in ("sal_knockout", "harrington_fall"):
+            with self.subTest(name):
+                clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+                pixels = np.array(Image.open(ART / "sprites" / f"{name}.png").convert("RGBA"))
+                width = clip["width"]
+                for i in range(1, len(clip["frames"])):
+                    frame = pixels[:, i * width:(i + 1) * width]
+                    shown = (frame[..., 3] > 0) & np.all(frame[..., :3] == shirt, axis=-1)
+                    self.assertFalse(shown.any(), f"frame {i}: kneeling and face-down only the coat shows")
+
     def test_sal_kicks_from_his_idle_pose_and_back(self):
         clip = json.loads((ART / "sprites" / "sal_kick.json").read_text())
         image = Image.open(ART / "sprites" / "sal_kick.png")
