@@ -83,6 +83,7 @@ public partial class ConventCell : Room
         agatha.Position = AgathaThreshold;
         agatha.FaceLeft(false);
         AgathaIn(true);
+        await Wait(0.5);
         await agatha.MoveTo(AgathaDoor, 44);
         DoorOpen(false);
         await agatha.MoveTo(AgathaByTheBed, 44);

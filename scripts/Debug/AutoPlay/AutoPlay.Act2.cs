@@ -207,7 +207,7 @@ public partial class AutoPlay
         Check(game.Room?.GetNodeOrNull<Area2D>("Hotspots/Bag")?.Visible == true, "her duffle is a hotspot in the cell");
         bool combed = false, sat = false, rose = false, thoughtOverBlack = false, cameThroughDoor = false;
         bool AgathaInOpenDoor() => game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true
-            && game.Room?.FindActor("nun") is { Visible: true } nun && nun.Position.X < 80;
+            && game.Room?.FindActor("nun") is { Visible: true } nun && nun.Position.X < 100;
         double nightScale = Engine.TimeScale;
         ulong blackAt = 0, knockAt = 0;
         var night = game.Perform(Verb.Hand, "bag");
