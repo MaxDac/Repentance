@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/MansionKitchen.cs" id="1_Room"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_kitchen.png" id="2_bg"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="5_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/eleanor_sheet.png" id="12_eleanor_sheet"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/mansion_kitchen_trapdoor.png" id="13_mansion_kitchen_trapdoor"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/gunman_a.png" id="14_gunman_a"]
+[ext_resource type="Texture2D" path="res://assets/art/sprites/gunman_b.png" id="15_gunman_b"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
 size = Vector2(48, 104)
@@ -62,6 +64,10 @@ metadata/facing = 3
 [node name="eleanor_coda" type="Marker2D" parent="Entries"]
 position = Vector2(432, 226)
 metadata/facing = 3
+
+[node name="ambush" type="Marker2D" parent="Entries"]
+position = Vector2(120, 232)
+metadata/facing = 4
 
 [node name="cellar" type="Marker2D" parent="Entries"]
 position = Vector2(306, 248)
@@ -180,3 +186,31 @@ monitorable = false
 Texture = ExtResource("12_eleanor_sheet")
 FlipH = true
 SpeechColor = Color(0.96, 0.78, 0.62, 1)
+
+[node name="Gunman" type="Area2D" parent="World"]
+position = Vector2(250, 232)
+script = ExtResource("5_Actor")
+Id = "gunman"
+DisplayName = "Club man"
+LookText = "A Club man in a charcoal overcoat, with a revolver, between me and the stairs."
+WalkTo = Vector2(150, 230)
+ShowIfFlags = "alarm_stayed"
+monitoring = false
+monitorable = false
+Texture = ExtResource("14_gunman_a")
+FlipH = true
+SpeechColor = Color(0.78, 0.8, 0.86, 1)
+
+[node name="GunmanB" type="Area2D" parent="World"]
+position = Vector2(300, 244)
+script = ExtResource("5_Actor")
+Id = "gunman_b"
+DisplayName = "Club man"
+LookText = "His partner, in a flat cap, with a revolver of his own."
+WalkTo = Vector2(150, 240)
+ShowIfFlags = "alarm_stayed"
+monitoring = false
+monitorable = false
+Texture = ExtResource("15_gunman_b")
+FlipH = true
+SpeechColor = Color(0.78, 0.8, 0.86, 1)

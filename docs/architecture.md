@@ -124,7 +124,7 @@ flowchart LR
     I1 --> A2[Act 2<br/>StoryAct 2]
     A2 --> I2[Second interlude]
     I2 --> A3[Act 3<br/>StoryAct 3]
-    A3 --> E[Endings 1-11<br/>Endings.Resolve]
+    A3 --> E[Endings 1-12<br/>Endings.Resolve]
     E --> C[Attic coda]
 ```
 

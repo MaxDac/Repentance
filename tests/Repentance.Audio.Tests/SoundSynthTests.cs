@@ -124,6 +124,19 @@ public class SoundSynthTests
     }
 
     [Fact]
+    public void TheAlarmBellRingsWithoutAGapForSecondsThenStops()
+    {
+        var alarm = SoundSynth.Render(Sound.AlarmBell);
+        int window = SoundSynth.SampleRate / 10;
+        double Rms(int start) => Math.Sqrt(Enumerable.Range(start, window).Average(i => (double)alarm[i] * alarm[i]));
+        double loud = Rms(SoundSynth.SampleRate);
+        for (int start = 0; start + window <= 3 * SoundSynth.SampleRate; start += window)
+            Assert.True(Rms(start) > loud * 0.5, $"still ringing at {start / (double)SoundSynth.SampleRate:0.0} s");
+        Assert.True(Rms(alarm.Length - window) < loud * 0.05, "silent once the circuit is cut");
+        Assert.NotEqual(SoundSynth.Render(Sound.Bell).Length, alarm.Length);
+    }
+
+    [Fact]
     public void GunshotIsLouderAndLongerThanAFootstep()
     {
         double Energy(float[] s) => s.Sum(v => (double)v * v);

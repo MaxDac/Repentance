@@ -10,7 +10,7 @@ public enum Sound
     Gunshot, Knock, Clang, Crash, Thunk, Crack, Rustle, Click, Scrape, Whoosh, DoorSlam, DoorOpen, DoorClose, Bell,
     Rain, Thunder, TinOpen, SafeOpen, SafeClose,
     // new sounds go last: each sound's value seeds its noise, so inserting one would change the others
-    StepMarble,
+    StepMarble, AlarmBell,
 }
 
 /// <summary>
@@ -87,6 +87,7 @@ public static partial class SoundSynth
             Sound.TinOpen => TinOpen(rng),
             Sound.SafeOpen => SafeOpen(rng),
             Sound.SafeClose => SafeClose(rng),
+            Sound.AlarmBell => AlarmBell(rng),
             _ => throw new ArgumentOutOfRangeException(nameof(sound)),
         };
         Normalize(buf);

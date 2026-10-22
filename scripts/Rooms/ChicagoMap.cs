@@ -5,7 +5,8 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// Act 2: the map of Chicago. Micah picks where to look for Eleanor next. Which places are on the map
-/// depends on how far the story has gone (see <see cref="OnRefresh"/>).
+/// depends on how far the story has gone (see <see cref="OnRefresh"/>). In Act 3, only if Micah killed Tony, it comes
+/// back once more with the Blue Lantern, the church and the Gold Coast mansion.
 /// </summary>
 public partial class ChicagoMap : Room
 {
@@ -64,6 +65,17 @@ public partial class ChicagoMap : Room
 
     public override async Task OnEnter(string entry)
     {
+        if (Act3Night)
+        {
+            if (State.HasFlag("map_act3_seen")) return;
+            State.SetFlag("map_act3_seen");
+            await Game.Run(async () =>
+            {
+                await Think("The same old map, and Tony's blood drying on my cuff. Three places left on it tonight.");
+                await Think("Caleb's church, or the Gold Coast. Whichever door I walk through, I don't walk back out to this map.");
+            });
+            return;
+        }
         State.SetFlag("on_map");
         if (State.HasFlag("map_seen")) return;
         State.SetFlag("map_seen");
@@ -82,8 +94,11 @@ public partial class ChicagoMap : Room
     private bool HarringtonDone => State.HasFlag("harrington_done");
     private bool HarringtonLocated => State.HasFlag("harrington_located");
 
+    /// <summary>Act 3, after Micah killed Tony: only the Blue Lantern, the church and the Gold Coast are left.</summary>
+    private bool Act3Night => State.HasFlag(Endings.KilledTony);
+
     /// <summary>Investigation leads close as the hunt narrows; the office stays available for the ring.</summary>
-    private bool Shows(string id) => id switch
+    private bool Shows(string id) => Act3Night ? id is "blue_lantern" or "church" or "mansion" : id switch
     {
         "library" => !NunThreatened,
         "office" => true,
@@ -101,7 +116,7 @@ public partial class ChicagoMap : Room
     {
         ("library", "Library"), ("church", "Church"), ("office", "Office"),
         ("club", "Club"), ("convent", "Convent"), ("tribune", "Tribune"), ("harrington", "Harrington"),
-        ("hotel", "Hotel"),
+        ("hotel", "Hotel"), ("blue_lantern", "BlueLantern"), ("mansion", "Mansion"),
     };
 
     protected override void OnRefresh()
@@ -129,6 +144,16 @@ public partial class ChicagoMap : Room
         if (verb == Verb.Look) return false;
         switch (target.Id)
         {
+            case "blue_lantern":
+                await Game.ChangeRoom("alley", "act3");
+                return true;
+            case "mansion":
+                await Game.ChangeRoom("office_storm", "window");
+                return true;
+            case "church" when Act3Night:
+                await Game.ChangeRoom("church_interior", "map");
+                return true;
+
             case "library" when State.HasFlag("library_banned"):
                 await Say("Better not show my face there for the time being.");
                 return true;

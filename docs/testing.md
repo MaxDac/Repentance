@@ -128,7 +128,7 @@ Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick cho
 modes, the save/load round trip and the coverage gates.
 
 - Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
-  1-oldman 1-steps 8 9 10 11`. No seeded state. `--ending=N` runs one route.
+  1-oldman 1-steps 8 9 10 11 12 12-oldman 13 14`. No seeded state. `--ending=N` runs one route.
 - After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
 - Fresh-launch checkpoints: the run also keeps two real saves in `user://autoplay_saves/checkpoints/` (end of Act One,
   Club vestibule) with the choices matched so far. `--resume=act2` / `--resume=act3` (suites `resume-act2`,
@@ -175,7 +175,9 @@ The launchers also take each ending by a case-insensitive title and pass Godot t
 | 2 | `escape-together` | 8 | `eleanor-burns-the-house` |
 | 3 | `escape-alone` | 9 | `eleanor-confesses` |
 | 4 | `prison-eleanor-visits` | 10 | `she-leaves-by-the-car` |
-| | | 11 | `she-visits-once` |
+| 12 | `kill-tony-surrender` | 11 | `she-visits-once` |
+| 12-oldman | `kill-tony-pray` | 13 | `alarm-run` |
+| 14 | `alarm-ambush` | | |
 
 Numbers follow [Branches and endings](story-overview.md#branches-and-endings).
 ## Unit tests (`tests/*.Tests`)

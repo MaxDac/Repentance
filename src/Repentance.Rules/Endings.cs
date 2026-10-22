@@ -15,8 +15,16 @@ namespace Repentance;
 ///   9  Prison      - Eleanor struck the old man and left the house standing: she confesses to Caleb.
 ///  10  Outskirts   - Eleanor (both refusals), worn out, followed Micah after he shot; fire or documents: she leaves him for her peace.
 ///  11  Prison      - The same, but nothing to bargain with: Eleanor visits once, wishing him his peace.
+///  12  Prison      - Micah killed Tony and turned himself in for it: from Caleb's church, or after the Our Father,
+///                    which needs the confession on top of the usual gates. Caleb visits.
+///  13  Outskirts   - After the warning shot (Tony never mentioned the alarm), Micah opened the kitchen door unnoticed,
+///                    the bell rang and he ran: alone, out of Chicago, and the journal ends with his suicide.
+///  14  Mansion     - The same bell, but he stayed and walked into the kitchen: two of the Club's men shot him.
+///                    Caleb finishes the journal.
 /// Eleanor's own endings need both interlude refusals; the refusals alone change nothing (a give-up is still 1).
 /// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
+/// Once Tony is dead there is no going home to Rose: the prayer that would give ending 1 gives 12 instead.
+/// The alarm stops the story at the kitchen door, so 13 and 14 decide before everything else.
 /// </summary>
 public static class Endings
 {
@@ -41,9 +49,29 @@ public static class Endings
     public const string EleanorBurned = "eleanor_burned";
     /// <summary>Micah shot the old man and Eleanor (both refusals), too worn out to argue, followed him without persuasion.</summary>
     public const string EleanorWeary = "eleanor_weary";
+    /// <summary>The alley: Micah shot Tony in the shoulder, and Tony knows who did it.</summary>
+    public const string ShotBartender = "shot_bartender";
+    /// <summary>The alley: Micah went back and finished Tony off, so he couldn't tell the mob.</summary>
+    public const string KilledTony = "killed_tony";
+    /// <summary>Micah confessed Tony to Caleb and went on to the mansion, promising to turn himself in after.</summary>
+    public const string ConfessedTony = "confessed_tony";
+    /// <summary>Micah confessed Tony to Caleb and walked with him to the police that night.</summary>
+    public const string SurrenderedTony = "surrendered_tony";
+    /// <summary>The alley: Micah fired into the brick by Tony's head instead. Tony talked, unhurt, but left out the alarm.</summary>
+    public const string WarnedTony = "warned_tony";
+    /// <summary>The kitchen door opened on an unnoticed alarm, and Micah ran from the footsteps.</summary>
+    public const string AlarmRan = "alarm_ran";
+    /// <summary>The kitchen door opened on an unnoticed alarm, and Micah walked in anyway.</summary>
+    public const string AlarmStayed = "alarm_stayed";
+
+    /// <summary>The number of endings.</summary>
+    public const int Count = 14;
 
     /// <summary>Endings in which Daniel keeps the journal for Leo.</summary>
-    public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10 or 11;
+    public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10 or 11 or 12;
+
+    /// <summary>Tony is alive and knows Micah shot him: the mob will want its revenge.</summary>
+    public static bool TonyWantsRevenge(Func<string, bool> has) => has(ShotBartender) && !has(KilledTony);
 
     /// <summary>Eleanor refused both the Mother Superior and the old man: her own endings open up.</summary>
     public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
@@ -68,8 +96,10 @@ public static class Endings
     public static bool CanWalkAwayFromBartender(Func<string, bool> has, Func<string, bool> hasItem) =>
         ChurchReturned(has) && hasItem("faith_ring");
 
+    /// <summary>The Our Father: the usual gates, and, once Tony is dead, his confession to Caleb as well.</summary>
     public static bool CanSpareOldMan(Func<string, bool> has, Func<string, bool> hasItem) =>
-        CanWalkAwayFromBartender(has, hasItem) && InsistedForgiveness(has) && hasItem("cross");
+        CanWalkAwayFromBartender(has, hasItem) && InsistedForgiveness(has) && hasItem("cross") &&
+        (!has(KilledTony) || has(ConfessedTony));
 
     public static bool CanOfferCross(int act, Func<string, bool> has) =>
         has("caleb_met") && !has("took_cross") &&
@@ -80,10 +110,16 @@ public static class Endings
 
     public static int Resolve(Func<string, bool> has)
     {
+        if (has(AlarmStayed))
+            return 14;
+        if (has(AlarmRan))
+            return 13;
         if (has(EleanorStruck))
             return has(EleanorBurned) ? 8 : 9;
         if (has(EleanorWeary))
             return StaysFree(has) ? 10 : 11;
+        if (has(SurrenderedTony) || (has(KilledTony) && has(SparedOldMan)))
+            return 12;
         if (has(GaveUpSteps) || has(WalkedAway) || has(SparedOldMan))
             return 1;
         if (has(Repented))

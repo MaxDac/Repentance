@@ -6,7 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Past the city limits, where the bookkeeper's drive ended in Act 2. In Act 3 it's where Micah's car stops on the way out
 /// of Chicago: with Eleanor beside him (ending 2) or alone (ending 3). In ending 10 she gets out with him, then walks off down
-/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own.
+/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own. In ending 13 Micah ran from the
+/// Harringtons' alarm without her, and he isn't stopping.
 /// </summary>
 public partial class Outskirts : Room
 {
@@ -63,6 +64,11 @@ public partial class Outskirts : Room
             await Weary();
             return;
         }
+        if (State.HasFlag("ending_13"))
+        {
+            await OutOfChicago();
+            return;
+        }
         bool together = State.HasFlag("ending_2");
         bool nextMorning = !together && State.HasFlag(Endings.MansionExploded);
         if (nextMorning)
@@ -82,6 +88,21 @@ public partial class Outskirts : Room
             : nextMorning ? "Grey light over the stubble fields. A morning paper on the passenger seat. I haven't had the nerve to open it."
             : "Prairie dark and a cold wind off the stubble. The passenger seat is empty. Maybe it always was.");
         await Talk(together ? "ending_together" : "ending_alone");
+        await Act3.Finish();
+    }
+
+    /// <summary>
+    /// Ending 13: the alarm went off, footsteps came, and Micah ran. He stops at the city limits only long enough to say
+    /// he's out, of the job and of Chicago, with Eleanor still in that house.
+    /// </summary>
+    private async Task OutOfChicago()
+    {
+        await Wait(1.0);
+        await Say("*A car door slams in the dark.*");
+        await Game.WalkTo(new Vector2(232, 252));
+        Player.Face(Facing.Right);
+        await Think("Prairie dark and a cold wind off the stubble. My hands still won't hold the wheel straight.");
+        await Talk("ending_out");
         await Act3.Finish();
     }
 

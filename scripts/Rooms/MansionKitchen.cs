@@ -63,6 +63,11 @@ public partial class MansionKitchen : Room
             });
             return;
         }
+        if (entry == "ambush")
+        {
+            await Game.Run(Ambush);
+            return;
+        }
         if (entry != "start" || State.HasFlag("seen_mansion_kitchen")) return;
         State.SetFlag("seen_mansion_kitchen");
         await Game.Run(async () =>
@@ -128,6 +133,36 @@ public partial class MansionKitchen : Room
                 return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Ending 14: Micah went in after the alarm. The Club's two men are waiting at the cook's table; they draw, and he's
+    /// shot down by the back door before he can finish her name. Then black, and Caleb's last pages.
+    /// </summary>
+    private async Task Ambush()
+    {
+        Player.Face(Facing.Right);
+        await Wait(0.6);
+        await Talk("kitchen_ambush");
+        var gunman = FindActor("gunman");
+        var partner = FindActor("gunman_b");
+        var draws = new System.Collections.Generic.List<Task>();
+        if (gunman != null) draws.Add(gunman.PlayPose("gunman_a_draw"));
+        if (partner != null) draws.Add(partner.PlayPose("gunman_b_draw"));
+        await Task.WhenAll(draws);
+        gunman?.SetPose("gunman_a_aim");
+        partner?.SetPose("gunman_b_aim");
+        await Wait(0.3);
+        Game.Sfx.Play(Sound.Gunshot);
+        var fall = Player.PlayPose("micah_gunned_down");
+        await Wait(0.25);
+        Game.Sfx.Play(Sound.Gunshot);
+        await fall;
+        Player.SetPose("micah_gunned_dead");
+        await Wait(1.6);
+        await Game.Hud.Fade(1, 0.08);
+        await Wait(1.2);
+        await Act3.End();
     }
 
     /// <summary>Eleanor on her way out: the back door, or the cellar and the Club's whiskey first.</summary>

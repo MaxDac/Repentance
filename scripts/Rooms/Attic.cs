@@ -373,7 +373,7 @@ public partial class Attic : Room
         await Game.ChangeRoom("bedroom", "start");
     });
 
-    private int EndingNumber() => Enumerable.Range(1, 11).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
+    private int EndingNumber() => Enumerable.Range(1, Endings.Count).FirstOrDefault(n => State.HasFlag($"ending_{n}"));
 
     /// <summary>
     /// After Act 3: Daniel reads the last entry. He keeps the journal for Leo if Micah found his way back
@@ -388,7 +388,8 @@ public partial class Attic : Room
             await Game.WalkTo(new Vector2(384, 224));
             Player.Face(Facing.Right);
             State.TakeItem("journal");
-            if (!State.HasFlag("ending_7"))
+            // Caleb's endings already have Daniel putting it back for Leo
+            if (!State.HasFlag("ending_7") && !State.HasFlag("ending_14"))
                 await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
         }
         await Wait(0.6);
