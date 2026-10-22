@@ -301,6 +301,36 @@ public partial class AutoPlay
     }
 
     /// <summary>
+    /// Caleb on the Club: the choices are asked over the room; once Micah pleads, the brothers' comic strip comes up
+    /// for Caleb's confession and the sermon after it, each line captioned under its speaker and Micah's thought
+    /// across the strip, then it goes before Micah's silent walk out.
+    /// </summary>
+    private async Task CalebClubStrip(Game game)
+    {
+        var talk = game.Perform(Verb.Walk, "church");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Micah. Twice in one week."));
+        Check(!game.Hud.InsetVisible, "Caleb greets Micah without the comic strip");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("I don't know anything about her."));
+        CheckCaptionPanel(game, CloseUps.Church);
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Performers, the Club calls them"));
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Shot("church_strip_confession");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("He looks at the altar"));
+        var panel = game.Hud.InsetRect;
+        var thought = game.Hud.ThoughtRect;
+        Check(game.Hud.CurrentCloseUp == CloseUps.Church && thought.Position.Y >= panel.End.Y &&
+            thought.Position.X >= panel.Position.X && thought.End.X <= panel.End.X && thought.End.Y <= 270 - 2,
+            "Micah's thought is a caption across the comic strip, under both brothers");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "You're a hypocrite, Caleb.");
+        CheckPortraitSpeech(game, right: false, CloseUps.Church);
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("No answer for that"));
+        Check(!game.Hud.InsetVisible && game.Hud.ThoughtRect.Position.Y < 20,
+            "the strip is gone before Micah's silent walk out, and his thought is back along the top");
+        await talk;
+    }
+
+    /// <summary>
     /// After the First Interlude: Micah is already in front of Eleanor on the landing; she repeats her Act 1 question,
     /// the two-portrait close-up, the compensation choice, the slow approach and the kiss, then a 3-second fade.
     /// </summary>
@@ -496,6 +526,19 @@ public partial class AutoPlay
         await game.Wait(2);
         await Shot("church_act2");
         // the whole caleb_act2 conversation plays out here: about two minutes of game time
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("My kid brother"), timeout: 120);
+        Check(!game.Hud.InsetVisible, "Caleb recognises Micah before the comic strip");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Hello, Caleb"), timeout: 60);
+        CheckCaptionPanel(game, CloseUps.Church);
+        CheckPortraitSpeech(game, right: false, CloseUps.Church);
+        await Shot("church_strip_micah");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Six years."), timeout: 60);
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Shot("church_strip_caleb");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText == "Micah, wait-", timeout: 180);
+        Check(game.Hud.CurrentCloseUp == CloseUps.Church, "the brothers stay in the comic strip to Caleb's last word");
+        await Until(() => game.Room?.Name == "ChicagoMap" || !game.Hud.InsetVisible, timeout: 60);
+        Check(!game.Hud.InsetVisible, "the comic strip goes when Micah walks out");
         await Until(() => game.Room?.Name == "ChicagoMap", timeout: 240);
         Check(game.Music.Current == null, "the organ stops on the map");
         Check(gs.HasFlag("caleb_met") && !gs.HasFlag("act2_church"), "Micah talks with Caleb and walks out");
@@ -687,7 +730,7 @@ public partial class AutoPlay
         Check(game.Room?.Name == "ChicagoMap", "no use going back to the Club");
 
         // ---- Caleb points to the convent; the sister, and the revolver
-        await game.Perform(Verb.Walk, "church");
+        await CalebClubStrip(game);
         Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
         Check(_offered.TryGetValue("caleb_club", out var calebLast) && calebLast.Length == 1 && calebLast[0].StartsWith("They have her, Caleb"),
             "Micah presses Caleb with both reasons before asking him outright");

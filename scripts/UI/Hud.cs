@@ -48,6 +48,7 @@ public partial class Hud : CanvasLayer
     private Label _speech = null!;
     private Label _thought = null!;
     private ColorRect _thoughtBg = null!;
+    private ColorRect _captionBg = null!;
     private ColorRect _fade = null!;
     private Label _caption = null!;
     private Label _captionSub = null!;

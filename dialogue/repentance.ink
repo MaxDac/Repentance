@@ -762,6 +762,7 @@ INSET: none
 CALEB: Can I help you, my son?
 CALEB: ...Micah?
 THOUGHT: My kid brother in a Roman collar. He still looks at me like I'm the one who ought to know the way.
+INSET: church
 MICAH: Hello, Caleb. Or is it "Father" now?
 CALEB: Six years. You look like a man who hasn't slept for most of them.
 ~ set_flag("caleb_met")
@@ -783,6 +784,7 @@ CALEB: Then start there. He remembers the rest.
 MICAH: I'll think about that.
 MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
+INSET: none
 -> END
 
 === caleb ===
@@ -954,6 +956,7 @@ CALEB: A club? Micah, what would a priest know about clubs?
     MICAH: But it's all one roof, in the end. Somebody under it might have heard something. Maybe you.
     -> opts
 * {hid and roof} [They have her, Caleb. If you know anything, tell me.]
+    INSET: church
     CALEB: ...
     CALEB: I don't know anything about her. But I hear things. A priest always does.
     CALEB: That Club keeps its Thursdays. Spectacles, they call them. And spectacles need new faces. Fresh ones.
@@ -985,6 +988,7 @@ CALEB: You've always been arrogant, Micah. Always the one who had to carry every
 CALEB: Despair is just another way of putting yourself first. If you're past saving, you never have to change.
 CALEB: The prodigal thought he was past it too. Then he turned for home, and his father ran to meet him.
 ~ set_flag("caleb_club")
+INSET: none
 -> END
 
 === office_ring ===

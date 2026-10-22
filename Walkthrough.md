@@ -476,6 +476,12 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   be Thy name... and then nothing. I can't get past it." Caleb answers: "Then start there. He remembers the rest."
 - Micah replies "I'll think about that", then says that coming here was a mistake, and walks out. The scene moves
   to the map.
+- The conversation is drawn like a comic strip. After Caleb recognises him ("...Micah?") and Micah's thought about
+  his kid brother in a Roman collar, a short two-portrait panel comes up along the top of the screen: Micah on the
+  left, Father Caleb on the right, both in the candlelit brick nave of Caleb's picture. Micah's portrait is a new
+  picture (his fire-escape portrait cut out and set in front of the church), not a change to the fire-escape one.
+  Each line appears in a caption directly below its speaker's portrait, as wide as that half only, not across the
+  screen. The panel goes after Caleb's "Micah, wait-", before Micah walks out.
 
 #### Map of Chicago
 
@@ -613,6 +619,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   repents. When Micah insists he is too far gone, Caleb rebukes him harshly: thinking himself beyond salvation is
   pride, arrogant and self-serving. He closes with the prodigal son.
   Micah will say nothing and get out.
+- The brothers' comic strip from the first visit returns for the confession: it comes up with Caleb's "..." after
+  Micah's plea (the choices before it are asked over the room) and stays through the sermon, each line captioned
+  under its speaker. Micah's thought ("He looks at the altar, not at me.") is a caption across the whole strip. The
+  panel goes after the prodigal son, before Micah's silent thought and walk out.
 
 #### Map of Chicago
 

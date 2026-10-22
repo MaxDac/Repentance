@@ -13,6 +13,13 @@ chunky pixels, a tight palette and ordered dithering, inside a dark bevelled fra
 - beaten_closeup: Micah flat on his back after a beating (Hubbard Street in Act 2, the cathedral steps in Act 3), looking up from under his hat.
 - fire_escape_closeup: on the motel fire escape after the First Interlude, Micah on the left and Eleanor on the right, two portraits
   in one panel split by a bar in the frame's colours. Micah's picture is zoomed so his face is the same size as hers.
+- church_closeup: the brothers in the cathedral, a comic strip shorter than the other panels (CHURCH_AH) so the
+  captions fit under it: Micah on the left, Father Caleb on the right. church_caleb.png is Caleb's picture.
+  church_micah.png is a new picture, built here and committed; fire_escape_micah.png is left alone. It is Micah cut
+  out of fire_escape_micah.png and stood in front of the nave from Caleb's picture, warmed to its candlelight. The
+  nave behind Caleb's shoulders is rebuilt as straight running-bond brick on the picture's own mortar lines, lit
+  like the wall around it (church_plate). The cut-out masks (church_micah_mask.png, church_caleb_mask.png) were made
+  once with rembg's isnet-general-use model and committed, so the build needs only Pillow and numpy.
 - motel_closeup: a vertical neon MOTEL sign, amber letters in a blue tube, high on the right of a rain-soaked Chicago
   street at night, matching the sign in the motel scenes. The source is the original picture mirrored to put the sign
   there, with the sign itself pasted back unmirrored so MOTEL still reads left to right.
@@ -51,12 +58,29 @@ PHOTO_AW, PHOTO_AH = 72, AH
 PHOTO_IW, PHOTO_IH = PHOTO_AW * SCALE, PHOTO_AH * SCALE
 MOUNT = 9
 PHOTO_PW, PHOTO_PH = PHOTO_IW + 2 * MOUNT, PHOTO_IH + 2 * MOUNT
+# The cathedral: Caleb's own picture, and Micah's fire-escape picture cut out (rembg masks, made once and committed)
+# and put in front of the same nave, Caleb painted out of it. The composite is its own source, church_micah.png.
+CALEB_SRC = os.path.join(ROOT, "tools", "art", "src", "church_caleb.png")
+CALEB_MASK = os.path.join(ROOT, "tools", "art", "src", "church_caleb_mask.png")
+MICAH_MASK = os.path.join(ROOT, "tools", "art", "src", "church_micah_mask.png")
+CHURCH_MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "church_micah.png")
+# the back wall's mortar lines behind Caleb's head, in his 1152x896 source; rows beyond them repeat CHURCH_ROW
+CHURCH_MORTAR = (166, 203, 230, 263, 286, 307, 343, 367, 388, 415, 446)
+CHURCH_ROW, CHURCH_BRICK = 27, 66
+# The cathedral panel is shorter than the others, leaving a strip under it for each speaker's line. Caleb is
+# zoomed so his face is a good part of his half, with his collar in view; Micah is zoomed so his face matches.
+CHURCH_AH = 74
+CALEB_FACE_X, CALEB_FACE_W, CALEB_FACE_H, CALEB_EYES_Y = 568, 265, 225, 317
+CHURCH_CALEB_ZOOM = 1.67
+CHURCH_EYES = 0.40  # the eye line, as a fraction of each half's height
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 # Face boxes in the sources (brow to chin, cheek to cheek) and the eye lines. Micah's picture is zoomed so his face
 # box covers the same area as Eleanor's, with his eyes on her eye line, so both faces come out the same size.
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
+# Micah's crop in the cathedral: as many of his 768 rows as makes his face box the same share of the half as Caleb's.
+CHURCH_MICAH_ZOOM = (768 * CHURCH_CALEB_ZOOM / 896) * ((CALEB_FACE_W * CALEB_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
 # Rose's face in her 1344x768 doorway source, and Micah's zoom to match it in the Rose close-up.
 ROSE_FACE_X, ROSE_FACE_W, ROSE_FACE_H, ROSE_EYES_Y = 672, 250, 260, 270
 ROSE_MICAH_ZOOM = ((ROSE_FACE_W * ROSE_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
@@ -192,14 +216,14 @@ def motel_closeup(src):
     return framed(img, palette_of(small, COLOURS - MOTEL_NEON) + palette_of(sign, MOTEL_NEON))
 
 
-def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None):
-    """One half of a two-portrait panel, as wide as the half's aspect, centred on the face at cx. At zoom 1 it is
-    the full height; zoomed in, it is 1/zoom of the height, placed so the eyes at eyes_y land where target_eyes_y
-    sits in a full-height crop."""
+def portrait_crop(src, cx, zoom=1.0, eyes_y=None, target_eyes_y=None, ah=AH):
+    """One half of a two-portrait panel, as wide as the half's aspect (HALF x ah), centred on the face at cx. At
+    zoom 1 it is the full height; zoomed in, it is 1/zoom of the height, placed so the eyes at eyes_y land where
+    target_eyes_y sits in a full-height crop."""
     img = src.convert("RGB")
     w, h = img.size
     ch = round(h / zoom)
-    cw = round(ch * HALF / AH)
+    cw = round(ch * HALF / ah)
     y = 0 if eyes_y is None else int(np.clip(round(eyes_y - target_eyes_y / zoom), 0, h - ch))
     x = int(np.clip(cx - cw // 2, 0, w - cw))
     return img.crop((x, y, x + cw, y + ch))
@@ -215,11 +239,93 @@ def fire_escape_closeup(micah, eleanor):
     return framed_pair(crop(lip_cut(micah, *MICAH_CUT)), right, pair_palette(crop(micah), right))
 
 
+def _push_pull(img, known):
+    """Fills the unknown pixels of img from their surroundings, coarse to fine (push-pull), so a hole takes a
+    smooth blend of the colours around it however wide it is."""
+    if known.all() or min(known.shape) < 2:
+        return img
+    h, w = known.shape
+    k = known.astype(float)[..., None]
+    ph, pw = h + h % 2, w + w % 2
+    pad = lambda x: np.pad(x, ((0, ph - h), (0, pw - w), (0, 0)), mode="edge")
+    s, kw = pad(img * k), pad(k)
+    s = s.reshape(ph // 2, 2, pw // 2, 2, 3).sum((1, 3))
+    kw = kw.reshape(ph // 2, 2, pw // 2, 2, 1).sum((1, 3))
+    coarse = _push_pull(s / np.maximum(kw, 1e-6), kw[..., 0] > 0)
+    up = coarse.repeat(2, 0).repeat(2, 1)[:h, :w]
+    return np.where(known[..., None], img, up)
+
+
+def _mortar_rows(h):
+    rows = list(CHURCH_MORTAR)
+    while rows[0] > 0:
+        rows.insert(0, rows[0] - CHURCH_ROW)
+    while rows[-1] < h:
+        rows.append(rows[-1] + CHURCH_ROW)
+    return rows
+
+
+def church_plate(caleb, mask):
+    """The nave behind Caleb with Caleb painted out: the back wall rebuilt where he stood, in running-bond brick on
+    the wall's own mortar lines, lit by the glow around him so the candlelight carries on across the gap."""
+    from PIL import ImageFilter
+    a = np.asarray(caleb.convert("RGB")).astype(float)
+    hole = np.asarray(mask.convert("L").filter(ImageFilter.MaxFilter(25))) > 40
+    h, w = hole.shape
+    # the wall's light without its bricks: the surroundings pulled into the hole, then smoothed
+    light = _push_pull(a, ~hole)
+    light = np.asarray(Image.fromarray(np.clip(light, 0, 255).astype(np.uint8))
+                       .filter(ImageFilter.GaussianBlur(20))).astype(float)
+    rng = np.random.default_rng(1926)
+    shade = np.ones((h, w))
+    rows = _mortar_rows(h)
+    for i, (y0, y1) in enumerate(zip(rows, rows[1:])):
+        y0, y1 = max(y0, 0), min(y1, h)
+        if y0 >= y1:
+            continue
+        off = (CHURCH_BRICK // 2) * (i % 2)
+        for x0 in range(-off, w, CHURCH_BRICK):
+            xs = slice(max(x0, 0), min(x0 + CHURCH_BRICK, w))
+            shade[y0:y1, xs] = rng.uniform(0.92, 1.1)
+            shade[y0:y0 + 3, xs] *= 1.12  # the lit top edge
+            shade[y1 - 3:y1, xs] *= 0.86
+            shade[y0:y1, xs.start:xs.start + 3] = 0.42  # the vertical joint
+        shade[y0:y0 + 4, :] = 0.42  # the bed joint
+    bricks = np.clip(light * shade[..., None] * 1.08, 0, 255)
+    out = np.where(hole[..., None], bricks, a)
+    return Image.fromarray(out.astype(np.uint8))
+
+
+def church_micah(micah, mask, caleb, caleb_mask):
+    """Micah from the fire escape, cut out and stood in the cathedral: the nave from Caleb's picture scaled to his
+    1344x768 frame, its top kept, and Micah warmed to the candlelight, the night's blue taken out of his shadows."""
+    micah = micah.convert("RGB")
+    plate = church_plate(caleb, caleb_mask)
+    w, h = micah.size
+    plate = plate.resize((w, round(plate.height * w / plate.width)), Image.LANCZOS).crop((0, 0, w, h))
+    b = np.asarray(micah).astype(float)
+    warm = np.stack([b[..., 0] * 1.04 + 14, b[..., 1] * 0.97 + 4, b[..., 2] * 0.72], -1)
+    warm = Image.fromarray(np.clip(warm, 0, 255).astype(np.uint8))
+    return Image.composite(warm, plate, mask.convert("L"))
+
+
+def church_closeup(micah, caleb):
+    """In the cathedral: Micah on the left in front of the nave (church_micah.png), Caleb on the right in his collar,
+    faces the same size, in a panel shorter than the others so each speaker's line fits in the strip below his
+    half. Micah's lip still carries the Blue Lantern cut, as in the Rose panel later that act."""
+    micah, caleb = micah.convert("RGB"), caleb.convert("RGB")
+    left = lambda m: portrait_crop(m, MICAH_FACE_X, CHURCH_MICAH_ZOOM, MICAH_EYES_Y, CHURCH_EYES * m.height, CHURCH_AH)
+    right = portrait_crop(caleb, CALEB_FACE_X, CHURCH_CALEB_ZOOM, CALEB_EYES_Y, CHURCH_EYES * caleb.height, CHURCH_AH)
+    pal = pair_palette(left(micah), right, CHURCH_AH)
+    return framed_pair(left(lip_cut(micah, *MICAH_CUT)), right, pal, CHURCH_AH)
+
+
 def frame_border(panel):
+    pw, ph = panel.size
     d = ImageDraw.Draw(panel)
-    d.rectangle([0, 0, PW - 1, PH - 1], outline=hx("000000"))
-    d.rectangle([2, 2, PW - 3, PH - 3], outline=hx("8a6a3a"))
-    d.rectangle([FRAME - 1, FRAME - 1, PW - FRAME, PH - FRAME], outline=hx("000000"))
+    d.rectangle([0, 0, pw - 1, ph - 1], outline=hx("000000"))
+    d.rectangle([2, 2, pw - 3, ph - 3], outline=hx("8a6a3a"))
+    d.rectangle([FRAME - 1, FRAME - 1, pw - FRAME, ph - FRAME], outline=hx("000000"))
     return panel
 
 
@@ -232,27 +338,29 @@ def framed(img, pal):
     return frame_border(panel)
 
 
-def pair_palette(left, right):
+def pair_palette(left, right, ah=AH):
     """The palette a two-portrait panel of these pictures gets."""
-    both = Image.new("RGB", (HALF * 2, AH))
-    both.paste(left.resize((HALF, AH), Image.BOX), (0, 0))
-    both.paste(right.resize((HALF, AH), Image.BOX), (HALF, 0))
+    both = Image.new("RGB", (HALF * 2, ah))
+    both.paste(left.resize((HALF, ah), Image.BOX), (0, 0))
+    both.paste(right.resize((HALF, ah), Image.BOX), (HALF, 0))
     return palette_of(both, COLOURS)
 
 
-def framed_pair(left, right, pal=None):
-    """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both."""
-    a = left.resize((HALF, AH), Image.BOX)
-    b = right.resize((HALF, AH), Image.BOX)
-    pal = pal or pair_palette(left, right)
-    panel = Image.new("RGB", (PW, PH), hx("08060a"))
-    panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (FRAME, FRAME))
-    panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, IH), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))
+def framed_pair(left, right, pal=None, ah=AH):
+    """Two pictures side by side in one framed panel, split by a bar in the frame's colours. One palette for both.
+    ah is the pictures' height in art pixels: AH like the other close-ups, or less for a shorter panel."""
+    a = left.resize((HALF, ah), Image.BOX)
+    b = right.resize((HALF, ah), Image.BOX)
+    pal = pal or pair_palette(left, right, ah)
+    ih, ph = ah * SCALE, ah * SCALE + 2 * FRAME
+    panel = Image.new("RGB", (PW, ph), hx("08060a"))
+    panel.paste(pixelize(a, pal, spread=8).resize((HALF * SCALE, ih), Image.NEAREST), (FRAME, FRAME))
+    panel.paste(pixelize(b, pal, spread=8).resize((HALF * SCALE, ih), Image.NEAREST), (PW - FRAME - HALF * SCALE, FRAME))
     d = ImageDraw.Draw(panel)
     x0 = FRAME + HALF * SCALE
     # the two halves' inner frames meet in the middle: black, gold, gold, black
     for dx, colour in ((0, "000000"), (2, "8a6a3a"), (BAR * SCALE - 3, "8a6a3a"), (BAR * SCALE - 1, "000000")):
-        d.line([x0 + dx, FRAME, x0 + dx, PH - FRAME - 1], fill=hx(colour))
+        d.line([x0 + dx, FRAME, x0 + dx, ph - FRAME - 1], fill=hx(colour))
     return frame_border(panel)
 
 
@@ -329,3 +437,8 @@ def build():
     save(fire_escape_closeup(Image.open(MICAH_SRC), Image.open(ELEANOR_SRC)), "ui", "fire_escape_closeup.png")
     save(heraldry_closeup(), "ui", "heraldry_closeup.png")
     save(vows_photo(Image.open(VOWS_SRC)), "ui", "vows_photo.png")
+    caleb = Image.open(CALEB_SRC)
+    micah = church_micah(Image.open(MICAH_SRC), Image.open(MICAH_MASK), caleb, Image.open(CALEB_MASK))
+    micah.save(CHURCH_MICAH_SRC)
+    print("wrote", os.path.relpath(CHURCH_MICAH_SRC, ROOT))
+    save(church_closeup(micah, caleb), "ui", "church_closeup.png")

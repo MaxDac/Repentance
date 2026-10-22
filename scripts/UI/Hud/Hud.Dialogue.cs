@@ -23,6 +23,9 @@ public partial class Hud
 
     private void BuildSpeech(Control root)
     {
+        // behind a comic-strip panel's captions
+        _captionBg = new ColorRect { Color = new Color(0.04f, 0.03f, 0.02f, 0.82f), Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        root.AddChild(_captionBg);
         _speech = new Label
         {
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -155,7 +158,11 @@ public partial class Hud
         _speech.Visible = true;
     }
 
-    public void HideSpeech() => _speech.Visible = false;
+    public void HideSpeech()
+    {
+        _speech.Visible = false;
+        if (!_thought.Visible) _captionBg.Visible = false;
+    }
 
     private static readonly Color WhisperGrey = new(0.55f, 0.55f, 0.6f);
 
@@ -165,6 +172,11 @@ public partial class Hud
     /// <summary>Shows a line of Micah's journal narration centred along the top of the screen.</summary>
     public void ShowThought(string text)
     {
+        if (CaptionsBelowInset)
+        {
+            ShowCaption(_thought, text, _inset.Position.X + CaptionPadding, _inset.Size.X - CaptionPadding * 2);
+            return;
+        }
         var size = MeasureDialogue(text, ThoughtWidth);
         _thought.Text = text;
         _thought.Size = new Vector2(ThoughtWidth, size.Y);
@@ -175,7 +187,11 @@ public partial class Hud
         _thought.Visible = _thoughtBg.Visible = true;
     }
 
-    public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
+    public void HideThought()
+    {
+        _thought.Visible = _thoughtBg.Visible = false;
+        if (!_speech.Visible) _captionBg.Visible = false;
+    }
 
     private static string? SpeakerId(ISpeaker speaker) => speaker switch
     {
@@ -205,11 +221,17 @@ public partial class Hud
         }
         if (_closeUp?.TwoPortraits == true)
         {
-            const int padding = 12;
+            // captions get the whole half, less a margin; over the picture, speech keeps clear of the frame
+            int padding = _closeUp.CaptionsBelow ? CaptionPadding : 12;
             float half = _inset.Size.X / 2f;
             width = half - padding * 2;
             x = _inset.Position.X + padding;
             if (SpeakerId(speaker) == _closeUp.RightSpeaker) x += half;
+            if (_closeUp.CaptionsBelow)
+            {
+                ShowCaption(_speech, text, x, width);
+                return;
+            }
         }
         var size = MeasureDialogue(text, width);
         _speech.Text = text;
@@ -219,4 +241,27 @@ public partial class Hud
         _speech.Position = new Vector2(x, bottom - size.Y).Round();
         _speech.Visible = true;
     }
+
+    /// <summary>Gap between a comic-strip panel's bottom edge and the captions under it.</summary>
+    private const int CaptionGap = 5;
+
+    /// <summary>Inset of a caption from its column's edges, leaving room for the dark strip around it.</summary>
+    private const int CaptionPadding = 6;
+
+    /// <summary>Puts a line in a caption box under a <see cref="CloseUp.CaptionsBelow"/> panel, starting at its top
+    /// edge, over a dark strip as wide as the column so it reads like a comic caption on any room.</summary>
+    private void ShowCaption(Label label, string text, float x, float width)
+    {
+        var size = MeasureDialogue(text, width);
+        label.Text = text;
+        label.Size = new Vector2(width, size.Y);
+        float top = _inset.Position.Y + _inset.Size.Y + CaptionGap;
+        label.Position = new Vector2(x, top).Round();
+        label.Visible = true;
+        _captionBg.Position = new Vector2(x - 4, top - 3).Round();
+        _captionBg.Size = new Vector2(width + 8, size.Y + 6).Round();
+        _captionBg.Visible = true;
+    }
+
+    private bool CaptionsBelowInset => _insetShown && _closeUp?.CaptionsBelow == true;
 }
