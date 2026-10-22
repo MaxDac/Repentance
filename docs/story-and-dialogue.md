@@ -68,6 +68,9 @@ Start a conversation from C# with `await Talk("knot")`. It runs inside `Game.Run
   inside the conversation, not sermons. Repentance is turning back and receiving grace, not earning it. Caleb
   carries the invitation (central line in `caleb_act2`); Agatha's condemnation is the contrast, until she confesses her own failure at gunpoint (`nun_threat2`); Rose stays cautious
   (forgiveness is not restored trust). The placements are listed in [Story overview](story-overview.md#scripture).
+- Doctrine: Caleb is a Catholic priest of 1927; Micah is a baptised Catholic who practises irregularly, Protestant
+  in his theology, Catholic in the forms he uses. Keep the seal (Caleb never repeats what he heard in confession,
+  wherever he heard it, nor hints at it), absolution only after sorrow and a purpose of amendment, and hope rather than verdicts for the dead. Check new lines against [Theology](theology.md).
 
 ## Flags
 
