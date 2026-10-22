@@ -663,6 +663,24 @@ class CharacterArtTests(unittest.TestCase):
         self.assertTrue((xs <= 30).any() and (xs >= 34).any(), "the strand rounds both sides of the neck")
         self.assertFalse(near(frame(2, 0), pearl).any(), "no pearls seen from behind")
 
+    def test_eleanor_escape_outfits_white_with_pearls_or_a_black_suit(self):
+        rgb = lambda h: np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)])
+        def front(name):
+            image = np.array(Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")).astype(int)[:, :56]
+            return lambda col, tol=20: (np.abs(image[..., :3] - rgb(col)).sum(axis=2) < tol) & (image[..., 3] == 255)
+        usual, white, suit = front("eleanor"), front("eleanor_white"), front("eleanor_suit")
+        hair = sprites.ELEANOR["hair"]
+        self.assertGreater(white(sprites.WHITE).sum(), 200, "the white dress is white")
+        self.assertGreater(white("fffcf4").sum(), 20, "her pearls over the white dress")
+        self.assertEqual(white(hair, 30).sum(), usual(hair, 30).sum(), "the white dress keeps her own long hair")
+        self.assertGreater(suit(sprites.SUIT_BLACK).sum(), 200, "a black suit")
+        self.assertLessEqual(suit("fffcf4").sum() + suit("f2eee4").sum(), 2, "no pearls with the suit")
+        self.assertEqual(suit(hair, 30).sum(), usual(hair, 30).sum(), "the suit keeps her own long hair")
+        stockings = sprites.ELEANOR["stockings"]
+        self.assertEqual(sprites.ELEANOR_SUIT["stockings"], stockings, "her usual stockings with the suit")
+        self.assertGreater(suit(stockings).sum(), 1.5 * usual(stockings).sum(),
+                           "the skirt is cut above the knee, showing more leg than her usual dress")
+
     def test_motel_foreground_is_a_transparent_rail_layer(self):
         rails = Image.open(ART / "rooms" / "motel_night_rails.png")
         self.assertEqual(rails.size, (480, 270))

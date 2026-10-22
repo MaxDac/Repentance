@@ -64,6 +64,9 @@ public partial class AutoPlay
         _ = game.Perform(Verb.Walk, "back_door");
         await Until(() => game.Room?.Name == "Prison");
         Check(gs.HasFlag("ending_4"), "ending 4: prison, Eleanor visits");
+        Check(game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible == true &&
+              game.Room?.GetNodeOrNull<CanvasItem>("EleanorWhite")?.Visible != true,
+            "ending 4: Eleanor, who gave in, visits in the black suit");
         await game.Wait(4);
         await Shot("ending_prison_eleanor");
         await TheEnd("ending_4");
@@ -315,8 +318,11 @@ public partial class AutoPlay
             Check(gs.HasFlag(ending) && game.Room?.Name == (free ? "Outskirts" : "Prison") && game.Player.Character != "eleanor_play",
                 free ? $"{label}: Micah and Eleanor out of town" : "ending 11: Micah in prison");
             Check(gs.HasFlag(Endings.MansionExploded) == fire, $"{label}: the house goes up only when the cellar burns");
-            Check(game.Room?.FindActor("eleanor")?.Visible == true || game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible == true,
-                $"{label}: Eleanor is there");
+            Check(free ? game.Room?.FindActor("eleanor") is { Visible: true } her &&
+                         her.Texture?.ResourcePath.EndsWith("/eleanor_white.png") == true
+                    : game.Room?.GetNodeOrNull<CanvasItem>("EleanorWhite")?.Visible == true &&
+                      game.Room?.GetNodeOrNull<CanvasItem>("Eleanor")?.Visible != true,
+                $"{label}: Eleanor is there, in white, having held out");
             string line = free ? "I can't go on like this, Micah, I can't be with you. I need ... peace."
                 : "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the Lord...";
             await Until(() => HeardLog.Any(l => l.Contains(line)), 60);
@@ -332,7 +338,7 @@ public partial class AutoPlay
             Check(HeardLog.Any(l => l.Contains("She watches the windows go. She doesn't make a sound.")) == fire,
                 $"{label}: she watches the house go without a sound only when it burns");
             Check(HeardLog.Any(l => l.Contains("changed in mine on the way")) == free,
-                $"{label}: the black dress from the Club's car explained only on the road out");
+                $"{label}: the white dress from her duffle explained only on the road out");
             HeardLog = null;
         }
         // 9 and 8: the Our Father, then the player is Eleanor; the candlestick, the study, the kitchen and the back door.
@@ -429,12 +435,13 @@ public partial class AutoPlay
             Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
             Check(DryHere(), $"{label}: no rain where Eleanor ends up");
             if (fire)
-                Check(game.Player.Character == "eleanor_play" && !gs.HasFlag(Endings.MansionExploded), "ending 8: Eleanor alone, out of the city");
+                Check(game.Player.Character == "eleanor_white_play" && !gs.HasFlag(Endings.MansionExploded),
+                    "ending 8: Eleanor alone, out of the city, in white");
             else
                 Check(eleanorInmate && gs.HasFlag("caleb_visits"), "ending 9: Eleanor in prison grey, confessing to Caleb");
             await TheEnd(label);
-            Check(HeardLog.Any(l => l.Contains("her black dress still on the back seat")) == fire,
-                fire ? "ending 8: out of the sheet and into her own black dress, from the Club's car" : $"{label}: no car at the gate");
+            Check(HeardLog.Any(l => l.Contains("the duffle she'd packed for running still on the back seat")) == fire,
+                fire ? "ending 8: out of the sheet and into a white dress, from her duffle in the Club's car" : $"{label}: no car at the gate");
             HeardLog = null;
         }
 

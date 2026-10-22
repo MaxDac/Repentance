@@ -1028,7 +1028,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - This ending is accessible only if Micah manages to convince Eleanor in the Harrington mansion, and manages to set it on fire
   or finds the documents in the mansion.
 - They both say goodbye to Chicago, and get into a car, which has to be generated in the location.
-- At the gate Eleanor retrieves her black dress from the Club's car and changes in Micah's car during the drive.
+- At the gate Eleanor takes the duffle she had packed for running from the Club's car and changes in Micah's car
+  during the drive: a black skirt suit cut above the knee, and no pearls.
 - In this case, the journal ends with Micah saying that he's now an alcoholic following Eleanor betraying him multiple times.
 
 #### Option 3 - Outskirts, without Eleanor
@@ -1054,6 +1055,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - This ending is accessible if Micah managed to convince Eleanor, but neither set the mansion on fire nor found the
   signed documents.
 - Micah in this case has a jumpsuit for an inmate, you have to generate the model.
+- Eleanor wears the black suit of ending 2.
 - Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
   jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
 - In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
@@ -1103,7 +1105,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 
 - Eleanor's coda: she strikes Harrington and burns the house. Micah's coffee scene at Rose's comes first, as in
   ending 1.
-- Then the outskirts at night: Eleanor alone, in her black dress, walking out of the city. No car, no Micah, no
+- Then the outskirts at night: Eleanor alone, in a white dress with her pearls (from the duffle she had packed for
+  running, still in the Club's car at the gate), walking out of the city. No car, no Micah, no
   newspaper.
 - Micah keeps the journal; the last entry is his, copied from a letter she sent him at Rose's, without a return
   address. Before leaving the city she mailed the old man's Thursday book to the Tribune; the letter says the paper
@@ -1125,7 +1128,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 - The shoot route with both refusals ("Let's get out of here, quick."), and the mansion burned or Micah took the
   documents.
 - The outskirts at night, the car as in ending 2: two car doors slam, and they both get out. She is tired, not
-  angry. She says "I can't go on like this, Micah, I can't be with you. I need ... peace." and walks off down the
+  angry, in a white dress with her pearls: at the gate she took her packed duffle from the Club's car and changed in
+  Micah's. She says "I can't go on like this, Micah, I can't be with you. I need ... peace." and walks off down the
   road alone, out of sight. Micah stays by the car.
 - The last entry is Micah's, hopeful: he is looking for his own peace (sober, writing to Rose, back at Caleb's
   church on Sundays). She told him the Second Interlude on the road, before she got out of the car.
@@ -1135,7 +1139,7 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 #### Option 11 - Prison, Eleanor visits for the last time
 
 - The shoot route with both refusals, and neither the fire nor the documents.
-- The prison parlour, Micah in the jumpsuit, Eleanor across the table, as in ending 4. She doesn't go back to
+- The prison parlour, Micah in the jumpsuit, Eleanor across the table in her white dress and pearls. She doesn't go back to
   Theodore. She says "I hope you find your peace, Micah. I'm going to try to find mine, with the help of the
   Lord..." and leaves.
 - The last entry is Micah's, hopeful: he looks for his peace behind bars (the Our Father, Caleb's visits, letters to

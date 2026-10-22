@@ -245,6 +245,19 @@ ELEANOR_GOWN = dict(ELEANOR, **dict(_CURVES, rear=(0.035, 0.051, 0.52)), torso="
 ELEANOR_INMATE = dict(ELEANOR, **_CURVES, high_neck=None, torso="8a8c90", collar="8a8c90", sleeves="8a8c90", cuff="8a8c90", pants="8a8c90",
                       coat=None, stockings=None, shoes="2a2a2e",
                       decals=[("buttons", 0.24, 0.42, 4, "4a4c50", True), ("belt", 0.42, "6e7074")])
+# Out of the sheet, from the duffle she had packed for running (Act 3 endings). Eleanor who held out both times walks
+# out in white: her own dress's cut, bodice, sash and pleats, with her pearls, her long hair as always.
+WHITE = "ece6da"
+ELEANOR_WHITE = dict(ELEANOR, torso=WHITE, coat=dict(ELEANOR["coat"], col=WHITE), stockings="d8c0ae", shoes="cfc6b8",
+                     decals=[("belt", 0.465, "c4baa8"), ("ribbon", 0.05, 0.465, 0.56, 0.008, "c4baa8"), ("pleats", 0.53),
+                             ("strand", 0.212, 0.25, 0.036, "fffcf4", "9c8e78", 0.058)])
+# Eleanor who gave in: a black tailleur, the jacket buttoned to the hip over a skirt cut above the knee, her usual
+# dark stockings, no pearls, and her own long hair.
+SUIT_BLACK = "141218"
+ELEANOR_SUIT = {**ELEANOR,
+               "torso": SUIT_BLACK, "coat": dict(col=SUIT_BLACK, top=0.42, hem=0.70, flare=0.008),
+               "shoes": "0c0a0c",
+               "decals": [("line", 0.24, 0.52), ("buttons", 0.30, 0.46, 3, "3a3640"), ("belt", 0.52, "0a090d")]}
 
 
 # Eleanor's night things at the convent, from her duffle: pale ivory cotton pyjamas, long sleeves and trousers, buttons
@@ -275,8 +288,9 @@ def _fuller(spec, k=1.1):
     return out
 
 
-ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC, ELEANOR_PYJAMA_NPC = map(
-    _fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE, ELEANOR_PYJAMA))
+(ELEANOR_NPC, ELEANOR_SHEET_NPC, ELEANOR_GOWN_NPC, ELEANOR_INMATE_NPC, ELEANOR_PYJAMA_NPC, ELEANOR_WHITE_NPC,
+ ELEANOR_SUIT_NPC) = map(_fuller, (ELEANOR, ELEANOR_SHEET, ELEANOR_GOWN, ELEANOR_INMATE, ELEANOR_PYJAMA, ELEANOR_WHITE,
+                                  ELEANOR_SUIT))
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
 GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
             pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
@@ -355,6 +369,7 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("masked_woman_b", MASKED_WOMAN_B, _arms("down")), ("eleanor_stage", ELEANOR_STAGE, _arms("cover", "side")),
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET_NPC, _arms("clutch")),
+        ("eleanor_white", ELEANOR_WHITE_NPC, _arms("down")), ("eleanor_suit", ELEANOR_SUIT_NPC, _arms("down")),
         ("goon", GOON, _arms("fold")), ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
 
 
@@ -1729,6 +1744,7 @@ def build():
     player_sheet(ELEANOR, "eleanor_play")
     player_sheet(ELEANOR_GOWN, "eleanor_gown_play")
     player_sheet(ELEANOR_SHEET, "eleanor_sheet_play", arms=_arms("clutch"))
+    player_sheet(ELEANOR_WHITE, "eleanor_white_play")
     eleanor_drink_strip()
     eleanor_phone_strips()
     eleanor_bag_sheets()
@@ -1763,7 +1779,8 @@ def build_act3():
     eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     inmate_seated_strip(ELEANOR_INMATE_NPC, "eleanor_inmate_seated")
-    seated_frame(ELEANOR_NPC, "eleanor_seated", flip=True)
+    seated_frame(ELEANOR_WHITE_NPC, "eleanor_white_seated", flip=True)
+    seated_frame(ELEANOR_SUIT_NPC, "eleanor_suit_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)
 

@@ -48,6 +48,13 @@ public static class Endings
     /// <summary>Eleanor refused both the Mother Superior and the old man: her own endings open up.</summary>
     public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
 
+    /// <summary>
+    /// Eleanor's clothes once she is out of the mansion and free (endings 2, 4, 8, 10, 11), from the duffle she packed for
+    /// running: "eleanor_white" (her own dress in white, with pearls) if she held out, otherwise "eleanor_suit" (a black
+    /// skirt suit cut above the knee). The sprite names of her NPC strip; seated and player variants add a suffix.
+    /// </summary>
+    public static string EleanorFreeOutfit(Func<string, bool> has) => EleanorHeldOut(has) ? "eleanor_white" : "eleanor_suit";
+
     /// <summary>Eleanor came away with Micah: convinced, or worn out after the shot.</summary>
     public static bool EleanorFollows(Func<string, bool> has) => has(EleanorConvinced) || has(EleanorWeary);
 
