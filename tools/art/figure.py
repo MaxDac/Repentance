@@ -747,21 +747,23 @@ def figure(spec, ps, fw=56, fh=80):
             c.put(c.capsule(P(wr), P(hand), H * 0.023, H * 0.02), col["skin"], f"hand{s}", dither=False)
         add(2.9, hand_mirror)
 
-    if col.get("held_mask"):  # a mask taken off and held in the hand of arm side, face out: (side, plate, accent)
+    if col.get("held_mask"):  # a mask taken off and held in the hand of arm side, face out: (side, plate, accent[, scale])
         def held(spec_=col["held_mask"]):
-            s, mc, ac = spec_
+            s, mc, ac = spec_[:3]
+            m = spec_[3] if len(spec_) > 3 else 1.0
             hx_, hy_ = P(arm_pts[s][3])[:2]
             hx_ += s * 1.0
+
+            def at(dx, dy):
+                return hx_ + dx * m, hy_ + dy * m
             for k in (1, -1):  # the antlers, branching up off the brow
-                c.put(c.capsule((hx_ + k * 1.2, hy_ - 2.6), (hx_ + k * 3.4, hy_ - 6.4), 0.7, 0.5), ac, "prop",
-                      dither=False)
-                c.put(c.capsule((hx_ + k * 2.6, hy_ - 5.0), (hx_ + k * 1.6, hy_ - 7.4), 0.5, 0.4), ac, "prop",
-                      dither=False)
-            c.put(c.ellipse((hx_, hy_ - 0.6), 2.3, 2.6), mc, "prop", dither=False)
-            c.put(c.capsule((hx_, hy_ + 0.8), (hx_, hy_ + 3.6), 1.4, 0.9), mc, "prop", dither=False)
+                c.put(c.capsule(at(k * 1.2, -2.6), at(k * 3.4, -6.4), 0.7 * m, 0.5 * m), ac, "prop", dither=False)
+                c.put(c.capsule(at(k * 2.6, -5.0), at(k * 1.6, -7.4), 0.5 * m, 0.4 * m), ac, "prop", dither=False)
+            c.put(c.ellipse(at(0, -0.6), 2.3 * m, 2.6 * m), mc, "prop", dither=False)
+            c.put(c.capsule(at(0, 0.8), at(0, 3.6), 1.4 * m, 0.9 * m), mc, "prop", dither=False)
             for k in (1, -1):
-                c.dot(math.floor(hx_ + k * 1.0), math.floor(hy_ - 1.0), "141016")
-            c.dot(math.floor(hx_), math.floor(hy_ + 3.6), "141016")
+                c.dot(*map(math.floor, at(k * 1.0, -1.0)), "141016")
+            c.dot(*map(math.floor, at(0, 3.6)), "141016")
         add(3.0, held)
 
     # ---- head ----

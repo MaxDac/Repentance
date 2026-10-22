@@ -194,7 +194,7 @@ MASKED_HARE = dict(MASKED_MAN, h=64, sw=0.134, mask=("animal", "hare", "ccae7e",
 # carved face held against his chest.
 LEADER_UNMASKED = dict(MASKED_STAG, skin=HARRINGTON["skin"], hair=HARRINGTON["hair"], hair_style="bald", old=True,
                        eye=HARRINGTON["eye"], brow=HARRINGTON["brow"], mask=None, hat="cowl_down",
-                       held_mask=(1, "c4a676", "d4cab4"))
+                       held_mask=(1, "c4a676", "d4cab4", 1.8))  # as large as his own face
 # The women of the club: short, strapless black-fringed dresses above the knee, bare shoulders and arms, sheer
 # stockings and a black domino mask.
 MASKED_WOMAN = dict(h=61, sw=0.11, hw=0.045, waist=0.066, hipw=0.088, leg_r=0.84, foot=0.056, skin="ecc6a6",
