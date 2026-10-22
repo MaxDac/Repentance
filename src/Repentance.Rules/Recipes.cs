@@ -5,13 +5,12 @@ using System.Linq;
 namespace Repentance;
 
 /// <summary>
-/// An inventory combination. <see cref="Consumes"/> leave the satchel; <see cref="Catalysts"/> must be held and are
-/// never consumed (Micah's lighter lights the wax and the lantern alike). <see cref="Requires"/> are held tools that aren't one of
-/// the two combined items (the morgue paste pot); <see cref="Missing"/> explains what is needed when they aren't held.
-/// A required item listed in <see cref="Consumes"/> is used up too (Eleanor's red thread).
+/// An inventory combination of exactly two items. <see cref="Consumes"/> leave the satchel; <see cref="Catalysts"/>
+/// must be held and are never consumed (Micah's lighter lights the wax and the lantern alike, the morgue paste pot
+/// pastes either half). A puzzle that needs three things joins two, then the result with the third.
 /// </summary>
 public sealed record Recipe(string A, string B, string Result, string[] Consumes, string Line,
-    string[]? Catalysts = null, string[]? Requires = null, string? Missing = null, string? Flag = null)
+    string[]? Catalysts = null, string? Flag = null)
 {
     public IEnumerable<string> Inputs => new[] { A, B };
 }
@@ -35,10 +34,18 @@ public static class Recipes
             "A splash of bluing in the stem water, a minute's wait, and the carnation drinks itself blue. The vial is empty now.",
             Flag: "made_blue_carnation"),
         // 13 - Tribune morgue.
-        new("clipping_top", "clipping_bottom", "clipping", new[] { "clipping_top", "clipping_bottom" },
-            "A thumb of paste along the tear and the two halves are one story again. The address reads clean.",
-            Requires: new[] { "paste" },
-            Missing: "Torn straight through the address. I'd need something to hold them together.",
+        // Two at a time: paste on either half, then the pasted half onto the other. The paste pot is only borrowed.
+        new("paste", "clipping_top", "clipping_top_pasted", new[] { "clipping_top" },
+            "A thumb of paste along the torn edge. It'll stay tacky long enough to find its other half.",
+            Catalysts: new[] { "paste" }),
+        new("paste", "clipping_bottom", "clipping_bottom_pasted", new[] { "clipping_bottom" },
+            "A thumb of paste along the torn edge. It'll stay tacky long enough to find its other half.",
+            Catalysts: new[] { "paste" }),
+        new("clipping_top_pasted", "clipping_bottom", "clipping", new[] { "clipping_top_pasted", "clipping_bottom" },
+            "Edge to edge, a press of the thumb, and the two halves are one story again. The address reads clean.",
+            Flag: "mended_clipping"),
+        new("clipping_bottom_pasted", "clipping_top", "clipping", new[] { "clipping_bottom_pasted", "clipping_top" },
+            "Edge to edge, a press of the thumb, and the two halves are one story again. The address reads clean.",
             Flag: "mended_clipping"),
         // 14 - Club vestibule.
         new(MicahKit.LighterId, "sealing_wax", "wax_soft", new[] { "sealing_wax" },
@@ -55,11 +62,11 @@ public static class Recipes
         new("lantern_filled", MicahKit.LighterId, "lantern_lit", new[] { "lantern_filled" },
             "One flick of the lighter, a careful hand on the chimney, and the cellar finds its edges again.",
             Catalysts: new[] { MicahKit.LighterId }, Flag: "lantern_lit"),
-        // 17 - Room 507, First Interlude (Eleanor). The thread is required and used up with the pair.
-        new("pellet", "riddle_scrap", "eleanor_flower", new[] { "pellet", "riddle_scrap", "red_thread" },
-            "The riddle round the pellet, and the red thread round both, twice, in a bow. A sweet nobody would eat.",
-            Requires: new[] { "red_thread" },
-            Missing: "It won't stay wrapped. I need something to tie it with."),
+        // 17 - Room 507, First Interlude (Eleanor). The riddle round the pellet, then the thread round both.
+        new("pellet", "riddle_scrap", "pellet_wrapped", new[] { "pellet", "riddle_scrap" },
+            "The riddle round the pellet, words inward. It won't stay wrapped on its own. I need something to tie it with."),
+        new("pellet_wrapped", "red_thread", "eleanor_flower", new[] { "pellet_wrapped", "red_thread" },
+            "The red thread round both, twice, in a bow. A sweet nobody would eat."),
         new("eleanor_flower", "eleanor_box", "eleanor_box_packed", new[] { "eleanor_flower", "eleanor_box" },
             "The flower in with the card, the matchbook and the bluing. Lid down. Everything the Tribune would need to find their Club, if they ever drag me back.",
             Flag: "interlude_box_packed"),
@@ -70,6 +77,11 @@ public static class Recipes
 
     public static readonly Refusal[] Refusals =
     {
+        new("clipping_top", "clipping_bottom", "Torn straight through the address. I'd need something to hold them together."),
+        new("paste", "clipping_top_pasted", "That edge is pasted already. It wants its other half, not more paste."),
+        new("paste", "clipping_bottom_pasted", "That edge is pasted already. It wants its other half, not more paste."),
+        new("clipping_top_pasted", "clipping_bottom_pasted", "One pasted edge is plenty. Any more and the address drowns in it."),
+        new("paste", "clipping", "It's mended. Any more paste and it'll stick to my fingers instead."),
         new("sealing_wax", "invitation", "Hard as a church pew. Needs a flame."),
         new("signet_raven", "invitation", "There's no wax on it to take the seal."),
         new("signet_lion", "invitation_waxed", "The lion. Second in line - not first."),
@@ -87,6 +99,7 @@ public static class Recipes
         new("red_thread", "pellet", "Thread round a bare pellet. It needs the riddle wrapped round it first."),
         new("red_thread", "riddle_scrap", "The thread's to tie the riddle round something. The little pellet."),
         new("red_thread", "eleanor_box", "The box locks on its own. The thread's for the flower."),
+        new("pellet_wrapped", "eleanor_box", "Loose like that, the riddle will slip off in the box. It needs tying first."),
         new("eleanor_riddle", "eleanor_box", "The combination doesn't go in with what it guards. It goes in the drawer."),
         new("eleanor_riddle", "eleanor_box_packed", "The combination doesn't go in with what it guards. It goes in the drawer."),
         new("eleanor_slip", "riddle_scrap", "Two slips, two riddles. One for the flower, one for the safe. The desk first."),
@@ -111,8 +124,6 @@ public static class Recipes
             var refusal = Refusals.FirstOrDefault(r => Matches(first, second, r.A, r.B));
             return refusal == null ? null : new CombineOutcome(refusal.Line, null, Array.Empty<string>(), null);
         }
-        if (recipe.Requires != null && !recipe.Requires.All(hasItem))
-            return new CombineOutcome(recipe.Missing ?? "I'm missing something.", null, Array.Empty<string>(), null);
         return new CombineOutcome(recipe.Line, recipe.Result, recipe.Consumes, recipe.Flag);
     }
 
