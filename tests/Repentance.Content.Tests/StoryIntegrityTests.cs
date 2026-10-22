@@ -289,6 +289,12 @@ public class StoryIntegrityTests
     [InlineData("sat on the edge of the cot", "Agatha stops a step short of the bed and stays standing")]
     [InlineData("left them on Tuesday", "on Tuesday Eleanor dined at the Aurelian; the Club meets on Thursdays")]
     [InlineData("runs past a lit window", "on the motel return Eleanor's window is dark")]
+    [InlineData("Serve your time, Micah Jones", "ending 8 also plays when Micah walked out of Joliet's reach unpunished; she wishes him peace")]
+    [InlineData("the second one only to cover up the first", "in ending 6 after killing Tony, Tony died first, to keep him quiet")]
+    [InlineData("glass between us", "Joliet's visiting room is a table with a NO TOUCHING sign, not a glass partition")]
+    [InlineData("visiting-room glass", "Joliet's visiting room is a table with a NO TOUCHING sign, not a glass partition")]
+    [InlineData("packed long ago", "Eleanor packed the duffle that afternoon")]
+    [InlineData("Two dresses, my nightclothes", "the duffle holds the white dress, the black suit and the pearls she changes into")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
         var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
@@ -325,6 +331,7 @@ public class StoryIntegrityTests
     [InlineData("You know that isn't true.")]
     [InlineData("Are you crazy?!")]
     [InlineData("Yeah. You can say that, sister. Where's Eleanor? What goes on at that club?")]
+    [InlineData("Coat. Hat. The bag, too.")]
     public void WalkthroughQuotesThePerformedLine(string line)
     {
         var text = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
@@ -358,6 +365,18 @@ public class StoryIntegrityTests
         var text = File.ReadAllText(Path.Combine(Root.Value, doc));
         Assert.DoesNotContain("sixteen", text);
         Assert.Contains("seventeen", text);
+    }
+
+    [Fact]
+    public void OverviewDiagramAndWalkthroughCountEveryEnding()
+    {
+        var overview = File.ReadAllText(Path.Combine(Root.Value, "docs/story-overview.md"));
+        var nodes = Regex.Matches(overview, @"\bE(\d+)\[""\1:").Select(m => int.Parse(m.Groups[1].Value)).Order().ToList();
+        Assert.Equal(Enumerable.Range(1, Endings.Count), nodes);
+        var walkthrough = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
+        Assert.Contains("fourteen ending outcomes", walkthrough);
+        Assert.Equal(14, Endings.Count);
+        Assert.Contains("Every ending but 7 and 14 has the \"The next morning\" caption.", walkthrough);
     }
 
     [Fact]

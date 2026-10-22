@@ -250,4 +250,32 @@ public class InkWalkTests
         Assert.Contains("Bathtub? Swell. Set 'em up, pal.", shown);
         Assert.DoesNotContain(shown, s => s.Contains('#'));
     }
+
+    /// <summary>
+    /// Lines that depend on decision flags: Rose's coffee remembers the forgiveness plea only when Micah insisted at
+    /// her door (rose_wait), not when he gave up (rose_done alone); after killing Tony, Eleanor's farewell (ending 8)
+    /// and Micah's Joliet page (ending 6) speak to the killing.
+    /// </summary>
+    [Theory]
+    [InlineData("rose_coffee", "rose_done", "ROSE: What do you want?\n", "Last time you were here")]
+    [InlineData("rose_coffee", "rose_done,rose_wait", "Last time you were here, you wanted me to forgive you.", null)]
+    [InlineData("ending_eleanor_alone", "killed_tony,shot_bartender", "ELEANOR: Find your peace, Micah Jones.", "Go home to your wife")]
+    [InlineData("ending_eleanor_alone", "", "Go home to your wife, Micah Jones.", "Find your peace")]
+    [InlineData("epilogue", "ending_6,killed_tony,shot_bartender", "Two men dead by my hand: Tony, so he couldn't name me, and then Harrington.", null)]
+    public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)
+    {
+        var set = flags.Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+        var walk = new Walk { World = new World { Name = "fixed", Flag = set.Contains, Item = _ => false } };
+        walk.Story.ChoosePathString(knot);
+        var text = new System.Text.StringBuilder();
+        for (int guard = 0; guard < 50; guard++)
+        {
+            while (walk.Story.canContinue) text.Append(walk.Story.Continue());
+            if (walk.Story.currentChoices.Count == 0) break;
+            walk.Story.ChooseChoiceIndex(0);
+        }
+        Assert.Empty(walk.Errors);
+        Assert.Contains(expected, text.ToString());
+        if (unexpected != null) Assert.DoesNotContain(unexpected, text.ToString());
+    }
 }

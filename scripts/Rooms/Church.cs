@@ -109,7 +109,8 @@ public partial class Church : Room
             Player.Face(Facing.Right);
         }
         if (!State.HasFlag(Endings.ConfessedTony)) await Talk("caleb_tony");
-        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);        if (State.HasFlag(Endings.SurrenderedTony))
+        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
+        if (State.HasFlag(Endings.SurrenderedTony))
         {
             await Game.Hud.Fade(1, 1.5);
             await Act3.End();

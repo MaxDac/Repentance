@@ -40,7 +40,10 @@ public partial class Prison : Room
         if (entry != "ending") return;
         await Game.Run(async () =>
         {
-            Game.Hud.ShowCaption("Joliet Correctional Center. Six months later.");
+            // ending 12 is a year on (prison_caleb_tony: "A year of grey walls"); the other prison visits, six months
+            Game.Hud.ShowCaption(State.HasFlag("ending_12")
+                ? "Joliet Correctional Center. A year later."
+                : "Joliet Correctional Center. Six months later.");
             await Wait(2.6);
             Game.Hud.ShowCaption(null);
             await Talk(State.HasFlag("ending_4") ? "prison_eleanor"
