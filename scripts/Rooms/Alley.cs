@@ -23,7 +23,7 @@ public partial class Alley : Room
     private static readonly Vector2 BehindSal = new(352, 222);
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
-    private static readonly Vector2 OverTony = new(300, 197);
+    private static readonly Vector2 OverTony = new(428, 218);
 
     /// <summary>Act 1: Sal's place by Micah's head, and the spot he kicks from: behind Micah, half turned to the
     /// screen, so his right foot goes into Micah's belly out of sight behind Micah's body.</summary>
@@ -423,9 +423,9 @@ public partial class Alley : Room
     /// </summary>
     private async Task KillTony(Actor tony)
     {
-        // up close, standing over his legs, the revolver pointed down at his chest
+        // up close, standing past his head, the revolver pointed down at it
         await Game.WalkTo(OverTony);
-        Player.Face(Facing.Right);
+        Player.Face(Facing.Left);
         await Player.PlayPose("micah_draw");
         await Player.PlayPose("micah_aim_down");
         Player.SetPose("micah_aim_down_held");

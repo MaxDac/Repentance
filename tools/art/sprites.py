@@ -467,8 +467,8 @@ def shoulder_shot_strip(spec, name, final_name, arms, dead_name=None):
     """Shot in the near shoulder while facing right: the hit snaps him back with the struck arm hanging limp, the legs
     give way straight down under him, he sits down hard, the far hand coming across to press on the wound, and goes
     over onto his back. Blood soaks the shoulder from the hit on, and pools on the ground under it once he's down. The
-    last frame is saved alone as final_name. dead_name: the same body after a second shot in the chest, saved alone,
-    with the chest soaked and the pool spread wide under him."""
+    last frame is saved alone as final_name. dead_name: the same body after a second shot through the head, saved alone,
+    with a wound in the temple and the pool spread under his head."""
     from PIL import Image, ImageDraw
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
@@ -490,15 +490,19 @@ def shoulder_shot_strip(spec, name, final_name, arms, dead_name=None):
     if dead_name:
         from PIL import ImageChops
         body = down
-        hip, shoulder = grounded_joints(SHOULDER_SHOT[-1])[:2]
-        cx, cy = hip + (shoulder - hip) * 0.7
+        hx, hy = grounded_joints(SHOULDER_SHOT[-1])[2]
+        # shot through the temple from above: a small dark wound, a trickle running down off the head to the floor
         stain = Image.new("RGBA", body.size)
-        ImageDraw.Draw(stain).ellipse([cx - 5, cy - 4, cx + 5, cy + 4], fill=(138, 18, 22, 255))
+        sd = ImageDraw.Draw(stain)
+        sd.ellipse([hx - 5, hy - 3, hx - 1, hy + 1], fill=(128, 14, 20, 255))
+        sd.ellipse([hx - 4, hy - 2, hx - 2, hy], fill=(70, 6, 10, 255))
+        sd.line([(hx - 3, hy + 1), (hx - 4, hy + 8)], fill=(128, 14, 20, 255), width=2)
         stain.putalpha(ImageChops.multiply(stain.getchannel("A"), body.getchannel("A")))
         body = body.copy()
         body.alpha_composite(stain)
+        # the pool spreads out round the head and runs back under the shoulder's
         pool = Image.new("RGBA", down.size)
-        ImageDraw.Draw(pool).ellipse([cx - 18, 86, wx + 14, 94], fill=(104, 12, 16, 255))
+        ImageDraw.Draw(pool).ellipse([hx - 14, 87, wx + 9, 94], fill=(104, 12, 16, 255))
         pool.alpha_composite(body)
         action_strip(dead_name, [(pool, head)], [1])
     return frames

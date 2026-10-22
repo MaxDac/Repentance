@@ -625,8 +625,8 @@ public partial class AutoPlay
         Check(gs.HasFlag(Endings.KilledTony) &&
               game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true,
             "the second shot: Tony dead on his back");
-        Check(_poseCounts.GetValueOrDefault("micah_aim_down") == aimsDown + 1 && game.Player.Position.X > 290,
-            "the second shot: Micah stands over Tony and aims down at him");
+        Check(_poseCounts.GetValueOrDefault("micah_aim_down") == aimsDown + 1 && game.Player.Position.X > 410,
+            "the second shot: Micah stands past Tony's head and aims down at it");
         await game.Perform(Verb.Walk, "street");
         await WaitIdle(game);
         Check(game.Room?.Name == "ChicagoMap", "after the kill, the street opens onto the map");
