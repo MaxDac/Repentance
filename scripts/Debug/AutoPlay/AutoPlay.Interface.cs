@@ -375,20 +375,7 @@ public partial class AutoPlay
             speech.Position.X >= (right ? divider : panel.Position.X) &&
             speech.End.X <= (right ? panel.End.X : divider),
             $"{speaker}'s subtitle stays beneath the {(right ? "right" : "left")} portrait of the {closeUp.Id} close-up");
-        if (closeUp.CaptionsBelow)
-            Check(speech.Position.Y >= panel.End.Y && speech.End.Y <= 270 - 2,
-                $"{speaker}'s caption sits below the {closeUp.Id} panel, on screen");
-        else
-            Check(speech.Position.Y > panel.Position.Y + panel.Size.Y * 0.7f && speech.End.Y < panel.End.Y,
-                "portrait speech wraps below the face and inside the frame");
-    }
-
-    /// <summary>A comic-strip close-up along the top of the screen, short enough to leave room for its captions.</summary>
-    private void CheckCaptionPanel(Game game, CloseUp closeUp)
-    {
-        var panel = game.Hud.InsetRect;
-        Check(game.Hud.CurrentCloseUp == closeUp && game.Hud.InsetName == closeUp.Texture(null) &&
-            panel.Size.X >= 400 && panel.Position.Y <= 10 && panel.End.Y <= 270 - 80,
-            $"the {closeUp.Id} comic strip runs along the top, leaving room for captions");
+        Check(speech.Position.Y > panel.Position.Y + panel.Size.Y * 0.7f && speech.End.Y < panel.End.Y,
+            "portrait speech wraps below the face and inside the frame");
     }
 }

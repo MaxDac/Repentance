@@ -6,7 +6,7 @@ namespace Repentance;
 /// <summary>
 /// A framed close-up panel popped up over the scene (built by tools/art/closeup.py into assets/art/ui/).
 /// The Hud does the rest: fades, speech along the panel's bottom edge (beneath the speaker's own portrait on a
-/// two-portrait panel, or in captions below it), swapping variants when settings change,
+/// two-portrait panel), swapping variants when settings change,
 /// and clearing it on a room change. Add a new one to <see cref="CloseUps"/>, then show it with
 /// <see cref="Hud.ShowCloseUp"/> or from ink with "INSET: id".
 /// </summary>
@@ -32,10 +32,6 @@ public sealed record CloseUp(string Id, Func<GameSettings?, string> Texture, dou
     public string? RightSpeaker { get; init; }
 
     public bool TwoPortraits => RightSpeaker != null;
-
-    /// <summary>A comic strip: a short two-portrait panel along the top of the screen, each line in a caption under
-    /// its speaker's half instead of over the picture, and Micah's narration in a caption across the whole panel.</summary>
-    public bool CaptionsBelow { get; init; }
 
     public string TexturePath(GameSettings? settings) => $"res://assets/art/ui/{Texture(settings)}.png";
 }
@@ -65,11 +61,11 @@ public static class CloseUps
         LeftSpeaker = "micah", RightSpeaker = "eleanor",
     };
 
-    /// <summary>The brothers in the cathedral nave, a comic strip: Micah on the left, Father Caleb on the right,
-    /// each line captioned under its speaker.</summary>
+    /// <summary>The brothers in the cathedral nave, Micah on the left and Father Caleb on the right, for the heavy
+    /// talks: salvation in Act 2, repentance after the Club, and Micah's confession after Tony.</summary>
     public static readonly CloseUp Church = new("church", "church_closeup")
     {
-        LeftSpeaker = "micah", RightSpeaker = "caleb", CaptionsBelow = true,
+        LeftSpeaker = "micah", RightSpeaker = "caleb",
     };
 
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,

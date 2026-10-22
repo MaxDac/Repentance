@@ -1,6 +1,5 @@
 """The two-portrait close-up in the cathedral: Micah on the left, cut out of his fire-escape picture and stood in
-front of the nave from Caleb's picture, Caleb on the right in his collar. A shorter panel than the others, so each
-speaker's line fits in a strip below his half."""
+front of the nave from Caleb's picture, Caleb on the right in his collar. The same size as the other close-ups."""
 from pathlib import Path
 import sys
 import unittest
@@ -50,11 +49,9 @@ class ChurchCloseupTests(unittest.TestCase):
         rebuilt = closeup.fire_escape_closeup(Image.open(closeup.MICAH_SRC), Image.open(closeup.ELEANOR_SRC))
         self.assertTrue((fire_escape == np.asarray(rebuilt)).all())
 
-    def test_as_wide_as_the_others_but_shorter_leaving_a_caption_strip(self):
-        w, h = self.panel.size
-        self.assertEqual(w, closeup.PW)
-        self.assertEqual(h, closeup.CHURCH_AH * closeup.SCALE + 2 * F)
-        self.assertLessEqual(h, 270 - 100, "room for seven caption lines below")
+    def test_the_same_size_as_the_other_close_ups(self):
+        self.assertEqual(self.panel.size, (closeup.PW, closeup.PH))
+        self.assertEqual(self.panel.size, Image.open(UI / "fire_escape_closeup.png").size)
 
     def test_faces_are_matched(self):
         caleb_ch = 896 / closeup.CHURCH_CALEB_ZOOM
@@ -79,16 +76,16 @@ class ChurchCloseupTests(unittest.TestCase):
 
     def test_micah_on_the_left_in_his_coat_in_front_of_warm_brick(self):
         left, _ = halves(self.panel)
-        coat = left[64:, 5:25]
+        coat = left[90:, 5:25]
         self.assertGreater(coat[..., 1].mean(), coat[..., 2].mean() + 25, "the yellow trench coat")
         wall = np.concatenate([left[20:50, :8], left[20:50, -8:]])
         self.assertGreater(warmth(wall), 50, "candlelit brick behind him, not the blue night street")
 
     def test_caleb_on_the_right_in_black_with_a_white_collar(self):
         _, right = halves(self.panel)
-        cassock = np.concatenate([right[66:, 8:30], right[66:, -30:-8]])
+        cassock = np.concatenate([right[95:, 8:30], right[95:, -30:-8]])
         self.assertLess(cassock.mean(), 70, "the black cassock")
-        collar = right[66:74, 48:60]
+        collar = right[106:113, 50:62]
         self.assertGreater(collar.max(axis=2).max(), 200, "the white tab of his collar")
 
 

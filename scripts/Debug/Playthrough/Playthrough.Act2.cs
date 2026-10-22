@@ -171,16 +171,16 @@ public sealed partial class Playthrough
         await Beat("church_and_convent", async () =>
         {
             var caleb = Do(Verb.Walk, "church");
-            bool strip = false;
+            bool closeUp = false;
             await Until(() =>
             {
-                strip |= _game.Hud.CurrentCloseUp == CloseUps.Church && _game.Hud.SpeechVisible &&
-                    _game.Hud.SpeechRect.Position.Y >= _game.Hud.InsetRect.End.Y;
+                closeUp |= _game.Hud.CurrentCloseUp == CloseUps.Church && _game.Hud.SpeechVisible &&
+                    _game.Hud.SpeechText.StartsWith("Repentance isn't for saints");
                 return caleb.IsCompleted;
             }, 600, 0.05);
             await caleb;
             Check(Gs.HasFlag("caleb_club"), "Caleb on the Club");
-            Check(strip && !_game.Hud.InsetVisible, "the brothers' comic strip, captioned below, for Caleb's confession");
+            Check(closeUp && !_game.Hud.InsetVisible, "the brothers' close-up for Caleb's sermon on repentance");
             await Do(Verb.Walk, "convent");
             Check(Gs.HasFlag("nun_club_asked"), "the sister knows nothing");
             var confession = await Spoken(() => Do(Verb.UseItem, "nun", "revolver"));

@@ -655,6 +655,13 @@ public partial class AutoPlay
         // 12: the church, the confession, and Caleb walks him to the station
         Seed(killed.Where(f => f != "rose_wait"), act3Items, "(Turn yourself in.)");
         _ = game.ChangeRoom("church_interior", "map");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("It's Tony's."), 60);
+        Check(!game.Hud.InsetVisible, "Micah owns up to Tony over the room");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Kneel down, Micah."), 60);
+        CheckPortraitSpeech(game, right: true, CloseUps.Church);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Bless me, Father"), 60);
+        CheckPortraitSpeech(game, right: false, CloseUps.Church);
+        await Shot("church_confession_tony");
         await Until(() => game.Room?.Name == "Prison", 180);
         Check(gs.HasFlag(Endings.SurrenderedTony) && gs.HasFlag("ending_12") && gs.HasFlag("caleb_visits"),
             "ending 12: Micah turns himself in from Caleb's church");

@@ -52,8 +52,7 @@ public partial class Hud
     /// <summary>
     /// Frames a close-up centred over the scene without blocking it: the room, speech and choices stay live around
     /// and above it, and speech moves to the panel's bottom edge. A <see cref="CloseUp.Photo"/> sits on the left
-    /// instead, with speech beside it; a <see cref="CloseUp.CaptionsBelow"/> strip sits along the top, with captions
-    /// under it. Stays until <see cref="HideCloseUp"/> or the next room change. Showing the one
+    /// instead, with speech beside it. Stays until <see cref="HideCloseUp"/> or the next room change. Showing the one
     /// already up does nothing.
     /// </summary>
     public void ShowCloseUp(CloseUp closeUp, double? fadeIn = null)
@@ -73,9 +72,6 @@ public partial class Hud
     /// <summary>Gap between a photo and the left edge of the screen, and between it and the speech beside it.</summary>
     private const int PhotoMargin = 32;
 
-    /// <summary>Top of a comic-strip panel, leaving the rest of the screen for its captions.</summary>
-    private const int CaptionPanelTop = 4;
-
     private void ShowInset(Texture2D texture, double seconds)
     {
         _insetTween?.Kill();
@@ -84,7 +80,6 @@ public partial class Hud
         _inset.Size = size;
         _inset.Position = ((new Vector2(ScreenW, ScreenH) - size) / 2).Floor();
         if (_closeUp?.Photo == true) _inset.Position = _inset.Position with { X = PhotoMargin };
-        if (_closeUp?.CaptionsBelow == true) _inset.Position = _inset.Position with { Y = CaptionPanelTop };
         _inset.Visible = true;
         _insetShown = true;
         _inset.Modulate = new Color(1, 1, 1, seconds > 0 ? 0 : 1);
