@@ -662,7 +662,14 @@ public partial class AutoPlay
         await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Bless me, Father"), 60);
         CheckPortraitSpeech(game, right: false, CloseUps.Church);
         await Shot("church_confession_tony");
-        await Until(() => game.Room?.Name == "Prison", 180);
+        string? prisonCaption = null;
+        await Until(() =>
+        {
+            if (game.Room?.Name == "Prison" && game.Hud.CaptionVisible && game.Hud.CaptionText.StartsWith("Joliet"))
+                prisonCaption ??= game.Hud.CaptionText;
+            return prisonCaption != null;
+        }, 180, 0.05);
+        Check(prisonCaption == "Joliet Correctional Center. A year later.", $"ending 12 is a year on: \"{prisonCaption}\"");
         Check(gs.HasFlag(Endings.SurrenderedTony) && gs.HasFlag("ending_12") && gs.HasFlag("caleb_visits"),
             "ending 12: Micah turns himself in from Caleb's church");
         Check(DryHere(), "ending 12: he gave himself up, and the rain has stopped");

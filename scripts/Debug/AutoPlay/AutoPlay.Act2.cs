@@ -147,6 +147,9 @@ public partial class AutoPlay
         var earlyBag = await Spoken(() => game.Perform(Verb.Hand, "bag"));
         Check(!gs.HasFlag("interlude_took_bag") && earlyBag.Any(l => l.Contains("The bag goes last")),
             "the duffle waits for the call");
+        var bagLook = await Spoken(() => game.Perform(Verb.Look, "bag"));
+        Check(bagLook.Any(l => l.Contains("packed this afternoon") && l.Contains("A white dress, a black suit, my pearls")),
+            "the duffle holds the white dress, the black suit and the pearls she changes into later");
         Check(game.Room?.FindHotspot("telephone")?.Visible == true && game.Room?.FindHotspot("fallen_telephone")?.Visible == false
               && game.Room?.GetNodeOrNull<Sprite2D>("InterludeTelephone")?.Visible == true,
             "the candlestick telephone stands on the vanity, not on the floor");
@@ -190,6 +193,7 @@ public partial class AutoPlay
         Check(gs.HasFlag("interlude_bag_left") && game.Player.Character == Story.EleanorBag.Plain
               && game.Room?.GetNodeOrNull<Sprite2D>("World/CellBag")?.Visible == true,
             "in the cell she sets her bag down by the nightstand");
+        await LegacyCellBag(game, gs);
         Check(game.Room?.FindActor("nun") is { Visible: false }, "Eleanor is alone in the cell until the knock");
         Check(game.Music.Current == Track.ConventPiano, "the convent piano plays in the cell before the knock");
         int pianoBeforeVisit = game.Music.Count(Track.ConventPiano);
@@ -400,6 +404,37 @@ public partial class AutoPlay
                 $"3s fade to black, 3s \"Later that night\", 3s fade into her room (took {fadeOut:0.0}s, {caption:0.0}s, {fadeIn:0.0}s)");
         }
         finally { Engine.TimeScale = scale; }
+    }
+
+    /// <summary>
+    /// A save made in the convent cell before #274 (when the bag was set down on entry) has no "interlude_bag_left":
+    /// it loads with the duffle in her hand and no bag hotspot. The first Hand on the bed sets it down, so the night
+    /// can go on. The run resumes from where it was.
+    /// </summary>
+    private async Task LegacyCellBag(Game game, GameState gs)
+    {
+        await WaitIdle(game);
+        Check(game.SaveToSlot(SaveSystem.ManualSlot(2)), "saved before the legacy cell bag check");
+        var resume = SaveSystem.Read(SaveSystem.ManualSlot(2));
+        var legacy = new SaveData
+        {
+            Room = resume!.Room, RoomTitle = resume.RoomTitle, StoryAct = resume.StoryAct, X = resume.X, Y = resume.Y,
+            Facing = resume.Facing, Flags = resume.Flags.Where(f => f != "interlude_bag_left").ToList(),
+            Inventory = resume.Inventory.ToList(), Ink = resume.Ink,
+        };
+        await game.LoadGame(legacy);
+        await WaitIdle(game);
+        Check(game.Room is Rooms.ConventCell && game.Player.Character == Story.EleanorBag.Sheet
+              && game.Room?.FindHotspot("bag")?.Visible == false,
+            "a pre-#274 cell save loads with the duffle in her hand and no bag to click");
+        var bed = await Spoken(() => game.Perform(Verb.Hand, "bed"));
+        await WaitIdle(game);
+        Check(gs.HasFlag("interlude_bag_left") && game.Player.Character == Story.EleanorBag.Plain
+              && game.Room?.FindHotspot("bag")?.Visible == true && bed.Any(l => l.Contains("they're in my bag")),
+            "on the legacy save the bed sets the bag down first, and the bag is there to click");
+        await game.LoadGame(resume);
+        await WaitIdle(game);
+        Check(game.Room is Rooms.ConventCell && gs.HasFlag("interlude_bag_left"), "back to the run");
     }
 
     /// <summary>

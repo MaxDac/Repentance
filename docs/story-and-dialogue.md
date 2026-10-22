@@ -68,6 +68,9 @@ Start a conversation from C# with `await Talk("knot")`. It runs inside `Game.Run
   inside the conversation, not sermons. Repentance is turning back and receiving grace, not earning it. Caleb
   carries the invitation (central line in `caleb_act2`); Agatha's condemnation is the contrast, until she confesses her own failure at gunpoint (`nun_threat2`); Rose stays cautious
   (forgiveness is not restored trust). The placements are listed in [Story overview](story-overview.md#scripture).
+- Doctrine: Caleb is a Catholic priest of 1927; Micah is a baptised Catholic who practises irregularly, Protestant
+  in his theology, Catholic in the forms he uses. Keep the seal (Caleb never repeats what he heard in confession,
+  wherever he heard it, nor hints at it), absolution only after sorrow and a purpose of amendment, and hope rather than verdicts for the dead. Check new lines against [Theology](theology.md).
 
 ## Flags
 
@@ -170,7 +173,8 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `EleanorFollows` is
 `eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
 a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
-1, 6, 8, 9, 10, 11, 12. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
+1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 has the "The next morning" caption (`Act3.Finish`); the Joliet
+visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`). `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
 case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not

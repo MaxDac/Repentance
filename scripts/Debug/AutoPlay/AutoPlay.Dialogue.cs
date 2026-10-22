@@ -125,6 +125,8 @@ public partial class AutoPlay
                 ("caleb_last", "God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him."),
                 ("caleb_club", "We hide them. A new name, a ticket, a parish in Milwaukee or a farm in Iowa that doesn't ask."),
                 ("caleb_club", "You're a hypocrite, Caleb."),
+                ("caleb_tony", "Ego te absolvo a peccatis tuis, in nomine Patris, et Filii, et Spiritus Sancti."),
+                ("caleb_tony", "This next part isn't your penance. I'm asking as your brother."),
                 ("harrington_unmask", "A new face on that stage every Thursday"),
                 ("bartender_gun", "They bring girls in off the trains like crates of oranges"),
                 ("dinner_call", "\"Were you looking for someone?\" ...You found her, Micah. Now what?"),
@@ -187,6 +189,13 @@ public partial class AutoPlay
                 bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10 or 12);
                 Check(lines.Contains("Thursday", StringComparison.Ordinal) == exposed,
                     $"epilogue {ending}: the end of the Club's traffic is told only where it is exposed (documents={documents})");
+                // The seal of confession follows the sacrament, not the room: Caleb never sources Eleanor's story
+                // in a confession, nor hints by sign that her confession binds him (docs/theology.md).
+                Check(!lines.Contains("confessional", StringComparison.Ordinal) &&
+                      !lines.Contains("breaking the seal", StringComparison.Ordinal) &&
+                      !lines.Contains("her own confession", StringComparison.Ordinal) &&
+                      !lines.Contains("I hear her confession", StringComparison.Ordinal),
+                    $"epilogue {ending}: Eleanor's story never comes from her confession to Caleb (documents={documents})");
             }
             // Tony knows who shot him: alive, he follows Micah out of town or into prison; dead, Micah carries him.
             // Endings 2, 3 and 7 are already out of town or past caring, so only a dead Tony is told there.
@@ -214,8 +223,25 @@ public partial class AutoPlay
             }
             await game.LoadGame(original);
             story.ChoosePathString("prison_eleanor_caleb");
-            Check(story.ContinueMaximally().Contains("I told the court the rest, Father.", StringComparison.Ordinal),
+            string absolution = story.ContinueMaximally();
+            Check(absolution.Contains("I told the court the rest, Father.", StringComparison.Ordinal),
                 "ending 9: Eleanor testified about the Club in open court");
+            int sorrowAsked = absolution.IndexOf("Be sorry for every part of you that wanted him dead", StringComparison.Ordinal);
+            int sorrowGiven = absolution.IndexOf("For all of it. And I won't call that part good.", StringComparison.Ordinal);
+            int absolved = absolution.IndexOf("Ego te absolvo", StringComparison.Ordinal);
+            Check(sorrowAsked >= 0 && sorrowAsked < sorrowGiven && sorrowGiven < absolved &&
+                  !absolution.Contains("can't be sorry", StringComparison.Ordinal),
+                "ending 9: Caleb absolves Eleanor only after her sorrow reaches the killing");
+            // Ending 7 after confessing Tony: the police report only, the confession stays under the seal.
+            await game.LoadGame(original);
+            for (int other = 1; other <= Endings.Count; other++) GameState.Instance.SetFlag($"ending_{other}", other == 7);
+            GameState.Instance.SetFlag(Endings.KilledTony, true);
+            GameState.Instance.SetFlag(Endings.ConfessedTony, true);
+            story.ChoosePathString("epilogue");
+            string sealed7 = story.ContinueMaximally();
+            Check(sealed7.Contains("What else I know of it, I may not write.", StringComparison.Ordinal) &&
+                  !sealed7.Contains("to confess it", StringComparison.Ordinal),
+                "ending 7: Caleb keeps the seal on Micah's confession of Tony");
             await game.LoadGame(original);
             Engine.TimeScale = 1;
             var timer = System.Diagnostics.Stopwatch.StartNew();
