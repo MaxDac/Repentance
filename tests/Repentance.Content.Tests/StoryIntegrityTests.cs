@@ -30,9 +30,10 @@ public class StoryIntegrityTests
     /// <summary>Knots that are one-time cutscenes: all their choices are <c>*</c> with no fallback, so the game must never run them twice.</summary>
     private static readonly Dictionary<string, string> OneShotKnots = new()
     {
-        ["bartender_gun"] = "Alley: Tony at gunpoint, once; the scene ends Act 3's alley either way",
+        ["bartender_gun"] = "Alley: Tony at gunpoint, once; afterwards he is shot or Micah has left, and later talks use other lines",
         ["beaten_choice"] = "ChurchExterior: the church steps cutscene, played once on the way out of the Club",
         ["caleb_club"] = "Church: Act 2 Club talk, guarded by caleb_club; later visits use other knots",
+        ["caleb_tony"] = "Church: the confession after killing Tony, once; surrender ends Act 3 and confessed_tony skips it on return",
         ["club_caught"] = "ClubStage: the unmasking cutscene, once",
         ["eleanor_persuade"] = "MansionBedroom: the finale, once",
         ["eleanor_footsteps"] = "MansionBedroom: the last choice after the persuasion fails, once",
@@ -121,7 +122,7 @@ public class StoryIntegrityTests
             foreach (Match m in IndirectRead.Matches(text)) read.Add(m.Groups[1].Value);
             foreach (Match m in IndirectSet.Matches(text)) set.Add(m.Groups[1].Value);
         }
-        foreach (var c in typeof(Endings).GetFields().Where(f => f.IsLiteral)) read.Add((string)c.GetValue(null)!);
+        foreach (var c in typeof(Endings).GetFields().Where(f => f.IsLiteral && f.FieldType == typeof(string))) read.Add((string)c.GetValue(null)!);
         foreach (var note in Notes.All)
             read.UnionWith(note.Unlock.Concat(note.Lines.Select(l => l.Flag).OfType<string>()));
         // Hotspots show and hide on flags set in the room scenes.

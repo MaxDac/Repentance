@@ -14,6 +14,11 @@ public partial class Church : Room
             await Game.Run(Act3Return);
             return;
         }
+        if (entry == "map" && State.HasFlag(Endings.KilledTony))
+        {
+            await Game.Run(TonyConfession);
+            return;
+        }
         if (entry == "map")
         {
             await Game.Run(FromMap);
@@ -90,6 +95,29 @@ public partial class Church : Room
             await Talk("caleb_cross");
     }
 
+    /// <summary>
+    /// Act 3, after Micah killed Tony: his confession to Caleb, past midnight. Turning himself in ends the story there
+    /// (ending 12); "not yet" is a promise to meet Caleb at the station at sunrise, and on to the Gold Coast through the
+    /// office in the storm. Either way there's no going back to the map.
+    /// </summary>
+    private async Task TonyConfession()
+    {
+        await Wait(0.4);
+        if (FindActor("caleb") is { } caleb)
+        {
+            await Game.WalkTo(caleb.WalkTo);
+            Player.Face(Facing.Right);
+        }
+        if (!State.HasFlag(Endings.ConfessedTony)) await Talk("caleb_tony");
+        if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);        if (State.HasFlag(Endings.SurrenderedTony))
+        {
+            await Game.Hud.Fade(1, 1.5);
+            await Act3.End();
+            return;
+        }
+        await Game.ChangeRoom("office_storm", "window");
+    }
+
     private async Task Act3Return()
     {
         if (FindActor("caleb") is { } caleb)
@@ -119,6 +147,9 @@ public partial class Church : Room
     {
         switch (target.Id, verb)
         {
+            case ("doors", Verb.Walk or Verb.Hand) when State.HasFlag(Endings.KilledTony):
+                await TonyConfession();
+                return true;
             case ("doors", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
                 await Game.ChangeRoom("office", "from_caleb");
                 return true;

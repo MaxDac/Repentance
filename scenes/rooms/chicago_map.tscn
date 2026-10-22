@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ChicagoMap.cs" id="1_ChicagoMap"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map.png" id="2_map"]
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_harrington.png" id="m_harrington"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_hotel.png" id="m_hotel"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/map_tribune.png" id="m_tribune"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_blue_lantern.png" id="m_blue_lantern"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/map_mansion.png" id="m_mansion"]
 
 [sub_resource type="RectangleShape2D" id="Rect_hotel"]
 size = Vector2(53, 24)
@@ -35,6 +37,12 @@ size = Vector2(64, 24)
 
 [sub_resource type="RectangleShape2D" id="Rect_tribune"]
 size = Vector2(51, 24)
+
+[sub_resource type="RectangleShape2D" id="Rect_blue_lantern"]
+size = Vector2(70, 24)
+
+[sub_resource type="RectangleShape2D" id="Rect_mansion"]
+size = Vector2(54, 24)
 
 [node name="ChicagoMap" type="Node2D"]
 script = ExtResource("1_ChicagoMap")
@@ -87,6 +95,16 @@ centered = false
 [node name="Hotel" type="Sprite2D" parent="Markers"]
 position = Vector2(329, 58)
 texture = ExtResource("m_hotel")
+centered = false
+
+[node name="BlueLantern" type="Sprite2D" parent="Markers"]
+position = Vector2(106, 140)
+texture = ExtResource("m_blue_lantern")
+centered = false
+
+[node name="Mansion" type="Sprite2D" parent="Markers"]
+position = Vector2(312, 30)
+texture = ExtResource("m_mansion")
 centered = false
 
 [node name="Entries" type="Node2D" parent="."]
@@ -194,3 +212,27 @@ monitorable = false
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Hotel"]
 position = Vector2(351, 66)
 shape = SubResource("Rect_hotel")
+
+[node name="BlueLantern" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "blue_lantern"
+DisplayName = "the Blue Lantern"
+LookText = "The Blue Lantern, on Halsted. Tony's still in the alley behind it, and he isn't going anywhere."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/BlueLantern"]
+position = Vector2(137, 148)
+shape = SubResource("Rect_blue_lantern")
+
+[node name="Mansion" type="Area2D" parent="Hotspots"]
+script = ExtResource("3_Hotspot")
+Id = "mansion"
+DisplayName = "Harrington's mansion"
+LookText = "The old man's house on the Gold Coast. Eleanor's in there tonight. If I go, I go straight in."
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Mansion"]
+position = Vector2(335, 38)
+shape = SubResource("Rect_mansion")

@@ -93,8 +93,37 @@ public sealed partial class Playthrough
             await tony;
             await WaitIdle();
             Check(Gs.HasFlag("shot_bartender"), "Tony shot in the shoulder");
+            Expect("Alley", "Tony on his back, and Micah still in the alley");
+            if (KillRoute)
+            {
+                await Do(Verb.UseItem, "bartender", "revolver");
+                await WaitIdle();
+                Check(Gs.HasFlag(Endings.KilledTony), "the second shot: Tony can't tell anyone now");
+                await Do(Verb.Walk, "street");
+                await WaitIdle();
+                Expect("ChicagoMap", "the map, one last time");
+                Check(new[] { "blue_lantern", "church", "mansion" }.All(id => _game.Room?.FindHotspot(id)?.Visible == true) &&
+                      new[] { "office", "library", "club" }.All(id => _game.Room?.FindHotspot(id)?.Visible != true),
+                    "only the Blue Lantern, the church and the mansion are left on the map");
+                var church = Do(Verb.Walk, "church");
+                if (_route == "12")
+                {
+                    await Until(() => _game.Room?.Name == "Prison", 300);
+                    Expect("Prison", "Micah turns himself in at Caleb's side");
+                    Check(Gs.HasFlag(Endings.SurrenderedTony), "surrendered at the church");
+                    await TheEnd();
+                    over = true;
+                    return;
+                }
+                await church;
+                await WaitIdle();
+                Check(Gs.HasFlag(Endings.ConfessedTony), "confessed to Caleb, and promised the station at sunrise");
+                Expect("OfficeStorm", "on from the church to the office, in the storm");
+                return;
+            }
+            await Do(Verb.Walk, "street");
             Expect("OfficeStorm", "back to the office, in the storm");
-        }, roundTrip: _route != "1");
+        }, roundTrip: _route is not ("1" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>
         {
@@ -131,7 +160,7 @@ public sealed partial class Playthrough
         bool free = _route is "2" or "3" or "10";
         await Beat("mansion_study", async () =>
         {
-            if (free)
+            if (free || _route == "12-oldman")
             {
                 await Do(Verb.Hand, "drawer_right");
                 await Do(Verb.Hand, "documents");
@@ -141,6 +170,15 @@ public sealed partial class Playthrough
                 Check(Gs.HasFlag(Endings.TookDocuments), "the signed payoff sheets");
             }
             var confront = Do(Verb.Walk, "door_right");
+            if (_route == "12-oldman")
+            {
+                await Until(() => _game.Room?.Name == "Prison", 300);
+                Expect("Prison", "after the prayer, Caleb at the station steps");
+                Check(Gs.HasFlag(Endings.SparedOldMan) && Gs.HasFlag("caleb_visits"), "spared the old man, and Caleb visits");
+                await TheEnd();
+                over = true;
+                return;
+            }
             if (_route == "1-oldman")
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);

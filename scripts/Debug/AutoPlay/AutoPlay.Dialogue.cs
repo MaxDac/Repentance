@@ -174,19 +174,34 @@ public partial class AutoPlay
                         : lines.Contains("the whore.", StringComparison.Ordinal) && lines.Contains("Jezebel she is.", StringComparison.Ordinal),
                     $"nun_threat2: Agatha's confession matches Eleanor's night choice (truth={truth})");
             }
-            // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10), Eleanor's Thursday
+            // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10, 12), Eleanor's Thursday
             // book (8) or her testimony (9). Endings 2 and 3 keep the papers private.
             foreach (bool documents in new[] { false, true })
-            for (int ending = 1; ending <= 11; ending++)
+            for (int ending = 1; ending <= Endings.Count; ending++)
             {
                 await game.LoadGame(original);
-                for (int other = 1; other <= 11; other++) GameState.Instance.SetFlag($"ending_{other}", other == ending);
+                for (int other = 1; other <= Endings.Count; other++) GameState.Instance.SetFlag($"ending_{other}", other == ending);
                 GameState.Instance.SetFlag(Endings.TookDocuments, documents);
                 story.ChoosePathString("epilogue");
                 string lines = story.ContinueMaximally();
-                bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10);
+                bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10 or 12);
                 Check(lines.Contains("Thursday", StringComparison.Ordinal) == exposed,
                     $"epilogue {ending}: the end of the Club's traffic is told only where it is exposed (documents={documents})");
+            }
+            // Tony knows who shot him: alive, he follows Micah out of town or into prison; dead, Micah carries him.
+            // Endings 2, 3 and 7 are already out of town or past caring, so only a dead Tony is told there.
+            foreach (var (shot, killed) in new[] { (false, false), (true, false), (true, true) })
+            for (int ending = 1; ending <= Endings.Count; ending++)
+            {
+                await game.LoadGame(original);
+                for (int other = 1; other <= Endings.Count; other++) GameState.Instance.SetFlag($"ending_{other}", other == ending);
+                GameState.Instance.SetFlag(Endings.ShotBartender, shot);
+                GameState.Instance.SetFlag(Endings.KilledTony, killed);
+                story.ChoosePathString("epilogue");
+                string lines = story.ContinueMaximally();
+                bool told = ending == 12 || killed || (shot && ending is not (2 or 3 or 7));
+                Check(lines.Contains("Tony", StringComparison.Ordinal) == told,
+                    $"epilogue {ending}: Tony is remembered only where he can follow (shot={shot}, killed={killed})");
             }
             foreach (bool documents in new[] { false, true })
             {

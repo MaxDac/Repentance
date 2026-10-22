@@ -27,10 +27,12 @@ namespace Repentance;
 /// Act 2's First Interlude always refuses the Mother Superior; Act 3's Second Interlude takes the old man's gin except on
 /// Eleanor's routes: 8 (after the prayer she strikes him and burns the house), 9 (strikes him only), 10 (Micah shoots,
 /// she follows him worn out, and the fire and documents take them out of town) and 11 (the same, but nothing taken: prison).
+/// Ending 12 kills Tony in the alley: 12 (confesses to Caleb and turns himself in at the church) and 12-oldman (confesses,
+/// goes on to the mansion for the papers and prays his way out past the old man).
 /// </summary>
 public sealed partial class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10", "11" };
+    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10", "11", "12", "12-oldman" };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.
@@ -54,7 +56,7 @@ public sealed partial class Playthrough : Harness
         "act2" => "act_two_opening",
         "interlude2" => "second_interlude_taken",
         "act3" => route == "1-steps" ? throw new ArgumentException("ending 1-steps ends in the Second Interlude, before Act 3") : "act_three_office",
-        "ending" => route switch { "1" => "alley_act_three", "1-steps" => "second_interlude_oldman", _ => "mansion_study" },
+        "ending" => route switch { "1" or "12" or "12-oldman" => "alley_act_three", "1-steps" => "second_interlude_oldman", _ => "mansion_study" },
         _ => throw new ArgumentException($"unknown chapter {chapter} (use {string.Join(", ", Chapters)})"),
     };
 

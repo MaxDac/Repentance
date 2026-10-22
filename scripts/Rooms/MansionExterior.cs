@@ -183,7 +183,9 @@ public partial class MansionExterior : Room
         await Game.WalkTo(new Vector2(30, 236));
         await Game.Hud.Fade(1, 1.5);
         State.SetFlag("eleanor_coda", false);
-        await Game.ChangeRoom("rose_house", "coffee");
+        // Micah killed Tony and promised Caleb the station steps: no coffee at Rose's door that morning.
+        if (State.HasFlag(Endings.KilledTony)) await Act3.EleanorAfterRose();
+        else await Game.ChangeRoom("rose_house", "coffee");
     }
 
     /// <summary>Back out through the kitchen door, with or without Eleanor, and maybe with the house burning behind.</summary>

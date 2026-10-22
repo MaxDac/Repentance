@@ -453,11 +453,12 @@ def fall_strip(spec, name, final_name, arms, wound=False):
     return frames
 
 
-def shoulder_shot_strip(spec, name, final_name, arms):
+def shoulder_shot_strip(spec, name, final_name, arms, dead_name=None):
     """Shot in the near shoulder while facing right: the hit snaps him back with the struck arm hanging limp, the legs
     give way straight down under him, he sits down hard, the far hand coming across to press on the wound, and goes
     over onto his back. Blood soaks the shoulder from the hit on, and pools on the ground under it once he's down. The
-    last frame is saved alone as final_name."""
+    last frame is saved alone as final_name. dead_name: the same body after a second shot in the chest, saved alone,
+    with the chest soaked and the pool spread wide under him."""
     from PIL import Image, ImageDraw
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [npc_standing(spec, arms)]
@@ -476,6 +477,20 @@ def shoulder_shot_strip(spec, name, final_name, arms):
     frames[-1] = (pool, head)
     action_strip(name, frames, [0.1, 0.12, 0.12, 0.08, 0.08, 0.1, 0.1, 0.3])
     action_strip(final_name, [frames[-1]], [1])
+    if dead_name:
+        from PIL import ImageChops
+        body = down
+        hip, shoulder = grounded_joints(SHOULDER_SHOT[-1])[:2]
+        cx, cy = hip + (shoulder - hip) * 0.7
+        stain = Image.new("RGBA", body.size)
+        ImageDraw.Draw(stain).ellipse([cx - 5, cy - 4, cx + 5, cy + 4], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), body.getchannel("A")))
+        body = body.copy()
+        body.alpha_composite(stain)
+        pool = Image.new("RGBA", down.size)
+        ImageDraw.Draw(pool).ellipse([cx - 18, 86, wx + 14, 94], fill=(104, 12, 16, 255))
+        pool.alpha_composite(body)
+        action_strip(dead_name, [(pool, head)], [1])
     return frames
 
 
@@ -1771,7 +1786,7 @@ def build_no_tie():
 
 def build_act3():
     fall_strip(SAL, "sal_knockout", "sal_out", _arms("pocket"))
-    shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"))
+    shoulder_shot_strip(BARTENDER, "bartender_fall", "bartender_shot", _arms("down"), dead_name="bartender_dead")
     fall_strip(HARRINGTON_GOWN, "harrington_fall", "harrington_shot", _arms("down", "pocket"))
     fall_strip(dict(ELEANOR_SHEET_NPC, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)

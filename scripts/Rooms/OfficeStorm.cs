@@ -48,7 +48,9 @@ public partial class OfficeStorm : Room
     {
         await Wait(1.2);
         await Think("The power's out on the whole block. The HOTEL sign is dead for the first time in six years. Only the sky lights the room now.");
-        await Think("Hat on the desk. Bottle in my hand. I don't remember taking either off. I remember the shot.");
+        await Think(State.HasFlag(Endings.KilledTony)
+            ? "Hat on the desk. Bottle in my hand. I don't remember taking either off. I remember both shots. The second one most."
+            : "Hat on the desk. Bottle in my hand. I don't remember taking either off. I remember the shot.");
         await Drink();
         await Think("It starts small. A drink you don't need. A lie you didn't have to tell. A woman who isn't your wife.");
         await Think("Every step is a little lower than the last, and every one makes the next one easier. You don't fall. You walk down.");

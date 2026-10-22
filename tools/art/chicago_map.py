@@ -52,7 +52,12 @@ MARKERS = {
     "office": ((163, 182), "Office", WHITE, 1, 0),              # West Madison, off Halsted
     "convent": ((213, 40), "Convent", BLUE, 1, 0),              # Near North, by Division
     "hotel": ((335, 68), "Aurelian", RED, 1, 0),                # the Gold Coast end of Michigan Ave
+    # Act 3, after Tony: the only three places left on Micah's map
+    "blue_lantern": ((112, 150), "Blue Lantern", BLUE, 1, 0),   # Near West Side, past the river
+    "mansion": ((318, 40), "Mansion", YELLOW, 1, 0),            # the Gold Coast, by the lake
 }
+# The markers whose colours decided the map's palette before the Act 3 pins; kept so adding a pin doesn't repaint it.
+PALETTE_MARKERS = ("cathedral", "tribune", "club", "library", "harrington", "office", "convent", "hotel")
 
 
 def desk(img):
@@ -301,7 +306,7 @@ def _overlay(base_px, key, pal):
 
 def palette():
     every = paint_base()
-    for key in MARKERS:
+    for key in PALETTE_MARKERS:
         marker(every, key)
     lighting(every)
     pal = palette_of(every, 112)

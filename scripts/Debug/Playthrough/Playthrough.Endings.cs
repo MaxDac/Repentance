@@ -12,7 +12,7 @@ public sealed partial class Playthrough
     /// <summary>Waits for "End of Act Three", then Daniel's epilogue in the attic and "The End".</summary>
     private async Task TheEnd()
     {
-        int ending = _route is "1" or "1-oldman" or "1-steps" ? 1 : int.Parse(_route);
+        int ending = _route is "1" or "1-oldman" or "1-steps" ? 1 : KillRoute ? 12 : int.Parse(_route);
         await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", 300);
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         bool sawVows = false;
@@ -23,7 +23,7 @@ public sealed partial class Playthrough
         }, 300);
         Check(_game.Room?.Name == "Attic" && _game.Hud.CaptionText == "The End", $"route {_route}: the epilogue ends on \"The End\"");
         Check(sawVows == (ending == 1), $"route {_route}: the vow-renewal photo {(ending == 1 ? "shown" : "not shown")} in the epilogue");
-        for (int n = 1; n <= 11; n++)
+        for (int n = 1; n <= Endings.Count; n++)
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         bool keeps = Endings.KeepsJournal(ending);
         Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
@@ -43,6 +43,9 @@ public sealed partial class Playthrough
 
     /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-11.</summary>
     private bool EleanorRoute => _route is "8" or "9" or "10" or "11";
+
+    /// <summary>Routes where Micah goes back to Tony with the revolver and kills him, ending in prison (ending 12).</summary>
+    private bool KillRoute => _route is "12" or "12-oldman";
 
     /// <summary>
     /// Eleanor's coda in the mansion, after Micah's prayer: the candlestick, then out through the study and the kitchen
@@ -120,6 +123,15 @@ public sealed partial class Playthrough
             case "10":
             case "11":
                 yield return "Shoot him";
+                break;
+            case "12":
+                yield return "Shoot him in the shoulder";
+                yield return "(Turn yourself in.)";
+                break;
+            case "12-oldman":
+                yield return "Shoot him in the shoulder";
+                yield return "Not yet";
+                yield return "Our Father";
                 break;
             // Eleanor's four turns: the lines' points must reach the threshold (see docs/eleanor-persuasion.md);
             // possessive 4 + rational 2 + possessive 4 + positive 1 = 11

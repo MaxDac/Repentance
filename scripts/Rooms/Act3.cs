@@ -20,7 +20,8 @@ public static class Act3
 
     /// <summary>
     /// Resolves the ending, records it as <c>ending_N</c> and moves to its scene. Eleanor rides out with Micah in endings
-    /// 2 and 10 (<c>eleanor_rides</c>) and visits him in prison in endings 4 and 11 (<c>eleanor_visits</c>).
+    /// 2 and 10 (<c>eleanor_rides</c>) and visits him in prison in endings 4 and 11 (<c>eleanor_visits</c>). Ending 12
+    /// (Micah killed Tony and gave himself up) is Caleb in the visiting room.
     /// </summary>
     public static Task End()
     {
@@ -29,7 +30,7 @@ public static class Act3
         if (ending is 2 or 3 or 10) State.SetFlag("outskirts_car");
         if (ending is 2 or 10) State.SetFlag("eleanor_rides");
         if (ending is 4 or 11) State.SetFlag("eleanor_visits");
-        if (ending is 5 or 9) State.SetFlag("caleb_visits");
+        if (ending is 5 or 9 or 12) State.SetFlag("caleb_visits");
         if (ending == 8) State.SetFlag("eleanor_epilogue");
         return ending switch
         {

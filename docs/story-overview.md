@@ -233,7 +233,13 @@ How each decision is made:
 
 - **Give up** (cathedral steps, after Bruno knocks Micah out): always offered; sets `gave_up_steps`.
 - **Lower the gun** (Tony): only with the church return and the wedding ring in his pocket; sets `walked_away`.
-- **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross; sets `spared_oldman`. If Eleanor held
+- **Kill Tony** (the revolver on him again, after the shoulder): Tony knows who shot him, and he's the mob. A second
+  bullet sets `killed_tony` and opens a night map with only the Blue Lantern, the church and the mansion. At the
+  church Micah confesses to Caleb: he turns himself in (`surrendered_tony`, ending 12) or promises to after Eleanor
+  (`confessed_tony`). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
+  the epilogues: out of town, or "Tony sends his regards" in the prison yard.
+- **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross, and the confession if Tony is dead; sets
+  `spared_oldman` (ending 12 instead of 1 after killing Tony). If Eleanor held
   out, she plays the coda (`eleanor_coda`): the old man stands between her and the door, and she can't walk past
   him. She goes back to bed (ending 1), or takes the candlestick and strikes him (`eleanor_struck`), then leaves
   through the study, down to the kitchen and out of the back door. To burn the house she goes down to the cellar
@@ -261,6 +267,7 @@ How each decision is made:
 |---|---|---|
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Micah's coffee with Rose, then Eleanor alone (8) or in prison with Caleb (9) |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
+| 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |
 | 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose |
 | 6 | Turned himself in | Prison, Rose visits |
 | 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
@@ -270,7 +277,7 @@ How each decision is made:
 The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
 the coda (endings 1, 8, 9) and in the epilogue of ending 8. Daniel keeps the journal for Leo after endings
-1, 6, 8, 9, 10 and 11.
+1, 6, 8, 9, 10, 11 and 12.
 
 ### Weather
 
