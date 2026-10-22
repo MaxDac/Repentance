@@ -5,6 +5,7 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
 
 ## Controls
 
+- At launch a verse (Luke 15:7) fades in over black before the title screen; any key, click or tap skips it.
 - **Left click** on the floor to walk. Left click on an object does the obvious thing: talk to people,
   go through exits, look at everything else. A character drawn in front of an object is the one you point at.
   On the map of Chicago, hovering a place shows its description at the bottom and a left click goes there.

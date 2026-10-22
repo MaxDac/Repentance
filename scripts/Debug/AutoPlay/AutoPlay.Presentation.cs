@@ -6,9 +6,30 @@ using System.Threading.Tasks;
 
 namespace Repentance;
 
-/// <summary>Content settings and character pose playback checks.</summary>
+/// <summary>The launch epigraph, content settings and character pose playback checks.</summary>
 public partial class AutoPlay
 {
+    private async Task EpigraphTest(Game game)
+    {
+        // the harness runs the game clock fast, so the epigraph's own timing is measured in game time
+        var epigraph = game.Epigraph();
+        await Timers.Wait(game, Game.EpigraphFade + 0.3);
+        Check(game.OnEpigraph && game.Hud.VersesVisible && game.Hud.VersesText.StartsWith(Game.EpigraphLines[0]),
+            "the launch epigraph fades in over black, a line at a time");
+        PressKey(Key.Enter);
+        await Timers.Wait(game, 0.8);
+        Check(epigraph.IsCompleted && !game.OnEpigraph && !game.Hud.VersesVisible,
+            "a key skips the epigraph, long before it would end");
+
+        epigraph = game.Epigraph();
+        await Timers.Wait(game, 0.3);
+        Check(game.OnEpigraph, "the epigraph plays again");
+        Click(new Vector2(240, 135));
+        await Timers.Wait(game, 0.8);
+        Check(epigraph.IsCompleted && !game.OnEpigraph && !game.Hud.VersesVisible, "a click skips the epigraph too");
+        Check(!game.Hud.Menu.IsOpen && !game.Hud.TitleVisible, "the skipping click reaches nothing else");
+    }
+
     private async Task ContentSettingsTest(Game game)
     {
         const string path = "user://autoplay_settings.cfg";
