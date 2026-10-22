@@ -310,7 +310,10 @@ public partial class MansionBedroom : Room
         }
     }
 
-    /// <summary>The end of the prayer Micah left the room on, over black, a line at a time, on the way to Rose's.</summary>
+    /// <summary>
+    /// The end of the prayer Micah left the room on, over black, a line at a time; after Tony's murder the Amen waits for
+    /// the station steps (ending 12).
+    /// </summary>
     public static readonly string[] Doxology =
         { "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen." };
     public const double DoxologyFade = 3.5;
@@ -319,7 +322,8 @@ public partial class MansionBedroom : Room
     {
         await Game.Hud.Fade(1, 1.0);
         await Wait(0.6);
-        await Game.Hud.ShowVerses(Doxology, DoxologyFade, 1.5);
+        var verses = State.HasFlag(Endings.KilledTony) ? Doxology[..^1] : Doxology;
+        await Game.Hud.ShowVerses(verses, DoxologyFade, 1.5);
         await Wait(0.5);
     }
 

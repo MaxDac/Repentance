@@ -681,9 +681,18 @@ public partial class AutoPlay
         var confessed = killed.Append(Endings.ConfessedTony).ToArray();
         Seed(confessed, act3Items, "Our Father");
         _ = game.ChangeRoom("mansion_bedroom", "start");
-        await Until(() => game.Room?.Name == "Prison", 180);
+        var stationVerses = new List<string>();
+        await Until(() =>
+        {
+            if (game.Room is Rooms.MansionBedroom && game.Hud.VersesVisible && game.Hud.VersesText != "" &&
+                (stationVerses.Count == 0 || stationVerses[^1] != game.Hud.VersesText))
+                stationVerses.Add(game.Hud.VersesText);
+            return game.Room?.Name == "Prison";
+        }, 180, 0.05);
         Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("ending_12") && !gs.HasFlag("ending_1"),
             "ending 12: confessed, Micah spares the old man, then keeps his promise to Caleb");
+        Check(stationVerses.Count > 0 && stationVerses[^1].EndsWith("Forever and ever.") && !stationVerses.Any(v => v.Contains("Amen")),
+            $"ending 12: the prayer over black stops before the Amen he finishes at the station: {string.Join(" | ", stationVerses)}");
         await TheEnd("ending_12 (old man)");
 
         // Eleanor's coda on the kill route: back to bed is ending 12; the candlestick is 9, and no coffee at Rose's

@@ -1042,10 +1042,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     evil"), walking backwards towards the door and lowering the gun gradually with each verse, while the old man talks
     into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody forgives a man like you"). Micah reaches
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
-    a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
+    a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.". If
+    Micah killed Tony, the "Amen." is left off: he finishes the prayer on the station steps (ending 12).
     Then the scene skips to *End of Act 3* (ending 1; ending 12 if Micah killed Tony, who keeps his promise to Caleb).
   - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
-    doesn't end the act. After the "Amen." the bedroom comes back with the player as Eleanor in the sheet and
+    doesn't end the act. After the last line the bedroom comes back with the player as Eleanor in the sheet and
     Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
     for his car. Two choices:
     - **Return to bed** (her rise played backwards): ending 1, as above (12 on the kill route).
@@ -1073,12 +1074,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Before ringing, Micah throws Eleanor's perfumed cloth into the street ("Into the gutter with it. No more chasin'
   that dame."). In every other ending he still has it.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
-- He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
+- He offers coffee without claiming she owes him forgiveness or reconciliation. The promises said again in the journal
   happen later, after he has begun showing change rather than merely promising it.
   Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee." Rose recalls "Last time
   you were here, you wanted me to forgive you." only if he asked her for it on her doorstep (`rose_wait`); if he
   said good night first, she only asks "What do you want?".
-- In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church (or, if he
+- In this case, the journal ends with Micah back with his wife, saying their promises again at his brother's church, with his blessing (or, if he
   shot Tony and they left Chicago, saying their promises again at St. Anne's downstate, with Caleb's blessing).
 - In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
   left of the screen: a 1920s sepia studio print, pixelised like the other close-ups, on a cream card mount with worn
@@ -1157,8 +1158,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - If Micah shot only himself, Eleanor survives; Caleb's entry says so.
 - The last entry is written by Caleb, from what the Club's men said in court (or, if Micah shot only himself, from
   what Eleanor told him after the funeral; she heard him ask forgiveness, and Caleb leaves what that word weighed to
-  God). If Micah confessed Tony first, Caleb names Tony from the police report and writes that the rest
-  he may not write (the seal). He couldn't make Micah repent, he prays for his soul still,
+  God). If Micah confessed Tony first, Caleb writes only that a bartender named Tony was found behind the Blue Lantern,
+  and that the rest he may not write (the seal). He couldn't make Micah repent, he prays for his soul still,
   finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
   brother's footsteps.
 
@@ -1254,7 +1255,7 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 1 | They leave Chicago the week after the coffee; they say their promises again at St. Anne's, a Catholic church downstate, and Caleb blesses them. | Not possible. |
 | 2, 3 | Out of town or past caring: no mention. | 2: she never asked what took him so long. 3: Tony's on the ceiling too. |
 | 4, 5, 6 | A man in the yard says Tony sends his regards; Micah sleeps with his back to the wall. | Tried for Tony too (6: he told the cop himself). |
-| 7 | No mention. | Caleb's entry names Tony; if Micah confessed it, only what the police found, and the rest under the seal. |
+| 7 | No mention. | Caleb's entry names Tony; if Micah confessed it, only that Tony was found behind the Blue Lantern, and the rest under the seal. |
 | 8 | They left Chicago; her letter is sent on by Caleb to the house downstate. | Her letter reaches Joliet; Rose reads it across the visiting-room table. |
 | 9 | Micah lives downstate; Tony's men looked for him all winter. | Micah serves his own sentence for Tony. |
 | 10 | Micah looks for his peace far from Chicago. | Nobody's come for him; he hears every car that slows down. |
@@ -1277,7 +1278,7 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 
 | Ending | Who wrote the Second Interlude, and from what |
 |---|---|
-| 1 | Micah: Caleb passed it on; she came to St. Brendan's months later and asked him to. |
+| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to. |
 | 2 | Micah: she told him on the road. |
 | 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
 | 4 | Micah: she told him across the parlour table. |
