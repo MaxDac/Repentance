@@ -432,7 +432,7 @@ public partial class AutoPlay
             "both audit clues survive save/load without granting evidence");
         await CancelPuzzle(() => CombineAndWait("audit_tracing", "audit_folder"), PuzzleKind.Alignment, "audit_identified", "audit_alignment");
         await SolvePuzzle(() => CombineAndWait("audit_folder", "audit_tracing"), PuzzleKind.Alignment,
-            new[] { ("rotate", 1), ("right", 6), ("down", 3) }, "audit_alignment");
+            new[] { ("flip", 1), ("rotate", 2), ("right", 6), ("down", 9) }, "audit_alignment");
         Check(gs.HasFlag(Endings.TookDocuments) && gs.HasItem("documents"), "index identifies signed payoff sheets");
         var confront = game.Perform(Verb.Walk, "door_right");
         await Until(() => game.Room?.Name == "MansionBedroom");

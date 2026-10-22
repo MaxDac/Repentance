@@ -158,7 +158,7 @@ From here the story follows Walkthrough.md:
    lantern, light it with the lighter (kept), use the lit lantern on the dark stair, then climb the
    bootleggers' stair to the study's bar panel.
    Walking back through the baize door unbolts it. Optionally take the right drawer's account register and the left drawer's auditor's
-   index. At the study desk, combine them and align BANK/JUDGE/CAPTAIN (one clockwise turn, offset 6,3)
+   index. At the study desk, combine them and fit all five index holes on the account dots so BANK/JUDGE/CAPTAIN read as the note (flipped, turned 180, offset 6,9)
    to locate and take the signed payoff sheets, which also record the Club's payments for the girls. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
 33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed

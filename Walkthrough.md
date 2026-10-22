@@ -918,9 +918,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - **Puzzle 10 - Auditor's index (optional):** the right drawer contains a numbered account register,
   not the signed evidence. The left drawer supplies a transparent index with the same Harrington Steel
   stamp. Combine them in either order, or use the index on the register in the open drawer, at the study
-  desk. Match all three labelled BANK/JUDGE/CAPTAIN marks by rotating and sliding the index. Its note
-  puts BANK above JUDGE and CAPTAIN left of BANK; the asymmetric grid has one solution: one clockwise
-  turn, offset **(6, 3)**. The aligned window identifies the drawer pocket containing signed payoff
+  desk. The register page is a field of fifteen unlabelled account dots; the index is an irregular figure of
+  five punched holes, three marked BANK/JUDGE/CAPTAIN and two blank. Slide, rotate and flip (turn over) the
+  index until all five holes sit on dots. The figure fits in exactly two places, and many placements cover
+  four of the five dots. Only the note decides between the two fits: BANK above JUDGE and CAPTAIN left of
+  BANK. The other fit leaves CAPTAIN right of BANK, and submitting it says the marks don't read as the note
+  says. The solution is flipped, turned 180 degrees, offset **(6, 9)**. The aligned window identifies the drawer pocket containing signed payoff
   sheets, which Micah takes as the existing documents item. Besides the payoffs, the sheets record the Club's
   Thursday payments: girls' names, stations and prices. Cancellation keeps both clues.
   Taking the register alone does not count as evidence. This opportunity ends on entering the bedroom,

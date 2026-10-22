@@ -71,7 +71,7 @@ public partial class MansionStudy : Room
                     {
                         State.SetFlag("audit_tracing_taken");
                         State.GiveItem("audit_tracing");
-                        await Say("Under the cigars: an auditor's index, stamped Harrington Steel - Private. Bank, judge, captain. Three marks to match against the register.");
+                        await Say("Under the cigars: an auditor's index, stamped Harrington Steel - Private. Five holes, three marked bank, judge, captain. Every hole should land on an account.");
                     }
                     else await Say("The cigars can stay. I've got what I need.");
                 }
@@ -82,7 +82,7 @@ public partial class MansionStudy : Room
                     await Say("A register of numbered accounts. \"Private. Use auditor's index to locate signed payment sheets.\" Might be something I could bargain with.");
                 return true;
             case ("documents", Verb.Look):
-                await Say("A register, not the evidence itself. BANK, JUDGE and CAPTAIN marks. The matching index should locate the signed sheets in this drawer.");
+                await Say("A register, not the evidence itself. A page of account dots with no names on them. The matching index should locate the signed sheets in this drawer.");
                 return true;
             case ("documents", Verb.Hand):
                 State.SetFlag("audit_folder_taken");
