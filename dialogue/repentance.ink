@@ -1137,12 +1137,18 @@ BARTENDER: And... there's a bell. A burglar alarm, wired to that door. The old m
 BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
--> END
-
-// Micah uses the revolver on Tony, on his back in the alley after the first shot: he finishes him so he can't tell
-// the mob. Alley fires the shot between this knot and bartender_dead.
-=== bartender_kill ===
+THOUGHT: The Gold Coast. The kitchen door. The delivery boys' key.
 THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
+THOUGHT: The gun's still warm in my hand, and the street's right there.
+* [(Leave him bleeding, and go.)]
+    THOUGHT: I shot a man tonight. My hand doesn't shake. That's what scares me.
+* [(Finish him. He knows my name.)]
+    ~ set_flag("finish_tony")
+- -> END
+
+// Micah chose to finish Tony, on his back in the alley after the first shot, so he can't tell the mob. Alley walks
+// him round to aim down at Tony's head, plays this knot, then fires the shot before bartender_dead.
+=== bartender_kill ===
 BARTENDER: Jones? What are you... no. No, no, I told you! I told you everything!
 MICAH: You did, Tony. That's the trouble. You'll tell them everything too.
 BARTENDER: I won't! On my mother, I won't say a--

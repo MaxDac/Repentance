@@ -886,15 +886,16 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
   from the kitchen, because they provide them with booze. Pressed ("And?"), he also gives up the burglar bell wired to
   the kitchen door since the Feds came sniffing, swearing on his mother that's everything.
-- Micah stays in the alley with Tony on his back in the gravel, and the player decides. Micah's thoughts say the
-  problem out loud: Tony knows his name, and Tony is the mob.
-  - **Walk out to the street:** Micah leaves Tony alive and goes back to his office before the mansion. Tony's
-    revenge follows him into every ending (below, *Tony's revenge*).
-  - **Use the revolver on Tony again:** Micah walks round to stand past his head, facing back down
-    the alley, and points the revolver down at it (`micah_aim_down` strip, held on `micah_aim_down_held`). He shoots
-    him through the head in cold blood so he can't tell anybody who shot him (`killed_tony`, knots `bartender_kill` and
-    `bartender_dead`; new `bartender_dead` sprite, Tony still on his back, a wound in his temple and the pool spread
-    under his head). Repentance becomes much harder from here; see *The night after Tony*.
+- Tony on his back in the gravel, the dialogue ends with Micah's thoughts saying the problem out loud: Tony knows his
+  name, his office and Rose's street, and Tony is the mob. Then the player chooses, as a dialogue choice:
+  - **(Leave him bleeding, and go.)**: Micah leaves Tony alive and walks out of the alley on his own, back to his
+    office before the mansion. Tony's revenge follows him into every ending (below, *Tony's revenge*).
+  - **(Finish him. He knows my name.)** (`finish_tony`): after the dialogue Micah walks round to stand past his head,
+    facing back down the alley, and points the revolver down at it (`micah_aim_down` strip, held on
+    `micah_aim_down_held`). Tony begs; Micah shoots him through the head in cold blood so he can't tell anybody who
+    shot him (`killed_tony`, knots `bartender_kill` and `bartender_dead`; new `bartender_dead` sprite, Tony still on
+    his back, a wound in his temple and the pool spread under his head, shown the moment the shot goes off).
+    Repentance becomes much harder from here; see *The night after Tony*.
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
 - **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
   and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery

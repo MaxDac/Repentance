@@ -247,7 +247,8 @@ How each decision is made:
 
 - **Give up** (cathedral steps, after Bruno knocks Micah out): always offered; sets `gave_up_steps`.
 - **Lower the gun** (Tony): only with the church return and the wedding ring in his pocket; sets `walked_away`.
-- **Kill Tony** (the revolver on him again, after the shoulder): Tony knows who shot him, and he's the mob. A second
+- **Kill Tony** (the dialogue choice "Finish him" after the shoulder, else Micah leaves him and walks out): Tony
+  knows who shot him, and he's the mob. A second
   bullet sets `killed_tony` and opens a night map with only the Blue Lantern, the church and the mansion. At the
   church Micah confesses to Caleb: he turns himself in (`surrendered_tony`, ending 12) or promises to after Eleanor
   (`confessed_tony`). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
