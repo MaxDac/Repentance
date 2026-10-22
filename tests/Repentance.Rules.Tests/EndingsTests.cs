@@ -67,6 +67,8 @@ public class EndingsTests
     [InlineData(10, true)]
     [InlineData(11, true)]
     [InlineData(12, true)]
+    [InlineData(13, false)]
+    [InlineData(14, false)]
     public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
         Assert.Equal(keeps, Endings.KeepsJournal(ending));
 
@@ -107,7 +109,21 @@ public class EndingsTests
         Assert.False(Endings.TonyWantsRevenge(Flags()));
         Assert.True(Endings.TonyWantsRevenge(Flags("shot_bartender")));
         Assert.False(Endings.TonyWantsRevenge(Flags("shot_bartender", "killed_tony")));
+        Assert.False(Endings.TonyWantsRevenge(Flags("warned_tony")));
     }
+
+    [Theory]
+    [InlineData(13, "warned_tony", "alarm_ran")]
+    [InlineData(14, "warned_tony", "alarm_stayed")]
+    // the bell stops the night at the kitchen door: nothing Micah could have set before it changes that
+    [InlineData(13, "warned_tony", "alarm_ran", Abbess, Drugs, "church_act3_return", "rose_wait")]
+    [InlineData(14, "warned_tony", "alarm_stayed", Abbess, Drugs, "eleanor_convinced")]
+    // a warning shot with the alarm found in time changes no outcome
+    [InlineData(1, "warned_tony", "spared_oldman")]
+    [InlineData(5, "warned_tony", "shot_oldman")]
+    [InlineData(8, "warned_tony", Abbess, Drugs, "spared_oldman", "eleanor_struck", "eleanor_burned")]
+    public void TheAlarmDecidesBeforeEverythingElse(int ending, params string[] flags) =>
+        Assert.Equal(ending, Endings.Resolve(Flags(flags)));
 
     private const string Abbess = "eleanor_refused_abbess", Drugs = "eleanor_refused_drugs";
 

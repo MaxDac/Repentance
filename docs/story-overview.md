@@ -204,6 +204,11 @@ flowchart TD
     steps -- "Keep going" --> tony["Tony at gunpoint"]
     tony -- "Lower the gun<br/>(church return + ring)" --> E1
     tony -- "Shoot him in the shoulder" --> mansion["Mansion: optional signed evidence"]
+    tony -- "Fire into the wall" --> door{"Spotted the alarm?"}
+    door -- yes --> mansion
+    door -- "no: the bell rings" --> feet{"Footsteps"}
+    feet -- Run --> E13["13: out of Chicago, alone"]
+    feet -- Stay --> E14["14: shot in the kitchen; Caleb writes"]
     mansion --> bedroom["Bedroom: old man and Eleanor"]
     bedroom -- "Our Father<br/>(church return + pressed Rose + ring + cross)" --> prayer{"Eleanor held out?"}
     prayer -- no --> E1
@@ -238,6 +243,12 @@ How each decision is made:
   church Micah confesses to Caleb: he turns himself in (`surrendered_tony`, ending 12) or promises to after Eleanor
   (`confessed_tony`). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
   the epilogues: out of town, or "Tony sends his regards" in the prison yard.
+- **Fire into the wall** (Tony, instead of the shoulder): `warned_tony`. Tony, unhurt, gives the house and the kitchen
+  key but not the alarm (the shoulder shot gets that out of him too), and no blood means no revenge. At the mansion a
+  look at the door, lintel, wire or bell spots the alarm, and the night goes on as usual. Opening the door without one
+  rings the bell, and feet come down the back stairs: **Run** (`alarm_ran`, ending 13: out of Chicago, the journal ends
+  in Omaha with the revolver on the washstand) or **Stay** (`alarm_stayed`, ending 14: two Club men at the cook's
+  table shoot him down; Caleb finishes the journal).
 - **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross, and the confession if Tony is dead; sets
   `spared_oldman` (ending 12 instead of 1 after killing Tony). If Eleanor held
   out, she plays the coda (`eleanor_coda`): the old man stands between her and the door, and she can't walk past
@@ -265,6 +276,7 @@ How each decision is made:
 
 | Ending | Condition (in priority order) | Scene |
 |---|---|---|
+| 14 / 13 | After the warning shot, the alarm rang; 14 if Micah went in | Shot in the kitchen, Caleb writes the last pages (14), or out of Chicago alone, a suicide (13) |
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Micah's coffee with Rose, then Eleanor alone (8) or in prison with Caleb (9) |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |

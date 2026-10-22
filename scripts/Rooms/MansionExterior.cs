@@ -6,7 +6,8 @@ namespace Repentance.Rooms;
 /// <summary>
 /// The back of the Harrington mansion, on the Gold Coast. Tony's trick (the key on the lintel, walk in like the delivery
 /// boys) would ring an alarm bell wired to the kitchen door: Micah spots the wire, shoves the coal bin under the bell,
-/// gags it with his tie, and only then lets himself in. On the way out the house may go up behind him.
+/// gags it with his tie, and only then lets himself in. On the way out the house may go up behind him. Shot, Tony told
+/// him about the bell; after the warning shot he left it out, and opening the door unseen rings it (endings 13 and 14).
 /// </summary>
 public partial class MansionExterior : Room
 {
@@ -15,6 +16,8 @@ public partial class MansionExterior : Room
     private bool Noticed => State.HasFlag("alarm_noticed");
     private bool Moved => State.HasFlag("bin_moved");
     private bool Wedged => State.HasFlag("bell_wedged");
+    /// <summary>Tony only ever had a warning shot, so he never mentioned the bell.</summary>
+    private bool Warned => State.HasFlag(Endings.WarnedTony);
 
     /// <summary>Eleanor waits out here on the escape only if she came: convinced, or worn out after the shot.</summary>
     protected override void OnRefresh()
@@ -41,7 +44,9 @@ public partial class MansionExterior : Room
             await Wait(0.5);
             await Think("Gold Coast, past midnight. Wind off the lake, and hedges clipped as neat as a banker's moustache.");
             await Think("The Harrington place. From the front it's a bank. From the back, it's still a bank, with a kitchen.");
-            await Think("Tony's directions: the kitchen door, the lintel, the key. Walk in like the delivery boys. Easy.");
+            await Think(Warned
+                ? "Tony's directions: the kitchen door, the lintel, the key. Walk in like the delivery boys. Easy."
+                : "Tony's directions: the kitchen door, the lintel, the key. And a bell on the door, he says. Walk in like the delivery boys. Sure.");
         });
     }
 
@@ -49,12 +54,12 @@ public partial class MansionExterior : Room
     {
         switch (target.Id, verb)
         {
-            case ("door", Verb.Look) or ("lintel", Verb.Look) when !Noticed:
+            case ("door" or "lintel" or "wire" or "bell", Verb.Look) or ("wire" or "bell", Verb.Hand or Verb.UseItem) when !Noticed:
                 await NoticeAlarm();
                 return true;
 
             case ("lintel", Verb.Hand) when !State.HasFlag("took_kitchen_key"):
-                if (!Noticed)
+                if (!Noticed && !Warned)
                 {
                     await Say("I reach up for the key, and my eye goes along the door frame...");
                     await NoticeAlarm();
@@ -78,9 +83,6 @@ public partial class MansionExterior : Room
                 await Say("Cut it and the bell's spring lets go: it rings anyway. Somebody thought about this.");
                 return true;
 
-            case ("bell", Verb.Hand or Verb.UseItem) when !Noticed:
-                await Say("A burglar alarm, up on the wall. Out of my reach, and none of my business. Yet.");
-                return true;
             case ("bell", Verb.Hand or Verb.UseItem) when Wedged:
                 await Say("My tie holds the hammer off the gong. Best use that tie ever had.");
                 return true;
@@ -125,7 +127,9 @@ public partial class MansionExterior : Room
     {
         State.SetFlag("alarm_noticed");
         await Say("Wait. A wire, along the door frame, up the wall... to that red box. A bell.");
-        await Say("Open the door and the bell rings the house awake. \"Walk in like the delivery boys.\" Thanks, Tony.");
+        await Say(Warned
+            ? "Open the door and the bell rings the house awake. \"Walk in like the delivery boys.\" Thanks, Tony. You left that part out."
+            : "There it is, Tony's bell. Open the door cold and it rings the house awake. \"Walk in like the delivery boys.\"");
         await Say("The delivery boys come by day. With the cook expecting them.");
     }
 
@@ -134,6 +138,11 @@ public partial class MansionExterior : Room
         if (!State.HasItem("kitchen_key"))
         {
             await Say(Noticed ? "Locked. And wired." : "Locked. The key's supposed to be on the lintel.");
+            return;
+        }
+        if (!Noticed && Warned)
+        {
+            await RingAlarm();
             return;
         }
         if (!Noticed)
@@ -152,6 +161,34 @@ public partial class MansionExterior : Room
         State.SetFlag("door_open");
         await Wait(0.4);
         await Game.ChangeRoom("mansion_kitchen", "start");
+    }
+
+    /// <summary>
+    /// The warning-shot route, the alarm unseen: the door rings the bell, feet come down the back stairs, and Micah
+    /// runs (ending 13) or goes in to them (ending 14, <see cref="MansionKitchen"/>).
+    /// </summary>
+    private async Task RingAlarm()
+    {
+        await Say("Key in, a quarter turn, and...");
+        Game.Sfx.Play(Sound.AlarmBell);
+        await Think("A bell. Right over my head, loud enough to wake the whole Gold Coast. A wire along the door frame, up to a red box.");
+        State.SetFlag("alarm_noticed");
+        await Wait(0.8);
+        for (int i = 0; i < 6; i++)
+        {
+            Game.Sfx.Step(FloorSurface.Wood, 0.7f);
+            await Wait(0.32);
+        }
+        await Talk("alarm_footsteps");
+        if (State.HasFlag(Endings.AlarmRan))
+        {
+            await Game.WalkTo(new Vector2(30, 236));
+            await Act3.End();
+            return;
+        }
+        State.TakeItem("kitchen_key");
+        State.SetFlag("door_open");
+        await Game.ChangeRoom("mansion_kitchen", "ambush");
     }
 
     private async Task WedgeBell()

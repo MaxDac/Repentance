@@ -26,6 +26,8 @@
     11        she-visits-once          Eleanor follows after the shot, nothing taken; prison, she visits once
     12        kill-tony-surrender      He kills Tony, confesses to Caleb and turns himself in; prison, Caleb visits
     12-oldman kill-tony-pray           He kills Tony, confesses, spares the old man, then gives himself up
+    13        alarm-run                A warning shot; the unseen alarm rings and he runs; out of Chicago, alone
+    14        alarm-ambush             A warning shot; the unseen alarm rings and he goes in; shot in the kitchen
 .EXAMPLE
     tools\run\film.ps1                  # 1x, ending 2
     tools\run\film.ps1 -Speed 4 -Ending 5
@@ -35,10 +37,11 @@
 #>
 param(
     [ValidateSet('1', '2', '4', '8', '16', '60', 'hyper')][string]$Speed = '1',
-    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '1-oldman', '1-steps', '12-oldman',
+    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '1-oldman', '1-steps', '12-oldman',
         'walk-away', 'spare-the-old-man', 'give-up', 'escape-together', 'escape-alone', 'prison-eleanor-visits',
         'prison-caleb-visits', 'turn-himself-in', 'last-entry', 'eleanor-burns-the-house', 'eleanor-confesses',
-        'she-leaves-by-the-car', 'she-visits-once', 'kill-tony-surrender', 'kill-tony-pray')][string]$Ending = '2',
+        'she-leaves-by-the-car', 'she-visits-once', 'kill-tony-surrender', 'kill-tony-pray',
+        'alarm-run', 'alarm-ambush')][string]$Ending = '2',
     [ValidateSet('act1', 'interlude1', 'act2', 'interlude2', 'act3', 'ending')][string]$From = 'act1',
     [switch]$NoClean,
     [string]$Godot
@@ -51,7 +54,7 @@ $endingNumbers = @{
     'escape-together' = '2'; 'escape-alone' = '3'; 'prison-eleanor-visits' = '4'; 'prison-caleb-visits' = '5'
     'turn-himself-in' = '6'; 'last-entry' = '7'; 'eleanor-burns-the-house' = '8'; 'eleanor-confesses' = '9'
     'she-leaves-by-the-car' = '10'; 'she-visits-once' = '11'
-    'kill-tony-surrender' = '12'; 'kill-tony-pray' = '12-oldman'
+    'kill-tony-surrender' = '12'; 'kill-tony-pray' = '12-oldman'; 'alarm-run' = '13'; 'alarm-ambush' = '14'
 }
 if ($endingNumbers.ContainsKey($Ending)) { $Ending = $endingNumbers[$Ending] }
 

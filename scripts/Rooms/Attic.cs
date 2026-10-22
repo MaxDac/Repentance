@@ -388,7 +388,8 @@ public partial class Attic : Room
             await Game.WalkTo(new Vector2(384, 224));
             Player.Face(Facing.Right);
             State.TakeItem("journal");
-            if (!State.HasFlag("ending_7"))
+            // Caleb's endings already have Daniel putting it back for Leo
+            if (!State.HasFlag("ending_7") && !State.HasFlag("ending_14"))
                 await Say("Back in the trunk you go. Somebody else can find you in another hundred years.");
         }
         await Wait(0.6);

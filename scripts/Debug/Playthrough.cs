@@ -29,10 +29,12 @@ namespace Repentance;
 /// she follows him worn out, and the fire and documents take them out of town) and 11 (the same, but nothing taken: prison).
 /// Ending 12 kills Tony in the alley: 12 (confesses to Caleb and turns himself in at the church) and 12-oldman (confesses,
 /// goes on to the mansion for the papers and prays his way out past the old man).
+/// Endings 13 and 14 fire the warning shot by Tony's head: Tony leaves the alarm out, the kitchen door rings it, and
+/// Micah runs out of Chicago (13) or goes in to the Club's two men (14).
 /// </summary>
 public sealed partial class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10", "11", "12", "12-oldman" };
+    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10", "11", "12", "12-oldman", "13", "14" };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.
@@ -56,7 +58,12 @@ public sealed partial class Playthrough : Harness
         "act2" => "act_two_opening",
         "interlude2" => "second_interlude_taken",
         "act3" => route == "1-steps" ? throw new ArgumentException("ending 1-steps ends in the Second Interlude, before Act 3") : "act_three_office",
-        "ending" => route switch { "1" or "12" or "12-oldman" => "alley_act_three", "1-steps" => "second_interlude_oldman", _ => "mansion_study" },
+        "ending" => route switch
+        {
+            "1" or "12" or "12-oldman" or "13" or "14" => "alley_act_three",
+            "1-steps" => "second_interlude_oldman",
+            _ => "mansion_study",
+        },
         _ => throw new ArgumentException($"unknown chapter {chapter} (use {string.Join(", ", Chapters)})"),
     };
 

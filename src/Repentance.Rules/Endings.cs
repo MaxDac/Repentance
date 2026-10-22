@@ -17,9 +17,14 @@ namespace Repentance;
 ///  11  Prison      - The same, but nothing to bargain with: Eleanor visits once, wishing him his peace.
 ///  12  Prison      - Micah killed Tony and turned himself in for it: from Caleb's church, or after the Our Father,
 ///                    which needs the confession on top of the usual gates. Caleb visits.
+///  13  Outskirts   - After the warning shot (Tony never mentioned the alarm), Micah opened the kitchen door unnoticed,
+///                    the bell rang and he ran: alone, out of Chicago, and the journal ends with his suicide.
+///  14  Mansion     - The same bell, but he stayed and walked into the kitchen: two of the Club's men shot him.
+///                    Caleb finishes the journal.
 /// Eleanor's own endings need both interlude refusals; the refusals alone change nothing (a give-up is still 1).
 /// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
 /// Once Tony is dead there is no going home to Rose: the prayer that would give ending 1 gives 12 instead.
+/// The alarm stops the story at the kitchen door, so 13 and 14 decide before everything else.
 /// </summary>
 public static class Endings
 {
@@ -52,9 +57,15 @@ public static class Endings
     public const string ConfessedTony = "confessed_tony";
     /// <summary>Micah confessed Tony to Caleb and walked with him to the police that night.</summary>
     public const string SurrenderedTony = "surrendered_tony";
+    /// <summary>The alley: Micah fired into the brick by Tony's head instead. Tony talked, unhurt, but left out the alarm.</summary>
+    public const string WarnedTony = "warned_tony";
+    /// <summary>The kitchen door opened on an unnoticed alarm, and Micah ran from the footsteps.</summary>
+    public const string AlarmRan = "alarm_ran";
+    /// <summary>The kitchen door opened on an unnoticed alarm, and Micah walked in anyway.</summary>
+    public const string AlarmStayed = "alarm_stayed";
 
     /// <summary>The number of endings.</summary>
-    public const int Count = 12;
+    public const int Count = 14;
 
     /// <summary>Endings in which Daniel keeps the journal for Leo.</summary>
     public static bool KeepsJournal(int ending) => ending is 1 or 6 or 8 or 9 or 10 or 11 or 12;
@@ -99,6 +110,10 @@ public static class Endings
 
     public static int Resolve(Func<string, bool> has)
     {
+        if (has(AlarmStayed))
+            return 14;
+        if (has(AlarmRan))
+            return 13;
         if (has(EleanorStruck))
             return has(EleanorBurned) ? 8 : 9;
         if (has(EleanorWeary))

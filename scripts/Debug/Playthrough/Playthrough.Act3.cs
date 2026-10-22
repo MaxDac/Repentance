@@ -92,6 +92,14 @@ public sealed partial class Playthrough
             }
             await tony;
             await WaitIdle();
+            if (AlarmRoute)
+            {
+                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && Gs.HasFlag("alley3_tony_inside"),
+                    "the warning shot: Tony talks, and goes back inside unhurt");
+                await Do(Verb.Walk, "street");
+                Expect("OfficeStorm", "back to the office, in the storm");
+                return;
+            }
             Check(Gs.HasFlag("shot_bartender"), "Tony shot in the shoulder");
             Expect("Alley", "Tony on his back, and Micah still in the alley");
             if (KillRoute)
@@ -138,13 +146,37 @@ public sealed partial class Playthrough
         if (over) return;
         await Beat("mansion_exterior", async () =>
         {
+            if (AlarmRoute)
+            {
+                // Tony left the bell out: the key from the lintel, straight into the lock, without a look at the door
+                await Do(Verb.Hand, "lintel");
+                Check(Gs.HasItem("kitchen_key") && !Gs.HasFlag("alarm_noticed"), "the key, and the bell still unseen");
+                var door = Do(Verb.Hand, "door");
+                if (_route == "13")
+                {
+                    await Until(() => _game.Room?.Name == "Outskirts", 300);
+                    Expect("Outskirts", "Micah runs, and drives out of Chicago");
+                    Check(Gs.HasFlag(Endings.AlarmRan) && Gs.HasFlag("alarm_noticed"), "the bell rang, and Micah ran");
+                }
+                else
+                {
+                    await Until(() => _game.Room?.Name == "MansionKitchen", 300);
+                    Expect("MansionKitchen", "Micah goes in after the bell");
+                    Check(Gs.HasFlag(Endings.AlarmStayed) && _game.Room?.FindActor("gunman")?.Visible == true
+                        && _game.Room?.FindActor("gunman_b")?.Visible == true, "the Club's two men wait at the cook's table");
+                }
+                await TheEnd();
+                over = true;
+                return;
+            }
             await Do(Verb.Look, "door");
             await Do(Verb.Hand, "lintel");
             await Do(Verb.Hand, "bin");
             await SolvePuzzle(() => Do(Verb.Hand, "bell"), PuzzleKind.Bell, new[] { ("s1", 1), ("s2", 2) }, "alarm_restraint");
             await Do(Verb.Hand, "door");
             Expect("MansionKitchen", "in through the kitchen");
-        });
+        }, roundTrip: !AlarmRoute);
+        if (over) return;
         await Beat("mansion_cellar", async () =>
         {
             await Do(Verb.Walk, "cellar_door");

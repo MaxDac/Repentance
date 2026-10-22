@@ -31,7 +31,8 @@ output_device invalidated`) is reopened by Godot itself about once a second once
 
 `Sound`: `StepWood`, `StepStone`, `StepCarpet`, `Gunshot`, `Knock`, `Clang`, `Crash`, `Thunk`, `Crack`, `Rustle`,
 `Click`, `Scrape`, `Whoosh`, `DoorSlam`, `DoorOpen`, `DoorClose`, `Bell`, `Rain`, `Thunder`, `TinOpen`, `SafeOpen`,
-`SafeClose`, `StepMarble` (new sounds go last: each sound's number seeds its noise).
+`SafeClose`, `StepMarble`, `AlarmBell` (new sounds go last: each sound's number seeds its noise). `AlarmBell` is the
+Harringtons' burglar alarm, an electric bell drummed 18 times a second for 3.6 s; rooms play it directly.
 
 - **Footsteps**: the player and walking actors, by `Room.Floor` (`Wood`, `Stone`, `Carpet`, `Marble`; scenes store
   the number, so new floors go last). Every step is a 1920s leather dress shoe: the hard heel's sharp click, the

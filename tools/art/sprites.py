@@ -294,6 +294,15 @@ def _fuller(spec, k=1.1):
 # A second Order heavy: the bouncer's build in a brown suit, ginger-haired and fairer.
 GOON = dict(BRUTE, skin="dcae90", hair="8a4a24", torso="4a3a2c", coat=dict(BRUTE["coat"], col="4a3a2c"),
             pants="4a3a2c", shoes="1a1410", decals=_vee(0.31, 0.03, "e2dccc", "1e3450"))
+# The two Club men waiting in the Harrington kitchen when the alarm rings (ending 14): one in a charcoal overcoat and
+# fedora, one in a grey suit and flat cap. Both draw and aim like Micah, in profile.
+GUNMAN_A = dict(BRUTE, h=69, skin="d4a484", hair="241c16", hat="fedora", hat_col="26262a", band="0e0e10",
+                brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35, torso="34343a",
+                coat=dict(col="34343a", top=0.40, hem=0.72, flare=0.03), pants="242428", shoes="0e0e10",
+                decals=_vee(0.31, 0.03, "e6e0d4", "4a1418"))
+GUNMAN_B = dict(GOON, h=67, skin="c48e6c", hair="161210", hat="cap", hat_col="4c463c", torso="5c564c",
+                coat=dict(BRUTE["coat"], col="5c564c"), pants="4c463c", shoes="16120e",
+                decals=_vee(0.31, 0.03, "e0dace", "263040"))
 
 
 def _arms(kind_r, kind_l=None):
@@ -370,7 +379,8 @@ NPCS = (("teddy", TEDDY, _arms("down")), ("concierge", CONCIERGE, _arms("fold"))
         ("eleanor_stage_clothed", ELEANOR_STAGE_CLOTHED, _arms("down")),
         ("harrington_gown", HARRINGTON_GOWN, _arms("down", "pocket")), ("eleanor_sheet", ELEANOR_SHEET_NPC, _arms("clutch")),
         ("eleanor_white", ELEANOR_WHITE_NPC, _arms("down")), ("eleanor_suit", ELEANOR_SUIT_NPC, _arms("down")),
-        ("goon", GOON, _arms("fold")), ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
+        ("goon", GOON, _arms("fold")), ("gunman_a", GUNMAN_A, _arms("down")), ("gunman_b", GUNMAN_B, _arms("down")),
+        ("clerk", CLERK, _arms("down"), dict(lean=4.0, nod=0.004)))
 
 
 def supine_frame(spec, name, wound=None):
@@ -603,6 +613,25 @@ def aim_lower_strip(spec, name):
     fw = FW + 32
     frames = [(figure(spec, _aim_level_pose(i), fw, FH), (FW / 2 + 16, 18)) for i in range(len(AIM_LEVELS))]
     action_strip(name, frames, [1] * len(frames), anchor=(fw / 2, FH - 3))
+    return frames
+
+
+# Standing over a man on the ground: the arm straightens out from the level aim and points down past the belt, the
+# shoulders lean in after it and the head tips to look down the barrel. (upper arm, forearm from straight down, lean,
+# nod) per frame; the last is held for the shot.
+AIM_DOWN = [(16, 94, -2.0, 0.0), (28, 78, 1.0, 0.004), (38, 62, 3.0, 0.008), (45, 48, 5.0, 0.012)]
+
+
+def aim_down_strip(spec, name, held_name):
+    """From aim_frame's level aim to the revolver pointed down at the ground a step ahead, the arm locked straight;
+    the last frame is also saved alone as held_name."""
+    fw = FW + 32
+    frames = []
+    for upper, a, lean, nod in AIM_DOWN:
+        ps = dict(_aim_pose(upper, a - upper), lean=lean, nod=nod)
+        frames.append((figure(spec, ps, fw, FH), (FW / 2 + 16, 18)))
+    action_strip(name, frames, [0.12, 0.12, 0.12, 0.3], anchor=(fw / 2, FH - 3))
+    action_strip(held_name, [frames[-1]], [1], anchor=(fw / 2, FH - 3))
     return frames
 
 
@@ -1725,6 +1754,46 @@ def struck_strip(spec, name, final_name, arms):
     return frames
 
 
+def gunned_down_strip(spec, name, final_name):
+    """Shot in the chest from in front while facing right: thrown back off his feet and flat on his back, head to the
+    left (FALL, as in the masked collapse). The coat is soaked across the chest from the hit on, and blood pools under
+    him once he's down. The first frame is the player's idle, so the strip starts without a jump; the last is also
+    saved alone as final_name."""
+    from PIL import Image, ImageDraw, ImageChops
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    stand = Image.new("RGBA", (192, FH))
+    stand.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
+
+    def between(a, b):
+        return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
+
+    def wounded(joints, r):
+        img, head = action_figure(scaled, joints)
+        hip, shoulder = grounded_joints(joints)[:2]
+        wx, wy = hip + (shoulder - hip) * 0.7
+        stain = Image.new("RGBA", img.size)
+        ImageDraw.Draw(stain).ellipse([wx - r, wy - r, wx + r, wy + r], fill=(138, 18, 22, 255))
+        stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
+        img.alpha_composite(stain)
+        return img, head, wx
+
+    keys = []
+    for a, b in zip(FALL, FALL[1:]):
+        keys += [a, between(a, b)]
+    frames = [(stand, (96, 18))]
+    for i, joints in enumerate(keys[1:]):
+        img, head, _ = wounded(joints, min(2.5 + i * 0.5, 5))
+        frames.append((img, head))
+    down, head, wx = wounded(REST, 5.5)
+    pool = Image.new("RGBA", down.size)
+    ImageDraw.Draw(pool).ellipse([wx - 14, 87, wx + 12, 94], fill=(104, 12, 16, 255))
+    pool.alpha_composite(down)
+    frames.append((pool, head))
+    action_strip(name, frames, [0.08] * (len(frames) - 1) + [0.4])
+    action_strip(final_name, [frames[-1]], [1])
+    return frames
+
+
 def build():
     player_sheet(MICAH, "micah")
     player_sheet(DANIEL, "daniel")
@@ -1737,6 +1806,7 @@ def build():
     aim_frame(MICAH, "micah_aim")
     aim_lower_strip(MICAH, "micah_aim_lower")
     aim_back_strip(MICAH, "micah_aim_back")
+    aim_down_strip(MICAH, "micah_aim_down", "micah_aim_down_held")
     aim_self_frame(MICAH, "micah_aim_self")
     draw_strip(MICAH, "micah_draw")
     action_sequences(MICAH, "micah")
@@ -1798,6 +1868,10 @@ def build_act3():
     seated_frame(ELEANOR_SUIT_NPC, "eleanor_suit_seated", flip=True)
     seated_frame(CALEB, "caleb_seated", flip=True)
     seated_frame(ROSE, "rose_seated", flip=True)
+    for spec, name in ((GUNMAN_A, "gunman_a"), (GUNMAN_B, "gunman_b")):
+        draw_strip(spec, f"{name}_draw")
+        aim_frame(spec, f"{name}_aim")
+    gunned_down_strip(MICAH, "micah_gunned_down", "micah_gunned_dead")
 
 
 # ---------------------------------------------------------------------------------------------------------------------

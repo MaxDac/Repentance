@@ -23,6 +23,7 @@ public partial class Alley : Room
     private static readonly Vector2 BehindSal = new(352, 222);
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
+    private static readonly Vector2 OverTony = new(300, 197);
 
     /// <summary>Act 1: Sal's place by Micah's head, and the spot he kicks from: behind Micah, half turned to the
     /// screen, so his right foot goes into Micah's belly out of sight behind Micah's body.</summary>
@@ -217,7 +218,7 @@ public partial class Alley : Room
             case ("street", Verb.Walk or Verb.Hand) when State.HasFlag(Endings.KilledTony):
                 await AfterTheKill();
                 return true;
-            case ("street", Verb.Walk or Verb.Hand) when State.HasFlag("shot_bartender"):
+            case ("street", Verb.Walk or Verb.Hand) when State.HasFlag("shot_bartender") || State.HasFlag(Endings.WarnedTony):
                 await AfterTheShot();
                 return true;
             case ("street", Verb.Walk or Verb.Hand):
@@ -244,6 +245,9 @@ public partial class Alley : Room
 
             case ("back_door", Verb.Hand or Verb.Talk) when State.HasFlag("shot_bartender"):
                 await Say("Nobody's coming out that door now. Not after a shot. They'll be calling somebody instead.");
+                return true;
+            case ("back_door", Verb.Hand or Verb.Talk) when State.HasFlag(Endings.WarnedTony):
+                await Say("Bolted. Tony's said all he's going to say, and he's said it to the wall.");
                 return true;
             case ("back_door", Verb.Hand or Verb.Talk) when salDown:
                 await KnockForTony();
@@ -377,6 +381,11 @@ public partial class Alley : Room
             await WalkAway();
             return;
         }
+        if (State.HasFlag(Endings.WarnedTony))
+        {
+            await WarnTony(tony);
+            return;
+        }
         await Say("*BANG*");
         // the bullet takes him in the shoulder: he folds straight down and goes over on his back
         await tony.PlayPose("bartender_fall");
@@ -391,15 +400,35 @@ public partial class Alley : Room
     }
 
     /// <summary>
+    /// Act 3, the warning shot: into the bricks by Tony's ear. He talks, all but the alarm, and is back inside with the
+    /// door bolted before the dust settles. No blood, so no debt with the mob.
+    /// </summary>
+    private async Task WarnTony(Actor tony)
+    {
+        await Say("*BANG*");
+        await Think("Brick dust in his hair. The bullet's in the wall, an inch from his ear. That's where I meant it to go.");
+        await Talk("bartender_miss");
+        Player.SetPose(null);
+        await tony.MoveTo(new Vector2(331, 198), 60);
+        State.SetFlag("alley3_tony_inside");
+        tony.Visible = false;
+        Game.Sfx.Play(Sound.DoorClose);
+        await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
+        await Think("Nobody bleeding, for once. Tony'll pour drinks tomorrow and swear he never saw me. He'd rather that than explain.");
+    }
+
+    /// <summary>
     /// Act 3, the revolver on Tony again, on his back after the first shot: a second bullet, so he can't tell the mob who
     /// shot him. The street then opens onto the Act 3 map, where the church and the mansion are both the last choice.
     /// </summary>
     private async Task KillTony(Actor tony)
     {
-        await Game.WalkTo(MicahAims);
+        // up close, standing over his legs, the revolver pointed down at his chest
+        await Game.WalkTo(OverTony);
         Player.Face(Facing.Right);
         await Player.PlayPose("micah_draw");
-        Player.SetPose("micah_aim");
+        await Player.PlayPose("micah_aim_down");
+        Player.SetPose("micah_aim_down_held");
         await Talk("bartender_kill");
         await Say("*BANG*");
         tony.SetTexture(BartenderDead);

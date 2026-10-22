@@ -47,6 +47,9 @@ public sealed partial class Playthrough
     /// <summary>Routes where Micah goes back to Tony with the revolver and kills him, ending in prison (ending 12).</summary>
     private bool KillRoute => _route is "12" or "12-oldman";
 
+    /// <summary>Routes where Micah's shot misses Tony on purpose and the unseen alarm rings at the mansion (13 runs, 14 stays).</summary>
+    private bool AlarmRoute => _route is "13" or "14";
+
     /// <summary>
     /// Eleanor's coda in the mansion, after Micah's prayer: the candlestick, then out through the study and the kitchen
     /// (route 8 sets the cellar alight first), to Micah's coffee with Rose and her own last scene.
@@ -132,6 +135,14 @@ public sealed partial class Playthrough
                 yield return "Shoot him in the shoulder";
                 yield return "Not yet";
                 yield return "Our Father";
+                break;
+            case "13":
+                yield return "Fire into the wall";
+                yield return "(Run.)";
+                break;
+            case "14":
+                yield return "Fire into the wall";
+                yield return "(Stay.";
                 break;
             // Eleanor's four turns: the lines' points must reach the threshold (see docs/eleanor-persuasion.md);
             // possessive 4 + rational 2 + possessive 4 + positive 1 = 11

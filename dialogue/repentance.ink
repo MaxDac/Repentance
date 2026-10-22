@@ -1102,10 +1102,25 @@ BARTENDER: You'd be better off with a bullet in your skull. Quicker. Cheaper, to
 THOUGHT: The revolver weighs more than it did this morning. Tony's sweating. So am I.
 * [(Shoot him in the shoulder.)]
     ~ set_flag("shot_bartender")
+* [(Fire into the wall by his head.)]
+    ~ set_flag("warned_tony")
 * {has_flag("can_walk_away")} [(Lower the gun. It's not worth it.)]
     MICAH: ...You're right, Tony. It's not worth it. None of it is.
     ~ set_flag("walked_away")
 - -> END
+
+// The warning shot: a brick by Tony's ear, not Tony. Scared and unhurt, he gives the house and the key, but not the
+// alarm on the kitchen door; MansionExterior rings it if Micah opens the door without spotting it first.
+=== bartender_miss ===
+BARTENDER: Jesus, Mary and Joseph! You're crazy! You're actually crazy!
+MICAH: That was the wall, Tony. I've got five more, and you've only got the one head. Where is she?
+BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
+BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday. There's a key on the lintel over the door.
+BARTENDER: Just walk right in like the delivery boys do, Jones. Nobody'll even look up.
+THOUGHT: He says it too quick, and he won't look at me. Tony never could keep a straight face on a short pour.
+MICAH: You never saw me tonight, Tony.
+BARTENDER: Saw who? I've been inside all night, polishing glasses. Ask anybody.
+-> END
 
 === bartender_shot ===
 BARTENDER: AAAAH! My shoulder! You shot me, you crazy son of a...
@@ -1113,6 +1128,9 @@ MICAH: I've got five more, Tony. And you've got another shoulder. Where is she?
 BARTENDER: The old man's! Harrington's place, on the Gold Coast! They took her to him tonight!
 BARTENDER: Go round the back, to the kitchen. We bring the booze in that way, every Thursday.
 BARTENDER: There's a key on the lintel over the kitchen door. Just walk in like the delivery boys do.
+MICAH: And?
+BARTENDER: And... there's a bell. A burglar alarm, wired to that door. The old man had it put in after the Feds came sniffing. Open it cold and it rings the whole house awake.
+BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
 -> END
@@ -1154,6 +1172,24 @@ CALEB: The station on Maxwell Street is open all night. I'll walk you there myse
     MICAH: After her, I'll walk in there on my own two feet. I swear it.
     CALEB: On your own two feet. I'll be on the station steps at sunrise, Micah. Don't make me wait for nothing.
 - -> END
+
+// The alarm, on the warning-shot route: Tony left the bell out. Running is ending 13 (Outskirts); going in anyway is
+// ending 14 (the kitchen ambush).
+=== alarm_footsteps ===
+THOUGHT: Feet on the back stairs. Heavy ones, and more than one pair. Nobody in this house sleeps in slippers.
+THOUGHT: "Walk right in like the delivery boys." Tony knew. He sent me to ring the doorbell.
++ [(Run.)]
+    ~ set_flag("alarm_ran")
++ [(Stay. She's in there.)]
+    ~ set_flag("alarm_stayed")
+- -> END
+
+// Ending 14: the Club's two men in the Harrington kitchen, waiting at the cook's table. MansionKitchen fires the shots.
+=== kitchen_ambush ===
+THOUGHT: Two of them, at the cook's table, with the light off. Like they've been waiting for me all week.
+GUNMAN: Bell's for the delivery boys, pal. You don't look like a delivery boy.
+MICAH: I'm here for Eleanor Har...
+-> END
 
 === harrington_eleanor ===
 HARRINGTON: There, now. It's not so bad, is it? Being back where you belong.
@@ -1394,6 +1430,14 @@ MICAH: She wouldn't come with me. Even with him on the carpet and the whole Club
     MICAH: They know who died. They don't know what I did.
 }
 THOUGHT: Free. That's the word for it. Free as a dog nobody wants.
+-> END
+
+// Ending 13: he ran from the alarm, and Eleanor's still in that house.
+=== ending_out ===
+THOUGHT: The last fence post. The last streetlight. I didn't stop for any of them.
+MICAH: A bell, and some feet on the stairs. That's all it took. I heard them coming and I ran.
+MICAH: She's still in that house. Thursdays, the old man said. Every Thursday.
+MICAH: I'm out. Out of the job, out of the city. Chicago can have what's left of Micah Jones. I'm not coming back for it.
 -> END
 
 === prison_eleanor ===
@@ -1845,6 +1889,25 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: So that's whose hand it was.
     DANIEL: ...A killer who walked himself into a cell. I don't know what to call that. Caleb would.
     DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_13"):
+    DANIEL: "Omaha. A rented room over a feed store, with one window, and it looks east. I keep the blind down."
+    DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and she's still in that house. The Club's car still pulls up at that door, and I'm in Omaha."
+    DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to his confessional in the spring, and what he could tell me without breaking the seal, he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    DANIEL: "I never wrote to Rose. Better she thinks I'm at the bottom of the lake. Better for Tommy."
+    DANIEL: "The revolver's on the washstand. Six in the cylinder. I only ever needed the one."
+    DANIEL: So he found out in the end. From his brother's letters, in a room in Omaha.
+    DANIEL: That's the last line. The rest of the page is blank.
+    DANIEL: ...Jesus, Micah.
+- has_flag("ending_14"):
+    DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
+    DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, in my confessional, the spring after."
+    DANIEL: "He went to the Harrington house past midnight, for her, with a key a bartender had told him of. There was a bell on the kitchen door that the bartender had not told him of. It rang, and he heard them coming, and he could have run."
+    DANIEL: "He went in. Two of the Club's men were waiting in the dark at the cook's table. They shot him on the kitchen tiles before he could finish her name."
+    DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I hear her confession, and I can do nothing else, and God forgive me, it is not enough."
+    DANIEL: "He died walking toward her and not away. That is not repentance. But it was the right direction, and I hold on to it."
+    DANIEL: ...
+    DANIEL: He never got to the end of the road. Caleb walked the last of it for him, on paper.
+    DANIEL: I'll put the journal back. Maybe in a couple of years I'll give it to Leo...
 - else:
     DANIEL: "Rose. Tommy. I know you won't come, and I don't blame you. I'd have stayed away from me too."
     DANIEL: "Tommy, be a better man than your father. It isn't a high bar. Rose, I'm sorry. I always was. I just never said it right."
@@ -1863,7 +1926,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11") && not has_flag("ending_12"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11") && not has_flag("ending_12") && not has_flag("ending_13") && not has_flag("ending_14"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END

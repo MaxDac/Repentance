@@ -859,22 +859,30 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   Eleanor.
 - The bartender tells him to bug off, these people are really dangerous (they bring girls in off the trains like
   crates of oranges, and nobody asks), and he'd be better off with a bullet in his skull.
-- At this point, the player must choose between firing the revolver into his shoulder, or walking away, because it's not worth it.
+- At this point, the player must choose between firing the revolver into his shoulder, firing it into the wall by his
+  head (the warning shot), or walking away, because it's not worth it.
   The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
   office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
 - If the player walks out, he's going to his wife's house (caption *End of Act Three*).
 - If he fires, Tony is hit in the shoulder: he clutches it, his legs fold straight down under him and he ends up on
   his back, with the blood on his shoulder and pooling on the ground under it.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
-  from the kitchen, because they provide them with booze.
+  from the kitchen, because they provide them with booze. Pressed ("And?"), he also gives up the burglar bell wired to
+  the kitchen door since the Feds came sniffing, swearing on his mother that's everything.
 - Micah stays in the alley with Tony on his back in the gravel, and the player decides. Micah's thoughts say the
   problem out loud: Tony knows his name, and Tony is the mob.
   - **Walk out to the street:** Micah leaves Tony alive and goes back to his office before the mansion. Tony's
     revenge follows him into every ending (below, *Tony's revenge*).
-  - **Use the revolver on Tony again:** Micah kills him in cold blood so he can't tell anybody who shot him
+  - **Use the revolver on Tony again:** Micah walks up to him, stands over his legs and points the revolver down at
+    his chest (`micah_aim_down` strip, held on `micah_aim_down_held`). He kills him in cold blood so he can't tell anybody who shot him
     (`killed_tony`, knots `bartender_kill` and `bartender_dead`; new `bartender_dead` sprite, Tony still on his back,
     a second wound in his chest). Repentance becomes much harder from here; see *The night after Tony*.
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
+- **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
+  and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery
+  boys"), too quickly: he leaves out the alarm. He goes back inside and bolts the door; knocking is refused. No blood,
+  so no debt with the mob and no revenge in the endings. The street leads to the office in the storm, as after the
+  shoulder.
 
 #### The night after Tony (the kill route)
 
@@ -918,6 +926,14 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
 - Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
   the taut wire; move the coal bin under the bell to reach its hammer.
+- After the warning shot Micah doesn't know about the alarm: taking the key doesn't reveal it, but a look at the door,
+  the lintel, the wire or the bell does (and then the night goes on as usual). Opening the door before that rings the
+  bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
+  - **Run** (`alarm_ran`): ending 13.
+  - **Stay. She's in there.** (`alarm_stayed`): into the kitchen, where two of the Club's men (charcoal overcoat and
+    fedora, grey suit and flat cap; `gunman_a`/`gunman_b` sprites with draw and aim strips) wait at the cook's table.
+    "Bell's for the delivery boys, pal." Micah gets as far as "I'm here for Eleanor Har...": two shots, he falls
+    backwards on the tiles (`micah_gunned_down`/`micah_gunned_dead`), cut to black, ending 14.
 - **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
   the door wire. Cutting the wire releases it. Plan **hold hammer, tie hammer, release hand**, using
   Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
@@ -1188,6 +1204,22 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   confession if he took them, the letters to Tony's mother, Rose visiting on first Sundays. Caleb's note says Eleanor
   came to his confessional. Daniel keeps the journal for Leo.
 
+#### Option 13 - Outskirts - Out of Chicago, alone
+
+- After the warning shot, the alarm rang and Micah ran. His car stops at the city's edge (`ending_out`): a bell and
+  some feet on the stairs were all it took; she's still in that house; he's out of the job and out of the city.
+- The journal's last pages are from a rented room in Omaha. Caleb writes care of general delivery and has passed on
+  what Eleanor told him in confession; Micah copied it in. He never wrote to Rose. The revolver is on the washstand,
+  six in the cylinder, and he only ever needed the one: the last line, then a blank page. Daniel: "...Jesus, Micah."
+  Daniel puts the journal back.
+
+#### Option 14 - The Harrington kitchen - Caleb's last pages
+
+- After the warning shot, the alarm rang and Micah went in anyway; the Club's two men shot him in the kitchen.
+- The last pages are in Caleb's hand: Eleanor told him the rest in his confessional the spring after. The police wrote
+  it down as a burglar shot by the household. "He died walking toward her and not away. That is not repentance. But
+  it was the right direction." Daniel puts the journal back; no "That's enough of you".
+
 #### Tony's revenge
 
 Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah carries him:
@@ -1203,6 +1235,9 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 10 | Micah looks for his peace far from Chicago. | Nobody's come for him; he hears every car that slows down. |
 | 11 | Tony sends his regards in the yard. | Tried for Tony too. |
 | 12 | Not possible. | The letters to Tony's mother. |
+
+After the warning shot (endings 13 and 14, and any other ending reached by spotting the alarm) Tony wasn't hurt, so
+none of the revenge lines play.
 
 ### Present
 

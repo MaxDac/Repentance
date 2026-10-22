@@ -453,6 +453,25 @@ public static partial class SoundSynth
         return buf;
     }
 
+    /// <summary>
+    /// A burglar alarm: an electric bell on the wall, its hammer drumming the iron gong eighteen times a second. The
+    /// gong's inharmonic partials never get the time to die away between blows, so it is one long harsh clangour that
+    /// stops dead when the circuit is cut.
+    /// </summary>
+    private static float[] AlarmBell(Random rng)
+    {
+        const double seconds = 3.6, rate = 18;
+        var buf = Buffer(seconds + 0.6);
+        double[] ratio = { 1, 2.32, 4.1, 5.43 }, level = { 1, 0.6, 0.35, 0.2 };
+        for (double t = 0; t < seconds; t += 1 / rate)
+        {
+            double amp = 0.5 + 0.1 * Noise(rng);
+            for (int k = 0; k < ratio.Length; k++)
+                Tone(buf, t, 1180 * ratio[k], 1180 * ratio[k], 0.09 / (k + 1), amp * level[k] * 0.4, attack: 0.001);
+            Burst(buf, rng, t, 0.004, amp * 0.15, Biquad.BandPass(3200, 1.5));
+        }
+        return buf;
+    }
     /// <summary>One struck tone bar: a ringing fundamental, a few fading partials and the soft tap of the felt hammer.</summary>
     private static void Chime(float[] buf, Random rng, double start, double hz, double amp)
     {

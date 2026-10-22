@@ -199,7 +199,8 @@ public partial class AutoPlay
                 GameState.Instance.SetFlag(Endings.KilledTony, killed);
                 story.ChoosePathString("epilogue");
                 string lines = story.ContinueMaximally();
-                bool told = ending == 12 || killed || (shot && ending is not (2 or 3 or 7));
+                // 13 and 14 follow the warning shot, so Tony was never shot there
+                bool told = ending is not (13 or 14) && (ending == 12 || killed || (shot && ending is not (2 or 3 or 7)));
                 Check(lines.Contains("Tony", StringComparison.Ordinal) == told,
                     $"epilogue {ending}: Tony is remembered only where he can follow (shot={shot}, killed={killed})");
             }

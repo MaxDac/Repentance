@@ -157,6 +157,7 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 
 | Order | Condition | Ending |
 |---|---|---|
+| 0 | `alarm_stayed`, else `alarm_ran` | 14 (shot in the kitchen; Caleb writes), else 13 (out of Chicago, alone) |
 | 1 | `eleanor_struck` | 8 if `eleanor_burned`, else 9 |
 | 2 | `eleanor_weary` | 10 if `StaysFree`, else 11 |
 | 3 | `surrendered_tony`, or `killed_tony` and `spared_oldman` | 12 (prison, Caleb, after Tony) |
@@ -172,8 +173,10 @@ a weary one follows in silence ("Not one more word in this house"). `KeepsJourna
 1, 6, 8, 9, 10, 11, 12. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
-case the epilogues tell.
-Every route must reach "The End" (`Playthrough` routes `1`-`12`, `1-oldman`, `1-steps`, `12-oldman`).
+case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not
+the alarm, and opening the kitchen door without a look at it rings the bell (`alarm_footsteps`): run (`alarm_ran`)
+or stay (`alarm_stayed`).
+Every route must reach "The End" (`Playthrough` routes `1`-`14`, `1-oldman`, `1-steps`, `12-oldman`).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
 click or refusal walks her past him to the door.
 
