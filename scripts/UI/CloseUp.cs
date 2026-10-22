@@ -5,7 +5,8 @@ namespace Repentance;
 
 /// <summary>
 /// A framed close-up panel popped up over the scene (built by tools/art/closeup.py into assets/art/ui/).
-/// The Hud does the rest: fades, speech along the panel's bottom edge, swapping variants when settings change,
+/// The Hud does the rest: fades, speech along the panel's bottom edge (beneath the speaker's own portrait on a
+/// two-portrait panel), swapping variants when settings change,
 /// and clearing it on a room change. Add a new one to <see cref="CloseUps"/>, then show it with
 /// <see cref="Hud.ShowCloseUp"/> or from ink with "INSET: id".
 /// </summary>
@@ -21,6 +22,17 @@ public sealed record CloseUp(string Id, Func<GameSettings?, string> Texture, dou
     /// <summary>A photograph: a small print on the left of the screen, with speech in a column to its right.</summary>
     public bool Photo { get; init; }
 
+    /// <summary>Speaker on the left of a two-portrait panel (the player counts as their character, e.g. "micah");
+    /// speech from anyone but
+    /// <see cref="RightSpeaker"/> goes beneath this portrait.</summary>
+    public string? LeftSpeaker { get; init; }
+
+    /// <summary>Speaker on the right of a two-portrait panel (the player counts as their character); their speech goes beneath the
+    /// right portrait. Set it to split speech per portrait instead of centring it across the panel.</summary>
+    public string? RightSpeaker { get; init; }
+
+    public bool TwoPortraits => RightSpeaker != null;
+
     public string TexturePath(GameSettings? settings) => $"res://assets/art/ui/{Texture(settings)}.png";
 }
 
@@ -32,7 +44,10 @@ public static class CloseUps
         s => s?.NudityEnabled == true ? "stage_closeup" : "stage_closeup_clothed");
 
     /// <summary>Rose at her door, calling Micah back, on the left; Micah on the right, with nothing to say.</summary>
-    public static readonly CloseUp Rose = new("rose", "rose_closeup");
+    public static readonly CloseUp Rose = new("rose", "rose_closeup")
+    {
+        LeftSpeaker = "rose", RightSpeaker = "micah",
+    };
 
     /// <summary>Micah flat on the cathedral steps in Act 3.</summary>
     public static readonly CloseUp Beaten = new("beaten", "beaten_closeup");
@@ -41,7 +56,10 @@ public static class CloseUps
     public static readonly CloseUp Motel = new("motel", "motel_closeup");
 
     /// <summary>On the motel fire escape, after the First Interlude: Micah on the left, Eleanor on the right.</summary>
-    public static readonly CloseUp FireEscape = new("fire_escape", "fire_escape_closeup");
+    public static readonly CloseUp FireEscape = new("fire_escape", "fire_escape_closeup")
+    {
+        LeftSpeaker = "micah", RightSpeaker = "eleanor",
+    };
 
     /// <summary>The band of heraldry at the foot of Harrington senior's portrait: raven and star, lion and sun,
     /// stag and moon.</summary>
