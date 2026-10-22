@@ -25,7 +25,7 @@ public partial class Game
         var path = RoomScenePath(room);
         if (!ResourceLoader.Exists(path)) return $"no room scene {path}";
         if (entry == FirstEntry) return null;
-        var state = GD.Load<PackedScene>(path).GetState();
+        var state = RoomPackedScene(room).GetState();
         for (var i = 0; i < state.GetNodeCount(); i++)
             if (state.GetNodePath(i).ToString() == $"./Entries/{entry}") return null;
         return $"room '{room}' has no entry marker '{entry}'";
@@ -81,7 +81,7 @@ public partial class Game
     {
         UnloadRoom();
         Hud.HideCloseUp(0);
-        Room = GD.Load<PackedScene>(RoomScenePath(name)).Instantiate<Room>();
+        Room = RoomPackedScene(name).Instantiate<Room>();
         _roomScene = name;
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
@@ -91,16 +91,44 @@ public partial class Game
         if (Room.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
         else Sfx.SetAmbient(null);
         Music.Play(Room.Music);
-        Music.Prefetch(NeighbourMusic());
+        var exits = Room.Hotspots.Where(h => h.Visible && h.ExitTo != "").Select(h => h.ExitTo).Distinct().ToList();
+        Music.Prefetch(NeighbourMusic(exits));
+        ReleaseRoomScenes(exits.Append(name).ToHashSet());
     }
 
-    /// <summary>The music of the rooms this room's open exits lead to, so it is rendered before the player goes there.</summary>
-    private List<Track> NeighbourMusic()
+    /// <summary>The music of the rooms these exits lead to, so it is rendered before the player goes there.</summary>
+    private static List<Track> NeighbourMusic(IEnumerable<string> exits)
     {
         var tracks = new List<Track>();
-        foreach (var exit in Room!.Hotspots.Where(h => h.Visible && h.ExitTo != "").Select(h => h.ExitTo).Distinct())
+        foreach (var exit in exits)
             if (RoomMusic(exit) is { } track) tracks.Add(track);
         return tracks;
+    }
+
+    /// <summary>
+    /// Room scenes loaded through <see cref="RoomPackedScene"/>, held until <see cref="ReleaseRoomScenes"/> disposes
+    /// them. Godot's resource cache does not own a loaded resource, so a dropped <c>GD.Load</c> result leaves the
+    /// scene owned by a weak C# wrapper alone; if the GC collects it and the next load revives the cached scene
+    /// before its finaliser runs, Godot 4.7.2 keeps a dead GC handle and later logs "Handle is not initialized"
+    /// (godotengine/godot#124587). Holding the wrapper and disposing it explicitly leaves no such window.
+    /// </summary>
+    private static readonly Dictionary<string, PackedScene> RoomScenes = new();
+
+    private static PackedScene RoomPackedScene(string room)
+    {
+        if (!RoomScenes.TryGetValue(room, out var scene))
+            RoomScenes[room] = scene = GD.Load<PackedScene>(RoomScenePath(room));
+        return scene;
+    }
+
+    /// <summary>Disposes the held room scenes except <paramref name="keep"/>, so only the current room's neighbourhood stays in memory.</summary>
+    private static void ReleaseRoomScenes(IReadOnlySet<string> keep)
+    {
+        foreach (var room in RoomScenes.Keys.Where(r => !keep.Contains(r)).ToList())
+        {
+            RoomScenes[room].Dispose();
+            RoomScenes.Remove(room);
+        }
     }
 
     /// <summary>
@@ -109,18 +137,27 @@ public partial class Game
     /// </summary>
     private static Track? RoomMusic(string room)
     {
-        var path = RoomScenePath(room);
-        if (!ResourceLoader.Exists(path)) return null;
-        var state = GD.Load<PackedScene>(path).GetState();
-        for (int i = 0; i < state.GetNodePropertyCount(0); i++)
-        {
-            if (state.GetNodePropertyName(0, i) != "script") continue;
-            if (state.GetNodePropertyValue(0, i).As<Script>()?.Call("new").As<Room>() is not { } probe) return null;
-            var track = probe.Music;
-            probe.Free();
-            return track;
-        }
-        return null;
+        if (!ResourceLoader.Exists(RoomScenePath(room))) return null;
+        if (RoomScript(room)?.Call("new").As<Room>() is not { } probe) return null;
+        var track = probe.Music;
+        probe.Free();
+        return track;
+    }
+
+    /// <summary>
+    /// Room root scripts read by <see cref="RoomMusic"/>, held for the whole run: a dropped wrapper of a script the
+    /// next scene load revives would hit the same dead GC handle as <see cref="RoomScenes"/>. Scripts hold no art.
+    /// </summary>
+    private static readonly Dictionary<string, Script?> RoomScripts = new();
+
+    private static Script? RoomScript(string room)
+    {
+        if (RoomScripts.TryGetValue(room, out var script)) return script;
+        var state = RoomPackedScene(room).GetState();
+        for (int i = 0; i < state.GetNodePropertyCount(0) && script == null; i++)
+            if (state.GetNodePropertyName(0, i) == "script")
+                script = state.GetNodePropertyValue(0, i).As<Script>();
+        return RoomScripts[room] = script;
     }
 
     /// <summary>Micah always carries his notepad and lighter in the first slots; Daniel, in the present day, never does.</summary>

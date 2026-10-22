@@ -66,7 +66,11 @@ Every run quits through `Harness.Finish`, which calls `Timers.ReleasePending` fi
 (`Music.StopRendering`; its worker forces a full GC) and runs the GC, waiting for pending finalizers: Godot's
 shutdown disposes only the wrappers C# still holds, so one collected but not yet finalized leaks its object ("RID
 allocations of type GodotShape2D were leaked") or is finalized mid-teardown. Dispose wrappers of scene-owned
-resources you only read, as `Hotspot.ShapeRect` does.
+resources you only read, as `Hotspot.ShapeRect` does. Don't drop a `GD.Load` result a later load can revive: Godot's
+resource cache does not own it, so the GC can collect its wrapper, and if a load revives the cached resource before
+the finalizer runs, Godot 4.7.2 keeps a dead GC handle and logs `Handle is not initialized` from
+`SwapGCHandleForType` ([godot#124587](https://github.com/godotengine/godot/issues/124587)). Hold the wrapper and
+`Dispose` it when done, as `Game.RoomPackedScene` and `Game.ReleaseRoomScenes` do for room scenes.
 A local pass does not cover exported builds; see [What only CI runs](#what-only-ci-runs).
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses
