@@ -364,15 +364,17 @@ public partial class AutoPlay
         Check(overlap > 0 && wrong == 0, $"{what} ({overlap} overlapping pixels, {wrong} wrong: {string.Join(" ", winners.Take(6))})");
     }
 
-    private void CheckPortraitSpeech(Game game, bool right)
+    private void CheckPortraitSpeech(Game game, bool right, CloseUp? closeUp = null)
     {
+        closeUp ??= CloseUps.FireEscape;
         var panel = game.Hud.InsetRect;
         var speech = game.Hud.SpeechRect;
         float divider = panel.Position.X + panel.Size.X / 2;
-        Check(game.Hud.CurrentCloseUp == CloseUps.FireEscape && game.Hud.SpeechVisible &&
+        var speaker = right ? closeUp.RightSpeaker : closeUp.LeftSpeaker;
+        Check(game.Hud.CurrentCloseUp == closeUp && game.Hud.SpeechVisible &&
             speech.Position.X >= (right ? divider : panel.Position.X) &&
             speech.End.X <= (right ? panel.End.X : divider),
-            right ? "Eleanor's subtitle stays beneath the right portrait" : "Micah's subtitle stays beneath the left portrait");
+            $"{speaker}'s subtitle stays beneath the {(right ? "right" : "left")} portrait of the {closeUp.Id} close-up");
         Check(speech.Position.Y > panel.Position.Y + panel.Size.Y * 0.7f && speech.End.Y < panel.End.Y,
             "portrait speech wraps below the face and inside the frame");
     }

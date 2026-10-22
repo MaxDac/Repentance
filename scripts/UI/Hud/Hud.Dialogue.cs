@@ -177,8 +177,16 @@ public partial class Hud
 
     public void HideThought() => _thought.Visible = _thoughtBg.Visible = false;
 
-    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face; beside a
-    /// photo, it fills the column to the photo's right, centred on it.</summary>
+    private static string? SpeakerId(ISpeaker speaker) => speaker switch
+    {
+        Player p => p.Character.Split('_')[0],
+        Actor a => a.Id,
+        _ => null,
+    };
+
+    /// <summary>While a close-up fills the screen, speech sits along its bottom edge, clear of the face (on a
+    /// two-portrait panel, beneath the speaker's own portrait); beside a photo, it fills the column to the photo's
+    /// right, centred on it.</summary>
     private void ShowSpeechOverInset(string text, ISpeaker speaker, Color color)
     {
         float width = 380;
@@ -195,13 +203,13 @@ public partial class Hud
             _speech.Visible = true;
             return;
         }
-        if (_closeUp == CloseUps.FireEscape)
+        if (_closeUp?.TwoPortraits == true)
         {
             const int padding = 12;
             float half = _inset.Size.X / 2f;
             width = half - padding * 2;
             x = _inset.Position.X + padding;
-            if (speaker is Actor { Id: "eleanor" }) x += half;
+            if (SpeakerId(speaker) == _closeUp.RightSpeaker) x += half;
         }
         var size = MeasureDialogue(text, width);
         _speech.Text = text;

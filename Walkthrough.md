@@ -570,7 +570,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   back with a "Wait!": Micah will turn, then the wife will say "Don't get into trouble again."
   After "Wait!" (not during it) a framed close-up panel pops up over the scene, two portraits split by a bar like the
   motel fire-escape panel: Rose at her door on the left, Micah on the right. After a couple of seconds of silence,
-  "Don't get into trouble again." appears along the panel's bottom edge, Micah answers only "...", then the panel is
+  "Don't get into trouble again." appears beneath Rose's portrait along the panel's bottom edge, Micah answers only
+  "..." beneath his own portrait, then the panel is
   removed and the scene continues.
 - Rose makes clear that forgiveness is not something Micah can demand; the callback is concern, not absolution.
   Keep her third-appeal reply: "Forgiving's the easy part, Micah. Forgetting is what you keep asking for."
