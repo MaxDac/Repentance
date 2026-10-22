@@ -90,12 +90,29 @@ public partial class Hud
     public string VersesText => string.Join("\n", _verses.GetChildren().OfType<Label>().Select(l => l.Text));
     public bool VersesFading => _verses.Modulate.A < 1 || _verses.GetChildren().OfType<Label>().Any(l => l.Modulate.A is > 0 and < 1);
 
+    private const double VersesSkipFade = 0.4;
+    private Tween? _versesTween;
+    private TaskCompletionSource? _versesSkip;
+
+    /// <summary>
+    /// Ends <see cref="ShowVerses"/> early: the line fading in completes, no further lines appear, and the block fades
+    /// out quickly. Does nothing when no verses are showing.
+    /// </summary>
+    public void SkipVerses()
+    {
+        if (_versesSkip == null || _versesSkip.Task.IsCompleted) return;
+        _versesSkip.TrySetResult();
+        _versesTween?.CustomStep(3600);
+    }
+
     /// <summary>
     /// Verses over black in <see cref="VerseFont"/>, centred: each line fades in under the previous ones over
     /// <paramref name="fadeSeconds"/>, the block holds for <paramref name="holdSeconds"/>, then fades out as one.
+    /// <see cref="SkipVerses"/> cuts it short.
     /// </summary>
     public async Task ShowVerses(IReadOnlyList<string> lines, double fadeSeconds, double holdSeconds)
     {
+        var skip = _versesSkip = new TaskCompletionSource();
         foreach (var child in _verses.GetChildren()) child.Free();
         int size = VerseFontSize;
         while (size > 8 && lines.Max(l => VerseFont.GetStringSize(l, HorizontalAlignment.Left, -1, size).X) > ScreenW - 16)
@@ -109,6 +126,7 @@ public partial class Hud
         var settings = new LabelSettings { Font = VerseFont, FontSize = size, FontColor = VerbHover };
         foreach (var line in lines)
         {
+            if (skip.Task.IsCompleted) break;
             var label = new Label
             {
                 Text = line,
@@ -118,20 +136,22 @@ public partial class Hud
                 Modulate = new Color(1, 1, 1, 0),
             };
             _verses.AddChild(label);
-            await TweenAlpha(label, 1, fadeSeconds);
+            await VersesTween(label, 1, fadeSeconds);
         }
-        await Timers.Wait(this, holdSeconds);
-        await TweenAlpha(_verses, 0, fadeSeconds);
+        if (!skip.Task.IsCompleted) await Task.WhenAny(Timers.Wait(this, holdSeconds), skip.Task);
+        await VersesTween(_verses, 0, skip.Task.IsCompleted ? VersesSkipFade : fadeSeconds);
         _verses.Visible = false;
         foreach (var child in _verses.GetChildren()) child.QueueFree();
+        if (_versesSkip == skip) _versesSkip = null;
     }
 
-    private async Task TweenAlpha(CanvasItem item, float alpha, double seconds)
+    private async Task VersesTween(CanvasItem item, float alpha, double seconds)
     {
-        var tw = CreateTween();
+        var tw = _versesTween = CreateTween();
         tw.SetPauseMode(Tween.TweenPauseMode.Stop);
         tw.TweenProperty(item, "modulate:a", alpha, seconds);
         await ToSignal(tw, Tween.SignalName.Finished);
+        if (_versesTween == tw) _versesTween = null;
     }
 
     private void BuildPause(Control root)

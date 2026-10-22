@@ -27,6 +27,16 @@ public partial class Game
             DismissTheEnd();
             return;
         }
+        if (OnEpigraph)
+        {
+            if (e is InputEventMouseButton { Pressed: true } ||
+                e is InputEventKey { Pressed: true, Echo: false } key && key.Keycode is not (Key.Alt or Key.Shift or Key.Ctrl or Key.Meta))
+            {
+                GetViewport().SetInputAsHandled();
+                Hud.SkipVerses();
+            }
+            return;
+        }
         if (e.IsActionPressed("ui_cancel"))
         {
             GetViewport().SetInputAsHandled();

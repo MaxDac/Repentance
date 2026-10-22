@@ -80,6 +80,7 @@ public partial class AutoPlay : Harness
             if (_failures.Count != 0) return;
 #endif
             var gs = GameState.Instance;
+            await EpigraphTest(game);
             await ContentSettingsTest(game);
             if (OS.GetCmdlineUserArgs().Contains("--settings-test")) return;
             bool autosave = game.AutosaveEnabled;
