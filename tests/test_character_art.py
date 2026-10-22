@@ -101,10 +101,11 @@ class CharacterArtTests(unittest.TestCase):
                            ("micah_no_tie", sprites.MICAH_NO_TIE)):
             image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
             poses = [(0, i + 1, sprites.walk_pose(90, i)) for i in range(8)]
-            for row, yaw in ((1, 16), (2, 164)):
+            front = sprites.front_yaw(spec)
+            for row, yaw in ((1, front), (2, 164)):
                 poses.append((row, 0, sprites.pose(yaw)))
                 poses += [(row, i + 1, sprites.walk_pose(yaw, i * 8 / 6, amp=0.8)) for i in range(6)]
-            poses += [(1, 7, sprites.pose(16, mouth=1)), (1, 8, sprites.pose(16, mouth=2, nod=0.004))]
+            poses += [(1, 7, sprites.pose(front, mouth=1)), (1, 8, sprites.pose(front, mouth=2, nod=0.004))]
             for row, column, ps in poses:
                 with self.subTest(character=name, row=row, column=column):
                     frame = image.crop((column * 64, row * 96, (column + 1) * 64, (row + 1) * 96))

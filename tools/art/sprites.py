@@ -2,8 +2,9 @@
 
 Walkable characters (Micah, Daniel) get a 10 x 3 sheet of 64x96 frames:
   row 0  facing right           : 3/4 idle, side walk 1-8, 3/4 talk
-  row 1  front 3/4 view          : idle, walk 1-6, talk A, talk B
+  row 1  front view, turned right: idle, walk 1-6, talk A, talk B (spec "front_yaw", default 3/4; Micah faces the camera)
   row 2  back 3/4 view           : idle, walk 1-6
+Horizontal and front frames face screen-right; Player flips them for left (the front row when walking down-left).
 NPCs get an 11-frame strip of 56x96 frames: idle, talk A, talk B in a 3/4 view facing screen-right, then walk 1-8 in
 side view facing screen-right; scenes (and Actor.MoveTo) flip them.
 """
@@ -24,6 +25,7 @@ NPC_W = 56
 SCALE = 1.2  # FOTA-sized: about a third of the play area tall
 STRIDE_FRAMES = 8
 PLAYER_IDLE_YAW = 55
+FRONT_YAW = 16  # a player sheet's front row, unless its spec sets "front_yaw"
 
 
 def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
@@ -36,7 +38,7 @@ def _vee(y1=0.33, w=0.034, col="e3d7bf", tie=None, top=0.215):
 # black hair, so the brown fedora stands out against it
 MICAH_HEAD = dict(skin="d09670", hair="141010", hair_style="cropped", brow="100c0c", stubble="8e6c52",
                   face_w=0.050, jaw_w=0.048, chin_w=0.03, front_gaze=True, deep_eyes=True, eye_white="d4c6b2",
-                  clean_jaw=True)
+                  clean_jaw=True, front_yaw=4)  # walking at the camera he faces it, his tie down the middle
 MICAH = dict(MICAH_HEAD, h=66, sw=0.142, hat="fedora", hat_col="6e4a30", band="1a120e",
              brim_w=0.102, brim_y=0.36, crown_h=0.04, crown_pinch=0.35,
              torso="ae8848", collar="e3d7bf", coat=dict(col="ae8848", top=0.40, hem=0.745, flare=0.035),
@@ -178,7 +180,7 @@ WATCHMAN = dict(h=69, sw=0.16, hw=0.058, skin="c89a7c", hair="4a3a2c", hat="cap"
 MASKED_MAN = dict(h=66, sw=0.142, skin="d8a480", hair="2a1d16", hat="cowl", hat_col="16141a", mask=("bauta", "ece6d4"),
                   torso="16141a", collar="16141a", sleeves="16141a", cloak=dict(col="16141a", hem=0.96),
                   pants="16141a", shoes="0e0c10", decals=[])
-MICAH_MASKED = dict(MASKED_MAN, decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
+MICAH_MASKED = dict(MASKED_MAN, front_yaw=MICAH_HEAD["front_yaw"], decals=[("strip", 0.24, 0.27, 0.012, 0.012, "7b1f2a")])
 # The inner circle and some of the members wear carved beasts' faces instead of the white mask, after the animals
 # of Celtic folklore: aged wood and bone, antler-grey and ochre against the black cowl. The stag, horned like
 # Cernunnos, leads the rite; the boar and the wolf stand with him. Bear, raven and hare walk among the guests.
@@ -288,6 +290,10 @@ def _arms(kind_r, kind_l=None):
     return {1: one(kind_r), -1: one(kind_l or kind_r)}
 
 
+def front_yaw(spec):
+    return spec.get("front_yaw", FRONT_YAW)
+
+
 def player_sheet(spec, name, arms=None, props=None):
     """arms: arms held still in every frame (e.g. both hands clutching a sheet) instead of the walk's swing.
     props: pose keys added to every frame (e.g. a bottle carried in one hand)."""
@@ -300,10 +306,11 @@ def player_sheet(spec, name, arms=None, props=None):
     side = [figure(spec, held(pose(PLAYER_IDLE_YAW)), FW, FH)]
     side += [figure(spec, held(walk_pose(90, i)), FW, FH) for i in range(STRIDE_FRAMES)]
     side += [figure(spec, held(pose(PLAYER_IDLE_YAW, mouth=1, nod=nod)), FW, FH)]
-    front = [figure(spec, held(pose(16)), FW, FH)]
-    front += [figure(spec, held(walk_pose(16, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
+    fy = front_yaw(spec)
+    front = [figure(spec, held(pose(fy)), FW, FH)]
+    front += [figure(spec, held(walk_pose(fy, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     # talking only moves the mouth and nods the head; the arms stay where they are
-    front += [figure(spec, held(pose(16, mouth=1)), FW, FH), figure(spec, held(pose(16, mouth=2, nod=nod)), FW, FH)]
+    front += [figure(spec, held(pose(fy, mouth=1)), FW, FH), figure(spec, held(pose(fy, mouth=2, nod=nod)), FW, FH)]
     back = [figure(spec, held(pose(164)), FW, FH)]
     back += [figure(spec, held(walk_pose(164, i * 8 / 6, amp=0.8)), FW, FH) for i in range(6)]
     img = sheet([side, front, back], FW, FH, cols=10)
