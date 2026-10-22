@@ -170,7 +170,8 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `EleanorFollows` is
 `eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
 a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
-1, 6, 8, 9, 10, 11, 12. `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
+1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 has the "The next morning" caption (`Act3.Finish`); the Joliet
+visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`). `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
 case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not

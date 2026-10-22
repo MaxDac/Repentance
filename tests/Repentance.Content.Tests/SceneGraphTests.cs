@@ -123,6 +123,15 @@ public class SceneGraphTests
         Assert.Equal(new[] { "blue_lantern_front" }, stateStreet);
     }
 
+    /// <summary>The Blue Lantern is on State Street (the florist front); the city map's pin agrees.</summary>
+    [Fact]
+    public void ChicagoMap_PinsTheBlueLanternOnStateStreet()
+    {
+        var text = File.ReadAllText(Path.Combine(Root.Value, "scenes", "rooms", "chicago_map.tscn"));
+        Assert.Contains("The Blue Lantern, on State Street.", text);
+        Assert.DoesNotContain("The Blue Lantern, on Halsted", text);
+    }
+
     /// <summary>On the motel return Eleanor's window is dark: no hotspot in the alley calls it lit.</summary>
     [Fact]
     public void MotelAlley_NeverCallsHerWindowLit()

@@ -206,6 +206,12 @@ public partial class ConventCell : Room
     {
         switch (target.Id, verb)
         {
+            // a save from before #274 put her duffle down on entry loads with it still in her hand (no bag hotspot):
+            // the first click on the bed, the nightstand or the door sets it down
+            case ("bed" or "nightstand" or "drawer" or "exit", Verb.Walk or Verb.Hand) when !State.HasFlag("interlude_bag_left"):
+                await SetBagDown();
+                await Say("My comb and my little mirror first; they're in my bag.");
+                return true;
             case ("bag", Verb.Hand):
                 await FirstNight();
                 return true;

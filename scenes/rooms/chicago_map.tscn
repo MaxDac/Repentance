@@ -217,7 +217,7 @@ shape = SubResource("Rect_hotel")
 script = ExtResource("3_Hotspot")
 Id = "blue_lantern"
 DisplayName = "the Blue Lantern"
-LookText = "The Blue Lantern, on Halsted. Tony's still in the alley behind it, and he isn't going anywhere."
+LookText = "The Blue Lantern, on State Street. Tony's still in the alley behind it, and he isn't going anywhere."
 monitoring = false
 monitorable = false
 

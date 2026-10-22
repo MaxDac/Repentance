@@ -393,7 +393,7 @@ public partial class EleanorRoom : Room
                 return true;
 
             case ("bag", Verb.Look):
-                await Say("My duffle, packed this afternoon. Two dresses, my nightclothes, a comb and a mirror. Nothing Theodore paid for.");
+                await Say("My duffle, packed this afternoon. A white dress, a black suit, my pearls and nightclothes, a comb and a mirror. Nothing Theodore paid for.");
                 return true;
             case ("bag", Verb.Hand) when !State.HasFlag("interlude_phoned"):
                 await Say("Not yet. The bag goes last, when there's somebody coming to carry me out of here.");

@@ -319,7 +319,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    round it, and reaches the dress from in front of it. She packs the brass box
    (**Puzzle 17**, below), puts the combination in the
    drawer, and phones Rizzo's Flowers on the candlestick telephone on the vanity (the answers are colour). Her
-   packed duffle (dark brown leather) stands at the foot of the bed: hand on it after the call and she takes it
+   packed duffle (dark brown leather: a white dress, a black suit, her pearls and nightclothes, a comb and a mirror,
+   nothing Theodore paid for) stands at the foot of the bed: hand on it after the call and she takes it
    (`interlude_took_bag`); the door waits for it. From here to the convent cell she carries it (the
    `eleanor_bag_play` sheet), and before every conversation (Sal at the door, Tony, Sal at the Blue Lantern,
    Agatha) she sets it down at her feet (`eleanor_bag_down`) and takes it back afterwards (`eleanor_bag_up`).
@@ -347,7 +348,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 4. **Convent cell, that night.** She walks in and sets her bag down in front of the nightstand
    (`interlude_bag_left`). Hand on the bag (the `bag` hotspot, shown once it is down): she opens it, takes out her
    comb and little mirror and combs her hair (`eleanor_comb`); Hand on the bed or the nightstand only points her to
-   the bag. The scene fades slowly to black and holds it for a second (the comb and mirror stay in the cell: the
+   the bag. A save from before she set it down loads with it still in her hand: the first Hand on the bed, the
+   nightstand or the door (or a Walk to the door) sets it down. The scene fades slowly to black and holds it for a second (the comb and mirror stay in the cell: the
    ones Micah finds in the nightstand drawer in Act 1). When the knock comes she is
    sitting up on the edge of the bed by the pillow, awake, in her pyjamas (`eleanor_pyjama_play`, the
    `eleanor_cell_sit` pose). As the knock fades in she gets up off the bed (`eleanor_cell_rise`) and stands in front
@@ -774,8 +776,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 1. **The motel room, after Micah has gone.** Colour only. A knock at the door. Eleanor goes to it but stops
    halfway; the door is kicked in, and Bruno and a second goon (new sprite) walk in and stand between her and it.
-   They followed "your detective" there. Her answers are colour; they walk her out through the broken door, over
-   black.
+   They followed "your detective" there. Her answers are colour; Bruno tells her to bring her coat, her hat and her
+   duffle ("Coat. Hat. The bag, too."; it rides in the Club's car from then on), and they walk her out through the
+   broken door, over black.
 2. **The Club, backstage (new room).** A dressing room with a lit mirror, in the Club's style. Eleanor wears a
    short pink gown (new playable sheet). She is alone: she puts her face on at the mirror (**Puzzle 18**, below)
    while the gin table waits. When the face is done, the stage door opens; Eleanor whispers "A foul odour of death
@@ -1070,7 +1073,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
 - He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
   happen later, after he has begun showing change rather than merely promising it.
-  Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee."
+  Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee." Rose recalls "Last time
+  you were here, you wanted me to forgive you." only if he asked her for it on her doorstep (`rose_wait`); if he
+  said good night first, she only asks "What do you want?".
 - In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church.
 - In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
   left of the screen: a 1920s sepia studio print, pixelised like the other close-ups, on a cream card mount with worn
@@ -1208,7 +1213,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 - Micah killed Tony and turned himself in: from Caleb's church ("(Turn yourself in.)"), or after the Our Father
   having confessed first, including when Eleanor returns to bed in her coda. If she strikes the old man instead, it
   is ending 8 or 9, told from Joliet.
-- The prison parlour, Caleb visiting (`caleb_visits`), a year on; the rain has stopped. Micah asks after the old man
+- The prison parlour, Caleb visiting (`caleb_visits`), a year on (caption "Joliet Correctional Center. A year
+  later."; the other Joliet endings say six months); the rain has stopped. Micah asks after the old man
   (if he spared him; whether the Club's Thursdays ended depends on the documents) or after Eleanor (if he never got to
   the Gold Coast). He writes every month to Tony's mother in Cicero, and she sends the letters back unopened. Caleb
   brings a crayon drawing from Tommy.
@@ -1223,7 +1229,7 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 - The journal's last pages are from a rented room in Omaha. Caleb writes care of general delivery and has passed on
   what Eleanor told him in confession; Micah copied it in. He never wrote to Rose. The revolver is on the washstand,
   six in the cylinder, and he only ever needed the one: the last line, then a blank page. Daniel: "...Jesus, Micah."
-  Daniel puts the journal back.
+  Daniel throws the journal back in the trunk.
 
 #### Option 14 - The Harrington kitchen - Caleb's last pages
 
@@ -1242,7 +1248,7 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 2, 3 | Out of town or past caring: no mention. | 2: she never asked what took him so long. 3: Tony's on the ceiling too. |
 | 4, 5, 6 | A man in the yard says Tony sends his regards; Micah sleeps with his back to the wall. | Tried for Tony too (6: he told the cop himself). |
 | 7 | No mention. | Caleb's entry names Tony, and the confession if there was one. |
-| 8 | They left Chicago; her letter is sent on by Caleb to the house downstate. | Her letter reaches Joliet; Rose reads it through the visiting-room glass. |
+| 8 | They left Chicago; her letter is sent on by Caleb to the house downstate. | Her letter reaches Joliet; Rose reads it across the visiting-room table. |
 | 9 | Micah lives downstate; Tony's men looked for him all winter. | Micah serves his own sentence for Tony. |
 | 10 | Micah looks for his peace far from Chicago. | Nobody's come for him; he hears every car that slows down. |
 | 11 | Tony sends his regards in the yard. | Tried for Tony too. |
@@ -1255,9 +1261,9 @@ none of the revenge lines play.
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife (ending 1)
 or found his faith in prison (endings 6 and 12), or the journal ends on Eleanor's own way (endings 8 to 11), the father
-keeps the journal, saying "Maybe Leo would like to read it some day." In ending 7 he respects Caleb's decision and
-puts the journal back, maybe for Leo in a couple of years. In all other endings, he throws the journal back in the
-trunk. Endings 8 to 11 keep the "The next morning" caption; only ending 7 skips it.
+keeps the journal, saying "Maybe Leo would like to read it some day." In endings 7 and 14 he respects Caleb's last pages
+and puts the journal back, maybe for Leo in a couple of years. In all other endings (2 to 5 and 13), he throws the
+journal back in the trunk. Every ending but 7 and 14 has the "The next morning" caption.
 
 Every last entry also says where the Second Interlude's pages came from, answering Daniel's "Not sure that's
 Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he never really knew."):
@@ -1270,11 +1276,13 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 | 4 | Micah: she told him across the parlour table. |
 | 5, 6 | Caleb's note: he heard it from her after the trial. |
 | 7 | Caleb: what the Club's men said in court; or, if Micah shot only himself, she told him after the funeral. |
-| 8 | Micah: a letter from her, no return address, arrived at Rose's house. |
+| 8 | Micah: a letter from her, no return address: at Rose's house if Tony was never shot, sent on downstate by Caleb if Tony survived the shoulder shot, or to Joliet if Micah killed Tony. |
 | 9 | Caleb: from her confession. |
 | 10 | Micah: she told him on the road, before she got out of the car. |
 | 11 | Micah: she told him across the parlour table, the one time she came. |
 | 12 | Caleb's note: she came to his confessional months later. |
+| 13 | Micah: Caleb's letters pass on what she told him in confession. |
+| 14 | Caleb: she told him in confession the spring after Micah died. |
 
 The First Interlude is always Micah's: she told him during the night at the motel.
 
@@ -1313,7 +1321,7 @@ His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
 The adventure remains a compact, single-case indie point-and-click: seventeen puzzles for Micah and two for Eleanor, the alley encounter, optional
-dialogue, two playable Eleanor interludes and twelve ending outcomes. The five collect-and-combine locations each sit on a route the story already
+dialogue, two playable Eleanor interludes and fourteen ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)

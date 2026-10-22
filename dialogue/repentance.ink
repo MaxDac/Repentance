@@ -928,7 +928,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
 - else:
     MICAH: It looks worse than it is. It usually does.
 }
-{has_flag("rose_done"):
+{has_flag("rose_wait"):
     ROSE: What do you want? Last time you were here, you wanted me to forgive you.
 - else:
     ROSE: What do you want?
@@ -1406,7 +1406,7 @@ THOUGHT: Her hand is cold and small in mine. For the first time in years I know 
 // ---------------------------------------------------------------- ACT 3: ENDINGS
 
 === ending_together ===
-THOUGHT: At the gate she fetched her duffle from the Club's car, packed long ago for running. She changed in mine while I drove: a black suit, the skirt above the knee. The sheet's somewhere on the road behind us.
+THOUGHT: At the gate she fetched her duffle from the Club's car, packed for running. She changed in mine while I drove: a black suit, the skirt above the knee. The sheet's somewhere on the road behind us.
 ELEANOR: So this is where Chicago ends.
 MICAH: It doesn't end. It just runs out of streetlights.
 ELEANOR: Where are we going?
@@ -1489,7 +1489,7 @@ ROSE: I don't even really understand why you called me here. What you want from 
 MICAH: Nothing. That's the strange part. Just for you to know I'm sorry.
 ROSE: ...
 ROSE: I'll try. That's all I can promise. I'll try.
-THOUGHT: She doesn't touch the glass between us. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
+THOUGHT: She doesn't reach across the table. But she doesn't hurry to the door, either. It's more than I deserve. It's more than I had.
 -> END
 
 // Ending 12: Micah killed Tony and turned himself in for it, from Caleb's church or after the Our Father. Caleb walked
@@ -1649,7 +1649,7 @@ THOUGHT: At the gate stood the Club's car, the duffle she'd packed for running s
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
 THOUGHT: The old man's Thursday book was in a brown envelope under her arm, addressed to the city desk of the Tribune. The first mailbox past the city limits would do.
 {has_flag("killed_tony"):
-    ELEANOR: Serve your time, Micah Jones. I'll write to you one day, and tell you what became of me. It might even be good news.
+    ELEANOR: Find your peace, Micah Jones. I'll write to you one day, and tell you what became of me. It might even be good news.
 - else:
     ELEANOR: Go home to your wife, Micah Jones. I'll write to her one day, and tell her you were a good man once. It might even be true.
 }
@@ -1698,7 +1698,7 @@ GOON: Nice place. Real classy. The sign's missing a letter.
     BRUTE: No, we don't.
 - GOON: He said you'd be trouble. You don't look like trouble.
 ELEANOR: Then he's wrong about one of us.
-BRUTE: Coat. Hat. And no tricks with the window. It's a long way down for a lady.
+BRUTE: Coat. Hat. The bag, too. And no tricks with the window. It's a long way down for a lady.
 THOUGHT: They didn't touch her. They didn't have to. She knew the way to the car better than they did.
 -> END
 
@@ -1746,7 +1746,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "The Harrington house burned to the cellar the night I left it. The papers said a gas main. Nobody ever asked me, and I never said."
     DANIEL: "A week later the Tribune printed the old man's Thursday book, page by page: the girls, the trains, the men who paid. She had mailed it to them on her way out of the city. The Club never opened on a Thursday again."
     {has_flag("killed_tony"):
-        DANIEL: "Rose knows. I passed her the letter through the visiting-room glass. She read it twice, and folded it, and kept it."
+        DANIEL: "Rose knows. I passed her the letter across the visiting-room table. She read it twice, and folded it, and kept it."
     - else:
         DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
     }
@@ -1843,7 +1843,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "I made a lot of awful choices, but now I know, I returned to the faith..."
     {
     - has_flag("killed_tony"):
-        DANIEL: "I told that cop about Tony too. He wrote it down without looking up. Two men dead by my hand, and the second one only to cover up the first. Caleb says the Lord forgives that. Tony's mother doesn't, and I don't ask her to."
+        DANIEL: "I told that cop about Tony too. He wrote it down without looking up. Two men dead by my hand: Tony, so he couldn't name me, and then Harrington. Caleb says the Lord forgives that. Tony's mother doesn't, and I don't ask her to."
     - has_flag("shot_bartender"):
         DANIEL: "Tony's friends have friends in here. A man in the yard told me Tony sends his regards, and asks after my shoulder. I sleep with my back to the wall, and I say my prayers facing it."
     }
