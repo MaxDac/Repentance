@@ -262,6 +262,11 @@ public class InkWalkTests
     [InlineData("ending_eleanor_alone", "killed_tony,shot_bartender", "ELEANOR: Find your peace, Micah Jones.", "Go home to your wife")]
     [InlineData("ending_eleanor_alone", "", "Go home to your wife, Micah Jones.", "Find your peace")]
     [InlineData("epilogue", "ending_6,killed_tony,shot_bartender", "Two men dead by my hand: Tony, so he couldn't name me, and then Harrington.", null)]
+    [InlineData("interlude_agatha_night", "interlude_agatha_proud", "Queens have the most to confess. I've been thinking of it ever since.", "vespers")]
+    [InlineData("epilogue", "ending_1", "Rose and I said our promises again today, at Caleb's church. He blessed us.", "renewed our vows")]
+    [InlineData("epilogue", "ending_1", "she came to Holy Name and told him, on the rectory steps", "Caleb carried them into the Tribune")]
+    [InlineData("epilogue", "ending_1,took_documents", "Caleb carried them into the Tribune himself", null)]
+    [InlineData("epilogue", "ending_7,killed_tony,confessed_tony,shot_himself", "What else I know of it, I may not write.", "police")]
     public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)
     {
         var set = flags.Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();

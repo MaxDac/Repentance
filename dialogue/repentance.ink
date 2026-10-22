@@ -180,7 +180,7 @@ THOUGHT: Past midnight. A candle under the door, then the door. Agatha, in her n
 NUN: You're awake. I thought you would be. A troubled soul doesn't sleep. I've come to hear you, child, if you want to be heard.
 {
 - has_flag("interlude_agatha_proud"):
-    NUN: A queen, you said. Queens have the most to confess. I thought of it all through vespers.
+    NUN: A queen, you said. Queens have the most to confess. I've been thinking of it ever since.
 - has_flag("interlude_agatha_sorry"):
     NUN: Here to hide, you said. Nobody hides from God. But you might lay it down, here, tonight.
 - else:
@@ -1813,7 +1813,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "A year since that cup of coffee. Rose and I said our promises again at St. Anne's, a wooden Catholic church downstate. Caleb came down on the train and blessed us. Tommy stood up for me. He has her eyes and, God help him, my chin."
     - else:
         INSET: vows
-        DANIEL: "A year since that cup of coffee. Rose and I renewed our vows today, at Caleb's church. Tommy stood up for me. He has her eyes and, God help him, my chin."
+        DANIEL: "A year since that cup of coffee. Rose and I said our promises again today, at Caleb's church. He blessed us. Tommy stood up for me. He has her eyes and, God help him, my chin."
     }
     DANIEL: "I don't need this journal anymore. A man doesn't need to write things down when he has somebody to tell them to."
     INSET: none
@@ -1821,7 +1821,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after that coffee. He said he owed fourteen girls that walk."
         DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
     }
-    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to St. Brendan's and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
+    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to Holy Name and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
     DANIEL: Maybe Leo would like to read it some day.

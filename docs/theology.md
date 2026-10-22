@@ -24,9 +24,9 @@ Catechism (1992) is noted only where it differs.
 
 - **Caleb Jones** is a Catholic priest of 1927: he hears confessions, says Mass, absolves in Latin and keeps the seal.
   His one grave fault is a prudential silence: he hides the girls who run from the Club, and in exchange keeps quiet
-  about the Club. He confesses that silence every week, and means to break it the day it won't cost the girls he
-  hid: a purpose of amendment bound to a prudential judgment. Whether the silence is still licit material cooperation
-  is a question of proportion, not something the game settles. Ending 1 ends it (he carries the papers to the Tribune); in ending 9, Eleanor does it for him.
+  about the Club. He confesses that silence every week, and means to break it "the day it won't bury the girls we
+  hid": a purpose of amendment bound to a prudential judgment. Whether the silence is still licit material cooperation
+  is a question of proportion, not something the game settles. Ending 1 ends it if Micah took the papers (Caleb carries them to the Tribune); in ending 9, Eleanor does it for him.
 - **Micah Jones** is a Catholic, born and raised, who practises irregularly. His *theology* leans Protestant: grace over
   works, sin as a power that lives in a man (Romans 7), doubt that he needs a priest between him and God. When he
   does turn to God he does it as a Catholic: "Bless me, Father", Mass, holding back from Communion when he isn't in a
@@ -196,7 +196,7 @@ lines in the game, and the verdict.
 - **Reformed:** the innocent party may divorce and remarry (WCF XXIV.5-6). **Lutheran:** the same, from Luther and the
   church orders.
 - **Bears on:** Rose in every ending. Under Westminster she could leave Micah; nothing in either tradition frees
-  Micah. Ending 1's "said our promises again at St. Anne's", Caleb blessing them, is a private renewal (there was no
+  Micah. Ending 1's promises "said again", at Caleb's church or at St. Anne's, Caleb blessing them, are a private renewal (there was no
   rite for it in 1927) in a Catholic church (CIC c. 1258 forbids a priest taking part in non-Catholic worship).
 
 ### Smaller points
@@ -247,7 +247,7 @@ Further points the endings raise:
 - **Satisfaction versus fruit.** In 1, 6, 9 and 12 the same deeds (prison, restitution, testimony) are satisfaction
   and temporal punishment for a Catholic, and the fruit of repentance for a Protestant. The game words them so that
   both readings stand ("Tony's mother doesn't, and I don't ask her to").
-- **Caleb's own turning.** His silence is the one sin the story lets him carry; ending 1 (the Tribune) and ending 9
+- **Caleb's own turning.** His silence is the one sin the story lets him carry; ending 1 with the papers (the Tribune) and ending 9
   (Eleanor's testimony, "She did, in one afternoon, what I had not the courage to do") are his reckoning.
 
 ## Fix log
@@ -262,6 +262,7 @@ Further points the endings raise:
 | `epilogue`, ending 13 | "She came to his confessional" | she came to him and told him, and asked him to pass it on | Seal |
 | `epilogue`, ending 14 | "she told me herself, in my confessional"; no prayer | she told him on the church steps; "I hear her confession, and I can do nothing else" becomes "I see her at Mass"; "I say Mass for him" | Seal (no betrayal by sign); prayer for the dead |
 | `epilogue`, ending 1 (Tony shot) | vows renewed "in a little white church downstate", Caleb "to say the words" | promises said again at St. Anne's, a Catholic church; Caleb blesses them | No renewal rite in 1927; c. 1258 |
+| `epilogue`, ending 1 (Tony not shot) | "Rose and I renewed our vows today, at Caleb's church" | "said our promises again today, at Caleb's church. He blessed us." | No renewal rite in 1927 |
 | `prison_eleanor_caleb` | absolution though she "can't be sorry for the last one"; touched forehead | sorrow "for all of it", and for every part that wanted him dead; a hand raised over her | Trent XIV ch. 4; *Rituale Romanum* |
 | `caleb_tony` | no absolution; the station as "the only penance a priest can't give himself" | sorrow, "no more blood", amends to Tony's mother, penance, absolution; the station asked as a brother | c. 887; no imposed self-denunciation |
 | `caleb_club` | "I confess it every week. It doesn't get lighter." | "I confess the silence every week, and I mean to break it the day it won't bury the girls we hid. That day hasn't come." | Confession needs a purpose of amendment |
