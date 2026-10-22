@@ -33,6 +33,7 @@ How to start the game: [Getting started](getting-started.md#first-run). Story sp
 - **Esc** opens the pause menu: *Resume*, *Save game*, *Load game*, *Settings*, *Quit to title*, *Quit to desktop*
   (asks *Quit without saving?* first). The title screen offers *Continue* (most recent save), *New game*, *Load game*,
   *Settings* and *Quit game*. The quit entries are not offered on Android.
+- When the story ends on *The End*, a click, a key or ten seconds return to the title screen.
 
 ### Touch (Android)
 

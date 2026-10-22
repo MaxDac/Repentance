@@ -113,7 +113,9 @@ matching local export command.
 `Harness` supplies `--clock` (fast 60x by default, normal 8x; restored to 1x at the end), checks, failure accounting,
 markers and exit codes, `WaitIdle`/`Until`/`Observe`, synthetic mouse and
 keyboard input (`Viewport.PushInput`), screenshots to `screenshots/`, a wiped per-suite save folder, and shared
-puzzle/satchel helpers. Put new shared helpers here, not in `AutoPlay`.
+puzzle/satchel helpers. Put new shared helpers here, not in `AutoPlay`. `Harness.Begin` turns off
+`Game.EndReturnsToTitle`, so "The End" stays up for the ending checks (players leave it for the title with a click,
+a key or `Game.TheEndSeconds`; `AutoPlay` checks that with the setting back on).
 
 `game.Wait`, `WaitIdle` and `Until` count game seconds, which the clock scales; `Observe` counts real seconds. Wait
 with `Observe` for anything timed in real time, such as the touch long press (`TouchPointer.HoldSeconds`).
