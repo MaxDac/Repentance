@@ -1,6 +1,6 @@
 """Item icons for Eleanor's interlude puzzles: Room 507's brass box (17) and the Club dressing room's face (18)."""
 from .common import hx, save
-from .items import _icon
+from .items import _icon, CARD_STOCK, CARD_GILT, CARD_CURL
 
 BRASS = hx("c89a3a")
 BRASS_D = hx("7a5a1c")
@@ -19,7 +19,15 @@ def eleanor_box(d, im):
     d.line([(9, 6), (23, 6)], fill=BRASS)
     d.rectangle([5, 10, 27, 21], fill=BRASS)
     d.rectangle([7, 11, 25, 13], fill=hx("3a2a18"))
-    d.rectangle([8, 9, 13, 12], fill=PAPER)
+    # the calling card Micah finds later (items.card), standing up in the box: white stock, a gilt inner rule, a pink
+    # curlicue and the two dark letters
+    d.rectangle([6, 5, 14, 12], fill=CARD_STOCK)
+    d.line([(14, 5), (14, 12)], fill=hx("c8c0b8"))
+    d.rectangle([7, 6, 13, 11], outline=CARD_GILT)
+    for x, y in ((9, 8), (10, 7), (11, 8)):
+        d.point((x, y), fill=CARD_CURL)
+    d.line([(9, 9), (9, 10)], fill=hx("3a2a22"))
+    d.line([(11, 9), (11, 10)], fill=hx("3a2a22"))
     d.rectangle([15, 9, 18, 12], fill=hx("1e2a6a"))
     d.rectangle([20, 8, 23, 12], fill=hx("1e3aa8"))
     d.line([(5, 14), (27, 14)], fill=BRASS_L)
@@ -44,9 +52,9 @@ def riddle_scrap(d, im):
 
 
 def eleanor_slip(d, im):
-    # a blank slip of hotel paper, the Aurelian's gilt rule along the top
-    d.polygon([(4, 5), (27, 3), (28, 20), (5, 21)], fill=PAPER)
-    d.line([(5, 7), (27, 5)], fill=GOLD)
+    # a blank slip of hotel paper, the Aurelian's gilt rule along the top: the same paper as Micah's combination slip
+    d.polygon([(4, 5), (27, 3), (28, 20), (5, 21)], fill=hx("ece4d0"))
+    d.line([(5, 7), (27, 5)], fill=hx("b8a060"))
 
 
 def eleanor_key(d, im):
