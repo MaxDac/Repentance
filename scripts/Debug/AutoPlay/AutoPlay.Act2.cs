@@ -205,7 +205,9 @@ public partial class AutoPlay
             "a hand on the bed sends Eleanor to her bag; the night doesn't start");
         await WaitIdle(game);
         Check(game.Room?.GetNodeOrNull<Area2D>("Hotspots/Bag")?.Visible == true, "her duffle is a hotspot in the cell");
-        bool combed = false, sat = false, rose = false, thoughtOverBlack = false;
+        bool combed = false, sat = false, rose = false, thoughtOverBlack = false, cameThroughDoor = false;
+        bool AgathaInOpenDoor() => game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true
+            && game.Room?.FindActor("nun") is { Visible: true } nun && nun.Position.X < 80;
         double nightScale = Engine.TimeScale;
         ulong blackAt = 0, knockAt = 0;
         var night = game.Perform(Verb.Hand, "bag");
@@ -219,6 +221,7 @@ public partial class AutoPlay
             }
             sat |= game.Player.PoseName == "eleanor_cell_sit";
             rose |= game.Player.PoseName == "eleanor_cell_rise";
+            cameThroughDoor |= AgathaInOpenDoor();
             if (combed && knockAt == 0 && game.Hud.FadeAlpha >= 0.99f)
             {
                 if (blackAt == 0) blackAt = Time.GetTicksMsec();
@@ -237,13 +240,22 @@ public partial class AutoPlay
         Check(knockAt > 0 && Math.Abs(black - Rooms.ConventCell.BlackHoldSeconds) < 0.4 && !thoughtOverBlack,
             $"after combing, about a second of black and no narration before Agatha knocks ({black:0.00}s)");
         Check(sat && rose, "at the knock Eleanor sits awake on the bed in her pyjamas, then gets up");
+        Check(cameThroughDoor && game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false,
+            "Agatha comes in through the open door, and it is shut behind her while she talks");
         Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == null,
             "when Agatha talks to her, Eleanor stands in her pyjamas");
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
             "Agatha is in the cell, by the bed, while she talks");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");
         await Shot("interlude_agatha_night");
+        bool wentThroughDoor = false;
+        await Until(() =>
+        {
+            wentThroughDoor |= AgathaInOpenDoor();
+            return night.IsCompleted;
+        }, 300, 0.02);
         await night;
+        Check(wentThroughDoor, "Agatha leaves through the open door instead of vanishing");
         await WaitIdle(game);
         Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
             "the convent piano comes back once Agatha has gone");
