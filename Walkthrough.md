@@ -430,8 +430,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   more, too ashamed to be in that room at all, and she knows it; he can see it in her eyes. So he leaves.
 - Eleanor remains in bed against the pillows, covered by the white sheet. She does not rise; her lips move while
   she talks.
-  The scene then fades to black: "Days later" fades in over 3 seconds and stays for 3 more, then Micah's office
-  fades in.
+  The scene then fades to black: "Days later" fades in over 3 seconds, stays for 3 more and fades out over 3,
+  then Micah's office fades in.
 
 #### Office, days later
 
