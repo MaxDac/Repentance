@@ -39,19 +39,142 @@ def overlay(variant, base_px, pal, box, name):
 
 # ------------------------------------------------------------------------------------------------ ROSE'S HOUSE
 
-def window(d, x0, y0, x1, y1, lit, frame=hx("d8d0c0")):
-    d.rectangle([x0 - 3, y0 - 6, x1 + 3, y0 - 2], fill=hx("b8ae9a"))
-    d.rectangle([x0 - 2, y1, x1 + 2, y1 + 3], fill=hx("a49a86"))
-    d.rectangle([x0, y0, x1, y1], fill=hx("e8b860") if lit else hx("1c2236"))
-    if lit:
-        d.rectangle([x0 + 2, y0 + 2, x0 + 8, y1 - 2], fill=hx("8a3a30"))
-        d.rectangle([x1 - 8, y0 + 2, x1 - 2, y1 - 2], fill=hx("8a3a30"))
-    else:
-        d.line([(x0 + 3, y0 + 4), (x0 + 12, y0 + 14)], fill=hx("4a5470"))
-    d.rectangle([x0, y0, x1, y1], outline=frame)
+def lintel(d, x0, x1, y):
+    """A stone lintel over a window: a lit top arris, a shadowed soffit and a raised keystone."""
+    stone, hi, lo = hx("b8ae9a"), hx("e2d8c2"), hx("4e4436")
+    d.rectangle([x0 - 4, y - 6, x1 + 4, y - 2], fill=stone)
+    d.line([(x0 - 4, y - 6), (x1 + 4, y - 6)], fill=hi)
+    d.line([(x0 - 4, y - 6), (x0 - 4, y - 2)], fill=hi)
+    d.line([(x1 + 4, y - 5), (x1 + 4, y - 2)], fill=hx("8a7e6a"))
+    d.line([(x0 - 4, y - 1), (x1 + 4, y - 1)], fill=lo)
+    cx = (x0 + x1) // 2
+    d.polygon([(cx - 3, y - 8), (cx + 3, y - 8), (cx + 2, y - 1), (cx - 2, y - 1)], fill=hx("c6bca6"))
+    d.line([(cx - 3, y - 8), (cx + 3, y - 8)], fill=hx("f0e6d0"))
+    d.line([(cx - 3, y - 8), (cx - 2, y - 1)], fill=hx("e6dcc6"))
+    d.line([(cx + 3, y - 7), (cx + 2, y - 1)], fill=lo)
+
+
+def sill(d, x0, x1, y):
+    """A projecting stone sill: lit top, a shadowed front, a drip shadow on the brick and two small corbels."""
+    d.rectangle([x0 - 4, y, x1 + 4, y + 3], fill=hx("b4aa96"))
+    d.line([(x0 - 4, y), (x1 + 4, y)], fill=hx("e6dcc6"))
+    d.line([(x0 - 4, y + 3), (x1 + 4, y + 3)], fill=hx("7a705e"))
+    d.line([(x0 - 3, y + 4), (x1 + 3, y + 4)], fill=hx("2e2018"))
+    d.line([(x0 - 2, y + 5), (x1 + 2, y + 5)], fill=hx("4a3428"))
+    for bx in (x0 - 3, x1 + 1):
+        d.rectangle([bx, y + 4, bx + 2, y + 6], fill=hx("9a907c"))
+        d.point((bx, y + 4), fill=hx("c6bca6"))
+
+
+CURTAINS = {"red": (hx("8a3a30"), hx("5e2420"), hx("b05444")), "green": (hx("3a5434"), hx("24361e"), hx("587a4a"))}
+
+
+def curtain(d, x0, y0, x1, y1, side, cols):
+    """A drape gathered at a tie-back two-thirds down, its folds as dark lines; side -1 hangs left, 1 right."""
+    base, fold, hi = cols
+    w = (x1 - x0) // 4
+    tie = y0 + (y1 - y0) * 3 // 5
+    for y in range(y0, y1 + 1):
+        if y <= tie:
+            cw = round(w - (w - 3) * ((y - y0) / (tie - y0)) ** 1.6)
+        else:
+            cw = round(3 + (w * 0.7 - 3) * min(1, (y - tie) / max(1, (y1 - tie) * 0.8)))
+        a, b = (x0, x0 + cw) if side < 0 else (x1 - cw, x1)
+        d.line([(a, y), (b, y)], fill=base)
+        for k in range(1, cw, 2):
+            d.point((a + k if side < 0 else b - k, y), fill=fold)
+        d.point((b if side < 0 else a, y), fill=hi)
+    tx = x0 + 2 if side < 0 else x1 - 3
+    d.rectangle([tx, tie - 1, tx + 1, tie + 1], fill=hx("d8b450"))
+
+
+def window(d, x0, y0, x1, y1, lit, frame=hx("d8d0c0"), dressing="nets", curtains="red", interior=None, seed=0):
+    """A six-over-six sash window in a brick reveal under a stone lintel: glass warm from the room or holding the
+    dusk sky, the room's dressing (curtains, nets, a roller blind, dark drapes), glazing bars, a meeting rail with
+    horns, and a sill. interior adds a hint of the room ("lamp" or "picture") behind lit glass."""
+    rnd = random.Random(seed or x0 * 7 + y0 * 13)
+    lintel(d, x0, x1, y0)
+    d.rectangle([x0 - 2, y0 - 1, x1 + 2, y1], fill=hx("2a1a14"))
+    d.line([(x1 + 1, y0), (x1 + 1, y1)], fill=hx("5e3e30"))
     my = (y0 + y1) // 2
-    d.rectangle([x0, my - 1, x1, my], fill=frame)
-    d.line([((x0 + x1) // 2, y0), ((x0 + x1) // 2, y1)], fill=frame)
+    for y in range(y0, y1 + 1):
+        t = (y - y0) / max(1, y1 - y0)
+        c = mix(hx("f6d088"), hx("d89848"), t) if lit else mix(hx("3a4766"), hx("12162a"), t ** 0.7)
+        d.line([(x0, y), (x1, y)], fill=c)
+    if lit:
+        if interior == "picture":
+            px = (x0 + x1) // 2 + rnd.randint(-3, 1)
+            d.rectangle([px - 4, y0 + 7, px + 4, y0 + 14], fill=hx("6a4a2a"), outline=hx("3a2410"))
+            d.rectangle([px - 2, y0 + 9, px + 2, y0 + 12], fill=hx("a88a5a"))
+        elif interior == "lamp":
+            lx, ly = (x0 + x1) // 2 + 2, my + 6
+            d.polygon([(lx - 3, ly), (lx + 3, ly), (lx + 5, ly + 6), (lx - 5, ly + 6)], fill=hx("fff2c8"))
+            d.line([(lx - 5, ly + 6), (lx + 5, ly + 6)], fill=hx("c88a40"))
+            d.line([(lx, ly + 7), (lx, y1 - 4)], fill=hx("6a4424"))
+            d.rectangle([lx - 6, y1 - 4, lx + 6, y1 - 3], fill=hx("7a4e2c"))
+        cols = CURTAINS[curtains]
+        d.rectangle([x0, y0, x1, y0 + 2], fill=cols[1])
+        curtain(d, x0 + 1, y0 + 3, x1 - 1, y1 - 2, -1, cols)
+        curtain(d, x0 + 1, y0 + 3, x1 - 1, y1 - 2, 1, cols)
+    else:
+        if dressing == "blind":
+            by = y0 + 3 + rnd.randint((y1 - y0) // 4, (y1 - y0) // 2)
+            d.rectangle([x0 + 1, y0 + 1, x1 - 1, by], fill=hx("6a6252"))
+            for y in range(y0 + 3, by, 4):
+                d.line([(x0 + 1, y), (x1 - 1, y)], fill=hx("5a5446"))
+            d.line([(x0 + 1, by), (x1 - 1, by)], fill=hx("3a3428"))
+            cx = (x0 + x1) // 2
+            d.line([(cx, by + 1), (cx, by + 3)], fill=hx("8a8270"))
+            d.point((cx, by + 4), fill=hx("b0a68e"))
+        elif dressing == "nets":
+            for y in range(my + 2, y1 - 1):
+                for x in range(x0 + 1 + y % 2, x1, 2):
+                    d.point((x, y), fill=hx("4e5878") if (x + y) % 4 else hx("5e6888"))
+        elif dressing == "drapes":
+            cols = (hx("2a2236"), hx("1a1626"), hx("3e3450"))
+            curtain(d, x0 + 1, y0 + 1, x1 - 1, y1 - 2, -1, cols)
+            curtain(d, x0 + 1, y0 + 1, x1 - 1, y1 - 2, 1, cols)
+        # the sky caught in a few of the old, uneven panes
+        for _ in range(3):
+            gx, gy = rnd.randint(x0 + 2, x1 - 8), rnd.randint(y0 + 2, my - 6)
+            d.line([(gx, gy + 5), (gx + 5, gy)], fill=hx("5a6890"))
+            d.point((gx + 1, gy + 5), fill=hx("7a88aa"))
+    # sashes: a thick frame, glazing bars three panes wide, a meeting rail with horns, a deep bottom rail
+    bar = mix(frame, hx("8a8274"), 0.35)
+    for k in (1, 2):
+        bx = x0 + (x1 - x0) * k // 3
+        d.line([(bx, y0), (bx, y1)], fill=bar)
+    for y in ((y0 + my) // 2, (my + y1) // 2):
+        d.line([(x0, y), (x1, y)], fill=bar)
+    d.rectangle([x0, y0, x1, y1], outline=frame)
+    d.rectangle([x0, my - 1, x1, my + 1], fill=frame)
+    d.line([(x0, my + 2), (x1, my + 2)], fill=mul(frame, 0.55))
+    for sx in (x0 + 1, x1 - 1):
+        d.line([(sx, my + 2), (sx, my + 3)], fill=frame)
+    d.rectangle([x0, y1 - 2, x1, y1], fill=frame)
+    d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("ece0c4"))
+    d.line([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1)], fill=mul(frame, 0.7))
+    d.rectangle([x0 - 1, y0 - 1, x1 + 1, y1], outline=hx("594b3c"))
+    sill(d, x0, x1, y1 + 1)
+
+
+def window_box(d, x0, x1, y):
+    """A painted planter on a sill, geraniums and trailing ivy spilling over the front."""
+    rnd = random.Random(x0 * 5 + y)
+    d.rectangle([x0 - 2, y - 5, x1 + 2, y], fill=hx("2e3a2a"))
+    d.line([(x0 - 2, y - 5), (x1 + 2, y - 5)], fill=hx("56664a"))
+    d.line([(x0 - 2, y), (x1 + 2, y)], fill=hx("161c14"))
+    for x in range(x0 + 4, x1 - 1, 8):
+        d.rectangle([x, y - 3, x + 4, y - 2], outline=hx("3e4c36"))
+    for x in range(x0 - 1, x1 + 2):
+        h = rnd.randint(2, 6)
+        d.line([(x, y - 5 - h), (x, y - 6)], fill=hx("3a5a2a") if x % 2 else hx("4e7a34"))
+    for _ in range(12):
+        fx, fy = rnd.randint(x0, x1), rnd.randint(y - 11, y - 8)
+        d.rectangle([fx, fy, fx + 1, fy + 1], fill=hx("e04030"))
+        d.point((fx, fy), fill=hx("ff7a5a"))
+    for x in range(x0, x1, 5):
+        d.line([(x, y - 4), (x + rnd.randint(-1, 1), y + rnd.randint(2, 5))], fill=hx("3a5a2a"))
 
 
 def fanlight(d, x0, y0, x1, lit, number=None, img=None):
@@ -100,7 +223,20 @@ def fanlight(d, x0, y0, x1, lit, number=None, img=None):
     d.line([(cx - 1, top + 3), (cx + 1, top + 3)], fill=hx("a49882"))
 
 
-def door(d, x0, y0, x1, y1, col, number=None, img=None, lit=True):
+def panel(d, a, b, c, e, col):
+    """A raised-and-fielded door panel lit from the upper left: a sunk moulding, four bevels and a flat field."""
+    d.rectangle([a, b, c, e], fill=mul(col, 0.45))
+    a, b, c, e = a + 1, b + 1, c - 1, e - 1
+    v = 2
+    d.polygon([(a, b), (c, b), (c - v, b + v), (a + v, b + v)], fill=mul(col, 1.5))
+    d.polygon([(a, b), (a + v, b + v), (a + v, e - v), (a, e)], fill=mul(col, 1.22))
+    d.polygon([(a, e), (a + v, e - v), (c - v, e - v), (c, e)], fill=mul(col, 0.6))
+    d.polygon([(c, b), (c, e), (c - v, e - v), (c - v, b + v)], fill=mul(col, 0.76))
+    d.rectangle([a + v + 1, b + v + 1, c - v - 1, e - v - 1], fill=mul(col, 1.08))
+    d.point((a + v + 1, b + v + 1), fill=mul(col, 1.4))
+
+
+def door(d, x0, y0, x1, y1, col, number=None, img=None, lit=True, knocker=None, letterbox=False):
     # the stone surround: a hood moulding with dentils over the arch, fluted pilasters on plinths either side
     d.rectangle([x0 - 5, y0 - 18, x1 + 5, y1], fill=hx("b0a690"))
     d.rectangle([x0 - 7, y0 - 22, x1 + 7, y0 - 19], fill=hx("c6bca6"))
@@ -123,12 +259,60 @@ def door(d, x0, y0, x1, y1, col, number=None, img=None, lit=True):
     d.rectangle([x0 - 1, y0 - 2, x1 + 1, y0], fill=hx("d6ccb4"))
     d.line([(x0 - 1, y0 - 2), (x1 + 1, y0 - 2)], fill=hx("f2e8d2"))
     d.line([(x0 - 1, y0), (x1 + 1, y0)], fill=hx("6a604e"))
+    # the leaf, set back in a shadowed reveal
     d.rectangle([x0, y0 + 1, x1, y1], fill=col)
-    for (a, b, c, e) in ((x0 + 4, y0 + 5, (x0 + x1) // 2 - 2, y0 + 38), ((x0 + x1) // 2 + 2, y0 + 5, x1 - 4, y0 + 38),
-                         (x0 + 4, y0 + 44, (x0 + x1) // 2 - 2, y1 - 6), ((x0 + x1) // 2 + 2, y0 + 44, x1 - 4, y1 - 6)):
-        d.rectangle([a, b, c, e], outline=mul(col, 0.62))
-        d.line([(a + 1, b + 1), (c - 1, b + 1)], fill=mul(col, 1.3))
-    d.ellipse([x1 - 9, y0 + 41, x1 - 6, y0 + 44], fill=hx("d8b450"))
+    d.rectangle([x0, y0 + 1, x0 + 1, y1], fill=hx("161210"))
+    d.line([(x0, y0 + 1), (x1, y0 + 1)], fill=hx("161210"))
+    lx, rx = x0 + 2, x1
+    cx = (lx + rx) // 2
+    # six raised-and-fielded panels: short frieze panels, tall middle ones, then the lock rail and bottom panels
+    ph = y1 - y0 - 22
+    heights = (round(ph * 0.2), round(ph * 0.45))
+    heights += (ph - sum(heights),)
+    rows, y = [], y0 + 6
+    for k, h in enumerate(heights):
+        rows.append((y, y + h - 1))
+        y += h + (3 if k == 0 else 6)
+    for b, e in rows:
+        panel(d, lx + 4, b, cx - 3, e, col)
+        panel(d, cx + 2, b, rx - 5, e, col)
+    d.line([(lx, y0 + 2), (lx, y1 - 1)], fill=mul(col, 1.35))
+    d.line([(cx - 2, y0 + 2), (cx - 2, y1 - 1)], fill=mul(col, 1.2))
+    for b, e in rows:
+        d.line([(lx + 1, e + 1), (rx - 1, e + 1)], fill=mul(col, 1.15))
+    # threshold: a worn oak sill under the leaf
+    d.line([(x0, y1), (x1, y1)], fill=hx("4a3424"))
+    hw, hw_hi, hw_lo = hx("c8a040"), hx("f8e090"), hx("6a4a18")
+    # knob and keyhole escutcheon on the lock stile
+    ky = (rows[1][0] + rows[1][1]) // 2
+    d.ellipse([rx - 4, ky, rx - 1, ky + 3], fill=hw)
+    d.point((rx - 3, ky + 1), fill=hw_hi)
+    d.rectangle([rx - 3, ky + 6, rx - 2, ky + 9], fill=hw)
+    d.point((rx - 3, ky + 7), fill=hx("1a1208"))
+    lr0, lr1 = rows[1][1] + 1, rows[2][0] - 1
+    if letterbox:
+        d.rectangle([cx - 8, lr0 + 1, cx + 8, lr1 - 1], fill=hw)
+        d.line([(cx - 8, lr0 + 1), (cx + 8, lr0 + 1)], fill=hw_hi)
+        d.line([(cx - 6, lr0 + 3), (cx + 6, lr0 + 3)], fill=hw_lo)
+        for sx in (cx - 7, cx + 7):
+            d.point((sx, lr0 + 3), fill=hw_lo)
+    ty = rows[0][0] + 6
+    if knocker == "ring":
+        d.rectangle([cx - 2, ty, cx, ty + 2], fill=hx("8a6a2a"))
+        d.ellipse([cx - 4, ty + 2, cx + 2, ty + 9], outline=hw)
+        d.point((cx - 1, ty + 9), fill=hx("f0d070"))
+    elif knocker == "lion":
+        d.ellipse([cx - 3, ty, cx + 2, ty + 5], fill=hw)
+        d.point((cx - 2, ty + 2), fill=hw_lo)
+        d.point((cx + 1, ty + 2), fill=hw_lo)
+        d.line([(cx - 1, ty + 4), (cx, ty + 4)], fill=hw_lo)
+        d.point((cx - 2, ty + 1), fill=hw_hi)
+        d.arc([cx - 3, ty + 4, cx + 2, ty + 11], 0, 180, fill=hw)
+    elif knocker == "urn":
+        d.rectangle([cx - 2, ty + 1, cx, ty + 5], fill=hx("a88434"))
+        d.line([(cx - 2, ty + 1), (cx - 2, ty + 5)], fill=hw_hi)
+        d.line([(cx - 3, ty + 6), (cx + 1, ty + 6)], fill=hw)
+        d.line([(cx - 3, ty + 7), (cx + 1, ty + 7)], fill=hw_lo)
 
 
 def street_lamp(d, x, top, foot):
@@ -190,11 +374,145 @@ def street_lamp(d, x, top, foot):
     d.rectangle([x - 7, foot - 4, x + 8, foot], fill=iron)
     d.line([(x - 7, foot - 4), (x + 8, foot - 4)], fill=iron_hi)
 
-def stoop(d, x0, x1, top):
+def stoop(d, x0, x1, top, seed=0):
+    """Three stone steps: lit nosings, shadowed risers, a hollow worn into each tread, joints and a few chips."""
+    rnd = random.Random(seed or x0)
     for i in range(3):
         y = top + i * 6
-        d.rectangle([x0 - i * 4, y, x1 + i * 4, y + 6], fill=mix(hx("9c968a"), hx("6a665e"), i / 3))
-        d.line([(x0 - i * 4, y), (x1 + i * 4, y)], fill=hx("c4beb0"))
+        a, b = x0 - i * 4, x1 + i * 4
+        base = mix(hx("9c968a"), hx("6a665e"), i / 3)
+        d.rectangle([a, y, b, y + 6], fill=mul(base, 0.74))
+        d.rectangle([a, y, b, y + 2], fill=base)
+        d.line([(a, y), (b, y)], fill=hx("c4beb0"))
+        d.line([(a, y + 3), (b, y + 3)], fill=mul(base, 0.55))
+        c = (a + b) // 2
+        d.line([(c - 9, y + 1), (c + 9, y + 1)], fill=mul(base, 1.1))
+        for jx in range(a + rnd.randint(12, 20), b - 6, rnd.randint(18, 24)):
+            d.line([(jx, y + 1), (jx, y + 6)], fill=mul(base, 0.5))
+        for _ in range(2):
+            px = rnd.randint(a + 2, b - 2)
+            d.line([(px, y), (px + 1, y)], fill=mul(base, 0.6))
+        d.line([(a, y), (a, y + 6)], fill=mul(base, 1.05))
+        d.line([(b, y + 1), (b, y + 6)], fill=mul(base, 0.5))
+
+
+def boot_scraper(d, x, foot):
+    """An iron boot scraper by the steps: two scrolled posts and a blade, leaded into a stone block."""
+    iron, hi = hx("1c1c20"), hx("4a4a54")
+    d.rectangle([x - 1, foot - 1, x + 7, foot], fill=hx("6a665e"))
+    for px in (x, x + 6):
+        d.line([(px, foot - 8), (px, foot - 2)], fill=iron)
+        d.point((px - 1 if px == x else px + 1, foot - 9), fill=iron)
+        d.point((px, foot - 9), fill=hi)
+    d.line([(x, foot - 4), (x + 6, foot - 4)], fill=iron)
+    d.line([(x + 1, foot - 5), (x + 5, foot - 5)], fill=hi)
+
+
+def milk_bottle(d, x, foot):
+    d.rectangle([x, foot - 6, x + 2, foot], fill=hx("e6e4dc"))
+    d.line([(x + 2, foot - 6), (x + 2, foot)], fill=hx("b0aea6"))
+    d.point((x, foot - 5), fill=hx("ffffff"))
+    d.rectangle([x, foot - 8, x + 1, foot - 7], fill=hx("d0cec6"))
+    d.line([(x, foot - 9), (x + 1, foot - 9)], fill=hx("c8c8d4"))
+
+
+def coal_hole(d, cx, cy):
+    """A cast-iron coal-hole cover set into the flags: a ring of stone, the lid's rim and its raised star of studs."""
+    d.ellipse([cx - 8, cy - 3, cx + 8, cy + 3], fill=hx("7a766e"))
+    d.ellipse([cx - 7, cy - 2, cx + 7, cy + 2], fill=hx("26262a"), outline=hx("4a4a50"))
+    d.arc([cx - 7, cy - 2, cx + 7, cy + 2], 180, 270, fill=hx("6a6a72"))
+    d.ellipse([cx - 4, cy - 1, cx + 4, cy + 1], outline=hx("3a3a40"))
+    for dx, dy in ((-5, 0), (5, 0), (-2, -1), (2, -1), (-2, 1), (2, 1), (0, 0)):
+        d.point((cx + dx, cy + dy), fill=hx("5a5a62"))
+
+
+def pavement(img, top=214, kerb=256):
+    """York-stone flags in three staggered rows, joints leaning gently to the vanishing point: every slab its own
+    shade, a lit leading edge, chipped corners, hairline cracks, moss in the joints and weeds at the railings."""
+    d = ImageDraw.Draw(img)
+    rnd = random.Random(35)
+    vpx, vpy = 240, -420
+
+    def jx(xb, y):
+        return vpx + (xb - vpx) * (y - vpy) / (kerb - vpy)
+
+    rows = ((top, 226), (226, 240), (240, kerb))
+    for r, (ya, yb) in enumerate(rows):
+        x = -60 + (0, 26, 12)[r]
+        while x < W + 40:
+            w = rnd.randint(38, 50)
+            xa, xb = x, x + w
+            quad = [(jx(xa, ya), ya), (jx(xb, ya), ya), (jx(xb, yb), yb), (jx(xa, yb), yb)]
+            tone = mix(hx("6a6660"), hx("4e4a46"), ((ya + yb) / 2 - top) / (kerb - top))
+            tone = mul(tone, rnd.uniform(0.88, 1.08))
+            if rnd.random() < 0.3:
+                tone = mix(tone, hx("6e6252"), 0.3)
+            d.polygon(quad, fill=tone)
+            d.line([(jx(xa, ya) + 1, ya + 1), (jx(xb, ya) - 1, ya + 1)], fill=mul(tone, 1.14))
+            d.line([(jx(xa, ya + 1) + 1, ya + 1), (jx(xa, yb) + 1, yb - 1)], fill=mul(tone, 1.07))
+            for _ in range(rnd.randint(2, 5)):
+                sx, sy = rnd.uniform(jx(xa, ya) + 3, jx(xb, ya) - 3), rnd.randint(ya + 2, yb - 2)
+                d.point((sx, sy), fill=mul(tone, rnd.choice((0.8, 0.86, 1.12))))
+            if rnd.random() < 0.35:
+                cx0, cy0 = (jx(xb, yb) - 1, yb - 1) if rnd.random() < 0.5 else (jx(xa, ya) + 1, ya + 1)
+                s = 1 if cy0 == ya + 1 else -1
+                d.polygon([(cx0, cy0), (cx0 + 3 * s, cy0), (cx0, cy0 + 2 * s)], fill=mul(tone, 0.62))
+            if rnd.random() < 0.25:
+                px, py = rnd.uniform(jx(xa, ya) + 6, jx(xb, ya) - 6), ya + 1
+                pts = [(px, py)]
+                while py < yb - 1:
+                    py += rnd.randint(1, 3)
+                    px += rnd.choice((-2, -1, 1, 2))
+                    pts.append((px, min(py, yb - 1)))
+                d.line(pts, fill=mul(tone, 0.62))
+            d.line([(jx(xa, ya), ya), (jx(xa, yb), yb)], fill=hx("36322e"))
+            for _ in range(rnd.randint(0, 2)):
+                my = rnd.randint(ya + 1, yb - 1)
+                d.point((jx(xa, my) + 1, my), fill=hx("4a5634"))
+            x = xb
+        d.line([(0, ya), (W, ya)], fill=hx("36322e"))
+        for _ in range(10):
+            mx = rnd.randint(0, W)
+            d.line([(mx, ya - 1), (mx + rnd.randint(1, 3), ya - 1)], fill=hx("4a5634"))
+    # weeds where the flags meet the railings' coping
+    for wx in (6, 94, 132, 188, 286, 330, 372, 468):
+        for k in range(3):
+            d.line([(wx + k, top + 1), (wx + k + rnd.choice((-1, 0, 1)), top - rnd.randint(1, 3))],
+                   fill=hx("4e6a30") if k % 2 else hx("3a5226"))
+    coal_hole(d, 58, 220)
+    coal_hole(d, 304, 220)
+    # a shallow puddle left by the rain, its rim catching the light
+    for box in ((150, 242, 182, 249), (172, 240, 198, 247), (160, 245, 190, 251)):
+        d.ellipse(box, fill=hx("2c303e"))
+    d.arc([150, 242, 182, 249], 190, 340, fill=hx("8a8a98"))
+    d.arc([172, 240, 198, 247], 200, 330, fill=hx("8a8a98"))
+    d.line([(164, 246), (186, 245)], fill=hx("4a5068"))
+    # fallen leaves blown against the railings and the kerb
+    for _ in range(26):
+        lx = rnd.randint(0, W - 3)
+        ly = rnd.choice((rnd.randint(top + 1, top + 6), rnd.randint(kerb - 6, kerb - 1), rnd.randint(top, kerb - 1)))
+        c = rnd.choice((hx("a05a28"), hx("8a4a20"), hx("c08030"), hx("6e3a1c")))
+        d.line([(lx, ly), (lx + rnd.randint(1, 2), ly)], fill=c)
+        if rnd.random() < 0.5:
+            d.point((lx + 1, ly - 1), fill=mul(c, 1.2))
+    # granite kerbstones with joints, a lit arris and a shadowed gutter
+    d.rectangle([0, kerb, W - 1, kerb + 4], fill=hx("8a8680"))
+    d.line([(0, kerb), (W - 1, kerb)], fill=hx("b4b0a8"))
+    d.line([(0, kerb + 3), (W - 1, kerb + 3)], fill=hx("6e6a64"))
+    d.line([(0, kerb + 4), (W - 1, kerb + 4)], fill=hx("5a5650"))
+    x = rnd.randint(10, 40)
+    while x < W:
+        d.line([(x, kerb + 1), (x, kerb + 4)], fill=hx("4a4844"))
+        d.point((x + 1, kerb + 1), fill=hx("a4a098"))
+        x += rnd.randint(48, 64)
+    vgrad(img, (0, kerb + 5, W - 1, H - 1), hx("2a2a2e"), hx("1e1e22"))
+    d.line([(0, kerb + 5), (W - 1, kerb + 5)], fill=hx("141418"))
+    for y in range(kerb + 8, H, 4):
+        off = 4 if (y // 4) % 2 else 0
+        d.line([(0, y), (W - 1, y)], fill=hx("19191d"))
+        for sx in range(off, W, 9):
+            d.line([(sx, y + 1), (sx, y + 3)], fill=hx("19191d"))
+            d.point((sx + 2, y + 1), fill=hx("38383e"))
 
 
 def railings(d, x0, x1, y0, y1):
@@ -247,38 +565,25 @@ def paint_rose(opened=False):
             d.line([(px - 1, 20), (px - 1, 211)], fill=hx("72685a"))
             for py in (70, 132, 194):
                 d.line([(px - 2, py), (px + 2, py)], fill=hx("a09078"))
-    # upper floor windows
     # upper floor windows: a tall house, each first-floor window centred over the door or window below it
+    upper_dressing = {32: "blind", 91: "nets", 224: "drapes", 283: "nets", 353: "blind"}
     for wx in ROSE_UPPER:
-        window(d, wx, ROSE_UPPER_Y[0], wx + 32, ROSE_UPPER_Y[1], lit=wx in ROSE_UPPER_LIT)
-    # neighbours' doors and ground windows
-    door(d, 30, 120, 66, 198, hx("26303a"), lit=False)
-    window(d, 86, 124, 128, 178, lit=False)
-    door(d, 410, 120, 446, 198, hx("4a2626"))
-    window(d, 348, 124, 390, 178, lit=True)
+        window(d, wx, ROSE_UPPER_Y[0], wx + 32, ROSE_UPPER_Y[1], lit=wx in ROSE_UPPER_LIT,
+               dressing=upper_dressing.get(wx, "nets"), curtains="red" if wx < 330 else "green",
+               interior="picture" if wx == 169 else None)
+    # neighbours' doors and ground windows: number 12 dark behind a lion's head, 16 lit behind an urn knocker
+    door(d, 30, 120, 66, 198, hx("26303a"), "12", img, lit=False, knocker="lion", letterbox=True)
+    window(d, 86, 124, 128, 178, lit=False, dressing="nets")
+    window_box(d, 86, 128, 178)
+    door(d, 410, 120, 446, 198, hx("4a2626"), "16", img, knocker="urn", letterbox=True)
+    window(d, 348, 124, 390, 178, lit=True, curtains="green", interior="lamp")
     # Rose's door: deep green, number 14 in the fanlight, a brass knocker on the centre stile
-    door(d, 222, 110, 258, 198, hx("23402e"), "14", img)
-    d.rectangle([239, 126, 241, 128], fill=hx("8a6a2a"))
-    d.ellipse([237, 128, 243, 135], outline=hx("d8b450"))
-    d.point((240, 135), fill=hx("f0d070"))
-    window(d, 278, 122, 320, 178, lit=True)
-    window(d, 166, 122, 204, 178, lit=False)
-    for x0, y0, x1, y1 in (
-            *((wx, ROSE_UPPER_Y[0], wx + 32, ROSE_UPPER_Y[1]) for wx in ROSE_UPPER),
-            (86, 124, 128, 178), (348, 124, 390, 178),
-            (278, 122, 320, 178), (166, 122, 204, 178)):
-        d.rectangle([x0 - 1, y0 - 1, x1 + 1, y1], outline=hx("594b3c"))
-        d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("ece0c4"))
-        d.line([(x0 - 4, y1 + 4), (x1 + 4, y1 + 4)], fill=hx("493a30"))
-        for x in range(x0 + 3, x0 + 9, 2):
-            d.line([(x, y0 + 3), (x, y1 - 3)], fill=hx("745c4c"))
-        for x in range(x1 - 8, x1 - 2, 2):
-            d.line([(x, y0 + 3), (x, y1 - 3)], fill=hx("4a3836"))
-        d.rectangle([x0 - 1, y1 + 1, x1 + 1, y1 + 2], fill=hx("c6bba6"))
+    door(d, 222, 110, 258, 198, hx("23402e"), "14", img, knocker="ring", letterbox=True)
+    window(d, 278, 122, 320, 178, lit=True, interior="lamp")
+    window(d, 166, 122, 204, 178, lit=False, dressing="blind")
     for x0 in (30, 222, 410):
         d.rectangle([x0 - 3, 151, x0 + 1, 156], fill=hx("b6a68c"))
     d.rectangle([262, 120, 272, 127], fill=hx("302a24"), outline=hx("bca06a"))
-    d.rectangle([228, 174, 251, 177], fill=hx("8a783e"))
     for x in (36, 112, 212, 286, 376, 440):
         for y in range(4, 14, 5):
             d.line([(x + 1, y), (x + 13, y)], fill=hx("765044"))
@@ -300,27 +605,21 @@ def paint_rose(opened=False):
         d.rectangle([224, 112, 227, 116], fill=hx("fff0c0"))
     for x0, x1 in ((24, 72), (216, 264), (404, 452)):
         stoop(d, x0, x1, 198)
+    milk_bottle(d, 401, 204)
+    milk_bottle(d, 405, 204)
     railings(d, 0, 18, 202, 214)
     railings(d, 82, 206, 202, 214)
-    railings(d, 278, 396, 202, 214)
+    railings(d, 283, 396, 202, 214)
     railings(d, 464, W - 1, 202, 214)
-    # pavement and kerb
-    vgrad(img, (0, 214, W - 1, 256), hx("6a6660"), hx("4e4a46"))
-    for i, x in enumerate(range(-40, W + 40, 40)):
-        shift = (i % 3 - 1) * 6
-        d.line([(x + shift, 214), (x - 24 + shift, 256)], fill=hx("3e3a36"))
-        if i % 4 == 0:
-            d.line([(x + 8, 230), (x + 22, 244)], fill=hx("2e2c28"))
-    for y in (226, 240):
-        d.line([(0, y), (W, y)], fill=hx("44403c"))
-    d.rectangle([0, 256, W - 1, 260], fill=hx("8a8680"))
-    vgrad(img, (0, 261, W - 1, H - 1), hx("2a2a2e"), hx("1e1e22"))
+    boot_scraper(d, 274, 214)
+    pavement(img)
     noise(img, (0, 214, W - 1, H - 1), 5, 34)
     # dusk: cool everything down, then the lamp, lit windows and lit fanlights glow
     dusk = ImageChops.multiply(img, Image.new("RGB", img.size, (150, 150, 196)))
     img.paste(dusk)
     light(img, "ellipse", [70, 70, 180, 260], hx("e0a050"), 0.45, 24)
     light(img, "ellipse", [ROSE_LAMP_X - 14, 96, ROSE_LAMP_X + 15, 126], hx("ffd890"), 0.4, 6)
+    light(img, "ellipse", [154, 243, 180, 248], hx("f0c070"), 0.4, 2)
     for x0, y0 in ((222, 110), (410, 120)):
         light(img, "rect", [x0 + 1, y0 - 14, x0 + 35, y0 - 1], hx("e8b060"), 0.4, 3)
     # the lamp post, painted over the glow so the iron stays crisp and the lantern keeps its own light
