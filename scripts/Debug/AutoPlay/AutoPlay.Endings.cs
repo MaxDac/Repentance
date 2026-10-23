@@ -612,19 +612,24 @@ public partial class AutoPlay
     /// </summary>
     private async Task KillTonyEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
-        // the first shot no longer leaves the alley on its own; the second needs the revolver on Tony
-        Seed(alleyReady, act3Items, "Shoot him in the shoulder");
+        // the shoulder shot ends on a choice; "Finish him" plays the second shot once the dialogue is over
+        Seed(alleyReady, act3Items, "Shoot him in the shoulder", "Finish him");
         await game.ChangeRoom("alley", "act3");
-        await game.Perform(Verb.Talk, "back_door");
-        await WaitIdle(game);
-        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.ShotBartender) && !gs.HasFlag(Endings.KilledTony),
-            "Tony shot in the shoulder, and Micah still in the alley");
         int aimsDown = _poseCounts.GetValueOrDefault("micah_aim_down");
-        await game.Perform(Verb.UseItem, "bartender", "revolver");
+        bool stainWithShot = false;
+        var knock = game.Perform(Verb.Talk, "back_door");
+        await Until(() =>
+        {
+            if (game.Hud.SpeechVisible && game.Hud.SpeechText == "*BANG*" && gs.HasFlag(Endings.ShotBartender))
+                stainWithShot |= game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true;
+            return knock.IsCompleted;
+        }, 120, 0.02);
+        await knock;
         await WaitIdle(game);
-        Check(gs.HasFlag(Endings.KilledTony) &&
+        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.KilledTony) &&
               game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true,
-            "the second shot: Tony dead on his back");
+            "the second shot: Tony dead on his back, and Micah still in the alley");
+        Check(stainWithShot, "the head wound shows as the second shot goes off, not after it");
         Check(_poseCounts.GetValueOrDefault("micah_aim_down") == aimsDown + 1 && game.Player.Position.X > 410,
             "the second shot: Micah stands past Tony's head and aims down at it");
         await game.Perform(Verb.Walk, "street");

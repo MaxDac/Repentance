@@ -101,11 +101,9 @@ public sealed partial class Playthrough
                 return;
             }
             Check(Gs.HasFlag("shot_bartender"), "Tony shot in the shoulder");
-            Expect("Alley", "Tony on his back, and Micah still in the alley");
             if (KillRoute)
             {
-                await Do(Verb.UseItem, "bartender", "revolver");
-                await WaitIdle();
+                Expect("Alley", "Micah finishes Tony, and stays in the alley");
                 Check(Gs.HasFlag(Endings.KilledTony), "the second shot: Tony can't tell anyone now");
                 await Do(Verb.Walk, "street");
                 await WaitIdle();
@@ -139,8 +137,7 @@ public sealed partial class Playthrough
                 Expect("OfficeStorm", "on from the church to the office, in the storm");
                 return;
             }
-            await Do(Verb.Walk, "street");
-            Expect("OfficeStorm", "back to the office, in the storm");
+            Expect("OfficeStorm", "Tony left bleeding: Micah walks out, back to the office, in the storm");
         }, roundTrip: _route is not ("1" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>

@@ -278,10 +278,6 @@ public partial class Alley : Room
                 await Say("With my bare hands? He'd fold me in half. I need something heavier than my fists.");
                 return true;
 
-            case ("bartender", Verb.UseItem) when item == "revolver" && State.HasFlag("shot_bartender")
-                                                  && !State.HasFlag(Endings.KilledTony) && FindActor("bartender") is { } shot:
-                await KillTony(shot);
-                return true;
             case ("bartender", Verb.Look) when State.HasFlag(Endings.KilledTony):
                 await Say("Tony, on his back in the rain, looking at nothing. He told me everything. Then I made sure he couldn't tell anyone else.");
                 return true;
@@ -394,9 +390,12 @@ public partial class Alley : Room
         await Talk("bartender_shot");
         Player.SetPose(null);
         tony.WalkTo = MicahAims;
-        await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
-        await Think("I shot a man tonight. My hand doesn't shake. That's what scares me.");
-        await Think("Tony watches me from the gravel. He knows my name. The gun's still warm in my hand, and the street's right there.");
+        if (State.HasFlag("finish_tony"))
+        {
+            await KillTony(tony);
+            return;
+        }
+        await AfterTheShot();
     }
 
     /// <summary>
@@ -418,8 +417,8 @@ public partial class Alley : Room
     }
 
     /// <summary>
-    /// Act 3, the revolver on Tony again, on his back after the first shot: a second bullet, so he can't tell the mob who
-    /// shot him. The street then opens onto the Act 3 map, where the church and the mansion are both the last choice.
+    /// Act 3, Tony on his back after the first shot, and Micah chose to finish him: a second bullet, so he can't tell the
+    /// mob who shot him. The street then opens onto the Act 3 map, where the church and the mansion are both the last choice.
     /// </summary>
     private async Task KillTony(Actor tony)
     {
@@ -430,8 +429,9 @@ public partial class Alley : Room
         await Player.PlayPose("micah_aim_down");
         Player.SetPose("micah_aim_down_held");
         await Talk("bartender_kill");
-        await Say("*BANG*");
+        // the wound shows with the shot, not after it
         tony.SetTexture(BartenderDead);
+        await Say("*BANG*");
         await Wait(1.0);
         Player.SetPose(null);
         await Talk("bartender_dead");

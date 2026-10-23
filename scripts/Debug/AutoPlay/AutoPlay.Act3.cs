@@ -332,11 +332,12 @@ public partial class AutoPlay
         Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;
-        Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
-        Check(game.Room?.Name == "Alley", "shot, Tony lies there, and the next move is Micah's");
-        await game.Perform(Verb.Walk, "street");
         await WaitIdle(game);
-        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm", "shot Tony in the shoulder, back to the office in the storm");
+        Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
+        Check(Offered("bartender_shot", "(Finish him. He knows my name.)") && !gs.HasFlag(Endings.KilledTony),
+            "the shoulder shot ends on the choice: finish Tony, or leave him bleeding");
+        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm",
+            "Tony left bleeding: Micah walks out on his own, back to the office in the storm");
 
         // ---- the office in the storm: the confession, the demon in the window, the hat, and out to the mansion
         if (game.Room is Rooms.OfficeStorm storm)
