@@ -371,7 +371,7 @@ public partial class Alley : Room
         await Talk("bartender_gun");
         if (State.HasFlag(Endings.WalkedAway))
         {
-            Player.SetPose(null);
+            await Player.Holster();
             await Wait(0.6);
             await Think("I walk away. Down the alley, past the dead lamp, out into the street. Nobody follows.");
             await WalkAway();
@@ -388,7 +388,7 @@ public partial class Alley : Room
         tony.SetTexture(BartenderShot);
         await Wait(0.8);
         await Talk("bartender_shot");
-        Player.SetPose(null);
+        await Player.Holster();
         tony.WalkTo = MicahAims;
         if (State.HasFlag("finish_tony"))
         {
@@ -407,7 +407,7 @@ public partial class Alley : Room
         await Say("*BANG*");
         await Think("Brick dust in his hair. The bullet's in the wall, an inch from his ear. That's where I meant it to go.");
         await Talk("bartender_miss");
-        Player.SetPose(null);
+        await Player.Holster();
         await tony.MoveTo(new Vector2(331, 198), 60);
         State.SetFlag("alley3_tony_inside");
         tony.Visible = false;
@@ -433,7 +433,7 @@ public partial class Alley : Room
         tony.SetTexture(BartenderDead);
         await Say("*BANG*");
         await Wait(1.0);
-        Player.SetPose(null);
+        await Player.Holster("micah_holster_down");
         await Talk("bartender_dead");
     }
 

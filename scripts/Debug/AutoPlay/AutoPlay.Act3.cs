@@ -323,6 +323,7 @@ public partial class AutoPlay
             !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
         await Shot("alley_sal_down");
         _prefer = Convinces.Prepend("Shoot him").ToArray();
+        int tonyHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var tonyTalk = game.Perform(Verb.Talk, "back_door");
         await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
             t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
@@ -332,6 +333,8 @@ public partial class AutoPlay
         Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == tonyHolsters + 1 && game.Player.PoseName == null,
+            "after the shot, Micah holsters the revolver");
         await WaitIdle(game);
         Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
         Check(Offered("bartender_shot", "(Finish him. He knows my name.)") && !gs.HasFlag(Endings.KilledTony),

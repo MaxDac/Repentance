@@ -317,6 +317,27 @@ class CharacterArtTests(unittest.TestCase):
                 self.assertEqual(frames[-1], aim.tobytes(), "the draw lands on the held aim")
                 self.assertEqual(len(frames), len(set(frames)), "every step of the draw is its own frame")
 
+    def test_holster_leaves_the_held_pose_and_ends_like_the_draw_starts(self):
+        crop = lambda img, w, h, i: img.crop((i * w, 0, (i + 1) * w, h)).tobytes()
+        cases = [(p, "holster", f"{p}_aim", 0) for p in ("micah", "micah_no_tie")]
+        cases += [(p, "holster_low", f"{p}_aim_lower", -1) for p in ("micah", "micah_no_tie")]
+        cases += [("micah", "holster_down", "micah_aim_down_held", 0)]
+        for prefix, kind, held, held_frame in cases:
+            with self.subTest(prefix=prefix, kind=kind):
+                clip = json.loads((ART / "sprites" / f"{prefix}_{kind}.json").read_text())
+                strip = Image.open(ART / "sprites" / f"{prefix}_{kind}.png").convert("RGBA")
+                draw = Image.open(ART / "sprites" / f"{prefix}_draw.png").convert("RGBA")
+                held_clip = json.loads((ART / "sprites" / f"{held}.json").read_text())
+                held_img = Image.open(ART / "sprites" / f"{held}.png").convert("RGBA")
+                width, height = clip["width"], clip["height"]
+                self.assertEqual((width, height), (held_clip["width"], held_clip["height"]))
+                frames = [crop(strip, width, height, i) for i in range(len(clip["frames"]))]
+                held_index = held_frame % len(held_clip["frames"])
+                self.assertNotEqual(frames[0], crop(held_img, width, height, held_index),
+                                    "the holster starts one step on from the held pose")
+                self.assertEqual(frames[-1], crop(draw, width, height, 0), "the hand ends at the side, as the draw starts")
+                self.assertEqual(len(frames), len(set(frames)), "every step of the holster is its own frame")
+
     def test_aim_back_steps_blend_between_aim_levels(self):
         back = json.loads((ART / "sprites" / "micah_aim_back.json").read_text())
         lower = json.loads((ART / "sprites" / "micah_aim_lower.json").read_text())

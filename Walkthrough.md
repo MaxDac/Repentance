@@ -515,7 +515,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - **Hand on the librarian** (canonical): Micah steps in, grabs him by the collar and drags him in
     close, the librarian stumbling forward with his feet on the floor (one animation for both, the librarian actor
     hidden), holds him through the request, then lets him go.
-  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
+  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks, then
+    puts it back in its shoulder holster (`micah_holster`; every time the gun goes away he holsters it this way).
 - Both routes set the same flags. With the book in hand Micah walks straight out through the hall door to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -892,7 +893,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     office before the mansion. Tony's revenge follows him into every ending (below, *Tony's revenge*).
   - **(Finish him. He knows my name.)** (`finish_tony`): after the dialogue Micah walks round to stand past his head,
     facing back down the alley, and points the revolver down at it (`micah_aim_down` strip, held on
-    `micah_aim_down_held`). Tony begs; Micah shoots him through the head in cold blood so he can't tell anybody who
+    `micah_aim_down_held`, then `micah_holster_down` raises it and puts it away). Tony begs; Micah shoots him
+    through the head in cold blood so he can't tell anybody who
     shot him (`killed_tony`, knots `bartender_kill` and `bartender_dead`; new `bartender_dead` sprite, Tony still on
     his back, a wound in his temple and the pool spread under his head, shown the moment the shot goes off).
     Repentance becomes much harder from here; see *The night after Tony*.
@@ -1003,8 +1005,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
     - **Exception (endings 10 and 11).** If Eleanor told the Mother Superior the truth and refused the old man's gin and
       powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
-      "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
-      the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
+      "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no turning
+      himself in, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
       documents), and Micah keeps the revolver. The fire or the documents give ending 10, neither gives ending 11.
     - Eleanor always gets four turns, each with four lines for Micah, one of each type. Every line scores points,
       and after the fourth turn a total of at least 10 out of 16 convinces her (`eleanor_convinced`):
@@ -1014,7 +1016,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       line in character, and Micah's thoughts hint when a line drew her in or when she is out of reach.
       Every line, its type, its reply, the arithmetic and the Ink implementation are in
       [Eleanor's persuasion](docs/eleanor-persuasion.md), which must be kept in step with the Ink.
-    - On the first turn he can instead lower the gun, leave her and walk out to turn himself in (ending 6), whatever
+    - On the first turn he can instead leave her and walk out to turn himself in (ending 6), whatever
       evidence he carries.
     - After two turns, "(Leave her.)" is offered (turns 3 and 4): Eleanor lets him go and he escapes alone.
     - After three turns, "(Shoot Eleanor.)" is offered (turn 4 only), ending 7: she drops to her knees under the
@@ -1022,7 +1024,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     - If all four turns fail, Micah hears footsteps on the landing behind the other door, men coming up the stairs.
       He has three choices: pull the trigger on himself (ending 7, Eleanor lives), shoot Eleanor and then himself
       (ending 7), or leave her to them and escape alone.
-    - Whenever Micah turns the gun on himself, he doesn't pray. He looks away at an empty corner of the room and says
+    - Whenever Micah turns the gun on himself or on Eleanor, he draws it again (he holstered it once the old man fell).
+      Turning it on himself, he doesn't pray. He looks away at an empty corner of the room and says
       "Forgive me... all of you..."; then he puts the revolver to his temple, the screen cuts to black and the shot
       is heard over black.
     - If Micah manages to convince her, they both are in the kitchen: here, Micah has the possibility to set the
@@ -1142,7 +1145,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Option 6 - Prison - With Rose
 
-- Accessible if Micah shoots the old man, then lowers the gun on the first persuasion turn and leaves Eleanor to turn
+- Accessible if Micah shoots the old man, then on the first persuasion turn leaves Eleanor to turn
   himself in. It overrides the evidence and the fire: there is no kitchen escape.
 - In the prison parlour, Rose (new seated sprite) visits. Micah says he's sorry; Rose doesn't know if she can forgive
   him and doesn't really understand why he asked her to come, but she'll try.

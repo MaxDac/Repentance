@@ -1294,9 +1294,9 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: They'll pin it on whoever they like. They always do.
     THOUGHT: Wrong thing to say. She's talking to the carpet now, not to me.
-* [(Lower the gun. Leave her, and turn yourself in.)]
+* [(Leave her, and turn yourself in.)]
     ~ set_flag("repented")
-    THOUGHT: The gun weighs nothing now. It's the rest of me that's heavy.
+    THOUGHT: The gun under my arm weighs nothing now. It's the rest of me that's heavy.
     MICAH: No. You're right. I'm not taking anybody anywhere. Not tonight, not ever again.
     MICAH: I'm going to walk out of here, find the first cop who isn't on this family's payroll, and tell him what I did.
     ELEANOR: There isn't one, Micah. Not in this city.
