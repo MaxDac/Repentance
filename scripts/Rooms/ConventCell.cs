@@ -7,7 +7,8 @@ namespace Repentance.Rooms;
 /// Eleanor's cell at the convent: a bed, a lampstand, a book and a nightstand. In the drawer, a comb and a little
 /// waxed mirror. Warming and cleaning its back reveals the symbol; Micah won't leave until he has found it.
 /// In the First Interlude Eleanor sets her duffle down in front of the nightstand and, from the bag, combs her hair
-/// with her comb and mirror: Agatha's knock finds her sitting up on the bed in her pyjamas, and she gets up.
+/// with her comb and mirror: Agatha's knock finds her sitting up on the bed in her pyjamas, and she gets up. Agatha comes
+/// in and goes out through the door, which stands open on the dark corridor only while she does.
 /// </summary>
 public partial class ConventCell : Room
 {
@@ -21,8 +22,14 @@ public partial class ConventCell : Room
 
     private static readonly Color Night = new(0.5f, 0.56f, 0.78f);
 
-    /// <summary>Agatha's night visit: she comes in at the door and stops a step short of Eleanor at the bed.</summary>
-    private static readonly Vector2 AgathaDoor = new(92, 228), AgathaByTheBed = new(238, 222);
+    /// <summary>
+    /// Agatha's night visit: she steps in out of the dark doorway (the threshold of the open door, tools/art/convent.py
+    /// l_door), a step inside the door, and stops a step short of Eleanor at the bed.
+    /// </summary>
+    private static readonly Vector2 AgathaThreshold = new(62, 230), AgathaDoor = new(92, 228), AgathaByTheBed = new(238, 222);
+
+    /// <summary>How long Agatha takes to fade into the dark corridor once she is in the doorway.</summary>
+    private const double AgathaFadeSeconds = 0.5;
 
     /// <summary>Where Eleanor stands to set her duffle down in front of the nightstand, facing left (the CellBag node).</summary>
     private static readonly Vector2 BagSpot = new(312, 215);
@@ -45,15 +52,58 @@ public partial class ConventCell : Room
         // Room.Refresh shows every hotspot without flag rules; Agatha is only here during her night visit
         if (FindActor("nun") is { } agatha) agatha.Visible = _agathaIn;
         if (GetNodeOrNull<FlagSprite>("World/CellBag") is { } bag) bag.Visible &= !_combing;
+        if (GetNodeOrNull<Sprite2D>("DoorOpen") is { } door) door.Visible = _doorOpen;
     }
 
     /// <summary>Agatha is in the cell: set for her night visit only, never saved.</summary>
     private bool _agathaIn;
 
+    /// <summary>The door stands open to the corridor only while Agatha comes in or goes out; never saved.</summary>
+    private bool _doorOpen;
+
     private void AgathaIn(bool inside)
     {
         _agathaIn = inside;
         Refresh();
+    }
+
+    private void DoorOpen(bool open)
+    {
+        if (open == _doorOpen) return;
+        _doorOpen = open;
+        Game.Sfx.Play(open ? Sound.DoorOpen : Sound.DoorClose);
+        Refresh();
+    }
+
+    /// <summary>The door opens on the dark corridor and Agatha steps in out of it, shutting it behind her.</summary>
+    private async Task AgathaComesIn(Actor agatha)
+    {
+        DoorOpen(true);
+        await Wait(0.4);
+        agatha.Position = AgathaThreshold;
+        agatha.FaceLeft(false);
+        AgathaIn(true);
+        await Wait(0.5);
+        await agatha.MoveTo(AgathaDoor, 44);
+        DoorOpen(false);
+        await agatha.MoveTo(AgathaByTheBed, 44);
+        agatha.FaceLeft(false);
+    }
+
+    /// <summary>Agatha opens the door, steps out into the dark of the corridor, and it shuts behind her.</summary>
+    private async Task AgathaGoesOut(Actor agatha)
+    {
+        await agatha.MoveTo(AgathaDoor, 56);
+        DoorOpen(true);
+        await Wait(0.3);
+        await agatha.MoveTo(AgathaThreshold, 44);
+        var fade = agatha.CreateTween();
+        fade.TweenProperty(agatha, "modulate:a", 0f, AgathaFadeSeconds);
+        await ToSignal(fade, Tween.SignalName.Finished);
+        AgathaIn(false);
+        agatha.Modulate = Colors.White;
+        await Wait(0.3);
+        DoorOpen(false);
     }
 
     public override async Task OnEnter(string entry)
@@ -181,19 +231,9 @@ public partial class ConventCell : Room
         Player.Teleport(StandAt, Facing.Left);
         Player.SetPose(null);
         var agatha = FindActor("nun");
-        if (agatha != null)
-        {
-            agatha.Position = AgathaDoor;
-            AgathaIn(true);
-            await agatha.MoveTo(AgathaByTheBed, 44);
-            agatha.FaceLeft(false);
-        }
+        if (agatha != null) await AgathaComesIn(agatha);
         await Talk("interlude_agatha_night");
-        if (agatha != null)
-        {
-            await agatha.MoveTo(AgathaDoor, 56);
-            AgathaIn(false);
-        }
+        if (agatha != null) await AgathaGoesOut(agatha);
         Game.Music.Play(Music);
         await Game.Hud.Fade(1, 1.2);
         Game.Hud.ShowCaption("The next morning");

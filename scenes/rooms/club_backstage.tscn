@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_compact.png" id="10_compact"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(60, 122)
+size = Vector2(52, 104)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
 size = Vector2(96, 84)
@@ -53,7 +53,7 @@ texture = ExtResource("2_club_backstage")
 centered = false
 
 [node name="DoorAjar" type="Sprite2D" parent="."]
-position = Vector2(10, 52)
+position = Vector2(14, 72)
 z_index = -6
 texture = ExtResource("7_door_ajar")
 centered = false
@@ -62,7 +62,7 @@ ShowIfFlags = "backstage_door_ajar"
 HideIfFlags = "backstage_door_open"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
-position = Vector2(10, 52)
+position = Vector2(14, 72)
 z_index = -6
 texture = ExtResource("8_door_open")
 centered = false
@@ -105,13 +105,13 @@ script = ExtResource("3_Hotspot")
 Id = "door"
 DisplayName = "door"
 LookText = "The door to the stage."
-WalkTo = Vector2(48, 192)
+WalkTo = Vector2(44, 192)
 Face = 2
 monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(48, 118)
+position = Vector2(44, 128)
 shape = SubResource("Rect_1")
 
 [node name="Mirror" type="Area2D" parent="Hotspots"]

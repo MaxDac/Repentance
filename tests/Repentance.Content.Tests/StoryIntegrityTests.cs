@@ -31,6 +31,7 @@ public class StoryIntegrityTests
     private static readonly Dictionary<string, string> OneShotKnots = new()
     {
         ["bartender_gun"] = "Alley: Tony at gunpoint, once; afterwards he is shot or Micah has left, and later talks use other lines",
+        ["bartender_shot"] = "Alley: once, right after the shoulder shot; Micah then kills Tony or walks out, and never hears it again",
         ["beaten_choice"] = "ChurchExterior: the church steps cutscene, played once on the way out of the Club",
         ["caleb_club"] = "Church: Act 2 Club talk, guarded by caleb_club; later visits use other knots",
         ["caleb_tony"] = "Church: the confession after killing Tony, once; surrender ends Act 3 and confessed_tony skips it on return",
@@ -324,7 +325,7 @@ public class StoryIntegrityTests
         Assert.DoesNotContain("St. Brendan", walkthrough);
         Assert.DoesNotContain("renewing the vows", walkthrough);
         Assert.Contains("only that Tony was found behind the Blue Lantern", walkthrough);
-        Assert.Contains("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
+        Assert.DoesNotContain("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
     }
 
     [Fact]

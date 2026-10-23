@@ -1203,6 +1203,28 @@ def clipping_bottom(d, im):
         d.line([(7, y), (15, y)], fill=hx("8a8474"))
 
 
+PASTE = "c8b060"
+PASTE_SHINE = "f8f0c0"
+
+
+def clipping_top_pasted(d, im):
+    """The upper half with a glossy line of paste along its torn edge."""
+    clipping_top(d, im)
+    edge = [(26 - i * 3, 13 + (i % 2) * 2) for i in range(8)]
+    d.line(edge, fill=hx(PASTE), width=2)
+    for x, y in edge[1::3]:
+        d.point((x, y - 1), fill=hx(PASTE_SHINE))
+
+
+def clipping_bottom_pasted(d, im):
+    """The lower half with a glossy line of paste along its torn edge."""
+    clipping_bottom(d, im)
+    edge = [(4 + i * 3, 9 + (i % 2) * 2) for i in range(1, 8)]
+    d.line(edge, fill=hx(PASTE), width=2)
+    for x, y in edge[::3]:
+        d.point((x, y + 1), fill=hx(PASTE_SHINE))
+
+
 def clipping(d, im):
     """The two halves pasted back together on a backing sheet, the seam yellow with paste."""
     d.polygon([(3, 2), (28, 1), (29, 22), (4, 22)], fill=hx("e6dec4"))
@@ -1284,6 +1306,7 @@ def signet_stag(d, im):
 
 
 ICONS = (("clipping_top", clipping_top), ("clipping_bottom", clipping_bottom), ("clipping", clipping),
+         ("clipping_top_pasted", clipping_top_pasted), ("clipping_bottom_pasted", clipping_bottom_pasted),
          ("paste", paste), ("sealing_wax", sealing_wax), ("wax_soft", wax_soft),
          ("invitation_waxed", invitation_waxed), ("sealed_invitation", sealed_invitation),
          ("signet_raven", signet_raven), ("signet_lion", signet_lion), ("signet_stag", signet_stag))

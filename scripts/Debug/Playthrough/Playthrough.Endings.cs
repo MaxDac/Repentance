@@ -142,10 +142,12 @@ public sealed partial class Playthrough
                 break;
             case "12":
                 yield return "Shoot him in the shoulder";
+                yield return "Finish him";
                 yield return "(Turn yourself in.)";
                 break;
             case "12-oldman":
                 yield return "Shoot him in the shoulder";
+                yield return "Finish him";
                 yield return "Not yet";
                 yield return "Our Father";
                 break;

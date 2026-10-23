@@ -5,7 +5,7 @@ namespace Repentance.Rooms;
 
 /// <summary>
 /// The Club's entrance hall on Hubbard Street. The first time, the Master of Ceremonies stops Micah at the door and
-/// has Bruno throw him out. Later Micah comes back masked and cloaked, with Harrington's invitation, and is let through.
+/// has Bruno throw him out. Later Micah comes back masked and cloaked, past the vestibule's sealed door, and is let through.
 /// </summary>
 public partial class ClubHall : Room
 {
@@ -25,7 +25,7 @@ public partial class ClubHall : Room
                 await Think("The mask breathes back at me. It smells of cedar, and of whoever wore it before.");
                 await Game.WalkTo(new Vector2(84, 222));
                 Player.Face(Facing.Right);
-                await Think("I hold out the invitation. I don't say a word. Nobody here does, it seems.");
+                await Think("I stop in front of the wig and say nothing. Nobody here does, it seems.");
                 await Talk("moc_masked");
             });
             return;
@@ -75,7 +75,7 @@ public partial class ClubHall : Room
                 await Say("A gun in here would be the last thing I ever pulled. They have a lot more members than I have bullets.");
                 return true;
             case ("moc", Verb.UseItem) when item == "sealed_invitation":
-                await Say("moc", "Yes, yes, brother. I have seen it. Go through.");
+                await Say("moc", "Put it away, brother. The door has read it already. Go through.");
                 return true;
             case ("moc" or "brute" or "guest", Verb.Hand or Verb.Kick):
                 await Say("Not in a room full of them. Not wearing their face.");

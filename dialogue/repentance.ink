@@ -711,7 +711,7 @@ BRUTE: This way, pal. Nice and easy. Or the other way.
 -> END
 
 === moc_masked ===
-MOC: Your invitation, brother.
+MOC: The raven's seal. The door has already spoken for you, brother.
 MOC: ...Welcome. The rite is about to begin. Go on through to the stage.
 -> END
 
@@ -1137,12 +1137,18 @@ BARTENDER: And... there's a bell. A burglar alarm, wired to that door. The old m
 BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
--> END
-
-// Micah uses the revolver on Tony, on his back in the alley after the first shot: he finishes him so he can't tell
-// the mob. Alley fires the shot between this knot and bartender_dead.
-=== bartender_kill ===
+THOUGHT: The Gold Coast. The kitchen door. The delivery boys' key.
 THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
+THOUGHT: The gun's still warm in my hand, and the street's right there.
+* [(Leave him bleeding, and go.)]
+    THOUGHT: I shot a man tonight. My hand doesn't shake. That's what scares me.
+* [(Finish him. He knows my name.)]
+    ~ set_flag("finish_tony")
+- -> END
+
+// Micah chose to finish Tony, on his back in the alley after the first shot, so he can't tell the mob. Alley walks
+// him round to aim down at Tony's head, plays this knot, then fires the shot before bartender_dead.
+=== bartender_kill ===
 BARTENDER: Jones? What are you... no. No, no, I told you! I told you everything!
 MICAH: You did, Tony. That's the trouble. You'll tell them everything too.
 BARTENDER: I won't! On my mother, I won't say a--
@@ -1288,9 +1294,9 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
     ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: They'll pin it on whoever they like. They always do.
     THOUGHT: Wrong thing to say. She's talking to the carpet now, not to me.
-* [(Lower the gun. Leave her, and turn yourself in.)]
+* [(Leave her, and turn yourself in.)]
     ~ set_flag("repented")
-    THOUGHT: The gun weighs nothing now. It's the rest of me that's heavy.
+    THOUGHT: The gun under my arm weighs nothing now. It's the rest of me that's heavy.
     MICAH: No. You're right. I'm not taking anybody anywhere. Not tonight, not ever again.
     MICAH: I'm going to walk out of here, find the first cop who isn't on this family's payroll, and tell him what I did.
     ELEANOR: There isn't one, Micah. Not in this city.

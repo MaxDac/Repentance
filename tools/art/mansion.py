@@ -1260,18 +1260,21 @@ def paint_kitchen(lit=False, gas=False):
         d.rectangle([x, 72 - hgt, x + 7, 71], fill=c)
         d.line([(x, 72 - hgt), (x + 7, 72 - hgt)], fill=mul(c, 1.3))
         d.line([(x + 7, 72 - hgt), (x + 7, 71)], fill=mul(c, 0.6))
-    d.line([(rx0 + 30, 76), (rx0 + 30, 96)], fill=hx("2a2a2c"))  # flue pipe stays
-    # utensils hanging from a rail under the hood
-    d.line([(rx0 + 8, 82), (rx1 - 8, 82)], fill=hx("5a5a60"))
+    rail = 100
+    d.line([(rx0 + 30, 76), (rx0 + 30, rail)], fill=hx("2a2a2c"))  # flue pipe stays
+    # utensils hanging from a rail over the hob, in reach of the cook
+    d.line([(rx0 + 8, rail), (rx1 - 8, rail)], fill=hx("5a5a60"))
     for i, x in enumerate(range(rx0 + 16, rx1 - 10, 12)):
-        d.line([(x, 82), (x, 96 + (i % 3) * 3)], fill=hx("8a8a90"))
+        drop = rail + 14 + (i % 3) * 3
+        d.line([(x, rail), (x, drop)], fill=hx("8a8a90"))
         if i % 2:
-            d.ellipse([x - 2, 95 + (i % 3) * 3, x + 2, 100 + (i % 3) * 3], fill=hx("8a8a90"))
+            d.ellipse([x - 2, drop - 1, x + 2, drop + 4], fill=hx("8a8a90"))
         else:
-            d.rectangle([x - 1, 94 + (i % 3) * 3, x + 1, 98 + (i % 3) * 3], fill=hx("6a5a40"))
-    # the range body, drawn in perspective so it stands out of the recess
-    R.box(img, rx0 + 6, rx1 - 6, 0, 74, 0, 24, hx("1e1e22"), top=hx("34343a"), side=hx("141416"))
-    a, b = R.P(rx0 + 6, 74, 24), R.P(rx1 - 6, 74, 24)
+            d.rectangle([x - 1, drop - 2, x + 1, drop + 2], fill=hx("6a5a40"))
+    # the range body, hob at hip height, drawn in perspective so it stands out of the recess
+    RH = 42
+    R.box(img, rx0 + 6, rx1 - 6, 0, RH, 0, 24, hx("1e1e22"), top=hx("34343a"), side=hx("141416"))
+    a, b = R.P(rx0 + 6, RH, 24), R.P(rx1 - 6, RH, 24)
     fx0, fx1, fy0 = int(a[0]), int(b[0]), int(a[1])
     fy1 = int(R.P(0, 0, 24)[1])
     d = ImageDraw.Draw(img)
@@ -1279,10 +1282,10 @@ def paint_kitchen(lit=False, gas=False):
     d.rectangle([fx0, fy0 + 1, fx1, fy0 + 3], fill=hx("6a6a70"))
     # burners on the hob
     for cx in (rx0 + 26, rx0 + 56, rx0 + 86):
-        p = R.P(cx, 74, 12)
+        p = R.P(cx, RH, 12)
         d.ellipse([p[0] - 9, p[1] - 3, p[0] + 9, p[1] + 2], fill=hx("161618"), outline=hx("4a4a50"))
         d.ellipse([p[0] - 4, p[1] - 1, p[0] + 4, p[1] + 1], fill=hx("2a2a2e"))
-    _range_pan(d, R.P(rx0 + 86, 74, 12))  # a copper stock pot on the back burner
+    _range_pan(d, R.P(rx0 + 86, RH, 12))  # a copper stock pot on the back burner
     # the brass gas taps along the front rail
     TAPS = []
     for i in range(7):
@@ -1295,17 +1298,18 @@ def paint_kitchen(lit=False, gas=False):
             d.line([(tx - 5, fy0 + 7), (tx + 5, fy0 + 7)], fill=hx("1a1a1a"), width=2)
         else:
             d.line([(tx, fy0 + 3), (tx, fy0 + 11)], fill=hx("1a1a1a"), width=2)
-    # two oven doors and a warming drawer, nickel handles and trim
+    # two oven doors over a plinth, nickel handles and trim
     ow = (fx1 - fx0 - 18) // 2
+    ot, ob = fy0 + 13, fy1 - 8
     for k in range(2):
         ox0 = fx0 + 6 + k * (ow + 6)
-        d.rectangle([ox0, fy0 + 16, ox0 + ow, fy0 + 52], fill=hx("26262a"), outline=hx("6a6a70"))
-        d.rectangle([ox0 + 4, fy0 + 20, ox0 + ow - 4, fy0 + 48], outline=hx("3a3a40"))
-        d.rectangle([ox0 + 8, fy0 + 24, ox0 + ow - 8, fy0 + 30], fill=hx("2e2e34"))
-        d.line([(ox0 + 10, fy0 + 18), (ox0 + ow - 10, fy0 + 18)], fill=hx("b8b8c0"), width=2)
-        d.ellipse([ox0 + ow // 2 - 4, fy0 + 36, ox0 + ow // 2 + 4, fy0 + 44], fill=hx("4a4a50"), outline=hx("8a8a90"))
-    d.rectangle([fx0 + 6, fy0 + 56, fx1 - 6, fy1 - 6], fill=hx("222226"), outline=hx("5a5a60"))
-    d.line([(fx0 + 30, fy0 + 60), (fx1 - 30, fy0 + 60)], fill=hx("b8b8c0"), width=2)
+        d.rectangle([ox0, ot, ox0 + ow, ob], fill=hx("26262a"), outline=hx("6a6a70"))
+        d.rectangle([ox0 + 4, ot + 5, ox0 + ow - 4, ob - 3], outline=hx("3a3a40"))
+        d.line([(ox0 + 10, ot + 2), (ox0 + ow - 10, ot + 2)], fill=hx("b8b8c0"), width=2)
+        my = (ot + 5 + ob - 3) // 2
+        d.ellipse([ox0 + ow // 2 - 4, my - 4, ox0 + ow // 2 + 4, my + 4], fill=hx("4a4a50"), outline=hx("8a8a90"))
+    d.rectangle([fx0 + 6, ob + 2, fx1 - 6, fy1 - 4], fill=hx("161618"))
+    d.line([(fx0 + 6, ob + 2), (fx1 - 6, ob + 2)], fill=hx("4a4a50"))
     for x in (fx0 + 2, fx1 - 4):
         d.rectangle([x, fy1 - 4, x + 2, fy1], fill=hx("0e0e10"))
     # ---- copper pans on the wall between range and dresser ----

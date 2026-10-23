@@ -697,13 +697,27 @@ def l_window(img):
     return g
 
 
-def l_door(img):
-    """The way back out to the corridor, in the near left wall."""
+CELL_DOOR_Z0, CELL_DOOR_Z1, CELL_DOOR_TOP = 40, 64, 62
+
+
+def l_door(img, open=False):
+    """The way back out to the corridor, in the near left wall. Hinged at its near jamb, it swings out into the
+    corridor: open, the leaf is a sliver of oak against that jamb and the doorway is the dark corridor, a candle
+    somewhere down it warming the far wall and laying a little light over the threshold."""
     d = ImageDraw.Draw(img)
-    z0, z1, top = 40, 64, 62
+    z0, z1, top = CELL_DOOR_Z0, CELL_DOOR_Z1, CELL_DOOR_TOP
     frame = [LR.P(XL, 0, z0 - 4), LR.P(XL, top + 5, z0 - 4), LR.P(XL, top + 5, z1 + 4), LR.P(XL, 0, z1 + 4)]
     d.polygon(frame, fill=hx("5a4a3a"))
     leaf = [LR.P(XL, 0, z0), LR.P(XL, top, z0), LR.P(XL, top, z1), LR.P(XL, 0, z1)]
+    if open:
+        d.polygon(leaf, fill=hx("0e0b0a"))
+        glow = [LR.P(XL, 0, z0), LR.P(XL, top * 0.7, z0), LR.P(XL, top * 0.5, z0 + 12), LR.P(XL, 0, z0 + 14)]
+        light(img, "polygon", glow, hx("c88038"), 0.7, 6)
+        d.polygon([LR.P(XL, 0, z1 - 3), LR.P(XL, top, z1 - 3), LR.P(XL, top, z1), LR.P(XL, 0, z1)], fill=hx("3e2818"))
+        d.line([LR.P(XL, 1, z1 - 3), LR.P(XL, top - 1, z1 - 3)], fill=hx("6a4a30"))
+        sill = [LR.P(XL, 0, z0), LR.P(XL + 16, 0, z0 + 2), LR.P(XL + 16, 0, z1 - 4), LR.P(XL, 0, z1)]
+        light(img, "polygon", sill, hx("c88038"), 0.35, 4)
+        return
     d.polygon(leaf, fill=hx("4a3020"))
     rnd = random.Random(261)
     for k in range(7):
@@ -1002,13 +1016,13 @@ def l_bed(img):
     LR.line(img, (X0, 11, Z0), (X0, 11, Z1), iron, 2)
 
 
-def paint_cell(drawer=False, comb=False, mirror=False):
+def paint_cell(drawer=False, comb=False, mirror=False, door_open=False):
     img = Image.new("RGB", (W, H), hx("141210"))
     l_vault(img)
     l_walls(img)
     l_floor(img)
     g = l_window(img)
-    l_door(img)
+    l_door(img, door_open)
     l_crucifix(img)
     l_bed(img)
     l_nightstand(img, drawer, comb, mirror)
@@ -1091,8 +1105,9 @@ def build():
     # the crucifix and the lampstand are too small for dithering: they keep their exact colours, as in the corridor
     cross = ImageChops.lighter(l_crucifix_layer(base.size).getchannel("A"),
                                l_lamp_layer(base.size).getchannel("A").point(lambda v: 255 if v else 0))
-    px, drawer, comb = (pixelize(im, pal) for im in (base, full, only_comb))
-    for out, src in ((px, base), (drawer, full), (comb, only_comb)):
+    door = paint_cell(door_open=True)
+    px, drawer, comb, opened = (pixelize(im, pal) for im in (base, full, only_comb, door))
+    for out, src in ((px, base), (drawer, full), (comb, only_comb), (opened, door)):
         out.paste(src, (0, 0), cross)
     save(px, "rooms", "convent_cell.png")
     a, b = _bbox(px, drawer), _bbox(px, comb)
@@ -1100,6 +1115,10 @@ def build():
     save(drawer.crop(box), "rooms", "convent_cell_drawer.png")
     save(comb.crop(box), "rooms", "convent_cell_drawer_comb.png")
     print(f"  convent_cell_drawer(.png/_comb.png) at {box[:2]} size {(box[2] - box[0], box[3] - box[1])}")
+    # the door open to the corridor while Mother Agatha comes and goes in the First Interlude
+    box = _bbox(px, opened)
+    save(opened.crop(box), "rooms", "convent_cell_door_open.png")
+    print(f"  convent_cell_door_open.png at {box[:2]}")
     cell_bed_art()
     return corridor, base
 

@@ -223,7 +223,7 @@ public partial class MansionBedroom : Room
         if (State.HasFlag(Endings.SparedOldMan))
         {
             // oldman_taunt went on into oldman_prayer: the Our Father, backing towards the door (OnCue).
-            Player.SetPose(null);
+            await Player.Holster("micah_holster_low");
             await Game.WalkTo(Door);
             await PrayerEnding();
             if (Endings.EleanorHeldOut(State.HasFlag))
@@ -244,7 +244,7 @@ public partial class MansionBedroom : Room
             harrington.SetTexture(Shot);
         }
         await Wait(1.0);
-        Player.SetPose(null);
+        await Player.Holster();
         await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
         if (Endings.EleanorHeldOut(State.HasFlag))
         {
@@ -311,8 +311,8 @@ public partial class MansionBedroom : Room
     }
 
     /// <summary>
-    /// The end of the prayer Micah left the room on, over black, a line at a time; after Tony's murder the Amen waits for
-    /// the station steps (ending 12).
+    /// The end of the prayer Micah left the room on, over black, a line at a time, down to the Amen he never said in
+    /// the room.
     /// </summary>
     public static readonly string[] Doxology =
         { "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen." };
@@ -322,8 +322,7 @@ public partial class MansionBedroom : Room
     {
         await Game.Hud.Fade(1, 1.0);
         await Wait(0.6);
-        var verses = State.HasFlag(Endings.KilledTony) ? Doxology[..^1] : Doxology;
-        await Game.Hud.ShowVerses(verses, DoxologyFade, 1.5);
+        await Game.Hud.ShowVerses(Doxology, DoxologyFade, 1.5);
         await Wait(0.5);
     }
 
@@ -334,6 +333,7 @@ public partial class MansionBedroom : Room
     private async Task MurderSuicide(Actor? eleanor)
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await Say("*BANG*");
@@ -352,6 +352,7 @@ public partial class MansionBedroom : Room
     private async Task Suicide()
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await LastShot();

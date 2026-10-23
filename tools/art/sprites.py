@@ -676,19 +676,60 @@ def draw_strip(spec, name):
     the elbow lifts in front of the chest as the hand goes in under the far lapel, the gun comes out at chest height
     muzzle down, swings forward past the belt, and the last frame is aim_frame's held aim."""
     fw = FW + 32
+    frames = [(figure(spec, ps, fw, FH), (FW / 2 + 16, 18)) for ps in _draw_poses()]
+    action_strip(name, frames, [0.15, 0.08, 0.2, 0.1, 0.08, 0.3], anchor=(fw / 2, FH - 3))
+    return frames
 
-    def stance(arm, **kw):
-        return pose(90, arms={1: arm, -1: AIM_OFF_ARM}, legs=AIM_LEGS, lean=-2.0, **kw)
-    poses = [
-        stance(("swing", 4, 6, 10)),
-        stance(("pts", (0.15, 0.36, 0.11), (0.06, 0.31, 0.13), (0.02, 0.29, 0.11))),
-        stance(("pts", (0.13, 0.31, 0.17), (0.02, 0.28, 0.10), (-0.04, 0.27, 0.05)), hand_in_coat=1),
-        stance(("pts", (0.12, 0.34, 0.15), (0.04, 0.31, 0.11), (0.03, 0.31, 0.135)), gun=1, gun_dir=(0, 0.9, 0.5)),
-        stance(("pts", (0.14, 0.38, 0.09), (0.07, 0.37, 0.16), (0.06, 0.37, 0.19)), gun=1, gun_dir=(0, 0.5, 1)),
+
+def _draw_stance(arm, **kw):
+    return pose(90, arms={1: arm, -1: AIM_OFF_ARM}, legs=AIM_LEGS, lean=-2.0, **kw)
+
+
+def _draw_poses():
+    """draw_strip's keys: arm at the side, hand up, hand in under the lapel, gun out muzzle down, gun swinging
+    forward, the level aim."""
+    return [
+        _draw_stance(("swing", 4, 6, 10)),
+        _draw_stance(("pts", (0.15, 0.36, 0.11), (0.06, 0.31, 0.13), (0.02, 0.29, 0.11))),
+        _draw_stance(("pts", (0.13, 0.31, 0.17), (0.02, 0.28, 0.10), (-0.04, 0.27, 0.05)), hand_in_coat=1),
+        _draw_stance(("pts", (0.12, 0.34, 0.15), (0.04, 0.31, 0.11), (0.03, 0.31, 0.135)), gun=1,
+                     gun_dir=(0, 0.9, 0.5)),
+        _draw_stance(("pts", (0.14, 0.38, 0.09), (0.07, 0.37, 0.16), (0.06, 0.37, 0.19)), gun=1, gun_dir=(0, 0.5, 1)),
         _aim_angle_pose(AIM_LEVELS[0]),
     ]
+
+
+# Where each holster strip starts: the held pose it leaves (the level aim, the last of aim_lower_strip with the gun
+# hanging at the side, or aim_down_strip's held frame).
+HOLSTER_STARTS = ("level", "low", "down")
+
+
+def holster_poses(start="level"):
+    """The draw played backwards, from a held aim to the empty hand back at the side. The held pose itself is not
+    repeated: the first frame is already one step on from it."""
+    draw = _draw_poses()
+    back = draw[-2::-1]  # gun swinging back, gun at the chest muzzle down, hand in the coat, hand out, arm down
+    if start == "level":
+        return back
+    if start == "low":
+        # the hanging gun comes up past the belt to the chest, muzzle still down
+        lift = _draw_stance(("pts", (0.10, 0.40, 0.10), (0.06, 0.38, 0.09), (0.06, 0.36, 0.10)), gun=1,
+                            gun_dir=(0, 1, 0.25))
+        return [lift] + back[1:]
+    if start == "down":
+        raise_ = [dict(_aim_pose(upper, a - upper), lean=lean, nod=nod) for upper, a, lean, nod in AIM_DOWN[-2::-1]]
+        return raise_ + back
+    raise ValueError(start)
+
+
+def holster_strip(spec, name, start="level"):
+    """Putting the revolver back in the shoulder holster under the coat, in profile facing right (see holster_poses);
+    the arm ends at the side, as the draw starts."""
+    fw = FW + 32
+    poses = holster_poses(start)
     frames = [(figure(spec, ps, fw, FH), (FW / 2 + 16, 18)) for ps in poses]
-    action_strip(name, frames, [0.15, 0.08, 0.2, 0.1, 0.08, 0.3], anchor=(fw / 2, FH - 3))
+    seconds = [0.08] * (len(frames) - 5) + [0.08, 0.1, 0.2, 0.08, 0.15]
+    action_strip(name, frames, seconds, anchor=(fw / 2, FH - 3))
     return frames
 
 
@@ -1813,6 +1854,9 @@ def build():
     aim_down_strip(MICAH, "micah_aim_down", "micah_aim_down_held")
     aim_self_frame(MICAH, "micah_aim_self")
     draw_strip(MICAH, "micah_draw")
+    holster_strip(MICAH, "micah_holster")
+    holster_strip(MICAH, "micah_holster_low", "low")
+    holster_strip(MICAH, "micah_holster_down", "down")
     action_sequences(MICAH, "micah")
     action_sequences(MICAH_MASKED, "micah_masked")
     door_strip(MICAH, "micah_open_door", PLAYER_IDLE_YAW)
@@ -1845,7 +1889,8 @@ def build():
 
 # The poses Micah strikes after he leaves his tie on the mansion's alarm bell; Player loads these instead of the
 # shared micah_* strips while he wears the micah_no_tie sheet.
-NO_TIE_POSES = ("crouch", "crouched", "crouch_rise", "aim", "aim_lower", "aim_back", "aim_self", "draw")
+NO_TIE_POSES = ("crouch", "crouched", "crouch_rise", "aim", "aim_lower", "aim_back", "aim_self", "draw", "holster",
+                "holster_low")
 
 
 def build_no_tie():
@@ -1855,6 +1900,8 @@ def build_no_tie():
     aim_back_strip(MICAH_NO_TIE, "micah_no_tie_aim_back")
     aim_self_frame(MICAH_NO_TIE, "micah_no_tie_aim_self")
     draw_strip(MICAH_NO_TIE, "micah_no_tie_draw")
+    holster_strip(MICAH_NO_TIE, "micah_no_tie_holster")
+    holster_strip(MICAH_NO_TIE, "micah_no_tie_holster_low", "low")
     action_sequences(MICAH_NO_TIE, "micah_no_tie")
 
 
