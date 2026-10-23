@@ -115,8 +115,8 @@ public partial class Hud
         _satchel.Visible = SatchelAllowed;
     }
 
-    // Eleanor carries nothing of Micah's: in the interludes the satchel holds only what she finds there, and in her
-    // coda and epilogue she has none.
+    // Eleanor carries nothing of Micah's: in the interludes and her coda the satchel holds only what she finds there,
+    // and in her epilogue she has none.
     private static bool SatchelAllowed
     {
         get

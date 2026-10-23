@@ -1060,9 +1060,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
       sprites: her swing, his fall forward, no wound). She leaves through the study (she had only ever seen it from the doorway), taking the old man's
       "Thursday book" (the Club's ledger of the girls: she always knew where he kept it), and the kitchen; the doors back to the bedroom
-      refuse her. The cellar is optional: the lantern hangs on its nail (Micah came in that way), she takes it
-      and opens the whiskey barrel over it, and the house burns. No satchel: two hand actions. The kitchen door
-      leads outside, a short beat in her voice, without Micah's escape. Then Micah's coffee scene at Rose's (as in
+      refuse her. She has her own satchel again, empty when the coda starts (Micah's things are put aside and come
+      back to him when it ends; a lantern she didn't use is left behind). The cellar is optional: the lit lantern
+      hangs on its nail (Micah came in that way) and goes into her satchel; hand on the whiskey barrel opens its
+      spigot, and the lantern used on the running whiskey sets the cellar alight. The kitchen door leads outside, a
+      short beat in her voice, without Micah's escape; if she set the fire, the house goes up behind her (*CRASH*,
+      the windows orange one by one). Then Micah's coffee scene at Rose's (as in
       ending 1), followed by ending 8 (she burned the house) or ending 9 (she didn't). On the kill route there is no
       coffee scene: Micah has gone to the station, and the endings tell it from Joliet.
 

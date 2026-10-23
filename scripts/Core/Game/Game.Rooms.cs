@@ -87,6 +87,7 @@ public partial class Game
         Room.World.AddChild(Player);
         Player.SetCharacter(Room.ResolvePlayerCharacter());
         SyncPinned();
+        Story.Interlude.SyncCoda();
         Player.Visible = Room.PlayerVisibleOnLoad;
         if (Room.Ambience is { } ambience) Sfx.SetAmbient(ambience.Sound, ambience.VolumeDb);
         else Sfx.SetAmbient(null);

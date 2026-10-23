@@ -7,8 +7,8 @@ namespace Repentance.Story;
 /// <summary>
 /// The two Eleanor interludes (the start of Act 2 and of Act 3) and her coda in the mansion: who the player is, the
 /// hand-offs in and out of Micah's journal, and the lines she says where a room has nothing special for her.
-/// Flags: "interlude1" / "interlude2" while an interlude plays, "eleanor_coda" in the mansion after the prayer,
-/// "eleanor_epilogue" for her last scene in ending 8.
+/// Flags: "interlude1" / "interlude2" while an interlude plays, "eleanor_coda" in the mansion after the prayer (Micah's
+/// things put aside as "coda_stash_" flags), "eleanor_epilogue" for her last scene in ending 8.
 /// </summary>
 public static class Interlude
 {
@@ -43,10 +43,53 @@ public static class Interlude
         has("interlude1") || has("interlude2") || has("eleanor_coda") || has("eleanor_epilogue");
 
     /// <summary>
-    /// True while Eleanor carries her own satchel: only during the two interludes, for the things she picks up there
-    /// (puzzles 17 and 18). Her coda and epilogue keep her empty-handed.
+    /// True while Eleanor carries her own satchel: during the two interludes, for the things she picks up there
+    /// (puzzles 17 and 18), and in her coda, for the cellar lantern. Her epilogue keeps her empty-handed.
     /// </summary>
-    public static bool SatchelOpen(Func<string, bool> has) => has("interlude1") || has("interlude2");
+    public static bool SatchelOpen(Func<string, bool> has) => has("interlude1") || has("interlude2") || has(Coda);
+
+    /// <summary>Micah's things put aside for the coda; apart from the act's <c>stash_</c> flags, which the ending reads.</summary>
+    private const string CodaStashPrefix = "coda_stash_";
+
+    /// <summary>The only thing Eleanor can pick up in her coda.</summary>
+    private const string CodaLantern = "lantern_lit";
+
+    /// <summary>After Micah's prayer the player is Eleanor, with a satchel of her own (<see cref="SyncCoda"/>).</summary>
+    public static void BeginCoda()
+    {
+        State.SetFlag(Coda);
+        SyncCoda();
+    }
+
+    /// <summary>
+    /// While the coda plays, Micah's things stay out of Eleanor's satchel. Runs on every room load, so a save from before
+    /// she had a satchel recovers: his things are put aside, and the lantern she took off its nail is back in her hand.
+    /// </summary>
+    public static void SyncCoda()
+    {
+        if (!State.HasFlag(Coda)) return;
+        foreach (var id in System.Linq.Enumerable.ToList(State.Inventory))
+        {
+            if (id == CodaLantern) continue;
+            if (!MicahKit.IsPinned(id)) State.SetFlag(CodaStashPrefix + id);
+            State.TakeItem(id);
+        }
+        if (State.HasFlag("took_hung_lantern") && !State.HasFlag(Endings.EleanorBurned) && !State.HasItem(CodaLantern))
+            State.GiveItem(CodaLantern);
+    }
+
+    /// <summary>The coda is over: a lantern she didn't use stays in the house, and Micah's things come back to him.</summary>
+    public static void EndCoda()
+    {
+        State.SetFlag(Coda, false);
+        DropEleanorItems();
+        foreach (var flag in System.Linq.Enumerable.ToList(State.Flags))
+        {
+            if (!flag.StartsWith(CodaStashPrefix)) continue;
+            State.SetFlag(flag, false);
+            State.GiveItem(flag[CodaStashPrefix.Length..]);
+        }
+    }
 
     /// <summary>
     /// Eleanor's player sheet for <paramref name="room"/>, or null when Micah (or Daniel) plays there. In the First

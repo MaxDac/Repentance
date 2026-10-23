@@ -145,7 +145,7 @@ public partial class MansionBedroom : Room
         State.SetFlag("eleanor_up", false);
         await Talk("coda_bed");
         await Game.Hud.Fade(1, 1.5);
-        State.SetFlag("eleanor_coda", false);
+        Story.Interlude.EndCoda();
         await Act3.End();
     }
 
@@ -229,7 +229,7 @@ public partial class MansionBedroom : Room
             if (Endings.EleanorHeldOut(State.HasFlag))
             {
                 // She never gave in: the story stays in the room after he's gone, and the player is Eleanor.
-                State.SetFlag("eleanor_coda");
+                Story.Interlude.BeginCoda();
                 await Game.ChangeRoom("mansion_bedroom", "eleanor_coda");
                 return;
             }
