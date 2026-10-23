@@ -737,6 +737,41 @@ def _closet_carcass(img):
         d.line([(fx - 2, fy - 2), (fx + 1, fy - 2)], fill=hx("6b4428"))
 
 
+BRASS, BRASS_L, BRASS_H, BRASS_M, BRASS_D, BRASS_K = (hx("b08a3a"), hx("d8b050"), hx("f0d880"), hx("8a6a28"),
+                                                      hx("6a5020"), hx("2e2010"))
+
+
+def brass_box(img, x0, x1, y0, y1, z):
+    """The little brass box standing in the safe, like its inventory icon: a lid with a lit edge, a seam and a hasp
+    dropping over it, corner bands, an engraved line along the front and an escutcheon with its keyhole."""
+    R.box(img, x0, x1, y0, y1, z - 0.4, z + 0.2, BRASS, top=BRASS_L)
+    d = ImageDraw.Draw(img)
+    l, b = (round(v) for v in R.P(x0, y0, z + 0.2))
+    r, t = (round(v) for v in R.P(x1, y1, z + 0.2))
+    r, b = r - 1, b - 1
+    cx, seam = (l + r) // 2, t + 3
+    # the lid: lit along its top edge, its own band of brass, a dark seam where it closes on the body
+    d.line([(l, t), (r, t)], fill=BRASS_H)
+    d.line([(l, t + 1), (r, t + 1)], fill=BRASS_L)
+    d.line([(l, seam), (r, seam)], fill=BRASS_D)
+    # corner bands up both ends, lit on the left
+    for x, c in ((l + 1, BRASS_L), (r - 1, BRASS_M)):
+        d.line([(x, t + 1), (x, b - 1)], fill=c)
+    d.line([(l, t), (l, b)], fill=BRASS_M)
+    d.line([(r, t), (r, b)], fill=BRASS_D)
+    # the body's top lip catching the light under the seam, and a low engraved line along the front
+    d.line([(l + 2, seam + 1), (r - 2, seam + 1)], fill=BRASS_L)
+    d.line([(l + 3, b - 2), (r - 3, b - 2)], fill=BRASS_M)
+    # the hasp hanging over the seam onto a round escutcheon with its keyhole
+    d.rectangle([cx - 1, seam - 1, cx, seam], fill=BRASS_D)
+    d.point((cx - 1, seam - 1), fill=BRASS_M)
+    d.rectangle([cx - 1, seam + 1, cx + 1, seam + 3], fill=BRASS_H)
+    d.point((cx, seam + 2), fill=BRASS_K)
+    d.point((cx, seam + 3), fill=BRASS_D)
+    # the base standing on the safe floor, in shadow
+    d.line([(l, b), (r, b)], fill=BRASS_D)
+
+
 def wall_safe(img, opened=False, box=False, ajar=False, scratched=True):
     """The wall safe sunk into the back of the closet: a bolted steel door with hinges, a maker's plate, a ticked
     combination dial scratched raw by whoever tried it, and a spoked handle. Open, it shows a shelved steel box and
@@ -755,9 +790,7 @@ def wall_safe(img, opened=False, box=False, ajar=False, scratched=True):
         # the door left standing half open on its left hinge, waiting for the box
         R.quad(img, [(X0, Y0, Z - 0.5), (X1, Y0, Z - 0.5), (X1, Y1, Z - 0.5), (X0, Y1, Z - 0.5)], CAVITY)
         if box:
-            R.box(img, X0 + 8, X1 - 4, Y0, Y0 + 8, Z - 0.4, Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
-            px, py = R.P((X0 + X1) / 2 + 2, Y0 + 4, Z + 0.3)
-            d.point((px, py), fill=hx("6a5020"))
+            brass_box(img, X0 + 8, X1 - 4, Y0, Y0 + 8, Z)
         ex, ez = X0 + 6, Z + 16
         R.quad(img, [(X0, Y0, Z), (ex, Y0, ez), (ex, Y1, ez), (X0, Y1, Z)], STEEL, STEEL_L)
         # the dial on the door's face, turned half away
@@ -838,9 +871,7 @@ def wall_safe(img, opened=False, box=False, ajar=False, scratched=True):
     for by in bolt_ys:
         R.line(img, (X1 + 1, by, Z), (X1 + 1, by + 1, Z), CAVITY)
     if box:
-        R.box(img, X0 + 6, X1 - 6, Y0, Y0 + 8, Z - 0.4, Z + 0.2, hx("b08a3a"), top=hx("d8b050"))
-        px, py = R.P((X0 + X1) / 2, Y0 + 4, Z + 0.3)
-        d.point((px, py), fill=hx("6a5020"))
+        brass_box(img, X0 + 6, X1 - 6, Y0, Y0 + 8, Z)
     # the heavy door swung open on its left hinge, seen nearly edge on: its inner face lit along the top, the locking
     # bolts standing out of the free edge
     DZ = Z + 22
