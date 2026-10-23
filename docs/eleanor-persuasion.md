@@ -72,7 +72,7 @@ The options appear in the order listed. Eleanor's opening lines come first on ea
 | Positive | "We'll find somewhere quiet. Somewhere nobody knows your name." | "Nobody knowing my name. That's a nice dream, Micah. I stopped having it." | |
 | Clumsy | "You can't stay here. Not now. They'll pin it on you." | "They'll pin it on whoever they like. They always do." | "Wrong thing to say. She's talking to the carpet now, not to me." |
 
-Also offered: "(Lower the gun. Leave her, and turn yourself in.)", which sets `repented` (ending 6) and ends the
+Also offered: "(Leave her, and turn yourself in.)", which sets `repented` (ending 6) and ends the
 conversation.
 
 ### Turn 2: "Theodore will be here by morning. He'll know what to do. He always does."

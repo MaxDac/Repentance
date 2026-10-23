@@ -143,6 +143,7 @@ public partial class AutoPlay
         Seed(act3Flags.Append("rose_wait"), act3Items, "Our Father");
         float nearest = float.MaxValue;
         bool lowering = false, steppedBack = false, versesFaded = false;
+        int holstersLow = _poseCounts.GetValueOrDefault("micah_holster_low");
         _ = game.ChangeRoom("mansion_bedroom", "start");
         var prayer = new List<string>();
         var coda = new List<string>();
@@ -164,6 +165,8 @@ public partial class AutoPlay
         Check(gs.HasFlag("spared_oldman") && gs.HasFlag("ending_1"), "ending 1: spared the old man");
         Check(lowering && nearest < 70, "Micah backs to the door, lowering the revolver step by step");
         Check(steppedBack, "Micah's legs step back with each verse");
+        Check(_poseCounts.GetValueOrDefault("micah_holster_low") == holstersLow + 1,
+            "at the door, Micah puts the lowered revolver back in its holster");
         Check(prayer.Any(l => l.Contains("Thy kingdom come", StringComparison.OrdinalIgnoreCase)) &&
               prayer.Any(l => l.Contains("deliver us from evil")) && !prayer.Any(l => l.Contains("Amen")),
             "Micah prays up to \"deliver us from evil\" on his way out, without the Amen");
@@ -200,6 +203,7 @@ public partial class AutoPlay
             HeardLog = new List<string>();
             int shots = game.Sfx.Count(Sound.Gunshot);
             bool eleanorDown = false, aimSelf = false, morning = false, lastWords = false, facedAway = false;
+            int holsters = _poseCounts.GetValueOrDefault("micah_holster"), draws = _poseCounts.GetValueOrDefault("micah_draw");
             _ = game.ChangeRoom("mansion_bedroom", "start");
             await Until(() =>
             {
@@ -224,6 +228,8 @@ public partial class AutoPlay
             Check(eleanorDown == murder, murder ? "ending 7: Eleanor falls like the old man, shot in the stomach" : $"{label}: Eleanor stays standing");
             Check(lastWords && facedAway, $"{label}: \"{Rooms.MansionBedroom.LastWords}\", looking away at an empty corner");
             Check(aimSelf, $"{label}: Micah puts the revolver to his temple");
+            Check(_poseCounts.GetValueOrDefault("micah_holster") == holsters + 1 && _poseCounts.GetValueOrDefault("micah_draw") == draws + 2,
+                $"{label}: Micah holsters after the old man falls, and draws again for the last shot");
             Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, $"{label}: the last shot is heard over black");
             await TheEnd(label);
             Check(HeardLog.Count(l => l.Contains("He shot Mr. Harrington on his own carpet.")) == 1 && !HeardLog.Any(l => l.Contains("in his bed.")),
@@ -534,7 +540,9 @@ public partial class AutoPlay
         Seed(alleyReady, act3Items, "Fire into the wall");
         await game.ChangeRoom("alley", "act3");
         int shots = game.Sfx.Count(Sound.Gunshot);
+        int warnHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         heard = await Spoken(async () => { await game.Perform(Verb.Talk, "back_door"); await WaitIdle(game); });
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == warnHolsters + 1, "the warning shot: Micah holsters the revolver");
         Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && gs.HasFlag("alley3_tony_inside")
               && game.Room?.FindActor("bartender")?.Visible != true && game.Sfx.Count(Sound.Gunshot) == shots + 1,
             "the warning shot: one bullet in the wall, and Tony back inside unhurt");
@@ -616,6 +624,7 @@ public partial class AutoPlay
         Seed(alleyReady, act3Items, "Shoot him in the shoulder", "Finish him");
         await game.ChangeRoom("alley", "act3");
         int aimsDown = _poseCounts.GetValueOrDefault("micah_aim_down");
+        int holstersDown = _poseCounts.GetValueOrDefault("micah_holster_down");
         bool stainWithShot = false;
         var knock = game.Perform(Verb.Talk, "back_door");
         await Until(() =>
@@ -632,6 +641,8 @@ public partial class AutoPlay
         Check(stainWithShot, "the head wound shows as the second shot goes off, not after it");
         Check(_poseCounts.GetValueOrDefault("micah_aim_down") == aimsDown + 1 && game.Player.Position.X > 410,
             "the second shot: Micah stands past Tony's head and aims down at it");
+        Check(_poseCounts.GetValueOrDefault("micah_holster_down") == holstersDown + 1 && game.Player.PoseName == null,
+            "the second shot: the revolver comes up from Tony's head and back into its holster");
         await game.Perform(Verb.Walk, "street");
         await WaitIdle(game);
         Check(game.Room?.Name == "ChicagoMap", "after the kill, the street opens onto the map");

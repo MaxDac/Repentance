@@ -684,7 +684,10 @@ public partial class AutoPlay
         Check(game.Player.PoseName == "micah_aim" && _poseCounts.GetValueOrDefault("micah_draw") == draws + 1,
             "Micah draws the revolver and aims it at the librarian");
         await Shot("library_threat");
+        int libraryHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         await threaten;
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == libraryHolsters + 1,
+            "Micah puts the revolver back in its holster after the threat");
         Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && gs.HasFlag("library_banned") &&
             game.Room?.Name == "ChicagoMap" && game.Player.PoseName == null,
             "threatened the librarian into giving up the book, then walked straight out to the map");
@@ -795,11 +798,13 @@ public partial class AutoPlay
                 nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
         }
         var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+        int nunHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var threatHeard = Listen(game, threat);
         await game.Wait(1.5);
         await Shot("convent_gun");
         await threat;
         var threatLines = await threatHeard;
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == nunHolsters + 1, "Micah puts the revolver away after the sister talks");
         Check(threatLines.Any(l => l.Contains("Jezebel")) && threatLines.Any(l => l.Contains("I failed her")),
             "seduced, Agatha still calls her a Jezebel, but confesses she failed her");
         Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");

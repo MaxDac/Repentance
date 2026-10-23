@@ -223,7 +223,7 @@ public partial class MansionBedroom : Room
         if (State.HasFlag(Endings.SparedOldMan))
         {
             // oldman_taunt went on into oldman_prayer: the Our Father, backing towards the door (OnCue).
-            Player.SetPose(null);
+            await Player.Holster("micah_holster_low");
             await Game.WalkTo(Door);
             await PrayerEnding();
             if (Endings.EleanorHeldOut(State.HasFlag))
@@ -244,7 +244,7 @@ public partial class MansionBedroom : Room
             harrington.SetTexture(Shot);
         }
         await Wait(1.0);
-        Player.SetPose(null);
+        await Player.Holster();
         await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
         if (Endings.EleanorHeldOut(State.HasFlag))
         {
@@ -333,6 +333,7 @@ public partial class MansionBedroom : Room
     private async Task MurderSuicide(Actor? eleanor)
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await Say("*BANG*");
@@ -351,6 +352,7 @@ public partial class MansionBedroom : Room
     private async Task Suicide()
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await LastShot();

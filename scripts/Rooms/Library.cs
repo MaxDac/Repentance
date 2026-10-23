@@ -50,7 +50,7 @@ public partial class Library : Room
                 Player.SetPose("micah_aim");
                 await Talk("librarian_threat");
                 State.SetFlag("librarian_threatened");
-                Player.SetPose(null);
+                await Player.Holster();
                 await Think("I've just held up a library. Mother would be so proud.");
                 await LeaveWithBook();
                 return true;

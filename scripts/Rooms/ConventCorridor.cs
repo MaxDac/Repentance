@@ -138,7 +138,7 @@ public partial class ConventCorridor : Room
                 await Talk("nun_threat2");
                 State.SetFlag("nun_threatened");
                 await Wait(1.0);
-                Player.SetPose(null);
+                await Player.Holster();
                 await Say("...");
                 await Think("I put the revolver away. My hand is shaking. It never used to.");
                 await Think("Harrington senior keeps his name off doors. The Tribune morgue keeps everybody's name - I'd start there.");

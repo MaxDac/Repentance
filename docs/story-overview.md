@@ -164,8 +164,8 @@ From here the story follows Walkthrough.md:
 33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
    a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1, or 12 if Tony was killed). Then talk Eleanor into leaving: four turns of four lines, each line
-   typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can lower the gun and
-   leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
+   typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can
+   leave her and turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
    If Eleanor told Agatha the truth and refused the old man: after the Our Father the player is Eleanor in the sheet, with the
    old man's back turned. Return to bed (ending 1, or 12 if Tony was killed), or take the candlestick off the nightstand and strike him, then
