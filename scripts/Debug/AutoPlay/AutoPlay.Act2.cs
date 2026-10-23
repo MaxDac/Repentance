@@ -293,7 +293,7 @@ public partial class AutoPlay
         await game.Wait(2);
         await Shot("motel_night");
         bool daysLater = false;
-        ulong captionStart = 0, captionOpaque = 0;
+        ulong captionStart = 0, captionOpaque = 0, captionFading = 0, captionGone = 0;
         await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater, step: 0.02);
         double scale = Engine.TimeScale;
         Engine.TimeScale = 1;
@@ -305,6 +305,8 @@ public partial class AutoPlay
                 bool shown = game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
                 daysLater |= shown;
                 if (shown && captionOpaque == 0 && game.Hud.CaptionAlpha >= 1) captionOpaque = Time.GetTicksMsec();
+                if (shown && captionOpaque > 0 && captionFading == 0 && game.Hud.CaptionAlpha < 1) captionFading = Time.GetTicksMsec();
+                if (!shown && captionFading > 0 && captionGone == 0) captionGone = Time.GetTicksMsec();
                 return game.Room?.Name == "Office";
             }, step: 0.02);
         }
@@ -313,6 +315,9 @@ public partial class AutoPlay
         double captionFade = (captionOpaque - captionStart) / 1000.0;
         Check(captionOpaque > 0 && captionFade is > 2.5 and < 3.6,
             $"\"Days later\" fades in over 3s (took {captionFade:0.0}s)");
+        double captionFadeOut = (captionGone - captionFading) / 1000.0;
+        Check(captionGone > 0 && captionFadeOut is > 2.5 and < 3.6,
+            $"\"Days later\" fades out over 3s (took {captionFadeOut:0.0}s)");
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
