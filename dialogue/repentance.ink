@@ -1604,9 +1604,9 @@ THOUGHT: She didn't look at him twice. The door Micah had used stood open on the
 -> END
 
 === coda_fire ===
-THOUGHT: The lantern Micah had hung on its nail, still burning. The Club's whiskey barrel on the floor, the rye they poured on Thursdays.
+THOUGHT: The Club's rye ran out over the flags, the whiskey they poured on Thursdays. Micah's lantern burned in her hand.
 ELEANOR: You always said this house would outlive us all.
-THOUGHT: She opened the spigot, and set the lantern down in what ran out of it, and took the kitchen steps two at a time.
+THOUGHT: She set the lantern down in the whiskey, and took the kitchen steps two at a time.
 -> END
 
 === coda_outside ===

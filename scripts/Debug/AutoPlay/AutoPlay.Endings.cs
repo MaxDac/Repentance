@@ -353,7 +353,8 @@ public partial class AutoPlay
             await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
             await WaitIdle(game);
             Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("eleanor_coda"), $"{label}: after the prayer, the player is Eleanor");
-            Check(!game.Hud.SatchelVisible, $"{label}: no satchel for Eleanor");
+            Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0 && gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                $"{label}: Eleanor's own satchel, empty, with Micah's things put aside");
             var harrington = game.Room?.FindActor("harrington");
             Check(harrington?.Visible == true && harrington.Texture?.ResourcePath.EndsWith("harrington_struck_down.png") != true,
                 $"{label}: the old man stands watching the door");
@@ -411,29 +412,40 @@ public partial class AutoPlay
                 await game.Perform(Verb.Walk, "stair");
                 Check(game.Room?.Name == "MansionCellar", "ending 8: not back up to him");
                 await game.Perform(Verb.Hand, "barrel");
-                Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the barrel wants a flame first");
-                await game.Perform(Verb.Hand, "hung_lantern");
+                Check(gs.HasFlag("barrel_open") && !gs.HasFlag(Endings.EleanorBurned), "ending 8: hand on the barrel opens the spigot");
                 await game.Perform(Verb.Hand, "barrel");
+                Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the running whiskey wants a flame");
+                await game.Perform(Verb.Hand, "hung_lantern");
+                Check(gs.HasItem("lantern_lit") && gs.Inventory.Count == 1, "ending 8: the lit lantern in her satchel");
+                await ReloadCheckpoint("eleanor_coda");
+                Check(game.Room?.Name == "MansionCellar" && gs.HasItem("lantern_lit") && gs.Inventory.Count == 1 &&
+                      game.Hud.SatchelVisible, "ending 8: a save in the cellar loads with only her lantern");
+                await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
                 await WaitIdle(game);
-                Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && game.Room?.Name == "MansionKitchen",
-                    "ending 8: the Club's rye alight, and up to the kitchen");
+                Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && !gs.HasItem("lantern_lit") &&
+                      game.Room?.Name == "MansionKitchen",
+                    "ending 8: the lantern in the Club's rye, and up to the kitchen");
             }
             else
             {
                 await game.Perform(Verb.Walk, "door_left");
                 Check(game.Room?.Name == "MansionKitchen", $"{label}: down to the kitchen");
             }
-            bool eleanorInmate = false, sawRose = false;
+            bool eleanorInmate = false, sawRose = false, blaze = false;
             HeardLog = new List<string>();
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() =>
             {
                 sawRose |= game.Room?.Name == "RoseHouse";
+                blaze |= game.Room?.Name == "MansionExterior" && game.Room.GetNodeOrNull<CanvasItem>("EleanorFire")?.Visible == true;
                 eleanorInmate |= game.Room?.Name == "Prison" && game.Room.GetNodeOrNull<CanvasItem>("EleanorInmate")?.Visible == true &&
                     game.Room.GetNodeOrNull<CanvasItem>("Micah")?.Visible != true;
                 return game.Room?.Name == (fire ? "Outskirts" : "Prison") && !game.Busy || game.Hud.CaptionText == "End of Act Three";
             }, 240, 0.05);
             Check(sawRose && !gs.HasItem("cloth"), $"{label}: Micah's journal goes on to Rose's door, without the cloth");
+            Check(blaze == fire, $"{label}: the house {(fire ? "burns behind her once she's out" : "stays dark behind her")}");
+            Check(!gs.HasItem("lantern_lit") && !gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                $"{label}: Micah's things back with him, nothing of Eleanor's");
             Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
             Check(DryHere(), $"{label}: no rain where Eleanor ends up");
             if (fire)

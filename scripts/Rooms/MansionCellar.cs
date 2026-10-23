@@ -51,7 +51,7 @@ public partial class MansionCellar : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
-        if (Coda) return await CodaInteract(verb, target);
+        if (Coda) return await CodaInteract(verb, target, item);
         switch (target.Id, verb)
         {
             case ("kitchen_steps", Verb.Hand or Verb.Walk):
@@ -161,11 +161,13 @@ public partial class MansionCellar : Room
     }
 
     /// <summary>
-    /// Eleanor's fire needs no inventory: the lantern Micah hung on its nail on the way in, then the barrel's spigot.
+    /// Eleanor's fire: the lantern Micah hung on its nail on the way in goes into her satchel, the barrel's spigot opens
+    /// by hand, and the lantern used on the running whiskey sets the cellar alight.
     /// </summary>
-    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target, string? item)
     {
-        bool lantern = State.HasFlag("took_hung_lantern");
+        bool lantern = State.HasItem("lantern_lit");
+        bool burned = State.HasFlag(Endings.EleanorBurned);
         switch (target.Id, verb)
         {
             case ("kitchen_steps", Verb.Hand or Verb.Walk):
@@ -176,16 +178,24 @@ public partial class MansionCellar : Room
                 return true;
             case ("hung_lantern", Verb.Hand):
                 State.SetFlag("took_hung_lantern");
+                State.GiveItem("lantern_lit");
                 await Say("eleanor", "Micah's lantern, still burning. Hot through the handle. I'll hold it anyway.");
                 return true;
-            case ("barrel", Verb.Hand or Verb.Kick) when !lantern:
-                await Say("eleanor", "The Club's rye. Twenty years of Thursdays in one barrel. It wants a flame.");
-                return true;
-            case ("barrel", Verb.Hand or Verb.Kick) when !State.HasFlag(Endings.EleanorBurned):
-                await EleanorFire();
+            case ("barrel", Verb.Hand or Verb.Kick) when burned || Open:
+                await Say("eleanor", burned ? "Let it burn." : lantern
+                    ? "It's running. All it wants now is the flame in my hand."
+                    : "It's running. All it wants now is a flame. Micah's lantern is still burning on its nail.");
                 return true;
             case ("barrel", Verb.Hand or Verb.Kick):
-                await Say("eleanor", "Let it burn.");
+                State.SetFlag("barrel_open");
+                await Say("eleanor", "I open the spigot all the way. The Club's rye, all over the flags. Twenty years of Thursdays.");
+                await Think(lantern ? "It wanted a flame. She had one in her hand." : "It wanted a flame. Micah's lantern still burned on its nail.");
+                return true;
+            case ("barrel", Verb.UseItem) when item == "lantern_lit" && !Open:
+                await Say("eleanor", "Against the oak, it would only warm the wood. The spigot first.");
+                return true;
+            case ("barrel", Verb.UseItem) when item == "lantern_lit" && !burned:
+                await EleanorFire();
                 return true;
             case ("barrel", Verb.Look):
                 await Say("eleanor", "The Club's whiskey. They poured it for the gentlemen on Thursdays, and for me, before I went on.");
@@ -199,7 +209,7 @@ public partial class MansionCellar : Room
 
     private async Task EleanorFire()
     {
-        State.SetFlag("barrel_open");
+        State.TakeItem("lantern_lit");
         await Talk("coda_fire");
         State.SetFlag(Endings.EleanorBurned);
         State.SetFlag("cellar_fire");
