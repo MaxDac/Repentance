@@ -298,10 +298,53 @@ def ground_window(img):
     d.line([(lx, ly - 6), (lx + 8, ly - 6)], fill=IRON, width=2)
     d.line([(lx + 8, ly - 10), (lx + 8, ly - 2)], fill=IRON, width=2)
     d.polygon([(lx - 6, ly - 1), (lx - 2, ly - 5), (lx + 2, ly - 5), (lx + 6, ly - 1)], fill=hx("2e4036"))
-    # an electric meter by the door, and a hand-painted arrow to the front desk
-    d.rectangle([128, 132, 142, 150], fill=hx("2a2a30"), outline=hx("4a4a52"))
-    d.ellipse([131, 136, 139, 144], fill=hx("6a6a62"))
-    d.line([(135, 150), (135, BASE - 6)], fill=hx("16161a"))
+    electric_meter(img)
+
+
+METER = (128, 130, 142, 152)     # the electric meter's socket by the door; its glass dome is centred in it
+
+
+def electric_meter(img):
+    """An old electric meter by the door: a galvanized conduit up the wall into a squat socket, a steel ring
+    clamping the glass dome, a pale dial face with its little register dials and the spinning disc's slot, and a
+    lead seal on a wire. Its glass catches the light in meter_lit."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, y1 = METER
+    cx = (x0 + x1) // 2
+    for top, bottom in ((112, y0), (y1, BASE - 4)):  # the conduit, in from above and down into the pavement
+        d.rectangle([cx - 1, top, cx + 1, bottom], fill=hx("6a7078"))
+        d.line([(cx - 1, top), (cx - 1, bottom)], fill=hx("9aa2aa"))
+        d.line([(cx + 1, top), (cx + 1, bottom)], fill=hx("2a2e34"))
+    for sy in (118, 166, 182):  # strap clamps
+        d.rectangle([cx - 3, sy, cx + 3, sy + 1], fill=hx("4a5058"))
+        d.point((cx - 3, sy), fill=hx("a4aab2"))
+    d.rectangle([cx - 2, BASE - 4, cx + 2, BASE - 1], fill=hx("3a3e44"))  # the elbow into the wall
+    d.rectangle([x0, y0, x1, y1], fill=hx("4a5058"), outline=hx("22262c"))  # the socket box
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=hx("8a9098"))
+    d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=hx("6a7078"))
+    gx0, gy0, gx1, gy1 = x0 + 1, y0 + 3, x1 - 1, y0 + 15
+    d.ellipse([gx0, gy0, gx1, gy1], fill=hx("9aa0a8"), outline=hx("1a1c20"))  # the clamping ring
+    d.ellipse([gx0 + 2, gy0 + 2, gx1 - 2, gy1 - 2], fill=hx("1e262c"))   # the glass, dark inside
+    d.rectangle([gx0 + 3, gy0 + 4, gx1 - 3, gy0 + 7], fill=hx("d8d2bc"))  # the dial face
+    for x in range(gx0 + 4, gx1 - 3, 2):  # the register dials
+        d.point((x, gy0 + 5), fill=hx("2a2a2a"))
+    d.line([(gx0 + 4, gy0 + 9), (gx1 - 4, gy0 + 9)], fill=hx("8a8a80"))  # the disc's slot
+    d.point((cx, gy0 + 9), fill=hx("1a1a1a"))  # the disc's black mark
+    d.line([(cx, gy1), (cx, gy1 + 2)], fill=hx("6a6a62"))  # the seal's wire
+    d.point((cx, gy1 + 3), fill=hx("a8a8a0"))  # the lead seal
+
+
+def meter_lit(img):
+    """Over the lit picture: the glass dome's highlights and the steel ring's rim, so the meter reads at night."""
+    d = ImageDraw.Draw(img)
+    x0, y0, x1, _ = METER
+    gx0, gy0, gx1, gy1 = x0 + 1, y0 + 3, x1 - 1, y0 + 15
+    d.arc([gx0, gy0, gx1, gy1], 200, 300, fill=hx("8a8c98"))      # the ring's top-left rim
+    d.arc([gx0, gy0, gx1, gy1], 330, 30, fill=hx("a04858"))       # ... and the neon's red on its right
+    d.point((gx0 + 3, gy0 + 3), fill=hx("f0f4f8"))                 # the glint on the glass
+    d.point((gx0 + 4, gy0 + 3), fill=hx("b8c0c8"))
+    d.point((gx0 + 3, gy0 + 4), fill=hx("b8c0c8"))
+    d.point((gx1 - 3, gy1 - 3), fill=hx("6a5058"))                 # a second, dimmer reflection low on the dome
 
 
 def fire_escape(d, lowered=False):
@@ -580,6 +623,7 @@ def lighting(img, far_box, lowered):
     light(img, "ellipse", [44, 94, 76, 124], hx("ffd890"), 0.5, 6)
     blade_sign(img)
     door_sign(img)
+    meter_lit(img)
     lx, ly = LAMP
     d.ellipse([lx - 2, ly - 2, lx + 2, ly + 3], fill=hx("fff0c0"))
     for x in (lx - 2, lx, lx + 2):  # the wire cage
