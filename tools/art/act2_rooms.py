@@ -1685,37 +1685,311 @@ PORTRAIT_FACE_COLOURS = """
 """
 
 
+OFFICE_FLOOR_Y = 196
+
+
+def _office_wall(img):
+    """Damask paper above a moulded chair rail, raised-and-fielded walnut wainscot below it, a dentilled cornice
+    under the ceiling and a skirting board along the floor."""
+    d = ImageDraw.Draw(img)
+    fy = OFFICE_FLOOR_Y
+    vgrad(img, (0, 0, W - 1, fy), hx("3a2618"), hx("2a1a10"))
+    # the paper: a lattice of thin lozenges with a fleuron in each, a dark seam where each strip was hung
+    ink, sheen = hx("261710"), hx("523824")
+    for row, y in enumerate(range(10, 100, 18)):
+        for x in range(-12 + (row % 2) * 12, W + 12, 24):
+            d.line([(x, y), (x + 12, y + 9), (x, y + 18), (x - 12, y + 9), (x, y)], fill=ink)
+            d.polygon([(x, y + 4), (x + 2, y + 8), (x, y + 13), (x - 2, y + 8)], fill=ink)
+            d.point((x, y + 6), fill=sheen)
+            for s in (-1, 1):
+                d.point((x + s * 4, y + 9), fill=ink)
+                d.point((x + s * 3, y + 7), fill=sheen)
+            d.point((x, y + 2), fill=ink)
+            d.point((x, y + 15), fill=ink)
+    for x in range(21, W, 64):
+        d.line([(x, 14), (x, 97)], fill=hx("24160c"))
+    # cornice: a deep shadow band, a bed moulding with dentils, a lip throwing a shadow on the paper
+    d.rectangle([0, 0, W - 1, 4], fill=hx("160e08"))
+    d.rectangle([0, 5, W - 1, 12], fill=hx("4a2e18"))
+    d.line([(0, 5), (W, 5)], fill=hx("7a5232"))
+    for x in range(0, W, 4):
+        d.rectangle([x, 8, x + 1, 10], fill=hx("6a4426"))
+        d.point((x + 2, 10), fill=hx("2a1a0c"))
+    d.line([(0, 11), (W, 11)], fill=hx("5e3c22"))
+    d.line([(0, 12), (W, 12)], fill=hx("1e1209"))
+    d.line([(0, 13), (W, 13)], fill=hx("221509"))
+    # chair rail: a rounded cap with the light on top and its shadow under it
+    d.rectangle([0, 98, W - 1, 105], fill=hx("5a3a22"))
+    d.line([(0, 98), (W, 98)], fill=hx("8a5e36"))
+    d.line([(0, 99), (W, 99)], fill=hx("74502e"))
+    d.line([(0, 102), (W, 102)], fill=hx("3a2414"))
+    d.line([(0, 103), (W, 103)], fill=hx("6a4628"))
+    d.line([(0, 105), (W, 105)], fill=hx("1e1209"))
+    d.line([(0, 106), (W, 106)], fill=hx("24160c"))
+    # wainscot: stiles and rails framing raised, fielded panels
+    wood = hx("3a2414")
+    d.rectangle([0, 107, W - 1, fy - 9], fill=wood)
+    _grain(d, (0, 107, W - 1, fy - 9), wood, 55, 5)
+    for x in range(0, W, 40):
+        x0, x1 = x + 5, x + 35
+        y0, y1 = 113, fy - 15
+        d.rectangle([x0, y0, x1, y1], fill=hx("2e1c0e"), outline=hx("1a1006"))
+        _bevel(d, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), hx("24160a"), hx("5a3a20"))
+        d.polygon([(x0 + 2, y0 + 2), (x1 - 2, y0 + 2), (x1 - 6, y0 + 6), (x0 + 6, y0 + 6)], fill=hx("4e321c"))
+        d.polygon([(x0 + 2, y0 + 2), (x0 + 6, y0 + 6), (x0 + 6, y1 - 6), (x0 + 2, y1 - 2)], fill=hx("462c18"))
+        d.polygon([(x1 - 2, y0 + 2), (x1 - 2, y1 - 2), (x1 - 6, y1 - 6), (x1 - 6, y0 + 6)], fill=hx("2a1a0c"))
+        d.polygon([(x0 + 2, y1 - 2), (x1 - 2, y1 - 2), (x1 - 6, y1 - 6), (x0 + 6, y1 - 6)], fill=hx("24160a"))
+        field = hx("402816")
+        d.rectangle([x0 + 6, y0 + 6, x1 - 6, y1 - 6], fill=field)
+        _grain(d, (x0 + 6, y0 + 6, x1 - 6, y1 - 6), field, x, 4)
+        d.line([(x0 + 6, y0 + 6), (x1 - 6, y0 + 6)], fill=hx("62422a"))
+    # skirting: a beaded top, a plain board and a shadow where it meets the floor
+    d.rectangle([0, fy - 9, W - 1, fy], fill=hx("2a1a0e"))
+    d.line([(0, fy - 9), (W, fy - 9)], fill=hx("1a1006"))
+    d.line([(0, fy - 8), (W, fy - 8)], fill=hx("7a5232"))
+    d.line([(0, fy - 7), (W, fy - 7)], fill=hx("4a2e18"))
+    d.line([(0, fy - 6), (W, fy - 6)], fill=hx("1e1209"))
+    d.line([(0, fy - 5), (W, fy - 5)], fill=hx("3a2414"))
+    d.line([(0, fy), (W, fy)], fill=hx("120a04"))
+    noise(img, (0, 0, W - 1, fy), 4, 51)
+
+
+def _solve(a, b):
+    """Gaussian elimination for the small linear system of a perspective transform."""
+    n = len(b)
+    m = [row[:] + [b[i]] for i, row in enumerate(a)]
+    for c in range(n):
+        p = max(range(c, n), key=lambda r: abs(m[r][c]))
+        m[c], m[p] = m[p], m[c]
+        for r in range(n):
+            if r != c:
+                f = m[r][c] / m[c][c]
+                m[r] = [v - f * w for v, w in zip(m[r], m[c])]
+    return [m[i][n] / m[i][i] for i in range(n)]
+
+
+def _perspective_coeffs(dst, src):
+    """Coefficients for Image.transform(PERSPECTIVE), which maps each output point in dst to the source point in src."""
+    a, b = [], []
+    for (x, y), (u, v) in zip(dst, src):
+        a.append([x, y, 1, 0, 0, 0, -u * x, -u * y])
+        a.append([0, 0, 0, x, y, 1, -v * x, -v * y])
+        b += [u, v]
+    return _solve(a, b)
+
+
+def _parquet(tw, th, seed):
+    """Flat herringbone parquet: columns of slanted oak blocks, alternate columns leaning the other way."""
+    tex = Image.new("RGB", (tw, th))
+    px = tex.load()
+    rnd = random.Random(seed)
+    tones = {}
+    cw, period = 10, 6
+    light_, dark, seam = hx("5a3a20"), hx("3a2412"), hx("1c1008")
+    for y in range(th):
+        for x in range(tw):
+            col, lx = divmod(x, cw)
+            s = lx if col % 2 == 0 else cw - 1 - lx
+            yy = y + s + (col % 2) * (period // 2)
+            k = (col, yy // period)
+            if k not in tones:
+                tones[k] = mix(light_, dark, rnd.random() * 0.8)
+            c = tones[k]
+            if lx == 0 or yy % period == 0:
+                c = seam
+            elif yy % period == 1:
+                c = mul(c, 1.12)
+            px[x, y] = c
+    return tex
+
+
+def _office_floor(img):
+    """Polished herringbone parquet in perspective, with a Persian rug laid over it."""
+    fy = OFFICE_FLOOR_Y
+    fh = H - fy
+    tw, th = 520, 150
+    tex = _parquet(tw, th, 54)
+    # the far edge is the full width of the wall; the near edge is closer, so fewer, larger blocks fill the frame
+    coeffs = _perspective_coeffs([(0, 0), (W, 0), (W, fh), (0, fh)],
+                                 [(20, 0), (tw - 20, 0), (tw - 90, th), (90, th)])
+    floor = tex.transform((W, fh), Image.PERSPECTIVE, coeffs, Image.BILINEAR)
+    img.paste(floor, (0, fy))
+    # the far boards fall into gloom; a polish catches along the middle
+    shadow(img, "rect", [0, fy, W - 1, fy + 10], 0.35, 6)
+    light(img, "ellipse", [140, fy + 8, 360, fy + 40], hx("8a6a50"), 0.12, 12)
+    noise(img, (0, fy, W - 1, H - 1), 4, 53)
+    _office_rug(img)
+
+
+def _office_rug(img):
+    """A Persian rug: a navy border between gold guard stripes, a madder field with spandrels in the corners, a
+    stepped medallion in the middle, small motifs scattered about and a fringe at both ends."""
+    d = ImageDraw.Draw(img)
+    y0, y1 = 214, 262
+
+    def P(u, v):
+        y = y0 + v * (y1 - y0)
+        xl = 90 + (60 - 90) * v
+        xr = 390 + (420 - 390) * v
+        return (round(xl + u * (xr - xl)), round(y))
+
+    def quad(u0, v0, u1, v1, fill=None, outline=None):
+        d.polygon([P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)], fill=fill, outline=outline)
+
+    navy, gold, madder, rust, ivory = hx("1e2238"), hx("a07a46"), hx("5a1e22"), hx("7a3a2a"), hx("c8b48a")
+    # a soft shadow lifts the rug off the boards
+    shadow(img, "polygon", [(92, 216), (392, 216), (424, 266), (58, 266)], 0.35, 3)
+    quad(0, 0, 1, 1, hx("3a1418"), hx("2a0e10"))
+    bu, bv = 0.055, 0.2
+    quad(0.012, 0.05, 0.988, 0.95, None, gold)
+    quad(0.024, 0.09, 0.976, 0.91, navy)
+    # the border's running motif: little gold rosettes on the navy, rust between them
+    for i in range(28):
+        u = 0.04 + i * 0.92 / 27
+        for v in (0.14, 0.86):
+            x, y = P(u, v)
+            d.point((x, y), fill=gold)
+            d.point((x - 1, y), fill=rust)
+            d.point((x + 1, y), fill=rust)
+    for v in (0.3, 0.5, 0.7):
+        for u in (0.035, 0.965):
+            x, y = P(u, v)
+            d.point((x, y), fill=gold)
+            d.point((x, y - 1), fill=rust)
+    quad(bu, bv, 1 - bu, 1 - bv, None, gold)
+    quad(bu + 0.006, bv + 0.03, 1 - bu - 0.006, 1 - bv - 0.03, madder, rust)
+    # spandrels in the field's corners
+    for uc, vc, su, sv in ((bu, bv, 1, 1), (1 - bu, bv, -1, 1), (bu, 1 - bv, 1, -1), (1 - bu, 1 - bv, -1, -1)):
+        d.polygon([P(uc + su * 0.01, vc + sv * 0.04), P(uc + su * 0.09, vc + sv * 0.04),
+                   P(uc + su * 0.01, vc + sv * 0.3)], fill=navy, outline=gold)
+    # the medallion: a stepped lozenge in navy, a gold rim, a madder heart and an ivory centre
+    cu, cv = 0.5, 0.5
+    for (ru, rv, fill, line) in ((0.14, 0.26, navy, gold), (0.09, 0.17, rust, gold), (0.045, 0.09, madder, ivory)):
+        d.polygon([P(cu, cv - rv), P(cu + ru * 0.5, cv - rv * 0.55), P(cu + ru, cv), P(cu + ru * 0.5, cv + rv * 0.55),
+                   P(cu, cv + rv), P(cu - ru * 0.5, cv + rv * 0.55), P(cu - ru, cv), P(cu - ru * 0.5, cv - rv * 0.55)],
+                  fill=fill, outline=line)
+    x, y = P(cu, cv)
+    d.point((x, y), fill=ivory)
+    for s in (-1, 1):  # pendants above and below
+        px0, py0 = P(cu, cv + s * 0.33)
+        d.line([(px0 - 2, py0), (px0 + 2, py0)], fill=gold)
+        d.point((px0, py0 - s), fill=gold)
+    # small motifs across the field, the same on both halves
+    rnd = random.Random(56)
+    for _ in range(26):
+        u, v = rnd.uniform(bu + 0.05, 0.5 - 0.17), rnd.uniform(bv + 0.07, 1 - bv - 0.07)
+        c = rnd.choice((gold, navy, rust, ivory))
+        for uu in (u, 1 - u):
+            x, y = P(uu, v)
+            d.point((x, y), fill=c)
+            d.point((x + 1, y), fill=mul(c, 0.75))
+    # fringe: short at the far end, foreshortened; longer at the near end
+    xa, ya = P(0, 0)
+    xb, _ = P(1, 0)
+    for x in range(xa + 1, xb, 2):
+        d.point((x, ya - 1), fill=hx("8a7a60"))
+    xa, ya = P(0, 1)
+    xb, _ = P(1, 1)
+    for x in range(xa + 1, xb, 2):
+        d.line([(x, ya + 1), (x, ya + 3)], fill=hx("d8ccb0"))
+        d.point((x, ya + 4), fill=hx("a89a80"))
+
+
+def _office_window(img):
+    """A sash window on a wet night: a moulded casing and sill, the sashes with their meeting rail and a brass
+    lock, a rolled-up blind, and beyond the glass the fire escape and the city's lit windows. The four panes stay
+    where the room's rain falls."""
+    d = ImageDraw.Draw(img)
+    # the casing, with a capped head and a sill on brackets
+    d.rectangle([18, 22, 118, 27], fill=hx("5a3c26"), outline=hx("1e1209"))
+    d.line([(19, 23), (117, 23)], fill=hx("8a5e36"))
+    d.rectangle([20, 28, 116, 160], fill=hx("4a3220"), outline=hx("1e1209"))
+    _bevel(d, (21, 29, 115, 159), hx("6a4a2c"), hx("2a1a0e"))
+    d.rectangle([24, 32, 112, 157], outline=hx("2a1a0e"))
+    _bevel(d, (25, 33, 111, 156), hx("2a1a0e"), hx("5e4228"))
+    # the glass: rain-dark sky, the city behind
+    vgrad(img, (30, 36, 106, 154), hx("1e2848"), hx("10162c"))
+    rnd = random.Random(52)
+    x = 30
+    while x < 107:
+        bw, top = rnd.randint(8, 16), rnd.randint(58, 104)
+        col = mix(hx("0a0e1c"), hx("161c34"), rnd.random() * 0.5)
+        d.rectangle([x, top, min(106, x + bw), 154], fill=col)
+        d.line([(x, top), (min(106, x + bw), top)], fill=hx("242c4a"))
+        for wy in range(top + 3, 152, 4):
+            for wx in range(x + 2, min(105, x + bw - 1), 3):
+                r = rnd.random()
+                if r < 0.18:
+                    d.point((wx, wy), fill=hx("e0c068"))
+                    d.point((wx, wy + 1), fill=hx("a08040"))
+                elif r < 0.3:
+                    d.point((wx, wy), fill=hx("5a4a30"))
+        x += bw + 1
+    # a water tower on one roof and an aerial on another
+    d.rectangle([42, 52, 50, 60], fill=hx("0c0f1e"))
+    d.polygon([(41, 52), (46, 47), (51, 52)], fill=hx("0c0f1e"))
+    d.line([(43, 61), (42, 66)], fill=hx("0c0f1e"))
+    d.line([(49, 61), (50, 66)], fill=hx("0c0f1e"))
+    d.line([(90, 50), (90, 64)], fill=hx("0c0f1e"))
+    d.line([(87, 53), (93, 53)], fill=hx("0c0f1e"))
+    # the fire escape: a slatted landing with a railing, the ladder going up past the transom
+    iron, rim = hx("06070e"), hx("2a3250")
+    d.rectangle([30, 138, 106, 141], fill=iron)
+    for x in range(31, 106, 3):
+        d.point((x, 139), fill=rim)
+    d.line([(30, 124), (106, 124)], fill=iron, width=2)
+    d.line([(30, 123), (106, 123)], fill=rim)
+    for x in range(30, 107, 4):
+        d.line([(x, 125), (x, 138)], fill=iron)
+    d.line([(30, 131), (106, 131)], fill=iron)
+    for x in (84, 92):
+        d.line([(x, 36), (x, 124)], fill=iron)
+    for y in range(40, 124, 5):
+        d.line([(84, y), (92, y)], fill=iron)
+    d.line([(85, 36), (85, 124)], fill=rim)
+    d.line([(30, 150), (106, 146)], fill=iron, width=2)
+    # the glass catches a little cold light, the bottom rail of each pane holds a bead of rain
+    for x0 in (30, 70):
+        for y0, y1 in ((36, 92), (96, 154)):
+            d.line([(x0 + 4, y0 + 10), (x0 + 12, y0 + 2)], fill=hx("4a5a8a"))
+            d.line([(x0 + 4, y0 + 14), (x0 + 16, y0 + 2)], fill=hx("2e3a62"))
+            d.line([(x0 + 1, y1 - 1), (x0 + 35, y1 - 1)], fill=hx("3a4a78"))
+    # the sashes: stiles, the meeting rail and a central bar, each with a lit edge, the brass lock on the rail
+    sash, hi, lo = hx("4a3220"), hx("6e4e2e"), hx("24160a")
+    d.rectangle([66, 36, 69, 154], fill=sash)
+    d.line([(66, 36), (66, 154)], fill=hi)
+    d.line([(69, 36), (69, 154)], fill=lo)
+    d.rectangle([30, 92, 106, 95], fill=sash)
+    d.line([(30, 92), (106, 92)], fill=hi)
+    d.line([(30, 95), (106, 95)], fill=lo)
+    d.rectangle([62, 90, 73, 92], fill=hx("8a6a28"))
+    d.line([(63, 90), (72, 90)], fill=hx("e0c068"))
+    d.rectangle([66, 88, 69, 89], fill=hx("b89a48"))
+    for x in (48, 88):
+        d.rectangle([x - 2, 150, x + 2, 152], fill=hx("8a6a28"))  # sash lifts
+        d.point((x, 150), fill=hx("e0c068"))
+    # the blind rolled up under the head, its cord and ring hanging down the right pane
+    d.rectangle([28, 33, 108, 36], fill=hx("b8a888"), outline=hx("4a4030"))
+    d.line([(29, 34), (107, 34)], fill=hx("d8ccb0"))
+    d.line([(100, 37), (100, 70)], fill=hx("c8bca0"))
+    d.ellipse([98, 70, 102, 74], outline=hx("c8a858"))
+    # the sill, its apron and two brackets
+    d.rectangle([14, 157, 122, 163], fill=hx("5a3c26"), outline=hx("1e1209"))
+    d.line([(15, 158), (121, 158)], fill=hx("8a5e36"))
+    d.line([(15, 162), (121, 162)], fill=hx("3a2414"))
+    d.rectangle([22, 164, 114, 170], fill=hx("4a3220"), outline=hx("1e1209"))
+    d.line([(23, 165), (113, 165)], fill=hx("6a4a2c"))
+    for x in (24, 108):
+        d.polygon([(x, 164), (x + 4, 164), (x + 4, 174), (x + 2, 174)], fill=hx("3e2a1a"), outline=hx("1e1209"))
+    shadow(img, "rect", [22, 171, 114, 176], 0.35, 2)
+
+
 def paint_office(left=False, right=False, closet=False, secret=False):
     img = Image.new("RGB", (W, H))
+    _office_wall(img)
+    _office_floor(img)
+    _office_window(img)
     d = ImageDraw.Draw(img)
-    # panelled walls
-    vgrad(img, (0, 0, W - 1, 196), hx("3a2618"), hx("2a1a10"))
-    for x in range(0, W, 40):
-        d.rectangle([x + 4, 110, x + 36, 186], outline=hx("1e1209"))
-        d.line([(x + 5, 111), (x + 35, 111)], fill=hx("5a3c24"))
-    d.rectangle([0, 100, W - 1, 104], fill=hx("5a3a22"))
-    d.rectangle([0, 0, W - 1, 8], fill=hx("1e140c"))
-    noise(img, (0, 0, W - 1, 196), 4, 51)
-    vgrad(img, (0, 196, W - 1, H - 1), hx("3a1a1a"), hx("4a2222"))
-    d.polygon([(90, 214), (390, 214), (420, 262), (60, 262)], fill=hx("4e2428"), outline=hx("7a5a2a"))
-    d.polygon([(96, 218), (384, 218), (410, 258), (70, 258)], outline=hx("a07a46"))
-    for x in range(114, 380, 32):
-        d.polygon([(x, 236), (x + 7, 230), (x + 14, 236), (x + 7, 242)], outline=hx("805238"))
-    noise(img, (0, 196, W - 1, H - 1), 5, 53)
-    # window on the left: the fire escape and the city at night
-    d.rectangle([24, 30, 112, 160], fill=hx("4a3220"))
-    d.rectangle([30, 36, 106, 154], fill=hx("141a30"))
-    rnd = random.Random(52)
-    for _ in range(18):
-        x, y = rnd.randint(32, 104), rnd.randint(90, 150)
-        d.rectangle([x, y, x + 1, y + 2], fill=hx("c8a858"))
-    for y in (100, 140):
-        d.line([(30, y), (106, y)], fill=hx("0a0a10"), width=2)
-    for x in range(30, 107, 6):
-        d.line([(x, 128), (x, 140)], fill=hx("0a0a10"))
-    d.rectangle([66, 36, 69, 154], fill=hx("4a3220"))
-    d.rectangle([30, 92, 106, 95], fill=hx("4a3220"))
-    d.rectangle([20, 160, 116, 166], fill=hx("5a3c26"))
     # Harrington senior's portrait in a heavy gilt frame, a little brass picture light above it
     d.rectangle([212, 16, 284, 102], fill=hx("6a4a1a"))
     d.rectangle([214, 18, 282, 100], fill=hx("b08a3a"))
