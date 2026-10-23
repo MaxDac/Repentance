@@ -1,5 +1,5 @@
 instructions: |
-  Follow AGENTS.md: CI runs the tests. Locally run only a quiet `dotnet build`, never a test suite unless the user
-  asks; finish every implemented plan with a PR whose checks you watch and fix from the CI logs until ci-ok is
-  green (skill pr-and-ci).
+  Follow AGENTS.md: CI runs the tests. Locally run only a quiet `dotnet build` plus the test level (0-5) the user
+  picked while planning, never other suites unless asked; finish every implemented plan with a PR whose checks you
+  watch and fix from the CI logs until ci-ok is green (skill pr-and-ci).
 

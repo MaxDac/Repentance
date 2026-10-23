@@ -9,12 +9,30 @@ do not repeat them locally:
   `dotnet build -v q -clp:ErrorsOnly`. Docs and config changes need nothing.
 - Test suites, `test.ps1` / `test.sh`, `dotnet test` (even one `--filter`ed class), `harness`, film mode and frame
   capture run only when the user explicitly asks. Claude Code prompts before running them.
+- A planning session that will change code asks the user which [test level](#test-levels) to run after
+  implementation, records the answer in the plan, and runs that level before opening the PR.
 - A failing check is diagnosed from its CI log and artifacts, read filtered to the failing lines
   ([Reading a CI failure](ci-and-release.md#reading-a-ci-failure)), then fixed and pushed; CI is the rerun.
 - Tools that are not tests stay available when a task needs them: `tools/music render` to listen, art generation,
   `dotnet build`.
 
 People running the game by hand are not bound by this; the rest of this page describes every suite and launcher.
+
+### Test levels
+
+Each level adds suites to the one above it. Level 0 is the default; level 5 is what CI runs. Run the first launch
+of a level clean; later runs in the same session can use `-NoClean` / `--no-clean`.
+
+| Level | Adds | Checks | Command (PowerShell; bash: `tools/run/test.sh <suites>`) |
+|---|---|---|---|
+| 0 None | `dotnet build` | It compiles; CI runs everything | `dotnet build -v q -clp:ErrorsOnly` |
+| 1 Basic | `unit` | Rules, scene graph, story integrity, Ink walk, music synth; no Godot | `tools\run\test.ps1 -Suite unit` |
+| 2 Tooling | `launcher`, `art` | Run scripts and generated art; Python, no Godot | `tools\run\test.ps1 -Suite unit, launcher, art` |
+| 3 Interaction | `walk`, `settings`, `pause` | Movement in every room, menus, pause (a few minutes) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause` |
+| 4 Story | `playthrough`, `resume-act2`, `resume-act3` | Every ending, save/load, resume in a fresh launch (~12 min more) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause, playthrough, resume-act2, resume-act3` |
+| 5 Full | `autoplay` | Targeted regressions and screenshots: every suite, as CI | `tools\run\test.ps1` |
+
+Exports, packaging and Android are never run locally ([What only CI runs](#what-only-ci-runs)).
 
 ## Quick reference
 

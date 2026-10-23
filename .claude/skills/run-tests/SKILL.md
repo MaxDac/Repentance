@@ -8,9 +8,12 @@ description: Build, import, run and test Repentance (Godot 4.7 .NET) locally ONL
 **Policy (`docs/testing.md`, "Local test policy"):** CI runs every suite on every PR. Run a suite, `dotnet test`,
 the harness, film or frame capture only when the user explicitly asks for it. Before a PR the only local check is
 `dotnet build -v q -clp:ErrorsOnly`. A failing CI check is read from its log (`pr-and-ci`), not rerun here.
+A test level the user picked while planning ("Test levels" in `docs/testing.md`, levels 0 to 5) counts as that
+request: after implementation, run exactly that level's command, once.
 
-Reference: `docs/testing.md` (suite selection, pass rule, harness, film and frame capture).
-When asked, pick only matching suites from its "Quick reference" table. Do not run all suites or film unless asked.
+Reference: `docs/testing.md` (test levels, suite selection, pass rule, harness, film and frame capture).
+When asked for specific suites rather than a level, pick only the matching ones from its "Quick reference" table.
+Do not run all suites or film unless asked.
 
 ```powershell
 tools\run\test.ps1 -Suite unit, playthrough     # first run: clean reset, build, import
