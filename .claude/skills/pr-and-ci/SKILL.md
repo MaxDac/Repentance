@@ -8,7 +8,7 @@ description: Finish a Repentance change - commit, push, open the pull request, w
 Reference: `docs/ci-and-release.md`. CI is the test run (`docs/testing.md`, "Local test policy").
 
 1. Compile: `dotnet build -v q -clp:ErrorsOnly` for C# or Ink changes (nothing for docs/config). Then run only the
-   test level the user chose while planning (`docs/testing.md`, "Test levels"; `run-tests` skill), level 0 if none.
+   test level or groups the user chose while planning (`docs/testing.md`, "Test levels"; `run-tests` skill), level 0 if none.
    Do not run other suites, `dotnet test`, the harness or film unless the user asked.
 2. Commit on the session branch (no new branch).
 3. Pick the base (see "Stacked pull requests" in `docs/ci-and-release.md`):

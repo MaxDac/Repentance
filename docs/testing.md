@@ -34,6 +34,12 @@ of a level clean; later runs in the same session can use `-NoClean` / `--no-clea
 
 Exports, packaging and Android are never run locally ([What only CI runs](#what-only-ci-runs)).
 
+Groups can also be picked on their own: answer the planning question with group names or suites, e.g.
+`Basic, Story` or `unit, playthrough`, and only those run, in the launcher's order
+(`tools\run\test.ps1 -Suite unit, playthrough, resume-act2, resume-act3`). The groups are those added at each level:
+Basic, Tooling, Interaction, Story, and Full, which adds `autoplay`. `resume-act2` / `resume-act3` need
+`playthrough` in the same run (it keeps the checkpoints they load).
+
 ## Quick reference
 
 One entry point runs every local suite: `tools\run\test.ps1` (Windows) or `tools/run/test.sh` (Linux, macOS, Git
