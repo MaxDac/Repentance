@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scripts/Rooms/ConventCell.cs" id="1_ConventCell"]
 [ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell.png" id="2_convent_cell"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/Core/Actor.cs" id="7_Actor"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/nun.png" id="8_nun"]
 [ext_resource type="Texture2D" path="res://assets/art/sprites/duffle_bag.png" id="12_duffle_bag"]
+[ext_resource type="Texture2D" path="res://assets/art/rooms/convent_cell_door_open.png" id="13_door_open"]
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
@@ -81,6 +82,13 @@ centered = false
 script = ExtResource("4_FlagSprite")
 ShowIfFlags = "cell_drawer_open,took_mirror"
 HideIfFlags = "interlude1"
+
+[node name="DoorOpen" type="Sprite2D" parent="."]
+visible = false
+z_index = -9
+position = Vector2(39, 140)
+texture = ExtResource("13_door_open")
+centered = false
 
 [node name="WalkArea" type="Polygon2D" parent="."]
 color = Color(0.3, 0.9, 0.4, 0.35)
