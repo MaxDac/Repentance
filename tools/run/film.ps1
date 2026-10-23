@@ -7,13 +7,14 @@
     -From starts at a chapter: the earlier story still plays, unseen and muted, at 60x behind a black screen.
 .PARAMETER Ending
     The ending to play, by number or by title (case-insensitive); default 2. The numbers are the ones used in
-    docs/story-overview.md ("Branches and endings") and by the playthrough routes; 1-oldman and 1-steps are other
-    routes to ending 1, and 12-oldman to ending 12.
+    docs/story-overview.md ("Branches and endings") and by the playthrough routes; 1-oldman, 1-steps and 1-caleb are
+    other routes to ending 1, and 12-oldman to ending 12.
 
     Number    Title                    Ending
     1         walk-away                Micah lowers the gun on Tony; coffee with Rose
     1-oldman  spare-the-old-man        He prays the Our Father and spares the old man; coffee with Rose
     1-steps   give-up                  He gives up on the cathedral steps; coffee with Rose
+    1-caleb   eleanor-escapes          Eleanor held out, he lowers the gun on Tony; Rose, then Eleanor and Caleb
     2         escape-together          Evidence or fire, Eleanor convinced; out of town with her
     3         escape-alone             Evidence or fire, Eleanor not convinced; out of town alone
     4         prison-eleanor-visits    Neither, Eleanor convinced; prison, Eleanor visits
@@ -32,13 +33,13 @@
     tools\run\film.ps1                  # 1x, ending 2
     tools\run\film.ps1 -Speed 4 -Ending 5
     tools\run\film.ps1 -Speed 4 -Ending prison-caleb-visits   # the same as -Ending 5
-    tools\run\film.ps1 -Speed 2 -Ending 1-oldman   # ending 1 variants: 1 (Tony), 1-oldman, 1-steps
+    tools\run\film.ps1 -Speed 2 -Ending 1-oldman   # ending 1 variants: 1 (Tony), 1-oldman, 1-steps, 1-caleb
     tools\run\film.ps1 -Speed hyper -From ending -Ending 8
 #>
 param(
     [ValidateSet('1', '2', '4', '8', '16', '60', 'hyper')][string]$Speed = '1',
-    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '1-oldman', '1-steps', '12-oldman',
-        'walk-away', 'spare-the-old-man', 'give-up', 'escape-together', 'escape-alone', 'prison-eleanor-visits',
+    [ValidateSet('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '1-oldman', '1-steps', '1-caleb', '12-oldman',
+        'walk-away', 'spare-the-old-man', 'give-up', 'eleanor-escapes', 'escape-together', 'escape-alone', 'prison-eleanor-visits',
         'prison-caleb-visits', 'turn-himself-in', 'last-entry', 'eleanor-burns-the-house', 'eleanor-confesses',
         'she-leaves-by-the-car', 'she-visits-once', 'kill-tony-surrender', 'kill-tony-pray',
         'alarm-run', 'alarm-ambush')][string]$Ending = '2',
@@ -50,7 +51,7 @@ param(
 
 # Ending titles to the numbers the game takes; keep in step with .PARAMETER Ending and film.sh.
 $endingNumbers = @{
-    'walk-away' = '1'; 'spare-the-old-man' = '1-oldman'; 'give-up' = '1-steps'
+    'walk-away' = '1'; 'spare-the-old-man' = '1-oldman'; 'give-up' = '1-steps'; 'eleanor-escapes' = '1-caleb'
     'escape-together' = '2'; 'escape-alone' = '3'; 'prison-eleanor-visits' = '4'; 'prison-caleb-visits' = '5'
     'turn-himself-in' = '6'; 'last-entry' = '7'; 'eleanor-burns-the-house' = '8'; 'eleanor-confesses' = '9'
     'she-leaves-by-the-car' = '10'; 'she-visits-once' = '11'

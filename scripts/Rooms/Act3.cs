@@ -58,6 +58,17 @@ public static class Act3
     }
 
     /// <summary>
+    /// Ending 1 after an early give-up, when Eleanor held out: after Micah's coffee at Rose's door, the player is Eleanor
+    /// at the city's edge with Caleb, who got her out. The ending is already recorded; this is her last scene.
+    /// </summary>
+    public static Task EleanorWithCaleb()
+    {
+        State.SetFlag("caleb_escape");
+        State.SetFlag("eleanor_epilogue");
+        return Game.ChangeRoom("outskirts", "eleanor_caleb");
+    }
+
+    /// <summary>
     /// "End of Act Three", then the attic, where Daniel reads the last entry: the next morning, or straight on from his
     /// bed when <paramref name="nextMorning"/> is false (endings 7 and 14, which have already cut to black).
     /// </summary>

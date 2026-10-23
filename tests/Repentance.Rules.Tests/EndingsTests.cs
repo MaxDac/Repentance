@@ -159,6 +159,19 @@ public class EndingsTests
     }
 
     [Fact]
+    public void CalebGetsEleanorOutOnlyAfterAnEarlyGiveUpWhenSheHeldOut()
+    {
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "gave_up_steps")));
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "walked_away")));
+        Assert.Equal(1, Endings.Resolve(Flags(Abbess, Drugs, "walked_away")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, "gave_up_steps")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Drugs, "walked_away")));
+        // the Our Father, with Eleanor back in bed in her coda, is ending 1 without the escape
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "spared_oldman")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "surrendered_tony", "killed_tony")));
+    }
+
+    [Fact]
     public void FreeEleanorWearsWhiteOnlyIfSheHeldOut()
     {
         Assert.Equal("eleanor_white", Endings.EleanorFreeOutfit(Flags(Abbess, Drugs)));

@@ -133,7 +133,8 @@ public partial class RoseHouse : Room
 
     /// <summary>
     /// Ending 1, giving up on Eleanor: Micah asks Rose out for a coffee, and that's the end of Act Three. In endings 8
-    /// and 9 (Eleanor struck the old man after Micah left) the same scene leads on to hers.
+    /// and 9 (Eleanor struck the old man after Micah left) the same scene leads on to hers, and so it does in ending 1
+    /// after an early give-up if she held out (<see cref="Act3.EleanorWithCaleb"/>).
     /// </summary>
     private Task Coffee() => Game.Run(async () =>
     {
@@ -158,6 +159,14 @@ public partial class RoseHouse : Room
             await Wait(1.0);
             await Game.Hud.Fade(1, 1.5);
             await Act3.EleanorAfterRose();
+            return;
+        }
+        if (Endings.EleanorEscapesWithCaleb(State.HasFlag))
+        {
+            // ending 1 when she held out: Caleb has got Eleanor out of the city, and she has one last scene
+            await Wait(1.0);
+            await Game.Hud.Fade(1, 1.5);
+            await Act3.EleanorWithCaleb();
             return;
         }
         await Act3.Finish();
