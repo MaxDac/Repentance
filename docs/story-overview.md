@@ -277,7 +277,7 @@ How each decision is made:
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
   on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
 - **Eleanor's escape outfits**: once out of the sheet she wears what she packed in her duffle. Held out
-  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11): a white dress with her pearls. Gave in (endings 2, 4): a black
+  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11, and ending 1 with Caleb): a white dress with her pearls. Gave in (endings 2, 4): a black
   skirt suit cut above the knee, no pearls. In prison (ending 9) she wears the inmate grey.
 - **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
   give Micah something to bargain with and keep him out of prison.
@@ -321,7 +321,8 @@ the girls who escape; Caleb keeps silent so the Club leaves the convent alone (T
 near those nuns"). Harrington's unmasking and Tony at gunpoint touch on the girls, and Caleb's later visits return to
 his silence. The traffic ends only where somebody exposes it: Micah's signed papers in endings 1, 6 and 10 (Caleb
 carries them to the Tribune, they come out at Micah's trial, or Eleanor asks him to give them to the papers),
-Eleanor's testimony at her trial in ending 9 and the old man's Thursday book she mails to the Tribune in ending 8.
+Eleanor's testimony at her trial in ending 9, the old man's Thursday book she mails to the Tribune in ending 8,
+and Micah's papers handed in with his confession to the grand jury in ending 12.
 Endings 2 and 3 keep the papers as Micah's private insurance. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving's the easy part, Micah.

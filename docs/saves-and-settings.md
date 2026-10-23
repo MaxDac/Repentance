@@ -38,7 +38,9 @@ For compatible changes to puzzle progress, extend `PuzzleMigration` instead (it 
 marks the save with `puzzles_v1` / `puzzles_act3_v1`). Where a room flag can be missing from an older save of the
 same version, the room recovers by itself: a convent-cell save from before Eleanor set her duffle down on entry
 (no `interlude_bag_left`) loads with the bag in her hand, and her first click on the bed, nightstand or door sets
-it down (`ConventCell.InterludeInteract`).
+it down (`ConventCell.InterludeInteract`). An alley save from before the finish-or-leave choice moved into Tony's
+shot scene (Tony wounded on the gravel, `shot_bartender` without `killed_tony`) still lets Micah use the revolver on
+Tony to finish him (`Alley.OnInteract`).
 
 | Version | Change |
 |---|---|

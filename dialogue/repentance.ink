@@ -1397,7 +1397,7 @@ THOUGHT: I don't look back. If I look back, I stay.
 // The persuasion ran out and the men are on the stairs: the last choice in the bedroom.
 === eleanor_footsteps ===
 THOUGHT: Two men. Maybe three. Coming up the stairs, in no hurry. They don't need to hurry.
-THOUGHT: She isn't coming. A door behind me, a gun in my hand, and maybe ten seconds to choose.
+THOUGHT: She isn't coming. A door behind me, a gun under my arm, and maybe ten seconds to choose.
 * [(Pull the trigger on myself.)]
     ~ set_flag("shot_himself")
     THOUGHT: No more running. Not from them, not from Caleb, not from the man in the mirror.
@@ -1676,7 +1676,7 @@ THOUGHT: She said it like she was closing a door. Softly. The way you close it o
 // Ending 1, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house.
 === ending_eleanor_caleb ===
 THOUGHT: Three nights after the Club. The edge of the city, past the last streetlight, and for once the rain had stopped.
-THOUGHT: She had walked out of the old man's house by the coal door, in the white dress from the duffle she'd packed for running, and her pearls. The priest had been waiting at the corner with his collar turned up, like a man who had done it before.
+THOUGHT: She had slipped out of the old man's house before it woke, with the duffle she'd packed for running, and changed into the white dress and her pearls. The priest had been waiting at the corner with his collar turned up, like a man who had done it before.
 ELEANOR: It's one thing, Father, sneaking a girl or two out the back of the Club. Nobody misses a girl or two.
 ELEANOR: But I'm their star. They won't take this lying down. They'll come after you.
 CALEB: I know.
@@ -1687,7 +1687,9 @@ CALEB: The Franciscan sisters there will put you up for a week or two, until a f
 CALEB: And this. It isn't much.
 ELEANOR: An envelope. From the poor box, Father?
 CALEB: From the poor box. You're poor tonight.
-ELEANOR: Your brother came for me too, you know. With a revolver, and a bottle, and that hat.
+ELEANOR: You're his brother, aren't you? Micah's. You have his hands.
+CALEB: So people tell me.
+ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
 CALEB: I know. He went home instead. To Rose, and a cup of coffee.
 ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
 THOUGHT: Headlights came up the road out of the dark, slow, the way a man drives when he's carrying crates of cabbages and a secret.

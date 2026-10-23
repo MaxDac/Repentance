@@ -268,6 +268,11 @@ public class InkWalkTests
     [InlineData("epilogue", "ending_1,caleb_escape", "the night he got her out of Chicago", "rectory steps")]
     [InlineData("ending_eleanor_caleb", "caleb_escape", "CALEB: But I'm tired of playing their game.", null)]
     [InlineData("ending_eleanor_caleb", "caleb_escape", "ELEANOR: Say hi to Micah.", null)]
+    [InlineData("ending_eleanor_caleb", "caleb_escape", "ELEANOR: You're his brother, aren't you? Micah's. You have his hands.", "Your brother came for me")]
+    [InlineData("ending_eleanor_caleb", "caleb_escape", "Into the Club, in one of their masks, and they carried him out.", "a bottle, and that hat")]
+    [InlineData("ending_eleanor_caleb", "caleb_escape", "slipped out of the old man's house before it woke", "coal door")]
+    [InlineData("eleanor_footsteps", "", "A door behind me, a gun under my arm, and maybe ten seconds to choose.", "a gun in my hand")]
+    [InlineData("epilogue", "ending_12,took_documents", "The grand jury read every name.", null)]
     [InlineData("epilogue", "ending_1,took_documents", "Caleb carried them into the Tribune himself", null)]
     [InlineData("epilogue", "ending_7,killed_tony,confessed_tony,shot_himself", "What else I know of it, I may not write.", "police")]
     public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)

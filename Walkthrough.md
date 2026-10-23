@@ -669,7 +669,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     to hold them together." Take the paste pot from the layout desk. Items join two at a time: the paste with
     either half gives a pasted half, and the pasted half with the other half gives the mended clipping (the paste
     is kept; it goes back on the desk when Micah leaves, or by using it on the desk). A pasted half doesn't take
-    more paste, and two pasted halves aren't needed.
+    more paste; two pasted halves still join into the mended clipping.
   - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
     halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
     LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.
@@ -1102,13 +1102,15 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   and powder refused) and Micah gave up before the mansion (on the church steps, or walking away from Tony), it is
   still ending 1, but after Rose's "Why not." the screen fades to the outskirts at night (`caleb_escape`). The rain
   has stopped. The player is Eleanor in her white dress and pearls, from the duffle she had packed for running;
-  Caleb stands beside her, and the scene plays by itself. A few nights after the Club, Caleb got her out of the old
+  Caleb stands beside her, and the scene plays by itself. Three nights after the Club, Caleb got her out of the old
   man's house:
   - Eleanor: it's one thing for him to sneak a few of the other girls out the back, but she's their star; they won't
     take it lying down, and they'll come after him. Caleb: "I know. But I'm tired of playing their game."
   - Practical arrangements: a parishioner's produce truck passes before dawn and takes her downstate to Springfield,
     where Caleb's friends, the Franciscan sisters, put her up with no questions until a family he knows can take her
     on to St. Louis; he gives her an envelope with a little money.
+  - Eleanor knows Caleb for Micah's brother by his hands, and tells him Micah came for her into the Club, masked,
+    and was carried out.
   - Eleanor learns that Micah went home to his wife, and is glad of it. Her last words, as the truck's lights come
     up the road: "Say hi to Micah."
   - Then *End of Act Three*. The journal's last entry is ending 1's, but the Second Interlude's source changes: Caleb

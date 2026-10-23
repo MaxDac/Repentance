@@ -278,6 +278,12 @@ public partial class Alley : Room
                 await Say("With my bare hands? He'd fold me in half. I need something heavier than my fists.");
                 return true;
 
+            // a save from before the finish-or-leave choice moved into bartender_shot: Tony wounded, still undecided
+            case ("bartender", Verb.UseItem) when item == "revolver" && State.HasFlag("shot_bartender")
+                                                  && !State.HasFlag(Endings.KilledTony) && FindActor("bartender") is { } shot:
+                State.SetFlag("finish_tony");
+                await KillTony(shot);
+                return true;
             case ("bartender", Verb.Look) when State.HasFlag(Endings.KilledTony):
                 await Say("Tony, on his back in the rain, looking at nothing. He told me everything. Then I made sure he couldn't tell anyone else.");
                 return true;
