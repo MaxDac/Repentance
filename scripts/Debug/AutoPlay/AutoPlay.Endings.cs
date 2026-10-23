@@ -645,6 +645,24 @@ public partial class AutoPlay
     /// </summary>
     private async Task KillTonyEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
+        // a save from before #331 (Tony wounded on the gravel, the choice not yet made) can still finish him
+        Seed(alleyReady.Where(f => f != "alley3_tony_inside").Append(Endings.ShotBartender), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await WaitIdle(game);
+        await game.LoadGame(game.CaptureSave());
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Alley" && game.Room?.FindActor("bartender") is { Visible: true } wounded &&
+              wounded.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
+            "a legacy wounded-Tony save loads with Tony on the gravel");
+        await game.Perform(Verb.UseItem, "bartender", "revolver");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.KilledTony) && gs.HasFlag("finish_tony") &&
+              game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true,
+            "on a legacy wounded-Tony save the revolver on Tony still finishes him");
+        await game.Perform(Verb.Walk, "street");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "ChicagoMap", "after the legacy kill, the street opens onto the map");
+
         // the shoulder shot ends on a choice; "Finish him" plays the second shot once the dialogue is over
         Seed(alleyReady, act3Items, "Shoot him in the shoulder", "Finish him");
         await game.ChangeRoom("alley", "act3");

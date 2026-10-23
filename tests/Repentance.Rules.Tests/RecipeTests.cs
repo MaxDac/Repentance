@@ -96,6 +96,27 @@ public class RecipeTests
         Assert.Equal(new[] { "mended_clipping" }, flags);
     }
 
+    [Theory]
+    [InlineData("clipping_top_pasted", "clipping_bottom_pasted")]
+    [InlineData("clipping_bottom_pasted", "clipping_top_pasted")]
+    public void BothPastedHalvesStillJoin(string a, string b)
+    {
+        // The raw halves are one-shot pickups, so pasting both must not strand the clipping.
+        var bag = new HashSet<string> { "clipping_top", "clipping_bottom", "paste" };
+        var flags = new List<string>();
+        void Combine(string x, string y)
+        {
+            var outcome = Recipes.Evaluate(x, y, bag.Contains);
+            Assert.NotNull(outcome?.Result);
+            Recipes.Apply(outcome!, id => bag.Remove(id), id => bag.Add(id), flags.Add);
+        }
+        Combine("paste", "clipping_top");
+        Combine("paste", "clipping_bottom");
+        Combine(a, b);
+        Assert.Equal(new[] { "clipping", "paste" }, bag.Order());
+        Assert.Equal(new[] { "mended_clipping" }, flags);
+    }
+
     [Fact]
     public void EleanorsBoxChainUsesUpTheThreadAndEndsPacked()
     {
@@ -157,7 +178,6 @@ public class RecipeTests
     [InlineData("pellet_wrapped", "eleanor_box", "tying")]
     [InlineData("paste", "clipping_top_pasted", "other half")]
     [InlineData("paste", "clipping_bottom_pasted", "other half")]
-    [InlineData("clipping_top_pasted", "clipping_bottom_pasted", "One pasted edge")]
     [InlineData("compact", "lipstick", "puff")]
     public void WrongCombinationsAreRefusedWithAHint(string a, string b, string hint)
     {
