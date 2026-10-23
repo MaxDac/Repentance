@@ -497,23 +497,20 @@ def tool_tin(img, at=TIN_AT, opened=False):
     w, h = 18, 8
     shadow(img, "rect", [x - 2, y - 3, x + w + 3, y + 1], 0.6, 1)
     back = along((x, y - h), 0.93)
-    dx, dy = back[0] - x, back[1] - (y - h)
+    dx, dy = 0, back[1] - (y - h)  # seen square on: the top recedes straight up, not towards the vanishing point
     lid = [(x, y - h), (x + w, y - h), (x + w + dx, y - h + dy), (x + dx, y - h + dy)]
     d.polygon([(x, y - h), (x + dx, y - h + dy), (x + dx, y + dy), (x, y)], fill=hx("7a1e18"))
     if opened:
-        # the lid thrown back past upright, its paler inside towards the room, hinged along the back edge
-        bx0, by = x + dx, y - h + dy
-        lh, lean = 8, 4
-        raised = [(bx0, by), (bx0 + w, by), (bx0 + w + lean, by - lh), (bx0 + lean, by - lh)]
+        # the lid stood upright on its hinges along the back edge, seen square on, its inside towards the room
+        by, lh = y - h + dy, 8
         # its red edge, then the bare steel lining that faces the room once the lid is thrown back
-        d.polygon(raised, fill=hx("8a2218"), outline=hx("4a1210"))
-        d.polygon([(bx0 + 2, by - 1), (bx0 + w - 1, by - 1), (bx0 + w + lean - 2, by - lh + 1), (bx0 + lean + 1, by - lh + 1)],
-                  fill=hx("a8a8b0"))
-        d.line([(bx0 + 2, by - 1), (bx0 + w - 1, by - 1)], fill=hx("6a6870"))
-        d.line([(bx0 + lean + 1, by - lh + 1), (bx0 + 2, by - 1)], fill=hx("6a6870"))
-        d.line([(bx0 + lean + 1, by - lh), (bx0 + w + lean - 1, by - lh)], fill=hx("e8705a"))
+        d.rectangle([x, by - lh, x + w, by], fill=hx("8a2218"), outline=hx("4a1210"))
+        d.rectangle([x + 2, by - lh + 2, x + w - 2, by - 1], fill=hx("a8a8b0"))
+        d.line([(x + 2, by - 1), (x + w - 2, by - 1)], fill=hx("6a6870"))
+        d.line([(x + 2, by - lh + 2), (x + 2, by - 1)], fill=hx("6a6870"))
+        d.line([(x + 1, by - lh + 1), (x + w - 1, by - lh + 1)], fill=hx("e8705a"))
         # the hasp's staple on the lid's front edge, swung up with it
-        sx = bx0 + w // 2 + lean
+        sx = x + w // 2
         d.rectangle([sx - 1, by - lh - 1, sx + 1, by - lh + 1], fill=hx("b8b4a8"))
         # the open box: a dark well, its tin floor catching a little light, the rim's bare metal edge
         d.polygon(lid, fill=hx("241a10"))
