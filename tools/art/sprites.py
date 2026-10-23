@@ -1799,6 +1799,35 @@ def struck_strip(spec, name, final_name, arms):
     return frames
 
 
+# Act 3, on the club stage: the stag takes his face off in front of everyone. From the masked idle, the near hand
+# (s = -1) goes to the carved jaw and lifts the mask away, his own old face appearing in the cowl's shadow; the far hand
+# pushes the cowl back off his bald head, and both hands come down to fold the mask against his chest, ending on the
+# leader_unmasked idle. (spec, near arm, far arm, front arms, seconds)
+_UNMASK_HELD = dict(LEADER_UNMASKED, held_mask=(-1,) + LEADER_UNMASKED["held_mask"][1:])
+_FOLD = _arms("fold")[1]
+UNMASK_KEYS = [
+    (MASKED_STAG, _FOLD, _FOLD, (), 0.3),
+    (MASKED_STAG, ("pts", (-0.19, 0.33, 0.06), (-0.05, 0.19, 0.11), (-0.03, 0.15, 0.10)), _FOLD, (-1,), 0.45),
+    (dict(_UNMASK_HELD, hat="cowl"), ("pts", (-0.19, 0.30, 0.10), (-0.05, 0.14, 0.17), (-0.02, 0.11, 0.18)), _FOLD,
+     (-1,), 0.7),
+    (_UNMASK_HELD, ("pts", (-0.17, 0.37, 0.06), (-0.04, 0.29, 0.14), (-0.01, 0.27, 0.15)),
+     ("pts", (0.20, 0.20, -0.03), (0.08, 0.06, -0.05), (0.04, 0.03, -0.06)), (-1, 1), 0.6),
+    (_UNMASK_HELD, ("pts", (-0.17, 0.39, 0.04), (-0.03, 0.40, 0.11), (-0.01, 0.39, 0.12)),
+     ("pts", (0.19, 0.36, 0.0), (0.09, 0.40, 0.06), (0.04, 0.42, 0.08)), (), 0.2),
+    (LEADER_UNMASKED, _FOLD, _FOLD, (), 0.4),
+]
+
+
+def unmask_strip(name="leader_unmask"):
+    frames, seconds = [], []
+    for spec, near, far, front, duration in UNMASK_KEYS:
+        ps = pose(35, arms={1: far, -1: near}, front_arms=front)
+        frames.append((figure(spec, ps, NPC_W, FH), (NPC_W / 2, 18)))
+        seconds.append(duration)
+    action_strip(name, frames, seconds, anchor=(NPC_W / 2, FH - 3))
+    return frames
+
+
 def gunned_down_strip(spec, name, final_name):
     """Shot in the chest from in front while facing right: thrown back off his feet and flat on his back, head to the
     left (FALL, as in the masked collapse). The coat is soaked across the chest from the hit on, and blood pools under
@@ -1912,6 +1941,7 @@ def build_act3():
     fall_strip(dict(ELEANOR_SHEET_NPC, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
     struck_strip(HARRINGTON_GOWN, "harrington_struck", "harrington_struck_down", _arms("down", "pocket"))
+    unmask_strip()
     eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     inmate_seated_strip(ELEANOR_INMATE_NPC, "eleanor_inmate_seated")

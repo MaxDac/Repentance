@@ -503,6 +503,26 @@ class CharacterArtTests(unittest.TestCase):
         ankle = grounded_joints(sprites.SHOULDER_SHOT[-1])[4]
         self.assertLess(xs.max(), (shoulder[0] + ankle[0]) / 2, "no blood down the legs")
 
+    def test_leader_unmask_runs_from_the_masked_idle_to_the_unmasked_idle(self):
+        clip = json.loads((ART / "sprites" / "leader_unmask.json").read_text())
+        image = Image.open(ART / "sprites" / "leader_unmask.png").convert("RGBA")
+        width, height = clip["width"], clip["height"]
+        self.assertEqual((width, height), (56, 96))
+        frames = [image.crop((i * width, 0, (i + 1) * width, height)) for i in range(len(clip["frames"]))]
+        for start, (name, index) in ((frames[0], ("masked_stag", 0)), (frames[-1], ("leader_unmasked", 0))):
+            idle = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA").crop((index * 56, 0, index * 56 + 56, 96))
+            self.assertEqual(start.tobytes(), idle.tobytes(), name)
+        for frame in frames:
+            ys, xs = np.nonzero(np.array(frame.getchannel("A")) >= 250)
+            self.assertGreater(xs.min(), 0)
+            self.assertLess(xs.max(), width - 1)
+            self.assertGreater(ys.min(), 0)
+        # antlers first, then the cowl's peak, leave the top of his silhouette as the mask and the hood come off
+        tops = [int(np.nonzero(np.array(frame.getchannel("A")) >= 250)[0].min()) for frame in frames]
+        self.assertLess(tops[0], tops[2], "the mask is lifted off his face")
+        self.assertLess(tops[2], tops[3], "the cowl is pushed back off his head")
+        self.assertEqual(tops[3], tops[-1])
+
     def test_door_reach_is_the_idle_pose_then_an_extended_arm(self):
         for name, spec, yaw in (("micah_open_door", sprites.MICAH, sprites.PLAYER_IDLE_YAW),
                                 ("teddy_open_door", sprites.TEDDY, 35),
