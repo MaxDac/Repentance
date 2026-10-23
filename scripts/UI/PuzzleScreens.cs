@@ -54,7 +54,7 @@ public abstract class PuzzleScreen
 
     public virtual void Draw(CanvasItem canvas) { }
 
-    protected Button Button(string id, string text, float x, float y, float width, Action action, float height = 22) =>
+    protected Button Button(string id, string text, float x, float y, float width, Action action, float height = 20) =>
         Panel.AddButton(id, text, new Rect2(x, y, width, height), () =>
         {
             action();
@@ -273,17 +273,17 @@ public sealed class CatalogueScreen : PuzzleScreen
             {
                 _motif = index;
                 Say(index == 1 ? "Connected triquetra. Now select Bell's entry." : "That plate differs from the mirror's three joined loops.");
-            }, 20);
+            }, 18);
         }
         string[] entries = { "Ash: Wells / C-02", "Birch: Groves / C-09", "Bell: Rites / C-17" };
         for (int i = 0; i < 3; i++)
         {
             int index = i;
-            Button($"entry{i}", entries[i], 24, 142 + i * 21, 236, () =>
+            Button($"entry{i}", entries[i], 24, 142 + i * 22, 236, () =>
             {
                 if (PuzzleRules.Catalogue(_motif, index)) Panel.Solve();
                 else Say("Match the motif, then the author. Nothing is checked out.");
-            }, 20);
+            }, 18);
         }
     }
 

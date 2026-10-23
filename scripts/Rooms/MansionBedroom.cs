@@ -145,7 +145,7 @@ public partial class MansionBedroom : Room
         State.SetFlag("eleanor_up", false);
         await Talk("coda_bed");
         await Game.Hud.Fade(1, 1.5);
-        State.SetFlag("eleanor_coda", false);
+        Story.Interlude.EndCoda();
         await Act3.End();
     }
 
@@ -223,13 +223,13 @@ public partial class MansionBedroom : Room
         if (State.HasFlag(Endings.SparedOldMan))
         {
             // oldman_taunt went on into oldman_prayer: the Our Father, backing towards the door (OnCue).
-            Player.SetPose(null);
+            await Player.Holster("micah_holster_low");
             await Game.WalkTo(Door);
             await PrayerEnding();
             if (Endings.EleanorHeldOut(State.HasFlag))
             {
                 // She never gave in: the story stays in the room after he's gone, and the player is Eleanor.
-                State.SetFlag("eleanor_coda");
+                Story.Interlude.BeginCoda();
                 await Game.ChangeRoom("mansion_bedroom", "eleanor_coda");
                 return;
             }
@@ -244,7 +244,7 @@ public partial class MansionBedroom : Room
             harrington.SetTexture(Shot);
         }
         await Wait(1.0);
-        Player.SetPose(null);
+        await Player.Holster();
         await Think("The old man folds onto his own carpet. Cordite and lilies. My hands are steady. That's the worst of it.");
         if (Endings.EleanorHeldOut(State.HasFlag))
         {
@@ -310,7 +310,10 @@ public partial class MansionBedroom : Room
         }
     }
 
-    /// <summary>The end of the prayer Micah left the room on, over black, a line at a time, on the way to Rose's.</summary>
+    /// <summary>
+    /// The end of the prayer Micah left the room on, over black, a line at a time, down to the Amen he never said in
+    /// the room.
+    /// </summary>
     public static readonly string[] Doxology =
         { "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen." };
     public const double DoxologyFade = 3.5;
@@ -330,6 +333,7 @@ public partial class MansionBedroom : Room
     private async Task MurderSuicide(Actor? eleanor)
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await Say("*BANG*");
@@ -348,6 +352,7 @@ public partial class MansionBedroom : Room
     private async Task Suicide()
     {
         Player.Face(Facing.Right);
+        await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         await Wait(0.6);
         await LastShot();

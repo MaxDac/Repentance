@@ -116,7 +116,7 @@ From here the story follows Walkthrough.md:
    then Agatha confesses that she went to Eleanor's cell and failed her (still calling her a Jezebel only if Eleanor
    seduced her). Try Harrington senior. Micah decides to look him up at the Tribune.
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
-    bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
+    bottom from the copy spike and the paste pot from the layout desk; paste one half, combine it with the other half,
     and Micah pins the mended clipping on the Loop wall map at once. The Harrington Building replaces the Tribune on the map.
 23. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge
@@ -164,8 +164,8 @@ From here the story follows Walkthrough.md:
 33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
    Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
    a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1, or 12 if Tony was killed). Then talk Eleanor into leaving: four turns of four lines, each line
-   typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can lower the gun and
-   leave her to turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
+   typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can
+   leave her and turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
    If Eleanor told Agatha the truth and refused the old man: after the Our Father the player is Eleanor in the sheet, with the
    old man's back turned. Return to bed (ending 1, or 12 if Tony was killed), or take the candlestick off the nightstand and strike him, then
@@ -247,7 +247,8 @@ How each decision is made:
 
 - **Give up** (cathedral steps, after Bruno knocks Micah out): always offered; sets `gave_up_steps`.
 - **Lower the gun** (Tony): only with the church return and the wedding ring in his pocket; sets `walked_away`.
-- **Kill Tony** (the revolver on him again, after the shoulder): Tony knows who shot him, and he's the mob. A second
+- **Kill Tony** (the dialogue choice "Finish him" after the shoulder, else Micah leaves him and walks out): Tony
+  knows who shot him, and he's the mob. A second
   bullet sets `killed_tony` and opens a night map with only the Blue Lantern, the church and the mansion. At the
   church Micah confesses to Caleb: he turns himself in (`surrendered_tony`, ending 12) or promises to after Eleanor
   (`confessed_tony`). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
@@ -325,7 +326,7 @@ he admits that his pursuit is driven by lust for Eleanor, in conflict with retur
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving's the easy part, Micah.
 Forgetting is what you keep asking for."; her callback is concern, not forgiveness earned by repeatedly asking.
 Micah throws Eleanor's perfumed cloth in the street before ringing, then offers coffee with "Nothing you owe me.";
-the journal places renewed vows a year later, and Daniel sees their photograph from that day (a sepia print on a
+the journal has them say their promises again a year later, and Daniel sees their photograph from that day (a sepia print on a
 cream card).
 His office reminder preserves the last opportunity to recover the wedding ring and visit Caleb.
 

@@ -86,16 +86,29 @@ public sealed partial class Playthrough
                 await WaitIdle();
                 Expect("MansionCellar", "Eleanor down to the cellar");
                 await Do(Verb.Hand, "hung_lantern");
+                Check(Gs.HasItem("lantern_lit") && _game.Hud.SatchelVisible, "the lit lantern in Eleanor's own satchel");
                 await Do(Verb.Hand, "barrel");
+                Check(Gs.HasFlag("barrel_open") && !Gs.HasFlag(Endings.EleanorBurned), "she opens the spigot");
+                await Do(Verb.UseItem, "barrel", "lantern_lit");
                 await WaitIdle();
-                Check(Gs.HasFlag(Endings.EleanorBurned) && Gs.HasFlag("cellar_fire"), "Eleanor sets the whiskey alight");
+                Check(Gs.HasFlag(Endings.EleanorBurned) && Gs.HasFlag("cellar_fire") && !Gs.HasItem("lantern_lit"),
+                    "Eleanor sets the whiskey alight with the lantern");
                 Expect("MansionKitchen", "up out of the burning cellar");
             });
         await Beat("eleanor_coda_escape", async () =>
         {
+            bool blaze = false;
             _ = Do(Verb.Walk, "back_door");
-            await Until(() => _game.Room?.Name == "RoseHouse", 300);
+            await Until(() =>
+            {
+                blaze |= _game.Room?.Name == "MansionExterior" &&
+                    _game.Room.GetNodeOrNull<CanvasItem>("EleanorFire")?.Visible == true;
+                return _game.Room?.Name == "RoseHouse";
+            }, 300, 0.05);
             Check(_game.Room?.Name == "RoseHouse", "Micah's coffee with Rose");
+            Check(blaze == (_route == "8"), $"the house {(_route == "8" ? "burns" : "stays dark")} behind her outside");
+            Check(!Gs.HasItem("lantern_lit") && !Gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                "Micah's things back with him, and nothing of Eleanor's");
             string last = _route == "8" ? "Outskirts" : "Prison";
             await Until(() => _game.Room?.Name == last, 600);
             Expect(last, _route == "8" ? "Eleanor alone at the city's edge" : "Eleanor confesses to Caleb");
@@ -129,10 +142,12 @@ public sealed partial class Playthrough
                 break;
             case "12":
                 yield return "Shoot him in the shoulder";
+                yield return "Finish him";
                 yield return "(Turn yourself in.)";
                 break;
             case "12-oldman":
                 yield return "Shoot him in the shoulder";
+                yield return "Finish him";
                 yield return "Not yet";
                 yield return "Our Father";
                 break;

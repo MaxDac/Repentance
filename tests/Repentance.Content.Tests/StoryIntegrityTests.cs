@@ -31,6 +31,7 @@ public class StoryIntegrityTests
     private static readonly Dictionary<string, string> OneShotKnots = new()
     {
         ["bartender_gun"] = "Alley: Tony at gunpoint, once; afterwards he is shot or Micah has left, and later talks use other lines",
+        ["bartender_shot"] = "Alley: once, right after the shoulder shot; Micah then kills Tony or walks out, and never hears it again",
         ["beaten_choice"] = "ChurchExterior: the church steps cutscene, played once on the way out of the Club",
         ["caleb_club"] = "Church: Act 2 Club talk, guarded by caleb_club; later visits use other knots",
         ["caleb_tony"] = "Church: the confession after killing Tony, once; surrender ends Act 3 and confessed_tony skips it on return",
@@ -295,6 +296,11 @@ public class StoryIntegrityTests
     [InlineData("visiting-room glass", "Joliet's visiting room is a table with a NO TOUCHING sign, not a glass partition")]
     [InlineData("packed long ago", "Eleanor packed the duffle that afternoon")]
     [InlineData("Two dresses, my nightclothes", "the duffle holds the white dress, the black suit and the pearls she changes into")]
+    [InlineData("In November.", "the story opens in October 1927")]
+    [InlineData("est. 1923", "the Aurelian's sign has blinked at Micah for six years by 1927")]
+    [InlineData("all through vespers", "Eleanor reaches the convent after Compline, after Vespers")]
+    [InlineData("St. Brendan", "Caleb's church is Holy Name")]
+    [InlineData("renewed our vows", "there was no 1927 rite for renewing vows; Rose and Micah say their promises again, with Caleb's blessing")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
         var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
@@ -302,6 +308,24 @@ public class StoryIntegrityTests
         var sources = Code.Value.Append(new KeyValuePair<string, string>("dialogue/repentance.ink", InkText)).Concat(scenes);
         var hits = sources.Where(kv => kv.Value.Contains(stale)).Select(kv => kv.Key).ToList();
         Assert.True(hits.Count == 0, $"\"{stale}\" in {string.Join(", ", hits)}: {reason}");
+    }
+
+    [Fact]
+    public void BranchDocsMatchTheLines()
+    {
+        string Flat(string doc) => Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, doc)), @"\s+", " ");
+        var theology = Flat("docs/theology.md");
+        Assert.Contains("Ending 1 ends it if Micah took the papers (Caleb carries them to the Tribune)", theology);
+        Assert.Contains("ending 1 with the papers (the Tribune)", theology);
+        Assert.Contains("\"the day it won't bury the girls we hid\"", theology);
+        Assert.Contains("the day it won't bury the girls we hid", InkText);
+        Assert.DoesNotContain("won't cost the girls", theology);
+        var walkthrough = Flat("Walkthrough.md");
+        Assert.DoesNotContain("police report", walkthrough);
+        Assert.DoesNotContain("St. Brendan", walkthrough);
+        Assert.DoesNotContain("renewing the vows", walkthrough);
+        Assert.Contains("only that Tony was found behind the Blue Lantern", walkthrough);
+        Assert.DoesNotContain("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
     }
 
     [Fact]

@@ -6,10 +6,10 @@ namespace Repentance;
 /// <summary>Inventory verbs and combining two items. Story-specific responses live in <c>scripts/Story</c>.</summary>
 public partial class Game
 {
-    /// <summary>The player is Eleanor (an interlude or her coda). Only in the interludes may she use her own satchel.</summary>
+    /// <summary>The player is Eleanor (an interlude or her coda). In the interludes and the coda she has a satchel of her own.</summary>
     public bool IsEleanor => Player.Character.StartsWith("eleanor");
 
-    /// <summary>Eleanor plays and holds a satchel of her own (the interludes, not her coda).</summary>
+    /// <summary>Eleanor plays and holds a satchel of her own (the interludes and her coda, not her epilogue).</summary>
     private bool EleanorSatchel => IsEleanor && Interlude.SatchelOpen(GameState.Instance.HasFlag);
 
     private async Task<bool> CombineItems(string first, string second)

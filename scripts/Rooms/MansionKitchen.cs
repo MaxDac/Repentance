@@ -79,7 +79,7 @@ public partial class MansionKitchen : Room
 
     public override async Task<bool> OnInteract(Verb verb, Hotspot target, string? item)
     {
-        if (Coda) return await CodaInteract(verb, target);
+        if (Coda) return await CodaInteract(verb, target, item);
         switch (target.Id, verb)
         {
             case ("back_door", Verb.Hand or Verb.Walk) when Escaping:
@@ -166,7 +166,7 @@ public partial class MansionKitchen : Room
     }
 
     /// <summary>Eleanor on her way out: the back door, or the cellar and the Club's whiskey first.</summary>
-    private async Task<bool> CodaInteract(Verb verb, Hotspot target)
+    private async Task<bool> CodaInteract(Verb verb, Hotspot target, string? item)
     {
         switch (target.Id, verb)
         {
@@ -183,6 +183,7 @@ public partial class MansionKitchen : Room
                 await Game.ChangeRoom("mansion_cellar", "kitchen");
                 return true;
             case ("range" or "candle", Verb.Hand):
+            case ("range" or "candle", Verb.UseItem) when item == "lantern_lit":
                 await Say("eleanor", "Gas and a candle. I'd go up with the house, and he isn't worth that.");
                 return true;
         }

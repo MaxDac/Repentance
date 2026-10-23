@@ -30,6 +30,9 @@ public sealed partial class Playthrough
             Check(Gs.HasItem("riddle_scrap") && Gs.HasItem("red_thread"), "the riddle on stationery and the red thread");
             await Pace(0.6);
             await CombineAndWait("riddle_scrap", "pellet");
+            Check(Gs.HasItem("pellet_wrapped") && Gs.HasItem("red_thread"), "the riddle wrapped round the flower, loose");
+            await Pace(0.6);
+            await CombineAndWait("red_thread", "pellet_wrapped");
             Check(Gs.HasItem("eleanor_flower") && !Gs.HasItem("red_thread"), "the riddle tied round the flower in red");
             await Pace(0.6);
             await CombineAndWait("eleanor_flower", "eleanor_box");
@@ -200,7 +203,9 @@ public sealed partial class Playthrough
             await Do(Verb.Hand, "drawer_h");
             await Do(Verb.Hand, "spike");
             await Do(Verb.Hand, "paste_pot");
-            await CombineAndWait("clipping_top", "clipping_bottom");
+            await CombineAndWait("paste", "clipping_top");
+            Check(Gs.HasItem("clipping_top_pasted") && Gs.HasItem("paste"), "paste along the top half's torn edge");
+            await CombineAndWait("clipping_top_pasted", "clipping_bottom");
             Check(Gs.HasFlag("harrington_located"), "the Harrington Building located");
             await Do(Verb.Walk, "door");
             Expect("ChicagoMap", "back to the map");

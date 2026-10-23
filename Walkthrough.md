@@ -376,8 +376,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
     word."
   - Look on the clothes shows a torn red hem; hand pulls a length of red thread from it.
-  - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
-    Without the thread, it won't stay wrapped.
+  - Items join two at a time. Join the scrap and the flower: the riddle-wrapped flower (both used up), loose until
+    it is tied. Join it with the thread: the wrapped water flower (both used up). The thread on the bare flower or
+    on the scrap alone is refused, and the loose wrapped flower won't go in the box until it is tied.
   - Join the flower and the box: the packed box.
   - Hand on the closet opens it: her dresses in a row and, at the back, the safe standing half open. Use the packed
     box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
@@ -514,7 +515,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - **Hand on the librarian** (canonical): Micah steps in, grabs him by the collar and drags him in
     close, the librarian stumbling forward with his feet on the floor (one animation for both, the librarian actor
     hidden), holds him through the request, then lets him go.
-  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks.
+  - **Revolver on the librarian** (alternative): Micah draws and aims the revolver at him while he asks, then
+    puts it back in its shoulder holster (`micah_holster`; every time the gun goes away he holsters it this way).
 - Both routes set the same flags. With the book in hand Micah walks straight out through the hall door to the map.
 - After leaving, the library isn't accessible anymore: selecting it on the map, Micah says "Better not show my face
   there for the time being".
@@ -664,8 +666,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     through the address.
   - The copy spike (with the wastebasket) holds the bottom half ("...Building, LaS").
   - Combining the two halves without paste is refused: "Torn straight through the address. I'd need something
-    to hold them together." Take the paste pot from the layout desk, then combine the halves into the mended
-    clipping (the paste is kept; it goes back on the desk when Micah leaves, or by using it on the desk).
+    to hold them together." Take the paste pot from the layout desk. Items join two at a time: the paste with
+    either half gives a pasted half, and the pasted half with the other half gives the mended clipping (the paste
+    is kept; it goes back on the desk when Micah leaves, or by using it on the desk). A pasted half doesn't take
+    more paste, and two pasted halves aren't needed.
   - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
     halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
     LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.
@@ -738,8 +742,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     raven is first: lion or stag on the wax is refused.
   - Combine the raven signet with the waxed invitation: the sealed invitation (the ring goes back in its cloak).
   - Use the sealed invitation on the door slot (a plain or waxed-but-unsealed invitation is refused): the door
-    opens (flag `vestibule_passed`) and Micah walks into the Club hall. The sealed card is returned to him and is
-    what the master of ceremonies wants to see inside.
+    opens (flag `vestibule_passed`) and Micah walks into the Club hall. The sealed card is returned to him; inside,
+    the master of ceremonies doesn't ask for it again: the door has already vouched for him.
 
 #### Club
 
@@ -883,15 +887,17 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
   from the kitchen, because they provide them with booze. Pressed ("And?"), he also gives up the burglar bell wired to
   the kitchen door since the Feds came sniffing, swearing on his mother that's everything.
-- Micah stays in the alley with Tony on his back in the gravel, and the player decides. Micah's thoughts say the
-  problem out loud: Tony knows his name, and Tony is the mob.
-  - **Walk out to the street:** Micah leaves Tony alive and goes back to his office before the mansion. Tony's
-    revenge follows him into every ending (below, *Tony's revenge*).
-  - **Use the revolver on Tony again:** Micah walks round to stand past his head, facing back down
-    the alley, and points the revolver down at it (`micah_aim_down` strip, held on `micah_aim_down_held`). He shoots
-    him through the head in cold blood so he can't tell anybody who shot him (`killed_tony`, knots `bartender_kill` and
-    `bartender_dead`; new `bartender_dead` sprite, Tony still on his back, a wound in his temple and the pool spread
-    under his head). Repentance becomes much harder from here; see *The night after Tony*.
+- Tony on his back in the gravel, the dialogue ends with Micah's thoughts saying the problem out loud: Tony knows his
+  name, his office and Rose's street, and Tony is the mob. Then the player chooses, as a dialogue choice:
+  - **(Leave him bleeding, and go.)**: Micah leaves Tony alive and walks out of the alley on his own, back to his
+    office before the mansion. Tony's revenge follows him into every ending (below, *Tony's revenge*).
+  - **(Finish him. He knows my name.)** (`finish_tony`): after the dialogue Micah walks round to stand past his head,
+    facing back down the alley, and points the revolver down at it (`micah_aim_down` strip, held on
+    `micah_aim_down_held`, then `micah_holster_down` raises it and puts it away). Tony begs; Micah shoots him
+    through the head in cold blood so he can't tell anybody who
+    shot him (`killed_tony`, knots `bartender_kill` and `bartender_dead`; new `bartender_dead` sprite, Tony still on
+    his back, a wound in his temple and the pool spread under his head, shown the moment the shot goes off).
+    Repentance becomes much harder from here; see *The night after Tony*.
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
 - **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
   and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery
@@ -999,8 +1005,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     sprite of the man shot falling), and Micah has to convince Eleanor to follow him (generate dialogue):
     - **Exception (endings 10 and 11).** If Eleanor told the Mother Superior the truth and refused the old man's gin and
       powder in the interludes, there is no persuasion. Worn out, emptied by too much at once, she only says
-      "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no lowering
-      the gun, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
+      "Let's get out of here, quick." (`eleanor_weary`) and follows Micah, as if he had convinced her: no turning
+      himself in, no leaving her, no shooting her. On the weary route Eleanor follows through the kitchen in silence (the fire, the
       documents), and Micah keeps the revolver. The fire or the documents give ending 10, neither gives ending 11.
     - Eleanor always gets four turns, each with four lines for Micah, one of each type. Every line scores points,
       and after the fourth turn a total of at least 10 out of 16 convinces her (`eleanor_convinced`):
@@ -1010,7 +1016,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       line in character, and Micah's thoughts hint when a line drew her in or when she is out of reach.
       Every line, its type, its reply, the arithmetic and the Ink implementation are in
       [Eleanor's persuasion](docs/eleanor-persuasion.md), which must be kept in step with the Ink.
-    - On the first turn he can instead lower the gun, leave her and walk out to turn himself in (ending 6), whatever
+    - On the first turn he can instead leave her and walk out to turn himself in (ending 6), whatever
       evidence he carries.
     - After two turns, "(Leave her.)" is offered (turns 3 and 4): Eleanor lets him go and he escapes alone.
     - After three turns, "(Shoot Eleanor.)" is offered (turn 4 only), ending 7: she drops to her knees under the
@@ -1018,7 +1024,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     - If all four turns fail, Micah hears footsteps on the landing behind the other door, men coming up the stairs.
       He has three choices: pull the trigger on himself (ending 7, Eleanor lives), shoot Eleanor and then himself
       (ending 7), or leave her to them and escape alone.
-    - Whenever Micah turns the gun on himself, he doesn't pray. He looks away at an empty corner of the room and says
+    - Whenever Micah turns the gun on himself or on Eleanor, he draws it again (he holstered it once the old man fell).
+      Turning it on himself, he doesn't pray. He looks away at an empty corner of the room and says
       "Forgive me... all of you..."; then he puts the revolver to his temple, the screen cuts to black and the shot
       is heard over black.
     - If Micah manages to convince her, they both are in the kitchen: here, Micah has the possibility to set the
@@ -1045,7 +1052,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
     Then the scene skips to *End of Act 3* (ending 1; ending 12 if Micah killed Tony, who keeps his promise to Caleb).
   - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
-    doesn't end the act. After the "Amen." the bedroom comes back with the player as Eleanor in the sheet and
+    doesn't end the act. After the last line the bedroom comes back with the player as Eleanor in the sheet and
     Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
     for his car. Two choices:
     - **Return to bed** (her rise played backwards): ending 1, as above (12 on the kill route).
@@ -1053,9 +1060,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
       sprites: her swing, his fall forward, no wound). She leaves through the study (she had only ever seen it from the doorway), taking the old man's
       "Thursday book" (the Club's ledger of the girls: she always knew where he kept it), and the kitchen; the doors back to the bedroom
-      refuse her. The cellar is optional: the lantern hangs on its nail (Micah came in that way), she takes it
-      and opens the whiskey barrel over it, and the house burns. No satchel: two hand actions. The kitchen door
-      leads outside, a short beat in her voice, without Micah's escape. Then Micah's coffee scene at Rose's (as in
+      refuse her. She has her own satchel again, empty when the coda starts (Micah's things are put aside and come
+      back to him when it ends; a lantern she didn't use is left behind). The cellar is optional: the lit lantern
+      hangs on its nail (Micah came in that way) and goes into her satchel; hand on the whiskey barrel opens its
+      spigot, and the lantern used on the running whiskey sets the cellar alight. The kitchen door leads outside, a
+      short beat in her voice, without Micah's escape; if she set the fire, the house goes up behind her (*CRASH*,
+      the windows orange one by one). Then Micah's coffee scene at Rose's (as in
       ending 1), followed by ending 8 (she burned the house) or ending 9 (she didn't). On the kill route there is no
       coffee scene: Micah has gone to the station, and the endings tell it from Joliet.
 
@@ -1073,12 +1083,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Before ringing, Micah throws Eleanor's perfumed cloth into the street ("Into the gutter with it. No more chasin'
   that dame."). In every other ending he still has it.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
-- He offers coffee without claiming she owes him forgiveness or reconciliation. The renewed vows in the journal
+- He offers coffee without claiming she owes him forgiveness or reconciliation. The promises said again in the journal
   happen later, after he has begun showing change rather than merely promising it.
   Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee." Rose recalls "Last time
   you were here, you wanted me to forgive you." only if he asked her for it on her doorstep (`rose_wait`); if he
   said good night first, she only asks "What do you want?".
-- In this case, the journal ends with Micah back with his wife, renewing the vows at his brother's Church (or, if he
+- In this case, the journal ends with Micah back with his wife, saying their promises again at his brother's church, with his blessing (or, if he
   shot Tony and they left Chicago, saying their promises again at St. Anne's downstate, with Caleb's blessing).
 - In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
   left of the screen: a 1920s sepia studio print, pixelised like the other close-ups, on a cream card mount with worn
@@ -1138,7 +1148,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 #### Option 6 - Prison - With Rose
 
-- Accessible if Micah shoots the old man, then lowers the gun on the first persuasion turn and leaves Eleanor to turn
+- Accessible if Micah shoots the old man, then on the first persuasion turn leaves Eleanor to turn
   himself in. It overrides the evidence and the fire: there is no kitchen escape.
 - In the prison parlour, Rose (new seated sprite) visits. Micah says he's sorry; Rose doesn't know if she can forgive
   him and doesn't really understand why he asked her to come, but she'll try.
@@ -1157,8 +1167,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - If Micah shot only himself, Eleanor survives; Caleb's entry says so.
 - The last entry is written by Caleb, from what the Club's men said in court (or, if Micah shot only himself, from
   what Eleanor told him after the funeral; she heard him ask forgiveness, and Caleb leaves what that word weighed to
-  God). If Micah confessed Tony first, Caleb names Tony from the police report and writes that the rest
-  he may not write (the seal). He couldn't make Micah repent, he prays for his soul still,
+  God). If Micah confessed Tony first, Caleb writes only that a bartender named Tony was found behind the Blue Lantern,
+  and that the rest he may not write (the seal). He couldn't make Micah repent, he prays for his soul still,
   finishing the journal is the only thing that eases his pain, and he warns whoever reads it not to walk in his
   brother's footsteps.
 
@@ -1254,7 +1264,7 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 1 | They leave Chicago the week after the coffee; they say their promises again at St. Anne's, a Catholic church downstate, and Caleb blesses them. | Not possible. |
 | 2, 3 | Out of town or past caring: no mention. | 2: she never asked what took him so long. 3: Tony's on the ceiling too. |
 | 4, 5, 6 | A man in the yard says Tony sends his regards; Micah sleeps with his back to the wall. | Tried for Tony too (6: he told the cop himself). |
-| 7 | No mention. | Caleb's entry names Tony; if Micah confessed it, only what the police found, and the rest under the seal. |
+| 7 | No mention. | Caleb's entry names Tony; if Micah confessed it, only that Tony was found behind the Blue Lantern, and the rest under the seal. |
 | 8 | They left Chicago; her letter is sent on by Caleb to the house downstate. | Her letter reaches Joliet; Rose reads it across the visiting-room table. |
 | 9 | Micah lives downstate; Tony's men looked for him all winter. | Micah serves his own sentence for Tony. |
 | 10 | Micah looks for his peace far from Chicago. | Nobody's come for him; he hears every car that slows down. |
@@ -1277,7 +1287,7 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 
 | Ending | Who wrote the Second Interlude, and from what |
 |---|---|
-| 1 | Micah: Caleb passed it on; she came to St. Brendan's months later and asked him to. |
+| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to. |
 | 2 | Micah: she told him on the road. |
 | 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
 | 4 | Micah: she told him across the parlour table. |

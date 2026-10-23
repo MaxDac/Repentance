@@ -95,7 +95,7 @@ public partial class NewspaperMorgue : Room
                 if (item == "clipping") State.TakeItem("clipping");
                 await PinClipping();
                 return true;
-            case ("wall_map", Verb.UseItem) when item is "clipping_top" or "clipping_bottom":
+            case ("wall_map", Verb.UseItem) when item is "clipping_top" or "clipping_bottom" or "clipping_top_pasted" or "clipping_bottom_pasted":
                 await Say("Half an address is no address. I need both halves stuck together first.");
                 return true;
             case ("wall_map", Verb.Hand):

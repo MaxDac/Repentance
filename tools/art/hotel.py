@@ -1,7 +1,9 @@
 """The Aurelian: a luxurious hotel room in warm daytime light."""
+import math
+import random
 from PIL import Image, ImageDraw
-from .common import (W, H, TOP, tall, hx, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
-                     save, floor_boards)
+from .common import (W, H, TOP, tall, hx, mul, mix, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
+                     save)
 from .furniture import Room3D
 
 FLOOR = 146
@@ -16,6 +18,7 @@ GREEN_L = hx("55735d")
 BURGUNDY = hx("6b2430")
 BURGUNDY_L = hx("8e4150")
 R = Room3D(FLOOR, 248, -220)
+CHANDELIER_X = 284  # the ceiling rose and the chandelier under it, clear of the painting
 
 
 def shell(img):
@@ -44,15 +47,132 @@ def shell(img):
     shadow(img, "rect", [x0 + 2, y1, x1 + 3, y1 + 3], 0.2, 2)
 
 
+OAK = [hx("8a5a34"), hx("7a4e2c"), hx("946640"), hx("6e4426"), hx("845532")]
+SEAM = hx("2e1a0e")
+N, PW = 4, 6.0             # herringbone: planks four widths long, PW room units wide
+_REF = [(i, 0, 0, i) for i in range(N)] + [(0, j, 1, j - 1) for j in range(1, N + 1)]
+
+
+def _brick(i, j):
+    """Which plank of the herringbone holds cell (i, j): (vertical?, lattice a, lattice b, cell along the plank)."""
+    for rx, ry, v, k in _REF:
+        dx, dy = i - rx, j - ry
+        s, t = dx + dy, dx - dy
+        if s % 2 == 0 and t % (2 * N) == 0:
+            return v, s // 2, t // (2 * N), k
+    raise ValueError
+
+
+def _room_xz(px, py):
+    s = (py + 0.5 - R.vy) / (R.floor - R.vy)
+    return R.vx + (px + 0.5 - R.vx) / s, R.d0 * (1 - 1 / s)
+
+
+RUG = (90, 410, 80, 190)
+# madder field, indigo medallion and border, ivory and saffron outlines
+MADDER, MADDER_D, INDIGO, INDIGO_L, IVORY, SAFFRON, RUG_GREEN = (hx("8a2a26"), hx("6a1c1c"), hx("1f2a4a"),
+                                                                  hx("34466e"), hx("e6d8b4"), hx("c89a3c"), hx("3f6a4e"))
+
+
+def _rug_colour(x, z):
+    x0, x1, z0, z1 = RUG
+    e = min(x - x0, x1 - x, z - z0, z1 - z)        # depth into the rug from its nearest edge
+    if e < 2:
+        return IVORY if e > 1 else SAFFRON
+    if e < 4:
+        return MADDER_D
+    if e < 14:                                        # main border: indigo with a running vine of rosettes
+        along = (x - x0) if min(z - z0, z1 - z) <= min(x - x0, x1 - x) else (z - z0)
+        mid = abs(e - 9)
+        if mid > 4:
+            return SAFFRON
+        ph = along % 16
+        r = math.hypot(ph - 8, (e - 9) * 1.6)
+        if r < 2.2:
+            return IVORY if r < 1 else MADDER
+        if r < 4 and int(ph) % 2 == 0:
+            return SAFFRON
+        wave = 9 + 2.6 * math.sin(along / 16 * 2 * math.pi + math.pi / 2)
+        if abs(e - wave) < 0.8:
+            return RUG_GREEN
+        return INDIGO
+    if e < 16:
+        return IVORY
+    # field: a medallion in the middle, spandrels in the corners
+    cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+    fx, fz = (x - cx) / 84, (z - cz) / 38
+    m = abs(fx) + abs(fz) * 1.0 + 0.25 * math.cos(math.atan2(fz, fx) * 8) * math.hypot(fx, fz)
+    if m < 0.18:
+        return SAFFRON if m < 0.09 else MADDER
+    if m < 0.75:
+        if abs(m - 0.42) < 0.03:
+            return IVORY
+        return INDIGO_L if m < 0.42 else INDIGO
+    if m < 0.8:
+        return IVORY
+    # corners: indigo spandrels with an ivory edge
+    for sx, sz in ((x0 + 16, z0 + 16), (x1 - 16, z0 + 16), (x0 + 16, z1 - 16), (x1 - 16, z1 - 16)):
+        c = abs(x - sx) / 46 + abs(z - sz) / 26
+        if c < 1:
+            return IVORY if c > 0.92 else INDIGO
+    # field: a herati lattice - diamonds of fine dark lines with a rosette at every other crossing
+    lx, lz = (x - x0) % 20 - 10, (z - z0) % 14 - 7
+    row = int((z - z0) // 14) + int((x - x0) // 20)
+    if abs(abs(lx) / 10 + abs(lz) / 7 - 1) < 0.08:
+        return MADDER_D
+    if row % 2 == 0 and abs(lx) / 2.6 + abs(lz) / 1.8 < 1:
+        return SAFFRON if abs(lx) / 2.6 + abs(lz) / 1.8 > 0.45 else IVORY
+    if row % 2 == 1 and abs(lx) < 0.8 and abs(lz) < 1.6:
+        return RUG_GREEN
+    return MADDER
+
+
 def floor(img):
-    floor_boards(img, FLOOR, H - 1, (248, -220), 22, hx("7a5132"), hx("5d3922"), hx("342012"), 111)
-    noise(img, (0, FLOOR, W - 1, H - 1), 5, 112)
-    R.quad(img, [(90, 0, 80), (410, 0, 80), (410, 0, 190), (90, 0, 190)], GREEN)
-    R.quad(img, [(98, 0, 86), (402, 0, 86), (402, 0, 184), (98, 0, 184)], None, GOLD)
-    R.quad(img, [(108, 0, 94), (392, 0, 94), (392, 0, 176), (108, 0, 176)], None, GREEN_L)
-    for x in range(118, 392, 16):
-        R.line(img, (x, 0, 94), (x, 0, 176), mul(GREEN_L, 0.85))
-    noise(img, (60, 160, 440, H - 1), 4, 113)
+    """Herringbone oak parquet with a walnut border along the skirting, under a Persian rug with fringed ends. Painted per
+    pixel by projecting each floor pixel back into the room."""
+    px = img.load()
+    rnd = random.Random(146)
+    tone = {}
+    x0, x1, z0, z1 = RUG
+    for py in range(FLOOR, H):
+        for pxx in range(W):
+            x, z = _room_xz(pxx, py)
+            if x0 <= x <= x1 and z0 <= z <= z1:
+                c = _rug_colour(x, z)
+                # worn pile: a little speckle
+                n = rnd.uniform(-0.06, 0.06)
+                px[pxx, py] = mul(c, 1 + n)
+                continue
+            if z < 7:                                 # a walnut border band along the skirting, a maple string
+                c = hx("4a2c18") if z < 5.5 else hx("b08a58")
+                px[pxx, py] = mul(c, 1 + rnd.uniform(-0.05, 0.05))
+                continue
+            u, v = (x + z) / (PW * math.sqrt(2)), (x - z) / (PW * math.sqrt(2))
+            i, j = math.floor(u), math.floor(v)
+            vert, a, b, k = _brick(i, j)
+            key = (vert, a, b)
+            if key not in tone:
+                tone[key] = (OAK[rnd.randrange(len(OAK))], rnd.uniform(0, 100))
+            base, seed = tone[key]
+            fu, fv = u - i, v - j
+            across = fu if vert else fv
+            along = (k + (fv if vert else fu)) / N
+            # grain: fine streaks along the plank, darker toward one end
+            g = 0.06 * math.sin(across * 9 + seed) + 0.04 * math.sin(across * 23 + seed * 2) - 0.05 * along
+            c = mul(base, 1 + g)
+            # seams on the plank sides and ends
+            edge = across < 0.16 or (k == 0 and (fv if vert else fu) < 0.06)
+            px[pxx, py] = mix(c, SEAM, 0.75) if edge else c
+    # fringe on the two short ends of the rug, knotted tassels on the floor
+    d = ImageDraw.Draw(img)
+    for xe, dirn in ((x0, -1), (x1, 1)):
+        for zz in range(z0 + 1, z1, 2):
+            a = R.P(xe, 0, zz)
+            b = R.P(xe + dirn * 5, 0, zz + 0.6)
+            d.line([a, b], fill=IVORY if zz % 4 else mul(IVORY, 0.8))
+    # a soft wear patch in the pile and a polished sheen on the boards in front of the window
+    shadow(img, "polygon", [R.P(x0, 0, z0), R.P(x1, 0, z0), R.P(x1, 0, z0 + 6), R.P(x0, 0, z0 + 6)], 0.2, 2)
+    light(img, "polygon", [R.P(150, 0, 4), R.P(230, 0, 4), R.P(250, 0, 80), R.P(130, 0, 80)], hx("f0d8b0"), 0.1, 6)
 
 
 def door(img):
@@ -79,20 +199,6 @@ def sconces(img):
         d.line([(cx, 66), (cx, 70)], fill=GOLD)
         d.polygon([(cx - 7, 54), (cx + 7, 54), (cx + 5, 44), (cx - 5, 44)], fill=hx("efe2c4"), outline=GOLD_D)
         light(img, "ellipse", [cx - 20, 30, cx + 20, 76], hx("fff4db"), 0.16, 6)
-
-
-def chandelier(img):
-    d = ImageDraw.Draw(img)
-    cx = 300
-    d.line([(cx, 0), (cx, 8)], fill=GOLD_D)
-    d.ellipse([cx - 5, 6, cx + 5, 12], fill=GOLD)
-    d.polygon([(cx - 20, 12), (cx + 20, 12), (cx + 14, 20), (cx - 14, 20)], fill=GOLD, outline=GOLD_D)
-    for ax in (-18, -6, 6, 18):
-        d.line([(cx, 14), (cx + ax, 22)], fill=GOLD_D)
-        d.ellipse([cx + ax - 2, 21, cx + ax + 2, 26], fill=hx("f8f1d8"))
-    for ax in range(-12, 13, 6):
-        d.line([(cx + ax, 20), (cx + ax, 26 + abs(ax) // 6)], fill=hx("e8e2d0"))
-    light(img, "ellipse", [cx - 60, -20, cx + 60, 60], hx("fff4d8"), 0.14, 16)
 
 
 def bed(img, unmade=False):
@@ -187,8 +293,13 @@ def ceiling(img):
         d.rectangle([x + 4, 4, x + 36, TOP - 5], outline=hx("e8d7b8"))
     d.line([(0, TOP - 3), (W, TOP - 3)], fill=GOLD_D)
     d.line([(0, TOP - 1), (W, TOP - 1)], fill=WOOD_D)
-    d.ellipse([288, TOP - 8, 312, TOP], fill=GOLD_D)
-    d.ellipse([292, TOP - 6, 308, TOP], fill=GOLD)
     noise(img, (0, 0, W - 1, TOP), 2, 121)
-
-
+    # a moulded ceiling rose: a ring of leaves round a gilt boss
+    d.ellipse([CHANDELIER_X - 15, TOP - 10, CHANDELIER_X + 15, TOP + 1], fill=hx("d9c6a2"), outline=hx("b8a07a"))
+    for k in range(14):
+        a = k / 14 * 2 * math.pi
+        ex, ey = CHANDELIER_X + 11.5 * math.cos(a), TOP - 5 + 3.4 * math.sin(a)
+        d.ellipse([ex - 2, ey - 1, ex + 1, ey + 1], fill=hx("f0e4c8") if math.sin(a + 0.6) < 0 else hx("a88e66"))
+    d.ellipse([CHANDELIER_X - 6, TOP - 8, CHANDELIER_X + 6, TOP - 2], fill=GOLD_D)
+    d.ellipse([CHANDELIER_X - 5, TOP - 8, CHANDELIER_X + 4, TOP - 3], fill=GOLD)
+    d.point([(CHANDELIER_X - 3, TOP - 7), (CHANDELIER_X - 2, TOP - 7)], fill=hx("f4dc96"))

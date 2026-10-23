@@ -94,12 +94,16 @@ def brass_box(d, im):
     d.rectangle([15, 8, 17, 11], fill=hx("8a6a28"))
 
 
+# Eleanor's calling card, shared with the card showing in her open brass box (interludes.eleanor_box)
+CARD_STOCK, CARD_GILT, CARD_CURL = hx("f0e8e0"), hx("c8a050"), hx("a0405a")
+
+
 def card(d, im):
-    d.polygon([(4, 6), (28, 5), (28, 19), (4, 20)], fill=hx("f0e8e0"))
-    d.polygon([(6, 8), (26, 7), (26, 17), (6, 18)], outline=hx("c8a050"))
-    d.arc([10, 9, 16, 15], 90, 360, fill=hx("a0405a"))
-    d.arc([16, 10, 22, 16], 270, 180, fill=hx("a0405a"))
-    d.point((16, 12), fill=hx("c8a050"))
+    d.polygon([(4, 6), (28, 5), (28, 19), (4, 20)], fill=CARD_STOCK)
+    d.polygon([(6, 8), (26, 7), (26, 17), (6, 18)], outline=CARD_GILT)
+    d.arc([10, 9, 16, 15], 90, 360, fill=CARD_CURL)
+    d.arc([16, 10, 22, 16], 270, 180, fill=CARD_CURL)
+    d.point((16, 12), fill=CARD_GILT)
     d.line([(8, 16), (22, 15)], fill=hx("6a5a4a"))
     d.text((9, 8), "MJ", fill=hx("3a2a22"))
 

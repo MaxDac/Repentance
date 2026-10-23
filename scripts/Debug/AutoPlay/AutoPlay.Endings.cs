@@ -143,6 +143,7 @@ public partial class AutoPlay
         Seed(act3Flags.Append("rose_wait"), act3Items, "Our Father");
         float nearest = float.MaxValue;
         bool lowering = false, steppedBack = false, versesFaded = false;
+        int holstersLow = _poseCounts.GetValueOrDefault("micah_holster_low");
         _ = game.ChangeRoom("mansion_bedroom", "start");
         var prayer = new List<string>();
         var coda = new List<string>();
@@ -164,6 +165,8 @@ public partial class AutoPlay
         Check(gs.HasFlag("spared_oldman") && gs.HasFlag("ending_1"), "ending 1: spared the old man");
         Check(lowering && nearest < 70, "Micah backs to the door, lowering the revolver step by step");
         Check(steppedBack, "Micah's legs step back with each verse");
+        Check(_poseCounts.GetValueOrDefault("micah_holster_low") == holstersLow + 1,
+            "at the door, Micah puts the lowered revolver back in its holster");
         Check(prayer.Any(l => l.Contains("Thy kingdom come", StringComparison.OrdinalIgnoreCase)) &&
               prayer.Any(l => l.Contains("deliver us from evil")) && !prayer.Any(l => l.Contains("Amen")),
             "Micah prays up to \"deliver us from evil\" on his way out, without the Amen");
@@ -200,6 +203,7 @@ public partial class AutoPlay
             HeardLog = new List<string>();
             int shots = game.Sfx.Count(Sound.Gunshot);
             bool eleanorDown = false, aimSelf = false, morning = false, lastWords = false, facedAway = false;
+            int holsters = _poseCounts.GetValueOrDefault("micah_holster"), draws = _poseCounts.GetValueOrDefault("micah_draw");
             _ = game.ChangeRoom("mansion_bedroom", "start");
             await Until(() =>
             {
@@ -224,6 +228,8 @@ public partial class AutoPlay
             Check(eleanorDown == murder, murder ? "ending 7: Eleanor falls like the old man, shot in the stomach" : $"{label}: Eleanor stays standing");
             Check(lastWords && facedAway, $"{label}: \"{Rooms.MansionBedroom.LastWords}\", looking away at an empty corner");
             Check(aimSelf, $"{label}: Micah puts the revolver to his temple");
+            Check(_poseCounts.GetValueOrDefault("micah_holster") == holsters + 1 && _poseCounts.GetValueOrDefault("micah_draw") == draws + 2,
+                $"{label}: Micah holsters after the old man falls, and draws again for the last shot");
             Check(game.Sfx.Count(Sound.Gunshot) >= shots + 1, $"{label}: the last shot is heard over black");
             await TheEnd(label);
             Check(HeardLog.Count(l => l.Contains("He shot Mr. Harrington on his own carpet.")) == 1 && !HeardLog.Any(l => l.Contains("in his bed.")),
@@ -353,7 +359,8 @@ public partial class AutoPlay
             await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
             await WaitIdle(game);
             Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("eleanor_coda"), $"{label}: after the prayer, the player is Eleanor");
-            Check(!game.Hud.SatchelVisible, $"{label}: no satchel for Eleanor");
+            Check(game.Hud.SatchelVisible && gs.Inventory.Count == 0 && gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                $"{label}: Eleanor's own satchel, empty, with Micah's things put aside");
             var harrington = game.Room?.FindActor("harrington");
             Check(harrington?.Visible == true && harrington.Texture?.ResourcePath.EndsWith("harrington_struck_down.png") != true,
                 $"{label}: the old man stands watching the door");
@@ -411,29 +418,40 @@ public partial class AutoPlay
                 await game.Perform(Verb.Walk, "stair");
                 Check(game.Room?.Name == "MansionCellar", "ending 8: not back up to him");
                 await game.Perform(Verb.Hand, "barrel");
-                Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the barrel wants a flame first");
-                await game.Perform(Verb.Hand, "hung_lantern");
+                Check(gs.HasFlag("barrel_open") && !gs.HasFlag(Endings.EleanorBurned), "ending 8: hand on the barrel opens the spigot");
                 await game.Perform(Verb.Hand, "barrel");
+                Check(!gs.HasFlag(Endings.EleanorBurned), "ending 8: the running whiskey wants a flame");
+                await game.Perform(Verb.Hand, "hung_lantern");
+                Check(gs.HasItem("lantern_lit") && gs.Inventory.Count == 1, "ending 8: the lit lantern in her satchel");
+                await ReloadCheckpoint("eleanor_coda");
+                Check(game.Room?.Name == "MansionCellar" && gs.HasItem("lantern_lit") && gs.Inventory.Count == 1 &&
+                      game.Hud.SatchelVisible, "ending 8: a save in the cellar loads with only her lantern");
+                await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
                 await WaitIdle(game);
-                Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && game.Room?.Name == "MansionKitchen",
-                    "ending 8: the Club's rye alight, and up to the kitchen");
+                Check(gs.HasFlag(Endings.EleanorBurned) && gs.HasFlag("cellar_fire") && !gs.HasItem("lantern_lit") &&
+                      game.Room?.Name == "MansionKitchen",
+                    "ending 8: the lantern in the Club's rye, and up to the kitchen");
             }
             else
             {
                 await game.Perform(Verb.Walk, "door_left");
                 Check(game.Room?.Name == "MansionKitchen", $"{label}: down to the kitchen");
             }
-            bool eleanorInmate = false, sawRose = false;
+            bool eleanorInmate = false, sawRose = false, blaze = false;
             HeardLog = new List<string>();
             _ = game.Perform(Verb.Walk, "back_door");
             await Until(() =>
             {
                 sawRose |= game.Room?.Name == "RoseHouse";
+                blaze |= game.Room?.Name == "MansionExterior" && game.Room.GetNodeOrNull<CanvasItem>("EleanorFire")?.Visible == true;
                 eleanorInmate |= game.Room?.Name == "Prison" && game.Room.GetNodeOrNull<CanvasItem>("EleanorInmate")?.Visible == true &&
                     game.Room.GetNodeOrNull<CanvasItem>("Micah")?.Visible != true;
                 return game.Room?.Name == (fire ? "Outskirts" : "Prison") && !game.Busy || game.Hud.CaptionText == "End of Act Three";
             }, 240, 0.05);
             Check(sawRose && !gs.HasItem("cloth"), $"{label}: Micah's journal goes on to Rose's door, without the cloth");
+            Check(blaze == fire, $"{label}: the house {(fire ? "burns behind her once she's out" : "stays dark behind her")}");
+            Check(!gs.HasItem("lantern_lit") && !gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                $"{label}: Micah's things back with him, nothing of Eleanor's");
             Check(gs.HasFlag(label) && !gs.HasFlag("eleanor_coda"), $"{label}: recorded once the coda is over");
             Check(DryHere(), $"{label}: no rain where Eleanor ends up");
             if (fire)
@@ -534,7 +552,9 @@ public partial class AutoPlay
         Seed(alleyReady, act3Items, "Fire into the wall");
         await game.ChangeRoom("alley", "act3");
         int shots = game.Sfx.Count(Sound.Gunshot);
+        int warnHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         heard = await Spoken(async () => { await game.Perform(Verb.Talk, "back_door"); await WaitIdle(game); });
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == warnHolsters + 1, "the warning shot: Micah holsters the revolver");
         Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && gs.HasFlag("alley3_tony_inside")
               && game.Room?.FindActor("bartender")?.Visible != true && game.Sfx.Count(Sound.Gunshot) == shots + 1,
             "the warning shot: one bullet in the wall, and Tony back inside unhurt");
@@ -612,21 +632,29 @@ public partial class AutoPlay
     /// </summary>
     private async Task KillTonyEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
-        // the first shot no longer leaves the alley on its own; the second needs the revolver on Tony
-        Seed(alleyReady, act3Items, "Shoot him in the shoulder");
+        // the shoulder shot ends on a choice; "Finish him" plays the second shot once the dialogue is over
+        Seed(alleyReady, act3Items, "Shoot him in the shoulder", "Finish him");
         await game.ChangeRoom("alley", "act3");
-        await game.Perform(Verb.Talk, "back_door");
-        await WaitIdle(game);
-        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.ShotBartender) && !gs.HasFlag(Endings.KilledTony),
-            "Tony shot in the shoulder, and Micah still in the alley");
         int aimsDown = _poseCounts.GetValueOrDefault("micah_aim_down");
-        await game.Perform(Verb.UseItem, "bartender", "revolver");
+        int holstersDown = _poseCounts.GetValueOrDefault("micah_holster_down");
+        bool stainWithShot = false;
+        var knock = game.Perform(Verb.Talk, "back_door");
+        await Until(() =>
+        {
+            if (game.Hud.SpeechVisible && game.Hud.SpeechText == "*BANG*" && gs.HasFlag(Endings.ShotBartender))
+                stainWithShot |= game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true;
+            return knock.IsCompleted;
+        }, 120, 0.02);
+        await knock;
         await WaitIdle(game);
-        Check(gs.HasFlag(Endings.KilledTony) &&
+        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.KilledTony) &&
               game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true,
-            "the second shot: Tony dead on his back");
+            "the second shot: Tony dead on his back, and Micah still in the alley");
+        Check(stainWithShot, "the head wound shows as the second shot goes off, not after it");
         Check(_poseCounts.GetValueOrDefault("micah_aim_down") == aimsDown + 1 && game.Player.Position.X > 410,
             "the second shot: Micah stands past Tony's head and aims down at it");
+        Check(_poseCounts.GetValueOrDefault("micah_holster_down") == holstersDown + 1 && game.Player.PoseName == null,
+            "the second shot: the revolver comes up from Tony's head and back into its holster");
         await game.Perform(Verb.Walk, "street");
         await WaitIdle(game);
         Check(game.Room?.Name == "ChicagoMap", "after the kill, the street opens onto the map");
@@ -677,13 +705,22 @@ public partial class AutoPlay
         await Shot("ending_prison_caleb_tony");
         await TheEnd("ending_12 (church)");
 
-        // confessed, he may still pray his way past the old man; the Amen is at the station, so ending 12 again
+        // confessed, he may still pray his way past the old man; Caleb is waiting at the station, so ending 12 again
         var confessed = killed.Append(Endings.ConfessedTony).ToArray();
         Seed(confessed, act3Items, "Our Father");
         _ = game.ChangeRoom("mansion_bedroom", "start");
-        await Until(() => game.Room?.Name == "Prison", 180);
+        var stationVerses = new List<string>();
+        await Until(() =>
+        {
+            if (game.Room is Rooms.MansionBedroom && game.Hud.VersesVisible && game.Hud.VersesText != "" &&
+                (stationVerses.Count == 0 || stationVerses[^1] != game.Hud.VersesText))
+                stationVerses.Add(game.Hud.VersesText);
+            return game.Room?.Name == "Prison";
+        }, 180, 0.05);
         Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("ending_12") && !gs.HasFlag("ending_1"),
             "ending 12: confessed, Micah spares the old man, then keeps his promise to Caleb");
+        Check(stationVerses.Count > 0 && stationVerses[^1].EndsWith("Amen."),
+            $"ending 12: the prayer over black still ends on the Amen: {string.Join(" | ", stationVerses)}");
         await TheEnd("ending_12 (old man)");
 
         // Eleanor's coda on the kill route: back to bed is ending 12; the candlestick is 9, and no coffee at Rose's

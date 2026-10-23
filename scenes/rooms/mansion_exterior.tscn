@@ -255,6 +255,16 @@ script = ExtResource("21_LoopStrip")
 ShowIfFlags = "mansion_exploded"
 FrameSeconds = 0.09
 
+[node name="EleanorFire" type="Sprite2D" parent="."]
+z_index = -8
+position = Vector2(0, 0)
+texture = ExtResource("13_mansion_exterior_fire")
+centered = false
+hframes = 16
+script = ExtResource("21_LoopStrip")
+ShowIfFlags = "eleanor_blaze"
+FrameSeconds = 0.09
+
 [node name="Eleanor" type="Area2D" parent="World"]
 position = Vector2(262, 224)
 script = ExtResource("5_Actor")

@@ -8,7 +8,7 @@ namespace Repentance.Rooms;
 /// The plaque wants the summons "sealed by the first of the procession": the coat-check's sealing wax, softened with the
 /// Micah's lighter (never used up), dripped on the invitation and pressed with the raven signet from the cloak rack (the
 /// invitation lists the procession raven, lion, stag). The sealed invitation goes through the inner door's slot and comes
-/// back out (the Master of Ceremonies inspects it in the hall), sets <c>vestibule_passed</c> and opens the club hall.
+/// back out (the door has already vouched for Micah; the Master of Ceremonies doesn't ask for it again), sets <c>vestibule_passed</c> and opens the club hall.
 /// Only one signet is borrowed at a time; any still held is hung back up on the way in.
 /// </summary>
 public partial class ClubVestibule : Room

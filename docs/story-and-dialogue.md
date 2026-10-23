@@ -149,9 +149,11 @@ send the story the wrong way.
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |
 
 `Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad is hidden, generic
-exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes (`Interlude.SatchelOpen`)
-she has her own satchel for Puzzles 17 and 18: she takes, joins and uses only what she finds there, and `EndFirst`/
-`EndSecond` clear it before Micah's kit comes back. In the coda and epilogue the satchel is hidden and held items are refused.
+exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes and the coda
+(`Interlude.SatchelOpen`) she has her own satchel (Puzzles 17 and 18, the cellar lantern): she takes, joins and uses
+only what she finds there, and `EndFirst`/`EndSecond`/`EndCoda` clear it before Micah's things come back (the coda puts
+them aside under `coda_stash_` flags, apart from the act's `stash_` ones). In the epilogue the satchel is hidden and
+held items are refused.
 Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeInteract`).
 
 ## Endings

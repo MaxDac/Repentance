@@ -54,14 +54,19 @@ public partial class AutoPlay
         await CombineAndWait("pellet", "eleanor_box");
         Check(gs.HasItem("pellet") && gs.HasItem("eleanor_box") && !gs.HasFlag("interlude_box_packed"), "a bare pellet won't go in the box");
         await game.Perform(Verb.Hand, "desk");
-        await CombineAndWait("pellet", "riddle_scrap");
-        Check(gs.HasItem("pellet") && gs.HasItem("riddle_scrap") && !gs.HasItem("eleanor_flower"), "the riddle won't stay on without thread");
         await game.Perform(Verb.Hand, "clothes");
         await CombineAndWait("red_thread", "pellet");
         Check(gs.HasItem("red_thread") && gs.HasItem("pellet"), "thread round a bare pellet is refused");
-        await CombineAndWait("riddle_scrap", "pellet");
-        Check(gs.HasItem("eleanor_flower") && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
-            "the riddle tied round the flower uses up the thread");
+        await CombineAndWait("red_thread", "riddle_scrap");
+        Check(gs.HasItem("red_thread") && gs.HasItem("riddle_scrap"), "thread round the bare riddle is refused");
+        await CombineAndWait("pellet", "riddle_scrap");
+        Check(gs.HasItem("pellet_wrapped") && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && gs.HasItem("red_thread"),
+            "the riddle wraps round the pellet, loose, and the thread is kept for the next join");
+        await CombineAndWait("pellet_wrapped", "eleanor_box");
+        Check(gs.HasItem("pellet_wrapped") && !gs.HasFlag("interlude_box_packed"), "a loose wrapped pellet won't go in the box");
+        await CombineAndWait("red_thread", "pellet_wrapped");
+        Check(gs.HasItem("eleanor_flower") && !gs.HasItem("pellet_wrapped") && !gs.HasItem("red_thread"),
+            "the thread ties the wrapped flower and is used up");
         await game.Perform(Verb.Hand, "vanity");
         await game.Perform(Verb.Hand, "desk");
         await game.Perform(Verb.Hand, "clothes");
@@ -205,7 +210,9 @@ public partial class AutoPlay
             "a hand on the bed sends Eleanor to her bag; the night doesn't start");
         await WaitIdle(game);
         Check(game.Room?.GetNodeOrNull<Area2D>("Hotspots/Bag")?.Visible == true, "her duffle is a hotspot in the cell");
-        bool combed = false, sat = false, rose = false, thoughtOverBlack = false;
+        bool combed = false, sat = false, rose = false, thoughtOverBlack = false, cameThroughDoor = false;
+        bool AgathaInOpenDoor() => game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == true
+            && game.Room?.FindActor("nun") is { Visible: true } nun && nun.Position.X < 100;
         double nightScale = Engine.TimeScale;
         ulong blackAt = 0, knockAt = 0;
         var night = game.Perform(Verb.Hand, "bag");
@@ -219,6 +226,7 @@ public partial class AutoPlay
             }
             sat |= game.Player.PoseName == "eleanor_cell_sit";
             rose |= game.Player.PoseName == "eleanor_cell_rise";
+            cameThroughDoor |= AgathaInOpenDoor();
             if (combed && knockAt == 0 && game.Hud.FadeAlpha >= 0.99f)
             {
                 if (blackAt == 0) blackAt = Time.GetTicksMsec();
@@ -237,13 +245,22 @@ public partial class AutoPlay
         Check(knockAt > 0 && Math.Abs(black - Rooms.ConventCell.BlackHoldSeconds) < 0.4 && !thoughtOverBlack,
             $"after combing, about a second of black and no narration before Agatha knocks ({black:0.00}s)");
         Check(sat && rose, "at the knock Eleanor sits awake on the bed in her pyjamas, then gets up");
+        Check(cameThroughDoor && game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false,
+            "Agatha comes in through the open door, and it is shut behind her while she talks");
         Check(game.Player.Character == "eleanor_pyjama_play" && game.Player.PoseName == null,
             "when Agatha talks to her, Eleanor stands in her pyjamas");
         Check(game.Room?.FindActor("nun") is { Visible: true } agatha && agatha.Position.X > 200,
             "Agatha is in the cell, by the bed, while she talks");
         Check(game.Music.Current == Track.ClubStrings, "the Club's strings play for Agatha's night visit");
         await Shot("interlude_agatha_night");
+        bool wentThroughDoor = false;
+        await Until(() =>
+        {
+            wentThroughDoor |= AgathaInOpenDoor();
+            return night.IsCompleted;
+        }, 300, 0.02);
         await night;
+        Check(wentThroughDoor, "Agatha leaves through the open door instead of vanishing");
         await WaitIdle(game);
         Check(game.Music.Count(Track.ConventPiano) == pianoBeforeVisit + 1,
             "the convent piano comes back once Agatha has gone");
@@ -299,7 +316,7 @@ public partial class AutoPlay
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
-        Check(!new[] { "eleanor_box", "pellet", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
+        Check(!new[] { "eleanor_box", "pellet", "pellet_wrapped", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
             && !gs.HasFlag("interlude_took_box") && !gs.HasFlag("interlude_took_thread"),
             "nothing of Eleanor's, and none of her puzzle flags, follow Micah out of the interlude");
     }
@@ -667,7 +684,10 @@ public partial class AutoPlay
         Check(game.Player.PoseName == "micah_aim" && _poseCounts.GetValueOrDefault("micah_draw") == draws + 1,
             "Micah draws the revolver and aims it at the librarian");
         await Shot("library_threat");
+        int libraryHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         await threaten;
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == libraryHolsters + 1,
+            "Micah puts the revolver back in its holster after the threat");
         Check(gs.HasItem("book") && gs.HasFlag("librarian_threatened") && gs.HasFlag("library_banned") &&
             game.Room?.Name == "ChicagoMap" && game.Player.PoseName == null,
             "threatened the librarian into giving up the book, then walked straight out to the map");
@@ -778,11 +798,13 @@ public partial class AutoPlay
                 nunLines.Any(l => l.Contains("I know nothing")), $"talking to the sister again is a short refusal ({i + 1})");
         }
         var threat = game.Perform(Verb.UseItem, "nun", "revolver");
+        int nunHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var threatHeard = Listen(game, threat);
         await game.Wait(1.5);
         await Shot("convent_gun");
         await threat;
         var threatLines = await threatHeard;
+        Check(_poseCounts.GetValueOrDefault("micah_holster") == nunHolsters + 1, "Micah puts the revolver away after the sister talks");
         Check(threatLines.Any(l => l.Contains("Jezebel")) && threatLines.Any(l => l.Contains("I failed her")),
             "seduced, Agatha still calls her a Jezebel, but confesses she failed her");
         Check(gs.HasFlag("nun_threatened") && game.Room?.Name == "ChicagoMap", "the sister names Harrington");
@@ -810,9 +832,16 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "paste_pot");
         Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
         await Shot("newspaper_morgue_taken");
-        await CombineAndWait("clipping_top", "clipping_bottom");
-        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
-            "pasted the halves together; the paste pot is kept");
+        await CombineAndWait("paste", "clipping_bottom");
+        Check(gs.HasItem("clipping_bottom_pasted") && !gs.HasItem("clipping_bottom") && gs.HasItem("paste"),
+            "paste on the bottom half's torn edge; the paste pot is kept");
+        await game.Perform(Verb.UseItem, "wall_map", "clipping_bottom_pasted");
+        Check(!gs.HasFlag("harrington_located"), "a pasted half is still half an address");
+        await CombineAndWait("paste", "clipping_bottom_pasted");
+        Check(gs.HasItem("clipping_bottom_pasted") && gs.HasItem("paste"), "a pasted edge takes no more paste");
+        await CombineAndWait("clipping_top", "clipping_bottom_pasted");
+        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom_pasted"),
+            "pressed the top half onto the pasted bottom; the paste pot is kept");
         Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"),
             "the mended clipping is pinned on the wall map at once: the Harrington Building on LaSalle");
         await ReloadCheckpoint("morgue_clipping");

@@ -210,16 +210,28 @@ public partial class MansionExterior : Room
         await Game.WalkTo(new Vector2(150, 238));
         Player.Face(Facing.Right);
         await Wait(0.6);
+        if (State.HasFlag(Endings.EleanorBurned))
+        {
+            Player.Face(Facing.Up);
+            await Wait(0.8);
+            State.SetFlag(EleanorBlaze);
+            await Say("*CRASH*");
+            await Wait(1.0);
+            Player.Face(Facing.Right);
+        }
         await Talk("coda_outside");
         await DownTheRoad();
     }
+
+    /// <summary>Eleanor's fire reaches the house once she is out of it (ending 8 never sets <see cref="Endings.MansionExploded"/>).</summary>
+    public const string EleanorBlaze = "eleanor_blaze";
 
     /// <summary>Eleanor off down the road, and the night back at Rose's door. The gate runs it too, in case the coda stopped short.</summary>
     private async Task DownTheRoad()
     {
         await Game.WalkTo(new Vector2(30, 236));
         await Game.Hud.Fade(1, 1.5);
-        State.SetFlag("eleanor_coda", false);
+        Story.Interlude.EndCoda();
         // Micah killed Tony and promised Caleb the station steps: no coffee at Rose's door that morning.
         if (State.HasFlag(Endings.KilledTony)) await Act3.EleanorAfterRose();
         else await Game.ChangeRoom("rose_house", "coffee");

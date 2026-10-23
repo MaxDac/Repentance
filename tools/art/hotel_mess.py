@@ -8,7 +8,7 @@ import random
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 from .common import W, H, TOP, tall, hx, mix, mul, vgrad, noise, light, shadow, vignette, pixelize, palette_of, save, city
 from . import hotel
-from .hotel import R, WOOD, WOOD_D, GOLD, GOLD_D, GREEN, GREEN_L, BURGUNDY, BURGUNDY_L
+from .hotel import R, CHANDELIER_X, WOOD, WOOD_D, GOLD, GOLD_D, GREEN, GREEN_L, BURGUNDY, BURGUNDY_L
 
 STEEL, STEEL_D, STEEL_L = hx("4a4c52"), hx("2a2c30"), hx("70747c")
 DESK_X0, DESK_X1, DESK_Z0, DESK_Z1 = 154, 232, 2, 26
@@ -1501,6 +1501,95 @@ def tidy_floor(img, bench=True):
     # a loose silk thread from the torn hem
     d.line([(ex + 3, ey + spr.height + 3), (ex + 4, ey + spr.height + 6), (ex + 3, ey + spr.height + 9)], fill=RED[2])
 
+
+CRYSTAL, CRYSTAL_L, CRYSTAL_D = hx("d8e4ec"), hx("ffffff"), hx("8a9cb0")
+FLAME, SLEEVE = hx("fff0c0"), hx("f2ead8")
+DARK = hx("3a2410")
+
+
+def _arm(d, cx, y0, dx, y1, lift):
+    """An S-curved gilt arm from the stem out to a candle cup: lit along its top, bronze underneath."""
+    pts = [(cx + dx * t, y0 + (y1 - y0) * t + lift * math.sin(t * math.pi)) for t in [i / 10 for i in range(11)]]
+    d.line([(x, y + 1) for x, y in pts], fill=GOLD_D)
+    d.line(pts, fill=GOLD)
+    # a small scroll curling under the arm halfway out
+    mx, my = pts[5]
+    d.point([(mx, my + 2), (mx + (1 if dx > 0 else -1), my + 3)], fill=GOLD_D)
+
+
+def _candle(d, x, y):
+    d.line([(x - 2, y), (x + 2, y)], fill=GOLD)                   # bobeche
+    d.point((x, y + 1), fill=GOLD_D)
+    d.rectangle([x - 1, y - 3, x, y - 1], fill=SLEEVE)            # candle sleeve
+    d.point([(x - 1, y - 4), (x, y - 4), (x, y - 5)], fill=FLAME)  # flame bulb
+
+
+def chandelier(img):
+    """A gilt and crystal chandelier: a short chain from the ceiling rose, a crown of crystal spikes and drops, two
+    tiers of candle arms, swags of beads between the lower arms and a cut-glass ball with a pendant. The gilt frame is
+    outlined in dark bronze so it reads against the cream wall, the glass is laid over it unoutlined; returns the flame
+    positions for their glow."""
+    sw, sh = 60, 34
+    frame = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    d = ImageDraw.Draw(frame)
+    c = sw // 2
+    d.polygon([(c - 3, 0), (c + 3, 0), (c + 1, 2), (c - 1, 2)], fill=GOLD)
+    for yy in range(3, 7):
+        d.point((c, yy), fill=GOLD if yy % 2 else GOLD_D)
+    yc = 8
+    d.ellipse([c - 6, yc - 1, c + 6, yc + 1], fill=GOLD)
+    d.line([(c - 5, yc + 1), (c + 5, yc + 1)], fill=GOLD_D)
+    d.line([(c, yc + 1), (c, yc + 17)], fill=GOLD_D)
+    cups = []
+    for y0, y1, arms in ((yc + 4, yc + 6, ((-13, -2), (-5, 0), (5, 0), (13, -2))),
+                         (yc + 12, yc + 14, ((-24, -4), (-15, -2), (-6, 1), (6, 1), (15, -2), (24, -4)))):
+        for dx, lift in arms:
+            yy = y1 + (1 if abs(dx) < 7 else 0)
+            _arm(d, c, y0, dx, yy, lift)
+            cups.append((c + dx, yy))
+    for x, yy in cups:
+        _candle(d, x, yy)
+    d.ellipse([c - 2, yc + 17, c + 2, yc + 19], fill=GOLD)
+    glass = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    g = ImageDraw.Draw(glass)
+    # crown: crystal spikes standing up from the ring, drops falling outward from it
+    for dx in (-5, -2, 1, 4):
+        top = yc - (3 if dx in (-2, 1) else 2)
+        g.line([(c + dx, yc - 2), (c + dx, top)], fill=CRYSTAL)
+        g.point((c + dx, top), fill=CRYSTAL_L)
+    for dx in (-5, -2, 2, 5):
+        for t in range(2, 6):
+            g.point((c + dx * (1 + t * 0.15), yc + t), fill=CRYSTAL_L if t == 5 else CRYSTAL)
+    # cut-glass bowl on the stem
+    g.ellipse([c - 4, yc + 7, c + 4, yc + 11], fill=CRYSTAL_D)
+    g.line([(c - 3, yc + 8), (c + 1, yc + 8)], fill=CRYSTAL)
+    g.point((c - 2, yc + 8), fill=CRYSTAL_L)
+    # prisms under every bobeche
+    for x, yy in cups:
+        g.point([(x - 1, yy + 2), (x + 1, yy + 2)], fill=CRYSTAL)
+        g.point((x, yy + 3), fill=CRYSTAL_L)
+    # swags of beads between the lower cups
+    lower = cups[4:]
+    for (ax, ay), (bx, by) in zip(lower, lower[1:]):
+        for t in [i / 5 for i in range(1, 5)]:
+            xx, yy = round(ax + (bx - ax) * t), round(ay + 2 + (by - ay) * t + 2.5 * math.sin(t * math.pi))
+            g.point((xx, yy), fill=CRYSTAL_L if (xx + yy) % 3 == 0 else CRYSTAL)
+    # ball and pendant at the bottom
+    g.ellipse([c - 2, yc + 19, c + 2, yc + 23], fill=CRYSTAL_D)
+    g.point([(c - 1, yc + 20)], fill=CRYSTAL_L)
+    g.line([(c, yc + 24), (c, yc + 25)], fill=CRYSTAL)
+    g.point((c, yc + 26), fill=CRYSTAL_L)
+    ox, oy = CHANDELIER_X - c, TOP - 1
+    _stamp(img, _outlined(frame, DARK), ox - 1, oy - 1)
+    _stamp(img, glass, ox, oy)
+    return [(ox + x, oy + yy - 5) for x, yy in cups]
+
+
+def chandelier_glow(img, flames):
+    light(img, "ellipse", [CHANDELIER_X - 50, TOP - 16, CHANDELIER_X + 50, TOP + 40], hx("ffe4b0"), 0.1, 14)
+    for x, y in flames:
+        light(img, "ellipse", [x - 2, y - 2, x + 3, y + 3], hx("fff2cc"), 0.3, 1)
+
 def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, paper=False, tidy=False, bench=True,
           phone=True, ajar=False):
     img = Image.new("RGB", (W, H))
@@ -1527,9 +1616,9 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     else:
         mess(img)
         telephone_down(img)
-    hotel.chandelier(img)
     img = tall(img, hotel.ceiling)
-    # night: the only light comes from the sconces, the bedside lamp and the city outside
+    flames = chandelier(img)
+    # night: the only light comes from the sconces, the chandelier turned low, the bedside lamp and the city outside
     dark = Image.new("RGB", img.size, (70, 70, 120))
     img = ImageChops.multiply(img, Image.blend(dark, Image.new("RGB", img.size, (255, 240, 210)), 0.55))
     lx, ly = lamp[0], lamp[1] + TOP
@@ -1537,6 +1626,7 @@ def paint(closet_open=False, safe_open=False, box=False, drawer_open=False, pape
     light(img, "ellipse", [lx - 7, ly - 5, lx + 7, ly + 5], hx("fff0c8"), 0.2, 3)
     light(img, "ellipse", [96, 40, 296, 140], hx("ffe0a0"), 0.18, 18)
     light(img, "polygon", [(166, 134), (222, 134), (300, H + TOP - 1), (150, H + TOP - 1)], hx("6a80c0"), 0.1, 12)
+    chandelier_glow(img, flames)
     vignette(img, 0.4, tint=(30, 24, 40), blur=34)
     return img
 
@@ -1551,13 +1641,19 @@ def _pinned(img, box, n):
     return [tuple(pal[i * 3:i * 3 + 3]) for i in range(n)]
 
 
+def _extra_pins(img):
+    """The chandelier's glass and the rug's dyes are small or dark next to the walls and the parquet."""
+    return (_pinned(img, (CHANDELIER_X - 26, TOP - 10, CHANDELIER_X + 26, TOP + 46), 10)
+            + _pinned(img, (90, 200, 410, H + TOP), 12))
+
+
 def build():
     base = paint()
     # the painting's sky, lake and meadow and the lamp's silk are small next to the cream walls, so their colours are
     # pinned or quantising turns the landscape tan and the shade into wallpaper
     lx, ly = (int(v) for v in R.P(399, 28, 13))
     pal = (palette_of(base, 128) + _pinned(base, (296, 52, 352, 96), 16)
-           + _pinned(base, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10))
+           + _pinned(base, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10) + _extra_pins(base))
     px = pixelize(base, pal)
     save(px, "rooms", "eleanor_room.png")
     states = {
@@ -1577,7 +1673,8 @@ def build():
     # the First Interlude: the same room the night she left, before the old man's men turned it over
     tidy = paint(tidy=True)
     tpal = (palette_of(tidy, 128) + _pinned(tidy, (296, 52, 352, 96), 16)
-            + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10) + _pinned(tidy, (90, 205, 160, 240), 8))
+            + _pinned(tidy, (lx - 9, ly + TOP - 32, lx + 10, ly + TOP + 2), 10) + _pinned(tidy, (90, 205, 160, 240), 8)
+            + _extra_pins(tidy))
     with_bench = pixelize(paint(tidy=True, phone=False), tpal)
     room = pixelize(paint(tidy=True, bench=False, phone=False), tpal)
     save(room, "rooms", "eleanor_room_interlude.png")

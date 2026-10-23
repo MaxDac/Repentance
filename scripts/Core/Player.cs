@@ -116,6 +116,17 @@ public partial class Player : Node2D, ISpeaker
     public void SetPoseFrame(int frame) => _poses.ShowFrame(frame);
 
     /// <summary>
+    /// Puts the revolver back in its shoulder holster and returns to the normal sheet. <paramref name="strip"/> is the
+    /// holster strip leaving the held pose: "micah_holster" from the level aim, "micah_holster_low" from the lowered
+    /// aim, "micah_holster_down" from the aim down at the ground.
+    /// </summary>
+    public async Task Holster(string strip = "micah_holster")
+    {
+        await PlayPose(strip);
+        SetPose(null);
+    }
+
+    /// <summary>
     /// Steps back to <paramref name="target"/> over <paramref name="seconds"/> without turning round or dropping the
     /// held pose: a slow retreat with the gun still up. With <paramref name="stepPose"/> (a strip of
     /// <paramref name="stepFrames"/>-frame backward steps, one run per <paramref name="run"/>), the legs walk through

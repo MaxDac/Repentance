@@ -53,12 +53,14 @@ class ChurchCloseupTests(unittest.TestCase):
         self.assertEqual(self.panel.size, (closeup.PW, closeup.PH))
         self.assertEqual(self.panel.size, Image.open(UI / "fire_escape_closeup.png").size)
 
-    def test_faces_are_matched(self):
+    def test_heads_are_matched(self):
+        """Eye lines level and chins on the same line, so both heads fill the same share of their halves."""
         caleb_ch = 896 / closeup.CHURCH_CALEB_ZOOM
         micah_ch = 768 / closeup.CHURCH_MICAH_ZOOM
-        caleb_face = (closeup.CALEB_FACE_W * closeup.CALEB_FACE_H) ** 0.5 / caleb_ch
-        micah_face = (closeup.MICAH_FACE_W * closeup.MICAH_FACE_H) ** 0.5 / micah_ch
-        self.assertAlmostEqual(caleb_face, micah_face, delta=0.005)
+        caleb_chin = (closeup.CALEB_CHIN_Y - closeup.CALEB_EYES_Y) / caleb_ch
+        micah_chin = (closeup.MICAH_CHIN_Y - closeup.MICAH_EYES_Y) / micah_ch
+        self.assertAlmostEqual(caleb_chin, micah_chin, delta=0.005)
+        self.assertLess(closeup.CHURCH_CALEB_ZOOM, 1.6, "zoomed out to his shoulders, not filling the half")
 
     def test_frame_bar_and_chunky_pixels(self):
         a = np.asarray(self.panel, dtype=float)

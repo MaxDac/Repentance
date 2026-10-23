@@ -17,7 +17,7 @@ public partial class ClubBackstage : Room
     public override Track? Music => Track.ClubStrings;
 
     /// <summary>Just inside the stage door, where the old man first shows.</summary>
-    public static readonly Vector2 Doorway = new(47, 182);
+    public static readonly Vector2 Doorway = new(44, 182);
 
     /// <summary>Where he stands to talk, by the screens; the scene's position for him.</summary>
     public static readonly Vector2 OldManSpot = new(362, 214);

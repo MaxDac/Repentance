@@ -67,9 +67,8 @@ CHURCH_MICAH_SRC = os.path.join(ROOT, "tools", "art", "src", "church_micah.png")
 # the back wall's mortar lines behind Caleb's head, in his 1152x896 source; rows beyond them repeat CHURCH_ROW
 CHURCH_MORTAR = (166, 203, 230, 263, 286, 307, 343, 367, 388, 415, 446)
 CHURCH_ROW, CHURCH_BRICK = 27, 66
-# Caleb is zoomed so his face is a good part of his half, with his collar in view; Micah is zoomed so his face matches.
-CALEB_FACE_X, CALEB_FACE_W, CALEB_FACE_H, CALEB_EYES_Y = 568, 265, 225, 317
-CHURCH_CALEB_ZOOM = 1.67
+# Caleb's face centre, eye line and chin (the jaw line under his mouth) in his 1152x896 source.
+CALEB_FACE_X, CALEB_EYES_Y, CALEB_CHIN_Y = 568, 317, 562
 CHURCH_EYES = 0.40  # the eye line, as a fraction of each half's height
 MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 # Face boxes in the sources (brow to chin, cheek to cheek) and the eye lines. Micah's picture is zoomed so his face
@@ -77,8 +76,11 @@ MICAH_FACE_X, ELEANOR_FACE_X = 672, 665  # face centres in the 1344x768 sources
 MICAH_FACE_W, MICAH_FACE_H, MICAH_EYES_Y = 260, 235, 265
 ELEANOR_FACE_W, ELEANOR_FACE_H, ELEANOR_EYES_Y = 280, 320, 245
 MICAH_ZOOM = ((ELEANOR_FACE_W * ELEANOR_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
-# Micah's crop in the cathedral: as many of his 768 rows as makes his face box the same share of the half as Caleb's.
-CHURCH_MICAH_ZOOM = (768 * CHURCH_CALEB_ZOOM / 896) * ((CALEB_FACE_W * CALEB_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
+MICAH_CHIN_Y = 485
+# The cathedral crops: Micah's sets the size, his hat brim to his collar; Caleb is zoomed so that, with the eye lines
+# level, his chin sits on Micah's chin line, so both heads fill the same share of their halves.
+CHURCH_MICAH_ZOOM = 1.414
+CHURCH_CALEB_ZOOM = (896 / 768) * CHURCH_MICAH_ZOOM * (MICAH_CHIN_Y - MICAH_EYES_Y) / (CALEB_CHIN_Y - CALEB_EYES_Y)
 # Rose's face in her 1344x768 doorway source, and Micah's zoom to match it in the Rose close-up.
 ROSE_FACE_X, ROSE_FACE_W, ROSE_FACE_H, ROSE_EYES_Y = 672, 250, 260, 270
 ROSE_MICAH_ZOOM = ((ROSE_FACE_W * ROSE_FACE_H) / (MICAH_FACE_W * MICAH_FACE_H)) ** 0.5
