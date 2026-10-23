@@ -1673,6 +1673,30 @@ ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
 -> END
 
+// Ending 1, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house.
+=== ending_eleanor_caleb ===
+THOUGHT: Three nights after the Club. The edge of the city, past the last streetlight, and for once the rain had stopped.
+THOUGHT: She had walked out of the old man's house by the coal door, in the white dress from the duffle she'd packed for running, and her pearls. The priest had been waiting at the corner with his collar turned up, like a man who had done it before.
+ELEANOR: It's one thing, Father, sneaking a girl or two out the back of the Club. Nobody misses a girl or two.
+ELEANOR: But I'm their star. They won't take this lying down. They'll come after you.
+CALEB: I know.
+CALEB: But I'm tired of playing their game.
+ELEANOR: ...
+CALEB: There's a produce truck through here before dawn. Walt, from the parish. He'll take you as far as Springfield, and he won't ask you a thing. He doesn't ask me anything either.
+CALEB: The Franciscan sisters there will put you up for a week or two, until a family I know can take you on to St. Louis. Nobody at the Club has ever heard of any of them.
+CALEB: And this. It isn't much.
+ELEANOR: An envelope. From the poor box, Father?
+CALEB: From the poor box. You're poor tonight.
+ELEANOR: Your brother came for me too, you know. With a revolver, and a bottle, and that hat.
+CALEB: I know. He went home instead. To Rose, and a cup of coffee.
+ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
+THOUGHT: Headlights came up the road out of the dark, slow, the way a man drives when he's carrying crates of cabbages and a secret.
+ELEANOR: That'll be Walt.
+ELEANOR: Thank you, Father. For not asking what I'd done before you'd help me.
+CALEB: I didn't need to. Go on. Before I change my mind about the poor box.
+ELEANOR: Say hi to Micah.
+-> END
+
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
 
 === dinner_call2 ===
@@ -1827,7 +1851,11 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after that coffee. He said he owed fourteen girls that walk."
         DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
     }
-    DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to Holy Name and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
+    {has_flag("caleb_escape"):
+        DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, she told Caleb at the edge of the city, the night he got her out of Chicago, and asked him to let me know. He did, a week later, over a cup of coffee. What she told him, I wrote in, and the rest I guessed."
+    - else:
+        DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to Holy Name and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
+    }
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
     DANIEL: Maybe Leo would like to read it some day.

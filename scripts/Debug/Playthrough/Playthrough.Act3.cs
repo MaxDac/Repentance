@@ -82,10 +82,18 @@ public sealed partial class Playthrough
             await Do(Verb.UseItem, "sal", "revolver");
             Check(Gs.HasFlag("alley3_sal_down"), "Sal knocked down");
             var tony = Do(Verb.Talk, "back_door");
-            if (_route == "1")
+            if (_route is "1" or "1-caleb")
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);
                 Check(Gs.HasFlag(Endings.WalkedAway), "walked away from Tony");
+                if (_route == "1-caleb")
+                {
+                    await Until(() => _game.Room?.Name == "Outskirts", 600);
+                    Expect("Outskirts", "Eleanor and Caleb at the city's edge");
+                    Check(Gs.HasFlag("caleb_escape") && Gs.HasFlag("ending_1"), "ending 1, with Eleanor's escape");
+                    Check(_game.Player.Character == "eleanor_white_play", "Eleanor in her white dress");
+                    Check(_game.Room?.FindActor("caleb")?.Visible == true, "Caleb beside her");
+                }
                 await TheEnd();
                 over = true;
                 return;
@@ -138,7 +146,7 @@ public sealed partial class Playthrough
                 return;
             }
             Expect("OfficeStorm", "Tony left bleeding: Micah walks out, back to the office, in the storm");
-        }, roundTrip: _route is not ("1" or "12"));
+        }, roundTrip: _route is not ("1" or "1-caleb" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>
         {

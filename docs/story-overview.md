@@ -201,7 +201,7 @@ the interludes; their combined effect on ending selection begins once Micah reac
 
 ```mermaid
 flowchart TD
-    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose"]
+    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose<br/>(then Eleanor and Caleb at the city's edge<br/>if she held out and Micah gave up or walked away)"]
     steps -- "Keep going" --> tony["Tony at gunpoint"]
     tony -- "Lower the gun<br/>(church return + ring)" --> E1
     tony -- "Shoot him in the shoulder" --> finishTony{"Finish Tony?"}
@@ -290,7 +290,7 @@ How each decision is made:
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Eleanor alone (8) or in prison with Caleb (9); preceded by Micah's coffee with Rose only if Tony lives |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |
-| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose |
+| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose; after a give-up or walk-away, if Eleanor held out, then Eleanor and Caleb at the city's edge |
 | 6 | Turned himself in | Prison, Rose visits |
 | 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
 | 2 / 3 | Evidence or fire; 2 if Eleanor was convinced | Out of town, with her (2) or alone (3) |
@@ -298,8 +298,9 @@ How each decision is made:
 
 The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
-the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9) and in the epilogue of
-ending 8. Daniel keeps the journal for Leo after endings
+the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9), in the epilogue of
+ending 8, and, if she held out, after Micah's coffee when he gave up on the steps or walked away from Tony (still
+ending 1: Caleb has got her out of the city, `caleb_escape`). Daniel keeps the journal for Leo after endings
 1, 6, 8, 9, 10, 11 and 12.
 
 ### Weather

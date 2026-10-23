@@ -12,7 +12,7 @@ public sealed partial class Playthrough
     /// <summary>Waits for "End of Act Three", then Daniel's epilogue in the attic and "The End".</summary>
     private async Task TheEnd()
     {
-        int ending = _route is "1" or "1-oldman" or "1-steps" ? 1 : KillRoute ? 12 : int.Parse(_route);
+        int ending = _route is "1" or "1-oldman" or "1-steps" or "1-caleb" ? 1 : KillRoute ? 12 : int.Parse(_route);
         await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", 300);
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         bool sawVows = false;
@@ -42,7 +42,7 @@ public sealed partial class Playthrough
     }
 
     /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-11.</summary>
-    private bool EleanorRoute => _route is "8" or "9" or "10" or "11";
+    private bool EleanorRoute => _route is "8" or "9" or "10" or "11" or "1-caleb";
 
     /// <summary>Routes where Micah goes back to Tony with the revolver and kills him, ending in prison (ending 12).</summary>
     private bool KillRoute => _route is "12" or "12-oldman";
@@ -128,6 +128,7 @@ public sealed partial class Playthrough
         switch (_route)
         {
             case "1":
+            case "1-caleb":
                 yield return "Lower the gun. It's not worth it";
                 break;
             case "1-oldman":

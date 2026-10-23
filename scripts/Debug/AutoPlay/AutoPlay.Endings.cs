@@ -260,8 +260,9 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
+        Check(!gs.HasFlag("caleb_escape"), "ending 1: without Eleanor's refusals, no escape with Caleb");
 
-        // Eleanor's refusals only matter once Micah shoots the old man: both of them still give way to the give-ups.
+        // Both of Eleanor's refusals give way to the give-ups, but after Rose's coffee Caleb gets Eleanor out of town.
         var bothRefused = new[] { Endings.RefusedAbbess, Endings.RefusedDrugs };
         Seed(act3Flags.Where(f => f != "keep_going").Concat(bothRefused), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
         _ = game.ChangeRoom("church_exterior", "beaten");
@@ -269,6 +270,7 @@ public partial class AutoPlay
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorStruck),
             "ending 1: giving up on the steps wins over both of Eleanor's refusals");
+        await CalebEscape("steps");
         await TheEnd("ending_1 (steps, Eleanor held out)");
 
         Seed(alleyReady.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
@@ -278,7 +280,18 @@ public partial class AutoPlay
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorWeary),
             "ending 1: walking away from Tony wins over both of Eleanor's refusals");
+        await CalebEscape("Tony");
         await TheEnd("ending_1 (Tony, Eleanor held out)");
+    }
+
+    /// <summary>After an early give-up with both refusals, Rose's coffee cuts to Eleanor and Caleb at the outskirts.</summary>
+    private async Task CalebEscape(string label)
+    {
+        var gs = GameState.Instance;
+        await Until(() => _game.Room is Rooms.Outskirts, 120);
+        Check(_game.Room is Rooms.Outskirts && gs.HasFlag("caleb_escape") && gs.HasFlag("eleanor_epilogue") &&
+              _game.Player.Character == "eleanor_white_play" && _game.Room.FindActor("caleb")?.Visible == true,
+            $"ending 1 ({label}, Eleanor held out): Eleanor in white with Caleb at the edge of the city");
     }
 
     /// <summary>

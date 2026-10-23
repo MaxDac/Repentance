@@ -845,7 +845,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
-  to the end of act 3 (caption "End of Act Three").
+  to the end of act 3 (caption "End of Act Three"); if Eleanor held out, her escape with Caleb comes first (ending 1).
 - If the player decide to keep pushing, keep to the next.
 
 #### Office
@@ -1098,6 +1098,21 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Only if Micah took the signed papers from the study (possible on the Our Father route), the journal adds that
   Caleb carried them to the Tribune himself; a grand jury followed, and the Club's Thursdays ended. Without the
   papers, there is no mention.
+- **Eleanor's escape, with Caleb.** If Eleanor held out both times (the truth to the Mother Superior, the old man's gin
+  and powder refused) and Micah gave up before the mansion (on the church steps, or walking away from Tony), it is
+  still ending 1, but after Rose's "Why not." the screen fades to the outskirts at night (`caleb_escape`). The rain
+  has stopped. The player is Eleanor in her white dress and pearls, from the duffle she had packed for running;
+  Caleb stands beside her, and the scene plays by itself. A few nights after the Club, Caleb got her out of the old
+  man's house:
+  - Eleanor: it's one thing for him to sneak a few of the other girls out the back, but she's their star; they won't
+    take it lying down, and they'll come after him. Caleb: "I know. But I'm tired of playing their game."
+  - Practical arrangements: a parishioner's produce truck passes before dawn and takes her downstate to Springfield,
+    where Caleb's friends, the Franciscan sisters, put her up with no questions until a family he knows can take her
+    on to St. Louis; he gives her an envelope with a little money.
+  - Eleanor learns that Micah went home to his wife, and is glad of it. Her last words, as the truck's lights come
+    up the road: "Say hi to Micah."
+  - Then *End of Act Three*. The journal's last entry is ending 1's, but the Second Interlude's source changes: Caleb
+    passed on what she told him the night he got her out of Chicago, at her asking.
 
 #### Option 2 - Outskirts, with Eleanor
 
@@ -1177,7 +1192,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 These need Eleanor to have held out **both** times: telling the Mother Superior the truth instead of seducing her
 (First Interlude) and refusing the old man's gin and powder
-(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
+(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1 (with Eleanor's escape
+with Caleb after the coffee, see Option 1), and so does Eleanor
 returning to bed in her coda. Endings 2-7 need her to have given in at least once.
 
 #### Option 8 - Outskirts, Eleanor alone, after the fire
@@ -1288,7 +1304,7 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 
 | Ending | Who wrote the Second Interlude, and from what |
 |---|---|
-| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to. |
+| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to (after Eleanor's escape with Caleb: she told Caleb the night he got her out, and asked him to pass it on). |
 | 2 | Micah: she told him on the road. |
 | 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
 | 4 | Micah: she told him across the parlour table. |

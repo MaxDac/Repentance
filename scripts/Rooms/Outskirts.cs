@@ -6,13 +6,14 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Past the city limits, where the bookkeeper's drive ended in Act 2. In Act 3 it's where Micah's car stops on the way out
 /// of Chicago: with Eleanor beside him (ending 2) or alone (ending 3). In ending 10 she gets out with him, then walks off down
-/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own. In ending 13 Micah ran from the
+/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own. In ending 1, after an early give-up
+/// when she held out, it's Eleanor with Caleb, who got her out. In ending 13 Micah ran from the
 /// Harringtons' alarm without her, and he isn't stopping.
 /// </summary>
 public partial class Outskirts : Room
 {
-    /// <summary>Eleanor walks out of the city free in ending 8: the rain has stopped.</summary>
-    protected override bool RainStopped => State.HasFlag("ending_8");
+    /// <summary>Eleanor walks out of the city free in ending 8, or with Caleb in ending 1: the rain has stopped.</summary>
+    protected override bool RainStopped => State.HasFlag("ending_8") || State.HasFlag("caleb_escape");
 
     public override void _Ready()
     {
@@ -38,6 +39,11 @@ public partial class Outskirts : Room
             await Game.Run(EleanorAlone);
             return;
         }
+        if (entry == "eleanor_caleb")
+        {
+            await Game.Run(EleanorWithCaleb);
+            return;
+        }
         if (State.HasFlag("seen_outskirts")) return;
         State.SetFlag("seen_outskirts");
         await Game.Run(() => Think("The last fence post, the last streetlight, the last place a man would go to bury something."));
@@ -50,6 +56,20 @@ public partial class Outskirts : Room
         await Game.WalkTo(new Vector2(232, 252));
         Player.Face(Facing.Right);
         await Talk("ending_eleanor_alone");
+        State.SetFlag("eleanor_epilogue", false);
+        await Act3.Finish();
+    }
+
+    /// <summary>
+    /// Ending 1 after an early give-up, when Eleanor held out: Caleb has got her out of the old man's house, and waits
+    /// with her at the edge of the city for the truck that takes her downstate.
+    /// </summary>
+    private async Task EleanorWithCaleb()
+    {
+        await Wait(1.0);
+        await Game.WalkTo(new Vector2(256, 252));
+        Player.Face(Facing.Right);
+        await Talk("ending_eleanor_caleb");
         State.SetFlag("eleanor_epilogue", false);
         await Act3.Finish();
     }

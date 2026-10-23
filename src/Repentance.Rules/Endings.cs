@@ -4,7 +4,8 @@ namespace Repentance;
 
 /// <summary>
 /// The rules that decide how Act 3 ends. Godot-free so they can be unit tested; callers pass GameState.HasFlag.
-///   1  Rose        - Micah gives up: on the church steps, in front of the bartender or the old man.
+///   1  Rose        - Micah gives up: on the church steps, in front of the bartender or the old man. If Eleanor held
+///                    out and he gave up before the mansion, Caleb gets her out of the city after the coffee.
 ///   2  Outskirts   - Eleanor convinced, and the mansion burned or Micah took the documents.
 ///   3  Outskirts   - Eleanor not convinced, and the mansion burned or Micah took the documents.
 ///   4  Prison      - Eleanor convinced, but nothing to bargain with: Eleanor visits.
@@ -75,6 +76,13 @@ public static class Endings
 
     /// <summary>Eleanor refused both the Mother Superior and the old man: her own endings open up.</summary>
     public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
+
+    /// <summary>
+    /// Ending 1 from a give-up before the mansion (the church steps, or walking away from Tony) when Eleanor held out:
+    /// after Rose's coffee, Caleb has got Eleanor out of the city, and she plays one last scene with him at the outskirts.
+    /// </summary>
+    public static bool EleanorEscapesWithCaleb(Func<string, bool> has) =>
+        EleanorHeldOut(has) && (has(GaveUpSteps) || has(WalkedAway)) && Resolve(has) == 1;
 
     /// <summary>
     /// Eleanor's clothes once she is out of the mansion and free (endings 2, 4, 8, 10, 11), from the duffle she packed for
