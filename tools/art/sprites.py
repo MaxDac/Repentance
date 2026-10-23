@@ -387,7 +387,7 @@ def supine_frame(spec, name, wound=None):
     """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
     with the body resting on the row the standing figure's soles touch. wound: where along the body (0 = head, 1 = feet)
     a gunshot has soaked the clothes, with a pool of blood on the ground beneath it."""
-    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST)
+    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST, on_back=True)
     from PIL import Image, ImageDraw, ImageChops
     if wound is not None:
         stain = Image.new("RGBA", img.size)
@@ -883,7 +883,7 @@ def action_sequences(spec, name):
         return frames + [end], times + [timing[-1]]
 
     if name == "micah_masked":
-        falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
+        falling, times = sequence(FALL, action_figure(scaled, REST, on_back=True), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
         recover_strip(spec, scaled, standing)
@@ -957,7 +957,7 @@ def recover_strip(spec, scaled, standing):
         out.alpha_composite(img.crop((max(0, -dx), 0, img.width - max(0, dx), img.height)), (max(0, dx), 0))
         return out, (head[0] + dx, head[1])
 
-    frames = [action_figure(scaled, REST)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
+    frames = [action_figure(scaled, REST, on_back=True)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
     action_strip("micah_recover", frames, [0.3, 0.22, 0.2, 0.16, 0.12, 0.12, 0.1, 0.07, 0.1, 0.15, 0.12, 0.1, 0.09,
                                            0.11, 0.12])
 
@@ -1812,8 +1812,8 @@ def gunned_down_strip(spec, name, final_name):
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
 
-    def wounded(joints, r):
-        img, head = action_figure(scaled, joints)
+    def wounded(joints, r, on_back=False):
+        img, head = action_figure(scaled, joints, on_back=on_back)
         hip, shoulder = grounded_joints(joints)[:2]
         wx, wy = hip + (shoulder - hip) * 0.7
         stain = Image.new("RGBA", img.size)
@@ -1829,7 +1829,7 @@ def gunned_down_strip(spec, name, final_name):
     for i, joints in enumerate(keys[1:]):
         img, head, _ = wounded(joints, min(2.5 + i * 0.5, 5))
         frames.append((img, head))
-    down, head, wx = wounded(REST, 5.5)
+    down, head, wx = wounded(REST, 5.5, on_back=True)
     pool = Image.new("RGBA", down.size)
     ImageDraw.Draw(pool).ellipse([wx - 14, 87, wx + 12, 94], fill=(104, 12, 16, 255))
     pool.alpha_composite(down)
