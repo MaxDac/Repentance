@@ -117,6 +117,7 @@ public partial class ClubStage : Room
     {
         if (FindActor("leader") is not { } leader) return;
         await Think("All but one. The stag puts a hand to his jaw, lifts the face away, and pushes the cowl back off his head.");
+        await leader.PlayPose("leader_unmask");
         leader.SetTexture(GD.Load<Texture2D>("res://assets/art/sprites/leader_unmasked.png"), leader.Frames);
         leader.Id = "harrington";
         leader.DisplayName = "Mr. Harrington";
