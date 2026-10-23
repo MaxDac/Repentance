@@ -15,6 +15,7 @@ public partial class PuzzlePanel : Control
 {
     private static readonly Color Parchment = new("e8dcc0");
     private readonly Dictionary<string, Button> _buttons = new();
+    private readonly Dictionary<string, Rect2> _rects = new();
     private TaskCompletionSource<bool>? _completion;
     private PuzzleScreen? _screen;
     private Label _feedback = null!;
@@ -39,6 +40,7 @@ public partial class PuzzlePanel : Control
             child.QueueFree();
         }
         _buttons.Clear();
+        _rects.Clear();
         Kind = kind;
         _screen = PuzzleScreen.For(kind);
         _completion = new TaskCompletionSource<bool>();
@@ -56,9 +58,9 @@ public partial class PuzzlePanel : Control
 
         _screen.Attach(this);
         if (_screen.HasDirections) _feedback.Text = "Use the pad, the arrow keys, or drag across the diagram.";
-        AddButton("reset", "Reset", new Rect2(18, 210, 70, 22), Reset);
-        if (_screen.HasSubmit) AddButton("submit", _screen.SubmitText, new Rect2(186, 210, 108, 22), Submit);
-        AddButton("close", "Close / Esc", new Rect2(368, 210, 96, 22), () => Finish(false));
+        AddButton("reset", "Reset", new Rect2(18, 211, 70, 20), Reset);
+        if (_screen.HasSubmit) AddButton("submit", _screen.SubmitText, new Rect2(186, 211, 108, 20), Submit);
+        AddButton("close", "Close / Esc", new Rect2(368, 211, 96, 20), () => Finish(false));
         QueueRedraw();
         return task;
     }
@@ -123,15 +125,16 @@ public partial class PuzzlePanel : Control
 
     public Button AddButton(string id, string text, Rect2 rect, Action action)
     {
-        var button = new Button
-        {
-            Text = text, Position = rect.Position, Size = rect.Size,
-            FocusMode = FocusModeEnum.None,
-        };
+        var button = new Button { Text = text, Position = rect.Position, FocusMode = FocusModeEnum.None };
         DecoStyle(button);
         button.Pressed += action;
         AddChild(button);
+        // The font overrides reach the minimum size only after the deferred theme update; until then the default
+        // font inflates it and the size set now grows past the rect, so set it again once the theme has settled.
+        button.Size = rect.Size;
+        Callable.From(() => { if (IsInstanceValid(button)) button.Size = rect.Size; }).CallDeferred();
         _buttons.Add(id, button);
+        _rects[id] = rect;
         return button;
     }
 
@@ -165,6 +168,7 @@ public partial class PuzzlePanel : Control
         button.Pressed += action;
         AddChild(button);
         _buttons.Add(id, button);
+        _rects[id] = rect;
         return button;
     }
 
@@ -207,8 +211,9 @@ public partial class PuzzlePanel : Control
 
     public Button? FindButton(string id) => _buttons.GetValueOrDefault(id);
 
+    /// <summary>Centre of a control's laid-out rect, valid even before its deferred resize.</summary>
     public Vector2 ButtonCenter(string id) =>
-        _buttons.TryGetValue(id, out var button) ? button.GetGlobalRect().GetCenter() :
+        _buttons.TryGetValue(id, out var button) ? button.GlobalPosition + _rects[id].Size / 2 :
             throw new ArgumentException($"No puzzle control '{id}'.", nameof(id));
 
     public void SetFeedback(string text) => _feedback.Text = text;
