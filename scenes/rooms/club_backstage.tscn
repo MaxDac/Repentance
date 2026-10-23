@@ -12,19 +12,19 @@
 [ext_resource type="Texture2D" path="res://assets/art/rooms/club_backstage_compact.png" id="10_compact"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(52, 104)
+size = Vector2(52, 92)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(96, 84)
+size = Vector2(96, 62)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(44, 44)
 
 [sub_resource type="RectangleShape2D" id="Rect_4"]
-size = Vector2(90, 94)
+size = Vector2(90, 74)
 
 [sub_resource type="RectangleShape2D" id="Rect_5"]
-size = Vector2(84, 112)
+size = Vector2(84, 88)
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
 size = Vector2(16, 18)
@@ -53,7 +53,7 @@ texture = ExtResource("2_club_backstage")
 centered = false
 
 [node name="DoorAjar" type="Sprite2D" parent="."]
-position = Vector2(14, 72)
+position = Vector2(14, 88)
 z_index = -6
 texture = ExtResource("7_door_ajar")
 centered = false
@@ -62,7 +62,7 @@ ShowIfFlags = "backstage_door_ajar"
 HideIfFlags = "backstage_door_open"
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
-position = Vector2(14, 72)
+position = Vector2(14, 88)
 z_index = -6
 texture = ExtResource("8_door_open")
 centered = false
@@ -111,7 +111,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Door"]
-position = Vector2(44, 128)
+position = Vector2(44, 134)
 shape = SubResource("Rect_1")
 
 [node name="Mirror" type="Area2D" parent="Hotspots"]
@@ -125,7 +125,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Mirror"]
-position = Vector2(281, 100)
+position = Vector2(281, 111)
 shape = SubResource("Rect_2")
 
 [node name="Table" type="Area2D" parent="Hotspots"]
@@ -216,7 +216,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Rack"]
-position = Vector2(141, 130)
+position = Vector2(141, 140)
 shape = SubResource("Rect_4")
 
 [node name="Screens" type="Area2D" parent="Hotspots"]
@@ -230,7 +230,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Screens"]
-position = Vector2(420, 120)
+position = Vector2(420, 134)
 shape = SubResource("Rect_5")
 
 [node name="Harrington" type="Area2D" parent="World"]
