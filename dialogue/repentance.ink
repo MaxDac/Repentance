@@ -711,7 +711,7 @@ BRUTE: This way, pal. Nice and easy. Or the other way.
 -> END
 
 === moc_masked ===
-MOC: Your invitation, brother.
+MOC: The raven's seal. The door has already spoken for you, brother.
 MOC: ...Welcome. The rite is about to begin. Go on through to the stage.
 -> END
 

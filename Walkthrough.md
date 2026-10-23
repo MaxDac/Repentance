@@ -738,8 +738,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     raven is first: lion or stag on the wax is refused.
   - Combine the raven signet with the waxed invitation: the sealed invitation (the ring goes back in its cloak).
   - Use the sealed invitation on the door slot (a plain or waxed-but-unsealed invitation is refused): the door
-    opens (flag `vestibule_passed`) and Micah walks into the Club hall. The sealed card is returned to him and is
-    what the master of ceremonies wants to see inside.
+    opens (flag `vestibule_passed`) and Micah walks into the Club hall. The sealed card is returned to him; inside,
+    the master of ceremonies doesn't ask for it again: the door has already vouched for him.
 
 #### Club
 
