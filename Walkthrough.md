@@ -1046,8 +1046,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     evil"), walking backwards towards the door and lowering the gun gradually with each verse, while the old man talks
     into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody forgives a man like you"). Micah reaches
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
-    a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.". If
-    Micah killed Tony, the "Amen." is left off: he finishes the prayer on the station steps (ending 12).
+    a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
     Then the scene skips to *End of Act 3* (ending 1; ending 12 if Micah killed Tony, who keeps his promise to Caleb).
   - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
     doesn't end the act. After the last line the bedroom comes back with the player as Eleanor in the sheet and

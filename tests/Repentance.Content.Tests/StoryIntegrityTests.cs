@@ -325,7 +325,7 @@ public class StoryIntegrityTests
         Assert.DoesNotContain("St. Brendan", walkthrough);
         Assert.DoesNotContain("renewing the vows", walkthrough);
         Assert.Contains("only that Tony was found behind the Blue Lantern", walkthrough);
-        Assert.Contains("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
+        Assert.DoesNotContain("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
     }
 
     [Fact]
