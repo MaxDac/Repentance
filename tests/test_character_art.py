@@ -148,6 +148,18 @@ class CharacterArtTests(unittest.TestCase):
         self.assertFalse(np.any(np.all(patch[:, :, None] == skin, axis=3)),
                          "the coat collar must cover the shoulder rather than expose a skin patch")
 
+    def test_supine_shows_only_a_short_shirt_collar_and_no_tie(self):
+        """Lying on his back side-on, the coat hides the shirt front and tie; only an edge of collar shows."""
+        image = np.array(Image.open(ART / "sprites" / "micah_supine.png").convert("RGB"))
+        tie = next(d[5] for d in sprites.MICAH["decals"] if d[0] == "strip" and d[3] == 0.007)
+
+        def mask(colour):
+            return np.any(np.all(image[:, :, None] == painter.ramp(colour), axis=3), axis=2)
+
+        collar = np.nonzero(mask(sprites.MICAH["collar"]))[1]
+        self.assertLessEqual(collar.max() - collar.min() + 1, 4, "the shirt collar must be a short edge at the throat")
+        self.assertFalse(mask(tie).any(), "no tie on the trunk of a body lying on its back")
+
     def test_eleanor_hair_is_one_mass(self):
         """Crown and mane share one shading: the mane is not left as a separately lit, dithered, seamed part."""
         canvases = []

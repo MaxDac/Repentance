@@ -1945,7 +1945,7 @@ def _apron(c, apron, hip, knee, ankle, up, across, floor=92.5):
 
 
 def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None,
-                  toes_tucked=False, far_arm=None, wound=None, shirt_collar=None):
+                  toes_tucked=False, far_arm=None, wound=None, shirt_collar=None, on_back=False):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
     hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
@@ -1960,7 +1960,9 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     wound, instead of shadowing the near arm behind it.
     wound: where between the shoulder (0) and the hip (1) a gunshot has soaked the clothes red.
     shirt_collar: colour of an open shirt collar at the base of the neck, which then rises from the back of the
-    shoulder, with the near arm hung level with the back."""
+    shoulder, with the near arm hung level with the back.
+    on_back: lying flat on his back seen side-on, so the coat hides the shirt front and tie, and only a short edge of
+    the shirt collar shows between the coat and the neck."""
     H = spec["h"]
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
@@ -2033,7 +2035,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     if apron:
         _apron(c, apron, hip, knee, ankle, up, across)
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
-    if not spec.get("cloak") and not chest_down and not drape and not plain_chest:
+    if not spec.get("cloak") and not chest_down and not drape and not plain_chest and not on_back:
         shirt = shoulder - up * 5
         limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
         tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)
@@ -2060,7 +2062,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         limb(shoulder, shoulder + head_axis * 0.3, 2.6, 2.3, torso, "collar")
         limb(shoulder + head_axis * 0.3, neck, 1.8, 1.6, skin, "neck")
     elif coat and abs(head_axis[0]) > abs(head_axis[1]):
-        neck = shoulder + head_axis * 0.55
+        neck = shoulder + head_axis * (0.25 if on_back else 0.55)
         # bent over the floor the shirt collar faces the ground, so only the coat's shows
         limb(shoulder, neck, 2.3, 2, torso if chest_down else spec.get("collar", torso), "collar")
         limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")
