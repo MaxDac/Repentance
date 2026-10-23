@@ -34,6 +34,8 @@ public partial class AutoPlay
             "Micah came on foot: no car of his in the lot");
         Check(game.Room?.Name == "MotelNight" && !gs.HasFlag("interlude_goons_in"), "the bed and the window don't bring the knock forward");
         var taken = game.Perform(Verb.Hand, "door");
+        var behindPost = new List<string>();
+        var watchPost = WatchFootPost(game, behindPost, () => taken.IsCompleted);
         await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
             || game.Room?.Name != "MotelNight", 30);
         Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorKicked")?.Visible == true && game.Sfx.Count(Sound.Crash) > 0,
@@ -42,6 +44,9 @@ public partial class AutoPlay
             "Bruno and the goon walk in; Eleanor stopped halfway, well away from the door");
         await Shot("interlude_motel_kicked");
         await taken;
+        await watchPost;
+        Check(behindPost.Count == 0,
+            "Bruno and the goon come in and go out round the foot of the bed, never behind its post: " + string.Join(", ", behindPost.Take(4)));
         await WaitIdle(game);
         Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
             "the Order's men take her to the Club's dressing room, in the pink gown");
@@ -544,5 +549,26 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("At the gate she fetched her duffle from the Club's car") && l.Contains("a black suit")),
             "ending 2: Micah says how Eleanor got from the sheet into the black suit");
         HeardLog = null;
+    }
+
+    /// <summary>
+    /// Every frame until <paramref name="done"/>, records the Order's men in the motel room whenever one is above the
+    /// bed rails' baseline (drawn behind them) with his body over the bed's left foot post.
+    /// </summary>
+    private static async Task WatchFootPost(Game game, List<string> behind, Func<bool> done)
+    {
+        const float bodyHalfWidth = 14;
+        while (!done())
+        {
+            if (game.Room is Rooms.MotelNight room)
+                foreach (var id in new[] { "brute", "goon" })
+                {
+                    if (room.FindActor(id) is not { Visible: true } man || man.Position.Y >= Rooms.MotelNight.BedRailsBaseline) continue;
+                    float half = bodyHalfWidth * room.ScaleAt(man.Position.Y);
+                    if (man.Position.X + half >= Rooms.MotelNight.FootPostLeft && man.Position.X - half <= Rooms.MotelNight.FootPostRight)
+                        behind.Add($"{id} at {man.Position.Round()}");
+                }
+            await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
     }
 }
