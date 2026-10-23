@@ -933,6 +933,7 @@ ROSE: Micah? It's the middle of the night. God, your face...
 - else:
     ROSE: What do you want?
 }
+INSET: rose
 MICAH: Nothing you owe me.
 MICAH: I'm not asking you to believe I've changed. I want to start showing you.
 MICAH: Would you have a cup of coffee with me? Sometime. Daylight. A table between us.
@@ -940,6 +941,7 @@ ROSE: ...
 ROSE: Coffee.
 MICAH: Just coffee. You can bring Tommy, if he wants to see what his old man looks like.
 ROSE: ...Why not.
+INSET: none
 -> END
 
 === caleb_club ===

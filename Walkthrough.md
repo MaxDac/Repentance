@@ -1089,6 +1089,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee." Rose recalls "Last time
   you were here, you wanted me to forgive you." only if he asked her for it on her doorstep (`rose_wait`); if he
   said good night first, she only asks "What do you want?".
+- From Micah's "Nothing you owe me." to Rose's "...Why not.", the Act 2 close-up of the two of them (Rose on the
+  left, Micah on the right) frames the invitation, as when she asked him not to get into trouble again; it fades
+  before his closing thought.
 - In this case, the journal ends with Micah back with his wife, saying their promises again at his brother's church, with his blessing (or, if he
   shot Tony and they left Chicago, saying their promises again at St. Anne's downstate, with Caleb's blessing).
 - In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
