@@ -116,7 +116,7 @@ From here the story follows Walkthrough.md:
    then Agatha confesses that she went to Eleanor's cell and failed her (still calling her a Jezebel only if Eleanor
    seduced her). Try Harrington senior. Micah decides to look him up at the Tribune.
     **Tribune newspaper morgue** (new map marker): take the torn top of a clipping from the H drawer, the
-    bottom from the copy spike and the paste pot from the layout desk; with the paste held, combine the halves
+    bottom from the copy spike and the paste pot from the layout desk; paste one half, combine it with the other half,
     and Micah pins the mended clipping on the Loop wall map at once. The Harrington Building replaces the Tribune on the map.
 23. **Behind the Harrington Building, at night**: set the trash can alight with the lighter so the watchman
    runs inside to phone the fire department. Take the packing wedge, stack the crates and use the wedge

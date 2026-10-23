@@ -237,7 +237,7 @@ public partial class EleanorRoom : Room
                 return true;
             case Verb.UseItem:
                 await Say(BoxInSafe ? "The box is all that goes in there."
-                    : item is "eleanor_box" or "eleanor_flower" or "pellet" or "riddle_scrap" or "red_thread"
+                    : item is "eleanor_box" or "eleanor_flower" or "pellet" or "pellet_wrapped" or "riddle_scrap" or "red_thread"
                         ? "Not yet. Everything goes in the box first, and then the box goes in the safe."
                         : "That doesn't go in the safe. Only the box.");
                 return true;

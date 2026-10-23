@@ -376,8 +376,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Hand on the writing desk: she tears a scrap of hotel paper and writes "Give me a drink and I'll tell you the
     word."
   - Look on the clothes shows a torn red hem; hand pulls a length of red thread from it.
-  - Join the scrap and the flower, with the thread in the satchel: the wrapped water flower (all three used up).
-    Without the thread, it won't stay wrapped.
+  - Items join two at a time. Join the scrap and the flower: the riddle-wrapped flower (both used up), loose until
+    it is tied. Join it with the thread: the wrapped water flower (both used up). The thread on the bare flower or
+    on the scrap alone is refused, and the loose wrapped flower won't go in the box until it is tied.
   - Join the flower and the box: the packed box.
   - Hand on the closet opens it: her dresses in a row and, at the back, the safe standing half open. Use the packed
     box on the safe (or the open closet): the box goes in, still showing through the open door. Hand on the safe
@@ -664,8 +665,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     through the address.
   - The copy spike (with the wastebasket) holds the bottom half ("...Building, LaS").
   - Combining the two halves without paste is refused: "Torn straight through the address. I'd need something
-    to hold them together." Take the paste pot from the layout desk, then combine the halves into the mended
-    clipping (the paste is kept; it goes back on the desk when Micah leaves, or by using it on the desk).
+    to hold them together." Take the paste pot from the layout desk. Items join two at a time: the paste with
+    either half gives a pasted half, and the pasted half with the other half gives the mended clipping (the paste
+    is kept; it goes back on the desk when Micah leaves, or by using it on the desk). A pasted half doesn't take
+    more paste, and two pasted halves aren't needed.
   - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
     halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
     LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.

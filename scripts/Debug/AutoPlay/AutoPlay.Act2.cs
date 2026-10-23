@@ -54,14 +54,19 @@ public partial class AutoPlay
         await CombineAndWait("pellet", "eleanor_box");
         Check(gs.HasItem("pellet") && gs.HasItem("eleanor_box") && !gs.HasFlag("interlude_box_packed"), "a bare pellet won't go in the box");
         await game.Perform(Verb.Hand, "desk");
-        await CombineAndWait("pellet", "riddle_scrap");
-        Check(gs.HasItem("pellet") && gs.HasItem("riddle_scrap") && !gs.HasItem("eleanor_flower"), "the riddle won't stay on without thread");
         await game.Perform(Verb.Hand, "clothes");
         await CombineAndWait("red_thread", "pellet");
         Check(gs.HasItem("red_thread") && gs.HasItem("pellet"), "thread round a bare pellet is refused");
-        await CombineAndWait("riddle_scrap", "pellet");
-        Check(gs.HasItem("eleanor_flower") && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && !gs.HasItem("red_thread"),
-            "the riddle tied round the flower uses up the thread");
+        await CombineAndWait("red_thread", "riddle_scrap");
+        Check(gs.HasItem("red_thread") && gs.HasItem("riddle_scrap"), "thread round the bare riddle is refused");
+        await CombineAndWait("pellet", "riddle_scrap");
+        Check(gs.HasItem("pellet_wrapped") && !gs.HasItem("pellet") && !gs.HasItem("riddle_scrap") && gs.HasItem("red_thread"),
+            "the riddle wraps round the pellet, loose, and the thread is kept for the next join");
+        await CombineAndWait("pellet_wrapped", "eleanor_box");
+        Check(gs.HasItem("pellet_wrapped") && !gs.HasFlag("interlude_box_packed"), "a loose wrapped pellet won't go in the box");
+        await CombineAndWait("red_thread", "pellet_wrapped");
+        Check(gs.HasItem("eleanor_flower") && !gs.HasItem("pellet_wrapped") && !gs.HasItem("red_thread"),
+            "the thread ties the wrapped flower and is used up");
         await game.Perform(Verb.Hand, "vanity");
         await game.Perform(Verb.Hand, "desk");
         await game.Perform(Verb.Hand, "clothes");
@@ -311,7 +316,7 @@ public partial class AutoPlay
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
-        Check(!new[] { "eleanor_box", "pellet", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
+        Check(!new[] { "eleanor_box", "pellet", "pellet_wrapped", "riddle_scrap", "red_thread", "eleanor_flower", "eleanor_box_packed" }.Any(gs.HasItem)
             && !gs.HasFlag("interlude_took_box") && !gs.HasFlag("interlude_took_thread"),
             "nothing of Eleanor's, and none of her puzzle flags, follow Micah out of the interlude");
     }
@@ -822,9 +827,16 @@ public partial class AutoPlay
         await game.Perform(Verb.Hand, "paste_pot");
         Check(gs.HasItem("paste") && gs.HasFlag("paste_out"), "borrowed the paste pot");
         await Shot("newspaper_morgue_taken");
-        await CombineAndWait("clipping_top", "clipping_bottom");
-        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom"),
-            "pasted the halves together; the paste pot is kept");
+        await CombineAndWait("paste", "clipping_bottom");
+        Check(gs.HasItem("clipping_bottom_pasted") && !gs.HasItem("clipping_bottom") && gs.HasItem("paste"),
+            "paste on the bottom half's torn edge; the paste pot is kept");
+        await game.Perform(Verb.UseItem, "wall_map", "clipping_bottom_pasted");
+        Check(!gs.HasFlag("harrington_located"), "a pasted half is still half an address");
+        await CombineAndWait("paste", "clipping_bottom_pasted");
+        Check(gs.HasItem("clipping_bottom_pasted") && gs.HasItem("paste"), "a pasted edge takes no more paste");
+        await CombineAndWait("clipping_top", "clipping_bottom_pasted");
+        Check(gs.HasFlag("mended_clipping") && gs.HasItem("paste") && !gs.HasItem("clipping_top") && !gs.HasItem("clipping_bottom_pasted"),
+            "pressed the top half onto the pasted bottom; the paste pot is kept");
         Check(gs.HasFlag("harrington_located") && !gs.HasItem("clipping"),
             "the mended clipping is pinned on the wall map at once: the Harrington Building on LaSalle");
         await ReloadCheckpoint("morgue_clipping");

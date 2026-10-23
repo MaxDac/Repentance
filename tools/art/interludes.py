@@ -51,6 +51,16 @@ def riddle_scrap(d, im):
         d.line([(7, y), (x1, y - 1)], fill=INK)
 
 
+def pellet_wrapped(d, im):
+    # the pellet with the riddle scrap wrapped round its middle, untied, one corner springing loose
+    pellet(d, im)
+    d.polygon([(7, 9), (25, 8), (26, 16), (8, 17)], fill=PAPER)
+    d.polygon([(25, 8), (30, 4), (29, 10), (26, 12)], fill=PAPER)
+    d.line([(26, 8), (29, 5)], fill=hx("b8ac90"))
+    for y, x1 in ((11, 22), (14, 19)):
+        d.line([(10, y), (x1, y - 1)], fill=INK)
+
+
 def eleanor_slip(d, im):
     # a blank slip of hotel paper, the Aurelian's gilt rule along the top: the same paper as Micah's combination slip
     d.polygon([(4, 5), (27, 3), (28, 20), (5, 21)], fill=hx("ece4d0"))
@@ -122,7 +132,7 @@ def hairpin(d, im):
     d.line([(9, 17), (12, 18)], fill=hx("6a6a74"))
 
 
-ICONS = (("eleanor_box", eleanor_box), ("pellet", pellet), ("riddle_scrap", riddle_scrap),
+ICONS = (("eleanor_box", eleanor_box), ("pellet", pellet), ("riddle_scrap", riddle_scrap), ("pellet_wrapped", pellet_wrapped),
          ("red_thread", red_thread), ("eleanor_slip", eleanor_slip), ("eleanor_key", eleanor_key), ("compact", compact), ("lipstick", lipstick), ("puff", puff),
          ("puff_powdered", puff_powdered), ("hairpin", hairpin))
 
