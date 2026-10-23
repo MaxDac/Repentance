@@ -556,6 +556,100 @@ def _archive_stacks(d, img):
         d.point((x, 92), fill=hx("6a6a58") if x % 2 else hx("56564a"))
 
 
+def _morgue_door(d, img):
+    """The door out to the stairs: an oak half-glazed door in a moulded casing, frosted glass gilded backwards from
+    this side, brass furniture worn by a generation of copy boys."""
+    # moulded casing, lit from the top left
+    d.rectangle([12, 66, 76, FLOOR + 2], fill=hx("3a2614"), outline=hx("140a04"))
+    d.line([(13, 67), (75, 67)], fill=hx("5e4024"))
+    d.line([(13, 67), (13, FLOOR + 1)], fill=hx("5e4024"))
+    d.line([(15, 69), (73, 69)], fill=hx("24160a"))
+    d.line([(73, 69), (73, FLOOR + 1)], fill=hx("24160a"))
+    d.line([(15, 69), (15, FLOOR + 1)], fill=hx("4a3018"))
+    # the slab: oak grain running down the stiles, across the rails
+    slab = (18, 72, 70, FLOOR)
+    d.rectangle(slab, fill=hx("4e321c"))
+    rnd = random.Random(1311)
+    for _ in range(70):
+        x = rnd.randint(slab[0], slab[2])
+        y0 = rnd.randint(slab[1], slab[3] - 10)
+        d.line([(x, y0), (x, y0 + rnd.randint(6, 30))], fill=hx(rnd.choice(("442a16", "5a3c22", "48301a", "563820"))))
+    for y in (74, 76, 129, 131, 184, 186):
+        for x in range(19, 70, rnd.randint(3, 5)):
+            d.line([(x, y), (x + rnd.randint(2, 6), y)], fill=hx(rnd.choice(("442a16", "5a3c22"))))
+    noise(img, slab, 5, 1312)
+    d.rectangle(slab, outline=hx("1e1208"))
+    d.line([(19, 73), (69, 73)], fill=hx("6a4628"))
+    d.line([(19, 73), (19, FLOOR - 1)], fill=hx("6a4628"))
+    # three butt hinges on the casing side
+    for hy in (80, 128, 172):
+        d.rectangle([16, hy, 19, hy + 7], fill=hx("8a7036"), outline=hx("3a2a0c"))
+        d.line([(17, hy + 1), (17, hy + 6)], fill=hx("d8bc6a"))
+        d.point((18, hy + 2), fill=hx("3a2a0c"))
+        d.point((18, hy + 5), fill=hx("3a2a0c"))
+    # the glass: bead, frosting, the stair light behind it, a streak of the room's lamp
+    g = (24, 78, 64, 126)
+    d.rectangle([g[0] - 2, g[1] - 2, g[2] + 2, g[3] + 2], fill=hx("3a2614"))
+    d.line([(g[0] - 2, g[1] - 2), (g[2] + 2, g[1] - 2)], fill=hx("24160a"))
+    d.line([(g[0] - 2, g[1] - 2), (g[0] - 2, g[3] + 2)], fill=hx("24160a"))
+    d.line([(g[0] - 1, g[3] + 2), (g[2] + 2, g[3] + 2)], fill=hx("6a4628"))
+    d.line([(g[2] + 2, g[1] - 1), (g[2] + 2, g[3] + 2)], fill=hx("6a4628"))
+    vgrad(img, g, hx("b2b8a4"), hx("8c9688"))
+    light(img, "ellipse", [g[0] + 4, g[1] + 22, g[2] - 4, g[3] + 14], hx("e8d8a0"), 0.3, 6)
+    noise(img, g, 7, 1313)
+    for x in range(g[0], g[2] + 1):
+        for y in range(g[1], g[3] + 1):
+            if (x * 7 + y * 13) % 11 == 0:
+                d.point((x, y), fill=hx("c4cab8") if (x + y) % 2 else hx("8a9286"))
+    for k in range(2):
+        d.line([(g[0] + 6 + k, g[3] - 2), (g[0] + 22 + k, g[1] + 2)], fill=hx("c4cab8"))
+    d.line([(g[0] + 12, g[3] - 2), (g[0] + 26, g[1] + 6)], fill=hx("b8c0ac"))
+    d.rectangle(g, outline=hx("1e1208"))
+    # gilt lettering, keylined, chipped, backwards from this side
+    for ox, oy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        text(img, (44 + ox, 98 + oy), "MORGUE", hx("2a2418"), size=8, mirror=True)
+    text(img, (44, 98), "MORGUE", hx("c8a050"), size=8, mirror=True)
+    for x in range(28, 61, 2):
+        d.point((x, 97), fill=hx("e8cc80") if x % 4 else hx("c8a050"))
+    for x, y in ((33, 99), (47, 96), (55, 100)):
+        d.point((x, y), fill=hx("9aa496"))
+    d.line([(30, 106), (58, 106)], fill=hx("2a2418"))
+    d.line([(30, 105), (58, 105)], fill=hx("c8a050"))
+    d.point((44, 105), fill=hx("e8cc80"))
+    # raised lower panel, bevelled toward the light
+    p = (24, 136, 64, 176)
+    d.polygon([p[:2], (p[2], p[1]), (p[2] - 4, p[1] + 4), (p[0] + 4, p[1] + 4)], fill=hx("6a4628"))
+    d.polygon([p[:2], (p[0] + 4, p[1] + 4), (p[0] + 4, p[3] - 4), (p[0], p[3])], fill=hx("5e3e22"))
+    d.polygon([(p[2], p[1]), (p[2], p[3]), (p[2] - 4, p[3] - 4), (p[2] - 4, p[1] + 4)], fill=hx("341e0e"))
+    d.polygon([(p[0], p[3]), (p[2], p[3]), (p[2] - 4, p[3] - 4), (p[0] + 4, p[3] - 4)], fill=hx("2a1a0c"))
+    d.rectangle([p[0] + 4, p[1] + 4, p[2] - 4, p[3] - 4], fill=hx("523620"))
+    for x in range(p[0] + 6, p[2] - 4, 4):
+        d.line([(x, p[1] + 6), (x + rnd.randint(-1, 1), p[3] - 6)], fill=hx("48301a"))
+    d.rectangle(p, outline=hx("1e1208"))
+    d.line([(p[0] + 5, p[1] + 5), (p[2] - 5, p[1] + 5)], fill=hx("6a4628"))
+    # brass kick plate, scuffed by boots
+    k = (19, 178, 69, FLOOR - 1)
+    d.rectangle(k, fill=hx("a88c3e"), outline=hx("4a3412"))
+    d.line([(20, 179), (68, 179)], fill=hx("ecd488"))
+    for x, w in ((27, 4), (38, 6), (52, 3), (60, 5)):
+        d.line([(x, 183), (x + w, 184)], fill=hx("6a5420"))
+    for x in (21, 67):
+        d.point((x, 181), fill=hx("4a3412"))
+        d.point((x, FLOOR - 3), fill=hx("4a3412"))
+    # escutcheon, knob and keyhole, the wood darkened round them by hands
+    shadow(img, "ellipse", [54, 136, 72, 162], 0.25, 3)
+    d.rectangle([62, 140, 66, 160], fill=hx("a88c3e"), outline=hx("4a3412"))
+    d.line([(63, 141), (63, 159)], fill=hx("d8bc6a"))
+    d.ellipse([61, 145, 67, 151], fill=hx("c8a858"), outline=hx("4a3412"))
+    d.point((62, 146), fill=hx("f4e0a0"))
+    d.point((63, 146), fill=hx("ecd488"))
+    d.rectangle([64, 154, 64, 157], fill=hx("140a04"))
+    d.point((64, 154), fill=hx("140a04"))
+    # threshold, and the stairwell's light under the door
+    d.rectangle([12, FLOOR, 76, FLOOR + 2], fill=hx("5a4228"), outline=hx("1e1208"))
+    d.line([(19, FLOOR), (69, FLOOR)], fill=hx("d8b868"))
+
+
 def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -576,13 +670,7 @@ def paint_morgue(drawer=False, spike=False, paste=False, pin=False):
     for k in range(-12, 13):
         d.line([(W // 2 + k * 30, FLOOR), (W // 2 + k * 52, H - 1)], fill=hx("2e2a20"))
     noise(img, (0, FLOOR, W - 1, H - 1), 5, 1302)
-    # the door out, frosted glass lettered backwards from this side
-    d.rectangle([12, 66, 76, FLOOR + 2], fill=hx("3a2614"), outline=hx("140a04"))
-    d.rectangle([18, 72, 70, FLOOR], fill=hx("4e321c"), outline=hx("1e1208"))
-    d.rectangle([24, 78, 64, 126], fill=hx("9aa496"), outline=hx("1e1208"))
-    text(img, (44, 98), "MORGUE", hx("2a2a24"), size=8, mirror=True)
-    d.rectangle([24, 136, 64, 182], outline=hx("2a1a0c"))
-    d.ellipse([62, 146, 67, 151], fill=hx("c8a858"))
+    _morgue_door(d, img)
     # three steel filing cabinets; the clippings filed by name
     d.rectangle([88, 92, 214, 96], fill=hx("4a4a40"))
     for cx in CAB_X:
