@@ -110,7 +110,13 @@ public sealed partial class Playthrough
             Check(!Gs.HasItem("lantern_lit") && !Gs.Flags.Any(f => f.StartsWith("coda_stash_")),
                 "Micah's things back with him, and nothing of Eleanor's");
             string last = _route == "8" ? "Outskirts" : "Prison";
-            await Until(() => _game.Room?.Name == last, 600);
+            bool sawRose = false;
+            await Until(() =>
+            {
+                sawRose |= _game.Room?.Name == "RoseHouse" && _game.Hud.CurrentCloseUp == CloseUps.Rose;
+                return _game.Room?.Name == last;
+            }, 600);
+            Check(sawRose, "Rose's close-up frames Micah's coffee invitation");
             Expect(last, _route == "8" ? "Eleanor alone at the city's edge" : "Eleanor confesses to Caleb");
             await TheEnd();
             Check(Gs.HasFlag(Endings.EleanorBurned) == (_route == "8"), "the house burns only in ending 8");

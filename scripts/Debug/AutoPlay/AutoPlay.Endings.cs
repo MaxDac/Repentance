@@ -137,6 +137,21 @@ public partial class AutoPlay
         await Until(() => game.Player.Facing == Facing.Up && game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
         Check(game.Player.Facing == Facing.Up, "Act 3: Micah stands by the bell, his back to the screen");
         await Shot("rose_coffee");
+        // the Act 2 close-up of the two of them frames the invitation, from "Nothing you owe me." to "...Why not."
+        bool earlyCloseUp = false;
+        await Until(() =>
+        {
+            earlyCloseUp |= game.Hud.InsetVisible && game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("What do you want");
+            return game.Hud.InsetVisible && game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Nothing you owe me");
+        });
+        Check(!earlyCloseUp, "no close-up yet while Rose asks what he wants");
+        Check(game.Hud.CurrentCloseUp == CloseUps.Rose, "Rose's close-up framed over the door as Micah asks her for coffee");
+        CheckPortraitSpeech(game, right: true, CloseUps.Rose);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Why not"));
+        CheckPortraitSpeech(game, right: false, CloseUps.Rose);
+        await Shot("rose_coffee_closeup");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("Two small words"));
+        Check(!game.Hud.InsetVisible, "Rose's close-up is gone before Micah's closing thought");
         await TheEnd("ending_1 (Tony)");
 
         // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
