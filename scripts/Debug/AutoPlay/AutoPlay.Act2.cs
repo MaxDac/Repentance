@@ -866,6 +866,11 @@ public partial class AutoPlay
         Check(!gs.HasFlag("crates_stacked"), "the watchman sees Micah going for the crates");
         await game.Perform(Verb.Hand, "fire_escape");
         Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
+        Check(game.Room?.FindHotspot("packing_wedge")?.Visible == true
+              && game.Room?.GetNodeOrNull<Sprite2D>("WedgeSprite")?.Visible == true,
+            "the packing wedge is visible among the crates before the fire");
+        await game.Perform(Verb.Hand, "packing_wedge");
+        Check(!gs.HasItem("wedge") && !gs.HasFlag("wedge_taken"), "the watchman sees Micah going for the wedge");
         await game.Perform(Verb.UseItem, "trash_can", MicahKit.LighterId);
         Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
         // count frame steps rather than compare two samples: at the fast clock one slow frame can step the strip a whole

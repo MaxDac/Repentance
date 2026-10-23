@@ -703,8 +703,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Step 1: use the lighter on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
-  - **Puzzle 7 - Ladder catch:** after the distraction, take the tapered packing wedge visible among the
-    crates. Stack the crates to reach the jammed ladder catch, whose illustration shows the obstruction.
+  - **Puzzle 7 - Ladder catch:** the tapered packing wedge is visible among the crates from the start, but
+    reaching for it while watched gets Micah spotted; take it after the distraction. Stack the crates to
+    reach the jammed ladder catch, whose illustration shows the obstruction.
     Use the wedge on the catch, then climb the fire escape (hand on it, or on the window).
     Both stacked crates and a freed catch are necessary; the wedge stays installed and the guard never
     returns on a gameplay timer.
