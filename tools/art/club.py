@@ -1045,7 +1045,8 @@ def stage_scene():
     shadow(full, "rect", [0, TOP + 144, W - 1, H + TOP], 0.12, 20, hx("160609"))
     return full
 
-BACKSTAGE_DOOR = (20, 74)  # x span of the stage door, left wall
+BACKSTAGE_DOOR = (24, 64)  # x span of the stage door, left wall
+BACKSTAGE_DOOR_TOP = 50  # its lintel: a little taller than a figure standing against the wall
 BACKSTAGE_TABLE = (214, 346)  # x span of the dressing table; the mirror sits above its middle
 BACKSTAGE_MIRROR = (236, 324, 34, 108)
 
@@ -1080,7 +1081,7 @@ def backstage_door(img, state="shut"):
     against the hinge jamb and the passage beyond, lit by the stage at its far end."""
     d = ImageDraw.Draw(img)
     x0, x1 = BACKSTAGE_DOOR
-    y0 = 30
+    y0 = BACKSTAGE_DOOR_TOP
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, FLOOR], fill=hx("4a2a18"), outline=WOOD_DEEP)
     d.line([(x0 - 4, y0 - 4), (x1 + 4, y0 - 4)], fill=hx("7a5030"))
     if state != "shut":
@@ -1092,31 +1093,31 @@ def backstage_door(img, state="shut"):
             d.line([(x0 + 8 * k // 2, FLOOR - 22 + 6 * k), (x1 - 8 * k // 2, FLOOR - 22 + 6 * k)], fill=hx("1a0a06"))
         d.rectangle([x0, y0, x1, FLOOR], outline=WOOD_DEEP)
         if state == "ajar":
-            fx = x1 - 16
+            fx = x1 - 12
             d.polygon([(x0, y0), (fx, y0 + 3), (fx, FLOOR - 3), (x0, FLOOR)], fill=hx("2e170e"), outline=WOOD_DEEP)
             vgrad(img, (x0 + 1, y0 + 3, fx - 1, FLOOR - 3), hx("3e2214"), hx("26130c"))
-            for p0, p1 in ((y0 + 10, y0 + 50), (y0 + 60, FLOOR - 12)):
+            for p0, p1 in ((y0 + 9, y0 + 40), (y0 + 48, FLOOR - 10)):
                 d.rectangle([x0 + 5, p0, fx - 5, p1], outline=hx("1a0c06"))
                 d.line([(x0 + 6, p0 + 1), (fx - 6, p0 + 1)], fill=hx("5a3020"))
             d.line([(fx, y0 + 3), (fx, FLOOR - 3)], fill=hx("6a3a22"))
-            d.ellipse([fx - 7, y0 + 55, fx - 4, y0 + 59], fill=BRASS, outline=hx("4a3412"))
-            d.point((fx - 6, y0 + 56), fill=hx("fff0c0"))
+            d.ellipse([fx - 7, y0 + 42, fx - 4, y0 + 46], fill=BRASS, outline=hx("4a3412"))
+            d.point((fx - 6, y0 + 43), fill=hx("fff0c0"))
         else:
             d.polygon([(x0, y0), (x0 + 7, y0 + 5), (x0 + 7, FLOOR - 5), (x0, FLOOR)], fill=hx("26130c"),
                       outline=WOOD_DEEP)
             d.line([(x0 + 7, y0 + 5), (x0 + 7, FLOOR - 5)], fill=hx("6a3a22"))
-            d.rectangle([x0 + 3, y0 + 56, x0 + 4, y0 + 59], fill=BRASS)
+            d.rectangle([x0 + 3, y0 + 43, x0 + 4, y0 + 46], fill=BRASS)
         light(img, "polygon", [(x0, FLOOR), (x1, FLOOR), (x1 + 18, FLOOR + 18), (x0 - 6, FLOOR + 18)], hx("c87a3a"),
               0.18, 4)
         return
     d.rectangle([x0, y0, x1, FLOOR], fill=hx("3a1e12"), outline=WOOD_DEEP)
     vgrad(img, (x0 + 1, y0 + 1, x1 - 1, FLOOR - 1), hx("4a2818"), hx("2e170e"))
-    for p0, p1 in ((y0 + 8, y0 + 50), (y0 + 60, FLOOR - 10)):
-        d.rectangle([x0 + 7, p0, x1 - 7, p1], outline=hx("1e0e08"))
-        d.line([(x0 + 8, p0 + 1), (x1 - 8, p0 + 1)], fill=hx("6a3a22"))
+    for p0, p1 in ((y0 + 7, y0 + 40), (y0 + 48, FLOOR - 8)):
+        d.rectangle([x0 + 6, p0, x1 - 7, p1], outline=hx("1e0e08"))
+        d.line([(x0 + 7, p0 + 1), (x1 - 7, p0 + 1)], fill=hx("6a3a22"))
 
-    d.ellipse([x1 - 10, y0 + 54, x1 - 5, y0 + 59], fill=BRASS, outline=hx("4a3412"))
-    d.point((x1 - 9, y0 + 55), fill=hx("fff0c0"))
+    d.ellipse([x1 - 9, y0 + 41, x1 - 5, y0 + 45], fill=BRASS, outline=hx("4a3412"))
+    d.point((x1 - 8, y0 + 42), fill=hx("fff0c0"))
     # light from the stage leaks under the door
     d.line([(x0 + 1, FLOOR - 1), (x1 - 1, FLOOR - 1)], fill=hx("c88a48"))
     light(img, "polygon", [(x0, FLOOR), (x1, FLOOR), (x1 + 14, FLOOR + 14), (x0 - 4, FLOOR + 14)], LAMPLIGHT, 0.12, 4)
@@ -1420,7 +1421,7 @@ def backstage_rug(img):
     noise(img, (204, 166, 356, 198), 3, 3550)
 
 
-BACKSTAGE_DOOR_BOX = (BACKSTAGE_DOOR[0] - 10, 22 + TOP, BACKSTAGE_DOOR[1] + 22, FLOOR + 20 + TOP)
+BACKSTAGE_DOOR_BOX = (BACKSTAGE_DOOR[0] - 10, BACKSTAGE_DOOR_TOP - 8 + TOP, BACKSTAGE_DOOR[1] + 22, FLOOR + 20 + TOP)
 
 
 def backstage_scene(door="shut", makeup=True):
