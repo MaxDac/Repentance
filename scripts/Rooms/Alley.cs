@@ -55,7 +55,7 @@ public partial class Alley : Room
             sal.WalkTo = BehindSal;
             if (State.HasFlag("alley3_sal_down")) sal.SetTexture(SalOut);
         }
-        if (State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway))
+        if (State.HasFlag("shot_bartender") || State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway))
             State.SetFlag("alley3_tony_inside", false);
         PlaceTony();
     }
