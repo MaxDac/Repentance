@@ -2183,7 +2183,43 @@ def _decanters(img, R):
         d.line([(tx - 1, ty - 2), (tx + 1, ty - 2)], fill=hx("c88a3a"))
 
 
+STUDY_DOORS = {"left": (22, 120, 60, SFL), "right": (424, 120, 462, SFL),
+               "closet": (168, 120, 206, SFL)}
+STUDY_CLOSET_CROP = (160, 110, 222, 210)
 STUDY_MOON = (292, 40, 304, 52)
+
+
+def _study_door(d, box, knob_left=False, opened=False):
+    """Study-only joinery; the smaller leaves keep their mouldings and hardware at whole-pixel sizes."""
+    x0, y0, x1, y1 = box
+    wood, edge, grain, gleam = hx("563820"), hx("24160c"), hx("62422a"), hx("98704a")
+    panel_door(d, *box, wood, knob_left=knob_left, frame=hx("785236"))
+    for x in (x0 - 3, x1 + 2):
+        d.line([(x, y0 - 2), (x, y1 - 3)], fill=gleam if x < x0 else edge)
+        d.rectangle([x - 1, y1 - 5, x + 1, y1 - 1], fill=hx("68482e"), outline=edge)
+    d.line([(x0 - 5, y0 - 7), (x1 + 5, y0 - 7)], fill=gleam)
+    d.line([(x0 - 3, y0 - 3), (x1 + 3, y0 - 3)], fill=edge)
+    if opened:
+        return
+    rnd = random.Random(190)
+    for px0, px1 in ((x0 + 6, (x0 + x1) // 2 - 4), ((x0 + x1) // 2 + 4, x1 - 6)):
+        for ya, yb in ((y0 + 7, y0 + 11), (y0 + 21, y0 + 39), (y0 + 49, y1 - 8)):
+            for x in range(px0, px1 + 1, 3):
+                for y in range(ya + rnd.randrange(3), yb, 7):
+                    d.line([(x, y), (x, min(y + 3, yb))], fill=grain)
+    hx0 = x1 if knob_left else x0
+    for y in (y0 + 12, y1 - 16):
+        d.rectangle([hx0, y, hx0 + 1, y + 5], fill=hx("a08250"))
+        d.point((hx0, y + 1), fill=hx("e0c488"))
+        d.point((hx0 + 1, y + 4), fill=edge)
+    kx, ky = (x0 + 4 if knob_left else x1 - 6), y0 + int((y1 - y0) * 0.59)
+    d.rectangle([kx - 1, ky - 4, kx + 2, ky + 8], fill=hx("9c783e"), outline=hx("362614"))
+    d.point((kx, ky - 3), fill=hx("e0c488"))
+    d.ellipse([kx - 1, ky - 1, kx + 2, ky + 2], fill=hx("d8b458"))
+    d.point((kx, ky - 1), fill=hx("fff0b0"))
+    d.point((kx, ky + 5), fill=hx("201408"))
+    d.line([(kx, ky + 6), (kx, ky + 7)], fill=hx("201408"))
+    d.line([(x0 + 2, y1 - 2), (x1 - 2, y1 - 2)], fill=gleam)
 
 
 def _study_moon(img, box):
@@ -2198,7 +2234,7 @@ def _study_moon(img, box):
             (-0.55, 0.05, 0.26, 0.42), (-0.12, 0.40, 0.20, 0.14), (0.52, 0.30, 0.13, 0.16))
     sun = np.array([0.62, -0.32, 0.72])
     sun /= np.linalg.norm(sun)
-    lit_c, sea_c, dark_c = np.array(hx("fbf6e2"), float), np.array(hx("a8a490"), float), np.array(hx("8a8a96"), float)
+    lit_c, sea_c, dark_c = np.array(hx("fff8e4"), float), np.array(hx("777d82"), float), np.array(hx("6e7388"), float)
     px = img.load()
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
@@ -2208,16 +2244,19 @@ def _study_moon(img, box):
                 continue
             mu = math.sqrt(1 - rr)
             sea = max(min(1.0, 1.6 * (1 - ((u - su) / ru) ** 2 - ((v - sv) / rv) ** 2)) for su, sv, ru, rv in seas)
-            col = lit_c + (sea_c - lit_c) * max(0.0, sea) * 0.75
+            col = lit_c + (sea_c - lit_c) * max(0.0, sea) * 0.92
             col = col * (0.72 + 0.28 * mu ** 0.5)  # limb darkening
             day = min(1.0, max(0.0, (np.dot((u, v, mu), sun) + 0.08) / 0.32))
             col = dark_c + (col - dark_c) * day
             px[x, y] = tuple(int(c) for c in col)
-    for (u, v), c in (((-0.10, 0.70), "ffffff"), ((-0.30, -0.06), "fffef4"), ((-0.62, -0.10), "f4f0de")):
-        d.point((int(cx + u * r), int(cy + v * r)), fill=hx(c))  # Tycho, Copernicus, Kepler
-    tx, ty = int(cx - 0.10 * r), int(cy + 0.70 * r)
-    for dx, dy in ((-1, -1), (1, -1), (0, -2)):  # Tycho's rays
-        d.point((tx + dx, ty + dy), fill=hx("efeadb"))
+    for u, v in ((-0.10, 0.60), (-0.30, -0.06), (0.48, -0.38)):
+        x, y = int(cx + u * r), int(cy + v * r)
+        d.point((x, y), fill=hx("727888"))
+        d.point((x + 1, y), fill=hx("fffdf0"))
+        d.point((x, y + 1), fill=hx("e4dfce"))
+    tx, ty = int(cx - 0.10 * r), int(cy + 0.60 * r)
+    for dx, dy in ((-2, -2), (-1, -1), (1, -1), (2, -2), (0, -2), (0, -3)):
+        d.point((tx + dx, ty + dy), fill=hx("f4efde"))
 
 
 def paint_study(left=False, right=False, docs=True, closet=False, moon=True):
@@ -2254,32 +2293,27 @@ def paint_study(left=False, right=False, docs=True, closet=False, moon=True):
         d.rectangle([x + 3, 147, x + 21, SFL - 13], fill=mul(OAK, 1.04))
     d.rectangle([0, SFL - 6, W - 1, SFL], fill=OAK_D)
     # ---- the two doors: the back passage to the kitchen and through to the bedroom ----
-    for x0, x1 in ((20, 62), (422, 464)):
-        panel_door(d, x0, 94, x1, SFL, hx("4a2e16"), knob_left=x0 > 200, frame=hx("6a4628"), frame_w=4)
+    for side in ("left", "right"):
+        _study_door(d, STUDY_DOORS[side], knob_left=side == "right")
     # ---- the built-in bookcase on the left ----
-    bookshelf(img, rnd, 78, 30, 150, SFL, ornaments={1: ("bust", 118), 2: ("globe", 92), 4: ("vase", 124), 5: ("bookends", 100)})
+    bookshelf(img, rnd, 78, 54, 150, SFL, ornaments={0: ("bust", 118), 1: ("globe", 92), 3: ("vase", 124), 4: ("bookends", 100)})
     d = ImageDraw.Draw(img)
     # ---- the closet: a tall panelled door flush in the panelling ----
-    wx0, wx1, wy0, wy1 = 160, 214, 70, SFL
-    d.rectangle([wx0 - 4, wy0 - 8, wx1 + 4, wy1], fill=OAK_L)
-    d.rectangle([wx0 - 6, wy0 - 11, wx1 + 6, wy0 - 6], fill=hx("8a6440"))
-    d.line([(wx0 - 6, wy0 - 6), (wx1 + 6, wy0 - 6)], fill=OAK_D)
+    wx0, wy0, wx1, wy1 = STUDY_DOORS["closet"]
+    _study_door(d, STUDY_DOORS["closet"], knob_left=True, opened=closet)
     if closet:
-        _closet_contents(img, wx0, wy0, wx1, wy1)
+        contents = Image.new("RGB", (55, 135))
+        _closet_contents(contents, 0, 0, 54, 134)
+        img.paste(contents.resize((wx1 - wx0 + 1, wy1 - wy0 + 1), Image.Resampling.NEAREST), (wx0, wy0))
         d = ImageDraw.Draw(img)
-        d.polygon([(wx1, wy0), (wx1 + 14, wy0 + 6), (wx1 + 14, wy1 + 4), (wx1, wy1)], fill=hx("5a3a1e"), outline=OAK_D)
-        d.polygon([(wx1 + 3, wy0 + 12), (wx1 + 11, wy0 + 16), (wx1 + 11, wy0 + 62), (wx1 + 3, wy0 + 60)], outline=OAK_D)
-        d.polygon([(wx1 + 3, wy0 + 70), (wx1 + 11, wy0 + 73), (wx1 + 11, wy1 - 8), (wx1 + 3, wy1 - 10)], outline=OAK_D)
-    else:
-        d.rectangle([wx0, wy0, wx1, wy1], fill=hx("4a2e16"))
-        for a, b in ((wy0 + 6, wy0 + 60), (wy0 + 68, wy1 - 8)):
-            d.rectangle([wx0 + 6, a, wx1 - 6, b], fill=mul(hx("4a2e16"), 0.9))
-            d.line([(wx0 + 6, a), (wx1 - 6, a)], fill=OAK_D)
-            d.line([(wx0 + 6, a), (wx0 + 6, b)], fill=OAK_D)
-            d.line([(wx0 + 6, b), (wx1 - 6, b)], fill=OAK_L)
-            d.line([(wx1 - 6, a), (wx1 - 6, b)], fill=OAK_L)
-        d.ellipse([wx1 - 9, 134, wx1 - 5, 138], fill=hx("c8a858"))
-        d.rectangle([wx1 - 8, 140, wx1 - 6, 143], fill=hx("2a1a0a"))
+        leaf = [(wx1, wy0), (wx1 + 10, wy0 + 4), (wx1 + 10, wy1 + 3), (wx1, wy1)]
+        d.polygon(leaf, fill=hx("624028"), outline=OAK_D)
+        d.line([(wx1 + 1, wy0 + 2), (wx1 + 1, wy1 - 1)], fill=hx("a07850"))
+        for a, b in ((wy0 + 8, wy0 + 31), (wy0 + 39, wy1 - 7)):
+            d.polygon([(wx1 + 3, a), (wx1 + 7, a + 2), (wx1 + 7, b + 2), (wx1 + 3, b)], outline=OAK_D)
+            d.line([(wx1 + 3, b), (wx1 + 7, b + 2)], fill=OAK_L)
+        d.rectangle([wx1 + 6, wy0 + 42, wx1 + 8, wy0 + 50], fill=hx("9c783e"), outline=OAK_D)
+        d.point((wx1 + 7, wy0 + 44), fill=hx("f0d490"))
     # ---- the window over the lake: moon, distant shoreline and heavy velvet drapes ----
     gx0, gy0, gx1, gy1 = 242, 32, 318, 108
     d.rectangle([gx0 - 6, gy0 - 6, gx1 + 6, gy1 + 8], fill=OAK_L)
@@ -2501,7 +2535,7 @@ def build_study():
     overlay(v["left"], px, pal, (dl[0] - 8, dl[1] - 6, dl[2] + 8, dl[3] + 18), "mansion_study_drawer_left")
     overlay(v["right"], px, pal, (dr[0] - 8, dr[1] - 6, dr[2] + 8, dr[3] + 18), "mansion_study_drawer_right")
     overlay(v["empty"], px, pal, (dr[0] - 8, dr[1] - 6, dr[2] + 8, dr[3] + 18), "mansion_study_drawer_empty")
-    overlay(v["closet"], px, pal, (150, 50, 236, 210), "mansion_study_closet")
+    overlay(v["closet"], px, pal, STUDY_CLOSET_CROP, "mansion_study_closet")
     return px, v
 
 
