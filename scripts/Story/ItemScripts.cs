@@ -51,8 +51,7 @@ public static class ItemScripts
         if (verb == Verb.Look && item == "dollar")
         {
             var gs = GameState.Instance;
-            string sal = gs.HasFlag("sal_password") ? "Sal took a password instead of ten." : "ten for Sal, unless I find the password.";
-            await game.Say($"${CashRules.Balance(gs.HasFlag)} in cash. Two dollars for the bellboy; {sal} What's left stays in my pocket.");
+            await game.Say($"${CashRules.Balance(gs.HasFlag)} in cash. It has to last the whole job.");
             return true;
         }
         if (verb == Verb.Hand && item == "water_flower")

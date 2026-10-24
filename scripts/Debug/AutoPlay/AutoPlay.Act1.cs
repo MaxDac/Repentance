@@ -110,6 +110,9 @@ public partial class AutoPlay
         Check(CashRules.Balance(gs.HasFlag) == 20, "repeat bellboy visit does not charge again");
         await ReloadCheckpoint("cash_after_bellboy");
         Check(CashRules.Balance(gs.HasFlag) == 20 && gs.HasItem("dollar"), "save/load preserves remaining cash");
+        var cashLook = await Spoken(async () => { await game.ItemVerb(Verb.Look, "dollar"); await WaitIdle(game); });
+        Check(cashLook.Contains("$20 in cash. It has to last the whole job.") && !cashLook.Any(l => l.Contains("Sal")),
+            "the cash counts what's left without budgeting for people Micah hasn't met");
         Check(gs.HasFlag("knows_lantern") && gs.HasFlag("staff_elevator"), "bribed the bellboy for the staff elevator");
         await game.Perform(Verb.Walk, "revolving_door");
         Check(game.Room is Rooms.Lobby, "cannot abandon newly required hotel clues before Blue Lantern departure");
@@ -184,8 +187,11 @@ public partial class AutoPlay
         Check(game.Room?.Name == "Lobby", "back down in the lobby");
         Check(game.Music.Current == Track.LobbyPiano, "the lobby piano plays again on the way back down");
         await SaveLoadTest(game);
-        await game.Perform(Verb.Walk, "revolving_door");
+        var arrival = await Spoken(async () => { await game.Perform(Verb.Walk, "revolving_door"); await WaitIdle(game); });
         Check(game.Room?.Name == "BlueLanternFront", "the Blue Lantern lead goes to Rizzo's Flowers");
+        Check(arrival.Contains("State Street again, and the rain hasn't let up. The sign says Rizzo's Flowers.")
+              && !arrival.Any(l => l.Contains("matchbook")) && !Notes.Known("brass_box", gs.HasFlag),
+            "with the brass box still shut, Micah knows nothing of its matchbook");
 
         // ---- Rizzo's Flowers: dye a white carnation blue for the cold-room grille
         await Shot("blue_lantern_front");
@@ -218,6 +224,21 @@ public partial class AutoPlay
         Check(game.Room?.Name == "Speakeasy", "the grille opens for a blue carnation");
         Check(gs.HasFlag("grille_opened") && !gs.HasItem("blue_carnation") && !gs.HasFlag("sal_passed"),
             "past the florist's grille, but Sal is still to come");
+
+        var admitted = game.CaptureSave();
+        await game.ChangeRoom("blue_lantern_front", "speakeasy");
+        foreach (var (verb, target, line) in new[]
+        {
+            (Verb.Talk, "grille", "The hatch knows my lapel now. All I have to do is walk through."),
+            (Verb.Talk, "regular", "The brim tips up an inch. He takes in the blue in my lapel, then goes back to studying the pavement. Conversation over."),
+        })
+        {
+            var said = await Spoken(async () => { await game.Perform(verb, target); await WaitIdle(game); });
+            Check(said.Contains(line) && !said.Any(l => l.Contains("bare lapel") || l.Contains("No blue")),
+                $"after admission, {verb} on the {target} sees the blue lapel");
+        }
+        await game.LoadGame(admitted);
+        Check(game.Room?.Name == "Speakeasy", "back inside the speakeasy after the lapel check");
 
         await Shot("speakeasy");
         Vector2? salWhenPassed = null;

@@ -49,7 +49,7 @@ public static class Notes
             L("Slip of paper from her locked drawer:"),
             L("Rightly He chose His Apostles; but first He left to stay in the desert to be tempted for a certain amount of days, He through whom all things were rightly made in the week of creation."),
             L("It opened her safe: right 12, left 40, right 7.", "safe_open")),
-        new NoteDef("brass_box", "The brass box", new[] { "opened_brass_box", "seen_blue_lantern_front", "club_lead" }, new[]
+        new NoteDef("brass_box", "The brass box", new[] { "opened_brass_box", "club_lead" }, new[]
         {
             L("A perfumed card, blank but for two letters. Her perfume."),
             L("A matchbook: The Blue Lantern, State Street."),

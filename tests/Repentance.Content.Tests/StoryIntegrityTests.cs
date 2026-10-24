@@ -301,6 +301,7 @@ public class StoryIntegrityTests
     [InlineData("all through vespers", "Eleanor reaches the convent after Compline, after Vespers")]
     [InlineData("St. Brendan", "Caleb's church is Holy Name")]
     [InlineData("coal door", "the mansion has only a coal hatch, too small for anyone over nine")]
+    [InlineData("Drake's", "the hotel with the service cage is the Aurelian")]
     [InlineData("renewed our vows", "there was no 1927 rite for renewing vows; Rose and Micah say their promises again, with Caleb's blessing")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
@@ -332,6 +333,9 @@ public class StoryIntegrityTests
         var overview = Flat("docs/story-overview.md");
         Assert.Contains("Micah's papers handed in with his confession to the grand jury in ending 12", overview);
         Assert.Contains("endings 8, 10, 11, and ending 1 with Caleb", overview);
+        var persuasion = Flat("docs/eleanor-persuasion.md");
+        Assert.Contains("it reads neither `eleanor_refused` nor the score", persuasion);
+        Assert.DoesNotContain("only reads the flags `eleanor_convinced` / `eleanor_refused`", persuasion);
     }
 
     [Fact]

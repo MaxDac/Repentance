@@ -7,7 +7,7 @@ namespace Repentance;
 public readonly record struct GridPoint(int X, int Y);
 
 /// <summary>
-/// The Drake's service cage, as a maze of shafts and chutes. Columns are the room numbers along a floor
+/// The Aurelian's service cage, as a maze of shafts and chutes. Columns are the room numbers along a floor
 /// (01 west to 13 east), rows the floors (5th at the top, the basement loading bay at the bottom).
 /// </summary>
 public static class LiftMaze
