@@ -1,5 +1,45 @@
 # Testing
 
+## Local test policy
+
+CI runs every suite on every pull request ([CI and release](ci-and-release.md#ci-githubworkflowsciyml)), so agents
+do not repeat them locally:
+
+- Before a PR, the only local check is a quiet compile for C# or Ink changes:
+  `dotnet build -v q -clp:ErrorsOnly`. Docs and config changes need nothing.
+- Test suites, `test.ps1` / `test.sh`, `dotnet test` (even one `--filter`ed class), `harness`, film mode and frame
+  capture run only when the user explicitly asks. Claude Code prompts before running them.
+- A planning session that will change code asks the user which [test level](#test-levels) to run after
+  implementation, records the answer in the plan, and runs that level before opening the PR.
+- A failing check is diagnosed from its CI log and artifacts, read filtered to the failing lines
+  ([Reading a CI failure](ci-and-release.md#reading-a-ci-failure)), then fixed and pushed; CI is the rerun.
+- Tools that are not tests stay available when a task needs them: `tools/music render` to listen, art generation,
+  `dotnet build`.
+
+People running the game by hand are not bound by this; the rest of this page describes every suite and launcher.
+
+### Test levels
+
+Each level adds suites to the one above it. Level 0 is the default; level 5 is what CI runs. Run the first launch
+of a level clean; later runs in the same session can use `-NoClean` / `--no-clean`.
+
+| Level | Adds | Checks | Command (PowerShell; bash: `tools/run/test.sh <suites>`) |
+|---|---|---|---|
+| 0 None | `dotnet build` | It compiles; CI runs everything | `dotnet build -v q -clp:ErrorsOnly` |
+| 1 Basic | `unit` | Rules, scene graph, story integrity, Ink walk, music synth; no Godot | `tools\run\test.ps1 -Suite unit` |
+| 2 Tooling | `launcher`, `art` | Run scripts and generated art; Python, no Godot | `tools\run\test.ps1 -Suite unit, launcher, art` |
+| 3 Interaction | `walk`, `settings`, `pause` | Movement in every room, menus, pause (a few minutes) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause` |
+| 4 Story | `playthrough`, `resume-act2`, `resume-act3` | Every ending, save/load, resume in a fresh launch (~12 min more) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause, playthrough, resume-act2, resume-act3` |
+| 5 Full | `autoplay` | Targeted regressions and screenshots: every suite, as CI | `tools\run\test.ps1` |
+
+Exports, packaging and Android are never run locally ([What only CI runs](#what-only-ci-runs)).
+
+Groups can also be picked on their own: answer the planning question with group names or suites, e.g.
+`Basic, Story` or `unit, playthrough`, and only those run, in the launcher's order
+(`tools\run\test.ps1 -Suite unit, playthrough, resume-act2, resume-act3`). The groups are those added at each level:
+Basic, Tooling, Interaction, Story, and Full, which adds `autoplay`. `resume-act2` / `resume-act3` need
+`playthrough` in the same run (it keeps the checkpoints they load).
+
 ## Quick reference
 
 One entry point runs every local suite: `tools\run\test.ps1` (Windows) or `tools/run/test.sh` (Linux, macOS, Git
@@ -23,8 +63,9 @@ tools/run/film.sh -s hyper --from ending --ending 8
 tools/run/film.sh --ending prison-caleb-visits   # endings by title too; see film.sh --help
 ```
 
-Before a PR, run only the suites matching your change; CI runs everything. With no `-Suite`, the launcher runs
-all suites from a clean slate (~15 min). Do not do this or run film mode unless requested.
+CI runs every suite on every PR; agents run them locally only on request ([policy](#local-test-policy)). With no
+`-Suite`, the launcher runs all suites from a clean slate (~15 min). The table shows which suites cover a change:
+the CI checks to watch, and what to run when a local run is requested.
 
 | Change | Suites |
 |---|---|

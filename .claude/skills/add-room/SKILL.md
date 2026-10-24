@@ -22,9 +22,11 @@ title screen). Use direct Godot room arguments for bounded diagnostics; normal-p
    list scripted exit hotspots in `SceneGraphTests.ScriptedExits`.
 5. Use `story-change` for dialogue/flags/items and playthrough beats; update debug kits/notes if needed.
 6. For incompatible saved room/entry changes follow `docs/saves-and-settings.md`, "Changing the format".
-7. Run `dotnet build`, then `tools\run\test.ps1 -Suite unit, walk`; add `playthrough` for story and `art` for art.
+7. Run `dotnet build -v q -clp:ErrorsOnly`. CI runs `unit` and `walk` (`playthrough` for story, `art` for art);
+   run them locally only if the user asks (`docs/testing.md`, "Local test policy").
 
-## When tests fail
+## When tests fail in CI
 
+Read the failing lines from the CI log and artifacts (`docs/ci-and-release.md`, "Reading a CI failure").
 `SceneGraphTests` reports invalid targets, off-floor points, unreachable rooms or rooms with no way out.
 `logs/walk.log` names runtime movement failures; fix the polygon, target or marker, not the test.

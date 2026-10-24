@@ -3,13 +3,8 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build:*)",
-      "Bash(dotnet test:*)",
-      "Bash(tools/run/test.sh:*)",
-      "Bash(tools/run/film.sh:*)",
       "Bash(godot-mono --path . --headless --import:*)",
       "Bash(py -3.14 tools/gen_art.py:*)",
-      "Bash(py -3.14 -m unittest:*)",
-      "Bash(python3 -m unittest:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -19,6 +14,7 @@
       "Bash(gh pr checks:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
+      "Bash(gh run download:*)",
       "Bash(gh run watch:*)"
     ],
     "deny": [
