@@ -11,10 +11,10 @@ collaborator also grants write capabilities, including creating, editing and del
 other people cannot currently open PRs; adding collaborators requires reconsidering this strict owner-only
 policy. Branch or tag rules alone do not remove collaborators' release permissions.
 
-The active ruleset "main owner-only updates" restricts updates to `refs/heads/main`, with only the user
-`MaxDac` allowed to bypass that gate. It is separate from "main protection": the latter has no bypass actors
-and still requires PRs, code-owner review, resolved conversations and all required CI checks, and blocks
-deletion and force pushes. Passing the owner-only gate does not bypass those protections. Auto-merge is
+Only write-access users can merge, so being the sole writer makes merging into `main` owner-only. Do not add a
+"Restrict updates" rule to `main`: it blocks normal PR merges even for its bypass actor, who must then tick
+"bypass rules" on every merge. The ruleset "main protection" has no bypass actors and requires PRs, code-owner
+review, resolved conversations and all required CI checks, and blocks deletion and force pushes. Auto-merge is
 disabled so merging remains an explicit owner action. `.github/CODEOWNERS` assigns all paths to `@MaxDac`;
 do not blindly increase the numeric approval count, since authors cannot approve their own PRs.
 
