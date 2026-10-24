@@ -138,6 +138,9 @@ BELL = (318, 62, 344, 92)
 BELL_TIE_BOX = (337, 69, 351, 106)
 BIN_HOME = (396, 172, 446, 210)
 BIN_MOVED = (306, 172, 356, 210)
+# Overlay crops match the BinMoved and DoorOpen node positions in mansion_exterior.tscn.
+BIN_OVERLAY_BOX = (304, 173, 455, 214)
+DOOR_OPEN_BOX = (248, 123, 290, 206)
 DOOR = (250, 125, 288, 206)  # a low service door at yard level, so its lintel is within Micah's reach
 STONE, STONE_L, STONE_D = hx("c8bc9e"), hx("e4dabe"), hx("7e735e")
 BRICK, MORTAR = hx("8a4634"), hx("5a3a30")
@@ -774,9 +777,9 @@ def build_exterior():
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_exterior.png")
     # These crops are locked to the existing scene nodes, independent of palette-dependent difference bounds.
-    for state, suffix, box in (("moved", "bin", (304, 173, 455, 214)),
+    for state, suffix, box in (("moved", "bin", BIN_OVERLAY_BOX),
                                ("wedged", "tie", BELL_TIE_BOX),
-                               ("open", "door", (248, 123, 290, 206))):
+                               ("open", "door", DOOR_OPEN_BOX)):
         save(pixelize(v[state], pal).crop(box), "rooms", f"mansion_exterior_{suffix}.png")
     fire = [v["fire"]] + [paint_exterior(moved=True, wedged=True, opened=True, fire=True, fire_t=i / EXT_FIRE_FRAMES)
                           for i in range(1, EXT_FIRE_FRAMES)]
