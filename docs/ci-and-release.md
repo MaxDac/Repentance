@@ -135,8 +135,8 @@ The `Android` preset (`build/android/Repentance.apk`) builds an arm64-v8a APK fr
 Gradle, so no AAB / Play Store build). C# on Android is experimental in Godot 4.7 but works for this game. Its prebuilt template only runs `net9.0`, so the
 three game projects switch to `net9.0` when Godot builds them for Android (`GodotTargetPlatform == android`): code
 must not use .NET 10-only APIs, and the .NET 10 SDK builds it without a separate .NET 9 install. On Linux a headless
-`--import` logs `EditorSettings not instantiated yet ... shutdown_adb_on_exit` as Godot quits (an engine bug in the
-Android plugin); the launchers ignore that one line in the import log. The package
+`--import` logs `EditorSettings not instantiated yet ... export/android/...` (`shutdown_adb_on_exit`, sometimes `android_sdk_path`) as
+Godot quits (an engine bug in the Android plugin); the launchers ignore those lines in the import log. The package
 is `com.maxdac.repentance`; the version name is the release version and the version code is
 `major*10000 + minor*100 + patch`, both patched in at export by `tools/package/android-export.sh`.
 
