@@ -297,49 +297,183 @@ def _cellar_fire(img, em, cx, cy, t):
     img.paste(out)
 
 
+def _cobweb(d, cx, cy, a0, a1, r, rnd, spider=False):
+    """An old web fanned out from a corner or joint at (cx, cy) between angles a0..a1 (degrees, y down): spokes of
+    uneven length, sagging threads strung between them, a broken strand hanging loose, grey dust caught where the
+    threads cross and, if spider, its maker hanging from the middle on a line of silk."""
+    col, dust = hx("9a9488"), hx("c8c0b0")
+    n = 6
+    spokes = []
+    for k in range(n):
+        a = math.radians(a0 + (a1 - a0) * k / (n - 1))
+        L = r * rnd.uniform(0.75, 1.05)
+        spokes.append((a, L))
+        d.line([(cx, cy), (cx + math.cos(a) * L, cy + math.sin(a) * L)], fill=col)
+    for f in (0.28, 0.5, 0.72, 0.92):
+        for (a, L), (b, M) in zip(spokes, spokes[1:]):
+            p = (cx + math.cos(a) * L * f, cy + math.sin(a) * L * f)
+            q = (cx + math.cos(b) * M * f, cy + math.sin(b) * M * f)
+            m = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2 + 1 + 2 * f)  # the thread sags under its dust
+            if rnd.random() < 0.88:
+                d.line([p, m, q], fill=col)
+            if rnd.random() < 0.3:
+                d.point((int(p[0]), int(p[1])), fill=dust)
+    a, L = spokes[rnd.randrange(1, n - 1)]
+    ex, ey = cx + math.cos(a) * L * 0.8, cy + math.sin(a) * L * 0.8
+    d.line([(ex, ey), (ex + rnd.choice((-2, 2)), ey + rnd.randint(6, 10))], fill=col)  # a broken strand
+    if spider:
+        a, L = spokes[n // 2]
+        sx, sy = int(cx + math.cos(a) * L * 0.55), int(cy + math.sin(a) * L * 0.55)
+        d.line([(sx, sy), (sx, sy + 7)], fill=col)
+        d.rectangle([sx - 1, sy + 7, sx, sy + 8], fill=hx("141010"))
+        for dx in (-2, 1):
+            d.point((sx + dx, sy + 7), fill=hx("2a2420"))
+            d.point((sx + dx, sy + 9), fill=hx("2a2420"))
+
+
+def _kitchen_hatch(img, em):
+    """The trapdoor cut up through the vault into the kitchen, the only light there is: the moonlit kitchen seen
+    through it (its ceiling joists, the window, the dresser with its plates), the kitchen floor in section around the
+    hole with the joist ends showing, and the plank flap standing open on its strap hinges, ring pull at the top."""
+    x0, x1 = 4, 100
+    vgrad(img, (x0, 0, x1, 17), hx("3a4a7a"), hx("6a7aa8"))
+    ImageDraw.Draw(em).rectangle([x0, 0, x1, 17], fill=120)
+    d = ImageDraw.Draw(img)
+    d.rectangle([x0, 0, x1, 2], fill=hx("2a3048"))  # the kitchen ceiling and its joists
+    for x in range(x0 + 6, x1, 16):
+        d.rectangle([x, 0, x + 3, 4], fill=hx("232a40"))
+    d.rectangle([20, 4, 40, 17], fill=hx("2a3250"))  # the dresser, plates stood on its rack
+    d.line([(20, 10), (40, 10)], fill=hx("1a2038"))
+    for px in (24, 30, 36):
+        d.ellipse([px - 2, 5, px + 2, 9], fill=hx("4a5a80"), outline=hx("8a9ac0"))
+    d.rectangle([60, 4, 82, 13], fill=hx("8a9ac8"), outline=hx("2a3048"))  # the window, moon through it
+    d.line([(71, 4), (71, 13)], fill=hx("2a3048"))
+    d.line([(60, 8), (82, 8)], fill=hx("2a3048"))
+    d.polygon([(61, 14), (82, 14), (70, 17), (48, 17)], fill=hx("7080b0"))  # its light across the boards
+    d.rectangle([x0 - 2, 0, x0 - 1, 17], fill=hx("3a2a22"))  # the brick cut back round the hole
+    d.rectangle([x1 + 1, 0, x1 + 2, 17], fill=hx("3a2a22"))
+    # the kitchen floor in section: the boards' edge catching the moon, then the joist ends and the trimmer
+    d.rectangle([0, 17, 106, 23], fill=hx("4a3424"))
+    d.line([(0, 17), (106, 17)], fill=hx("9a7a58"))
+    d.line([(0, 18), (106, 18)], fill=hx("2a1c10"))
+    for x in range(2, 104, 12):
+        d.rectangle([x, 19, x + 5, 23], fill=hx("6a4a30"), outline=hx("2a1c10"))
+        d.point((x + 2, 21), fill=hx("3a2818"))  # end grain
+    d.line([(0, 24), (106, 24)], fill=hx("1a120c"))
+    # the flap, hinged on the far side of the hole and standing open
+    d.polygon([(100, 17), (104, 0), (126, 0), (116, 17)], fill=hx("5a4430"), outline=hx("2a1c10"))
+    for t in (0.33, 0.66):
+        d.line([(100 + 16 * t, 16), (104 + 22 * t, 1)], fill=hx("3a2a1c"))
+    d.line([(102, 9), (120, 9)], fill=hx("3a2a1c"), width=2)  # the batten
+    d.line([(102, 8), (120, 8)], fill=hx("7a5c40"))
+    for y in (3, 14):  # strap hinges
+        d.line([(101 + (17 - y) // 4, y), (110 + (17 - y) // 4, y)], fill=hx("2a2a2e"))
+    d.ellipse([113, 2, 118, 7], outline=hx("3a3a40"))  # the ring pull
+    shadow(img, "rect", [0, 24, 110, 32], 0.4, 3)
+
+
+def _stores(img, rnd):
+    """What the cook keeps under the stair: a coal shovel and a corn broom against the wall (bristles bound with red
+    twine, a leather hang loop), a coil of rope on a nail, two burlap sacks (tied at the neck, stencilled, one patched,
+    a potato rolled out) and a pair of brown-shouldered stoneware crocks with lids, ears and a cobalt gallon mark."""
+    d = ImageDraw.Draw(img)
+    # a coal shovel leaning against the wall
+    d.line([(3, 142), (6, 190)], fill=hx("5a4028"), width=2)
+    d.line([(2, 142), (5, 190)], fill=hx("8a6a44"))
+    d.rectangle([1, 140, 6, 142], fill=hx("4a3420"))  # the D-grip
+    d.polygon([(1, 189), (11, 189), (12, 203), (0, 203)], fill=hx("3a3a3e"), outline=hx("1a1a1e"))
+    d.line([(2, 191), (2, 201)], fill=hx("6a6a70"))
+    # a coil of rope on a nail
+    d.point((40, 132), fill=hx("1a1614"))
+    for k in range(3):
+        d.ellipse([33 + k, 133 + k, 47 - k, 151 - k], outline=mul(hx("9a8058"), 1 - 0.12 * k))
+    d.line([(46, 144), (49, 160)], fill=hx("8a7050"))  # the loose end
+    # the corn broom, hung by its loop and slipped off the nail
+    d.ellipse([8, 113, 12, 118], outline=hx("4a3020"))
+    d.line([(10, 118), (22, 196)], fill=hx("6a4a2a"), width=2)
+    d.line([(9, 119), (21, 196)], fill=hx("9a7448"))
+    d.polygon([(18, 186), (27, 186), (32, 204), (13, 204)], fill=hx("b0904a"), outline=hx("5a4420"))
+    for x in (16, 19, 22, 25, 28, 30):
+        d.line([(x + 1, 189), (x + (x - 22) // 3, 203)], fill=hx("806428") if x % 2 else hx("c8a860"))
+    for y in (188, 191, 194):  # stitched with red twine
+        d.line([(18 - (y - 186) // 4, y), (27 + (y - 186) // 4, y)], fill=hx("7a2a1a"))
+    for x in (12, 33):  # straws come loose on the flags
+        d.line([(x, 203), (x + 4, 202)], fill=hx("b0904a"))
+    # two burlap sacks
+    for x0, top, col, word in ((34, 172, hx("8a7650"), True), (54, 180, hx("7a6646"), False)):
+        d.polygon([(x0 + 3, top + 6), (x0 + 8, top), (x0 + 13, top), (x0 + 17, top + 6), (x0 + 21, 203),
+                   (x0, 203)], fill=col, outline=hx("3a2e1a"))
+        d.polygon([(x0 + 7, top - 3), (x0 + 10, top + 1), (x0 + 6, top + 1)], fill=mul(col, 0.9))  # the ears
+        d.polygon([(x0 + 14, top - 2), (x0 + 15, top + 1), (x0 + 11, top + 1)], fill=mul(col, 0.8))
+        d.line([(x0 + 6, top + 6), (x0 + 15, top + 6)], fill=hx("4a3a20"))  # the tie
+        d.line([(x0 + 14, top + 6), (x0 + 16, top + 11)], fill=hx("4a3a20"))
+        for y in range(top + 10, 203, 4):  # coarse weave
+            d.line([(x0 + 3, y), (x0 + 18, y + 1)], fill=mul(col, 0.86))
+        d.line([(x0 + 4, top + 12), (x0 + 3, 200)], fill=mul(col, 1.15))
+        d.line([(x0 + 13, top + 9), (x0 + 16, top + 20)], fill=mul(col, 0.7))  # folds
+        d.line([(x0 + 8, top + 18), (x0 + 6, top + 26)], fill=mul(col, 0.7))
+        if word:  # a stencilled mark from the mill
+            d.rectangle([x0 + 7, top + 13, x0 + 14, top + 19], outline=hx("3a2a3a"))
+            d.line([(x0 + 9, top + 15), (x0 + 12, top + 17)], fill=hx("3a2a3a"))
+        else:  # a patch, stitched on
+            d.rectangle([x0 + 9, top + 12, x0 + 16, top + 18], fill=mul(col, 1.18), outline=mul(col, 0.65))
+            for x in range(x0 + 10, x0 + 16, 2):
+                d.point((x, top + 12), fill=hx("2a2014"))
+    d.ellipse([75, 199, 80, 203], fill=hx("8a6a40"), outline=hx("3a2a1a"))  # a potato rolled out
+    d.point((77, 200), fill=hx("b08a5a"))
+    # the crocks
+    for x0, h, mark in ((80, 16, 2), (93, 12, 1)):
+        top = 204 - h
+        d.rectangle([x0, top, x0 + 9, 203], fill=hx("b8a880"), outline=hx("4a4030"))
+        d.rectangle([x0, top, x0 + 9, top + 3], fill=hx("6a4a2a"))  # the brown glazed shoulder
+        d.line([(x0 + 3, top + 4), (x0 + 3, top + 6)], fill=hx("6a4a2a"))  # glaze run
+        d.line([(x0 + 2, top + 2), (x0 + 2, 202)], fill=hx("e0d4b0"))
+        d.rectangle([x0 - 1, top - 2, x0 + 10, top - 1], fill=hx("5a4028"), outline=hx("3a2a1a"))  # the lid
+        d.rectangle([x0 + 4, top - 4, x0 + 5, top - 3], fill=hx("6a4a2a"))  # its knob
+        for ex in (x0 - 2, x0 + 10):  # the ears
+            d.point((ex, top + 4), fill=hx("4a4030"))
+            d.point((ex, top + 5), fill=hx("4a4030"))
+        for k in range(mark):  # the cobalt gallon mark
+            d.line([(x0 + 5 + 2 * k, top + 7), (x0 + 5 + 2 * k, top + 10)], fill=hx("3a4a9a"))
+
+
 def _kitchen_stair(img, rnd):
-    """The kitchen stair down from the trapdoor: a dark hollow under it with the cook's sacks, crocks and broom, a far
-    stringer, nine treads on riser boards (worn pale where feet land, nailed at the ends, one split and patched), a
-    near stringer bolted at each tread, and a handrail on square balusters ending in a newel post at the floor."""
+    """The kitchen stair down from the trapdoor: its stringers and handrail climbing up through the hole into the
+    kitchen, the top tread dark against the moonlight there; under it a dark hollow with the cook's stores (see
+    _stores), a far stringer, ten treads on riser boards (worn pale where feet land, nailed at the ends, one split and
+    patched), a near stringer bolted at each tread, and a handrail on square balusters ending in a newel post at the
+    floor."""
     def near(y):  # the near stringer's top edge
         return 70 + (y - 22) * 92 / 182
+
+    def far(y):  # the far stringer's top edge
+        return 22 + (y - 22) * 92 / 182
 
     def rail(x):  # the handrail runs parallel to the stringer, a little over 30 px above it
         return 22 + (x - 72) * 182 / 92 - 32
 
-    shadow(img, "polygon", [(22, 26), (114, 204), (0, 204), (0, 70)], 0.55, 6)
+    shadow(img, "polygon", [(22, 26), (114, 204), (0, 204), (0, 70)], 0.45, 6)
+    _stores(img, rnd)
     d = ImageDraw.Draw(img)
-    # stored under the stair: a corn broom against the wall, two burlap sacks, a pair of stoneware crocks
-    d.line([(10, 118), (22, 196)], fill=hx("6a4a2a"), width=2)
-    d.polygon([(18, 188), (27, 188), (31, 204), (14, 204)], fill=hx("b0904a"), outline=hx("5a4420"))
-    for x in (19, 22, 25, 28):
-        d.line([(x, 190), (x + (x - 22) // 3, 203)], fill=hx("806428"))
-    d.rectangle([18, 189, 27, 190], fill=hx("6a2a1a"))
-    for x0, top, col in ((30, 172, hx("8a7650")), (50, 180, hx("7a6646"))):
-        d.polygon([(x0 + 3, top + 6), (x0 + 8, top), (x0 + 13, top), (x0 + 17, top + 6), (x0 + 21, 203),
-                   (x0, 203)], fill=col, outline=hx("3a2e1a"))
-        d.line([(x0 + 6, top + 6), (x0 + 15, top + 6)], fill=hx("4a3a20"))  # the tie
-        for y in range(top + 10, 203, 4):  # coarse weave
-            d.line([(x0 + 3, y), (x0 + 18, y + 1)], fill=mul(col, 0.86))
-        d.line([(x0 + 4, top + 12), (x0 + 3, 200)], fill=mul(col, 1.15))
-    for x0, h in ((74, 16), (86, 12)):
-        d.rectangle([x0, 204 - h, x0 + 9, 203], fill=hx("b8a880"), outline=hx("4a4030"))
-        d.rectangle([x0, 204 - h, x0 + 9, 204 - h + 3], fill=hx("6a4a2a"))  # the brown glazed shoulder
-        d.line([(x0 + 2, 206 - h), (x0 + 2, 202)], fill=hx("e0d4b0"))
-    # the far stringer
-    d.polygon([(19, 22), (25, 22), (117, 204), (111, 204)], fill=hx("4a3420"))
-    d.line([(25, 22), (117, 204)], fill=hx("6a4a2e"))
-    for i in range(9):
+    # the far stringer, up through the hole
+    d.polygon([(far(0) - 3, 0), (far(0) + 3, 0), (117, 204), (111, 204)], fill=hx("4a3420"))
+    d.line([(far(0) + 3, 0), (117, 204)], fill=hx("6a4a2e"))
+    for i in range(-1, 9):
         ty, tx0 = 34 + i * 19, 24 + i * 10
         tx1 = tx0 + 46
-        if i:  # the riser board under the previous tread's nosing, two planks wide
-            d.rectangle([tx0, ty - 11, tx1, ty - 1], fill=hx("7a5838"))
-            d.line([(tx0, ty - 11), (tx1, ty - 11)], fill=hx("2a1c10"))
-            d.line([(tx0, ty - 10), (tx1, ty - 10)], fill=hx("4a3420"))
-            d.line([(tx0, ty - 6), (tx1, ty - 6)], fill=hx("5a4028"))
-            d.line([(tx0, ty - 1), (tx1, ty - 1)], fill=hx("4a3420"))
-            for gx in (tx0 + 9, tx0 + 23, tx0 + 37):
-                d.line([(gx, ty - 9), (gx + rnd.choice((-1, 0, 1)), ty - 2)], fill=hx("6a4c30"))
+        if i < 0:  # the top tread, up in the hole, black against the kitchen
+            d.rectangle([tx0, ty, tx1, ty + 4], fill=hx("2a2018"))
+            d.line([(tx0, ty), (tx1, ty)], fill=hx("9a9ab0"))
+            d.rectangle([tx0, ty + 5, tx1, ty + 7], fill=hx("1a120c"))
+            continue
+        # the riser board under the previous tread's nosing, two planks wide
+        d.rectangle([tx0, ty - 11, tx1, ty - 1], fill=hx("7a5838"))
+        d.line([(tx0, ty - 11), (tx1, ty - 11)], fill=hx("2a1c10"))
+        d.line([(tx0, ty - 10), (tx1, ty - 10)], fill=hx("4a3420"))
+        d.line([(tx0, ty - 6), (tx1, ty - 6)], fill=hx("5a4028"))
+        d.line([(tx0, ty - 1), (tx1, ty - 1)], fill=hx("4a3420"))
+        for gx in (tx0 + 9, tx0 + 23, tx0 + 37):
+            d.line([(gx, ty - 9), (gx + rnd.choice((-1, 0, 1)), ty - 2)], fill=hx("6a4c30"))
         d.rectangle([tx0, ty, tx1, ty + 4], fill=hx("9a7648"))
         d.line([(tx0, ty), (tx1, ty)], fill=hx("d8b07a"))  # the rounded nosing catching the light
         d.line([(tx0 + 14, ty + 1), (tx0 + 32, ty + 1)], fill=hx("c09a66"))  # worn pale where feet land
@@ -354,16 +488,16 @@ def _kitchen_stair(img, rnd):
             d.rectangle([tx0 + 34, ty + 5, tx0 + 41, ty + 6], fill=hx("6a5a40"))
         d.rectangle([tx0, ty + 5, tx1, ty + 7], fill=hx("2a1c10"))
     # the near stringer, its top edge lit, a bolt where each tread lands
-    d.polygon([(67, 22), (73, 22), (165, 204), (159, 204)], fill=hx("5a4028"))
-    d.line([(67, 22), (159, 204)], fill=hx("8a6a44"))
-    d.line([(73, 22), (165, 204)], fill=hx("2a1c10"))
+    d.polygon([(near(0) - 3, 0), (near(0) + 3, 0), (165, 204), (159, 204)], fill=hx("5a4028"))
+    d.line([(near(0) - 3, 0), (159, 204)], fill=hx("8a6a44"))
+    d.line([(near(0) + 3, 0), (165, 204)], fill=hx("2a1c10"))
     for i in range(9):
         ty = 34 + i * 19
         bx = int(near(ty)) + 2
         d.point((bx, ty + 3), fill=hx("1a1614"))
         d.point((bx - 1, ty + 2), fill=hx("9a8a70"))
     # square balusters up from the stringer to the handrail, then the newel post at the foot
-    for i in range(9):
+    for i in range(-1, 9):
         ty = 34 + i * 19
         bx = int(near(ty)) + 1
         top = int(rail(bx)) + 2
@@ -376,12 +510,135 @@ def _kitchen_stair(img, rnd):
     d.line([(nx0 + 1, ntop + 1), (nx0 + 1, 203)], fill=hx("8a6a44"))
     d.rectangle([nx0 - 1, ntop - 4, nx0 + 7, ntop], fill=hx("6a4a2e"), outline=hx("2a1c10"))  # its cap
     d.rectangle([nx0 + 2, ntop - 7, nx0 + 4, ntop - 4], fill=hx("6a4a2e"))  # a turned finial
-    d.line([(72, int(rail(72))), (nx0 + 1, int(rail(nx0 + 1)))], fill=hx("5a3c24"), width=4)
-    d.line([(72, int(rail(72)) - 1), (nx0, int(rail(nx0)) - 1)], fill=hx("b89060"))
-    d.line([(72, int(rail(72)) + 2), (nx0, int(rail(nx0)) + 2)], fill=hx("2a1c10"))
-    for k in range(3):  # a web strung between the top balusters
-        d.line([(near(34) + 2, rail(near(34)) + 6 + k * 6), (near(53) + 2, rail(near(53)) + 10 + k * 5)],
-               fill=hx("8a8478"))
+    x0 = 66
+    d.line([(x0, int(rail(x0))), (nx0 + 1, int(rail(nx0 + 1)))], fill=hx("5a3c24"), width=4)
+    d.line([(x0, int(rail(x0)) - 1), (nx0, int(rail(nx0)) - 1)], fill=hx("b89060"))
+    d.line([(x0, int(rail(x0)) + 2), (nx0, int(rail(nx0)) + 2)], fill=hx("2a1c10"))
+    bx = int(near(91)) + 2  # a web strung from a baluster under the rail
+    _cobweb(d, bx, rail(bx) + 3, 10, 80, 14, rnd)
+
+
+def _wine_racks(img, rnd):
+    """The wine racks along the back wall: bottles laid base out in pegged bins, in green, black and amber glass, each
+    with its punt and a curl of light on the shoulder, dust on the older ones; a few turned neck out under red wax or
+    a bare cork, one or two with a paper tag; empty bins dark to the back with dust on the sill; chalked slates and
+    dust along the top board."""
+    wx0, wx1, wy0 = 204, 352, 70
+    d = ImageDraw.Draw(img)
+    d.rectangle([wx0, wy0, wx1, CFL], fill=hx("2a1a10"))
+    glass = ((hx("1e3a22"), 0.62), (hx("1a2a1e"), 0.75), (hx("4a2a12"), 0.93), (hx("2a4a44"), 1.0))
+    for y in range(wy0, CFL, 12):
+        if y + 6 >= CFL:
+            continue
+        for x in range(wx0 + 7, wx1, 14):
+            r = rnd.random()
+            if r > 0.84:  # an empty bin
+                d.rectangle([x - 5, y + 2, x + 5, y + 10], fill=hx("1a100a"))
+                d.line([(x - 5, y + 10), (x + 5, y + 10)], fill=hx("4a3a2a"))
+                continue
+            q = rnd.random()
+            col = next(c for c, p in glass if q <= p)
+            if r < 0.08:  # turned neck out
+                d.ellipse([x - 3, y + 3, x + 3, y + 9], fill=mul(col, 0.8), outline=hx("0e1a10"))
+                wax = hx("9a1a1a") if rnd.random() < 0.6 else hx("b08a5a")
+                d.ellipse([x - 2, y + 4, x + 1, y + 7], fill=wax)
+                d.point((x - 1, y + 4), fill=mix(wax, (255, 255, 255), 0.5))
+                if rnd.random() < 0.5:  # a paper tag on a string
+                    d.line([(x + 1, y + 7), (x + 2, y + 8)], fill=hx("c8b890"))
+                    d.rectangle([x + 2, y + 8, x + 4, y + 10], fill=hx("e0d4b0"))
+                continue
+            d.ellipse([x - 4, y + 2, x + 4, y + 10], fill=col, outline=mul(col, 0.45))
+            d.ellipse([x - 1, y + 5, x + 1, y + 7], fill=mul(col, 0.55))  # the punt
+            d.arc([x - 3, y + 3, x + 3, y + 9], 190, 260, fill=mix(col, hx("c0e0c0"), 0.5))
+            d.point((x - 2, y + 4), fill=mix(col, (255, 255, 255), 0.6))
+            if rnd.random() < 0.35:  # dust on the shoulder
+                d.arc([x - 4, y + 2, x + 4, y + 10], 225, 315, fill=hx("6a6458"))
+    # the rack: posts and rails with lit edges, pegged where they cross
+    for x in range(wx0, wx1 + 1, 14):
+        d.rectangle([x - 1, wy0, x, CFL], fill=hx("6a4a2a"))
+        d.line([(x - 1, wy0), (x - 1, CFL)], fill=hx("8a6438"))
+    for y in range(wy0, CFL + 1, 12):
+        d.rectangle([wx0, y - 1, wx1, y], fill=hx("6a4a2a"))
+        d.line([(wx0, y - 1), (wx1, y - 1)], fill=hx("8a6a40"))
+        d.line([(wx0, y + 1), (wx1, y + 1)], fill=hx("1a100a"))
+        for x in range(wx0, wx1 + 1, 14):
+            d.point((x, y), fill=hx("3a2414"))
+    d.rectangle([wx0 - 3, wy0 - 6, wx1 + 3, wy0], fill=hx("7a5634"))
+    d.line([(wx0 - 3, wy0 - 6), (wx1 + 3, wy0 - 6)], fill=hx("a07a50"))
+    for _ in range(30):
+        d.point((rnd.randint(wx0 - 2, wx1 + 2), wy0 - 6), fill=hx("8a8070"))
+    for sx in (214, 262, 318):  # chalked slates for the vintages
+        d.rectangle([sx, wy0 - 5, sx + 10, wy0 - 1], fill=hx("2a2a2e"), outline=hx("1a1a1e"))
+        d.line([(sx + 2, wy0 - 4), (sx + 5 + rnd.randint(0, 2), wy0 - 4)], fill=hx("d8d4c8"))
+        d.line([(sx + 3, wy0 - 2), (sx + 7 + rnd.randint(0, 1), wy0 - 2)], fill=hx("b8b4a8"))
+
+
+def _service_stair(img, em, sx0, rnd):
+    """The bootleggers' stair in its recess off the right of the cellar: dressed stone quoins down the jamb and a
+    lintel over the way in, ashlar behind, eleven solid stone steps rising to the right wall (lit nosings, worn hollow
+    in the middle, chipped, the joints of the blocks in the risers), an iron handrail on posts up the open side, and a
+    landing at the top with the plank panel that opens behind the study bar: battens, strap hinges, a bolt, and a
+    thread of lamplight round its edges from the study (emissive, so it shows even in the dark)."""
+    bricks(img, (sx0, 4, W - 1, CFL), hx("3a3028"), hx("1e1612"), 1508, h=9, w=18)
+    shadow(img, "rect", [sx0, 4, W, CFL], 0.35, 8)
+    d = ImageDraw.Draw(img)
+    # the jamb and lintel
+    for k, y in enumerate(range(18, CFL, 9)):
+        w = 7 if k % 2 else 5
+        c = hx("6a5a48") if k % 2 else hx("5a4c3c")
+        d.rectangle([sx0 - 3, y, sx0 - 3 + w, y + 8], fill=c, outline=hx("2a221a"))
+        d.line([(sx0 - 2, y + 1), (sx0 - 4 + w, y + 1)], fill=mul(c, 1.3))
+    d.rectangle([sx0 - 5, 9, sx0 + 34, 17], fill=hx("5a4c3c"), outline=hx("2a221a"))
+    d.line([(sx0 - 4, 10), (sx0 + 33, 10)], fill=hx("8a7a64"))
+    d.line([(sx0 + 14, 10), (sx0 + 14, 16)], fill=hx("2a221a"))
+    # the landing and the panel at the top
+    lx0, ly = sx0 + 78, 36
+    px0, px1, py0 = lx0 + 4, W - 4, 6
+    d.rectangle([px0 - 2, py0 - 2, px1 + 2, ly], fill=hx("4a3a2c"), outline=hx("1e1612"))  # its frame
+    d.rectangle([px0, py0, px1, ly - 1], fill=hx("5a3a20"))
+    for x in range(px0 + 6, px1, 6):
+        d.line([(x, py0), (x, ly - 1)], fill=hx("3a2410"))
+    for y in (py0 + 5, ly - 7):  # battens and the strap hinges on them
+        d.rectangle([px0 + 1, y, px1 - 1, y + 2], fill=hx("6a4628"))
+        d.line([(px0 + 1, y), (px1 - 1, y)], fill=hx("8a6438"))
+        d.line([(px1 - 12, y + 1), (px1, y + 1)], fill=hx("2a2a2e"))
+        d.point((px1 - 10, y + 1), fill=hx("8a8a90"))
+    d.rectangle([px0 - 4, 20, px0 + 4, 21], fill=hx("8a8a90"))  # the bolt, shot into the frame
+    d.rectangle([px0 + 2, 19, px0 + 3, 22], fill=hx("5a5a60"))
+    sliver = hx("e8c070")
+    d.line([(px0, py0 - 1), (px1, py0 - 1)], fill=sliver)
+    d.line([(px1 + 1, py0), (px1 + 1, ly - 2)], fill=sliver)
+    d.line([(px0 - 1, py0 + 2), (px0 - 1, 18)], fill=sliver)
+    ImageDraw.Draw(em).line([(px0, py0 - 1), (px1, py0 - 1)], fill=255)
+    ImageDraw.Draw(em).line([(px1 + 1, py0), (px1 + 1, ly - 2)], fill=255)
+    ImageDraw.Draw(em).line([(px0 - 1, py0 + 2), (px0 - 1, 18)], fill=255)
+    # the steps, solid stone to the wall
+    for i in range(11):
+        ty = 186 - i * 15
+        tx0 = sx0 + 8 + i * 7
+        d.rectangle([tx0, ty + 4, W - 1, ty + 14], fill=hx("4a4238"))  # the riser
+        d.line([(tx0, ty + 14), (W - 1, ty + 14)], fill=hx("2a241e"))
+        off = 0 if i % 2 else 9
+        for jx in range(tx0 + 14 + off, W - 1, 18):
+            d.line([(jx, ty + 5), (jx, ty + 13)], fill=hx("2a241e"))
+        d.rectangle([tx0, ty, W - 1, ty + 3], fill=hx("8a8274"))  # the tread
+        d.line([(tx0, ty), (W - 1, ty)], fill=hx("b0a894"))
+        d.line([(tx0 + 12, ty + 1), (tx0 + 30, ty + 1)], fill=hx("6e675c"))  # worn hollow where feet land
+        d.line([(tx0, ty), (tx0, ty + 14)], fill=hx("2a241e"))  # the open end of the step
+        d.line([(tx0 + 1, ty + 4), (tx0 + 1, ty + 13)], fill=hx("5e564a"))
+        cx = tx0 + rnd.randint(4, 30)  # a chip out of the nosing
+        d.line([(cx, ty), (cx + 2, ty)], fill=hx("4a4238"))
+        if i == 10:  # the landing runs on to the wall
+            d.line([(tx0, ty + 1), (W - 1, ty + 1)], fill=hx("9a9282"))
+    # the iron handrail up the open side
+    posts = [(sx0 + 8 + i * 7 + 2, 186 - i * 15) for i in (1, 4, 7, 10)]
+    tops = [(x, y - 34) for x, y in posts]
+    for (x, y), (_, t) in zip(posts, tops):
+        d.line([(x, t), (x, y)], fill=hx("2a2a2e"), width=2)
+        d.line([(x, t), (x, y)], fill=hx("5a5a62"))
+    d.line([tops[0], tops[-1]], fill=hx("2a2a2e"), width=2)
+    d.line([(tops[0][0], tops[0][1] - 1), (tops[-1][0], tops[-1][1] - 1)], fill=hx("6a6a72"))
+    d.ellipse([tops[0][0] - 3, tops[0][1] - 1, tops[0][0] + 1, tops[0][1] + 3], outline=hx("2a2a2e"))  # its scroll
 
 
 def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=False, pool=False, lantern_down=False,
@@ -412,10 +669,7 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
     shadow(img, "rect", [0, 0, W, 40], 0.6, 14)
     d = ImageDraw.Draw(img)
     # ---- the kitchen trapdoor in the ceiling, top left: the only light there is ----
-    vgrad(img, (24, 0, 98, 18), hx("6a7aa8"), hx("3a4a7a"))
-    ed.rectangle([24, 0, 98, 18], fill=120)
-    d.rectangle([20, 18, 102, 22], fill=hx("4a3424"))
-    d.polygon([(98, 0), (120, 0), (112, 18), (102, 18)], fill=hx("5a4430"))  # the raised flap
+    _kitchen_hatch(img, em)
     # ---- the wooden kitchen stair coming down on the left ----
     _kitchen_stair(img, rnd)
     d = ImageDraw.Draw(img)
@@ -429,39 +683,18 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
     if lantern:
         _storm_lantern(d, hx0, hy0 + 1)
     # ---- wine racks along the back wall ----
-    wx0, wx1, wy0 = 204, 352, 70
-    d.rectangle([wx0, wy0, wx1, CFL], fill=hx("2a1a10"))
-    for x in range(wx0, wx1 + 1, 14):
-        d.line([(x, wy0), (x, CFL)], fill=hx("6a4a2a"), width=2)
-    for y in range(wy0, CFL + 1, 12):
-        d.line([(wx0, y), (wx1, y)], fill=hx("6a4a2a"), width=2)
-        for x in range(wx0 + 7, wx1, 14):
-            if y + 6 < CFL and rnd.random() < 0.82:
-                d.ellipse([x - 4, y + 2, x + 4, y + 10], fill=hx("1e3a22"), outline=hx("0e1a10"))
-                d.point((x - 1, y + 4), fill=hx("6aa070"))
-    d.rectangle([wx0 - 3, wy0 - 6, wx1 + 3, wy0], fill=hx("7a5634"))
+    _wine_racks(img, random.Random(1505))
     # ---- the bootleggers' service stair, going up the far right wall to a panel ----
     sx0 = 368
-    d.rectangle([sx0, 14, W - 1, CFL], fill=hx("2a1c16"))
-    d.line([(sx0, 14), (sx0, CFL)], fill=hx("4a3024"), width=3)
-    for i in range(11):
-        ty = 186 - i * 15
-        tx0 = sx0 + 8 + i * 7
-        d.rectangle([tx0, ty, min(W - 1, tx0 + 40), ty + 4], fill=hx("8a8274"))
-        d.line([(tx0, ty), (min(W - 1, tx0 + 40), ty)], fill=hx("b0a894"))
-        d.rectangle([tx0, ty + 5, min(W - 1, tx0 + 40), ty + 14], fill=hx("4a4238"))
-    d.line([(sx0 + 4, 150), (sx0 + 82, 16)], fill=hx("6a5a48"), width=2)  # a rope rail
-    d.rectangle([432, 14, 474, 30], fill=hx("5a3a20"), outline=hx("2a1a0c"))  # the back of the bar panel
-    for x in (442, 454, 466):
-        d.line([(x, 15), (x, 29)], fill=hx("3a2410"))
-    d.rectangle([436, 21, 442, 23], fill=hx("8a8a90"))  # its bolt
+    _service_stair(img, em, sx0, random.Random(1506))
+    d = ImageDraw.Draw(img)
     nx, ny = STAIR_NAIL
     d.rectangle([nx - 1, ny - 1, nx + 1, ny + 1], fill=hx("3a3a3e"))
     # cobwebs in the corners
-    for cx, cy, sx in ((0, 24, 1), (W - 1, 14, -1), (204, 64, 1)):
-        for k in range(5):
-            d.line([(cx, cy), (cx + sx * (10 + k * 6), cy + 14 - k * 3)], fill=hx("9a9488"))
-        d.arc([cx - 18, cy - 18, cx + 18, cy + 18], 0 if sx > 0 else 90, 90 if sx > 0 else 180, fill=hx("9a9488"))
+    wr = random.Random(1507)
+    _cobweb(d, 0, 25, 0, 85, 28, wr)
+    _cobweb(d, sx0 + 3, 18, 0, 90, 14, wr)
+    _cobweb(d, 204, 64, 0, 90, 26, wr, spider=True)
     # ---- floor: old flagstones, straw from the deliveries ----
     flagstones(img, CFL, H - 1, 240, 100, 30, hx("6a6458"), hx("4e4a42"), hx("2a2620"), 1503)
     noise(img, (0, CFL, W - 1, H - 1), 5, 1504)
@@ -499,22 +732,23 @@ def paint_cellar(lantern=True, can=True, lit=False, barrel=False, barrel_open=Fa
     hang = lit and not lantern_down
     # ---- light ----
     hatch = (60, 30, 80, 90, (0.55, 0.62, 0.95), 0.9)
+    spill = (55, 188, 70, 32, (0.55, 0.6, 0.9), 0.8)  # the moon reaching the stores under the stair
     if fire:
         px_, py_ = POOL
         k = 0.9 + 0.1 * math.sin(2 * math.pi * fire_t) + 0.05 * math.sin(6 * math.pi * fire_t)
-        pools = [hatch, (px_, py_ - 30, 240, 170, (1.75, 1.05, 0.55), k), (px_ - 10, py_ - 20, 90, 70, (2.0, 1.3, 0.7), 0.7 * k)]
+        pools = [hatch, spill, (px_, py_ - 30, 240, 170, (1.75, 1.05, 0.55), k), (px_ - 10, py_ - 20, 90, 70, (2.0, 1.3, 0.7), 0.7 * k)]
         img = grade(img, (0.2, 0.18, 0.24), pools, em)
         light(img, "ellipse", [px_ - 60, py_ - 50, px_ + 40, py_ + 12], hx("f08030"), 0.35 * k, 14)
         vignette(img, 0.45, (10, 4, 4), 40)
     elif lit:
-        pools = [hatch, (nx, ny + 20, 190, 150, (1.25, 0.95, 0.62), 1.0), (nx, ny + 20, 70, 60, (1.5, 1.15, 0.8), 0.6)]
+        pools = [hatch, spill, (nx, ny + 20, 190, 150, (1.25, 0.95, 0.62), 1.0), (nx, ny + 20, 70, 60, (1.5, 1.15, 0.8), 0.6)]
         img = grade(img, (0.2, 0.2, 0.28), pools, em)
         light(img, "ellipse", [nx - 26, ny - 6, nx + 26, ny + 46], hx("f0b060"), 0.4, 10)
         vignette(img, 0.45, (8, 6, 12), 40)
         if hang:  # the lantern hung at the stair foot, painted over its own light so the tin and flame stay crisp
             _storm_lantern(ImageDraw.Draw(img), nx, ny, lit=True)
     else:
-        pools = [hatch, (hx0, hy0 + 18, 26, 30, (0.55, 0.55, 0.7), 0.8),
+        pools = [hatch, spill, (hx0, hy0 + 18, 26, 30, (0.55, 0.55, 0.7), 0.8),
                  (276, 172, 70, 36, (0.3, 0.3, 0.4), 0.6)]
         img = grade(img, (0.07, 0.07, 0.11), pools, em)
         shadow(img, "rect", [sx0, 0, W, CFL + 20], 0.6, 10)  # the service stair stays black
