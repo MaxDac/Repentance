@@ -56,6 +56,10 @@ tags (see [CREDITS.md](../CREDITS.md)).
 Club rooms use separate 128-color palettes. Replacement art must preserve these contracts and be incorporated into
 the generator; otherwise regeneration overwrites it and art tests fail.
 
+The mansion exterior shares a 124-color palette across its background and state overlays, reserving three shades
+for the lantern's light source and glass. Its bin, tied-bell and open-door crops are fixed to the existing scene
+positions; do not tighten them to palette-dependent difference bounds.
+
 ## Action strips and poses
 
 Story actions (opening a door, collapsing, kneeling, drinking) are strips beside the walk sheets, played by
