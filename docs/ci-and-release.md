@@ -1,5 +1,28 @@
 # CI and release
 
+## Repository access
+
+The repository stays public: anyone can read, fork, download releases, open issues, and comment on issues and
+pull requests. Issues have no repository interaction limit. Pull request creation is set to
+`collaborators_only`.
+
+MaxDac is the sole write-access user. A personal repository has no PR-only collaborator role: inviting a
+collaborator also grants write capabilities, including creating, editing and deleting releases. Consequently,
+other people cannot currently open PRs; adding collaborators requires reconsidering this strict owner-only
+policy. Branch or tag rules alone do not remove collaborators' release permissions.
+
+The active ruleset "main owner-only updates" restricts updates to `refs/heads/main`, with only the user
+`MaxDac` allowed to bypass that gate. It is separate from "main protection": the latter has no bypass actors
+and still requires PRs, code-owner review, resolved conversations and all required CI checks, and blocks
+deletion and force pushes. Passing the owner-only gate does not bypass those protections. Auto-merge is
+disabled so merging remains an explicit owner action. `.github/CODEOWNERS` assigns all paths to `@MaxDac`;
+do not blindly increase the numeric approval count, since authors cannot approve their own PRs.
+
+The sole-writer policy controls human release access. The existing Release workflow remains owner-authorized
+automation and publishes as `github-actions[bot]` using `GITHUB_TOKEN`. This policy does not distinguish the
+owner from someone using the owner's credentials. Review installed GitHub Apps and their repository permissions
+in **Settings > Integrations > GitHub Apps** as well: collaborator listings do not enumerate app access.
+
 ## Pull requests
 
 The description lists the changes and the local suites run. Every PR that adds or changes an image (generated art,
