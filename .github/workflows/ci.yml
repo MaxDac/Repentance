@@ -21,8 +21,8 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       # Includes StoryIntegrityTests and InkWalkTests; the project downloads the Ink compiler (GodotInk.props).
@@ -35,8 +35,8 @@ jobs:
   art-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.14'
       - name: Art generator dependencies
@@ -53,8 +53,8 @@ jobs:
         suite: [autoplay, settings, pause, walk, playthrough]
     name: godot-tests (${{ matrix.suite }})
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - uses: ./.github/actions/setup-godot
@@ -84,7 +84,7 @@ jobs:
           GODOT_FLAGS: --rendering-driver opengl3
         run: timeout 20m xvfb-run -a -s "-screen 0 1280x720x24" tools/run/test.sh resume-act2 resume-act3 --no-clean
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: godot-tests-${{ matrix.suite }}
@@ -111,8 +111,8 @@ jobs:
             binary: Repentance.exe
     name: export (${{ matrix.platform }})
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - uses: ./.github/actions/setup-godot
@@ -151,7 +151,7 @@ jobs:
           sudo apt-get install -y -qq nsis > /dev/null
           tools/package/windows-installer.sh build/windows 0.0.0 build/Repentance-ci-windows-x86_64-setup.exe
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.platform == 'windows'
         with:
           name: windows-installer
@@ -222,7 +222,7 @@ jobs:
           fi
           exit $ok
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: export-${{ matrix.platform }}
@@ -234,8 +234,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - uses: ./.github/actions/setup-godot
@@ -254,7 +254,7 @@ jobs:
       - name: Export Android (debug-signed)
         run: tools/package/android-export.sh debug build/android/Repentance.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: build/android/Repentance.apk
@@ -265,7 +265,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: windows-installer
       - name: Install, check and uninstall silently
