@@ -135,6 +135,7 @@ def panel_door(d, x0, y0, x1, y1, col, knob_left=False, frame=None, frame_w=4):
 # ------------------------------------------------------------------------------------------------ MANSION, BACK
 
 BELL = (318, 62, 344, 92)
+BELL_TIE_BOX = (337, 69, 351, 106)
 BIN_HOME = (396, 172, 446, 210)
 BIN_MOVED = (306, 172, 356, 210)
 DOOR = (250, 125, 288, 206)  # a low service door at yard level, so its lintel is within Micah's reach
@@ -417,6 +418,61 @@ def _ash_can(img, x0, y0, x1, y1):
     d.point((hx_ - 2, by0 - 10), fill=zinc_l)
 
 
+def _alarm(d, wedged=False):
+    """A small cast-iron alarm with a dished brass gong and an exposed spring hammer."""
+    x, y = (BELL[0] + BELL[2]) // 2, 80
+    dark, brass, bright = hx("49300e"), hx("b88a32"), hx("ecd080")
+    d.rectangle([x - 8, y - 15, x + 8, y - 4], fill=hx("281616"))
+    d.rectangle([x - 7, y - 15, x + 7, y - 5], fill=hx("78231e"), outline=hx("340e0c"))
+    d.line([(x - 6, y - 14), (x + 6, y - 14)], fill=hx("cf5944"))
+    d.line([(x - 6, y - 13), (x - 6, y - 6)], fill=hx("a63a2c"))
+    d.rectangle([x - 3, y - 12, x + 3, y - 10], fill=hx("351716"))
+    d.line([(x - 2, y - 12), (x + 2, y - 12)], fill=hx("bd9b60"))
+    for sx in (x - 5, x + 5):
+        d.point((sx, y - 13), fill=hx("d4bba0"))
+        d.point((sx, y - 12), fill=hx("3c2520"))
+    d.ellipse([x - 8, y - 6, x + 10, y + 11], fill=hx("241b12"))
+    d.ellipse([x - 9, y - 8, x + 9, y + 10], fill=dark)
+    d.arc([x - 9, y - 8, x + 9, y + 10], 150, 295, fill=bright)
+    d.arc([x - 8, y - 7, x + 8, y + 9], 15, 125, fill=hx("80531c"))
+    d.ellipse([x - 7, y - 6, x + 7, y + 8], fill=brass)
+    d.ellipse([x - 6, y - 5, x + 5, y + 6], fill=hx("cda34b"))
+    d.arc([x - 6, y - 5, x + 6, y + 7], 5, 115, fill=hx("926420"), width=2)
+    d.arc([x - 5, y - 4, x + 5, y + 6], 170, 275, fill=bright)
+    d.line([(x - 3, y - 4), (x, y - 5)], fill=hx("f7e3a3"))
+    d.line([(x - 4, y + 4), (x - 2, y + 5)], fill=hx("9b752d"))
+    d.point((x + 4, y - 2), fill=hx("a17c36"))
+    d.ellipse([x - 2, y - 1, x + 2, y + 3], fill=dark)
+    d.ellipse([x - 1, y - 1, x + 1, y + 1], fill=bright)
+    d.line([(x, y), (x + 1, y + 1)], fill=hx("6a491e"))
+    # The same hammer sits beside the gong in both states; cloth fills their narrow gap.
+    d.line([(x + 7, y - 9), (x + 13, y - 7), (x + 13, y - 1)], fill=hx("222126"))
+    d.line([(x + 8, y - 9), (x + 14, y - 7)], fill=hx("8b8582"))
+    d.point((x + 8, y - 8), fill=hx("c7b9a0"))
+    d.rectangle([x + 10, y - 2, x + 14, y + 2], fill=hx("302d30"), outline=hx("171619"))
+    d.line([(x + 11, y - 2), (x + 13, y - 2)], fill=hx("b0a9a0"))
+    d.line([(x + 11, y - 1), (x + 11, y + 1)], fill=hx("777278"))
+    if wedged:
+        cloth, fold, silk = hx("872b3b"), hx("3b111e"), hx("c05b65")
+        d.polygon([(x + 12, y + 1), (x + 14, y + 2), (x + 15, y + 10),
+                   (x + 14, y + 12), (x + 13, y + 10)], fill=fold)
+        d.line([(x + 14, y + 4), (x + 14, y + 9)], fill=hx("a34550"))
+        d.polygon([(x + 11, y + 1), (x + 13, y + 1), (x + 13, y + 7),
+                   (x + 14, y + 17), (x + 12, y + 20), (x + 10, y + 17),
+                   (x + 11, y + 8)], fill=cloth, outline=fold)
+        d.line([(x + 12, y + 4), (x + 12, y + 9), (x + 13, y + 16)], fill=silk)
+        for ty in (y + 8, y + 14):
+            d.line([(x + 11, ty), (x + 12, ty + 1)], fill=hx("c4a25e"))
+        d.polygon([(x + 6, y - 2), (x + 9, y - 3), (x + 12, y - 1),
+                   (x + 11, y + 2), (x + 7, y + 1)], fill=cloth, outline=fold)
+        d.line([(x + 7, y - 1), (x + 9, y - 1)], fill=silk)
+        d.line([(x + 8, y + 1), (x + 10, y + 1)], fill=hx("b94e5b"))
+        d.polygon([(x + 12, y - 3), (x + 15, y - 2), (x + 14, y + 1),
+                   (x + 12, y + 3), (x + 11, y)], fill=cloth, outline=fold)
+        d.line([(x + 12, y - 2), (x + 13, y - 1)], fill=silk)
+        d.point((x + 12, y + 1), fill=hx("a94754"))
+
+
 def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0.0):
     """The back of the house; fire_t in [0, 1) is the phase of the blaze's flame and smoke loop."""
     img = Image.new("RGB", (W, H))
@@ -570,29 +626,7 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
     for y in range(dy0 + 4, dy0 + 30, 8):
         d.point((dx1 + 9, y), fill=hx("8a8478"))
     d.rectangle([dx1 + 7, dy0 + 29, dx1 + 10, dy0 + 32], fill=hx("3a3632"))
-    # the bell: a red cast-iron box on a backplate, a big brass gong, the striker on its spring arm
-    d.rectangle([bx0 + 2, by0 - 2, bx1 - 2, by0 + 12], fill=hx("4a1210"))
-    d.rectangle([bx0 + 4, by0, bx1 - 4, by0 + 11], fill=hx("a82420"), outline=hx("3a0806"))
-    d.line([(bx0 + 5, by0 + 1), (bx1 - 5, by0 + 1)], fill=hx("e05a48"))
-    d.rectangle([bx0 + 8, by0 + 4, bx1 - 8, by0 + 7], fill=hx("6a1210"))
-    d.ellipse([bx0, by0 + 9, bx1, by1], fill=hx("8a6418"), outline=hx("3a2808"))
-    d.ellipse([bx0 + 2, by0 + 10, bx1 - 3, by1 - 3], fill=hx("c89a38"))
-    d.ellipse([bx0 + 4, by0 + 11, bx0 + 14, by0 + 17], fill=hx("f4dc88"))
-    d.ellipse([bx0 + 10, by0 + 17, bx1 - 10, by1 - 7], fill=hx("6a4a14"), outline=hx("3a2808"))
-    d.point((bcx, by0 + 21), fill=hx("e8c870"))
-    if wedged:
-        # Micah's tie, folded between the hammer and the gong and knotted round the arm
-        d.line([(bx1 - 2, by0 + 13), (bx1 + 4, by0 + 16)], fill=hx("2a2a2a"), width=2)
-        d.polygon([(bx1 - 7, by0 + 11), (bx1 + 3, by0 + 12), (bx1 + 6, by1 + 9), (bx1 + 1, by1 + 12), (bx1 - 4, by0 + 20)],
-                  fill=hx("8b2534"), outline=hx("3a0a10"))
-        for k in range(3):
-            y = by0 + 16 + k * 7
-            d.line([(bx1 - 3 + k, y), (bx1 + 3 + k, y + 2)], fill=hx("c8a040"))
-        d.ellipse([bx1 - 3, by0 + 10, bx1 + 3, by0 + 16], fill=hx("6a1a26"))
-    else:
-        d.line([(bx1 - 4, by0 + 6), (bx1 + 3, by0 + 9), (bx1 + 3, by0 + 14)], fill=hx("2a2a2a"), width=2)
-        d.ellipse([bx1, by0 + 13, bx1 + 6, by0 + 19], fill=hx("4a4a4e"), outline=hx("161616"))
-        d.point((bx1 + 2, by0 + 14), fill=hx("9a9aa0"))
+    _alarm(d, wedged)
     # ---- ivy up the corner and around the first window ----
     ivy(d, img, 76, FX - 2, FX + 24, 40, 190, 0.8)
     ivy(d, img, 77, FX + 296, FX + 318, 120, 184, 0.35)
@@ -674,7 +708,8 @@ def build_exterior():
     save(px, "rooms", "mansion_exterior.png")
     overlay(v["moved"], px, pal, (BIN_MOVED[0] - 4, BIN_MOVED[1] - 4, BIN_HOME[2] + 10, BIN_HOME[3] + 6),
             "mansion_exterior_bin")
-    overlay(v["wedged"], px, pal, (BELL[0] - 2, BELL[1] - 2, BELL[2] + 10, BELL[3] + 16), "mansion_exterior_tie")
+    save(pixelize(v["wedged"], pal).crop(BELL_TIE_BOX), "rooms", "mansion_exterior_tie.png")
+    print("mansion_exterior_tie at", BELL_TIE_BOX[:2])
     overlay(v["open"], px, pal, (DOOR[0] - 2, DOOR[1] - 2, DOOR[2] + 2, DOOR[3] + 1), "mansion_exterior_door")
     fire = [v["fire"]] + [paint_exterior(moved=True, wedged=True, opened=True, fire=True, fire_t=i / EXT_FIRE_FRAMES)
                           for i in range(1, EXT_FIRE_FRAMES)]

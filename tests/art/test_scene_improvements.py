@@ -29,7 +29,9 @@ class SceneImprovementsTests(unittest.TestCase):
         with patch.object(common, "ART", cls.directory.name), contextlib.redirect_stdout(io.StringIO()):
             for build in (motel.build, attic.build, library.build, act2_rooms.build_rose,
                           mansion.build_study, mansion.build_bedroom, mansion.build_exterior, outskirts.build):
-                build()
+                result = build()
+                if build == mansion.build_exterior:
+                    cls.exterior_base, cls.exterior_variants = result
 
     def assert_image_equal(self, a, b):
         self.assertEqual(a.size, b.size)
@@ -406,6 +408,53 @@ class SceneImprovementsTests(unittest.TestCase):
         self.assertGreater((px[60:96].mean(axis=2) < 90).sum(), 150, "towers rise well above the horizon")
         hedge = Image.fromarray(px[150:200, 0:200].astype("uint8"))
         self.assertGreater(len(hedge.getcolors(4000)), 20, "the hedge is modelled leaf by leaf, not flat blobs")
+
+    def test_mansion_alarm_is_small_with_a_narrow_folded_tie(self):
+        bare = Image.new("RGBA", (common.W, common.FULL_H))
+        tied = bare.copy()
+        mansion._alarm(ImageDraw.Draw(bare))
+        mansion._alarm(ImageDraw.Draw(tied), wedged=True)
+        left, top, right, bottom = bare.getbbox()
+        self.assertLessEqual(right - left, 25, "the housing, gong and hammer fit a small wall alarm")
+        self.assertLessEqual(bottom - top, 27, "the alarm must not grow back to its old 35-pixel height")
+        self.assertLessEqual(abs((left + right) / 2 - 331), 4, "keep the existing mounting position")
+        gong = bare.crop((315, 72, 341, 92)).getbbox()
+        self.assertLessEqual(gong[2] - gong[0], 20, "the gong was previously 27 pixels wide")
+        self.assertGreaterEqual(gong[2] - gong[0], 18, "the gong remains readable at native resolution")
+
+        difference = ImageChops.difference(bare, tied)
+        mask = ImageChops.lighter(difference.getchannel("R"), difference.getchannel("A"))
+        left, top, right, bottom = mask.getbbox()
+        self.assertLessEqual(right - left, 10, "the knot and folded pad should be compact")
+        self.assertLessEqual(bottom - top, 24, "shorten the hanging tie as well as narrowing it")
+        self.assertGreater(bottom - top, 18, "the tie must still read as hanging fabric")
+        tail = mask.crop((330, 84, 350, 102))
+        tx0, _, tx1, _ = tail.getbbox()
+        self.assertLessEqual(tx1 - tx0, 6, "two slim fabric ends, not a wide slab")
+        self.assertIsNotNone(mask.crop((337, 78, 342, 82)).getbbox(),
+                             "folded cloth must visibly occupy the gap between gong and hammer")
+        x0, y0, x1, y1 = mansion.BELL_TIE_BOX
+        self.assertTrue(x0 <= left < right <= x1 and y0 <= top < bottom <= y1,
+                        "all tied-state changes fit the fixed overlay")
+
+    def test_mansion_tie_overlay_composes_at_its_existing_scene_position(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
+        block = re.search(r'\[node name="Tie" type="Sprite2D" parent="\."\]([^\[]*)', scene)[1]
+        position = tuple(map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", block).groups()))
+        self.assertEqual(position, mansion.BELL_TIE_BOX[:2])
+        self.assertIn('ShowIfFlags = "bell_wedged"', block)
+        self.assertIn("centered = false", block)
+        blend = mansion.paint_exterior()
+        for variant in self.exterior_variants.values():
+            blend = Image.blend(blend, variant, 0.3)
+        palette = common.palette_of(blend, 124)
+        expected = common.pixelize(self.exterior_variants["wedged"], palette)
+        actual = self.exterior_base.copy()
+        with Image.open(self.generated / "rooms" / "mansion_exterior_tie.png") as tie:
+            x0, y0, x1, y1 = mansion.BELL_TIE_BOX
+            self.assertEqual(tie.size, (x1 - x0, y1 - y0))
+            actual.paste(tie, position)
+        self.assert_image_equal(actual, expected)
 
     def test_burning_mansion_is_a_looping_strip_of_flames_and_smoke(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
