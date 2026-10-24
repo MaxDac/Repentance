@@ -2183,9 +2183,9 @@ def _decanters(img, R):
         d.line([(tx - 1, ty - 2), (tx + 1, ty - 2)], fill=hx("c88a3a"))
 
 
-STUDY_DOORS = {"left": (25, 128, 57, SFL), "right": (427, 128, 459, SFL),
-               "closet": (171, 128, 203, SFL)}
-STUDY_CLOSET_CROP = (165, 120, 219, 210)
+STUDY_DOORS = {"left": (22, 120, 60, SFL), "right": (424, 120, 462, SFL),
+               "closet": (168, 120, 206, SFL)}
+STUDY_CLOSET_CROP = (160, 110, 222, 210)
 STUDY_MOON = (292, 40, 304, 52)
 
 
@@ -2296,7 +2296,7 @@ def paint_study(left=False, right=False, docs=True, closet=False, moon=True):
     for side in ("left", "right"):
         _study_door(d, STUDY_DOORS[side], knob_left=side == "right")
     # ---- the built-in bookcase on the left ----
-    bookshelf(img, rnd, 78, 30, 150, SFL, ornaments={1: ("bust", 118), 2: ("globe", 92), 4: ("vase", 124), 5: ("bookends", 100)})
+    bookshelf(img, rnd, 78, 54, 150, SFL, ornaments={0: ("bust", 118), 1: ("globe", 92), 3: ("vase", 124), 4: ("bookends", 100)})
     d = ImageDraw.Draw(img)
     # ---- the closet: a tall panelled door flush in the panelling ----
     wx0, wy0, wx1, wy1 = STUDY_DOORS["closet"]

@@ -187,8 +187,8 @@ class SceneImprovementsTests(unittest.TestCase):
                 height = (bounds[3] - bounds[1]) * scale
                 hat_y = walk_y - (93 - bounds[1]) * scale
                 headroom = (hat_y - (y0 - 8)) / height
-                self.assertGreaterEqual(headroom, 0.20)
-                self.assertLessEqual(headroom, 0.30)
+                self.assertGreaterEqual(headroom, 0.35)
+                self.assertLessEqual(headroom, 0.45)
                 self.assertGreater((y1 - y0 + 8) / (x1 - x0 + 12), 1.8)
                 self.assertEqual(y1, mansion.SFL)
                 shape = re.search(rf'\[node name="Shape" type="CollisionShape2D" parent="Hotspots/{node}"\]'
