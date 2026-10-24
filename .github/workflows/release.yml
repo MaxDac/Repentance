@@ -31,7 +31,7 @@ jobs:
       version: ${{ steps.compute.outputs.version }}
       tag: ${{ steps.compute.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Compute version
@@ -65,8 +65,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       # Same as CI: the Ink compiler InkWalkTests needs is only referenced in Debug (GodotInk.props).
@@ -87,8 +87,8 @@ jobs:
             preset: Windows Desktop
             binary: Repentance.exe
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -131,7 +131,7 @@ jobs:
           fi
           ls -la packages
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.platform }}
           path: packages/*
@@ -142,8 +142,8 @@ jobs:
     needs: [version, test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - uses: ./.github/actions/setup-godot
@@ -173,7 +173,7 @@ jobs:
             "packages/Repentance-${{ needs.version.outputs.tag }}-android-arm64.apk" "${{ needs.version.outputs.version }}"
           rm -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android
           path: packages/*.apk
@@ -187,7 +187,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
@@ -198,7 +198,7 @@ jobs:
           sha256sum -- * > SHA256SUMS
           cat SHA256SUMS
       # Build provenance for every asset: gh attestation verify <file> --repo <owner/repo>.
-      - uses: actions/attest-build-provenance@v2
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/*
       - name: Create GitHub Release
