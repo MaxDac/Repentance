@@ -11,7 +11,7 @@ GODOT_FLAGS="${GODOT_FLAGS:-}"
 ERROR_PATTERN='^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
 # Godot 4.7 bug, not ours: on Linux the Android export plugin reads an editor setting after a headless --import has
 # freed EditorSettings. Ignored in the import log only (docs/ci-and-release.md#android).
-IMPORT_NOISE='EditorSettings not instantiated yet when getting setting "export/android/shutdown_adb_on_exit"'
+IMPORT_NOISE='EditorSettings not instantiated yet when getting setting "export/android/'
 
 check_godot() {
   local godot="$1" probe output status=0

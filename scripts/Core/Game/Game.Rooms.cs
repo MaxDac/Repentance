@@ -81,7 +81,9 @@ public partial class Game
     {
         UnloadRoom();
         Hud.HideCloseUp(0);
-        Room = RoomPackedScene(name).Instantiate<Room>();
+        var scene = RoomPackedScene(name);
+        FinalizeCollectedWrappers();
+        Room = scene.Instantiate<Room>();
         _roomScene = name;
         _roomHost.AddChild(Room);
         Room.World.AddChild(Player);
@@ -118,8 +120,23 @@ public partial class Game
     private static PackedScene RoomPackedScene(string room)
     {
         if (!RoomScenes.TryGetValue(room, out var scene))
+        {
+            FinalizeCollectedWrappers();
             RoomScenes[room] = scene = GD.Load<PackedScene>(RoomScenePath(room));
+        }
         return scene;
+    }
+
+    /// <summary>
+    /// Runs the finalizers of wrappers the GC has already collected before a room scene is loaded or instantiated.
+    /// Rooms share art (Bruno is in the Club and the motel), and an actor's texture wrapper outlives the freed room
+    /// only as garbage: a load that revives that cached texture before its finalizer runs hits the same dead GC
+    /// handle as <see cref="RoomScenes"/> (godotengine/godot#124587).
+    /// </summary>
+    private static void FinalizeCollectedWrappers()
+    {
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
     }
 
     /// <summary>Disposes the held room scenes except <paramref name="keep"/>, so only the current room's neighbourhood stays in memory.</summary>

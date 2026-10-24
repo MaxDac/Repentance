@@ -81,6 +81,9 @@ public sealed partial class Playthrough
             await Do(Verb.Kick, "trash");
             await Do(Verb.UseItem, "sal", "revolver");
             Check(Gs.HasFlag("alley3_sal_down"), "Sal knocked down");
+            Check(_game.Room?.FindActor("sal") is { } sal &&
+                sal.Position.X - _game.Player.Position.X is >= 24 and <= 32,
+                "Micah steps close behind Sal for the short downward revolver-butt blow");
             var tony = Do(Verb.Talk, "back_door");
             if (_route is "1" or "1-caleb")
             {
@@ -102,9 +105,8 @@ public sealed partial class Playthrough
             await WaitIdle();
             if (AlarmRoute)
             {
-                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && Gs.HasFlag("alley3_tony_inside"),
-                    "the warning shot: Tony talks, and goes back inside unhurt");
-                await Do(Verb.Walk, "street");
+                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && !Gs.HasFlag("alley3_tony_inside"),
+                    "the warning shot: Tony stays outside unhurt while Micah leaves");
                 Expect("OfficeStorm", "back to the office, in the storm");
                 return;
             }
@@ -163,10 +165,13 @@ public sealed partial class Playthrough
         {
             if (AlarmRoute)
             {
-                // Tony left the bell out: the key from the lintel, straight into the lock, without a look at the door
+                // Tony left the bell out: ordinary inspection of the door and lintel doesn't expose it.
+                await Do(Verb.Look, "door");
+                await Do(Verb.Look, "lintel");
+                Check(!Gs.HasFlag("alarm_noticed"), "the door and lintel don't reveal Tony's omitted alarm");
                 await Do(Verb.Hand, "lintel");
                 Check(Gs.HasItem("kitchen_key") && !Gs.HasFlag("alarm_noticed"), "the key, and the bell still unseen");
-                var door = Do(Verb.Hand, "door");
+                var door = _route == "14" ? Do(Verb.UseItem, "door", "kitchen_key") : Do(Verb.Hand, "door");
                 if (_route == "13")
                 {
                     await Until(() => _game.Room?.Name == "Outskirts", 300);

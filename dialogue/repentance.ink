@@ -1148,6 +1148,10 @@ THOUGHT: The gun's still warm in my hand, and the street's right there.
     ~ set_flag("finish_tony")
 - -> END
 
+=== bartender_dismiss ===
+BARTENDER: Scram, pal. I already spilled everything I know.
+-> END
+
 // Micah chose to finish Tony, on his back in the alley after the first shot, so he can't tell the mob. Alley walks
 // him round to aim down at Tony's head, plays this knot, then fires the shot before bartender_dead.
 === bartender_kill ===

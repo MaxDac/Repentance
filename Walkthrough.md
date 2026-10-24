@@ -830,7 +830,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 - Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
   you for bringing me back."), never calling him Micah.
-- Micah's masked, cloaked collapse is shown before the blackout on either choice.
+- Bruno lifts a slightly bent arm in front of himself, hand just above his head, brings it down in a short blow,
+  then relaxes it: no broad wind-up or body lunge. His off-hand stays hidden; his shoulder and collar stay
+  jacket-coloured up to the jaw. The thud lands at contact. Still masked and cloaked, Micah
+  drops onto both knees, holds there briefly, then pitches forward onto the floor before the blackout on every choice.
+  His black cloak keeps his neck and shoulders covered throughout the fall, including when he is face-down.
 
 #### Church, outside
 
@@ -871,18 +875,23 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 #### Behind Blue Lantern, previous location from Act 1
 
 - The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
-  Sal out, then use the revolver on him to knock him down. Hit from behind, Sal drops to his knees and then falls
-  face-down. Only then knock on the back door to face Tony.
+  Sal out through the visibly opened back door, then use the revolver on him to knock him down. Micah visibly
+  steps close behind Sal, raises the revolver by its barrel in front of himself with a bent arm and his hand
+  just above his head, makes a small downward blow and relaxes his arm; the thud lands with the blow. His body
+  stays still, his off-hand stays hidden, and the shoulder/collar stay jacket-coloured up to the jaw, without
+  an exposed shirt, tie or skin patch.
+  Sal drops to his knees and then falls face-down. Only then knock on the back door to face Tony.
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
-- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
-  Eleanor.
+- Tony opens the back door before stepping outside, then shuts it behind him. Once he is out, Micah automatically
+  starts the dialogue with the revolver out, asking how to get to Eleanor.
 - The bartender tells him to bug off, these people are really dangerous (they bring girls in off the trains like
   crates of oranges, and nobody asks), and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between firing the revolver into his shoulder, firing it into the wall by his
   head (the warning shot), or walking away, because it's not worth it.
   The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
   office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
-- If the player walks out, he's going to his wife's house (caption *End of Act Three*).
+- If the player walks out, Tony remains standing outside while Micah automatically leaves for his wife's house
+  (caption *End of Act Three*).
 - If he fires, Tony is hit in the shoulder: he clutches it, his legs fold straight down under him and he ends up on
   his back, with the blood on his shoulder and pooling on the ground under it.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
@@ -902,9 +911,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
 - **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
   and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery
-  boys"), too quickly: he leaves out the alarm. He goes back inside and bolts the door; knocking is refused. No blood,
-  so no debt with the mob and no revenge in the endings. The street leads to the office in the storm, as after the
-  shoulder.
+  boys"), too quickly: he leaves out the alarm. Tony stays in his position outside; knocking is refused, and Micah
+  automatically leaves for the office in the storm, as after the shoulder shot. No blood, so no debt with the mob
+  and no revenge in the endings. Reloading the alley preserves Tony's standing or fallen position.
 
 #### The night after Tony (the kill route)
 
@@ -948,11 +957,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 - Music: from here to the last mansion room, one unbroken dissonant thriller loop (double bass, pizzicato clusters,
   bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
-- Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
-  the taut wire; move the coal bin under the bell to reach its hammer.
-- After the warning shot Micah doesn't know about the alarm: taking the key doesn't reveal it, but a look at the door,
-  the lintel, the wire or the bell does (and then the night goes on as usual). Opening the door before that rings the
-  bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
+- Tony's key-on-the-lintel shortcut is wired to an alarm. After the shoulder shot, inspect the door or reach for the
+  key to notice the taut wire; move the coal bin under the bell to reach its hammer.
+- After the warning shot Micah doesn't know about the alarm: looking at the door or lintel and taking the key don't
+  reveal it. Only inspecting the wire or bell does (and then the night goes on as usual). Opening the keyed door
+  before that rings the bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
   - **Run** (`alarm_ran`): ending 13.
   - **Stay. She's in there.** (`alarm_stayed`): into the kitchen, where two of the Club's men (charcoal overcoat and
     fedora, grey suit and flat cap; `gunman_a`/`gunman_b` sprites with draw and aim strips) wait at the cook's table.

@@ -273,6 +273,7 @@ public partial class AutoPlay
         await stage;
         await WaitIdle(game);
         Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+        Check(_poseCounts.GetValueOrDefault("brute_strike") == 1, "Bruno visibly strikes before Micah drops to his knees");
         Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
         Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
         _prefer = new[] { "Visit Caleb", "Refuse the cross" };
@@ -317,24 +318,40 @@ public partial class AutoPlay
         Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
         Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
         await Shot("alley_dark");
-        await game.Perform(Verb.Kick, "trash");
+        int doorOpens = game.Sfx.Count(Sound.DoorOpen), doorCloses = game.Sfx.Count(Sound.DoorClose);
+        var lure = game.Perform(Verb.Kick, "trash");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("Lamp/DoorOpenLit").Visible == true,
+            "Sal opens both lamp variants of the back door before coming out");
+        await lure;
         Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == false &&
+              game.Sfx.Count(Sound.DoorOpen) == doorOpens + 1 && game.Sfx.Count(Sound.DoorClose) == doorCloses + 1,
+            "Sal opens the door and shuts it after stepping outside");
         Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
         await Shot("alley_sal_out");
         CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
         await game.Perform(Verb.UseItem, "sal", "revolver");
         Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+        Check(_poseCounts.GetValueOrDefault("micah_pistol_whip") == 1 && !game.Player.Poses.Active,
+            "Micah visibly swings the revolver butt and returns to his walking sprite");
         Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
             !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
         await Shot("alley_sal_down");
         _prefer = Convinces.Prepend("Shoot him").ToArray();
         int tonyHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var tonyTalk = game.Perform(Verb.Talk, "back_door");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("Lamp/DoorOpenLit").Visible == true,
+            "Tony opens the back door before coming out");
         await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
             t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
         Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
             "Tony falls, shot in the shoulder, and stays down on his back");
         await Shot("alley_tony_shot");
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == false &&
+              game.Sfx.Count(Sound.DoorOpen) == doorOpens + 2 && game.Sfx.Count(Sound.DoorClose) == doorCloses + 2,
+            "Tony shuts the back door after stepping outside");
         Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;

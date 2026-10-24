@@ -13,7 +13,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageStat
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from art import act2_rooms, attic, common, library, mansion, motel, outskirts
+from art import act2_rooms, attic, common, expansion_act3, library, mansion, motel, outskirts
 
 
 def luminance(image):
@@ -28,8 +28,12 @@ class SceneImprovementsTests(unittest.TestCase):
         cls.generated = Path(cls.directory.name)
         with patch.object(common, "ART", cls.directory.name), contextlib.redirect_stdout(io.StringIO()):
             for build in (motel.build, attic.build, library.build, act2_rooms.build_rose,
-                          mansion.build_study, mansion.build_bedroom, mansion.build_exterior, outskirts.build):
+                          mansion.build_bedroom, outskirts.build):
                 build()
+            cls.exterior, cls.exterior_variants = mansion.build_exterior()
+            with patch.object(mansion, "overlay", wraps=mansion.overlay) as overlays:
+                mansion.build_study()
+                cls.study_palette = overlays.call_args_list[0].args[2]
 
     def assert_image_equal(self, a, b):
         self.assertEqual(a.size, b.size)
@@ -165,6 +169,90 @@ class SceneImprovementsTests(unittest.TestCase):
     def test_study_water_has_no_ladder_like_reflections(self):
         image = mansion.paint_study()
         self.assertLess(np.asarray(image.crop((287, 81, 310, 107))).max(), 130)
+
+    def test_study_doors_have_human_headroom_and_matching_hotspots(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_study.tscn").read_text()
+        with Image.open(ROOT / "assets" / "art" / "sprites" / "micah.png") as sheet:
+            bounds = sheet.crop((0, 0, 64, 96)).getchannel("A").getbbox()
+        far_y, near_y, far_scale, near_scale = [
+            float(re.search(rf"^{name} = ([\d.]+)", scene, re.M)[1])
+            for name in ("FarY", "NearY", "FarScale", "NearScale")]
+        for side, node in (("left", "DoorLeft"), ("right", "DoorRight"), ("closet", "Closet")):
+            with self.subTest(door=side):
+                x0, y0, x1, y1 = mansion.STUDY_DOORS[side]
+                block = re.search(rf'\[node name="{node}" type="Area2D".*?\](.*?)(?=\[node )',
+                                  scene, re.S)[1]
+                walk_y = float(re.search(r"WalkTo = Vector2\([\d.]+, ([\d.]+)\)", block)[1])
+                scale = far_scale + (near_scale - far_scale) * (walk_y - far_y) / (near_y - far_y)
+                height = (bounds[3] - bounds[1]) * scale
+                hat_y = walk_y - (93 - bounds[1]) * scale
+                headroom = (hat_y - (y0 - 8)) / height
+                self.assertGreaterEqual(headroom, 0.35)
+                self.assertLessEqual(headroom, 0.45)
+                self.assertGreater((y1 - y0 + 8) / (x1 - x0 + 12), 1.8)
+                self.assertEqual(y1, mansion.SFL)
+                shape = re.search(rf'\[node name="Shape" type="CollisionShape2D" parent="Hotspots/{node}"\]'
+                                  r'(.*?)(?=\[node )', scene, re.S)[1]
+                cx, cy = map(float, re.search(r"position = Vector2\(([\d.]+), ([\d.]+)\)", shape).groups())
+                rect = re.search(r'shape = SubResource\("([^"]+)"\)', shape)[1]
+                w, h = map(float, re.search(rf'\[sub_resource type="RectangleShape2D" id="{rect}"\]'
+                                           r'\s+size = Vector2\(([\d.]+), ([\d.]+)\)', scene).groups())
+                self.assertEqual((cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2),
+                                 (x0 - 6, y0 - 8, x1 + 6, y1))
+
+    def test_study_state_overlays_compose_at_their_scene_positions(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_study.tscn").read_text()
+        with Image.open(self.generated / "rooms" / "mansion_study.png") as image:
+            base = image.copy()
+        for node, suffix, flags in (("DrawerLeft", "drawer_left", dict(left=True)),
+                                    ("DrawerRight", "drawer_right", dict(right=True)),
+                                    ("DrawerEmpty", "drawer_empty", dict(right=True, docs=False)),
+                                    ("ClosetOpen", "closet", dict(closet=True))):
+            with self.subTest(state=suffix):
+                block = re.search(rf'\[node name="{node}" type="Sprite2D".*?\](.*?)(?=\[node )',
+                                  scene, re.S)[1]
+                position = tuple(map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", block).groups()))
+                with Image.open(self.generated / "rooms" / f"mansion_study_{suffix}.png") as overlay:
+                    variant = common.pixelize(mansion.paint_study(**flags), self.study_palette)
+                    mx0, my0, mx1, my1 = mansion.STUDY_MOON
+                    moon_box = (mx0, my0, mx1 + 1, my1 + 1)
+                    variant.paste(base.crop(moon_box), moon_box[:2])
+                    composed = base.copy()
+                    composed.paste(overlay, position)
+                    self.assert_image_equal(composed, variant)
+                    changed = ImageChops.difference(composed, base).getbbox()
+                    self.assertIsNotNone(changed)
+                    if node == "ClosetOpen":
+                        x0, y0, x1, y1 = mansion.STUDY_DOORS["closet"]
+                        self.assertGreaterEqual(changed[0], x0)
+                        self.assertGreaterEqual(changed[1], y0)
+                        self.assertLessEqual(changed[2], x1 + 11)
+                        self.assertLessEqual(changed[3], y1 + 4)
+
+    def test_study_moon_keeps_surface_contrast_in_the_final_png(self):
+        self.assertEqual(mansion.STUDY_MOON, (292, 40, 304, 52))
+        with Image.open(self.generated / "rooms" / "mansion_study.png") as image:
+            moon = np.asarray(image.convert("L").crop((296, 41, 303, 51))).astype(int)
+            self.assertGreater(np.count_nonzero(moon > 220), 20)
+            self.assertGreater(np.count_nonzero((moon > 100) & (moon < 170)), 10)
+            self.assertGreater(moon.std(), 35)
+            self.assertGreater(len(np.unique(moon)), 6)
+            self.assertGreater(int(moon[3, 4]), int(moon[3, 5]) + 70)
+
+    def test_study_hatch_matches_the_regenerated_background(self):
+        with Image.open(self.generated / "rooms" / "mansion_study.png") as image:
+            base = image.copy()
+        modified = base.copy()
+        expansion_act3._study_hatch(modified)
+        box = (330, 160, 432, 214)
+        region, before = modified.crop(box), base.crop(box)
+        changed = ImageChops.difference(region, before).convert("L").point(lambda value: 255 if value > 2 else 0)
+        palette = common.palette_of(before, 48) + common.palette_of(region, 48)
+        expected = common.pixelize(region, palette).convert("RGBA")
+        expected.putalpha(changed)
+        expected = expected.crop(changed.getbbox())
+        with Image.open(ROOT / "assets" / "art" / "rooms" / "mansion_study_hatch.png") as overlay:
+            self.assert_image_equal(overlay, expected)
 
     def test_catch_is_a_mechanism_not_a_framed_icon(self):
         for name in ("ladder_catch", "ladder_freed"):
@@ -406,6 +494,127 @@ class SceneImprovementsTests(unittest.TestCase):
         self.assertGreater((px[60:96].mean(axis=2) < 90).sum(), 150, "towers rise well above the horizon")
         hedge = Image.fromarray(px[150:200, 0:200].astype("uint8"))
         self.assertGreater(len(hedge.getcolors(4000)), 20, "the hedge is modelled leaf by leaf, not flat blobs")
+
+    def test_mansion_alarm_is_small_with_a_narrow_folded_tie(self):
+        bare = Image.new("RGBA", (common.W, common.FULL_H))
+        tied = bare.copy()
+        mansion._alarm(ImageDraw.Draw(bare))
+        mansion._alarm(ImageDraw.Draw(tied), wedged=True)
+        left, top, right, bottom = bare.getbbox()
+        self.assertLessEqual(right - left, 25, "the housing, gong and hammer fit a small wall alarm")
+        self.assertLessEqual(bottom - top, 27, "the alarm must not grow back to its old 35-pixel height")
+        self.assertLessEqual(abs((left + right) / 2 - 331), 4, "keep the existing mounting position")
+        gong = bare.crop((315, 72, 341, 92)).getbbox()
+        self.assertLessEqual(gong[2] - gong[0], 20, "the gong was previously 27 pixels wide")
+        self.assertGreaterEqual(gong[2] - gong[0], 18, "the gong remains readable at native resolution")
+
+        difference = ImageChops.difference(bare, tied)
+        mask = ImageChops.lighter(difference.getchannel("R"), difference.getchannel("A"))
+        left, top, right, bottom = mask.getbbox()
+        self.assertLessEqual(right - left, 10, "the knot and folded pad should be compact")
+        self.assertLessEqual(bottom - top, 24, "shorten the hanging tie as well as narrowing it")
+        self.assertGreater(bottom - top, 18, "the tie must still read as hanging fabric")
+        tail = mask.crop((330, 84, 350, 102))
+        tx0, _, tx1, _ = tail.getbbox()
+        self.assertLessEqual(tx1 - tx0, 6, "two slim fabric ends, not a wide slab")
+        self.assertIsNotNone(mask.crop((337, 78, 342, 82)).getbbox(),
+                             "folded cloth must visibly occupy the gap between gong and hammer")
+        x0, y0, x1, y1 = mansion.BELL_TIE_BOX
+        self.assertTrue(x0 <= left < right <= x1 and y0 <= top < bottom <= y1,
+                        "all tied-state changes fit the fixed overlay")
+
+    def test_mansion_tie_overlay_composes_at_its_existing_scene_position(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
+        block = re.search(r'\[node name="Tie" type="Sprite2D" parent="\."\]([^\[]*)', scene)[1]
+        position = tuple(map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", block).groups()))
+        self.assertEqual(position, mansion.BELL_TIE_BOX[:2])
+        self.assertIn('ShowIfFlags = "bell_wedged"', block)
+        self.assertIn("centered = false", block)
+        palette = mansion.exterior_palette(mansion.paint_exterior(), self.exterior_variants)
+        expected = common.pixelize(self.exterior_variants["wedged"], palette)
+        actual = self.exterior.copy()
+        with Image.open(self.generated / "rooms" / "mansion_exterior_tie.png") as tie:
+            x0, y0, x1, y1 = mansion.BELL_TIE_BOX
+            self.assertEqual(tie.size, (x1 - x0, y1 - y0))
+            actual.paste(tie, position)
+        self.assert_image_equal(actual, expected)
+
+    def test_mansion_lantern_keeps_its_flame_glass_and_metal_after_quantization(self):
+        lx, ly = mansion.DOOR[0] - 22, mansion.DOOR[1] - 2
+        image = self.exterior.convert("L")
+        flame = image.getpixel((lx, ly - 2))
+        glass = image.getpixel((lx - 1, ly))
+        side = image.getpixel((lx - 3, ly))
+        metal = image.getpixel((lx + 2, ly))
+        self.assertGreater(flame, glass + 15)
+        self.assertGreater(glass, side + 15)
+        self.assertGreater(side, metal + 30)
+        self.assertGreater(flame, image.getpixel((lx, ly - 8)) + 100)
+        self.assertLessEqual(len(self.exterior.getcolors(common.W * common.FULL_H)), 124)
+
+    def test_mansion_lantern_emits_through_glass_not_its_frame(self):
+        lx, ly = mansion.DOOR[0] - 22, mansion.DOOR[1] - 2
+        for fire in (False, True):
+            with self.subTest(fire=fire), patch.object(mansion, "grade", wraps=mansion.grade) as grade:
+                mansion.paint_exterior(fire=fire)
+                mask = grade.call_args.args[3]
+                self.assertEqual(mask.getpixel((lx, ly - 2)), 255)
+                self.assertEqual(mask.getpixel((lx - 1, ly)), 255)
+                for point in ((lx, ly - 7), (lx - 4, ly - 5), (lx + 2, ly), (lx, ly + 5)):
+                    self.assertEqual(mask.getpixel(point), 0, point)
+
+    def test_mansion_sash_detail_preserves_divisions_and_security_bars(self):
+        for glass in ("dark", "lit", "fire"):
+            for bars in (False, True):
+                with self.subTest(glass=glass, bars=bars):
+                    image = Image.new("RGB", (60, 80))
+                    mask = Image.new("L", image.size)
+                    mansion.sash(ImageDraw.Draw(image), 10, 20, 44, 70, glass, bars, em=ImageDraw.Draw(mask))
+                    fr = common.hx("3a2a20" if glass == "fire" else "d8d0bc")
+                    for y in (32, 57):
+                        self.assertEqual(image.getpixel((12, y)), fr)
+                        self.assertEqual(mask.getpixel((12, y)), 0)
+                    self.assertEqual(image.getpixel((27, 23)), fr)
+                    self.assertEqual(mask.getpixel((27, 23)), 0)
+                    self.assertEqual(mask.getpixel((20, 27)), 0 if glass == "dark" else 235 if glass == "lit" else 255)
+                    self.assertNotEqual(image.getpixel((11, 26)), image.getpixel((43, 26)))
+                    if bars:
+                        for x in range(13, 44, 5):
+                            self.assertEqual(image.getpixel((x, 28)), common.hx("161414"))
+                            self.assertEqual(image.getpixel((x + 1, 28)), common.hx("383632"))
+                            self.assertEqual(mask.getpixel((x, 28)), 0)
+
+    def test_mansion_windows_keep_the_single_lit_room_and_pane_reflections(self):
+        image = self.exterior
+        self.assertGreater(luminance(image.crop((446, 42, 468, 78))), 120)
+        for x in mansion.UPPER_X[:-1]:
+            with self.subTest(window=x):
+                self.assertLess(luminance(image.crop((x + 2, 42, x + 24, 78))), 45)
+        for x in (132, 196, 372):
+            for y in (42, 52, 62, 72):
+                with self.subTest(window=x, pane=y):
+                    pane = image.crop((x + 2, y, x + 12, y + 7))
+                    self.assertGreater(ImageStat.Stat(pane.convert("L")).extrema[0][1] -
+                                       ImageStat.Stat(pane.convert("L")).extrema[0][0], 8)
+
+    def test_mansion_exterior_overlays_preserve_the_detailed_facade(self):
+        scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
+        base = mansion.paint_exterior()
+        pal = mansion.exterior_palette(base, self.exterior_variants)
+        combined = self.exterior.copy()
+        for suffix, flags in (("bin", {"moved": True}), ("tie", {"wedged": True}), ("door", {"opened": True})):
+            asset = f"mansion_exterior_{suffix}.png"
+            resource_id = re.search(rf'path="res://assets/art/rooms/{asset}" id="([^"]+)"', scene)[1]
+            node = next(block for block in re.split(r"(?=\[node )", scene)
+                        if f'texture = ExtResource("{resource_id}")' in block)
+            position = tuple(map(int, re.search(r"position = Vector2\((\d+), (\d+)\)", node).groups()))
+            with self.subTest(overlay=asset), Image.open(self.generated / "rooms" / asset) as overlay:
+                composed = self.exterior.copy()
+                composed.paste(overlay, position)
+                self.assert_image_equal(composed, common.pixelize(mansion.paint_exterior(**flags), pal))
+                combined.paste(overlay, position)
+        self.assert_image_equal(combined, common.pixelize(
+            mansion.paint_exterior(moved=True, wedged=True, opened=True), pal))
 
     def test_burning_mansion_is_a_looping_strip_of_flames_and_smoke(self):
         scene = (ROOT / "scenes" / "rooms" / "mansion_exterior.tscn").read_text()
