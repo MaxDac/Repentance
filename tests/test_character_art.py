@@ -121,14 +121,33 @@ class CharacterArtTests(unittest.TestCase):
         clip = json.loads((ART / "sprites" / "micah_masked_collapse.json").read_text())
         image = Image.open(ART / "sprites" / "micah_masked_collapse.png").convert("RGBA")
         scaled = dict(sprites.MICAH_MASKED, h=sprites.MICAH_MASKED["h"] * sprites.SCALE)
-        kneeling, _ = action_figure(scaled, sprites.KNEES_PRONE[0])
-        down, _ = action_figure(scaled, sprites.KNEES_PRONE[-1], chest_down=True)
+        kneeling, _ = action_figure(scaled, sprites.KNEES_PRONE[0], closed_coat=True)
+        down, _ = action_figure(scaled, sprites.KNEES_PRONE[-1], chest_down=True, closed_coat=True)
         w, h = clip["width"], clip["height"]
         self.assertEqual(image.crop((2 * w, 0, 3 * w, h)).tobytes(), kneeling.tobytes())
         self.assertGreaterEqual(clip["frames"][2]["seconds"], 0.35, "make the knees readable before the fall")
         self.assertEqual(image.crop((image.width - w, 0, image.width, h)).tobytes(), down.tobytes())
         self.assertGreater(clip["frames"][-1]["head"][0], clip["frames"][2]["head"][0])
         self.assertGreater(clip["frames"][-1]["head"][1], clip["frames"][2]["head"][1])
+
+    def test_masked_collapse_keeps_every_shoulder_covered_by_the_black_cloak(self):
+        with patch.object(sprites, "action_strip") as write, \
+                patch.object(sprites, "action_figure", wraps=action_figure) as paint:
+            sprites.action_sequences(sprites.MICAH_MASKED, "micah_masked")
+        expected = write.call_args.args[1]
+        strip = Image.open(ART / "sprites" / "micah_masked_collapse.png").convert("RGBA")
+        black = painter.ramp(sprites.MICAH_MASKED["cloak"]["col"])
+        for i, (frame, _) in enumerate(expected):
+            self.assertEqual(strip.crop((i * 192, 0, (i + 1) * 192, 96)).tobytes(), frame.tobytes())
+        for i, call in enumerate(paint.call_args_list, 1):
+            x, y = np.rint(grounded_joints(call.args[1])[1]).astype(int)
+            pixels = np.array(expected[i][0])[y - 2:y + 3, x - 2:x + 3]
+            opaque = pixels[pixels[..., 3] == 255, :3]
+            with self.subTest(frame=i):
+                self.assertTrue(call.kwargs["closed_coat"])
+                self.assertGreater(len(opaque), 0)
+                self.assertTrue(np.any(np.all(opaque[:, None, :] == black, axis=2), axis=1).all(),
+                                "the shoulder must stay black through kneeling, pitching forward and lying down")
 
     def test_strikes_lift_make_contact_and_return_to_idle(self):
         for name, source, size in (("brute_strike", "brute", 56), ("micah_pistol_whip", "micah", 64)):

@@ -928,8 +928,8 @@ def action_sequences(spec, name):
         falling = [standing]
         times = [0.08]
         for i, (a, b) in enumerate(zip(keys, keys[1:])):
-            falling.append(action_figure(scaled, between(a, b), chest_down=i > 0))
-            falling.append(action_figure(scaled, b, chest_down=i > 0))
+            falling.append(action_figure(scaled, between(a, b), chest_down=i > 0, closed_coat=True))
+            falling.append(action_figure(scaled, b, chest_down=i > 0, closed_coat=True))
             times += [0.12, 0.4 if i == 0 else 0.18 if i == 1 else 0.3]
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":

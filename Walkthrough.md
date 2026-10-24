@@ -834,6 +834,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   then relaxes it: no broad wind-up or body lunge. His off-hand stays hidden; his shoulder and collar stay
   jacket-coloured up to the jaw. The thud lands at contact. Still masked and cloaked, Micah
   drops onto both knees, holds there briefly, then pitches forward onto the floor before the blackout on every choice.
+  His black cloak keeps his neck and shoulders covered throughout the fall, including when he is face-down.
 
 #### Church, outside
 

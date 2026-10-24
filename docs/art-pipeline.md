@@ -77,6 +77,8 @@ shoulder/sleeve shading (`closed_coat`): no shirt, tie, skin patch or contrastin
 close behind Sal rather than lengthening the arm or lunging to reach him.
 The reversed revolver is a small shaded cylinder/frame and textured wooden butt; the original fist is composited
 over its short barrel so no barrel protrudes from Micah's grip. Keep weapon refinements separate from the pose.
+Masked Micah's collapse also uses `closed_coat` so the black cloak covers his neck/shoulder through every
+in-between, kneeling and final prone frame.
 
 ## Visual checks
 
