@@ -34,6 +34,16 @@ public class EndingsTests
         Assert.Equal(ending, Endings.Resolve(Flags(flags.ToArray())));
     }
 
+    [Theory]
+    [InlineData(true, 3)]
+    [InlineData(false, 5)]
+    public void RefusalFlagDoesNotChangeTheOrdinaryEndings(bool free, int ending)
+    {
+        var flags = new List<string> { "eleanor_refused" };
+        if (free) flags.Add("took_documents");
+        Assert.Equal(ending, Endings.Resolve(Flags(flags.ToArray())));
+    }
+
     [Fact]
     public void RepentingAfterTheShotEndsInJailWhateverTheLeverage()
     {

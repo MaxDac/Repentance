@@ -126,7 +126,6 @@ DisplayName = "wire"
 LookText = "A thin wire from the door frame up the wall to the bell. Open the door, the bell rings."
 WalkTo = Vector2(300, 222)
 Face = 2
-ShowIfFlags = "alarm_noticed"
 monitoring = false
 monitorable = false
 
