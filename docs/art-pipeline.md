@@ -75,6 +75,9 @@ make the hem follow the legs (padding past each leg) rather than the hip width.
 - After changing a room painter, regenerate its state overlays and check the printed crop origins against the node
   positions in the scene. Moving a crop without its node misaligns the object.
 - Locked crops (attic bulb, library clock, motel curtain, Harrington road window) must not move.
+- The mansion alarm's tie uses the fixed `BELL_TIE_BOX` crop at `(337, 69)`, matching its scene node even when the
+  knot or tails shrink. Keep the gong at 18-20 pixels wide and the hanging tie ends within a six-pixel span;
+  regenerate every exterior state together so the smaller alarm and its palette agree.
 - Shared painters (the mansion and motel bed figure) must stay identical across rooms; per-room differences go in
   parameters (sheet color), not copies.
 - Passing tests is not visual approval: look at the frames (see [Testing](testing.md#seeing-what-the-game-draws)).

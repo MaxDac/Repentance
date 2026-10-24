@@ -270,6 +270,14 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Film finished.", result.stdout)
 
+    def test_android_plugin_sdk_path_noise_does_not_block_launch(self):
+        self.env["IMPORT_ERROR"] = (
+            'ERROR: EditorSettings not instantiated yet when getting setting "export/android/android_sdk_path".'
+        )
+        result = self.run_launcher("film.sh", "--no-clean")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Film finished.", result.stdout)
+
     def test_import_warnings_do_not_block_launch(self):
         self.env["IMPORT_ERROR"] = "WARNING: harmless warning"
         result = self.run_launcher("film.sh", "--no-clean")
