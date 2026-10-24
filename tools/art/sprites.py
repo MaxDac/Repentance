@@ -582,17 +582,19 @@ def strike_strip(spec, name, player=False):
         idle = Image.new("RGBA", (192, FH))
         idle.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
         standing = (idle, (96, 18))
-        contact = [(72, 56), (76, 34), (80, 19), (75, 74), (66, 91), (92, 34), (108, 23)]
+        contact = [(74, 56), (83, 35), (88, 20), (75, 74), (66, 91), (95, 30), (107, 24)]
+        follow_arm = [(93, 44), (103, 52)]
     else:
         standing = npc_standing(spec, _arms("fold"))
-        contact = [(66, 56), (68, 33), (69, 18), (68, 74), (66, 91), (80, 28), (91, 18)]
+        contact = [(66, 56), (68, 33), (69, 18), (68, 74), (66, 91), (80, 28), (91, 21)]
+        follow_arm = [(78, 42), (87, 52)]
     windup = [(64, 56), (62, 33), (61, 18), (65, 74), (66, 91), (47, 35), (46, 21)]
     follow = [tuple(p) for p in contact]
-    follow[5], follow[6] = (contact[5][0], 42), (contact[6][0] - 5, 43)
+    follow[5:7] = follow_arm
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [standing]
     for joints in (windup, contact, follow):
-        image, head = action_figure(scaled, joints)
+        image, head = action_figure(scaled, joints, shirt_collar=spec.get("collar", "e8e2d6"))
         if player:
             # Fingers wrap the barrel; the cylinder and wooden butt project past the fist, not a firing grip.
             x, y = grounded_joints(joints)[6]

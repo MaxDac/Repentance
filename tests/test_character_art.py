@@ -151,6 +151,39 @@ class CharacterArtTests(unittest.TestCase):
                 second = sprites.player_sheet(spec, name)
             self.assertEqual(first.tobytes(), second.tobytes())
 
+    def test_strike_arms_keep_standing_limb_lengths(self):
+        upper = np.linalg.norm(np.subtract(sprites.UPRIGHT[5], sprites.UPRIGHT[1]))
+        forearm = np.linalg.norm(np.subtract(sprites.UPRIGHT[6], sprites.UPRIGHT[5]))
+        for player, spec in ((True, sprites.MICAH), (False, sprites.BRUTE)):
+            with patch.object(sprites, "action_strip"), \
+                    patch.object(sprites, "action_figure", wraps=action_figure) as paint:
+                sprites.strike_strip(spec, "test_strike", player=player)
+            for frame, call in enumerate(paint.call_args_list, 1):
+                joints = call.args[1]
+                for label, actual, expected in (
+                        ("upper arm", np.linalg.norm(np.subtract(joints[5], joints[1])), upper),
+                        ("forearm", np.linalg.norm(np.subtract(joints[6], joints[5])), forearm)):
+                    with self.subTest(player=player, frame=frame, limb=label):
+                        self.assertGreaterEqual(actual, expected * 0.85)
+                        self.assertLessEqual(actual, expected * 1.15, "reach with the body, not stretched limbs")
+
+    def test_strike_armpits_are_clothed_and_committed_frames_match(self):
+        for name, spec, player in (("micah_pistol_whip", sprites.MICAH, True),
+                                   ("brute_strike", sprites.BRUTE, False)):
+            with patch.object(sprites, "action_strip"), \
+                    patch.object(sprites, "action_figure", wraps=action_figure) as paint:
+                expected = sprites.strike_strip(spec, name, player=player)
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            skin = painter.ramp(spec["skin"])
+            for i, (frame, _) in enumerate(expected):
+                self.assertEqual(image.crop((i * 192, 0, (i + 1) * 192, 96)).tobytes(), frame.tobytes())
+            for i, call in enumerate(paint.call_args_list, 1):
+                x, y = np.rint(grounded_joints(call.args[1])[1]).astype(int)
+                pixels = np.array(expected[i][0])[y - 1:y + 10, x - 4:x + 5]
+                exposed = (pixels[..., 3] > 0) & np.any(np.all(pixels[..., None, :3] == skin, axis=3), axis=2)
+                with self.subTest(sprite=name, frame=i):
+                    self.assertFalse(exposed.any(), "shirt collar and sleeve must cover the shoulder and armpit")
+
     def test_resting_arm_lies_along_the_ground(self):
         _, shoulder, _, _, ankle, elbow, hand = sprites.REST
         self.assertGreater(elbow[1], shoulder[1])
