@@ -830,7 +830,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 - Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
   you for bringing me back."), never calling him Micah.
-- Micah's masked, cloaked collapse is shown before the blackout on either choice.
+- Bruno visibly swings a fist into Micah from behind on every choice. Micah, still masked and cloaked, drops onto
+  both knees, holds there for a beat, then pitches forward onto the floor before the blackout.
 
 #### Church, outside
 
@@ -871,8 +872,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 #### Behind Blue Lantern, previous location from Act 1
 
 - The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
-  Sal out, then use the revolver on him to knock him down. Hit from behind, Sal drops to his knees and then falls
-  face-down. Only then knock on the back door to face Tony.
+  Sal out, then use the revolver on him to knock him down. Sal opens the back door before stepping through and
+  shuts it after clearing the threshold. Micah grips the revolver by its barrel and visibly swings the butt into
+  Sal from behind; at contact, Sal drops to his knees and then falls face-down. Only then knock on the back door
+  to face Tony, who likewise opens the door, steps outside and shuts it behind him.
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
 - Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
   Eleanor.
@@ -890,8 +893,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   the kitchen door since the Feds came sniffing, swearing on his mother that's everything.
 - Tony on his back in the gravel, the dialogue ends with Micah's thoughts saying the problem out loud: Tony knows his
   name, his office and Rose's street, and Tony is the mob. Then the player chooses, as a dialogue choice:
-  - **(Leave him bleeding, and go.)**: Micah leaves Tony alive and walks out of the alley on his own, back to his
-    office before the mansion. Tony's revenge follows him into every ending (below, *Tony's revenge*).
+  - **(Leave him bleeding, and go.)**: Micah holsters the gun and the player regains control. Tony remains wounded
+    on his back; talking again gets only a dismissal, without replaying the interrogation. The player leaves by
+    the street exit, back to Micah's office before the mansion. Tony's revenge follows him into every ending
+    (below, *Tony's revenge*).
   - **(Finish him. He knows my name.)** (`finish_tony`): after the dialogue Micah walks round to stand past his head,
     facing back down the alley, and points the revolver down at it (`micah_aim_down` strip, held on
     `micah_aim_down_held`, then `micah_holster_down` raises it and puts it away). Tony begs; Micah shoots him
@@ -902,9 +907,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
 - **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
   and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery
-  boys"), too quickly: he leaves out the alarm. He goes back inside and bolts the door; knocking is refused. No blood,
-  so no debt with the mob and no revenge in the endings. The street leads to the office in the storm, as after the
-  shoulder.
+  boys"), too quickly: he leaves out the alarm. He stays standing outside at his confrontation position while Micah
+  holsters the gun and the player regains control. Talking again gets only “Scram, pal. I already spilled everything
+  I know.” Knocking cannot summon him again. No blood, so no debt with the mob and no revenge in the endings.
+  The street leads to the office in the storm, as after the shoulder shot. Surviving Tony's position and condition
+  persist through saving and loading; neither nonlethal outcome makes Micah leave automatically.
 
 #### The night after Tony (the kill route)
 

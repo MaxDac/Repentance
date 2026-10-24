@@ -273,6 +273,7 @@ public partial class AutoPlay
         await stage;
         await WaitIdle(game);
         Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+        Check(_poseCounts.GetValueOrDefault("brute_strike") == 1, "Bruno visibly strikes before Micah drops to his knees");
         Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
         Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
         _prefer = new[] { "Visit Caleb", "Refuse the cross" };
@@ -317,19 +318,31 @@ public partial class AutoPlay
         Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
         Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
         await Shot("alley_dark");
-        await game.Perform(Verb.Kick, "trash");
+        var lureSal = game.Perform(Verb.Kick, "trash");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.FindActor("sal")?.Visible != true, "Sal opens the door before emerging");
+        await Until(() => game.Room?.FindActor("sal")?.Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true, "the door stays open while Sal crosses the threshold");
+        await lureSal;
         Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == false, "Sal closes the door after stepping clear");
         Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
         await Shot("alley_sal_out");
         CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
         await game.Perform(Verb.UseItem, "sal", "revolver");
         Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+        Check(_poseCounts.GetValueOrDefault("micah_pistol_whip") == 1 && game.Player.PoseName == null,
+            "Micah visibly swings the revolver butt and restores his walking sprite");
         Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
             !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
         await Shot("alley_sal_down");
         _prefer = Convinces.Prepend("Shoot him").ToArray();
         int tonyHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var tonyTalk = game.Perform(Verb.Talk, "back_door");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.FindActor("bartender")?.Visible != true, "Tony opens the door before emerging");
+        await Until(() => game.Room?.FindActor("bartender")?.Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true, "the door stays open while Tony crosses the threshold");
         await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
             t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
         Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
@@ -344,8 +357,12 @@ public partial class AutoPlay
         Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
         Check(Offered("bartender_shot", "(Finish him. He knows my name.)") && !gs.HasFlag(Endings.KilledTony),
             "the shoulder shot ends on the choice: finish Tony, or leave him bleeding");
-        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm",
-            "Tony left bleeding: Micah walks out on his own, back to the office in the storm");
+        Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "Alley" && !game.Busy,
+            "Tony left bleeding: Micah regains control in the alley");
+        await TonyDismissalTest(game, gs, "alley_tony_wounded");
+        await game.Perform(Verb.Walk, "street");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "OfficeStorm", "Micah leaves wounded Tony manually, back to the office in the storm");
 
         // ---- the office in the storm: the confession, the demon in the window, the hat, and out to the mansion
         if (game.Room is Rooms.OfficeStorm storm)

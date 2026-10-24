@@ -201,6 +201,12 @@ public partial class AutoPlay
         if (name == "eleanor_bed_turn")
             Check(_game.Room!.GetNode<Sprite2D>("EleanorFigure").ZIndex == 0,
                 $"{name}: frame {frame} stays behind the bed rail");
+        if (name == "micah_masked_collapse" && frame == 0)
+            Check(_game.Room?.FindActor("brute")?.Poses is { Action: "brute_strike", Frame: >= 3 },
+                "Micah reacts only once Bruno's fist reaches its contact frame");
+        if (name == "sal_knockout" && frame == 0)
+            Check(_game.Player.Poses is { Action: "micah_pistol_whip", Frame: >= 3 },
+                "Sal reacts only once Micah's revolver butt reaches its contact frame");
         var image = _game.GetViewport().GetTexture().GetImage();
         Check(image.SavePng($"{_dir}/{++_shot:00}_pose_{name}_{frame}.png") == Error.Ok, $"{name}: saved frame {frame}");
     }

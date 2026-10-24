@@ -117,6 +117,37 @@ class CharacterArtTests(unittest.TestCase):
             collapse = Image.open(ART / "sprites" / f"{name}_collapse.png").convert("RGBA")
             self.assertEqual(collapse.crop((64, 0, 128, 96)).tobytes(), normal.tobytes())
 
+    def test_masked_collapse_holds_both_knees_before_pitching_forward(self):
+        clip = json.loads((ART / "sprites" / "micah_masked_collapse.json").read_text())
+        frames = clip["frames"]
+        self.assertGreaterEqual(frames[2]["seconds"], 0.4, "the kneeling beat must be readable")
+        kneel, tip, prone = sprites.KNEES_PRONE
+        self.assertGreater(kneel[3][1], 85)
+        self.assertLess(kneel[2][1], 35, "head up while kneeling")
+        self.assertGreater(frames[2]["head"][1], frames[0]["head"][1])
+        self.assertGreater(frames[-1]["head"][1], frames[2]["head"][1] + 40)
+        scaled = dict(sprites.MICAH_MASKED, h=sprites.MICAH_MASKED["h"] * sprites.SCALE)
+        image = Image.open(ART / "sprites" / "micah_masked_collapse.png").convert("RGBA")
+        for i, joints, down in ((2, kneel, False), (4, tip, True), (6, prone, True)):
+            expected, _ = action_figure(scaled, joints, plain_chest=not down, chest_down=down)
+            self.assertEqual(image.crop((192 * i, 0, 192 * (i + 1), 96)).tobytes(), expected.tobytes())
+
+    def test_strikes_wind_up_contact_and_return_to_idle(self):
+        for name, spec, keys, arms, pistol in (
+                ("brute_strike", sprites.BRUTE, sprites.BRUTE_STRIKE, sprites._arms("fold"), False),
+                ("micah_pistol_whip", sprites.MICAH, sprites.PISTOL_WHIP, None, True)):
+            with self.subTest(action=name), patch.object(sprites, "action_strip") as save_strip:
+                frames = sprites.strike_strip(spec, name, keys, arms, pistol)
+                clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+                image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+                self.assertEqual(frames[0][0].tobytes(), frames[-1][0].tobytes())
+                self.assertEqual(clip["frames"][sprites.STRIKE_CONTACT_FRAME]["seconds"], 0.18)
+                self.assertNotEqual(frames[2][0].tobytes(), frames[3][0].tobytes(), "wind-up differs from contact")
+                self.assertEqual(image.width, len(frames) * 192)
+                for i, (expected, _) in enumerate(frames):
+                    self.assertEqual(image.crop((192 * i, 0, 192 * (i + 1), 96)).tobytes(), expected.tobytes())
+                self.assertEqual(save_strip.call_args.args[2], sprites.STRIKE_SECONDS)
+
     def test_player_sheet_generation_is_deterministic(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH)):
             with patch.object(sprites, "save"):

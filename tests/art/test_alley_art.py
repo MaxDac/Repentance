@@ -77,6 +77,14 @@ class AlleyArtTests(unittest.TestCase):
             self.assertLessEqual(door.width, (x1 - x0) * 3)
             self.assertLessEqual(door.height, (y1 - y0) * 3)
 
+    def test_moon_keeps_readable_surface_shading_after_palette_reduction(self):
+        for image in (self.off, self.on, self.ajar_off, self.ajar_on):
+            core = image.crop((54, 5, 63, 14))
+            colours = {rgb for _, rgb in core.getcolors(core.width * core.height)}
+            self.assertGreaterEqual(len(colours), 3, "the lunar disk must not flatten to a single colour")
+            luminance = [sum(rgb) for rgb in colours]
+            self.assertGreater(max(luminance) - min(luminance), 80, "craters need visible contrast")
+
 
 if __name__ == "__main__":
     unittest.main()
