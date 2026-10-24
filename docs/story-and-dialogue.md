@@ -183,7 +183,8 @@ visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
 case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not
-the alarm, and opening the kitchen door without a look at it rings the bell (`alarm_footsteps`): run (`alarm_ran`)
+the alarm. Looking at the door or lintel and taking the key do not reveal it; only inspecting the wire or bell does.
+Opening the keyed kitchen door without that inspection rings the bell (`alarm_footsteps`): run (`alarm_ran`)
 or stay (`alarm_stayed`).
 Every route must reach "The End" (`Playthrough` routes `1`-`14`, `1-oldman`, `1-steps`, `1-caleb`, `12-oldman`).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no

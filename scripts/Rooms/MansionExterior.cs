@@ -54,7 +54,8 @@ public partial class MansionExterior : Room
     {
         switch (target.Id, verb)
         {
-            case ("door" or "lintel" or "wire" or "bell", Verb.Look) or ("wire" or "bell", Verb.Hand or Verb.UseItem) when !Noticed:
+            case ("door" or "lintel", Verb.Look) when !Noticed && !Warned:
+            case ("wire" or "bell", Verb.Look or Verb.Hand or Verb.UseItem) when !Noticed:
                 await NoticeAlarm();
                 return true;
 

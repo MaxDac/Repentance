@@ -564,7 +564,7 @@ public partial class AutoPlay
 
     /// <summary>
     /// The warning shot and the alarm: Tony talks unhurt and leaves the bell out, while the shoulder shot gets it out of
-    /// him; looking at the door first stops the ring; the ring itself is ending 13 (run) or ending 14 (go in).
+    /// him; only inspecting the alarm stops the ring after a warning; the ring is ending 13 (run) or 14 (go in).
     /// </summary>
     private async Task AlarmEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
@@ -575,6 +575,14 @@ public partial class AutoPlay
         Check(Offered("bartender_gun", "Fire into the wall") && gs.HasFlag(Endings.ShotBartender),
             "Tony's last threat offers the warning shot beside the shoulder");
         Check(heard.Any(l => l.Contains("A burglar alarm")), "shot in the shoulder, Tony tells Micah about the alarm");
+
+        foreach (var (verb, target) in new[] { (Verb.Look, "door"), (Verb.Look, "lintel"), (Verb.Hand, "lintel") })
+        {
+            Seed(act3Flags.Append(Endings.ShotBartender), act3Items);
+            await game.ChangeRoom("mansion_exterior", "start");
+            await game.Perform(verb, target);
+            Check(gs.HasFlag("alarm_noticed"), $"shoulder shot: {verb} on {target} still reveals Tony's bell");
+        }
 
         // the warning shot: the house and the key, not the bell; Tony goes back inside unhurt
         Seed(alleyReady, act3Items, "Fire into the wall");
@@ -597,23 +605,41 @@ public partial class AutoPlay
 
         var warned = act3Flags.Append(Endings.WarnedTony).Append("alley3_tony_inside").ToArray();
 
-        // a look at the door is enough: the bell is spotted and the door won't open until it's gagged
         Seed(warned, act3Items);
         await game.ChangeRoom("mansion_exterior", "start");
         int bells = game.Sfx.Count(Sound.AlarmBell);
+        await game.Perform(Verb.Hand, "door");
+        Check(!gs.HasFlag("alarm_noticed") && game.Sfx.Count(Sound.AlarmBell) == bells,
+            "warned: trying the locked door without the key doesn't reveal or ring the bell");
+        foreach (string target in new[] { "door", "lintel" })
+        {
+            var hotspot = game.Room!.FindHotspot(target)!;
+            Check(game.LeftClickVerb(hotspot) == Verb.Look, $"warned: a left click looks at the {target}");
+            await game.Perform(game.LeftClickVerb(hotspot), target);
+            Check(!gs.HasFlag("alarm_noticed"), $"warned: looking at the {target} doesn't reveal the alarm");
+        }
         await game.Perform(Verb.Hand, "lintel");
         Check(gs.HasItem("kitchen_key") && !gs.HasFlag("alarm_noticed"), "warned: the key from the lintel, and the bell still unseen");
-        await game.Perform(Verb.Look, "door");
-        Check(gs.HasFlag("alarm_noticed"), "warned: a look at the door spots the bell Tony left out");
+        await game.Perform(Verb.Look, "bell");
+        Check(gs.HasFlag("alarm_noticed"), "warned: inspecting the bell itself reveals the alarm Tony left out");
         await game.Perform(Verb.Hand, "door");
         Check(game.Room?.Name == "MansionExterior" && game.Sfx.Count(Sound.AlarmBell) == bells && !gs.HasFlag(Endings.AlarmRan)
               && !gs.HasFlag(Endings.AlarmStayed), "warned, but the bell spotted: the door stays shut and nothing rings");
+        await game.Perform(Verb.Hand, "bin");
+        await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
+            new[] { ("s1", 1), ("s2", 2) }, "warned_alarm_restraint");
+        await game.Perform(Verb.UseItem, "door", "kitchen_key");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("bell_wedged") && !gs.HasItem("kitchen_key")
+              && game.Sfx.Count(Sound.AlarmBell) == bells && !gs.HasFlag(Endings.AlarmStayed) && !gs.HasFlag(Endings.AlarmRan),
+            "warned: deliberate discovery and restraint let Micah enter the kitchen quietly");
 
         // 13: the bell rings, feet on the stairs, and Micah runs out of Chicago
         HeardLog = new List<string>();
         Seed(warned, act3Items, "(Run.)");
         await game.ChangeRoom("mansion_exterior", "start");
         bells = game.Sfx.Count(Sound.AlarmBell);
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
         await game.Perform(Verb.Hand, "lintel");
         _ = game.Perform(Verb.Hand, "door");
         await Until(() => game.Room?.Name == "Outskirts", 180);
@@ -631,10 +657,14 @@ public partial class AutoPlay
         HeardLog = new List<string>();
         Seed(warned, act3Items, "(Stay.");
         await game.ChangeRoom("mansion_exterior", "start");
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
         await game.Perform(Verb.Hand, "lintel");
+        Check(!gs.HasFlag("alarm_noticed"), "ending 14: ordinary inspection and taking the key leave the alarm unseen");
+        bells = game.Sfx.Count(Sound.AlarmBell);
         shots = game.Sfx.Count(Sound.Gunshot);
         bool gunmen = false, fell = false;
-        _ = game.Perform(Verb.Hand, "door");
+        _ = game.Perform(Verb.UseItem, "door", "kitchen_key");
         await Until(() =>
         {
             if (game.Room is Rooms.MansionKitchen kitchen)
@@ -644,7 +674,8 @@ public partial class AutoPlay
             }
             return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
         }, 180, 0.05);
-        Check(gs.HasFlag(Endings.AlarmStayed) && gs.HasFlag("ending_14"), "ending 14: Micah goes in after the bell");
+        Check(gs.HasFlag(Endings.AlarmStayed) && gs.HasFlag("ending_14") && game.Sfx.Count(Sound.AlarmBell) == bells + 1,
+            "ending 14: using the key rings the bell, and Micah goes in");
         Check(gunmen && fell && game.Sfx.Count(Sound.Gunshot) >= shots + 2,
             "ending 14: two Club men at the cook's table, two shots, and Micah falls");
         HeardLog = new List<string>();

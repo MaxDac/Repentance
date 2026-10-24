@@ -255,7 +255,8 @@ How each decision is made:
   the epilogues: out of town, or "Tony sends his regards" in the prison yard.
 - **Fire into the wall** (Tony, instead of the shoulder): `warned_tony`. Tony, unhurt, gives the house and the kitchen
   key but not the alarm (the shoulder shot gets that out of him too), and no blood means no revenge. At the mansion a
-  look at the door, lintel, wire or bell spots the alarm, and the night goes on as usual. Opening the door without one
+  look at the wire or bell spots the alarm, and the night goes on as usual; looking at the door or lintel and taking
+  the key do not reveal it. Opening the keyed door without inspecting the alarm
   rings the bell, and feet come down the back stairs: **Run** (`alarm_ran`, ending 13: out of Chicago, the journal ends
   in Omaha with the revolver on the washstand) or **Stay** (`alarm_stayed`, ending 14: two Club men at the cook's
   table shoot him down; Caleb finishes the journal).
