@@ -168,6 +168,11 @@ def sash(d, x0, y0, x1, y1, glass="dark", bars=False, seed=0, em=None):
     for cxx in (x0 - 2, x1 - 1):
         d.rectangle([cxx, y1 + 6, cxx + 3, y1 + 8], fill=STONE)
     d.line([(x0 - 7, y1 + 9), (x1 + 7, y1 + 9)], fill=hx("4a2a22"))
+    d.line([(x0 - 4, y0), (x0 - 4, y1)], fill=mul(STONE, 1.07))
+    d.line([(x1 + 3, y0), (x1 + 3, y1)], fill=mul(STONE_D, 1.12))
+    d.line([(x0 - 6, y1 + 3), (x1 + 5, y1 + 3)], fill=STONE)
+    for x in range(x0 - 3, x1 + 3, 7):
+        d.point((x, y1 + 4), fill=STONE_D)
     # reveal and glass
     d.rectangle([x0 - 1, y0 - 1, x1 + 1, y1 + 1], fill=STONE_D)
     if glass == "dark":
@@ -180,10 +185,16 @@ def sash(d, x0, y0, x1, y1, glass="dark", bars=False, seed=0, em=None):
         for x in range(x0 + 2, x1, 3):
             if abs(x - cx) > gap:
                 d.line([(x, y0), (x, y1)], fill=hx("281418"))
-        # the moon's sheen across the panes
-        for k in range(3):
-            xa = x0 + 4 + k * 3 + rnd.randint(0, 4)
-            d.line([(xa, y0 + 3), (xa + 8, y0 + 13)], fill=hx("4a5a80"))
+        # Reflections stop at each pane rather than running across the sash.
+        my = (y0 + y1) // 2
+        rows = (y0, (y0 + my) // 2, my, (my + y1) // 2, y1)
+        for row, (top, bottom) in enumerate(zip(rows, rows[1:])):
+            for left, right in ((x0, cx), (cx, x1)):
+                xa = left + 3 + rnd.randint(0, 2)
+                length = min(5, right - xa - 2, bottom - top - 4)
+                sheen = hx("53617a") if row == 0 else hx("303e56")
+                d.line([(xa, top + 2), (xa + length, top + 2 + length)], fill=sheen)
+                d.point((right - 2, bottom - 2), fill=hx("38445a"))
     elif glass == "lit":
         for y in range(y0, y1 + 1):
             d.line([(x0, y), (x1, y)], fill=mix(hx("ffd890"), hx("e09848"), (y - y0) / (y1 - y0)))
@@ -193,9 +204,12 @@ def sash(d, x0, y0, x1, y1, glass="dark", bars=False, seed=0, em=None):
             d.line([(x, y0), (x + 1, y1)], fill=hx("9a4022"))
         for x in range(x1 - 6, x1, 2):
             d.line([(x, y0), (x - 1, y1)], fill=hx("9a4022"))
+        d.line([(x0 + 6, y0 + 1), (x0 + 3, y1 - 1)], fill=hx("e08c46"))
+        d.line([(x1 - 6, y0 + 1), (x1 - 3, y1 - 1)], fill=hx("e08c46"))
         d.rectangle([x0 + 8, y1 - 9, x1 - 8, y1], fill=hx("f8e0a0"))  # lace half-blind
         for x in range(x0 + 9, x1 - 8, 2):
             d.point((x, y1 - 8), fill=hx("c89858"))
+            d.line([(x, y1 - 5), (x, y1 - 2)], fill=hx("d8b878"))
         if em is not None:
             em.rectangle([x0, y0, x1, y1], fill=235)
     else:
@@ -223,12 +237,36 @@ def sash(d, x0, y0, x1, y1, glass="dark", bars=False, seed=0, em=None):
     d.line([(cx, y0), (cx, y1)], fill=fr)
     for yy in ((y0 + my) // 2, (my + y1) // 2):
         d.line([(x0, yy), (x1, yy)], fill=fr)
+    edge = hx("8a826e") if glass != "fire" else hx("201812")
+    glint = hx("f0e4c8") if glass != "fire" else hx("68503a")
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=edge)
+    d.line([(x0 + 1, y0 + 1), (x0 + 1, y1 - 1)], fill=edge)
+    d.line([(x1 - 1, y0 + 1), (x1 - 1, y1 - 1)], fill=glint)
+    d.line([(x0 + 2, y1 - 1), (x1 - 1, y1 - 1)], fill=glint)
+    d.line([(cx + 1, y0 + 2), (cx + 1, y1 - 2)], fill=edge)
+    d.line([(x0 + 2, my - 1), (x1 - 2, my - 1)], fill=glint)
+    d.line([(x0 + 1, my + 2), (x1 - 1, my + 2)], fill=edge)
+    d.rectangle([cx - 2, my - 1, cx + 2, my], fill=hx("786044") if glass != "fire" else edge)
+    d.point((cx - 1, my - 1), fill=hx("d0b880") if glass != "fire" else glint)
+    if em is not None:
+        em.rectangle([x0, y0, x1, y1], outline=0, width=2)
+        em.rectangle([x0, my - 1, x1, my + 2], fill=0)
+        em.rectangle([cx, y0, cx + 1, y1], fill=0)
+        em.rectangle([cx - 2, my - 1, cx + 2, my], fill=0)
+        for yy in ((y0 + my) // 2, (my + y1) // 2):
+            em.line([(x0, yy), (x1, yy)], fill=0)
     if bars:
         for x in range(x0 + 3, x1, 5):
             d.line([(x, y0 - 1), (x, y1 + 1)], fill=hx("161414"))
+            d.line([(x + 1, y0), (x + 1, y1)], fill=hx("383632"))
             d.point((x, y0 - 2), fill=hx("2a2624"))
+            if em is not None:
+                em.rectangle([x, y0, x + 1, y1], fill=0)
         d.line([(x0, y0 + 4), (x1, y0 + 4)], fill=hx("161414"))
         d.line([(x0, y1 - 4), (x1, y1 - 4)], fill=hx("161414"))
+        if em is not None:
+            for yy in (y0 + 4, y1 - 4):
+                em.line([(x0, yy), (x1, yy)], fill=0)
 
 
 def coal_bin(d, box, img=None):
@@ -591,6 +629,7 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
     kx = (dx0 + dx1) // 2
     d.polygon([(kx - 6, dy0 - 3), (kx + 6, dy0 - 3), (kx + 7, dy0 - 19), (kx - 7, dy0 - 19)], fill=STONE_L, outline=STONE_D)
     d.line([(kx - 3, dy0 - 16), (kx + 3, dy0 - 16)], fill=STONE_D)
+    panel_door(d, dx0, dy0, dx1, dy1, hx("2e4a36"), frame=hx("2e4a36"), frame_w=0)
     if opened:
         # inside: the dark scullery passage, a gleam of the kitchen tiles, the door swung in against the left jamb
         vgrad(img, (dx0, dy0, dx1, dy1), hx("0c0a08"), hx("181410"))
@@ -602,20 +641,42 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
             vgrad(img, (dx0 + 11, dy0, dx1, dy1), hx("ffd060"), hx("f06020"))
             ed.rectangle([dx0 + 11, dy0, dx1, dy1], fill=255)
     else:
-        panel_door(d, dx0, dy0, dx1, dy1, hx("2e4a36"), frame=hx("2e4a36"), frame_w=0)
         d.rectangle([dx0 + 8, dy0 + 6, dx1 - 8, dy0 + 22], fill=hx("141c2a"))  # a little glazed light
         d.line([(dx0 + 10, dy0 + 8), (dx0 + 16, dy0 + 14)], fill=hx("4a5a7a"))
         d.line([((dx0 + dx1) // 2, dy0 + 6), ((dx0 + dx1) // 2, dy0 + 22)], fill=hx("2e4a36"))
         d.rectangle([dx0 + 13, dy1 - 30, dx1 - 13, dy1 - 27], fill=hx("b89a50"))  # letter plate
     # the servants' lamp on its bracket, left of the door
     lx, ly = dx0 - 22, dy0 - 2
+    iron, iron_l = hx("242420"), hx("80745a")
+    d.rectangle([lx - 7, ly - 13, lx - 5, ly - 4], fill=iron)
+    d.line([(lx - 7, ly - 12), (lx - 7, ly - 5)], fill=iron_l)
+    for y in (ly - 12, ly - 5):
+        d.point((lx - 6, y), fill=hx("c0a878"))
     d.line([(lx - 6, ly - 10), (lx, ly - 10), (lx, ly - 6)], fill=hx("1a1816"), width=2)
-    d.rectangle([lx - 7, ly - 13, lx - 5, ly - 4], fill=hx("1a1816"))
-    d.polygon([(lx - 5, ly - 6), (lx + 5, ly - 6), (lx + 3, ly - 8), (lx - 3, ly - 8)], fill=hx("1a1816"))
-    d.polygon([(lx - 4, ly - 6), (lx + 4, ly - 6), (lx + 3, ly + 6), (lx - 3, ly + 6)], fill=hx("ffe6a0"))
-    d.line([(lx, ly - 6), (lx, ly + 6)], fill=hx("2a2016"))
-    d.rectangle([lx - 4, ly + 6, lx + 4, ly + 8], fill=hx("1a1816"))
-    ed.polygon([(lx - 4, ly - 6), (lx + 4, ly - 6), (lx + 3, ly + 6), (lx - 3, ly + 6)], fill=255)
+    d.line([(lx - 5, ly - 11), (lx, ly - 11)], fill=iron_l)
+    d.line([(lx - 5, ly - 6), (lx - 2, ly - 8)], fill=iron)
+    d.point((lx, ly - 9), fill=hx("b4a080"))
+    d.polygon([(lx - 5, ly - 6), (lx + 5, ly - 6), (lx + 2, ly - 9), (lx - 2, ly - 9)], fill=iron)
+    d.line([(lx - 4, ly - 7), (lx - 1, ly - 9), (lx + 1, ly - 9)], fill=iron_l)
+    d.line([(lx - 5, ly - 6), (lx + 5, ly - 6)], fill=hx("b09868"))
+    glass_box = [(lx - 4, ly - 5), (lx + 4, ly - 5), (lx + 3, ly + 5), (lx - 3, ly + 5)]
+    d.polygon(glass_box, fill=hx("dca658"))
+    ed.polygon(glass_box, fill=255)
+    d.polygon([(lx - 2, ly - 4), (lx + 2, ly - 4), (lx + 1, ly + 4), (lx - 1, ly + 4)], fill=hx("f8d482"))
+    d.line([(lx, ly - 2), (lx, ly + 2)], fill=hx("fff4c8"))
+    d.point((lx, ly - 3), fill=hx("fffce0"))
+    for side in (-1, 1):
+        edge = [(lx + side * 4, ly - 5), (lx + side * 3, ly + 5)]
+        d.line(edge, fill=iron_l if side == -1 else iron)
+        ed.line(edge, fill=0)
+    d.line([(lx + 2, ly - 4), (lx + 2, ly + 4)], fill=hx("3a3024"))
+    ed.line([(lx + 2, ly - 4), (lx + 2, ly + 4)], fill=0)
+    d.point((lx - 2, ly - 3), fill=hx("fff0b8"))
+    d.rectangle([lx - 3, ly + 5, lx + 3, ly + 6], fill=iron)
+    ed.rectangle([lx - 3, ly + 5, lx + 3, ly + 6], fill=0)
+    d.line([(lx - 3, ly + 5), (lx + 2, ly + 5)], fill=iron_l)
+    d.polygon([(lx - 4, ly + 7), (lx + 4, ly + 7), (lx + 2, ly + 8), (lx - 2, ly + 8)], fill=iron)
+    d.line([(lx - 3, ly + 7), (lx + 3, ly + 7)], fill=hx("a08a60"))
     # ---- the alarm: a wire stapled up the jamb, along the string course to the bell box ----
     bx0, by0, bx1, by1 = BELL
     bcx = (bx0 + bx1) // 2
@@ -696,21 +757,27 @@ def paint_exterior(moved=False, wedged=False, opened=False, fire=False, fire_t=0
     return img
 
 
+def exterior_palette(base, variants):
+    blend = base
+    for img in variants.values():
+        blend = Image.blend(blend, img, 0.3)
+    lx, ly = DOOR[0] - 22, DOOR[1] - 2
+    # The tiny lamp's flame and glass would otherwise collapse into the lit window's single warm shade.
+    return palette_of(blend, 121) + [base.getpixel(p) for p in ((lx, ly - 2), (lx - 1, ly), (lx - 3, ly))]
+
+
 def build_exterior():
     base = paint_exterior()
     v = {"moved": paint_exterior(moved=True), "wedged": paint_exterior(wedged=True), "open": paint_exterior(opened=True),
          "fire": paint_exterior(moved=True, wedged=True, opened=True, fire=True)}
-    blend = base
-    for img in v.values():
-        blend = Image.blend(blend, img, 0.3)
-    pal = palette_of(blend, 124)
+    pal = exterior_palette(base, v)
     px = pixelize(base, pal)
     save(px, "rooms", "mansion_exterior.png")
-    overlay(v["moved"], px, pal, (BIN_MOVED[0] - 4, BIN_MOVED[1] - 4, BIN_HOME[2] + 10, BIN_HOME[3] + 6),
-            "mansion_exterior_bin")
-    save(pixelize(v["wedged"], pal).crop(BELL_TIE_BOX), "rooms", "mansion_exterior_tie.png")
-    print("mansion_exterior_tie at", BELL_TIE_BOX[:2])
-    overlay(v["open"], px, pal, (DOOR[0] - 2, DOOR[1] - 2, DOOR[2] + 2, DOOR[3] + 1), "mansion_exterior_door")
+    # These crops are locked to the existing scene nodes, independent of palette-dependent difference bounds.
+    for state, suffix, box in (("moved", "bin", (304, 173, 455, 214)),
+                               ("wedged", "tie", BELL_TIE_BOX),
+                               ("open", "door", (248, 123, 290, 206))):
+        save(pixelize(v[state], pal).crop(box), "rooms", f"mansion_exterior_{suffix}.png")
     fire = [v["fire"]] + [paint_exterior(moved=True, wedged=True, opened=True, fire=True, fire_t=i / EXT_FIRE_FRAMES)
                           for i in range(1, EXT_FIRE_FRAMES)]
     fpal = palette_of(Image.blend(fire[0], fire[EXT_FIRE_FRAMES // 2], 0.5), 160)
