@@ -659,6 +659,16 @@ public partial class AutoPlay
               && game.Sfx.Count(Sound.AlarmBell) == bells && !gs.HasFlag(Endings.AlarmStayed) && !gs.HasFlag(Endings.AlarmRan),
             "warned: deliberate discovery and restraint let Micah enter the kitchen quietly");
 
+        // The wire is clickable before the bell is noticed, so "wire or bell" both reveal it.
+        Seed(warned, act3Items);
+        await game.ChangeRoom("mansion_exterior", "start");
+        bells = game.Sfx.Count(Sound.AlarmBell);
+        Check(game.Room?.HotspotAt(new Vector2(314, 118))?.Id == "wire" && !gs.HasFlag("alarm_noticed"),
+            "warned: the wire along the door frame can be clicked before the alarm is noticed");
+        heard = await Spoken(async () => { await game.Perform(Verb.Look, "wire"); await WaitIdle(game); });
+        Check(gs.HasFlag("alarm_noticed") && heard.Any(l => l.Contains("A wire, along the door frame"))
+              && game.Sfx.Count(Sound.AlarmBell) == bells, "warned: looking at the wire reveals the alarm without ringing it");
+
         // 13: the bell rings, feet on the stairs, and Micah runs out of Chicago
         HeardLog = new List<string>();
         Seed(warned, act3Items, "(Run.)");

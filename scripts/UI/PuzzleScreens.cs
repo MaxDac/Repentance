@@ -125,7 +125,7 @@ public abstract class WheelScreen : PuzzleScreen
     }
 }
 
-/// <summary>Issue #51: the staff cage, driven through the Drake's maze of service shafts to the right linen room.</summary>
+/// <summary>Issue #51: the staff cage, driven through the Aurelian's maze of service shafts to the right linen room.</summary>
 public sealed class LiftMazeScreen : PuzzleScreen
 {
     private const float Cell = 14, OriginX = 28, OriginY = 54;

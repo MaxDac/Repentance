@@ -232,6 +232,9 @@ public partial class Alley : Room
             case ("street", Verb.Walk or Verb.Hand):
                 await Say("Not without Tony telling me where she is. He knows. They always know.");
                 return true;
+            case ("street_lamp", Verb.Look) when Dark:
+                await Say("Dead. Just the way I want it.");
+                return true;
             case ("street_lamp", Verb.Hand or Verb.Kick) when !Dark:
                 await Say(verb == Verb.Kick ? "*CLANG*" : "I give the post a good shake. The bulb rattles in its cage...");
                 State.SetFlag("alley3_dark");

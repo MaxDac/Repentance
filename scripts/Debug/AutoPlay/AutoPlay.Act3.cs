@@ -316,6 +316,9 @@ public partial class AutoPlay
         Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
         await game.Perform(Verb.Hand, "street_lamp");
         Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+        var deadLamp = await Spoken(async () => { await game.Perform(Verb.Look, "street_lamp"); await WaitIdle(game); });
+        Check(deadLamp.Contains("Dead. Just the way I want it.") && !deadLamp.Any(l => l.Contains("flicker")),
+            "the broken lamp looks dead, not flickering");
         Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
         await Shot("alley_dark");
         int doorOpens = game.Sfx.Count(Sound.DoorOpen), doorCloses = game.Sfx.Count(Sound.DoorClose);

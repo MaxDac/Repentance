@@ -138,7 +138,7 @@ is the number of turns still to play after the current line. The Ink writes it o
 - After turn 4 a gather computes `~ temp convinced = persuade_score >= PERSUADE_THRESHOLD`, then branches.
 - The action options are unchanged: turning himself in on turn 1 only, "(Leave her.)" on turns 3 and 4 (the
   `= leave` stitch), "(Shoot Eleanor.)" on turn 4 only. `AutoPlay.CheckPersuasionTurns` asserts those positions.
-- `Endings.cs` only reads the flags `eleanor_convinced` / `eleanor_refused`; it doesn't know about the score.
+- For the ordinary persuasion outcomes, `Endings.cs` uses `eleanor_convinced` together with the fire/documents flags; it reads neither `eleanor_refused` nor the score.
 
 ## Changing the lines
 

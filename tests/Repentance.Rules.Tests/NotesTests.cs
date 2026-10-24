@@ -45,6 +45,14 @@ public class NotesTests
     }
 
     [Fact]
+    public void BrassBox_StaysShutUntilOpened()
+    {
+        Assert.False(Notes.Known("brass_box", Has(new[] { "took_brass_box", "seen_blue_lantern_front" })));
+        Assert.True(Notes.Known("brass_box", Has(new[] { "opened_brass_box" })));
+        Assert.True(Notes.Known("brass_box", Has(new[] { "club_lead" })));
+    }
+
+    [Fact]
     public void BackWay_RoomNumbers_SpanTheLiftMaze()
     {
         var text = string.Join(" ", Notes.Get("service_lift")!.Lines.Select(l => l.Text));
