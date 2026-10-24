@@ -101,10 +101,20 @@ public partial class ClubStage : Room
     {
         Game.Hud.HideCloseUp();
         State.SetFlag("brute_stage");
-        if (FindActor("brute") is { } brute)
-            await brute.MoveTo(new Vector2(Player.Position.X - 24, Player.Position.Y + 4), 70);
+        var brute = FindActor("brute") ?? throw new System.InvalidOperationException("The Club knockout requires Bruno.");
+        await brute.MoveTo(new Vector2(Player.Position.X - 24, Player.Position.Y + 4), 70);
+        brute.FaceLeft(false);
         await Say("brute", "Night night, pal.");
-        if (!await Player.PlayPose("micah_masked_collapse")) return;
+        Player.Face(Facing.Right);
+        var strike = brute.PlayPose("brute_strike");
+        while (!strike.IsCompleted && brute.Poses?.Frame < 2) await Wait(0.01);
+        if (strike.IsCompleted && !await strike) return;
+        Game.Sfx.Play(Sound.Thunk);
+        bool collapsed = await Player.PlayPose("micah_masked_collapse");
+        bool struck = await strike;
+        brute.SetPose(null);
+        if (!collapsed || !struck) return;
+        await Wait(0.35);
         await Game.Hud.Fade(1, 0.08);
         await Wait(1.6);
         State.SetFlag("masked", false);

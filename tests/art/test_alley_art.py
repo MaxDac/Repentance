@@ -77,6 +77,19 @@ class AlleyArtTests(unittest.TestCase):
             self.assertLessEqual(door.width, (x1 - x0) * 3)
             self.assertLessEqual(door.height, (y1 - y0) * 3)
 
+    def test_moon_has_a_defined_rim_and_visible_surface_detail(self):
+        moon = self.off.crop((51, 1, 66, 16)).convert("RGB")
+        self.assertGreaterEqual(len(moon.getcolors()), 5, "retain craters after palette reduction")
+        center, rim, sky = (sum(self.off.getpixel(p)[:3]) for p in ((57, 6), (52, 8), (48, 8)))
+        self.assertGreater(center, sky + 80)
+        self.assertGreater(rim, sky + 30)
+
+    def test_passage_has_staggered_stones_and_a_drain(self):
+        surface = Image.new("RGB", (480, 270))
+        alley.passage(surface)
+        self.assertGreaterEqual(len(surface.crop((20, 175, 42, 184)).getcolors()), 6)
+        self.assertNotEqual(surface.getpixel((25, 180)), surface.getpixel((25, 177)))
+
 
 if __name__ == "__main__":
     unittest.main()

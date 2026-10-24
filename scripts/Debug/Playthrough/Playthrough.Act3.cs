@@ -81,6 +81,9 @@ public sealed partial class Playthrough
             await Do(Verb.Kick, "trash");
             await Do(Verb.UseItem, "sal", "revolver");
             Check(Gs.HasFlag("alley3_sal_down"), "Sal knocked down");
+            Check(_game.Room?.FindActor("sal") is { } sal &&
+                sal.Position.X - _game.Player.Position.X is >= 24 and <= 32,
+                "Micah steps close behind Sal for the short downward revolver-butt blow");
             var tony = Do(Verb.Talk, "back_door");
             if (_route is "1" or "1-caleb")
             {
@@ -102,9 +105,8 @@ public sealed partial class Playthrough
             await WaitIdle();
             if (AlarmRoute)
             {
-                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && Gs.HasFlag("alley3_tony_inside"),
-                    "the warning shot: Tony talks, and goes back inside unhurt");
-                await Do(Verb.Walk, "street");
+                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && !Gs.HasFlag("alley3_tony_inside"),
+                    "the warning shot: Tony stays outside unhurt while Micah leaves");
                 Expect("OfficeStorm", "back to the office, in the storm");
                 return;
             }

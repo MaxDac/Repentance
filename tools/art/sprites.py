@@ -575,6 +575,47 @@ def kicked_strip(spec, name):
     return frames
 
 
+def strike_strip(spec, name, player=False):
+    """A small bent-arm lift, downward blow and relaxed return; contact follows the 0.45-second preparation."""
+    from PIL import Image, ImageDraw
+    if player:
+        idle = Image.new("RGBA", (192, FH))
+        idle.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
+        standing = (idle, (96, 18))
+    else:
+        standing = npc_standing(spec, _arms("fold"))
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [standing]
+    for elbow, hand in (((73, 20), (75, 7)), ((76, 34), (82, 22)), ((68, 44), (70, 57))):
+        joints = UPRIGHT[:5] + [elbow, hand]
+        joints[1] = (64, 31)
+        image, head = action_figure(scaled, joints, closed_coat=True, hide_far_arm=True)
+        if player:
+            x, y = map(int, grounded_joints(joints)[6])
+            fist = image.crop((x - 2, y - 3, x + 3, y + 3))
+            d = ImageDraw.Draw(image)
+            d.rectangle((x - 1, y - 1, x + 1, y), fill="#83909c")
+            d.polygon([(x + 1, y - 2), (x + 2, y - 4), (x + 5, y - 3),
+                       (x + 6, y), (x + 4, y + 1), (x + 1, y)], fill="#26303d")
+            d.line([(x + 2, y - 3), (x + 4, y - 3)], fill="#9aa6b2")
+            d.rectangle((x + 2, y - 2, x + 4, y), fill="#596574")
+            d.line([(x + 3, y - 2), (x + 3, y - 1)], fill="#2d3541")
+            d.point((x + 4, y - 2), fill="#83909c")
+            d.line([(x + 5, y - 2), (x + 6, y - 3)], fill="#83909c")
+            d.arc((x + 2, y, x + 5, y + 3), 0, 180, fill="#26303d")
+            d.polygon([(x + 4, y), (x + 6, y - 1), (x + 8, y + 3),
+                       (x + 7, y + 4), (x + 5, y + 2)], fill="#60402d", outline="#2c211b")
+            d.line([(x + 5, y), (x + 7, y + 2)], fill="#98653d")
+            d.point((x + 6, y + 2), fill="#412b21")
+            d.point((x + 7, y + 3), fill="#77808b")
+            # Keep the existing fingers in front: the short barrel is entirely enclosed by the grip.
+            image.alpha_composite(fist, (x - 2, y - 3))
+        frames.append((image, head))
+    frames.append(standing)
+    action_strip(name, frames, [0.15, 0.3, 0.12, 0.18, 0.15])
+    return frames
+
+
 def aim_frame(spec, name):
     """Single 96x96 frame of a character in profile facing right, revolver held out one-handed the old-picture way:
     upper arm tucked against the side, forearm level at the target, the free hand hanging."""
@@ -883,7 +924,13 @@ def action_sequences(spec, name):
         return frames + [end], times + [timing[-1]]
 
     if name == "micah_masked":
-        falling, times = sequence(FALL, action_figure(scaled, REST, on_back=True), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
+        keys = [UPRIGHT, KNEES_PRONE[0], KNEES_PRONE[1], KNEES_PRONE[2]]
+        falling = [standing]
+        times = [0.08]
+        for i, (a, b) in enumerate(zip(keys, keys[1:])):
+            falling.append(action_figure(scaled, between(a, b), chest_down=i > 0, closed_coat=True))
+            falling.append(action_figure(scaled, b, chest_down=i > 0, closed_coat=True))
+            times += [0.12, 0.4 if i == 0 else 0.18 if i == 1 else 0.3]
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
         recover_strip(spec, scaled, standing)
@@ -1875,6 +1922,8 @@ def build():
     kneel_frame(MICAH, "micah_kneel")
     kicked_strip(MICAH, "micah_kicked")
     kick_strip(SAL, "sal_kick", _arms("pocket"))
+    strike_strip(BRUTE, "brute_strike")
+    strike_strip(MICAH, "micah_pistol_whip", player=True)
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")

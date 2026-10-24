@@ -584,26 +584,52 @@ public partial class AutoPlay
             Check(gs.HasFlag("alarm_noticed"), $"shoulder shot: {verb} on {target} still reveals Tony's bell");
         }
 
-        // the warning shot: the house and the key, not the bell; Tony goes back inside unhurt
+        // The warning shot: the house and the key, not the bell; Tony stays outside unhurt.
         Seed(alleyReady, act3Items, "Fire into the wall");
         await game.ChangeRoom("alley", "act3");
         int shots = game.Sfx.Count(Sound.Gunshot);
         int warnHolsters = _poseCounts.GetValueOrDefault("micah_holster");
-        heard = await Spoken(async () => { await game.Perform(Verb.Talk, "back_door"); await WaitIdle(game); });
+        heard = await Spoken(async () =>
+        {
+            var warning = game.Perform(Verb.Talk, "back_door");
+            await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("Nobody bleeding", StringComparison.Ordinal));
+            Check(game.Room?.FindActor("bartender") is { Visible: true } outside &&
+                  outside.Position.DistanceTo(new Vector2(318, 208)) < 1 && outside.Poses?.Active != true &&
+                  !gs.HasFlag("alley3_tony_inside"), "Tony remains standing where he came out after the warning shot");
+            await Shot("alley_tony_spared");
+            await warning;
+            await WaitIdle(game);
+        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, Micah automatically leaves for the office in the storm");
+
+        // Old warning-shot saves also restore Tony outside, without repeating the confrontation.
+        Seed(alleyReady.Append(Endings.WarnedTony).Append("alley3_tony_inside"), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await game.LoadGame(game.CaptureSave());
+        Check(game.Room?.FindActor("bartender") is { Visible: true } restoredTony &&
+              restoredTony.Position.DistanceTo(new Vector2(318, 208)) < 1 &&
+              restoredTony.Texture?.ResourcePath.EndsWith("bartender.png") == true &&
+              !gs.HasFlag("alley3_tony_inside"), "reloaded warning-shot saves keep Tony standing outside");
+        });
         Check(_poseCounts.GetValueOrDefault("micah_holster") == warnHolsters + 1, "the warning shot: Micah holsters the revolver");
-        Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && gs.HasFlag("alley3_tony_inside")
-              && game.Room?.FindActor("bartender")?.Visible != true && game.Sfx.Count(Sound.Gunshot) == shots + 1,
-            "the warning shot: one bullet in the wall, and Tony back inside unhurt");
+        Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && !gs.HasFlag("alley3_tony_inside")
+              && game.Sfx.Count(Sound.Gunshot) == shots + 1,
+            "the warning shot: one bullet in the wall, and Tony left outside unhurt");
         Check(heard.Any(l => l.Contains("delivery boys")) && !heard.Any(l => l.Contains("bell")),
             "the warning shot: Tony gives the kitchen key, but not the alarm");
         Check(!Endings.TonyWantsRevenge(gs.HasFlag), "no debt with the mob: Tony wants no revenge after a miss");
         await game.Perform(Verb.Hand, "back_door");
-        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "Tony's bolted the back door behind him");
+        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "knocking cannot summon Tony a second time");
+        await TonyDismissalTest(game, gs, "alley_tony_warned", seeded: true);
         await game.Perform(Verb.Walk, "street");
-        await WaitIdle(game);
-        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, back to the office in the storm");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works after the warning shot");
 
-        var warned = act3Flags.Append(Endings.WarnedTony).Append("alley3_tony_inside").ToArray();
+        Seed(alleyReady.Append(Endings.ShotBartender), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await TonyDismissalTest(game, gs, "alley_tony_wounded", seeded: true);
+        await game.Perform(Verb.Walk, "street");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works for a reloaded wounded Tony");
+
+        var warned = act3Flags.Append(Endings.WarnedTony).ToArray();
 
         Seed(warned, act3Items);
         await game.ChangeRoom("mansion_exterior", "start");
@@ -672,6 +698,7 @@ public partial class AutoPlay
                 gunmen |= kitchen.FindActor("gunman")?.Visible == true && kitchen.FindActor("gunman_b")?.Visible == true;
                 fell |= game.Player.PoseName is "micah_gunned_down" or "micah_gunned_dead";
             }
+
             return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
         }, 180, 0.05);
         Check(gs.HasFlag(Endings.AlarmStayed) && gs.HasFlag("ending_14") && game.Sfx.Count(Sound.AlarmBell) == bells + 1,
@@ -683,6 +710,42 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("Father Caleb Jones")) && !HeardLog.Any(l => l.Contains("That's enough of you"))
               && !HeardLog.Any(l => l.Contains("Tony")), "ending 14: Caleb finishes the journal, with no word of Tony");
         HeardLog = null;
+    }
+
+    private async Task TonyDismissalTest(Game game, GameState gs, string checkpoint, bool seeded = false)
+    {
+        var tony = game.Room!.FindActor("bartender")!;
+        var position = tony.Position;
+        var texture = tony.Texture;
+        var flags = gs.Flags.OrderBy(f => f).ToArray();
+        var inventory = gs.Inventory.ToArray();
+        int shots = game.Sfx.Count(Sound.Gunshot);
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            var heard = await Spoken(() => game.Perform(Verb.Talk, "bartender"));
+            Check(heard.SequenceEqual(new[] { "Scram, pal. I already spilled everything I know." }),
+                "talking to surviving Tony gives only his repeatable dismissal");
+        }
+        Check(gs.Flags.OrderBy(f => f).SequenceEqual(flags) && gs.Inventory.SequenceEqual(inventory)
+              && game.Sfx.Count(Sound.Gunshot) == shots && tony.Position == position && tony.Texture == texture,
+            "repeat talk neither moves Tony nor changes clues, choices, inventory or gunshots");
+        if (seeded)
+        {
+            // Seeded endings follow the return-to-title test: exercise serialization without reopening title-only saves.
+            var saved = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(game.CaptureSave()))
+                ?? throw new InvalidOperationException($"Cannot deserialize {checkpoint}");
+            await game.LoadGame(saved);
+            await WaitIdle(game);
+        }
+        else await ReloadCheckpoint(checkpoint);
+        tony = game.Room!.FindActor("bartender")!;
+        Check(game.Room is Rooms.Alley && tony.Visible && tony.Position == position && tony.Texture == texture
+              && tony.WalkTo == new Vector2(258, 214) && tony.FlipH && !game.Busy,
+            "surviving Tony restores his position, condition, facing and talk target on load");
+        await game.ChangeRoom("alley", "act3");
+        await WaitIdle(game);
+        Check(game.Room.FindActor("bartender") is { Visible: true } returned && returned.Position == position,
+            "returning to the alley leaves surviving Tony in place");
     }
 
     /// <summary>

@@ -20,7 +20,7 @@ public partial class Alley : Room
     private static readonly Vector2 StreetMouth = new(50, 192);
 
     private static readonly Vector2 SalAtTrash = new(398, 224);
-    private static readonly Vector2 BehindSal = new(352, 222);
+    private static readonly Vector2 BehindSal = new(370, 222);
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
     private static readonly Vector2 OverTony = new(428, 218);
@@ -55,6 +55,8 @@ public partial class Alley : Room
             sal.WalkTo = BehindSal;
             if (State.HasFlag("alley3_sal_down")) sal.SetTexture(SalOut);
         }
+        if (State.HasFlag("shot_bartender") || State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway))
+            State.SetFlag("alley3_tony_inside", false);
         PlaceTony();
     }
 
@@ -95,6 +97,12 @@ public partial class Alley : Room
         if (entry == "act3" && State.HasFlag(Endings.KilledTony))
         {
             await Game.Run(() => Think("Back again. Like they say killers do. Tony hasn't moved, and Sal's still dreaming."));
+            return;
+        }
+        if (entry == "act3" && (State.HasFlag("shot_bartender") || State.HasFlag(Endings.WarnedTony)
+                                  || State.HasFlag(Endings.WalkedAway)))
+        {
+            await Game.Run(() => Think("Tony's still by the door. I've done enough here."));
             return;
         }
         if (entry == "act3")
@@ -247,7 +255,10 @@ public partial class Alley : Room
                 await Say("Nobody's coming out that door now. Not after a shot. They'll be calling somebody instead.");
                 return true;
             case ("back_door", Verb.Hand or Verb.Talk) when State.HasFlag(Endings.WarnedTony):
-                await Say("Bolted. Tony's said all he's going to say, and he's said it to the wall.");
+                await Say("Tony's right here. He's said all he's going to say, and he's said it to the wall.");
+                return true;
+            case ("back_door", Verb.Hand or Verb.Talk) when State.HasFlag(Endings.WalkedAway):
+                await Say("I've lowered the gun. All that's left is to walk away.");
                 return true;
             case ("back_door", Verb.Hand or Verb.Talk) when salDown:
                 await KnockForTony();
@@ -294,10 +305,19 @@ public partial class Alley : Room
                 await Say("There's nothing left to say to him. There never will be.");
                 return true;
             case ("bartender", Verb.Talk) when State.HasFlag("shot_bartender"):
-                await Say("bartender", "Go on, get out of here, Jones. Before I remember I'm the one who's bleeding.");
+                await Talk("bartender_dismiss");
                 return true;
             case ("bartender", Verb.Hand or Verb.Kick) when State.HasFlag("shot_bartender"):
                 await Say("I've done enough to him for one night. Maybe.");
+                return true;
+            case ("bartender", Verb.Talk) when State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway):
+                await Talk("bartender_dismiss");
+                return true;
+            case ("bartender", Verb.Look) when State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway):
+                await Say("Tony, still by the door. Brick dust in his hair and no more answers in him.");
+                return true;
+            case ("bartender", Verb.Hand or Verb.Kick or Verb.UseItem) when State.HasFlag(Endings.WarnedTony) || State.HasFlag(Endings.WalkedAway):
+                await Say("I've done enough. Time to leave him where he is.");
                 return true;
         }
         return false;
@@ -309,6 +329,19 @@ public partial class Alley : Room
     {
         foreach (var door in new[] { "DoorOpen", "Lamp/DoorOpenLit" })
             if (GetNodeOrNull<Sprite2D>(door) is { } overlay) overlay.Visible = open;
+    }
+
+    private async Task OpenBackDoor()
+    {
+        Game.Sfx.Play(Sound.DoorOpen);
+        ShowDoorOpen(true);
+        await Wait(0.25);
+    }
+
+    private void CloseBackDoor()
+    {
+        Game.Sfx.Play(Sound.DoorClose);
+        ShowDoorOpen(false);
     }
 
     /// <summary>One kick: from behind Micah, facing the screen, Sal drives his foot into Micah's belly, and Micah
@@ -335,9 +368,11 @@ public partial class Alley : Room
         await Wait(0.8);
         if (FindActor("sal") is not { } sal) return;
         sal.Position = new Vector2(331, 198);
+        await OpenBackDoor();
         State.SetFlag("alley3_sal_inside", false);
         State.SetFlag("alley3_sal_out");
         await sal.MoveTo(SalAtTrash, 40);
+        CloseBackDoor();
         sal.FaceLeft(false);
         sal.WalkTo = BehindSal;
         await Say("sal", "Damn cats. And who turned off the light? Tony! The light's out again!");
@@ -350,9 +385,14 @@ public partial class Alley : Room
         if (FindActor("sal") is not { } sal) return;
         Player.FaceTowards(sal.Position);
         await Say("Revolver by the barrel. The butt's the only part of it I ever hit anything with.");
-        await Say("*THUNK*");
-        // hit from behind: down on his knees, then flat on his face
-        await sal.PlayPose("sal_knockout");
+        var swing = Player.PlayPose("micah_pistol_whip");
+        while (!swing.IsCompleted && Player.Poses.Frame < 2) await Wait(0.01);
+        if (swing.IsCompleted && !await swing) return;
+        Game.Sfx.Play(Sound.Thunk);
+        bool fell = await sal.PlayPose("sal_knockout");
+        bool struck = await swing;
+        Player.SetPose(null);
+        if (!fell || !struck) return;
         sal.SetTexture(SalOut);
         State.SetFlag("alley3_sal_down");
         await Wait(0.6);
@@ -368,9 +408,12 @@ public partial class Alley : Room
         await Wait(1.0);
         if (FindActor("bartender") is not { } tony) return;
         tony.Position = new Vector2(331, 198);
+        await OpenBackDoor();
         State.SetFlag("alley3_tony_inside", false);
         await tony.MoveTo(TonyOut, 40);
+        CloseBackDoor();
         tony.FaceLeft(true);
+        tony.WalkTo = MicahAims;
         await Player.PlayPose("micah_draw");
         Player.SetPose("micah_aim");
         Act3.UpdateGates();
@@ -385,7 +428,7 @@ public partial class Alley : Room
         }
         if (State.HasFlag(Endings.WarnedTony))
         {
-            await WarnTony(tony);
+            await WarnTony();
             return;
         }
         await Say("*BANG*");
@@ -405,21 +448,18 @@ public partial class Alley : Room
     }
 
     /// <summary>
-    /// Act 3, the warning shot: into the bricks by Tony's ear. He talks, all but the alarm, and is back inside with the
-    /// door bolted before the dust settles. No blood, so no debt with the mob.
+    /// Act 3, the warning shot: into the bricks by Tony's ear. He talks, all but the alarm, and stays outside while
+    /// Micah leaves. No blood, so no debt with the mob.
     /// </summary>
-    private async Task WarnTony(Actor tony)
+    private async Task WarnTony()
     {
         await Say("*BANG*");
         await Think("Brick dust in his hair. The bullet's in the wall, an inch from his ear. That's where I meant it to go.");
         await Talk("bartender_miss");
         await Player.Holster();
-        await tony.MoveTo(new Vector2(331, 198), 60);
-        State.SetFlag("alley3_tony_inside");
-        tony.Visible = false;
-        Game.Sfx.Play(Sound.DoorClose);
         await Think("The Gold Coast. The kitchen door. The delivery boys' key.");
         await Think("Nobody bleeding, for once. Tony'll pour drinks tomorrow and swear he never saw me. He'd rather that than explain.");
+        await AfterTheShot();
     }
 
     /// <summary>
@@ -443,13 +483,15 @@ public partial class Alley : Room
         await Talk("bartender_dead");
     }
 
-    /// <summary>Tony back where the story left him on a reload: on his back by the door, shot or dead.</summary>
+    /// <summary>Tony back where the story left him on a reload, standing or on his back by the door.</summary>
     private void PlaceTony()
     {
-        if (!State.HasFlag("shot_bartender") || FindActor("bartender") is not { } tony) return;
+        bool shot = State.HasFlag("shot_bartender");
+        if ((!shot && !State.HasFlag(Endings.WarnedTony) && !State.HasFlag(Endings.WalkedAway))
+            || FindActor("bartender") is not { } tony) return;
         tony.Position = TonyOut;
         tony.FaceLeft(true);
         tony.WalkTo = MicahAims;
-        tony.SetTexture(State.HasFlag(Endings.KilledTony) ? BartenderDead : BartenderShot);
+        if (shot) tony.SetTexture(State.HasFlag(Endings.KilledTony) ? BartenderDead : BartenderShot);
     }
 }
