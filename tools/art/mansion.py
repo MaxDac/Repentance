@@ -1261,6 +1261,318 @@ def _broom(img, x0, y0, xh, floor):
             d.point((sx, y), fill=mul(c, 1.4))
 
 
+def _range_hood(img, x0, x1, top, base):
+    """The iron hood over the range: sheet iron in riveted courses, its collar up into the flue, a soot-dark belly, the
+    shelf along its front lip on cast brackets, lit from the left."""
+    d = ImageDraw.Draw(img)
+    iron, iron_l, iron_d = hx("34343a"), hx("5e5e66"), hx("18181c")
+    tx0, tx1 = x0 + 12, x1 - 12  # the top of the trapezoid
+    cx = (x0 + x1) // 2
+    d.rectangle([cx - 16, top - 10, cx + 16, top], fill=hx("26262a"))  # the collar into the flue
+    d.line([(cx - 16, top - 10), (cx - 16, top)], fill=iron_l)
+    d.line([(cx + 16, top - 10), (cx + 16, top)], fill=iron_d)
+    d.line([(cx - 16, top - 6), (cx + 16, top - 6)], fill=iron_d)
+    for x in range(cx - 13, cx + 15, 5):
+        d.point((x, top - 4), fill=hx("8a8a94"))
+    for y in range(top, base):  # the canopy, a little lighter towards its lip
+        t = (y - top) / (base - top)
+        xa = round(tx0 + (x0 - tx0) * t)
+        xb = round(tx1 + (x1 - tx1) * t)
+        d.line([(xa, y), (xb, y)], fill=mix(hx("222226"), iron, t))
+    for k, y in enumerate((top + 9, top + 18)):  # the riveted seams between courses
+        t = (y - top) / (base - top)
+        xa = round(tx0 + (x0 - tx0) * t)
+        xb = round(tx1 + (x1 - tx1) * t)
+        d.line([(xa + 1, y), (xb - 1, y)], fill=iron_d)
+        d.line([(xa + 1, y + 1), (xb - 1, y + 1)], fill=mul(iron_l, 0.85))
+        for x in range(xa + 3 + k * 2, xb - 2, 6):
+            d.point((x, y - 1), fill=iron_l)
+    for x in range(cx - 30, cx + 31, 15):  # vertical lap joints
+        d.line([(x, top + 1), (x, base - 1)], fill=mul(iron, 0.8))
+    d.line([(tx0, top), (x0, base)], fill=iron_l)  # lit left edge, shadowed right
+    d.line([(tx0 + 1, top), (x0 + 1, base)], fill=mul(iron_l, 0.8))
+    d.line([(tx1, top), (x1, base)], fill=iron_d)
+    d.line([(tx0, top), (tx1, top)], fill=iron_l)
+    shadow(img, "ellipse", [cx - 30, top - 2, cx + 18, top + 16], 0.35, 4, (20, 14, 8))  # soot round the flue
+    d = ImageDraw.Draw(img)
+    # the shelf on the hood's lip: a moulded oak board on three cast brackets
+    d.rectangle([x0 - 2, base, x1 + 2, base + 4], fill=hx("5a3e26"))
+    d.line([(x0 - 2, base), (x1 + 2, base)], fill=hx("9a7448"))
+    d.line([(x0 - 2, base + 1), (x1 + 2, base + 1)], fill=hx("7a5836"))
+    d.line([(x0 - 2, base + 4), (x1 + 2, base + 4)], fill=hx("24160c"))
+    d.line([(x0 - 2, base), (x0 - 2, base + 4)], fill=hx("9a7448"))
+    for bx in (x0 + 6, cx, x1 - 6):
+        d.polygon([(bx - 1, base + 5), (bx + 1, base + 5), (bx + 1, base + 11), (bx - 1, base + 7)], fill=hx("1e1e22"))
+        d.point((bx - 1, base + 5), fill=hx("6a6a72"))
+    shadow(img, "rect", [x0, base + 5, x1, base + 9], 0.5, 2)
+
+
+def _shelf_things(img, x0, shelf):
+    """What stands on the hood shelf, left to right: a stoneware salt crock, a japanned tea caddy, three spice jars,
+    a coffee mill, a blue coffee canister, a mortar and pestle, a sugar tin, a treacle jar and a green mustard tin.
+    Each is rounded by a lit left column and a shadowed right, with a cast shadow on the iron behind it."""
+    d = ImageDraw.Draw(img)
+    y = shelf - 1  # the row they stand on
+
+    def drum(xa, w, h, col, hi=None):
+        for k in range(w):
+            t = k / max(1, w - 1)
+            c = mix(mul(col, 1.35), mul(col, 0.55), t ** 0.9) if t > 0.12 else mul(col, 1.2)
+            d.line([(xa + k, y - h + 1), (xa + k, y)], fill=c)
+        d.point((xa + 1, y - h + 2), fill=hi or mix(col, hx("ffffff"), 0.7))
+        d.line([(xa + w, y - h + 2), (xa + w, y)], fill=hx("101014"))  # its shadow on the hood
+
+    def label(xa, w, yy, h, col, ink):
+        d.rectangle([xa + 1, yy, xa + w - 2, yy + h], fill=col)
+        d.line([(xa + w - 2, yy), (xa + w - 2, yy + h)], fill=mul(col, 0.7))
+        for k in range(xa + 2, xa + w - 2, 2):
+            d.point((k, yy + h // 2), fill=ink)
+
+    x = x0
+    # the salt crock: cream stoneware, a brown-dipped shoulder, a wooden lid with a knob
+    drum(x, 10, 10, hx("d8ccaa"))
+    d.rectangle([x, y - 9, x + 9, y - 7], fill=hx("7a4a24"))
+    d.line([(x, y - 9), (x + 9, y - 9)], fill=hx("a86a38"))
+    d.rectangle([x - 1, y - 11, x + 10, y - 10], fill=hx("8a6a44"))
+    d.line([(x - 1, y - 11), (x + 10, y - 11)], fill=hx("b8925c"))
+    d.rectangle([x + 4, y - 13, x + 5, y - 12], fill=hx("6a4a2a"))
+    d.line([(x + 2, y - 4), (x + 7, y - 4)], fill=hx("4a5a8a"))  # SALT in cobalt
+    d.point((x + 3, y - 3), fill=hx("4a5a8a"))
+    d.point((x + 6, y - 3), fill=hx("4a5a8a"))
+    x += 13
+    # the tea caddy: red japanned tin, gilt bands, a paper label, a hinged lid
+    drum(x, 8, 13, hx("8a2a20"))
+    d.line([(x, y - 11), (x + 7, y - 11)], fill=hx("d8b048"))
+    d.line([(x, y - 1), (x + 7, y - 1)], fill=hx("d8b048"))
+    label(x, 8, y - 8, 4, hx("e8dcb8"), hx("3a2010"))
+    d.rectangle([x - 1, y - 14, x + 8, y - 13], fill=hx("a83a2a"))
+    d.point((x + 3, y - 15), fill=hx("d8b048"))
+    x += 11
+    # three little spice jars: glass, a cork each, something dark or ochre inside
+    for col in (hx("8a4a1a"), hx("c89a3a"), hx("4a3a1e")):
+        d.rectangle([x, y - 6, x + 3, y], fill=mix(col, hx("6a7a7a"), 0.25))
+        d.line([(x, y - 6), (x, y)], fill=hx("b8c8c8"))
+        d.rectangle([x, y - 6, x + 3, y - 5], fill=hx("8a9a9a"))
+        d.rectangle([x + 1, y - 8, x + 2, y - 7], fill=hx("b08a5a"))
+        d.line([(x + 4, y - 5), (x + 4, y)], fill=hx("101014"))
+        x += 5
+    x += 2
+    # the coffee mill: a dovetailed box, a brass hopper, the crank and its knob
+    drum(x, 9, 8, hx("6a4424"))
+    d.line([(x, y - 3), (x + 8, y - 3)], fill=hx("3a2410"))  # the drawer
+    d.point((x + 4, y - 2), fill=hx("d8b048"))
+    d.rectangle([x + 1, y - 10, x + 7, y - 8], fill=hx("b89040"))
+    d.line([(x + 1, y - 10), (x + 7, y - 10)], fill=hx("f0d890"))
+    d.line([(x + 4, y - 11), (x + 4, y - 13)], fill=hx("3a3a3e"))
+    d.line([(x + 4, y - 13), (x + 9, y - 14)], fill=hx("4a4a50"))
+    d.rectangle([x + 9, y - 16, x + 10, y - 14], fill=hx("2a1a0c"))
+    x += 13
+    # the coffee canister: blue tin, domed lid, a printed label
+    drum(x, 8, 12, hx("2a4a7a"))
+    label(x, 8, y - 8, 4, hx("d8c890"), hx("6a2a1a"))
+    d.line([(x, y - 2), (x + 7, y - 2)], fill=hx("1a2a4a"))
+    d.ellipse([x, y - 15, x + 7, y - 10], fill=hx("34588a"), outline=hx("16243e"))
+    d.point((x + 2, y - 14), fill=hx("a8c0e0"))
+    d.point((x + 3, y - 16), fill=hx("16243e"))
+    x += 11
+    # the mortar and pestle: a grey stone bowl, the pestle leaning in it
+    d.line([(x + 5, y - 6), (x + 10, y - 13)], fill=hx("c8c0b0"), width=2)
+    d.point((x + 10, y - 14), fill=hx("e8e0d0"))
+    d.polygon([(x, y - 6), (x + 10, y - 6), (x + 8, y), (x + 2, y)], fill=hx("8a8a84"))
+    d.line([(x, y - 6), (x + 2, y)], fill=hx("c0c0b8"))
+    d.line([(x + 10, y - 6), (x + 8, y)], fill=hx("4a4a46"))
+    d.line([(x + 1, y - 6), (x + 9, y - 6)], fill=hx("3a3a36"))  # the dark of the bowl
+    d.line([(x + 1, y - 7), (x + 9, y - 7)], fill=hx("b0b0a8"))  # its lit rim
+    x += 13
+    # the sugar tin: cream enamel with a red band
+    drum(x, 8, 10, hx("d8d0bc"))
+    d.rectangle([x, y - 7, x + 7, y - 5], fill=hx("a02a20"))
+    d.point((x + 2, y - 6), fill=hx("f0d890"))
+    d.point((x + 5, y - 6), fill=hx("f0d890"))
+    d.rectangle([x - 1, y - 11, x + 8, y - 10], fill=hx("b8b0a0"))
+    x += 11
+    # a treacle jar: brown salt-glaze, a paper cover tied with string
+    drum(x, 7, 10, hx("6a3a1a"))
+    d.rectangle([x - 1, y - 12, x + 7, y - 10], fill=hx("d8ccb0"))
+    d.line([(x - 1, y - 10), (x + 7, y - 10)], fill=hx("8a7a5a"))
+    d.point((x + 7, y - 9), fill=hx("d8ccb0"))
+    x += 10
+    # the mustard tin: green, a gilt rim, a little yellow label
+    drum(x, 7, 8, hx("3a5a34"))
+    d.line([(x, y - 8), (x + 6, y - 8)], fill=hx("d8b048"))
+    d.rectangle([x + 1, y - 5, x + 4, y - 3], fill=hx("d8b040"))
+    d.point((x + 2, y - 4), fill=hx("6a2a10"))
+
+
+def _turned_leg(d, top, bot, w, col, lit, dark, rings):
+    """A turned leg in screen space: a square block under the top, then the turning with its rings and a bulb."""
+    (xa, ya), yb = top, bot
+    xa = round(xa)
+    for y in range(round(ya), round(yb) + 1):
+        d.line([(xa, y), (xa + w - 1, y)], fill=col)
+    d.line([(xa, round(ya)), (xa, round(yb))], fill=lit)
+    d.line([(xa + w - 1, round(ya)), (xa + w - 1, round(yb))], fill=dark)
+    for t in rings:  # rings and a bulb proud of the leg
+        y = round(ya + (yb - ya) * t)
+        d.line([(xa - 1, y), (xa + w, y)], fill=mix(col, dark, 0.6))
+        d.point((xa - 1, y - 1), fill=lit)
+    d.point((xa, round(yb)), fill=mul(dark, 0.7))
+
+
+def _deal_table(img, R, tx0, tx1, tz0, tz1, th):
+    """The scrubbed deal kitchen table: a thick pale top with a rounded lit edge and an overhang, turned legs with
+    blocks and rings, an apron with a drawer and its brass knob, side stretchers low down, knife scores and a
+    tea stain on the top, its shadow on the flags."""
+    wood, wood_l, wood_d, wood_dd = hx("a88858"), hx("d0b07a"), hx("7a5e38"), hx("4a3820")
+    shadow(img, "polygon", [R.P(tx0, 0, tz0), R.P(tx1, 0, tz0), R.P(tx1 + 6, 0, tz1 + 2), R.P(tx0 - 2, 0, tz1 + 2)],
+           0.45, 4)
+    d = ImageDraw.Draw(img)
+    legs = [(tx0 + 3, tz0 + 3), (tx1 - 6, tz0 + 3), (tx0 + 3, tz1 - 3), (tx1 - 6, tz1 - 3)]
+    rings = (0.28, 0.36, 0.62, 0.8)
+    for lx, lz in legs[:2]:  # the back pair, in the table's shade
+        a, b = R.P(lx, th - 4, lz), R.P(lx, 0, lz)
+        _turned_leg(d, a, b[1], 3, mul(wood_d, 0.7), mul(wood_d, 0.9), wood_dd, rings)
+    R.line(img, (tx0 + 4, 7, tz0 + 2), (tx0 + 4, 7, tz1 - 4), wood_d, 2)
+    R.line(img, (tx0 + 4, 8, tz0 + 2), (tx0 + 4, 8, tz1 - 4), wood_l)
+    R.line(img, (tx1 - 5, 7, tz0 + 2), (tx1 - 5, 7, tz1 - 4), mul(wood_d, 0.7), 2)
+    R.line(img, (tx0 + 5, 9, (tz0 + tz1) / 2), (tx1 - 5, 9, (tz0 + tz1) / 2), mul(wood_d, 0.75), 2)  # the middle one
+    d = ImageDraw.Draw(img)
+    for lx, lz in legs[2:]:  # the front pair
+        a, b = R.P(lx, th - 4, lz), R.P(lx, 0, lz)
+        _turned_leg(d, a, b[1], 4, mul(wood, 0.85), wood, wood_dd, rings)
+        d.point((round(a[0]) + 1, round(b[1]) - 1), fill=wood_l)
+    # the apron: along the left side and across the front, with the drawer
+    R.quad(img, [(tx0 + 2, th - 4, tz0 + 2), (tx0 + 2, th - 4, tz1 - 2), (tx0 + 2, th - 10, tz1 - 2),
+                 (tx0 + 2, th - 10, tz0 + 2)], mul(wood_d, 0.85))
+    R.box(img, tx0 + 2, tx1 - 2, th - 10, th - 4, tz1 - 3, tz1 - 2, wood_d, top=wood_d, side=mul(wood_d, 0.8))
+    d = ImageDraw.Draw(img)
+    a, b = R.P(tx0 + 2, th - 4, tz1 - 2), R.P(tx1 - 2, th - 10, tz1 - 2)
+    ax0, ay0, ax1, ay1 = round(a[0]), round(a[1]), round(b[0]), round(b[1])
+    d.line([(ax0, ay1), (ax1, ay1)], fill=wood_dd)  # the apron's lower edge
+    d.line([(ax0, ay0 + 1), (ax1, ay0 + 1)], fill=mul(wood_d, 0.7))
+    mx = (ax0 + ax1) // 2
+    d.rectangle([mx - 12, ay0 + 2, mx + 12, ay1 - 1], fill=mul(wood, 0.92), outline=wood_dd)  # the drawer front
+    d.line([(mx - 11, ay0 + 3), (mx + 11, ay0 + 3)], fill=wood_l)
+    d.ellipse([mx - 1, (ay0 + ay1) // 2, mx + 1, (ay0 + ay1) // 2 + 2], fill=hx("c8a040"), outline=hx("5a4418"))
+    for lx, lz in legs[2:]:  # the leg blocks show through the apron's front
+        p = R.P(lx, th - 4, tz1 - 2)
+        d.line([(round(p[0]), ay0 + 1), (round(p[0]), ay1)], fill=wood_l)
+    # the top: a thick board overhanging the frame
+    R.box(img, tx0 - 2, tx1 + 2, th - 4, th, tz0, tz1 + 2, mul(wood, 1.05), top=hx("c8a874"), side=wood_d)
+    d = ImageDraw.Draw(img)
+    fl, fr = R.P(tx0 - 2, th, tz1 + 2), R.P(tx1 + 2, th, tz1 + 2)
+    bl, br = R.P(tx0 - 2, th - 4, tz1 + 2), R.P(tx1 + 2, th - 4, tz1 + 2)
+    d.line([fl, fr], fill=hx("ecd09a"))  # the rounded front edge catching the light
+    d.line([(fl[0], fl[1] + 1), (fr[0], fr[1] + 1)], fill=wood_l)
+    d.line([bl, br], fill=wood_dd)  # the underside of the overhang
+    d.line([R.P(tx0 - 2, th, tz0), fl], fill=hx("e0c48e"))
+    rnd = random.Random(88)
+    for k in range(3):  # the boards of the top and their joints
+        z = tz0 + (k + 1) * (tz1 + 2 - tz0) / 4
+        R.line(img, (tx0, th, z), (tx1, th, z), hx("a88a5c"))
+    d = ImageDraw.Draw(img)
+    for _ in range(40):  # scrubbed grain, pale and dark
+        x = rnd.uniform(tx0, tx1 - 10)
+        z = rnd.uniform(tz0 + 1, tz1)
+        a, b = R.P(x, th, z), R.P(x + rnd.uniform(4, 12), th, z)
+        d.line([a, b], fill=hx("dcc090") if rnd.random() < 0.5 else hx("b09060"))
+    for _ in range(6):  # knife scores
+        x, z = rnd.uniform(tx0 + 6, tx1 - 30), rnd.uniform(tz0 + 4, tz1 - 2)
+        a, b = R.P(x, th, z), R.P(x + 3, th, z + 3)
+        d.line([a, b], fill=hx("8a6a40"))
+    p = R.P(tx0 + 54, th, tz0 + 10)  # an old tea ring
+    d.ellipse([p[0] - 3, p[1] - 1, p[0] + 3, p[1] + 1], outline=hx("9a7448"))
+
+
+def _ladder_chair(img, R, x0, x1, zb, zf, seat):
+    """A ladder-back kitchen chair turned out from the table: turned back posts with finials and three arched slats,
+    a woven rush seat on rails, front legs with rings, two tiers of rungs, its shadow."""
+    post, post_l, post_d = hx("6a4428"), hx("9a6c40"), hx("2e1c0e")
+    rush, rush_l, rush_d = hx("a08a4e"), hx("c8b070"), hx("5e4e28")
+    shadow(img, "polygon", [R.P(x0, 0, zb), R.P(x1, 0, zb), R.P(x1 + 4, 0, zf + 2), R.P(x0, 0, zf + 2)], 0.5, 2)
+    d = ImageDraw.Draw(img)
+    top = 42
+    # the back legs/posts
+    for x in (x0, x1 - 1):
+        a, b = R.P(x, top, zb), R.P(x, 0, zb)
+        xa = round(a[0])
+        d.line([(xa, round(a[1])), (xa, round(b[1]))], fill=post_d, width=2)
+        d.line([(xa, round(a[1])), (xa, round(b[1]))], fill=post if x == x0 else post_d)
+        f = R.P(x, top + 2, zb)  # the finial
+        d.ellipse([xa - 1, round(f[1]) - 1, xa + 1, round(f[1]) + 1], fill=post_l)
+        d.point((xa - 1, round(f[1])), fill=hx("c89a64"))
+    # three slats, each arched up a pixel in the middle, lit along the top
+    for y in (seat + 9, seat + 16, seat + 22):
+        a, b = R.P(x0, y, zb), R.P(x1 - 1, y, zb)
+        xa, xb, yy = round(a[0]) + 1, round(b[0]) - 1, round(a[1])
+        mid = (xa + xb) // 2
+        d.line([(xa, yy + 1), (mid, yy), (xb, yy + 1)], fill=post)
+        d.line([(xa, yy + 2), (mid, yy + 1), (xb, yy + 2)], fill=post_d)
+        d.line([(xa, yy), (mid, yy - 1), (xb, yy)], fill=post_l)
+    # the back rungs low down
+    R.line(img, (x0, 5, zb), (x1 - 1, 5, zb), post_d)
+    # the seat: rails round a woven rush square, the four woven triangles meeting in the middle
+    R.box(img, x0, x1, seat - 2, seat, zb, zf, post, top=rush, side=post_d)
+    d = ImageDraw.Draw(img)
+    c = [R.P(x0 + 1, seat, zb + 1), R.P(x1 - 1, seat, zb + 1), R.P(x1 - 1, seat, zf - 1), R.P(x0 + 1, seat, zf - 1)]
+    m = R.P((x0 + x1) / 2, seat, (zb + zf) / 2)
+    for k in range(4):
+        d.line([c[k], m], fill=rush_d)
+    for t in (0.35, 0.7):  # the coils of rush round the seat
+        pts = [(m[0] + (p[0] - m[0]) * t, m[1] + (p[1] - m[1]) * t) for p in c]
+        d.polygon(pts, outline=mix(rush, rush_l, 0.6))
+    d.line([c[3], c[2]], fill=rush_l)  # the lit front of the seat
+    fa, fb = R.P(x0, seat - 2, zf), R.P(x1, seat - 2, zf)
+    d.line([fa, fb], fill=post_d)
+    # side and front rungs, then the front legs over them
+    R.line(img, (x0, 6, zb), (x0, 6, zf), post)
+    R.line(img, (x0, 10, zb), (x0, 10, zf), post_d)
+    R.line(img, (x1 - 1, 6, zb), (x1 - 1, 6, zf), post_d)
+    R.line(img, (x0, 8, zf), (x1 - 1, 8, zf), post_l)
+    R.line(img, (x0, 7, zf), (x1 - 1, 7, zf), post_d)
+    d = ImageDraw.Draw(img)
+    for x in (x0, x1 - 2):
+        a, b = R.P(x, seat - 2, zf), R.P(x, 0, zf)
+        _turned_leg(d, a, b[1], 2, post, post_l, post_d, (0.3, 0.7))
+
+
+def _chamberstick(d, cx, cy):
+    """A brass chamberstick on the table: a dished drip pan with a lit rim and a finger ring, a turned stem with
+    knops, a socket and bobeche, and a tallow candle burnt down a little, a run of wax down its side and the charred
+    wick bent over."""
+    brass, brass_l, brass_d, brass_hi = hx("b08a34"), hx("e0be5c"), hx("5a4418"), hx("fff0b0")
+    d.ellipse([cx - 7, cy, cx + 8, cy + 3], fill=hx("8a6c44"))  # its shadow on the table
+    d.arc([cx + 5, cy - 4, cx + 11, cy + 1], 280, 120, fill=brass_d, width=2)  # the finger ring
+    d.arc([cx + 6, cy - 3, cx + 10, cy], 280, 40, fill=brass_l)
+    d.ellipse([cx - 7, cy - 3, cx + 7, cy + 2], fill=brass, outline=brass_d)  # the drip pan
+    d.ellipse([cx - 5, cy - 2, cx + 5, cy + 1], fill=mul(brass, 0.75))
+    d.arc([cx - 7, cy - 3, cx + 7, cy + 2], 150, 260, fill=brass_l)
+    d.point((cx - 5, cy - 1), fill=brass_hi)
+    for y in range(cy - 11, cy - 1):  # the stem, rounded
+        d.line([(cx - 1, y), (cx + 1, y)], fill=brass)
+        d.point((cx - 1, y), fill=brass_l)
+        d.point((cx + 1, y), fill=brass_d)
+    for y in (cy - 3, cy - 8):  # knops on the stem
+        d.line([(cx - 2, y), (cx + 2, y)], fill=brass)
+        d.point((cx - 2, y), fill=brass_hi)
+        d.point((cx + 2, y), fill=brass_d)
+    d.rectangle([cx - 2, cy - 12, cx + 2, cy - 11], fill=brass)  # the socket
+    d.line([(cx - 4, cy - 13), (cx + 4, cy - 13)], fill=brass_l)  # the bobeche
+    d.line([(cx - 3, cy - 12), (cx + 3, cy - 12)], fill=brass_d)
+    d.point((cx - 4, cy - 13), fill=brass_hi)
+    tallow, tallow_l, tallow_d = hx("e8e0c4"), hx("fffaea"), hx("a89c7c")
+    d.rectangle([cx - 1, cy - 21, cx + 1, cy - 14], fill=tallow)  # the candle
+    d.line([(cx - 1, cy - 21), (cx - 1, cy - 14)], fill=tallow_l)
+    d.line([(cx + 1, cy - 21), (cx + 1, cy - 14)], fill=tallow_d)
+    d.point((cx + 1, cy - 22), fill=tallow)  # the melted lip, higher on one side
+    d.point((cx - 1, cy - 21), fill=tallow_d)
+    d.line([(cx + 2, cy - 21), (cx + 2, cy - 17)], fill=tallow)  # a run of wax down the side
+    d.point((cx + 2, cy - 16), fill=tallow_d)
+    d.point((cx - 3, cy - 13), fill=tallow)  # a drop set on the bobeche
+    d.line([(cx, cy - 22), (cx, cy - 23)], fill=hx("1a1a1a"))  # the wick, bent over
+    d.point((cx + 1, cy - 24), fill=hx("2a2420"))
+
+
 def paint_kitchen(lit=False, gas=False):
     img = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(img)
@@ -1355,16 +1667,10 @@ def paint_kitchen(lit=False, gas=False):
     d.line([(rx0 - 10, 26), (rx1 + 10, 26)], fill=hx("c8b894"))
     shadow(img, "rect", [rx0, 36, rx1, 70], 0.7, 8)
     d = ImageDraw.Draw(img)
-    # the hood
-    d.polygon([(rx0 + 8, 72), (rx1 - 8, 72), (rx1 - 20, 46), (rx0 + 20, 46)], fill=hx("2e2e32"))
-    d.line([(rx0 + 8, 72), (rx1 - 8, 72)], fill=hx("6a6a70"))
-    d.rectangle([rx0 + 6, 72, rx1 - 6, 76], fill=hx("3a3a3e"))
-    for i, x in enumerate(range(rx0 + 12, rx1 - 12, 14)):  # tins and a salt crock on the hood shelf
-        c = [hx("8a2a20"), hx("2a4a6a"), hx("c8a040"), hx("d8d0c0"), hx("3a5a3a")][i % 5]
-        hgt = 8 + (i * 3) % 6
-        d.rectangle([x, 72 - hgt, x + 7, 71], fill=c)
-        d.line([(x, 72 - hgt), (x + 7, 72 - hgt)], fill=mul(c, 1.3))
-        d.line([(x + 7, 72 - hgt), (x + 7, 71)], fill=mul(c, 0.6))
+    # the hood, and the tins and crocks on its shelf
+    _range_hood(img, rx0 + 8, rx1 - 8, 46, 72)
+    _shelf_things(img, rx0 + 14, 72)
+    d = ImageDraw.Draw(img)
     rail = 100
     d.line([(rx0 + 30, 76), (rx0 + 30, rail)], fill=hx("2a2a2c"))  # flue pipe stays
     # utensils hanging from a rail over the hob, in reach of the cook
@@ -1480,36 +1786,31 @@ def paint_kitchen(lit=False, gas=False):
     rug(R, img, rx0 + 4, rx1 - 4, 30, 62, hx("6a3a2a"), hx("3a2a3a"), hx("a8885a"), seed=86)
     # ---- the deal table with a candlestick and a box of matches ----
     tx0, tx1, tz0, tz1, th = 280, 372, 26, 52, 32
-    R.box(img, tx0, tx1, th - 3, th, tz0, tz1, hx("b0905e"), top=hx("c8a874"), side=hx("8a6a40"))
-    for lx, lz in ((tx0 + 3, tz1 - 3), (tx1 - 6, tz1 - 3), (tx0 + 3, tz0 + 3), (tx1 - 6, tz0 + 3)):
-        R.box(img, lx, lx + 3, 0, th - 3, lz - 3, lz, hx("8a6a40"), side=hx("6a4e2c"))
-    R.box(img, tx0 + 2, tx1 - 2, th - 9, th - 3, tz1 - 4, tz1 - 2, hx("8a6a40"))  # apron rail
+    _deal_table(img, R, tx0, tx1, tz0, tz1, th)
     d = ImageDraw.Draw(img)
-    for x in range(tx0 + 8, tx1 - 4, 10):  # scrubbed grain
-        a, b = R.P(x, th, tz0 + 2), R.P(x + 2, th, tz1 - 2)
-        d.line([a, b], fill=hx("b89a68"))
     base = R.P(330, th, 40)
     cx, cy = int(base[0]), int(base[1])
-    d.ellipse([cx - 5, cy - 2, cx + 5, cy + 2], fill=hx("a8842e"), outline=hx("5a4418"))
-    d.rectangle([cx - 1, cy - 12, cx + 1, cy - 2], fill=hx("c8a040"))
-    d.rectangle([cx - 3, cy - 13, cx + 3, cy - 11], fill=hx("d8b450"))
-    d.rectangle([cx - 1, cy - 22, cx + 1, cy - 13], fill=hx("f0ead8"))
-    d.line([(cx, cy - 24), (cx, cy - 23)], fill=hx("1a1a1a"))
+    _chamberstick(d, cx, cy)
     flame = (cx, cy - 27)
-    mb = R.P(346, th, 36)  # the matchbox
+    mb = R.P(346, th, 36)  # the matchbox, its striker down the side
     d.rectangle([mb[0], mb[1] - 3, mb[0] + 10, mb[1]], fill=hx("c84030"), outline=hx("5a1a10"))
     d.line([(mb[0] + 1, mb[1] - 2), (mb[0] + 9, mb[1] - 2)], fill=hx("f0d050"))
-    p = R.P(298, th, 34)  # a bread board and a knife
+    d.line([(mb[0] + 1, mb[1]), (mb[0] + 9, mb[1])], fill=hx("4a3020"))
+    d.line([(mb[0] + 12, mb[1] - 1), (mb[0] + 15, mb[1] - 2)], fill=hx("d8c8a0"))  # a spent match
+    d.point((mb[0] + 15, mb[1] - 2), fill=hx("1a1410"))
+    p = R.P(298, th, 34)  # a bread board, the heel of a loaf and a knife
+    d.ellipse([p[0] - 8, p[1] - 1, p[0] + 9, p[1] + 3], fill=hx("8a6c44"))
     d.ellipse([p[0] - 8, p[1] - 3, p[0] + 8, p[1] + 2], fill=hx("9a7444"), outline=hx("5a4020"))
-    d.line([(p[0] - 4, p[1]), (p[0] + 6, p[1] - 1)], fill=hx("c8c8d0"))
+    d.arc([p[0] - 8, p[1] - 3, p[0] + 8, p[1] + 2], 160, 250, fill=hx("c89a64"))
+    d.chord([p[0] - 6, p[1] - 6, p[0], p[1] + 1], 180, 360, fill=hx("a86a30"), outline=hx("5a3414"))
+    d.line([(p[0] - 1, p[1] - 3), (p[0] - 1, p[1] - 1)], fill=hx("e8d8a8"))  # the cut face
+    d.point((p[0] + 3, p[1]), fill=hx("e0d0a0"))  # crumbs
+    d.point((p[0] + 5, p[1] - 1), fill=hx("e0d0a0"))
+    d.line([(p[0] + 1, p[1] + 1), (p[0] + 8, p[1] - 1)], fill=hx("d8d8e0"))
+    d.line([(p[0] + 8, p[1] - 1), (p[0] + 11, p[1] - 2)], fill=hx("3a2414"), width=2)  # its handle
     # a ladder-back chair pulled out
-    R.box(img, 352, 366, 16, 18, 56, 68, hx("6a4a2a"), top=hx("8a6a44"))
-    for lx, lz in ((352, 68), (364, 68), (352, 56), (364, 56)):
-        R.line(img, (lx, 0, lz), (lx, 16, lz), hx("4a321c"))
-    for y in (24, 30, 36):
-        R.line(img, (352, y, 56), (366, y, 56), hx("6a4a2a"))
-    R.line(img, (352, 16, 56), (352, 40, 56), hx("4a321c"))
-    R.line(img, (366, 16, 56), (366, 40, 56), hx("4a321c"))
+    _ladder_chair(img, R, 352, 366, 56, 68, 18)
+    d = ImageDraw.Draw(img)
     # ---- light: a sliver of moonlight under the back door, the candle if it's lit ----
     light(img, "polygon", [(bx0, KFL - 2), (bx1, KFL - 2), (bx1 + 30, H), (bx0 - 20, H)], hx("5a6aa8"), 0.18, 8)
     fxx, fyy = flame
