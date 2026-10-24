@@ -120,7 +120,8 @@ lines in the game, and the verdict.
   apart from any confession, with the express request that he write it down (ending 9: "what she told the court, and
   what she told me again plainly afterwards"; endings 1, 12, 13, 14: she came and told him). Ending 7 gives only what
   the police found ("What else I know of it, I may not write."). Ending 14 no longer says "I hear her confession,
-  and I can do nothing else", which would betray by sign that her confession binds him; it says he sees her at Mass.
+  and I can do nothing else", which would betray by sign that her confession binds him; it says he sees her at Mass,
+  or, after her escape (`caleb_escape`), that he put her on a truck out of Chicago and she told him at the city's edge.
 
 ### Absolution needs sorrow (Eleanor, ending 9)
 
@@ -259,8 +260,8 @@ Further points the endings raise:
 | `epilogue`, ending 7 | "I prayed for him every day of his life" | adds "I pray for his soul still"; if Eleanor lived, she heard him ask forgiveness, and Caleb leaves what that word weighed to God | Prayer for the dead (Trent XXV); no burial claimed (c. 1240) |
 | `epilogue`, ending 9 | "from her own confession, at her asking" | what she told the court, and told him again plainly afterwards, at her asking | Seal follows the sacrament, not the place |
 | `epilogue`, ending 12 | Caleb's note: "She came to my confessional" | she told him all of it, months after, and asked him to write it in | Seal |
-| `epilogue`, ending 13 | "She came to his confessional" | she came to him and told him, and asked him to pass it on | Seal |
-| `epilogue`, ending 14 | "she told me herself, in my confessional"; no prayer | she told him on the church steps; "I hear her confession, and I can do nothing else" becomes "I see her at Mass"; "I say Mass for him" | Seal (no betrayal by sign); prayer for the dead |
+| `epilogue`, ending 13 | "She came to his confessional" | she came to him and told him, and asked him to pass it on (after her escape: told him the night he got her out of Chicago) | Seal |
+| `epilogue`, ending 14 | "she told me herself, in my confessional"; no prayer | she told him on the church steps (after her escape: at the city's edge, the night he got her out); "I hear her confession, and I can do nothing else" becomes "I see her at Mass" (after her escape: he put her on a truck out of Chicago); "I say Mass for him" | Seal (no betrayal by sign); prayer for the dead |
 | `epilogue`, ending 1 (Tony shot) | vows renewed "in a little white church downstate", Caleb "to say the words" | promises said again at St. Anne's, a Catholic church; Caleb blesses them | No renewal rite in 1927; c. 1258 |
 | `epilogue`, ending 1 (Tony not shot) | "Rose and I renewed our vows today, at Caleb's church" | "said our promises again today, at Caleb's church. He blessed us." | No renewal rite in 1927 |
 | `prison_eleanor_caleb` | absolution though she "can't be sorry for the last one"; touched forehead | sorrow "for all of it", and for every part that wanted him dead; a hand raised over her | Trent XIV ch. 4; *Rituale Romanum* |

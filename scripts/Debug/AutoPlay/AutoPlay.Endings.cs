@@ -285,7 +285,7 @@ public partial class AutoPlay
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorStruck),
             "ending 1: giving up on the steps wins over both of Eleanor's refusals");
-        await CalebEscape("steps");
+        await CalebEscape("ending 1 (steps, Eleanor held out)");
         await TheEnd("ending_1 (steps, Eleanor held out)");
 
         Seed(alleyReady.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
@@ -295,18 +295,18 @@ public partial class AutoPlay
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorWeary),
             "ending 1: walking away from Tony wins over both of Eleanor's refusals");
-        await CalebEscape("Tony");
+        await CalebEscape("ending 1 (Tony, Eleanor held out)");
         await TheEnd("ending_1 (Tony, Eleanor held out)");
     }
 
-    /// <summary>After an early give-up with both refusals, Rose's coffee cuts to Eleanor and Caleb at the outskirts.</summary>
+    /// <summary>When Eleanor held out and Micah never reached her, Eleanor and Caleb at the outskirts (endings 1, 13, 14).</summary>
     private async Task CalebEscape(string label)
     {
         var gs = GameState.Instance;
         await Until(() => _game.Room is Rooms.Outskirts, 120);
         Check(_game.Room is Rooms.Outskirts && gs.HasFlag("caleb_escape") && gs.HasFlag("eleanor_epilogue") &&
               _game.Player.Character == "eleanor_white_play" && _game.Room.FindActor("caleb")?.Visible == true,
-            $"ending 1 ({label}, Eleanor held out): Eleanor in white with Caleb at the edge of the city");
+            $"{label}: Eleanor in white with Caleb at the edge of the city");
     }
 
     /// <summary>
@@ -719,6 +719,51 @@ public partial class AutoPlay
         await TheEnd("ending_14 (kitchen)");
         Check(HeardLog.Any(l => l.Contains("Father Caleb Jones")) && !HeardLog.Any(l => l.Contains("That's enough of you"))
               && !HeardLog.Any(l => l.Contains("Tony")), "ending 14: Caleb finishes the journal, with no word of Tony");
+        Check(!gs.HasFlag("caleb_escape") && HeardLog.Any(l => l.Contains("She is still in that house")),
+            "ending 14: without Eleanor's refusals, no escape with Caleb, and she stays in the house");
+
+        // 13 and 14 when Eleanor held out: after the alarm, Caleb gets her out of the house a week later
+        var warnedHeldOut = warned.Append(Endings.RefusedAbbess).Append(Endings.RefusedDrugs).ToArray();
+        HeardLog = new List<string>();
+        Seed(warnedHeldOut, act3Items, "(Run.)");
+        await game.ChangeRoom("mansion_exterior", "start");
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
+        await game.Perform(Verb.Hand, "lintel");
+        _ = game.Perform(Verb.Hand, "door");
+        await Until(() => game.Room?.Name == "Outskirts", 180);
+        await Until(() => gs.HasFlag("caleb_escape") && game.Player.Character == "eleanor_white_play", 180);
+        await CalebEscape("ending 13 (Eleanor held out)");
+        Check(gs.HasFlag("ending_13") && !gs.HasFlag("outskirts_car")
+              && game.Room?.GetNodeOrNull<CanvasItem>("World/Car")?.Visible != true
+              && HeardLog.Any(l => l.Contains("I'm out. Out of the job, out of the city.")),
+            "ending 13 (Eleanor held out): Micah's run first, then Eleanor and Caleb without his car");
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three", 180);
+        Check(HeardLog.Any(l => l.Contains("tell him I got out too")) && !HeardLog.Any(l => l.Contains("Say hi to Micah")),
+            "ending 13 (Eleanor held out): Eleanor's farewell knows Micah ran");
+        HeardLog = new List<string>();
+        await TheEnd("ending_13 (run, Eleanor held out)");
+        Check(HeardLog.Any(l => l.Contains("walked her out of it")) && HeardLog.Any(l => l.Contains("Omaha"))
+              && !HeardLog.Any(l => l.Contains("she's still in that house")), "ending 13 (Eleanor held out): Omaha, and she got out");
+
+        HeardLog = new List<string>();
+        Seed(warnedHeldOut, act3Items, "(Stay.");
+        await game.ChangeRoom("mansion_exterior", "start");
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
+        await game.Perform(Verb.Hand, "lintel");
+        _ = game.Perform(Verb.UseItem, "door", "kitchen_key");
+        await Until(() => game.Room?.Name == "Outskirts", 180);
+        await CalebEscape("ending 14 (Eleanor held out)");
+        Check(gs.HasFlag("ending_14") && gs.HasFlag(Endings.AlarmStayed) && game.Player.PoseName == null,
+            "ending 14 (Eleanor held out): from the kitchen tiles to Eleanor, standing, at the city's edge");
+        await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three", 180);
+        Check(HeardLog.Any(l => l.Contains("I buried him on Tuesday")) && HeardLog.Any(l => l.Contains("Light a candle for Micah"))
+              && !HeardLog.Any(l => l.Contains("Say hi to Micah")), "ending 14 (Eleanor held out): Eleanor and Caleb know Micah is dead");
+        HeardLog = new List<string>();
+        await TheEnd("ending_14 (kitchen, Eleanor held out)");
+        Check(HeardLog.Any(l => l.Contains("Father Caleb Jones")) && HeardLog.Any(l => l.Contains("produce truck"))
+              && !HeardLog.Any(l => l.Contains("She is still in that house")), "ending 14 (Eleanor held out): Caleb's pages say he got her out");
         HeardLog = null;
     }
 

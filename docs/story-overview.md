@@ -259,7 +259,8 @@ How each decision is made:
   the key do not reveal it. Opening the keyed door without inspecting the alarm
   rings the bell, and feet come down the back stairs: **Run** (`alarm_ran`, ending 13: out of Chicago, the journal ends
   in Omaha with the revolver on the washstand) or **Stay** (`alarm_stayed`, ending 14: two Club men at the cook's
-  table shoot him down; Caleb finishes the journal).
+  table shoot him down; Caleb finishes the journal). If Eleanor held out, either is followed by her escape with Caleb
+  at the city's edge, a week later (`caleb_escape`), in lines that know Micah ran or died.
 - **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross, and the confession if Tony is dead; sets
   `spared_oldman` (ending 12 instead of 1 after killing Tony). If Eleanor held
   out, she plays the coda (`eleanor_coda`): the old man stands between her and the door, and she can't walk past
@@ -287,7 +288,7 @@ How each decision is made:
 
 | Ending | Condition (in priority order) | Scene |
 |---|---|---|
-| 14 / 13 | After the warning shot, the alarm rang; 14 if Micah went in | Shot in the kitchen, Caleb writes the last pages (14), or out of Chicago alone, a suicide (13) |
+| 14 / 13 | After the warning shot, the alarm rang; 14 if Micah went in | Shot in the kitchen, Caleb writes the last pages (14), or out of Chicago alone, a suicide (13); if Eleanor held out, then Eleanor and Caleb at the city's edge |
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Eleanor alone (8) or in prison with Caleb (9); preceded by Micah's coffee with Rose only if Tony lives |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |
@@ -301,7 +302,8 @@ The interludes play in every run: the First between Acts One and Two (Room 507, 
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
 the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9), in the epilogue of
 ending 8, and, if she held out, after Micah's coffee when he gave up on the steps or walked away from Tony (still
-ending 1: Caleb has got her out of the city, `caleb_escape`). Daniel keeps the journal for Leo after endings
+ending 1: Caleb has got her out of the city, `caleb_escape`), or after the alarm (endings 13 and 14, the same scene
+told after Micah ran or died). Daniel keeps the journal for Leo after endings
 1, 6, 8, 9, 10, 11 and 12.
 
 ### Weather

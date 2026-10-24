@@ -967,6 +967,20 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     fedora, grey suit and flat cap; `gunman_a`/`gunman_b` sprites with draw and aim strips) wait at the cook's table.
     "Bell's for the delivery boys, pal." Micah gets as far as "I'm here for Eleanor Har...": two shots, he falls
     backwards on the tiles (`micah_gunned_down`/`micah_gunned_dead`), cut to black, ending 14.
+  - **Eleanor's escape after the alarm.** If Eleanor held out both times, endings 13 and 14 also get her scene with
+    Caleb at the outskirts (`caleb_escape`; see ending 1's *Eleanor's escape, with Caleb*), a week after the bell
+    instead of three nights after the Club. In 13 it follows Micah's stop at the city's edge (his car is gone from her
+    scene); in 14 it follows the cut to black. The dialogue changes because Micah never came home to Rose:
+    - Ending 14: Eleanor heard the bell and two shots from upstairs, and the old man told her whose they were; Caleb
+      buried him on Tuesday. "He died on that kitchen floor for me. I never asked him to." / "He walked in all the
+      same. Toward you, not away." Her last words: "Light a candle for Micah, Father." / "Every Sunday."
+    - Ending 13: Caleb tells her the night the bell rang was Micah; the Club's men found only the kitchen door open
+      on the rain. He ran, and hasn't written to Rose or to Caleb yet. "...Good. One of us should get out of this
+      city alive." Her last words: "If he ever writes to you, tell him I got out too."
+    - The epilogue changes with it: in 14 Caleb's pages say she told him the night he got her out of Chicago, and
+      that he put her on a produce truck a week after the funeral (not "She is still in that house"); in 13 Micah
+      writes that his brother walked her out of the house a week after he ran from it, and that she told Caleb the
+      rest that night (not in the spring).
 - **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
   the door wire. Cutting the wire releases it. Plan **hold hammer, tie hammer, release hand**, using
   Micah's tie to secure the hammer to its bracket, clear of the gong. "Cut wire" is a tempting wrong
@@ -1127,6 +1141,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     up the road: "Say hi to Micah."
   - Then *End of Act Three*. The journal's last entry is ending 1's, but the Second Interlude's source changes: Caleb
     passed on what she told him the night he got her out of Chicago, at her asking.
+  - The same scene, with its own lines, follows endings 13 and 14 when she held out (see the alarm, above).
 
 #### Option 2 - Outskirts, with Eleanor
 
