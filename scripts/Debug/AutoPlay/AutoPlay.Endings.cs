@@ -589,27 +589,47 @@ public partial class AutoPlay
         await game.ChangeRoom("alley", "act3");
         int shots = game.Sfx.Count(Sound.Gunshot);
         int warnHolsters = _poseCounts.GetValueOrDefault("micah_holster");
-        heard = await Spoken(async () => { await game.Perform(Verb.Talk, "back_door"); await WaitIdle(game); });
+        heard = await Spoken(async () =>
+        {
+            var warning = game.Perform(Verb.Talk, "back_door");
+            await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("Nobody bleeding", StringComparison.Ordinal));
+            Check(game.Room?.FindActor("bartender") is { Visible: true } outside &&
+                  outside.Position.DistanceTo(new Vector2(318, 208)) < 1 && outside.Poses?.Active != true &&
+                  !gs.HasFlag("alley3_tony_inside"), "Tony remains standing where he came out after the warning shot");
+            await Shot("alley_tony_spared");
+            await warning;
+            await WaitIdle(game);
+        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, Micah automatically leaves for the office in the storm");
+
+        // Old warning-shot saves also restore Tony outside, without repeating the confrontation.
+        Seed(alleyReady.Append(Endings.WarnedTony).Append("alley3_tony_inside"), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await game.LoadGame(game.CaptureSave());
+        Check(game.Room?.FindActor("bartender") is { Visible: true } restoredTony &&
+              restoredTony.Position.DistanceTo(new Vector2(318, 208)) < 1 &&
+              restoredTony.Texture?.ResourcePath.EndsWith("bartender.png") == true &&
+              !gs.HasFlag("alley3_tony_inside"), "reloaded warning-shot saves keep Tony standing outside");
+        });
         Check(_poseCounts.GetValueOrDefault("micah_holster") == warnHolsters + 1, "the warning shot: Micah holsters the revolver");
         Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && !gs.HasFlag("alley3_tony_inside")
-              && game.Room?.FindActor("bartender")?.Visible == true && game.Sfx.Count(Sound.Gunshot) == shots + 1,
-            "the warning shot: one bullet in the wall, and Tony still outside unhurt");
+              && game.Sfx.Count(Sound.Gunshot) == shots + 1,
+            "the warning shot: one bullet in the wall, and Tony left outside unhurt");
         Check(heard.Any(l => l.Contains("delivery boys")) && !heard.Any(l => l.Contains("bell")),
             "the warning shot: Tony gives the kitchen key, but not the alarm");
         Check(!Endings.TonyWantsRevenge(gs.HasFlag), "no debt with the mob: Tony wants no revenge after a miss");
         await game.Perform(Verb.Hand, "back_door");
-        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "knocking cannot replay Tony's confrontation");
+        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "knocking cannot summon Tony a second time");
         await TonyDismissalTest(game, gs, "alley_tony_warned", seeded: true);
-        // Old saves left this visibility flag set; the completed warning shot now takes precedence.
-        gs.SetFlag("alley3_tony_inside");
-        await game.LoadGame(game.CaptureSave());
-        await WaitIdle(game);
-        Check(game.Room?.FindActor("bartender")?.Visible == true, "older warning-shot saves restore Tony outside");
         await game.Perform(Verb.Walk, "street");
-        await WaitIdle(game);
-        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, back to the office in the storm");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works after the warning shot");
 
-        var warned = act3Flags.Append(Endings.WarnedTony).Append("alley3_tony_inside").ToArray();
+        Seed(alleyReady.Append(Endings.ShotBartender), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await TonyDismissalTest(game, gs, "alley_tony_wounded", seeded: true);
+        await game.Perform(Verb.Walk, "street");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works for a reloaded wounded Tony");
+
+        var warned = act3Flags.Append(Endings.WarnedTony).ToArray();
 
         Seed(warned, act3Items);
         await game.ChangeRoom("mansion_exterior", "start");

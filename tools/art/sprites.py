@@ -575,57 +575,35 @@ def kicked_strip(spec, name):
     return frames
 
 
-STRIKE_CONTACT_FRAME = 3
-STRIKE_SECONDS = [0.12, 0.18, 0.16, 0.18, 0.16, 0.16]
-BRUTE_STRIKE = [
-    ((0.16, 0.32, -0.07), (0.13, 0.18, -0.03), (0.13, 0.15, 0.0)),
-    ((0.17, 0.24, 0.03), (0.12, 0.13, 0.07), (0.12, 0.11, 0.10)),
-    ((0.14, 0.25, 0.23), (0.12, 0.22, 0.37), (0.12, 0.22, 0.41)),
-    ((0.16, 0.32, 0.13), (0.12, 0.35, 0.19), (0.12, 0.36, 0.22)),
-]
-PISTOL_WHIP = [
-    [(64, 56), (64, 33), (67, 18), (65, 74), (66, 91), (70, 44), (76, 35)],
-    [(64, 56), (63, 33), (66, 18), (65, 74), (66, 91), (59, 29), (65, 16)],
-    [(66, 56), (71, 34), (74, 19), (65, 74), (66, 91), (86, 26), (101, 26)],
-    [(64, 56), (66, 33), (69, 18), (65, 74), (66, 91), (78, 38), (85, 45)],
-]
-
-
-def strike_strip(spec, name, keys, arms=None, pistol=False):
-    """Wind up, make contact on frame 3, and recover. The pistol is gripped by its barrel, butt leading the blow."""
+def strike_strip(spec, name, player=False):
+    """An empty-handed blow or a revolver-butt strike, with contact after the 0.45-second wind-up."""
     from PIL import Image, ImageDraw
-    scaled = dict(spec, h=spec["h"] * SCALE)
-    if arms is not None:
-        standing = npc_standing(spec, arms)
+    if player:
+        idle = Image.new("RGBA", (192, FH))
+        idle.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
+        standing = (idle, (96, 18))
+        contact = [(72, 56), (76, 34), (80, 19), (75, 74), (66, 91), (92, 34), (108, 23)]
     else:
-        img = Image.new("RGBA", (192, FH))
-        img.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
-        standing = img, (96, 18)
+        standing = npc_standing(spec, _arms("fold"))
+        contact = [(66, 56), (68, 33), (69, 18), (68, 74), (66, 91), (80, 28), (91, 18)]
+    windup = [(64, 56), (62, 33), (61, 18), (65, 74), (66, 91), (47, 35), (46, 21)]
+    follow = [tuple(p) for p in contact]
+    follow[5], follow[6] = (contact[5][0], 42), (contact[6][0] - 5, 43)
+    scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [standing]
-    for i, joints in enumerate(keys):
-        if arms is not None:
-            ps = pose(75, arms={1: ("pts", *joints), -1: ("swing", 6, 6, 14)}, lean=4 if i == 2 else 0)
-            img, head = figure(spec, ps, 192, FH), (96, 18)
-        else:
-            img, head = action_figure(scaled, joints, plain_chest=True)
-        if pistol:
-            hand = grounded_joints(joints)[6]
-            # Only the short muzzle projects behind his fist; the cylinder and wooden grip lead the swing.
-            direction = np.array([(0.6, -0.8), (0.15, -0.99), (1, 0), (0.7, 0.7)][i])
-            cross = np.array([-direction[1], direction[0]])
-            muzzle, cylinder = hand - direction * 3, hand + direction * 7
-            butt = cylinder + direction * 2 + cross * 6
-            d = ImageDraw.Draw(img)
-            d.line([tuple(muzzle), tuple(cylinder)], fill=(26, 29, 36, 255), width=3)
-            d.line([tuple(muzzle - cross), tuple(cylinder - cross)], fill=(146, 153, 165, 255))
-            d.ellipse([cylinder[0] - 2, cylinder[1] - 2, cylinder[0] + 2, cylinder[1] + 2],
-                      fill=(88, 94, 108, 255))
-            d.line([tuple(cylinder), tuple(butt)], fill=(74, 45, 30, 255), width=4)
-            d.line([tuple(cylinder + direction), tuple(butt + direction)], fill=(148, 104, 64, 255))
-            d.ellipse([hand[0] - 2, hand[1] - 2, hand[0] + 2, hand[1] + 2], fill=(*common.hx(spec["skin"]), 255))
-        frames.append((img, head))
+    for joints in (windup, contact, follow):
+        image, head = action_figure(scaled, joints)
+        if player:
+            # Fingers wrap the barrel; the cylinder and wooden butt project past the fist, not a firing grip.
+            x, y = grounded_joints(joints)[6]
+            d = ImageDraw.Draw(image)
+            d.line([(x - 7, y + 3), (x + 3, y - 2)], fill="#83909c", width=2)
+            d.ellipse([x + 1, y - 4, x + 6, y + 1], fill="#4d5662")
+            d.line([(x + 6, y - 1), (x + 10, y + 4)], fill="#60402d", width=4)
+            d.line([(x - 2, y), (x + 1, y - 1)], fill="#" + spec["skin"], width=2)
+        frames.append((image, head))
     frames.append(standing)
-    action_strip(name, frames, STRIKE_SECONDS)
+    action_strip(name, frames, [0.15, 0.3, 0.12, 0.18, 0.15])
     return frames
 
 
@@ -928,12 +906,23 @@ def action_sequences(spec, name):
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
 
+    def sequence(keys, end, timing, paint=action_figure):
+        frames, times = [], []
+        for i, (a, b) in enumerate(zip(keys, keys[1:])):
+            frames.append(standing if i == 0 and keys is FALL else paint(scaled, a))
+            frames.append(paint(scaled, between(a, b)))
+            times += [timing[i] / 2] * 2
+        return frames + [end], times + [timing[-1]]
+
     if name == "micah_masked":
-        kneel, tip, prone = KNEES_PRONE
-        keys = [between(UPRIGHT, kneel), kneel, between(kneel, tip), tip, between(tip, prone), prone]
-        frames = [standing] + [action_figure(scaled, j, plain_chest=i < 2, chest_down=i >= 2)
-                               for i, j in enumerate(keys)]
-        action_strip(f"{name}_collapse", frames, [0.08, 0.18, 0.45, 0.12, 0.14, 0.12, 0.4])
+        keys = [UPRIGHT, KNEES_PRONE[0], KNEES_PRONE[1], KNEES_PRONE[2]]
+        falling = [standing]
+        times = [0.08]
+        for i, (a, b) in enumerate(zip(keys, keys[1:])):
+            falling.append(action_figure(scaled, between(a, b), chest_down=i > 0))
+            falling.append(action_figure(scaled, b, chest_down=i > 0))
+            times += [0.12, 0.4 if i == 0 else 0.18 if i == 1 else 0.3]
+        action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
         recover_strip(spec, scaled, standing)
         kneel_rise_strip(spec, scaled, standing)
@@ -1924,8 +1913,8 @@ def build():
     kneel_frame(MICAH, "micah_kneel")
     kicked_strip(MICAH, "micah_kicked")
     kick_strip(SAL, "sal_kick", _arms("pocket"))
-    strike_strip(BRUTE, "brute_strike", BRUTE_STRIKE, _arms("fold"))
-    strike_strip(MICAH, "micah_pistol_whip", PISTOL_WHIP, pistol=True)
+    strike_strip(BRUTE, "brute_strike")
+    strike_strip(MICAH, "micah_pistol_whip", player=True)
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")

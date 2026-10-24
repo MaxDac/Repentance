@@ -102,10 +102,8 @@ public sealed partial class Playthrough
             await WaitIdle();
             if (AlarmRoute)
             {
-                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) &&
-                      _game.Room?.FindActor("bartender")?.Visible == true,
-                    "the warning shot: Tony stays outside unhurt");
-                await Do(Verb.Walk, "street");
+                Check(Gs.HasFlag(Endings.WarnedTony) && !Gs.HasFlag(Endings.ShotBartender) && !Gs.HasFlag("alley3_tony_inside"),
+                    "the warning shot: Tony stays outside unhurt while Micah leaves");
                 Expect("OfficeStorm", "back to the office, in the storm");
                 return;
             }
@@ -146,9 +144,7 @@ public sealed partial class Playthrough
                 Expect("OfficeStorm", "on from the church to the office, in the storm");
                 return;
             }
-            Expect("Alley", "Tony left bleeding: Micah regains control beside him");
-            await Do(Verb.Walk, "street");
-            Expect("OfficeStorm", "Micah leaves manually, back to the office, in the storm");
+            Expect("OfficeStorm", "Tony left bleeding: Micah walks out, back to the office, in the storm");
         }, roundTrip: _route is not ("1" or "1-caleb" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>

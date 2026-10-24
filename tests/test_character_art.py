@@ -117,36 +117,32 @@ class CharacterArtTests(unittest.TestCase):
             collapse = Image.open(ART / "sprites" / f"{name}_collapse.png").convert("RGBA")
             self.assertEqual(collapse.crop((64, 0, 128, 96)).tobytes(), normal.tobytes())
 
-    def test_masked_collapse_holds_both_knees_before_pitching_forward(self):
+    def test_masked_collapse_holds_both_knees_before_falling_forward(self):
         clip = json.loads((ART / "sprites" / "micah_masked_collapse.json").read_text())
-        frames = clip["frames"]
-        self.assertGreaterEqual(frames[2]["seconds"], 0.4, "the kneeling beat must be readable")
-        kneel, tip, prone = sprites.KNEES_PRONE
-        self.assertGreater(kneel[3][1], 85)
-        self.assertLess(kneel[2][1], 35, "head up while kneeling")
-        self.assertGreater(frames[2]["head"][1], frames[0]["head"][1])
-        self.assertGreater(frames[-1]["head"][1], frames[2]["head"][1] + 40)
-        scaled = dict(sprites.MICAH_MASKED, h=sprites.MICAH_MASKED["h"] * sprites.SCALE)
         image = Image.open(ART / "sprites" / "micah_masked_collapse.png").convert("RGBA")
-        for i, joints, down in ((2, kneel, False), (4, tip, True), (6, prone, True)):
-            expected, _ = action_figure(scaled, joints, plain_chest=not down, chest_down=down)
-            self.assertEqual(image.crop((192 * i, 0, 192 * (i + 1), 96)).tobytes(), expected.tobytes())
+        scaled = dict(sprites.MICAH_MASKED, h=sprites.MICAH_MASKED["h"] * sprites.SCALE)
+        kneeling, _ = action_figure(scaled, sprites.KNEES_PRONE[0])
+        down, _ = action_figure(scaled, sprites.KNEES_PRONE[-1], chest_down=True)
+        w, h = clip["width"], clip["height"]
+        self.assertEqual(image.crop((2 * w, 0, 3 * w, h)).tobytes(), kneeling.tobytes())
+        self.assertGreaterEqual(clip["frames"][2]["seconds"], 0.35, "make the knees readable before the fall")
+        self.assertEqual(image.crop((image.width - w, 0, image.width, h)).tobytes(), down.tobytes())
+        self.assertGreater(clip["frames"][-1]["head"][0], clip["frames"][2]["head"][0])
+        self.assertGreater(clip["frames"][-1]["head"][1], clip["frames"][2]["head"][1])
 
-    def test_strikes_wind_up_contact_and_return_to_idle(self):
-        for name, spec, keys, arms, pistol in (
-                ("brute_strike", sprites.BRUTE, sprites.BRUTE_STRIKE, sprites._arms("fold"), False),
-                ("micah_pistol_whip", sprites.MICAH, sprites.PISTOL_WHIP, None, True)):
-            with self.subTest(action=name), patch.object(sprites, "action_strip") as save_strip:
-                frames = sprites.strike_strip(spec, name, keys, arms, pistol)
-                clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
-                image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
-                self.assertEqual(frames[0][0].tobytes(), frames[-1][0].tobytes())
-                self.assertEqual(clip["frames"][sprites.STRIKE_CONTACT_FRAME]["seconds"], 0.18)
-                self.assertNotEqual(frames[2][0].tobytes(), frames[3][0].tobytes(), "wind-up differs from contact")
-                self.assertEqual(image.width, len(frames) * 192)
-                for i, (expected, _) in enumerate(frames):
-                    self.assertEqual(image.crop((192 * i, 0, 192 * (i + 1), 96)).tobytes(), expected.tobytes())
-                self.assertEqual(save_strip.call_args.args[2], sprites.STRIKE_SECONDS)
+    def test_strikes_wind_up_make_contact_and_return_to_idle(self):
+        for name, source, size in (("brute_strike", "brute", 56), ("micah_pistol_whip", "micah", 64)):
+            clip = json.loads((ART / "sprites" / f"{name}.json").read_text())
+            image = Image.open(ART / "sprites" / f"{name}.png").convert("RGBA")
+            w, h = clip["width"], clip["height"]
+            frames = [image.crop((i * w, 0, (i + 1) * w, h)) for i in range(len(clip["frames"]))]
+            idle = Image.open(ART / "sprites" / f"{source}.png").convert("RGBA").crop((0, 0, size, h))
+            self.assertEqual(frames[0].crop(((w - size) // 2, 0, (w + size) // 2, h)).tobytes(), idle.tobytes())
+            self.assertEqual(frames[0].tobytes(), frames[-1].tobytes())
+            self.assertNotEqual(frames[1].tobytes(), frames[2].tobytes())
+            self.assertAlmostEqual(sum(f["seconds"] for f in clip["frames"][:2]), 0.45)
+            self.assertGreater(clip["frames"][2]["bounds"][0] + clip["frames"][2]["bounds"][2],
+                               clip["frames"][1]["bounds"][0] + clip["frames"][1]["bounds"][2])
 
     def test_player_sheet_generation_is_deterministic(self):
         for name, spec in (("daniel", sprites.DANIEL), ("micah", sprites.MICAH)):

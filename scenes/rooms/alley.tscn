@@ -51,13 +51,13 @@ Seed = 71
 
 [node name="DoorOpen" type="Sprite2D" parent="."]
 z_index = -10
-position = Vector2(303, 120)
+position = Vector2(303, 119)
 texture = ExtResource("8_door_open")
 centered = false
 
 [node name="Lamp" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(48, 36)
+position = Vector2(48, 35)
 texture = ExtResource("3_alley_lamp")
 centered = false
 

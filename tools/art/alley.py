@@ -25,6 +25,7 @@ PUDDLES = [(150, 238, 236, 252), (300, 244, 380, 258), (80, 204, 128, 211), (392
 IRON, IRON_L = hx("26282e"), hx("4a4e58")
 WARM = (255, 172, 92)
 BLUE = hx("4a8ae8")
+MOON_COLORS = [hx("515e7d"), hx("8e99b5"), hx("bbc4d4"), hx("e0e3e5")]
 
 
 def illuminate(img, ambient, lights):
@@ -98,54 +99,33 @@ def passage(img):
     # cobbled floor of the passage
     floor = [lfoot, rfoot, frf, flf]
     d.polygon(floor, fill=hx("4a4852"))
-    rnd = random.Random(117)
-    rows = [0.0]
-    for i in range(1, 20):
-        t = t_far * (1 - (1 - i / 20) ** 1.6)
-        rows.append(t)
-        a, b = toward(lfoot, t), toward(rfoot, t)
-        d.line([a, b], fill=hx("34323a"))
-    for row, (ta, tb) in enumerate(zip(rows, rows[1:])):
-        for x in range(NEAR_X0 - 9, NEAR_X1, 9):
-            x0, x1 = max(NEAR_X0, x + (row % 2) * 4), min(NEAR_X1, x + 8 + (row % 2) * 4)
-            if x0 >= x1:
+    rnd = random.Random(152)
+    rows = [t_far * (1 - (1 - i / 16) ** 1.6) for i in range(17)]
+    for row, (near, far) in enumerate(zip(rows, rows[1:])):
+        for col in range(-1, 12):
+            x0 = col * 10 + (5 if row % 2 else 0)
+            x1 = x0 + 9
+            a, b = toward((max(0, x0), BASE), near), toward((min(100, x1), BASE), near)
+            c, e = toward((min(100, x1), BASE), far), toward((max(0, x0), BASE), far)
+            if x1 <= 0 or x0 >= 100:
                 continue
-            a, b = toward((x0, BASE), ta), toward((x1, BASE), ta)
-            c, e = toward((x1, BASE), tb), toward((x0, BASE), tb)
-            tone = mix(hx("4a4852"), hx("8a8290"), rnd.uniform(0.05, 0.45))
-            d.polygon([a, b, c, e], fill=tone)
-            d.line([a, b], fill=hx("292a34"))
-            d.line([a, e], fill=hx("32303c"))
-            if row < 12 and rnd.random() < 0.55:
-                d.line([(a[0] + 1, a[1] - 1), (b[0] - 1, b[1] - 1)], fill=hx("a49c98"))
-    # Gutters, damp brick edges and a drain emphasize the passage's receding perspective.
-    for x in (4, 95):
-        d.line([(x, BASE), toward((x, BASE), t_far)], fill=hx("96909a"))
-        d.line([(x + 2, BASE), toward((x + 2, BASE), t_far)], fill=hx("262630"))
-    for x in (4, 13, 22, 31):
-        a, b = toward((x, BASE), 0.22), toward((x, BASE), 0.31)
-        d.line([a, b], fill=hx("20232c"))
-    for y in (77, 99, 121, 143):
-        a, b = toward((99, y), 0.12), toward((99, y + 2), 0.48)
-        d.line([a, b], fill=hx("9a7460"))
-    # A small puddle catches the shopfront; no new prop blocks the exit.
-    d.polygon([toward((28, BASE), 0.16), toward((58, BASE), 0.19),
-               toward((61, BASE), 0.30), toward((35, BASE), 0.29)], fill=hx("343446"))
-    for x, t in ((34, 0.20), (42, 0.23), (46, 0.26)):
-        p = toward((x, BASE), t)
-        d.line([p, (p[0] + 5 * (1 - t), p[1])], fill=hx("b89a70"))
+            color = mix(hx("42434e"), hx("85879a"), rnd.uniform(0.1, 0.65))
+            d.polygon([a, b, c, e], fill=color)
+            d.line([a, b], fill=mul(color, 1.3))
+            d.line([e, c], fill=hx("292b36"))
+    # A wet gutter, drain grate, scattered rubbish and a broken chair give the narrow road a human scale.
+    d.line([toward((10, BASE), 0.05), toward((10, BASE), 0.7)], fill=hx("99a2ba"), width=1)
+    d.polygon([(20, 182), (37, 182), (39, 178), (24, 178)], fill=hx("252936"))
+    for x in range(24, 38, 3):
+        d.line([(x, 181), (x + 2, 178)], fill=hx("737c92"))
+    d.polygon([(30, 174), (36, 173), (34, 176), (29, 176)], fill=hx("9b8b76"))
+    d.line([(77, 173), (80, 160), (88, 160), (87, 174)], fill=hx("725745"), width=2)
+    d.line([(79, 167), (88, 167)], fill=hx("9b7960"), width=2)
+    d.line([(81, 160), (82, 155), (87, 156)], fill=hx("725745"), width=2)
     # a garbage pail and a broken chair half-way down
     p = toward((70, BASE), 0.35)
     d.rectangle([p[0] - 5, p[1] - 14, p[0] + 5, p[1]], fill=hx("6a6e74"))
     d.line([(p[0] - 6, p[1] - 14), (p[0] + 6, p[1] - 14)], fill=hx("9a9ea4"))
-    for x in (-3, 0, 3):
-        d.line([(p[0] + x, p[1] - 11), (p[0] + x, p[1] - 2)], fill=hx("858994"))
-    chair = toward((23, BASE), 0.43)
-    for x in (0, 7):
-        d.line([(chair[0] + x, chair[1] - 4), (chair[0] + x - 1, chair[1] + 2)], fill=hx("5c4230"))
-    d.line([(chair[0] - 1, chair[1] - 5), (chair[0] + 8, chair[1] - 5)], fill=hx("9a7450"), width=2)
-    d.line([(chair[0], chair[1] - 5), (chair[0] - 2, chair[1] - 16)], fill=hx("7a583c"))
-    d.line([(chair[0] - 2, chair[1] - 15), (chair[0] + 4, chair[1] - 13)], fill=hx("9a7450"))
     return floor, (fx0, int(flt[1]) - 30, fx1, int(flf[1]))
 
 
@@ -644,7 +624,7 @@ def lighting(img, on, far_box, ajar=False):
     d.point((394, 155), fill=hx("b8f0ff"))
     d.point((397, 155), fill=hx("b8f0ff"))
     light(img, "rect", [fx0 - 2, fy0, fx1 + 2, fy1], hx("e0a860"), 0.18, 6)
-    moon(img)
+    light(img, "ellipse", [20, -40, 100, 50], hx("8090c0"), 0.25, 18)
     if on:
         # the glow starts under the rim and fans downward; nothing shines up through the dish
         light(img, "polygon", [(sx - 13, sy + 5), (sx + 13, sy + 5), (sx + 34, sy + 40), (sx - 34, sy + 40)],
@@ -657,17 +637,17 @@ def lighting(img, on, far_box, ajar=False):
 
 
 def moon(img):
-    """A shaded lunar disk, not just a bloom: small maria and crater rims survive the room palette."""
-    light(img, "ellipse", [44, -5, 72, 23], hx("8090c0"), 0.18, 6)
+    """A crisp lunar disc and shaded maria inside the existing misty halo, rather than a blurred white dot."""
     d = ImageDraw.Draw(img)
-    d.ellipse([51, 2, 65, 16], fill=hx("989eae"))
-    d.ellipse([52, 2, 64, 15], fill=hx("c2c4ca"))
-    d.arc([51, 2, 65, 16], 95, 260, fill=hx("e0dfdc"))
-    for box in ([54, 5, 57, 8], [58, 8, 62, 12], [54, 11, 56, 13]):
-        d.ellipse(box, fill=hx("9299aa"))
-        d.arc(box, 0, 140, fill=hx("dbd9d6"))
-    for p in ((59, 4), (62, 6), (57, 10), (60, 13)):
-        d.point(p, fill=hx("a8afbc"))
+    dark, middle, bright, rim = MOON_COLORS
+    d.ellipse([51, 1, 65, 15], fill=middle)
+    d.ellipse([52, 2, 64, 14], fill=bright)
+    d.arc([52, 2, 64, 14], 110, 285, fill=rim)
+    for box in ([58, 4, 62, 8], [55, 8, 60, 12], [54, 4, 56, 6]):
+        d.ellipse(box, fill=middle)
+        d.arc(box, 20, 140, fill=rim)
+    d.point((55, 5), fill=dark)
+    d.point((61, 11), fill=middle)
 
 
 def glints(img, on):
@@ -728,6 +708,7 @@ def paint(on, ajar=False):
     img = lighting(img, on, far_box, ajar)
     reflections(img)
     vignette(img, 0.5, tint=(14, 14, 34), blur=46)
+    moon(img)
     return img
 
 
@@ -746,8 +727,7 @@ def variants():
     both = Image.new("RGB", (W * 4, FULL_H))
     for i, img in enumerate((off, on, ajar_off, ajar_on)):
         both.paste(img, (W * i, 0))
-    # The small moon otherwise loses every surface tone to the much larger brickwork during quantization.
-    pal = palette_of(both, 124) + palette_of(off.crop((53, 4, 63, 14)), 4)
+    pal = palette_of(both, 124) + MOON_COLORS
     return tuple(pixelize(i, pal) for i in (off, on, ajar_off, ajar_on))
 
 
