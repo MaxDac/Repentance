@@ -948,11 +948,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 - Music: from here to the last mansion room, one unbroken dissonant thriller loop (double bass, pizzicato clusters,
   bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
-- Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
-  the taut wire; move the coal bin under the bell to reach its hammer.
-- After the warning shot Micah doesn't know about the alarm: taking the key doesn't reveal it, but a look at the door,
-  the lintel, the wire or the bell does (and then the night goes on as usual). Opening the door before that rings the
-  bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
+- Tony's key-on-the-lintel shortcut is wired to an alarm. After the shoulder shot, inspect the door or reach for the
+  key to notice the taut wire; move the coal bin under the bell to reach its hammer.
+- After the warning shot Micah doesn't know about the alarm: looking at the door or lintel and taking the key don't
+  reveal it. Only inspecting the wire or bell does (and then the night goes on as usual). Opening the keyed door
+  before that rings the bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
   - **Run** (`alarm_ran`): ending 13.
   - **Stay. She's in there.** (`alarm_stayed`): into the kitchen, where two of the Club's men (charcoal overcoat and
     fedora, grey suit and flat cap; `gunman_a`/`gunman_b` sprites with draw and aim strips) wait at the cook's table.

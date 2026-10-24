@@ -163,10 +163,13 @@ public sealed partial class Playthrough
         {
             if (AlarmRoute)
             {
-                // Tony left the bell out: the key from the lintel, straight into the lock, without a look at the door
+                // Tony left the bell out: ordinary inspection of the door and lintel doesn't expose it.
+                await Do(Verb.Look, "door");
+                await Do(Verb.Look, "lintel");
+                Check(!Gs.HasFlag("alarm_noticed"), "the door and lintel don't reveal Tony's omitted alarm");
                 await Do(Verb.Hand, "lintel");
                 Check(Gs.HasItem("kitchen_key") && !Gs.HasFlag("alarm_noticed"), "the key, and the bell still unseen");
-                var door = Do(Verb.Hand, "door");
+                var door = _route == "14" ? Do(Verb.UseItem, "door", "kitchen_key") : Do(Verb.Hand, "door");
                 if (_route == "13")
                 {
                     await Until(() => _game.Room?.Name == "Outskirts", 300);
