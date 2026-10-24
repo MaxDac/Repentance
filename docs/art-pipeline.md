@@ -84,6 +84,9 @@ make the hem follow the legs (padding past each leg) rather than the hip width.
   regenerate every exterior state together so the smaller alarm and its palette agree.
 - Shared painters (the mansion and motel bed figure) must stay identical across rooms; per-room differences go in
   parameters (sheet color), not copies.
+- Study door geometry lives in `mansion.STUDY_DOORS`: keep the three hotspot rectangles and the open closet crop
+  aligned when changing it. Check door headroom against Micah's visible sprite at the scene's approach-point scale,
+  not the transparent 64x96 frame. The study moon retains its own eight-color surface ramp after room quantization.
 - Passing tests is not visual approval: look at the frames (see [Testing](testing.md#seeing-what-the-game-draws)).
 - Show changed images as before/after previews in the PR description
   ([CI and release](ci-and-release.md#pull-requests)).

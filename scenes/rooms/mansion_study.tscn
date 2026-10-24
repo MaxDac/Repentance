@@ -12,10 +12,10 @@
 [ext_resource type="Script" path="res://scripts/Core/Rain.cs" id="90_Rain"]
 
 [sub_resource type="RectangleShape2D" id="Rect_1"]
-size = Vector2(50, 118)
+size = Vector2(44, 84)
 
 [sub_resource type="RectangleShape2D" id="Rect_2"]
-size = Vector2(50, 118)
+size = Vector2(44, 84)
 
 [sub_resource type="RectangleShape2D" id="Rect_3"]
 size = Vector2(40, 14)
@@ -27,7 +27,7 @@ size = Vector2(40, 14)
 size = Vector2(32, 10)
 
 [sub_resource type="RectangleShape2D" id="Rect_6"]
-size = Vector2(64, 146)
+size = Vector2(44, 84)
 
 [sub_resource type="RectangleShape2D" id="Rect_7"]
 size = Vector2(78, 182)
@@ -100,7 +100,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/DoorLeft"]
-position = Vector2(41.0, 145.0)
+position = Vector2(41, 162)
 shape = SubResource("Rect_1")
 
 [node name="DoorRight" type="Area2D" parent="Hotspots"]
@@ -115,7 +115,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/DoorRight"]
-position = Vector2(443.0, 145.0)
+position = Vector2(443, 162)
 shape = SubResource("Rect_2")
 
 [node name="DrawerLeft" type="Area2D" parent="Hotspots"]
@@ -174,7 +174,7 @@ monitoring = false
 monitorable = false
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Closet"]
-position = Vector2(188.0, 131.0)
+position = Vector2(187, 162)
 shape = SubResource("Rect_6")
 
 [node name="Bookcase" type="Area2D" parent="Hotspots"]
@@ -229,7 +229,7 @@ ShowIfFlags = "study_drawer_left_open"
 
 [node name="DrawerRight" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(301, 181)
+position = Vector2(300, 181)
 texture = ExtResource("11_mansion_study_drawer_right")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -238,7 +238,7 @@ HideIfFlags = "audit_folder_taken"
 
 [node name="DrawerEmpty" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(301, 181)
+position = Vector2(300, 181)
 texture = ExtResource("12_mansion_study_drawer_empty")
 centered = false
 script = ExtResource("4_FlagSprite")
@@ -246,7 +246,7 @@ ShowIfFlags = "study_drawer_right_open,audit_folder_taken"
 
 [node name="ClosetOpen" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(152, 61)
+position = Vector2(171, 128)
 texture = ExtResource("13_mansion_study_closet")
 centered = false
 script = ExtResource("4_FlagSprite")
