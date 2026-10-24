@@ -70,6 +70,14 @@ right-facing 3/4 view is `s = -1`. A spec with `far_arm_behind` (Eleanor's pink 
 dress in the front and back 3/4 rows, instead of painting it over the torso edge. Its coat's `hem_legs` and `hem_pad`
 make the hem follow the legs (padding past each leg) rather than the hip width.
 
+The Club and alley strikes keep the body still: lift one bent arm in front with the hand just above the head,
+make a short downward blow, then relax it. Occlude the far arm behind the body (`hide_far_arm`) rather than
+showing a second hand at the waist. The jacket covers the chest and neck up to the jaw, with continuous
+shoulder/sleeve shading (`closed_coat`): no shirt, tie, skin patch or contrasting shoulder cap. Move Micah
+close behind Sal rather than lengthening the arm or lunging to reach him.
+The reversed revolver is a small shaded cylinder/frame and textured wooden butt; the original fist is composited
+over its short barrel so no barrel protrudes from Micah's grip. Keep weapon refinements separate from the pose.
+
 ## Visual checks
 
 - Fix shapes that don't read as what they claim (a portrait that collapses to a blob after palette reduction, seats

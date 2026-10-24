@@ -81,6 +81,9 @@ public sealed partial class Playthrough
             await Do(Verb.Kick, "trash");
             await Do(Verb.UseItem, "sal", "revolver");
             Check(Gs.HasFlag("alley3_sal_down"), "Sal knocked down");
+            Check(_game.Room?.FindActor("sal") is { } sal &&
+                sal.Position.X - _game.Player.Position.X is >= 24 and <= 32,
+                "Micah steps close behind Sal for the short downward revolver-butt blow");
             var tony = Do(Verb.Talk, "back_door");
             if (_route is "1" or "1-caleb")
             {

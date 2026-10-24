@@ -20,7 +20,7 @@ public partial class Alley : Room
     private static readonly Vector2 StreetMouth = new(50, 192);
 
     private static readonly Vector2 SalAtTrash = new(398, 224);
-    private static readonly Vector2 BehindSal = new(352, 222);
+    private static readonly Vector2 BehindSal = new(370, 222);
     private static readonly Vector2 TonyOut = new(318, 208);
     private static readonly Vector2 MicahAims = new(258, 214);
     private static readonly Vector2 OverTony = new(428, 218);

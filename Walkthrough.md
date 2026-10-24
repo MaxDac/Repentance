@@ -830,7 +830,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 - Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
   you for bringing me back."), never calling him Micah.
-- Bruno visibly winds up and strikes Micah from behind, with a thud at contact. Still masked and cloaked, Micah
+- Bruno lifts a slightly bent arm in front of himself, hand just above his head, brings it down in a short blow,
+  then relaxes it: no broad wind-up or body lunge. His off-hand stays hidden; his shoulder and collar stay
+  jacket-coloured up to the jaw. The thud lands at contact. Still masked and cloaked, Micah
   drops onto both knees, holds there briefly, then pitches forward onto the floor before the blackout on every choice.
 
 #### Church, outside
@@ -873,7 +875,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 - The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
   Sal out through the visibly opened back door, then use the revolver on him to knock him down. Micah visibly
-  raises the revolver by its barrel and swings the butt into Sal from behind; the thud lands with the blow.
+  steps close behind Sal, raises the revolver by its barrel in front of himself with a bent arm and his hand
+  just above his head, makes a small downward blow and relaxes his arm; the thud lands with the blow. His body
+  stays still, his off-hand stays hidden, and the shoulder/collar stay jacket-coloured up to the jaw, without
+  an exposed shirt, tie or skin patch.
   Sal drops to his knees and then falls face-down. Only then knock on the back door to face Tony.
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
 - Tony opens the back door before stepping outside, then shuts it behind him. Once he is out, Micah automatically
