@@ -16,7 +16,7 @@ public partial class MotelNight : Room
     private const string EmptyBed = "res://assets/art/rooms/motel_empty.png";
     /// <summary>The black card between the motel night and the office: Micah's journal skips the days in between.</summary>
     public const string DaysLater = "Days later";
-    /// <summary>Seconds for <see cref="DaysLater"/> to fade in on the black screen.</summary>
+    /// <summary>Seconds for <see cref="DaysLater"/> to fade in on the black screen, and out again.</summary>
     public const double DaysLaterFade = 3.0;
 
     private bool First => State.HasFlag("interlude1");
@@ -79,7 +79,7 @@ public partial class MotelNight : Room
         await Game.Hud.Fade(1, MotelFireEscape.NightFade);
         await Game.Hud.FadeCaptionIn(DaysLater, DaysLaterFade);
         await Wait(MotelFireEscape.NightCaption);
-        Game.Hud.ShowCaption(null);
+        await Game.Hud.FadeCaptionOut(DaysLaterFade);
         await Game.ChangeRoom("office", "act2", fadeInSeconds: MotelFireEscape.NightFade);
     }
 
@@ -122,7 +122,24 @@ public partial class MotelNight : Room
     }
 
     /// <summary>Where the Order's men stand in the doorway: on the walkway outside, framed by the kicked-in door.</summary>
-    private static readonly Vector2 Doorway = new(28, 170);
+    public static readonly Vector2 Doorway = new(26, 170);
+
+    /// <summary>
+    /// The floor just inside the door, in front of the bed's foot post. The Order's men step down here from the
+    /// doorway before crossing the room, so they never walk through the foot of the bed behind its post.
+    /// </summary>
+    public static readonly Vector2 DoorStep = new(26, 196);
+
+    /// <summary>Y-sort baseline of the bed's foot posts (<c>World/BedRails</c>): anyone above it draws behind them.</summary>
+    public const float BedRailsBaseline = 185;
+
+    /// <summary>The bed's left foot post and its finial, in room pixels.</summary>
+    public const float FootPostLeft = 40, FootPostRight = 52;
+
+    private static async Task MoveVia(Actor actor, float speed, params Vector2[] points)
+    {
+        foreach (var point in points) await actor.MoveTo(point, speed);
+    }
 
     /// <summary>
     /// Eleanor goes to the door but stops halfway, calling out; the second knock is a shoulder, the third a boot.
@@ -149,9 +166,9 @@ public partial class MotelNight : Room
         State.SetFlag("interlude_door_kicked");
         State.SetFlag("interlude_goons_in");
         await Wait(0.8);
-        var bruteIn = brute.MoveTo(bruteSpot, 38);
+        var bruteIn = MoveVia(brute, 38, DoorStep, bruteSpot);
         await Wait(0.9);
-        await Task.WhenAll(bruteIn, goon.MoveTo(goonSpot, 38));
+        await Task.WhenAll(bruteIn, MoveVia(goon, 38, DoorStep + new Vector2(-4, -2), goonSpot));
         brute.FaceLeft(false);
         goon.FaceLeft(false);
         Player.Face(Facing.Left);
@@ -162,7 +179,7 @@ public partial class MotelNight : Room
     private async Task TheyTakeHer()
     {
         if (FindActor("brute") is not { } brute || FindActor("goon") is not { } goon) return;
-        var bruteOut = brute.MoveTo(Doorway, 40);
+        var bruteOut = MoveVia(brute, 40, DoorStep, Doorway);
         await Wait(0.6);
         var eleanorOut = Game.WalkTo(new Vector2(30, 190));
         await Wait(0.8);

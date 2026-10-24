@@ -56,6 +56,10 @@ tags (see [CREDITS.md](../CREDITS.md)).
 Club rooms use separate 128-color palettes. Replacement art must preserve these contracts and be incorporated into
 the generator; otherwise regeneration overwrites it and art tests fail.
 
+The mansion exterior shares a 124-color palette across its background and state overlays, reserving three shades
+for the lantern's light source and glass. Its bin, tied-bell and open-door crops are fixed to the existing scene
+positions; do not tighten them to palette-dependent difference bounds.
+
 ## Action strips and poses
 
 Story actions (opening a door, collapsing, kneeling, drinking) are strips beside the walk sheets, played by
@@ -66,6 +70,16 @@ right-facing 3/4 view is `s = -1`. A spec with `far_arm_behind` (Eleanor's pink 
 dress in the front and back 3/4 rows, instead of painting it over the torso edge. Its coat's `hem_legs` and `hem_pad`
 make the hem follow the legs (padding past each leg) rather than the hip width.
 
+The Club and alley strikes keep the body still: lift one bent arm in front with the hand just above the head,
+make a short downward blow, then relax it. Occlude the far arm behind the body (`hide_far_arm`) rather than
+showing a second hand at the waist. The jacket covers the chest and neck up to the jaw, with continuous
+shoulder/sleeve shading (`closed_coat`): no shirt, tie, skin patch or contrasting shoulder cap. Move Micah
+close behind Sal rather than lengthening the arm or lunging to reach him.
+The reversed revolver is a small shaded cylinder/frame and textured wooden butt; the original fist is composited
+over its short barrel so no barrel protrudes from Micah's grip. Keep weapon refinements separate from the pose.
+Masked Micah's collapse also uses `closed_coat` so the black cloak covers his neck/shoulder through every
+in-between, kneeling and final prone frame.
+
 ## Visual checks
 
 - Fix shapes that don't read as what they claim (a portrait that collapses to a blob after palette reduction, seats
@@ -75,8 +89,15 @@ make the hem follow the legs (padding past each leg) rather than the hip width.
 - After changing a room painter, regenerate its state overlays and check the printed crop origins against the node
   positions in the scene. Moving a crop without its node misaligns the object.
 - Locked crops (attic bulb, library clock, motel curtain, Harrington road window) must not move.
+- The mansion alarm's tie uses the fixed `BELL_TIE_BOX` crop at `(337, 69)`, matching its scene node even when the
+  knot or tails shrink. Keep the gong at 18-20 pixels wide and the hanging tie ends within a six-pixel span;
+  regenerate every exterior state together so the smaller alarm and its palette agree.
 - Shared painters (the mansion and motel bed figure) must stay identical across rooms; per-room differences go in
   parameters (sheet color), not copies.
+- Study door geometry lives in `mansion.STUDY_DOORS`: keep the three hotspot rectangles and the open closet crop
+  aligned when changing it. Check door headroom against Micah's visible sprite at the scene's approach-point scale,
+  not the transparent 64x96 frame; the frame tops sit 35-45% of his height above his hat. The study moon retains
+  its own eight-color surface ramp after room quantization.
 - Passing tests is not visual approval: look at the frames (see [Testing](testing.md#seeing-what-the-game-draws)).
 - Show changed images as before/after previews in the PR description
   ([CI and release](ci-and-release.md#pull-requests)).

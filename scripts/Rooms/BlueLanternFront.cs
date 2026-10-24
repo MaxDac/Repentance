@@ -19,7 +19,9 @@ public partial class BlueLanternFront : Room
         await Game.Run(async () =>
         {
             await Wait(0.4);
-            await Think("State Street again, and the rain hasn't let up. The matchbook says Blue Lantern. The sign says Rizzo's Flowers.");
+            await Think(State.HasFlag("opened_brass_box")
+                ? "State Street again, and the rain hasn't let up. The matchbook says Blue Lantern. The sign says Rizzo's Flowers."
+                : "State Street again, and the rain hasn't let up. The sign says Rizzo's Flowers.");
             await Think("Closed at this hour, but somebody's still taking deliveries round the cold room.");
         });
     }
@@ -43,6 +45,9 @@ public partial class BlueLanternFront : Room
             case ("grille" or "cold_door", Verb.Walk or Verb.Hand) when State.HasFlag("grille_opened"):
                 await Say("The hatch knows my lapel now. The door swings open before I knock.");
                 await Game.ChangeRoom("speakeasy", "door");
+                return true;
+            case ("grille" or "cold_door", Verb.Talk or Verb.UseItem) when State.HasFlag("grille_opened"):
+                await Say("The hatch knows my lapel now. All I have to do is walk through.");
                 return true;
             case ("grille" or "cold_door", Verb.Hand or Verb.Talk):
                 await Say("I rap on the grille. The slot opens, an eye drops to my lapel, and the slot shuts again.");
@@ -88,7 +93,9 @@ public partial class BlueLanternFront : Room
                 return true;
             case ("regular", Verb.Talk):
                 await Say("Evening.");
-                await Say("The brim tips up an inch. He takes in my bare lapel, then goes back to studying the pavement. Conversation over.");
+                await Say(State.HasFlag("grille_opened")
+                    ? "The brim tips up an inch. He takes in the blue in my lapel, then goes back to studying the pavement. Conversation over."
+                    : "The brim tips up an inch. He takes in my bare lapel, then goes back to studying the pavement. Conversation over.");
                 return true;
             case ("regular", Verb.Hand):
                 await Say("Lift a flower off a man's coat on State Street and I'll be wearing it in the river.");

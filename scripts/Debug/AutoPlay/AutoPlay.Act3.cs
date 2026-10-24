@@ -34,6 +34,8 @@ public partial class AutoPlay
             "Micah came on foot: no car of his in the lot");
         Check(game.Room?.Name == "MotelNight" && !gs.HasFlag("interlude_goons_in"), "the bed and the window don't bring the knock forward");
         var taken = game.Perform(Verb.Hand, "door");
+        var behindPost = new List<string>();
+        var watchPost = WatchFootPost(game, behindPost, () => taken.IsCompleted);
         await Until(() => game.Room?.FindActor("brute") is { Visible: true } b && b.Position.DistanceTo(new Vector2(84, 212)) < 1
             || game.Room?.Name != "MotelNight", 30);
         Check(game.Room?.GetNodeOrNull<Sprite2D>("DoorKicked")?.Visible == true && game.Sfx.Count(Sound.Crash) > 0,
@@ -42,6 +44,9 @@ public partial class AutoPlay
             "Bruno and the goon walk in; Eleanor stopped halfway, well away from the door");
         await Shot("interlude_motel_kicked");
         await taken;
+        await watchPost;
+        Check(behindPost.Count == 0,
+            "Bruno and the goon come in and go out round the foot of the bed, never behind its post: " + string.Join(", ", behindPost.Take(4)));
         await WaitIdle(game);
         Check(game.Room?.Name == "ClubBackstage" && game.Player.Character == "eleanor_gown_play",
             "the Order's men take her to the Club's dressing room, in the pink gown");
@@ -268,6 +273,7 @@ public partial class AutoPlay
         await stage;
         await WaitIdle(game);
         Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+        Check(_poseCounts.GetValueOrDefault("brute_strike") == 1, "Bruno visibly strikes before Micah drops to his knees");
         Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
         Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
         _prefer = new[] { "Visit Caleb", "Refuse the cross" };
@@ -310,26 +316,45 @@ public partial class AutoPlay
         Check(!gs.HasFlag("alley3_sal_out"), "no luring Sal out under the lamp");
         await game.Perform(Verb.Hand, "street_lamp");
         Check(gs.HasFlag("alley3_dark"), "broke the street lamp");
+        var deadLamp = await Spoken(async () => { await game.Perform(Verb.Look, "street_lamp"); await WaitIdle(game); });
+        Check(deadLamp.Contains("Dead. Just the way I want it.") && !deadLamp.Any(l => l.Contains("flicker")),
+            "the broken lamp looks dead, not flickering");
         Check(game.Sfx.Count(Sound.StepStone) > stoneSteps, "Micah's shoes sound on the alley cobbles");
         await Shot("alley_dark");
-        await game.Perform(Verb.Kick, "trash");
+        int doorOpens = game.Sfx.Count(Sound.DoorOpen), doorCloses = game.Sfx.Count(Sound.DoorClose);
+        var lure = game.Perform(Verb.Kick, "trash");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("Lamp/DoorOpenLit").Visible == true,
+            "Sal opens both lamp variants of the back door before coming out");
+        await lure;
         Check(gs.HasFlag("alley3_sal_out") && !gs.HasFlag("alley3_sal_inside"), "the noise brings Sal out");
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == false &&
+              game.Sfx.Count(Sound.DoorOpen) == doorOpens + 1 && game.Sfx.Count(Sound.DoorClose) == doorCloses + 1,
+            "Sal opens the door and shuts it after stepping outside");
         Check(game.Sfx.Count(Sound.Crash) > 0, "the trash cans go over with a crash");
         await Shot("alley_sal_out");
         CheckActorWins(game, "sal", "trash", "Sal, out by the trash cans, wins the hover over them (#97)");
         await game.Perform(Verb.UseItem, "sal", "revolver");
         Check(gs.HasFlag("alley3_sal_down"), "pistol-whipped Sal");
+        Check(_poseCounts.GetValueOrDefault("micah_pistol_whip") == 1 && !game.Player.Poses.Active,
+            "Micah visibly swings the revolver butt and returns to his walking sprite");
         Check(game.Room?.FindActor("sal") is { } downSal && downSal.Texture?.ResourcePath.EndsWith("sal_out.png") == true &&
             !downSal.Poses!.Active, "Sal goes down on his knees and ends face-down");
         await Shot("alley_sal_down");
         _prefer = Convinces.Prepend("Shoot him").ToArray();
         int tonyHolsters = _poseCounts.GetValueOrDefault("micah_holster");
         var tonyTalk = game.Perform(Verb.Talk, "back_door");
+        await Until(() => game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == true);
+        Check(game.Room?.GetNode<Sprite2D>("Lamp/DoorOpenLit").Visible == true,
+            "Tony opens the back door before coming out");
         await Until(() => gs.HasFlag("shot_bartender") && game.Room?.FindActor("bartender") is { } t &&
             t.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true);
         Check(game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
             "Tony falls, shot in the shoulder, and stays down on his back");
         await Shot("alley_tony_shot");
+        Check(game.Room?.GetNode<Sprite2D>("DoorOpen").Visible == false &&
+              game.Sfx.Count(Sound.DoorOpen) == doorOpens + 2 && game.Sfx.Count(Sound.DoorClose) == doorCloses + 2,
+            "Tony shuts the back door after stepping outside");
         Check(game.Sfx.Count(Sound.Knock) >= knocks + 3, "Sal's knock is heard: two, a pause, and one");
         Check(game.Sfx.Count(Sound.Gunshot) == gunshots + 1, "the revolver goes off once");
         await tonyTalk;
@@ -544,5 +569,26 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("At the gate she fetched her duffle from the Club's car") && l.Contains("a black suit")),
             "ending 2: Micah says how Eleanor got from the sheet into the black suit");
         HeardLog = null;
+    }
+
+    /// <summary>
+    /// Every frame until <paramref name="done"/>, records the Order's men in the motel room whenever one is above the
+    /// bed rails' baseline (drawn behind them) with his body over the bed's left foot post.
+    /// </summary>
+    private static async Task WatchFootPost(Game game, List<string> behind, Func<bool> done)
+    {
+        const float bodyHalfWidth = 14;
+        while (!done())
+        {
+            if (game.Room is Rooms.MotelNight room)
+                foreach (var id in new[] { "brute", "goon" })
+                {
+                    if (room.FindActor(id) is not { Visible: true } man || man.Position.Y >= Rooms.MotelNight.BedRailsBaseline) continue;
+                    float half = bodyHalfWidth * room.ScaleAt(man.Position.Y);
+                    if (man.Position.X + half >= Rooms.MotelNight.FootPostLeft && man.Position.X - half <= Rooms.MotelNight.FootPostRight)
+                        behind.Add($"{id} at {man.Position.Round()}");
+                }
+            await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
     }
 }

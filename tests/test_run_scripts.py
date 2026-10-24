@@ -270,6 +270,14 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Film finished.", result.stdout)
 
+    def test_android_plugin_sdk_path_noise_does_not_block_launch(self):
+        self.env["IMPORT_ERROR"] = (
+            'ERROR: EditorSettings not instantiated yet when getting setting "export/android/android_sdk_path".'
+        )
+        result = self.run_launcher("film.sh", "--no-clean")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Film finished.", result.stdout)
+
     def test_import_warnings_do_not_block_launch(self):
         self.env["IMPORT_ERROR"] = "WARNING: harmless warning"
         result = self.run_launcher("film.sh", "--no-clean")
@@ -301,6 +309,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
     def test_film_ending_titles_map_to_numbers(self):
         for ending, number in (
             ("walk-away", "1"), ("spare-the-old-man", "1-oldman"), ("Give-Up", "1-steps"),
+            ("Eleanor-Escapes", "1-caleb"), ("1-caleb", "1-caleb"),
             ("escape-together", "2"), ("escape-alone", "3"), ("prison-eleanor-visits", "4"),
             ("prison-caleb-visits", "5"), ("turn-himself-in", "6"), ("last-entry", "7"),
             ("eleanor-burns-the-house", "8"), ("eleanor-confesses", "9"),
@@ -327,6 +336,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         result = self.run_launcher("film.sh", "--help")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("1-steps   give-up", result.stdout)
+        self.assertIn("1-caleb   eleanor-escapes", result.stdout)
         self.assertIn("11        she-visits-once", result.stdout)
         self.assertIn("12-oldman kill-tony-pray", result.stdout)
         self.assertIn("14        alarm-ambush", result.stdout)

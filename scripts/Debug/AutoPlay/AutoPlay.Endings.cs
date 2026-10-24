@@ -137,6 +137,21 @@ public partial class AutoPlay
         await Until(() => game.Player.Facing == Facing.Up && game.Player.Position.DistanceTo(Rooms.RoseHouse.TalkSpot) < 2);
         Check(game.Player.Facing == Facing.Up, "Act 3: Micah stands by the bell, his back to the screen");
         await Shot("rose_coffee");
+        // the Act 2 close-up of the two of them frames the invitation, from "Nothing you owe me." to "...Why not."
+        bool earlyCloseUp = false;
+        await Until(() =>
+        {
+            earlyCloseUp |= game.Hud.InsetVisible && game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("What do you want");
+            return game.Hud.InsetVisible && game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Nothing you owe me");
+        });
+        Check(!earlyCloseUp, "no close-up yet while Rose asks what he wants");
+        Check(game.Hud.CurrentCloseUp == CloseUps.Rose, "Rose's close-up framed over the door as Micah asks her for coffee");
+        CheckPortraitSpeech(game, right: true, CloseUps.Rose);
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.Contains("Why not"));
+        CheckPortraitSpeech(game, right: false, CloseUps.Rose);
+        await Shot("rose_coffee_closeup");
+        await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("Two small words"));
+        Check(!game.Hud.InsetVisible, "Rose's close-up is gone before Micah's closing thought");
         await TheEnd("ending_1 (Tony)");
 
         // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
@@ -260,8 +275,9 @@ public partial class AutoPlay
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
+        Check(!gs.HasFlag("caleb_escape"), "ending 1: without Eleanor's refusals, no escape with Caleb");
 
-        // Eleanor's refusals only matter once Micah shoots the old man: both of them still give way to the give-ups.
+        // Both of Eleanor's refusals give way to the give-ups, but after Rose's coffee Caleb gets Eleanor out of town.
         var bothRefused = new[] { Endings.RefusedAbbess, Endings.RefusedDrugs };
         Seed(act3Flags.Where(f => f != "keep_going").Concat(bothRefused), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
         _ = game.ChangeRoom("church_exterior", "beaten");
@@ -269,6 +285,7 @@ public partial class AutoPlay
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorStruck),
             "ending 1: giving up on the steps wins over both of Eleanor's refusals");
+        await CalebEscape("steps");
         await TheEnd("ending_1 (steps, Eleanor held out)");
 
         Seed(alleyReady.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
@@ -278,7 +295,18 @@ public partial class AutoPlay
         Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorWeary),
             "ending 1: walking away from Tony wins over both of Eleanor's refusals");
+        await CalebEscape("Tony");
         await TheEnd("ending_1 (Tony, Eleanor held out)");
+    }
+
+    /// <summary>After an early give-up with both refusals, Rose's coffee cuts to Eleanor and Caleb at the outskirts.</summary>
+    private async Task CalebEscape(string label)
+    {
+        var gs = GameState.Instance;
+        await Until(() => _game.Room is Rooms.Outskirts, 120);
+        Check(_game.Room is Rooms.Outskirts && gs.HasFlag("caleb_escape") && gs.HasFlag("eleanor_epilogue") &&
+              _game.Player.Character == "eleanor_white_play" && _game.Room.FindActor("caleb")?.Visible == true,
+            $"ending 1 ({label}, Eleanor held out): Eleanor in white with Caleb at the edge of the city");
     }
 
     /// <summary>
@@ -536,7 +564,7 @@ public partial class AutoPlay
 
     /// <summary>
     /// The warning shot and the alarm: Tony talks unhurt and leaves the bell out, while the shoulder shot gets it out of
-    /// him; looking at the door first stops the ring; the ring itself is ending 13 (run) or ending 14 (go in).
+    /// him; only inspecting the alarm stops the ring after a warning; the ring is ending 13 (run) or 14 (go in).
     /// </summary>
     private async Task AlarmEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
@@ -548,44 +576,106 @@ public partial class AutoPlay
             "Tony's last threat offers the warning shot beside the shoulder");
         Check(heard.Any(l => l.Contains("A burglar alarm")), "shot in the shoulder, Tony tells Micah about the alarm");
 
-        // the warning shot: the house and the key, not the bell; Tony goes back inside unhurt
+        foreach (var (verb, target) in new[] { (Verb.Look, "door"), (Verb.Look, "lintel"), (Verb.Hand, "lintel") })
+        {
+            Seed(act3Flags.Append(Endings.ShotBartender), act3Items);
+            await game.ChangeRoom("mansion_exterior", "start");
+            await game.Perform(verb, target);
+            Check(gs.HasFlag("alarm_noticed"), $"shoulder shot: {verb} on {target} still reveals Tony's bell");
+        }
+
+        // The warning shot: the house and the key, not the bell; Tony stays outside unhurt.
         Seed(alleyReady, act3Items, "Fire into the wall");
         await game.ChangeRoom("alley", "act3");
         int shots = game.Sfx.Count(Sound.Gunshot);
         int warnHolsters = _poseCounts.GetValueOrDefault("micah_holster");
-        heard = await Spoken(async () => { await game.Perform(Verb.Talk, "back_door"); await WaitIdle(game); });
+        heard = await Spoken(async () =>
+        {
+            var warning = game.Perform(Verb.Talk, "back_door");
+            await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.StartsWith("Nobody bleeding", StringComparison.Ordinal));
+            Check(game.Room?.FindActor("bartender") is { Visible: true } outside &&
+                  outside.Position.DistanceTo(new Vector2(318, 208)) < 1 && outside.Poses?.Active != true &&
+                  !gs.HasFlag("alley3_tony_inside"), "Tony remains standing where he came out after the warning shot");
+            await Shot("alley_tony_spared");
+            await warning;
+            await WaitIdle(game);
+        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, Micah automatically leaves for the office in the storm");
+
+        // Old warning-shot saves also restore Tony outside, without repeating the confrontation.
+        Seed(alleyReady.Append(Endings.WarnedTony).Append("alley3_tony_inside"), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await game.LoadGame(game.CaptureSave());
+        Check(game.Room?.FindActor("bartender") is { Visible: true } restoredTony &&
+              restoredTony.Position.DistanceTo(new Vector2(318, 208)) < 1 &&
+              restoredTony.Texture?.ResourcePath.EndsWith("bartender.png") == true &&
+              !gs.HasFlag("alley3_tony_inside"), "reloaded warning-shot saves keep Tony standing outside");
+        });
         Check(_poseCounts.GetValueOrDefault("micah_holster") == warnHolsters + 1, "the warning shot: Micah holsters the revolver");
-        Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && gs.HasFlag("alley3_tony_inside")
-              && game.Room?.FindActor("bartender")?.Visible != true && game.Sfx.Count(Sound.Gunshot) == shots + 1,
-            "the warning shot: one bullet in the wall, and Tony back inside unhurt");
+        Check(gs.HasFlag(Endings.WarnedTony) && !gs.HasFlag(Endings.ShotBartender) && !gs.HasFlag("alley3_tony_inside")
+              && game.Sfx.Count(Sound.Gunshot) == shots + 1,
+            "the warning shot: one bullet in the wall, and Tony left outside unhurt");
         Check(heard.Any(l => l.Contains("delivery boys")) && !heard.Any(l => l.Contains("bell")),
             "the warning shot: Tony gives the kitchen key, but not the alarm");
         Check(!Endings.TonyWantsRevenge(gs.HasFlag), "no debt with the mob: Tony wants no revenge after a miss");
         await game.Perform(Verb.Hand, "back_door");
-        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "Tony's bolted the back door behind him");
+        Check(game.Room?.Name == "Alley" && !gs.HasFlag(Endings.ShotBartender), "knocking cannot summon Tony a second time");
+        await TonyDismissalTest(game, gs, "alley_tony_warned", seeded: true);
         await game.Perform(Verb.Walk, "street");
-        await WaitIdle(game);
-        Check(game.Room?.Name == "OfficeStorm", "after the warning shot, back to the office in the storm");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works after the warning shot");
 
-        var warned = act3Flags.Append(Endings.WarnedTony).Append("alley3_tony_inside").ToArray();
+        Seed(alleyReady.Append(Endings.ShotBartender), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await TonyDismissalTest(game, gs, "alley_tony_wounded", seeded: true);
+        await game.Perform(Verb.Walk, "street");
+        Check(game.Room?.Name == "OfficeStorm", "the manual alley exit still works for a reloaded wounded Tony");
 
-        // a look at the door is enough: the bell is spotted and the door won't open until it's gagged
+        var warned = act3Flags.Append(Endings.WarnedTony).ToArray();
+
         Seed(warned, act3Items);
         await game.ChangeRoom("mansion_exterior", "start");
         int bells = game.Sfx.Count(Sound.AlarmBell);
+        await game.Perform(Verb.Hand, "door");
+        Check(!gs.HasFlag("alarm_noticed") && game.Sfx.Count(Sound.AlarmBell) == bells,
+            "warned: trying the locked door without the key doesn't reveal or ring the bell");
+        foreach (string target in new[] { "door", "lintel" })
+        {
+            var hotspot = game.Room!.FindHotspot(target)!;
+            Check(game.LeftClickVerb(hotspot) == Verb.Look, $"warned: a left click looks at the {target}");
+            await game.Perform(game.LeftClickVerb(hotspot), target);
+            Check(!gs.HasFlag("alarm_noticed"), $"warned: looking at the {target} doesn't reveal the alarm");
+        }
         await game.Perform(Verb.Hand, "lintel");
         Check(gs.HasItem("kitchen_key") && !gs.HasFlag("alarm_noticed"), "warned: the key from the lintel, and the bell still unseen");
-        await game.Perform(Verb.Look, "door");
-        Check(gs.HasFlag("alarm_noticed"), "warned: a look at the door spots the bell Tony left out");
+        await game.Perform(Verb.Look, "bell");
+        Check(gs.HasFlag("alarm_noticed"), "warned: inspecting the bell itself reveals the alarm Tony left out");
         await game.Perform(Verb.Hand, "door");
         Check(game.Room?.Name == "MansionExterior" && game.Sfx.Count(Sound.AlarmBell) == bells && !gs.HasFlag(Endings.AlarmRan)
               && !gs.HasFlag(Endings.AlarmStayed), "warned, but the bell spotted: the door stays shut and nothing rings");
+        await game.Perform(Verb.Hand, "bin");
+        await SolvePuzzle(() => game.Perform(Verb.Hand, "bell"), PuzzleKind.Bell,
+            new[] { ("s1", 1), ("s2", 2) }, "warned_alarm_restraint");
+        await game.Perform(Verb.UseItem, "door", "kitchen_key");
+        Check(game.Room?.Name == "MansionKitchen" && gs.HasFlag("bell_wedged") && !gs.HasItem("kitchen_key")
+              && game.Sfx.Count(Sound.AlarmBell) == bells && !gs.HasFlag(Endings.AlarmStayed) && !gs.HasFlag(Endings.AlarmRan),
+            "warned: deliberate discovery and restraint let Micah enter the kitchen quietly");
+
+        // The wire is clickable before the bell is noticed, so "wire or bell" both reveal it.
+        Seed(warned, act3Items);
+        await game.ChangeRoom("mansion_exterior", "start");
+        bells = game.Sfx.Count(Sound.AlarmBell);
+        Check(game.Room?.HotspotAt(new Vector2(314, 118))?.Id == "wire" && !gs.HasFlag("alarm_noticed"),
+            "warned: the wire along the door frame can be clicked before the alarm is noticed");
+        heard = await Spoken(async () => { await game.Perform(Verb.Look, "wire"); await WaitIdle(game); });
+        Check(gs.HasFlag("alarm_noticed") && heard.Any(l => l.Contains("A wire, along the door frame"))
+              && game.Sfx.Count(Sound.AlarmBell) == bells, "warned: looking at the wire reveals the alarm without ringing it");
 
         // 13: the bell rings, feet on the stairs, and Micah runs out of Chicago
         HeardLog = new List<string>();
         Seed(warned, act3Items, "(Run.)");
         await game.ChangeRoom("mansion_exterior", "start");
         bells = game.Sfx.Count(Sound.AlarmBell);
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
         await game.Perform(Verb.Hand, "lintel");
         _ = game.Perform(Verb.Hand, "door");
         await Until(() => game.Room?.Name == "Outskirts", 180);
@@ -603,10 +693,14 @@ public partial class AutoPlay
         HeardLog = new List<string>();
         Seed(warned, act3Items, "(Stay.");
         await game.ChangeRoom("mansion_exterior", "start");
+        await game.Perform(Verb.Look, "door");
+        await game.Perform(Verb.Look, "lintel");
         await game.Perform(Verb.Hand, "lintel");
+        Check(!gs.HasFlag("alarm_noticed"), "ending 14: ordinary inspection and taking the key leave the alarm unseen");
+        bells = game.Sfx.Count(Sound.AlarmBell);
         shots = game.Sfx.Count(Sound.Gunshot);
         bool gunmen = false, fell = false;
-        _ = game.Perform(Verb.Hand, "door");
+        _ = game.Perform(Verb.UseItem, "door", "kitchen_key");
         await Until(() =>
         {
             if (game.Room is Rooms.MansionKitchen kitchen)
@@ -614,9 +708,11 @@ public partial class AutoPlay
                 gunmen |= kitchen.FindActor("gunman")?.Visible == true && kitchen.FindActor("gunman_b")?.Visible == true;
                 fell |= game.Player.PoseName is "micah_gunned_down" or "micah_gunned_dead";
             }
+
             return game.Hud.CaptionVisible && game.Hud.CaptionText == "End of Act Three";
         }, 180, 0.05);
-        Check(gs.HasFlag(Endings.AlarmStayed) && gs.HasFlag("ending_14"), "ending 14: Micah goes in after the bell");
+        Check(gs.HasFlag(Endings.AlarmStayed) && gs.HasFlag("ending_14") && game.Sfx.Count(Sound.AlarmBell) == bells + 1,
+            "ending 14: using the key rings the bell, and Micah goes in");
         Check(gunmen && fell && game.Sfx.Count(Sound.Gunshot) >= shots + 2,
             "ending 14: two Club men at the cook's table, two shots, and Micah falls");
         HeardLog = new List<string>();
@@ -626,12 +722,66 @@ public partial class AutoPlay
         HeardLog = null;
     }
 
+    private async Task TonyDismissalTest(Game game, GameState gs, string checkpoint, bool seeded = false)
+    {
+        var tony = game.Room!.FindActor("bartender")!;
+        var position = tony.Position;
+        var texture = tony.Texture;
+        var flags = gs.Flags.OrderBy(f => f).ToArray();
+        var inventory = gs.Inventory.ToArray();
+        int shots = game.Sfx.Count(Sound.Gunshot);
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            var heard = await Spoken(() => game.Perform(Verb.Talk, "bartender"));
+            Check(heard.SequenceEqual(new[] { "Scram, pal. I already spilled everything I know." }),
+                "talking to surviving Tony gives only his repeatable dismissal");
+        }
+        Check(gs.Flags.OrderBy(f => f).SequenceEqual(flags) && gs.Inventory.SequenceEqual(inventory)
+              && game.Sfx.Count(Sound.Gunshot) == shots && tony.Position == position && tony.Texture == texture,
+            "repeat talk neither moves Tony nor changes clues, choices, inventory or gunshots");
+        if (seeded)
+        {
+            // Seeded endings follow the return-to-title test: exercise serialization without reopening title-only saves.
+            var saved = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(game.CaptureSave()))
+                ?? throw new InvalidOperationException($"Cannot deserialize {checkpoint}");
+            await game.LoadGame(saved);
+            await WaitIdle(game);
+        }
+        else await ReloadCheckpoint(checkpoint);
+        tony = game.Room!.FindActor("bartender")!;
+        Check(game.Room is Rooms.Alley && tony.Visible && tony.Position == position && tony.Texture == texture
+              && tony.WalkTo == new Vector2(258, 214) && tony.FlipH && !game.Busy,
+            "surviving Tony restores his position, condition, facing and talk target on load");
+        await game.ChangeRoom("alley", "act3");
+        await WaitIdle(game);
+        Check(game.Room.FindActor("bartender") is { Visible: true } returned && returned.Position == position,
+            "returning to the alley leaves surviving Tony in place");
+    }
+
     /// <summary>
     /// Ending 12 and the kill route: the second shot in the alley, the night's last map, the church's surrender, the
     /// mansion with no Our Father unless Micah confessed, and Eleanor's coda without Rose's coffee.
     /// </summary>
     private async Task KillTonyEndings(Game game, GameState gs, string[] alleyReady, string[] act3Flags, string[] act3Items)
     {
+        // a save from before #331 (Tony wounded on the gravel, the choice not yet made) can still finish him
+        Seed(alleyReady.Where(f => f != "alley3_tony_inside").Append(Endings.ShotBartender), act3Items);
+        await game.ChangeRoom("alley", "act3");
+        await WaitIdle(game);
+        await game.LoadGame(game.CaptureSave());
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Alley" && game.Room?.FindActor("bartender") is { Visible: true } wounded &&
+              wounded.Texture?.ResourcePath.EndsWith("bartender_shot.png") == true,
+            "a legacy wounded-Tony save loads with Tony on the gravel");
+        await game.Perform(Verb.UseItem, "bartender", "revolver");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "Alley" && gs.HasFlag(Endings.KilledTony) && gs.HasFlag("finish_tony") &&
+              game.Room?.FindActor("bartender")?.Texture?.ResourcePath.EndsWith("bartender_dead.png") == true,
+            "on a legacy wounded-Tony save the revolver on Tony still finishes him");
+        await game.Perform(Verb.Walk, "street");
+        await WaitIdle(game);
+        Check(game.Room?.Name == "ChicagoMap", "after the legacy kill, the street opens onto the map");
+
         // the shoulder shot ends on a choice; "Finish him" plays the second shot once the dialogue is over
         Seed(alleyReady, act3Items, "Shoot him in the shoulder", "Finish him");
         await game.ChangeRoom("alley", "act3");

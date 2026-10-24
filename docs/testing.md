@@ -111,7 +111,9 @@ resources you only read, as `Hotspot.ShapeRect` does. Don't drop a `GD.Load` res
 resource cache does not own it, so the GC can collect its wrapper, and if a load revives the cached resource before
 the finalizer runs, Godot 4.7.2 keeps a dead GC handle and logs `Handle is not initialized` from
 `SwapGCHandleForType` ([godot#124587](https://github.com/godotengine/godot/issues/124587)). Hold the wrapper and
-`Dispose` it when done, as `Game.RoomPackedScene` and `Game.ReleaseRoomScenes` do for room scenes.
+`Dispose` it when done, as `Game.RoomPackedScene` and `Game.ReleaseRoomScenes` do for room scenes. Art that rooms
+share (an actor's texture) can't be held that way, so `Game.FinalizeCollectedWrappers` runs the GC and waits for
+pending finalizers before each room scene is loaded or instantiated.
 A local pass does not cover exported builds; see [What only CI runs](#what-only-ci-runs).
 
 Don't run `autoplay` or `settings` with `--headless` by hand: they take screenshots, which need a renderer (CI uses
@@ -173,7 +175,7 @@ Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick cho
 modes, the save/load round trip and the coverage gates.
 
 - Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
-  1-oldman 1-steps 8 9 10 11 12 12-oldman 13 14`. No seeded state. `--ending=N` runs one route.
+  1-oldman 1-steps 1-caleb 8 9 10 11 12 12-oldman 13 14`. No seeded state. `--ending=N` runs one route.
 - After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
 - Fresh-launch checkpoints: the run also keeps two real saves in `user://autoplay_saves/checkpoints/` (end of Act One,
   Club vestibule) with the choices matched so far. `--resume=act2` / `--resume=act3` (suites `resume-act2`,
@@ -222,7 +224,7 @@ The launchers also take each ending by a case-insensitive title and pass Godot t
 | 4 | `prison-eleanor-visits` | 10 | `she-leaves-by-the-car` |
 | 12 | `kill-tony-surrender` | 11 | `she-visits-once` |
 | 12-oldman | `kill-tony-pray` | 13 | `alarm-run` |
-| 14 | `alarm-ambush` | | |
+| 14 | `alarm-ambush` | 1-caleb | `eleanor-escapes` |
 
 Numbers follow [Branches and endings](story-overview.md#branches-and-endings).
 ## Unit tests (`tests/*.Tests`)

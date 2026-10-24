@@ -69,7 +69,7 @@ User options go after `--`, e.g. `godot_console --path . --quit-after 600 -- --r
 | `--no-music` | Neither render nor play music (the requested track is still recorded). The launchers pass it to `settings`, `pause` and `walk`, which never check music |
 | `--clock=fast\|normal` | Automated runs only: 60x (default) or 8x game time |
 
-Endings: `1`-`14`, `1-oldman`, `1-steps`, `12-oldman`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.
+Endings: `1`-`14`, `1-oldman`, `1-steps`, `1-caleb`, `12-oldman`. Playthrough defaults to `all`; film defaults to `2` and rejects `all`.
 
 Useful Godot options: `--quit-after N` (frames; use it for bounded diagnostic runs, not interactive play), `--headless`,
 `--write-movie frames\f.png --fixed-fps 30` (record what the game draws, 480x270 PNGs), `--audio-driver Dummy`.

@@ -201,7 +201,7 @@ the interludes; their combined effect on ending selection begins once Micah reac
 
 ```mermaid
 flowchart TD
-    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose"]
+    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose<br/>(then Eleanor and Caleb at the city's edge<br/>if she held out and Micah gave up or walked away)"]
     steps -- "Keep going" --> tony["Tony at gunpoint"]
     tony -- "Lower the gun<br/>(church return + ring)" --> E1
     tony -- "Shoot him in the shoulder" --> finishTony{"Finish Tony?"}
@@ -255,7 +255,8 @@ How each decision is made:
   the epilogues: out of town, or "Tony sends his regards" in the prison yard.
 - **Fire into the wall** (Tony, instead of the shoulder): `warned_tony`. Tony, unhurt, gives the house and the kitchen
   key but not the alarm (the shoulder shot gets that out of him too), and no blood means no revenge. At the mansion a
-  look at the door, lintel, wire or bell spots the alarm, and the night goes on as usual. Opening the door without one
+  look at the wire or bell spots the alarm, and the night goes on as usual; looking at the door or lintel and taking
+  the key do not reveal it. Opening the keyed door without inspecting the alarm
   rings the bell, and feet come down the back stairs: **Run** (`alarm_ran`, ending 13: out of Chicago, the journal ends
   in Omaha with the revolver on the washstand) or **Stay** (`alarm_stayed`, ending 14: two Club men at the cook's
   table shoot him down; Caleb finishes the journal).
@@ -277,7 +278,7 @@ How each decision is made:
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
   on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
 - **Eleanor's escape outfits**: once out of the sheet she wears what she packed in her duffle. Held out
-  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11): a white dress with her pearls. Gave in (endings 2, 4): a black
+  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11, and ending 1 with Caleb): a white dress with her pearls. Gave in (endings 2, 4): a black
   skirt suit cut above the knee, no pearls. In prison (ending 9) she wears the inmate grey.
 - **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
   give Micah something to bargain with and keep him out of prison.
@@ -290,7 +291,7 @@ How each decision is made:
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Eleanor alone (8) or in prison with Caleb (9); preceded by Micah's coffee with Rose only if Tony lives |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |
-| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose |
+| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose; after a give-up or walk-away, if Eleanor held out, then Eleanor and Caleb at the city's edge |
 | 6 | Turned himself in | Prison, Rose visits |
 | 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
 | 2 / 3 | Evidence or fire; 2 if Eleanor was convinced | Out of town, with her (2) or alone (3) |
@@ -298,8 +299,9 @@ How each decision is made:
 
 The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
-the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9) and in the epilogue of
-ending 8. Daniel keeps the journal for Leo after endings
+the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9), in the epilogue of
+ending 8, and, if she held out, after Micah's coffee when he gave up on the steps or walked away from Tony (still
+ending 1: Caleb has got her out of the city, `caleb_escape`). Daniel keeps the journal for Leo after endings
 1, 6, 8, 9, 10, 11 and 12.
 
 ### Weather
@@ -320,7 +322,8 @@ the girls who escape; Caleb keeps silent so the Club leaves the convent alone (T
 near those nuns"). Harrington's unmasking and Tony at gunpoint touch on the girls, and Caleb's later visits return to
 his silence. The traffic ends only where somebody exposes it: Micah's signed papers in endings 1, 6 and 10 (Caleb
 carries them to the Tribune, they come out at Micah's trial, or Eleanor asks him to give them to the papers),
-Eleanor's testimony at her trial in ending 9 and the old man's Thursday book she mails to the Tribune in ending 8.
+Eleanor's testimony at her trial in ending 9, the old man's Thursday book she mails to the Tribune in ending 8,
+and Micah's papers handed in with his confession to the grand jury in ending 12.
 Endings 2 and 3 keep the papers as Micah's private insurance. While still supine outside the cathedral,
 he admits that his pursuit is driven by lust for Eleanor, in conflict with returning to Rose and Tommy.
 Caleb's leads refer to the established convent. Rose's doorstep reply remains "Forgiving's the easy part, Micah.

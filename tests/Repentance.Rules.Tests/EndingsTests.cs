@@ -34,6 +34,16 @@ public class EndingsTests
         Assert.Equal(ending, Endings.Resolve(Flags(flags.ToArray())));
     }
 
+    [Theory]
+    [InlineData(true, 3)]
+    [InlineData(false, 5)]
+    public void RefusalFlagDoesNotChangeTheOrdinaryEndings(bool free, int ending)
+    {
+        var flags = new List<string> { "eleanor_refused" };
+        if (free) flags.Add("took_documents");
+        Assert.Equal(ending, Endings.Resolve(Flags(flags.ToArray())));
+    }
+
     [Fact]
     public void RepentingAfterTheShotEndsInJailWhateverTheLeverage()
     {
@@ -156,6 +166,19 @@ public class EndingsTests
         Assert.False(Endings.EleanorHeldOut(Flags(Abbess)));
         Assert.False(Endings.EleanorHeldOut(Flags(Drugs)));
         Assert.False(Endings.EleanorHeldOut(Flags()));
+    }
+
+    [Fact]
+    public void CalebGetsEleanorOutOnlyAfterAnEarlyGiveUpWhenSheHeldOut()
+    {
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "gave_up_steps")));
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "walked_away")));
+        Assert.Equal(1, Endings.Resolve(Flags(Abbess, Drugs, "walked_away")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, "gave_up_steps")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Drugs, "walked_away")));
+        // the Our Father, with Eleanor back in bed in her coda, is ending 1 without the escape
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "spared_oldman")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "surrendered_tony", "killed_tony")));
     }
 
     [Fact]

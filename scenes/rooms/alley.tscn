@@ -57,12 +57,12 @@ centered = false
 
 [node name="Lamp" type="Sprite2D" parent="."]
 z_index = -9
-position = Vector2(47, 35)
+position = Vector2(48, 35)
 texture = ExtResource("3_alley_lamp")
 centered = false
 
 [node name="DoorOpenLit" type="Sprite2D" parent="Lamp"]
-position = Vector2(256, 84)
+position = Vector2(255, 84)
 texture = ExtResource("9_door_open_lamp")
 centered = false
 

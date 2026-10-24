@@ -430,8 +430,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   more, too ashamed to be in that room at all, and she knows it; he can see it in her eyes. So he leaves.
 - Eleanor remains in bed against the pillows, covered by the white sheet. She does not rise; her lips move while
   she talks.
-  The scene then fades to black: "Days later" fades in over 3 seconds and stays for 3 more, then Micah's office
-  fades in.
+  The scene then fades to black: "Days later" fades in over 3 seconds, stays for 3 more and fades out over 3,
+  then Micah's office fades in.
 
 #### Office, days later
 
@@ -669,7 +669,7 @@ Micah's things are stashed and come back when the interlude ends, and none of he
     to hold them together." Take the paste pot from the layout desk. Items join two at a time: the paste with
     either half gives a pasted half, and the pasted half with the other half gives the mended clipping (the paste
     is kept; it goes back on the desk when Micah leaves, or by using it on the desk). A pasted half doesn't take
-    more paste, and two pasted halves aren't needed.
+    more paste; two pasted halves still join into the mended clipping.
   - Look at the wall map: "Map of the Loop, pins for every address the paper ever printed." As soon as the
     halves are mended, Micah walks to the wall map and pins the clipping on it himself: the Harrington Building,
     LaSalle Street (flag `harrington_located`). Using a mended clipping on the map (an older save) does the same.
@@ -703,8 +703,9 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   - Step 1: use the lighter on the trash can. It catches fire, the watchman shouts "Fire!" and
     goes inside to phone the fire department, leaving the alley unwatched.
   - Step 2: use the hand on the crates to stack two of them under the fire escape.
-  - **Puzzle 7 - Ladder catch:** after the distraction, take the tapered packing wedge visible among the
-    crates. Stack the crates to reach the jammed ladder catch, whose illustration shows the obstruction.
+  - **Puzzle 7 - Ladder catch:** the tapered packing wedge is visible among the crates from the start, but
+    reaching for it while watched gets Micah spotted; take it after the distraction. Stack the crates to
+    reach the jammed ladder catch, whose illustration shows the obstruction.
     Use the wedge on the catch, then climb the fire escape (hand on it, or on the window).
     Both stacked crates and a freed catch are necessary; the wedge stays installed and the guard never
     returns on a gameplay timer.
@@ -829,7 +830,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - The man from behind is Bruno, the brute who escorted Micah out of the Club earlier.
 - Eleanor only speaks robotically here: flat, formal, repeated phrases ("I am where I belong, Mr. Jones." / "Thank
   you for bringing me back."), never calling him Micah.
-- Micah's masked, cloaked collapse is shown before the blackout on either choice.
+- Bruno lifts a slightly bent arm in front of himself, hand just above his head, brings it down in a short blow,
+  then relaxes it: no broad wind-up or body lunge. His off-hand stays hidden; his shoulder and collar stay
+  jacket-coloured up to the jaw. The thud lands at contact. Still masked and cloaked, Micah
+  drops onto both knees, holds there briefly, then pitches forward onto the floor before the blackout on every choice.
+  His black cloak keeps his neck and shoulders covered throughout the fall, including when he is face-down.
 
 #### Church, outside
 
@@ -844,7 +849,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - At this point, the player can have two choices: keep going for Eleanor, or giving up.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
   whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
-  to the end of act 3 (caption "End of Act Three").
+  to the end of act 3 (caption "End of Act Three"); if Eleanor held out, her escape with Caleb comes first (ending 1).
 - If the player decide to keep pushing, keep to the next.
 
 #### Office
@@ -870,18 +875,23 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 #### Behind Blue Lantern, previous location from Act 1
 
 - The existing alley sequence has three steps: break the lamp, kick the trash cans in the dark to lure
-  Sal out, then use the revolver on him to knock him down. Hit from behind, Sal drops to his knees and then falls
-  face-down. Only then knock on the back door to face Tony.
+  Sal out through the visibly opened back door, then use the revolver on him to knock him down. Micah visibly
+  steps close behind Sal, raises the revolver by its barrel in front of himself with a bent arm and his hand
+  just above his head, makes a small downward blow and relaxes his arm; the thud lands with the blow. His body
+  stays still, his off-hand stays hidden, and the shoulder/collar stay jacket-coloured up to the jaw, without
+  an exposed shirt, tie or skin patch.
+  Sal drops to his knees and then falls face-down. Only then knock on the back door to face Tony.
   Trying the noise while the lamp is lit or knocking while Sal is inside cannot bypass the sequence.
-- Once the bartender is out, Micah automatically starts the dialogue with the revolver out, asking how to get to
-  Eleanor.
+- Tony opens the back door before stepping outside, then shuts it behind him. Once he is out, Micah automatically
+  starts the dialogue with the revolver out, asking how to get to Eleanor.
 - The bartender tells him to bug off, these people are really dangerous (they bring girls in off the trains like
   crates of oranges, and nobody asks), and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between firing the revolver into his shoulder, firing it into the wall by his
   head (the warning shot), or walking away, because it's not worth it.
   The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
   office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
-- If the player walks out, he's going to his wife's house (caption *End of Act Three*).
+- If the player walks out, Tony remains standing outside while Micah automatically leaves for his wife's house
+  (caption *End of Act Three*).
 - If he fires, Tony is hit in the shoulder: he clutches it, his legs fold straight down under him and he ends up on
   his back, with the blood on his shoulder and pooling on the ground under it.
 - The bartender screams, and he tell him to go directly to the house of Harrington father, he explains how to get inside
@@ -901,9 +911,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Knocking again after the shot is refused: nobody's coming out of that door after a gunshot.
 - **The warning shot** (`warned_tony`, knot `bartender_miss`): the bullet goes into the bricks by Tony's ear. Scared
   and unhurt, Tony gives the Gold Coast, the kitchen door and the key on the lintel ("walk right in like the delivery
-  boys"), too quickly: he leaves out the alarm. He goes back inside and bolts the door; knocking is refused. No blood,
-  so no debt with the mob and no revenge in the endings. The street leads to the office in the storm, as after the
-  shoulder.
+  boys"), too quickly: he leaves out the alarm. Tony stays in his position outside; knocking is refused, and Micah
+  automatically leaves for the office in the storm, as after the shoulder shot. No blood, so no debt with the mob
+  and no revenge in the endings. Reloading the alley preserves Tony's standing or fallen position.
 
 #### The night after Tony (the kill route)
 
@@ -947,11 +957,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 - Music: from here to the last mansion room, one unbroken dissonant thriller loop (double bass, pizzicato clusters,
   bowed cello, one brief high trumpet stab), also under Eleanor's coda; it stops when the story leaves the house.
-- Tony's key-on-the-lintel shortcut is wired to an alarm. Inspect the door or reach for the key to notice
-  the taut wire; move the coal bin under the bell to reach its hammer.
-- After the warning shot Micah doesn't know about the alarm: taking the key doesn't reveal it, but a look at the door,
-  the lintel, the wire or the bell does (and then the night goes on as usual). Opening the door before that rings the
-  bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
+- Tony's key-on-the-lintel shortcut is wired to an alarm. After the shoulder shot, inspect the door or reach for the
+  key to notice the taut wire; move the coal bin under the bell to reach its hammer.
+- After the warning shot Micah doesn't know about the alarm: looking at the door or lintel and taking the key don't
+  reveal it. Only inspecting the wire or bell does (and then the night goes on as usual). Opening the keyed door
+  before that rings the bell (`AlarmBell`), and heavy feet come down the back stairs (`alarm_footsteps`):
   - **Run** (`alarm_ran`): ending 13.
   - **Stay. She's in there.** (`alarm_stayed`): into the kitchen, where two of the Club's men (charcoal overcoat and
     fedora, grey suit and flat cap; `gunman_a`/`gunman_b` sprites with draw and aim strips) wait at the cook's table.
@@ -1088,6 +1098,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   Keep Micah's "Nothing you owe me." and the journal's "A year since that cup of coffee." Rose recalls "Last time
   you were here, you wanted me to forgive you." only if he asked her for it on her doorstep (`rose_wait`); if he
   said good night first, she only asks "What do you want?".
+- From Micah's "Nothing you owe me." to Rose's "...Why not.", the Act 2 close-up of the two of them (Rose on the
+  left, Micah on the right) frames the invitation, as when she asked him not to get into trouble again; it fades
+  before his closing thought.
 - In this case, the journal ends with Micah back with his wife, saying their promises again at his brother's church, with his blessing (or, if he
   shot Tony and they left Chicago, saying their promises again at St. Anne's downstate, with Caleb's blessing).
 - In the present day, when Daniel reads the vows entry, a photograph of Micah and Rose on that day pops up on the
@@ -1097,6 +1110,23 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Only if Micah took the signed papers from the study (possible on the Our Father route), the journal adds that
   Caleb carried them to the Tribune himself; a grand jury followed, and the Club's Thursdays ended. Without the
   papers, there is no mention.
+- **Eleanor's escape, with Caleb.** If Eleanor held out both times (the truth to the Mother Superior, the old man's gin
+  and powder refused) and Micah gave up before the mansion (on the church steps, or walking away from Tony), it is
+  still ending 1, but after Rose's "Why not." the screen fades to the outskirts at night (`caleb_escape`). The rain
+  has stopped. The player is Eleanor in her white dress and pearls, from the duffle she had packed for running;
+  Caleb stands beside her, and the scene plays by itself. Three nights after the Club, Caleb got her out of the old
+  man's house:
+  - Eleanor: it's one thing for him to sneak a few of the other girls out the back, but she's their star; they won't
+    take it lying down, and they'll come after him. Caleb: "I know. But I'm tired of playing their game."
+  - Practical arrangements: a parishioner's produce truck passes before dawn and takes her downstate to Springfield,
+    where Caleb's friends, the Franciscan sisters, put her up with no questions until a family he knows can take her
+    on to St. Louis; he gives her an envelope with a little money.
+  - Eleanor knows Caleb for Micah's brother by his hands, and tells him Micah came for her into the Club, masked,
+    and was carried out.
+  - Eleanor learns that Micah went home to his wife, and is glad of it. Her last words, as the truck's lights come
+    up the road: "Say hi to Micah."
+  - Then *End of Act Three*. The journal's last entry is ending 1's, but the Second Interlude's source changes: Caleb
+    passed on what she told him the night he got her out of Chicago, at her asking.
 
 #### Option 2 - Outskirts, with Eleanor
 
@@ -1176,7 +1206,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 These need Eleanor to have held out **both** times: telling the Mother Superior the truth instead of seducing her
 (First Interlude) and refusing the old man's gin and powder
-(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1, and so does Eleanor
+(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1 (with Eleanor's escape
+with Caleb after the coffee, see Option 1), and so does Eleanor
 returning to bed in her coda. Endings 2-7 need her to have given in at least once.
 
 #### Option 8 - Outskirts, Eleanor alone, after the fire
@@ -1287,7 +1318,7 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 
 | Ending | Who wrote the Second Interlude, and from what |
 |---|---|
-| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to. |
+| 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to (after Eleanor's escape with Caleb: she told Caleb the night he got her out, and asked him to pass it on). |
 | 2 | Micah: she told him on the road. |
 | 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
 | 4 | Micah: she told him across the parlour table. |

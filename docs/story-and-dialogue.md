@@ -147,6 +147,7 @@ send the story the wrong way.
 | Act 2 -> 3 | `Attic.EndOfActTwo` | Stash, clear `masked`, `StoryAct = 3`, present-day bedroom |
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |
+| Eleanor's escape | `Act3.EleanorWithCaleb`, flags `caleb_escape`, `eleanor_epilogue` | Ending 1 after a give-up or walk-away when she held out: after Rose's coffee, Eleanor and Caleb at the outskirts |
 
 `Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad is hidden, generic
 exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes and the coda
@@ -172,7 +173,9 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 | 7 | `StaysFree` | 2 if `eleanor_convinced`, else 3 (outskirts) |
 | 8 | otherwise | 4 if `eleanor_convinced`, else 5 (prison) |
 
-Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). `EleanorFollows` is
+Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). With it, a give-up on
+the steps or a walk-away from Tony is still ending 1, but `EleanorEscapesWithCaleb` adds her scene with Caleb at the
+outskirts after Rose's coffee. `EleanorFollows` is
 `eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
 a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
 1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 has the "The next morning" caption (`Act3.Finish`); the Joliet
@@ -180,9 +183,10 @@ visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
 case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not
-the alarm, and opening the kitchen door without a look at it rings the bell (`alarm_footsteps`): run (`alarm_ran`)
+the alarm. Looking at the door or lintel and taking the key do not reveal it; only inspecting the wire or bell does.
+Opening the keyed kitchen door without that inspection rings the bell (`alarm_footsteps`): run (`alarm_ran`)
 or stay (`alarm_stayed`).
-Every route must reach "The End" (`Playthrough` routes `1`-`14`, `1-oldman`, `1-steps`, `12-oldman`).
+Every route must reach "The End" (`Playthrough` routes `1`-`14`, `1-oldman`, `1-steps`, `1-caleb`, `12-oldman`).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
 click or refusal walks her past him to the door.
 

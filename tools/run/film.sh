@@ -12,12 +12,13 @@
 #   tools/run/film.sh -s hyper --from ending --ending 8
 #
 # Endings: pass the number or the title (case-insensitive). The numbers are the ones used in docs/story-overview.md
-# ("Branches and endings") and by the playthrough routes; 1-oldman and 1-steps are other routes to ending 1,
+# ("Branches and endings") and by the playthrough routes; 1-oldman, 1-steps and 1-caleb are other routes to ending 1,
 # 12-oldman another route to ending 12.
 #   Number    Title                    Ending
 #   1         walk-away                Micah lowers the gun on Tony; coffee with Rose
 #   1-oldman  spare-the-old-man        He prays the Our Father and spares the old man; coffee with Rose
 #   1-steps   give-up                  He gives up on the cathedral steps; coffee with Rose
+#   1-caleb   eleanor-escapes          Eleanor held out, he lowers the gun on Tony; Rose, then Eleanor and Caleb
 #   2         escape-together          Evidence or fire, Eleanor convinced; out of town with her
 #   3         escape-alone             Evidence or fire, Eleanor not convinced; out of town alone
 #   4         prison-eleanor-visits    Neither, Eleanor convinced; prison, Eleanor visits
@@ -40,6 +41,7 @@ ending_number() {
     1|walk-away) echo 1 ;;
     1-oldman|spare-the-old-man) echo 1-oldman ;;
     1-steps|give-up) echo 1-steps ;;
+    1-caleb|eleanor-escapes) echo 1-caleb ;;
     2|escape-together) echo 2 ;;
     3|escape-alone) echo 3 ;;
     4|prison-eleanor-visits) echo 4 ;;
@@ -76,14 +78,14 @@ while [ $# -gt 0 ]; do
     --ending=*) ending="${1#*=}" ;;
     --from=*) from="${1#*=}" ;;
     --no-clean) clean=0 ;;
-    -h|--help) sed -n '2,34p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,35p' "$0"; exit 0 ;;
     *) echo "Unknown argument '$1'. Use --speed <value> or -s <value> (default: 1); see --help." >&2; exit 2 ;;
   esac
   shift
 done
 case "$speed" in 1|2|4|8|16|60|hyper) ;; *) echo "--speed / -s must be 1, 2, 4, 8, 16, 60 or hyper." >&2; exit 2 ;; esac
 if ! ending="$(ending_number "$ending")"; then
-  echo "--ending must be an ending number (1-14, 1-oldman, 1-steps, 12-oldman) or its title; see --help." >&2; exit 2
+  echo "--ending must be an ending number (1-14, 1-oldman, 1-steps, 1-caleb, 12-oldman) or its title; see --help." >&2; exit 2
 fi
 case "$from" in act1|interlude1|act2|interlude2|act3|ending) ;; *) echo "--from must be act1, interlude1, act2, interlude2, act3 or ending." >&2; exit 2 ;; esac
 if [ "$from" = act3 ] && [ "$ending" = 1-steps ]; then

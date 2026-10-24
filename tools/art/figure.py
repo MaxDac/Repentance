@@ -1945,7 +1945,8 @@ def _apron(c, apron, hip, knee, ankle, up, across, floor=92.5):
 
 
 def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=False, plain_chest=False, head_sprite=None,
-                  toes_tucked=False, far_arm=None, wound=None, shirt_collar=None):
+                  toes_tucked=False, far_arm=None, wound=None, shirt_collar=None, on_back=False,
+                  closed_coat=False, hide_far_arm=False):
     """Articulated screen-space pose. Contact points stay fixed; limbs, clothes and the head are painted separately.
     chest_down: the trunk is bent over the floor (hands and knees), so the shirt front and tie face the ground and are
     hidden behind the coat's flank instead of being drawn along the spine, and the coat skirt hangs from the hips.
@@ -1960,8 +1961,13 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     wound, instead of shadowing the near arm behind it.
     wound: where between the shoulder (0) and the hip (1) a gunshot has soaked the clothes red.
     shirt_collar: colour of an open shirt collar at the base of the neck, which then rises from the back of the
-    shoulder, with the near arm hung level with the back."""
+    shoulder, with the near arm hung level with the back.
+    on_back: lying flat on his back seen side-on, so the coat hides the shirt front and tie, and only a short edge of
+    the shirt collar shows between the coat and the neck.
+    closed_coat: the coat covers the chest and neck up to the jaw, shading the shoulder and sleeve as one mass.
+    hide_far_arm: the far arm is completely occluded by the body in a side-on pose."""
     H = spec["h"]
+    plain_chest = plain_chest or closed_coat
     c = Canvas(fw, fh)
     # Keep the weight-bearing ankle fixed across the entire sequence, with space for a body lying to its left.
     points = grounded_joints(joints, fw)
@@ -1976,7 +1982,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     across = np.array([-up[1], up[0]])
     torso, skin = spec["torso"], spec["skin"]
     pants = spec.get("pants", torso)
-    if head_sprite is not None or chest_down:  # the coat shoulder and the upper sleeve shade as one mass, no seam
+    if head_sprite is not None or chest_down or closed_coat:
         c.blend_parts = ("torso", "arm", "collar")
         along = elbow - shoulder
         t = ((c.X - shoulder[0]) * along[0] + (c.Y - shoulder[1]) * along[1]) / max(along @ along, 1e-6)
@@ -2002,6 +2008,8 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
                 limb(ankle + off + (-2, -2), np.array([ankle[0] + off[0] - 1, 91.0]), 2, 1.5, spec["shoes"], part)
             else:
                 limb(ankle + off + (-2, -1), ankle + off + (5, 0), 2, 1.5, spec["shoes"], part)
+        if far and hide_far_arm:
+            continue
         if far and far_arm:
             limb(shoulder + off, far_arm[0], 3 * ak, 2.5 * ak, sleeve, "fararm")
         elif far:
@@ -2033,14 +2041,15 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
     if apron:
         _apron(c, apron, hip, knee, ankle, up, across)
     # Shirt opening and tie follow the trunk, not the screen's vertical axis.
-    if not spec.get("cloak") and not chest_down and not drape and not plain_chest:
+    if not spec.get("cloak") and not chest_down and not drape and not plain_chest and not on_back:
         shirt = shoulder - up * 5
         limb(shoulder, shirt, 2, 1.4, "e3d7bf", "shirt")
         tie = next((d[5] for d in spec.get("decals", []) if d[0] == "strip" and d[3] == 0.007), None)
         if tie:
             limb(shoulder - up * 2, shoulder - up * 9, 0.7, 0.6, tie, "tie")
     hk = max(ak, 0.7)
-    limb(shoulder + across * (0 if chest_down else -0.5 if shirt_collar else 2), elbow, 3.2 * ak, 2.7 * ak, sleeve, "arm")
+    limb(shoulder + across * (0 if chest_down or closed_coat else -0.5 if shirt_collar else 2),
+         elbow, 3.2 * ak, 2.7 * ak, sleeve, "arm")
     limb(elbow, hand - (hand - elbow) * 0.12, 2.7 * ak, 2 * ak, fore, "arm")
     limb(hand - (hand - elbow) * 0.12, hand, 2 * hk, 1.7 * hk, skin, "hand")
     if spec.get("cloak"):
@@ -2055,12 +2064,15 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         ang = math.atan2(across[1], across[0])
         c.put(c.ellipse(shoulder + across * 0.5 + head_axis * 0.05, 5.6, 4.6, ang), torso, "torso")
         c.put(c.capsule(shoulder, neck + (0, 1), 3.2, 2.6), torso, "torso")
+    elif closed_coat:
+        neck = shoulder + head_axis * 0.5
+        limb(shoulder, neck, 3.2, 2.6, torso, "collar")
     elif plain_chest:  # the coat's collar turned up round the neck, then a little skin under the jaw
         neck = shoulder + head_axis * 0.5
         limb(shoulder, shoulder + head_axis * 0.3, 2.6, 2.3, torso, "collar")
         limb(shoulder + head_axis * 0.3, neck, 1.8, 1.6, skin, "neck")
     elif coat and abs(head_axis[0]) > abs(head_axis[1]):
-        neck = shoulder + head_axis * 0.55
+        neck = shoulder + head_axis * (0.25 if on_back else 0.55)
         # bent over the floor the shirt collar faces the ground, so only the coat's shows
         limb(shoulder, neck, 2.3, 2, torso if chest_down else spec.get("collar", torso), "collar")
         limb(neck, shoulder + head_axis * 0.75, 1.7, 1.5, skin, "neck")
@@ -2081,7 +2093,7 @@ def action_figure(spec, joints, fw=192, fh=96, chest_down=False, coat_drape=Fals
         ImageDraw.Draw(stain).ellipse([wx - 3, wy - 3, wx + 3, wy + 3], fill=(138, 18, 22, 255))
         stain.putalpha(ImageChops.multiply(stain.getchannel("A"), img.getchannel("A")))
         img.alpha_composite(stain)
-    if far_arm:  # the far forearm and hand cross in front of the body, pressed over the wound
+    if far_arm and not hide_far_arm:  # the far forearm and hand cross in front of the body, pressed over the wound
         fe, fhand = far_arm
         hk = max(ak, 0.7)
         fc = Canvas(fw, fh)

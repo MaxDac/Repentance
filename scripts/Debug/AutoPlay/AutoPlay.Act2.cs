@@ -293,7 +293,7 @@ public partial class AutoPlay
         await game.Wait(2);
         await Shot("motel_night");
         bool daysLater = false;
-        ulong captionStart = 0, captionOpaque = 0;
+        ulong captionStart = 0, captionOpaque = 0, captionFading = 0, captionGone = 0;
         await Until(() => game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater, step: 0.02);
         double scale = Engine.TimeScale;
         Engine.TimeScale = 1;
@@ -305,6 +305,8 @@ public partial class AutoPlay
                 bool shown = game.Hud.CaptionVisible && game.Hud.CaptionText == Rooms.MotelNight.DaysLater;
                 daysLater |= shown;
                 if (shown && captionOpaque == 0 && game.Hud.CaptionAlpha >= 1) captionOpaque = Time.GetTicksMsec();
+                if (shown && captionOpaque > 0 && captionFading == 0 && game.Hud.CaptionAlpha < 1) captionFading = Time.GetTicksMsec();
+                if (!shown && captionFading > 0 && captionGone == 0) captionGone = Time.GetTicksMsec();
                 return game.Room?.Name == "Office";
             }, step: 0.02);
         }
@@ -313,6 +315,9 @@ public partial class AutoPlay
         double captionFade = (captionOpaque - captionStart) / 1000.0;
         Check(captionOpaque > 0 && captionFade is > 2.5 and < 3.6,
             $"\"Days later\" fades in over 3s (took {captionFade:0.0}s)");
+        double captionFadeOut = (captionGone - captionFading) / 1000.0;
+        Check(captionGone > 0 && captionFadeOut is > 2.5 and < 3.6,
+            $"\"Days later\" fades out over 3s (took {captionFadeOut:0.0}s)");
         Check(!gs.HasFlag("interlude1") && game.Player.Character.StartsWith("micah") && gs.HasItem("revolver"),
             "Micah's journal takes the story back, with his things");
         Check(game.Hud.SatchelVisible, "the satchel is back for Micah");
@@ -861,6 +866,11 @@ public partial class AutoPlay
         Check(!gs.HasFlag("crates_stacked"), "the watchman sees Micah going for the crates");
         await game.Perform(Verb.Hand, "fire_escape");
         Check(game.Room?.Name == "HarringtonRoad", "can't climb while watched");
+        Check(game.Room?.FindHotspot("packing_wedge")?.Visible == true
+              && game.Room?.GetNodeOrNull<Sprite2D>("WedgeSprite")?.Visible == true,
+            "the packing wedge is visible among the crates before the fire");
+        await game.Perform(Verb.Hand, "packing_wedge");
+        Check(!gs.HasItem("wedge") && !gs.HasFlag("wedge_taken"), "the watchman sees Micah going for the wedge");
         await game.Perform(Verb.UseItem, "trash_can", MicahKit.LighterId);
         Check(gs.HasFlag("watchman_distracted"), "the fire sends the watchman inside");
         // count frame steps rather than compare two samples: at the fast clock one slow frame can step the strip a whole

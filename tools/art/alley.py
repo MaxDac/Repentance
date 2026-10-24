@@ -25,6 +25,7 @@ PUDDLES = [(150, 238, 236, 252), (300, 244, 380, 258), (80, 204, 128, 211), (392
 IRON, IRON_L = hx("26282e"), hx("4a4e58")
 WARM = (255, 172, 92)
 BLUE = hx("4a8ae8")
+MOON_COLORS = [hx("515e7d"), hx("8e99b5"), hx("bbc4d4"), hx("e0e3e5")]
 
 
 def illuminate(img, ambient, lights):
@@ -98,12 +99,29 @@ def passage(img):
     # cobbled floor of the passage
     floor = [lfoot, rfoot, frf, flf]
     d.polygon(floor, fill=hx("4a4852"))
-    for i in range(1, 20):
-        t = t_far * (1 - (1 - i / 20) ** 1.6)
-        a, b = toward(lfoot, t), toward(rfoot, t)
-        d.line([a, b], fill=hx("34323a"))
-    for x in range(NEAR_X0 + 6, NEAR_X1, 9):
-        d.line([(x, BASE), toward((x, BASE), t_far)], fill=hx("3a3842"))
+    rnd = random.Random(152)
+    rows = [t_far * (1 - (1 - i / 16) ** 1.6) for i in range(17)]
+    for row, (near, far) in enumerate(zip(rows, rows[1:])):
+        for col in range(-1, 12):
+            x0 = col * 10 + (5 if row % 2 else 0)
+            x1 = x0 + 9
+            a, b = toward((max(0, x0), BASE), near), toward((min(100, x1), BASE), near)
+            c, e = toward((min(100, x1), BASE), far), toward((max(0, x0), BASE), far)
+            if x1 <= 0 or x0 >= 100:
+                continue
+            color = mix(hx("42434e"), hx("85879a"), rnd.uniform(0.1, 0.65))
+            d.polygon([a, b, c, e], fill=color)
+            d.line([a, b], fill=mul(color, 1.3))
+            d.line([e, c], fill=hx("292b36"))
+    # A wet gutter, drain grate, scattered rubbish and a broken chair give the narrow road a human scale.
+    d.line([toward((10, BASE), 0.05), toward((10, BASE), 0.7)], fill=hx("99a2ba"), width=1)
+    d.polygon([(20, 182), (37, 182), (39, 178), (24, 178)], fill=hx("252936"))
+    for x in range(24, 38, 3):
+        d.line([(x, 181), (x + 2, 178)], fill=hx("737c92"))
+    d.polygon([(30, 174), (36, 173), (34, 176), (29, 176)], fill=hx("9b8b76"))
+    d.line([(77, 173), (80, 160), (88, 160), (87, 174)], fill=hx("725745"), width=2)
+    d.line([(79, 167), (88, 167)], fill=hx("9b7960"), width=2)
+    d.line([(81, 160), (82, 155), (87, 156)], fill=hx("725745"), width=2)
     # a garbage pail and a broken chair half-way down
     p = toward((70, BASE), 0.35)
     d.rectangle([p[0] - 5, p[1] - 14, p[0] + 5, p[1]], fill=hx("6a6e74"))
@@ -606,7 +624,6 @@ def lighting(img, on, far_box, ajar=False):
     d.point((394, 155), fill=hx("b8f0ff"))
     d.point((397, 155), fill=hx("b8f0ff"))
     light(img, "rect", [fx0 - 2, fy0, fx1 + 2, fy1], hx("e0a860"), 0.18, 6)
-    light(img, "ellipse", [52, 2, 64, 14], hx("dfe4f4"), 0.75, 2)          # moon over the passage
     light(img, "ellipse", [20, -40, 100, 50], hx("8090c0"), 0.25, 18)
     if on:
         # the glow starts under the rim and fans downward; nothing shines up through the dish
@@ -617,6 +634,20 @@ def lighting(img, on, far_box, ajar=False):
         light(img, "rect", [sx - 4, 200, sx + 4, 262], hx("ffe0a0"), 0.3, 3)  # streak on the wet stones
     shade(ImageDraw.Draw(img), on)
     return img
+
+
+def moon(img):
+    """A crisp lunar disc and shaded maria inside the existing misty halo, rather than a blurred white dot."""
+    d = ImageDraw.Draw(img)
+    dark, middle, bright, rim = MOON_COLORS
+    d.ellipse([51, 1, 65, 15], fill=middle)
+    d.ellipse([52, 2, 64, 14], fill=bright)
+    d.arc([52, 2, 64, 14], 110, 285, fill=rim)
+    for box in ([58, 4, 62, 8], [55, 8, 60, 12], [54, 4, 56, 6]):
+        d.ellipse(box, fill=middle)
+        d.arc(box, 20, 140, fill=rim)
+    d.point((55, 5), fill=dark)
+    d.point((61, 11), fill=middle)
 
 
 def glints(img, on):
@@ -677,6 +708,7 @@ def paint(on, ajar=False):
     img = lighting(img, on, far_box, ajar)
     reflections(img)
     vignette(img, 0.5, tint=(14, 14, 34), blur=46)
+    moon(img)
     return img
 
 
@@ -695,7 +727,7 @@ def variants():
     both = Image.new("RGB", (W * 4, FULL_H))
     for i, img in enumerate((off, on, ajar_off, ajar_on)):
         both.paste(img, (W * i, 0))
-    pal = palette_of(both, 128)
+    pal = palette_of(both, 124) + MOON_COLORS
     return tuple(pixelize(i, pal) for i in (off, on, ajar_off, ajar_on))
 
 

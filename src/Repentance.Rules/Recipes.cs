@@ -47,6 +47,11 @@ public static class Recipes
         new("clipping_bottom_pasted", "clipping_top", "clipping", new[] { "clipping_bottom_pasted", "clipping_top" },
             "Edge to edge, a press of the thumb, and the two halves are one story again. The address reads clean.",
             Flag: "mended_clipping"),
+        // Both halves pasted: the raw halves are one-shot pickups, so this join must stay open.
+        new("clipping_top_pasted", "clipping_bottom_pasted", "clipping",
+            new[] { "clipping_top_pasted", "clipping_bottom_pasted" },
+            "Edge to edge, a press of the thumb, and the two halves are one story again. The address reads clean.",
+            Flag: "mended_clipping"),
         // 14 - Club vestibule.
         new(MicahKit.LighterId, "sealing_wax", "wax_soft", new[] { "sealing_wax" },
             "I hold the lighter under the stick until the end goes glossy and soft. The lighter goes back in my pocket.",
@@ -80,7 +85,6 @@ public static class Recipes
         new("clipping_top", "clipping_bottom", "Torn straight through the address. I'd need something to hold them together."),
         new("paste", "clipping_top_pasted", "That edge is pasted already. It wants its other half, not more paste."),
         new("paste", "clipping_bottom_pasted", "That edge is pasted already. It wants its other half, not more paste."),
-        new("clipping_top_pasted", "clipping_bottom_pasted", "One pasted edge is plenty. Any more and the address drowns in it."),
         new("paste", "clipping", "It's mended. Any more paste and it'll stick to my fingers instead."),
         new("sealing_wax", "invitation", "Hard as a church pew. Needs a flame."),
         new("signet_raven", "invitation", "There's no wax on it to take the seal."),

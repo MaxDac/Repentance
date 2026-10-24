@@ -23,7 +23,8 @@ namespace Repentance;
 /// </list>
 /// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
 /// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
-/// 1 (walk away from Tony), 1-oldman (spare Harrington, praying back to the door), 1-steps (give up on the church steps).
+/// 1 (walk away from Tony), 1-oldman (spare Harrington, praying back to the door), 1-steps (give up on the church steps),
+/// and 1-caleb (walk away from Tony after Eleanor refused the gin too: Rose, then Eleanor and Caleb at the outskirts).
 /// Act 2's First Interlude always refuses the Mother Superior; Act 3's Second Interlude takes the old man's gin except on
 /// Eleanor's routes: 8 (after the prayer she strikes him and burns the house), 9 (strikes him only), 10 (Micah shoots,
 /// she follows him worn out, and the fire and documents take them out of town) and 11 (the same, but nothing taken: prison).
@@ -34,7 +35,7 @@ namespace Repentance;
 /// </summary>
 public sealed partial class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "8", "9", "10", "11", "12", "12-oldman", "13", "14" };
+    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "1-caleb", "8", "9", "10", "11", "12", "12-oldman", "13", "14" };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.
@@ -60,7 +61,7 @@ public sealed partial class Playthrough : Harness
         "act3" => route == "1-steps" ? throw new ArgumentException("ending 1-steps ends in the Second Interlude, before Act 3") : "act_three_office",
         "ending" => route switch
         {
-            "1" or "12" or "12-oldman" or "13" or "14" => "alley_act_three",
+            "1" or "1-caleb" or "12" or "12-oldman" or "13" or "14" => "alley_act_three",
             "1-steps" => "second_interlude_oldman",
             _ => "mansion_study",
         },

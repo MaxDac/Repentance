@@ -387,7 +387,7 @@ def supine_frame(spec, name, wound=None):
     """Single frame of a character lying on his back on the ground, head to the left; as tall as a walk frame but wider,
     with the body resting on the row the standing figure's soles touch. wound: where along the body (0 = head, 1 = feet)
     a gunshot has soaked the clothes, with a pool of blood on the ground beneath it."""
-    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST)
+    img, head = action_figure(dict(spec, h=spec["h"] * SCALE), REST, on_back=True)
     from PIL import Image, ImageDraw, ImageChops
     if wound is not None:
         stain = Image.new("RGBA", img.size)
@@ -572,6 +572,47 @@ def kicked_strip(spec, name):
     scaled = dict(spec, h=spec["h"] * SCALE)
     frames = [kneeling_figure(scaled, joints) for joints in KICKED] + [kneeling_figure(scaled, KNEEL)]
     action_strip(name, frames, [0.3, 0.3, 0.2])
+    return frames
+
+
+def strike_strip(spec, name, player=False):
+    """A small bent-arm lift, downward blow and relaxed return; contact follows the 0.45-second preparation."""
+    from PIL import Image, ImageDraw
+    if player:
+        idle = Image.new("RGBA", (192, FH))
+        idle.alpha_composite(figure(spec, pose(PLAYER_IDLE_YAW), FW, FH), (64, 0))
+        standing = (idle, (96, 18))
+    else:
+        standing = npc_standing(spec, _arms("fold"))
+    scaled = dict(spec, h=spec["h"] * SCALE)
+    frames = [standing]
+    for elbow, hand in (((73, 20), (75, 7)), ((76, 34), (82, 22)), ((68, 44), (70, 57))):
+        joints = UPRIGHT[:5] + [elbow, hand]
+        joints[1] = (64, 31)
+        image, head = action_figure(scaled, joints, closed_coat=True, hide_far_arm=True)
+        if player:
+            x, y = map(int, grounded_joints(joints)[6])
+            fist = image.crop((x - 2, y - 3, x + 3, y + 3))
+            d = ImageDraw.Draw(image)
+            d.rectangle((x - 1, y - 1, x + 1, y), fill="#83909c")
+            d.polygon([(x + 1, y - 2), (x + 2, y - 4), (x + 5, y - 3),
+                       (x + 6, y), (x + 4, y + 1), (x + 1, y)], fill="#26303d")
+            d.line([(x + 2, y - 3), (x + 4, y - 3)], fill="#9aa6b2")
+            d.rectangle((x + 2, y - 2, x + 4, y), fill="#596574")
+            d.line([(x + 3, y - 2), (x + 3, y - 1)], fill="#2d3541")
+            d.point((x + 4, y - 2), fill="#83909c")
+            d.line([(x + 5, y - 2), (x + 6, y - 3)], fill="#83909c")
+            d.arc((x + 2, y, x + 5, y + 3), 0, 180, fill="#26303d")
+            d.polygon([(x + 4, y), (x + 6, y - 1), (x + 8, y + 3),
+                       (x + 7, y + 4), (x + 5, y + 2)], fill="#60402d", outline="#2c211b")
+            d.line([(x + 5, y), (x + 7, y + 2)], fill="#98653d")
+            d.point((x + 6, y + 2), fill="#412b21")
+            d.point((x + 7, y + 3), fill="#77808b")
+            # Keep the existing fingers in front: the short barrel is entirely enclosed by the grip.
+            image.alpha_composite(fist, (x - 2, y - 3))
+        frames.append((image, head))
+    frames.append(standing)
+    action_strip(name, frames, [0.15, 0.3, 0.12, 0.18, 0.15])
     return frames
 
 
@@ -883,7 +924,13 @@ def action_sequences(spec, name):
         return frames + [end], times + [timing[-1]]
 
     if name == "micah_masked":
-        falling, times = sequence(FALL, action_figure(scaled, REST), [0.12, 0.12, 0.12, 0.12, 0.12, 0.22])
+        keys = [UPRIGHT, KNEES_PRONE[0], KNEES_PRONE[1], KNEES_PRONE[2]]
+        falling = [standing]
+        times = [0.08]
+        for i, (a, b) in enumerate(zip(keys, keys[1:])):
+            falling.append(action_figure(scaled, between(a, b), chest_down=i > 0, closed_coat=True))
+            falling.append(action_figure(scaled, b, chest_down=i > 0, closed_coat=True))
+            times += [0.12, 0.4 if i == 0 else 0.18 if i == 1 else 0.3]
         action_strip(f"{name}_collapse", falling, times)
     if name == "micah":
         recover_strip(spec, scaled, standing)
@@ -957,7 +1004,7 @@ def recover_strip(spec, scaled, standing):
         out.alpha_composite(img.crop((max(0, -dx), 0, img.width - max(0, dx), img.height)), (max(0, dx), 0))
         return out, (head[0] + dx, head[1])
 
-    frames = [action_figure(scaled, REST)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
+    frames = [action_figure(scaled, REST, on_back=True)] + [placed(k) for k in recover_keys()] + [turning_frame(spec), standing]
     action_strip("micah_recover", frames, [0.3, 0.22, 0.2, 0.16, 0.12, 0.12, 0.1, 0.07, 0.1, 0.15, 0.12, 0.1, 0.09,
                                            0.11, 0.12])
 
@@ -1799,6 +1846,35 @@ def struck_strip(spec, name, final_name, arms):
     return frames
 
 
+# Act 3, on the club stage: the stag takes his face off in front of everyone. From the masked idle, the near hand
+# (s = -1) goes to the carved jaw and lifts the mask away, his own old face appearing in the cowl's shadow; the far hand
+# pushes the cowl back off his bald head, and both hands come down to fold the mask against his chest, ending on the
+# leader_unmasked idle. (spec, near arm, far arm, front arms, seconds)
+_UNMASK_HELD = dict(LEADER_UNMASKED, held_mask=(-1,) + LEADER_UNMASKED["held_mask"][1:])
+_FOLD = _arms("fold")[1]
+UNMASK_KEYS = [
+    (MASKED_STAG, _FOLD, _FOLD, (), 0.3),
+    (MASKED_STAG, ("pts", (-0.19, 0.33, 0.06), (-0.05, 0.19, 0.11), (-0.03, 0.15, 0.10)), _FOLD, (-1,), 0.45),
+    (dict(_UNMASK_HELD, hat="cowl"), ("pts", (-0.19, 0.30, 0.10), (-0.05, 0.14, 0.17), (-0.02, 0.11, 0.18)), _FOLD,
+     (-1,), 0.7),
+    (_UNMASK_HELD, ("pts", (-0.17, 0.37, 0.06), (-0.04, 0.29, 0.14), (-0.01, 0.27, 0.15)),
+     ("pts", (0.20, 0.20, -0.03), (0.08, 0.06, -0.05), (0.04, 0.03, -0.06)), (-1, 1), 0.6),
+    (_UNMASK_HELD, ("pts", (-0.17, 0.39, 0.04), (-0.03, 0.40, 0.11), (-0.01, 0.39, 0.12)),
+     ("pts", (0.19, 0.36, 0.0), (0.09, 0.40, 0.06), (0.04, 0.42, 0.08)), (), 0.2),
+    (LEADER_UNMASKED, _FOLD, _FOLD, (), 0.4),
+]
+
+
+def unmask_strip(name="leader_unmask"):
+    frames, seconds = [], []
+    for spec, near, far, front, duration in UNMASK_KEYS:
+        ps = pose(35, arms={1: far, -1: near}, front_arms=front)
+        frames.append((figure(spec, ps, NPC_W, FH), (NPC_W / 2, 18)))
+        seconds.append(duration)
+    action_strip(name, frames, seconds, anchor=(NPC_W / 2, FH - 3))
+    return frames
+
+
 def gunned_down_strip(spec, name, final_name):
     """Shot in the chest from in front while facing right: thrown back off his feet and flat on his back, head to the
     left (FALL, as in the masked collapse). The coat is soaked across the chest from the hit on, and blood pools under
@@ -1812,8 +1888,8 @@ def gunned_down_strip(spec, name, final_name):
     def between(a, b):
         return [tuple((x + y) / 2 for x, y in zip(p, q)) for p, q in zip(a, b)]
 
-    def wounded(joints, r):
-        img, head = action_figure(scaled, joints)
+    def wounded(joints, r, on_back=False):
+        img, head = action_figure(scaled, joints, on_back=on_back)
         hip, shoulder = grounded_joints(joints)[:2]
         wx, wy = hip + (shoulder - hip) * 0.7
         stain = Image.new("RGBA", img.size)
@@ -1829,7 +1905,7 @@ def gunned_down_strip(spec, name, final_name):
     for i, joints in enumerate(keys[1:]):
         img, head, _ = wounded(joints, min(2.5 + i * 0.5, 5))
         frames.append((img, head))
-    down, head, wx = wounded(REST, 5.5)
+    down, head, wx = wounded(REST, 5.5, on_back=True)
     pool = Image.new("RGBA", down.size)
     ImageDraw.Draw(pool).ellipse([wx - 14, 87, wx + 12, 94], fill=(104, 12, 16, 255))
     pool.alpha_composite(down)
@@ -1846,6 +1922,8 @@ def build():
     kneel_frame(MICAH, "micah_kneel")
     kicked_strip(MICAH, "micah_kicked")
     kick_strip(SAL, "sal_kick", _arms("pocket"))
+    strike_strip(BRUTE, "brute_strike")
+    strike_strip(MICAH, "micah_pistol_whip", player=True)
     player_sheet(MICAH_MASKED, "micah_masked")
     supine_frame(MICAH, "micah_supine")
     aim_frame(MICAH, "micah_aim")
@@ -1912,6 +1990,7 @@ def build_act3():
     fall_strip(dict(ELEANOR_SHEET_NPC, drape=dict(col=ELEANOR_SHEET["torso"])), "eleanor_fall", "eleanor_shot", _arms("clutch"),
                wound=True)
     struck_strip(HARRINGTON_GOWN, "harrington_struck", "harrington_struck_down", _arms("down", "pocket"))
+    unmask_strip()
     eleanor_strike_strip()
     seated_frame(MICAH_INMATE, "micah_inmate_seated")
     inmate_seated_strip(ELEANOR_INMATE_NPC, "eleanor_inmate_seated")

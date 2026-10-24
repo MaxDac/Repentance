@@ -9,7 +9,7 @@ $LogDir = Join-Path $Root 'logs'
 $ErrorPattern = '^(ERROR|SCRIPT ERROR|USER ERROR):|Unhandled exception'
 # Godot 4.7 bug, not ours: on Linux the Android export plugin reads an editor setting after a headless --import has
 # freed EditorSettings. Ignored in the import log only (docs/ci-and-release.md#android).
-$ImportNoise = 'EditorSettings not instantiated yet when getting setting "export/android/shutdown_adb_on_exit"'
+$ImportNoise = 'EditorSettings not instantiated yet when getting setting "export/android/'
 
 function Test-Godot([string]$Godot) {
     $probe = Join-Path ([IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())

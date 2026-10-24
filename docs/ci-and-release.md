@@ -1,5 +1,28 @@
 # CI and release
 
+## Repository access
+
+The repository stays public: anyone can read, fork, download releases, open issues, and comment on issues and
+pull requests. Issues have no repository interaction limit. Pull request creation is set to
+`collaborators_only`.
+
+MaxDac is the sole write-access user. A personal repository has no PR-only collaborator role: inviting a
+collaborator also grants write capabilities, including creating, editing and deleting releases. Consequently,
+other people cannot currently open PRs; adding collaborators requires reconsidering this strict owner-only
+policy. Branch or tag rules alone do not remove collaborators' release permissions.
+
+Only write-access users can merge, so being the sole writer makes merging into `main` owner-only. Do not add a
+"Restrict updates" rule to `main`: it blocks normal PR merges even for its bypass actor, who must then tick
+"bypass rules" on every merge. The ruleset "main protection" has no bypass actors and requires PRs, code-owner
+review, resolved conversations and all required CI checks, and blocks deletion and force pushes. Auto-merge is
+disabled so merging remains an explicit owner action. `.github/CODEOWNERS` assigns all paths to `@MaxDac`;
+do not blindly increase the numeric approval count, since authors cannot approve their own PRs.
+
+The sole-writer policy controls human release access. The existing Release workflow remains owner-authorized
+automation and publishes as `github-actions[bot]` using `GITHUB_TOKEN`. This policy does not distinguish the
+owner from someone using the owner's credentials. Review installed GitHub Apps and their repository permissions
+in **Settings > Integrations > GitHub Apps** as well: collaborator listings do not enumerate app access.
+
 ## Pull requests
 
 The description lists the changes and says what ran locally (normally `dotnet build` only; tests run in CI, see
@@ -125,8 +148,8 @@ The `Android` preset (`build/android/Repentance.apk`) builds an arm64-v8a APK fr
 Gradle, so no AAB / Play Store build). C# on Android is experimental in Godot 4.7 but works for this game. Its prebuilt template only runs `net9.0`, so the
 three game projects switch to `net9.0` when Godot builds them for Android (`GodotTargetPlatform == android`): code
 must not use .NET 10-only APIs, and the .NET 10 SDK builds it without a separate .NET 9 install. On Linux a headless
-`--import` logs `EditorSettings not instantiated yet ... shutdown_adb_on_exit` as Godot quits (an engine bug in the
-Android plugin); the launchers ignore that one line in the import log. The package
+`--import` logs `EditorSettings not instantiated yet ... export/android/...` (`shutdown_adb_on_exit`, sometimes `android_sdk_path`) as
+Godot quits (an engine bug in the Android plugin); the launchers ignore those lines in the import log. The package
 is `com.maxdac.repentance`; the version name is the release version and the version code is
 `major*10000 + minor*100 + patch`, both patched in at export by `tools/package/android-export.sh`.
 
