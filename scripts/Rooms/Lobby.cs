@@ -78,7 +78,7 @@ public partial class Lobby : Room
                 await Say("Not yet. Somebody in this lobby saw her go. Rain and State Street will keep until I find out who.");
                 return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("staff_elevator"):
-                await Say("Not yet. Her room could tell me more than the bellboy did. Another dollar buys me the back way.");
+                await Say("Not yet. If she had a room upstairs, it could tell me more than the bellboy did. Another dollar buys me the back way.");
                 return true;
             case ("revolving_door", Verb.Walk or Verb.Hand) when !State.HasFlag("took_brass_box"):
                 await Say("Not yet. I bought a look at room 507. I should collect its clues before I go chasing anybody.");

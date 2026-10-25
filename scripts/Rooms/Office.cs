@@ -209,7 +209,9 @@ public partial class Office : Room
         State.SetFlag("micah_at_desk", false);
         Player.Face(Facing.Left);
         await Wait(0.4);
-        await Think("Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
+        await Think(State.HasFlag("took_faith_ring")
+            ? "Before I go: Caleb's door. Last chance to remember who I'm supposed to be coming home to."
+            : "Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed to be coming home to.");
     }
 
     private async Task LeaveAct3()

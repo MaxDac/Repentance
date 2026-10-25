@@ -53,6 +53,16 @@ public class NotesTests
     }
 
     [Fact]
+    public void FlowerShop_NamesTheBlueLantern_OnlyAfterTheMatchbook()
+    {
+        var note = Notes.Get("blue_lantern")!;
+        var before = note.Title + " " + string.Join(" ", Notes.Lines(note, Has(new[] { "seen_blue_lantern_front" })));
+        Assert.DoesNotContain("Blue Lantern", before);
+        var after = string.Join(" ", Notes.Lines(note, Has(new[] { "seen_blue_lantern_front", "opened_brass_box" })));
+        Assert.Contains("The matchbook's Blue Lantern is behind it.", after);
+    }
+
+    [Fact]
     public void BackWay_RoomNumbers_SpanTheLiftMaze()
     {
         var text = string.Join(" ", Notes.Get("service_lift")!.Lines.Select(l => l.Text));

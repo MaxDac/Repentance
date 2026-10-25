@@ -349,7 +349,7 @@ MICAH: Who were they?
 BELLBOY: The kind of fellas who make sure nobody saw 'em. Nobody did. Car with no lights, gone down the alley. That's all my memory's got.
 THOUGHT: Escorted, not dragged. Either she went quietly, or she knew exactly where she was going.
 ~ set_flag("knows_lantern")
-MICAH: Her room. The one she had Tuesday. I want a look.
+MICAH: Out the service door, with nobody seeing. If she had a room here, I want a look.
 BELLBOY: That's another dollar, mister. The first one bought my memory. The back way costs extra.
 MICAH: Everything costs extra in this joint.
 BELLBOY: Now you're learning.
@@ -704,7 +704,7 @@ MOC: How edifying. And what does a gentleman like you read?
     MICAH: Jones. Micah Jones.
     -> opts
 * [Do the bonfires burn here too? Is that what the robe is for?]
-    MOC: The robe is for the members, Mr. Jones. The questions seem to be yours. Why are you asking?
+    MOC: The robe is for the members, sir. The questions seem to be yours. Why are you asking?
     -> opts
 * -> done
 - (done) MOC: Enough. I know why you are asking, Mr. Jones. And it has nothing to do with druids.
@@ -755,6 +755,7 @@ INSET: none
     MICAH: Eleanor. Look at me.
     ELEANOR: I am where I belong.
 * [(Do nothing.)]
+    ~ set_flag("eleanor_said_go_home")
     MICAH: ...
     ELEANOR: Thank you for bringing me back, Mr. Jones. Go home, Mr. Jones.
     MICAH: Eleanor...?
@@ -796,30 +797,6 @@ MICAH: ...Coming here was a mistake.
 CALEB: Micah, wait-
 INSET: none
 -> END
-
-=== caleb ===
-{not has_flag("caleb_met"):
-    CALEB: Can I help you, my son?
-    CALEB: ...Micah?
-    MICAH: Hello, Caleb. Or is it "Father" now?
-    CALEB: Six years. You look like a man who sleeps in his coat.
-    MICAH: Only when it's raining.
-    ~ set_flag("caleb_met")
-- else:
-    CALEB: Back so soon? Careful, Micah. People will think you've found religion.
-}
-- (opts)
-* [How have you been?]
-    CALEB: I hear confessions, I bury the poor, I pray for my brother. Two out of three are going well.
-    -> caleb.opts
-* [How's Rose?]
-    CALEB: Ask her yourself. She's still at the library, still putting the world in alphabetical order, as if that would make it behave.
-    CALEB: She keeps your picture in her desk drawer. Face down. But she keeps it.
-    MICAH: That's something.
-    -> caleb.opts
-+ [(Leave)]
-    CALEB: Go with God, Micah. He's been waiting for you longer than I have.
-    -> END
 
 // ---------------------------------------------------------------- LIBRARY
 
@@ -1045,7 +1022,11 @@ CALEB: Rose and Tommy are still there. You can still choose them.
 -> END
 
 === caleb_cross ===
-CALEB: Take this cross, brother. Not as a bargain with God. As a reminder.
+{has_flag("cross_refused"):
+    CALEB: I asked you once already. I'm asking again, brother. Not as a bargain with God. As a reminder.
+- else:
+    CALEB: Take this cross, brother. Not as a bargain with God. As a reminder.
+}
 CALEB: There's a way back for everybody. Even you.
 + [(Accept the cross pendant.)]
     ~ give_item("cross")
@@ -1053,6 +1034,7 @@ CALEB: There's a way back for everybody. Even you.
     MICAH: I'll keep it with me, Caleb.
     CALEB: Then remember what it means.
 + [(Refuse the cross pendant.)]
+    ~ set_flag("cross_refused")
     MICAH: Keep it. I can't take it tonight.
     {has_flag("visit_caleb_act3") || has_flag("killed_tony"):
         CALEB: Then I'll pray you don't need it.
@@ -1631,7 +1613,7 @@ ELEANOR: I hope you find your peace, Micah. I'm going to try to find mine, with 
 THOUGHT: She gets up and goes, and doesn't look back. It doesn't feel like a door closing. It feels like one opening, somewhere I can't see yet.
 -> END
 
-// Endings 1, 8 and 9: after Micah's prayer, the player is Eleanor in the sheet, and the old man has his back to her.
+// Endings 1, 8, 9, 12 and 15: after Micah's prayer, the player is Eleanor in the sheet, and the old man has his back to her.
 === coda_wake ===
 THOUGHT: The door closed on the last of his prayer. The old man stood at the foot of the bed looking at it, his back to her, and laughed, a little, the way he laughed at the theatre.
 HARRINGTON: A prayer. In my house. In my bedroom.
@@ -1720,7 +1702,7 @@ ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
 -> END
 
-// Ending 1, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house. Endings 13 and 14
+// Ending 1 or 15, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house. Endings 13 and 14
 // too, after the alarm: Micah ran from the bell (13) or was shot dead in the kitchen (14), and she heard it from upstairs.
 === ending_eleanor_caleb ===
 {has_flag("ending_13") || has_flag("ending_14"):
@@ -2098,7 +2080,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "Tony's friends have friends in here. A man in the yard told me Tony sends his regards. I don't sleep much."
     }
     {has_flag("ending_4"):
-        DANIEL: "Eleanor comes on Sundays. She told me the rest of it across the parlour table, a little every week. The motel. The old man's gin. I wrote it in. Somebody should."
+        DANIEL: "Eleanor came once, before she went back to him. She told me the rest of it across the parlour table. The motel. The old man's gin. I wrote it in that same night. Somebody should."
     - else:
         DANIEL: There's a note pinned to the page, in another hand: "She told me the rest herself, after the trial. I have written it in for him. - C."
         DANIEL: So that's whose hand it was.

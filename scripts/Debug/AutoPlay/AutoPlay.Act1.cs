@@ -31,14 +31,17 @@ public partial class AutoPlay
         Check(game.Sfx.Count(Sound.StepWood) > woodSteps, "Daniel's shoes sound on the attic boards");
         await game.Perform(Verb.Hand, "boxes");
         Check(gs.HasFlag("boxes_spilled"), "spilled the boxes");
-        await game.Perform(Verb.Hand, "suitcase");
-        Check(gs.HasItem("suitcase_key"), "found the key in the suitcase");
-        await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
-        Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
         await game.Perform(Verb.Hand, "papers");
         Check(!gs.HasFlag("tool_tin_found"), "nothing heavy hides under the papers");
         await game.Perform(Verb.Hand, "boxes");
         Check(gs.HasFlag("tool_tin_found") && !gs.HasItem("crowbar"), "searching the boxes again opens one on a locked tin");
+        var tinBeforeKey = await Spoken(async () => { await game.Perform(Verb.Look, "tool_tin"); await WaitIdle(game); });
+        Check(tinBeforeKey.Contains("A small locked tool tin. A little padlock wants a little key.") &&
+              !tinBeforeKey.Any(l => l.Contains("suitcase key")), "before the suitcase is searched, the tin doesn't know about its key");
+        await game.Perform(Verb.Hand, "suitcase");
+        Check(gs.HasItem("suitcase_key"), "found the key in the suitcase");
+        await game.Perform(Verb.UseItem, "trunk", "suitcase_key");
+        Check(!gs.HasFlag("trunk_open"), "the suitcase key doesn't fit the trunk");
         await game.Perform(Verb.Hand, "tool_tin");
         Check(!gs.HasItem("crowbar"), "tin cannot be opened by hand");
         await game.Perform(Verb.UseItem, "tool_tin", "suitcase_key");
@@ -327,6 +330,34 @@ public partial class AutoPlay
         Check(game.Room?.FindHotspot("street")?.Visible == true, "the alley street exit is available");
         Check(game.Room?.FindHotspot("street")?.Bounds is { } exit && exit.Position.X < 10 && exit.End.X <= 100 &&
             exit.End.Y <= 192 && exit.Size.Y > 120, "the alley street exit covers the painted passage on the left");
+
+        // the other way into the alley: a wise-guy answer at Sal's door gets Micah thrown out before he meets Tony
+        // (after the kick counts above, which are absolute: pose counts live outside the save)
+        var standing = game.CaptureSave();
+        await game.LoadGame(admitted);
+        await WaitIdle(game);
+        var preferMain = _prefer;
+        _prefer = new[] { "All right. I don't know the password.", "What's the matter, big fella?" };
+        int salKicks = _poseCounts.GetValueOrDefault("sal_kick");
+        var thrownOut = await Spoken(async () =>
+        {
+            await game.Perform(Verb.Talk, "sal");
+            await Until(() => game.Room is Rooms.Alley && gs.HasFlag("alley_done") && !game.Busy, 180);
+        }, 240);
+        _prefer = preferMain;
+        Check(game.Room is Rooms.Alley && gs.HasFlag("thrown_out") && !gs.HasFlag("sal_passed") && !gs.HasFlag("asked_tony_eleanor") &&
+              _poseCounts.GetValueOrDefault("sal_kick") == salKicks + 2,
+            "a wise-guy answer at the door: Sal throws Micah out back before he ever reaches Tony");
+        Check(thrownOut.Any(l => l.EndsWith("Now the bartender wants his turn.", StringComparison.Ordinal)) &&
+              !thrownOut.Any(l => l.Contains("Tony wants his turn")) &&
+              thrownOut.Any(l => l.Contains("All I came in for was a word about Eleanor Harrington.")),
+            "thrown out by Sal, Micah doesn't know the bartender's name yet, and tells him why he came");
+        Click(game.Room!.FindHotspot("street")!.Bounds.GetCenter(), MouseButton.Left);
+        await Until(() => game.Room is Rooms.ConventRoad && !game.Busy && gs.HasFlag("seen_convent_exterior"));
+        Check(game.Room is Rooms.ConventRoad, "from Sal's throw-out the alley leads on to the convent too");
+        await game.LoadGame(standing);
+        await WaitIdle(game);
+        Check(game.Room is Rooms.Alley && gs.HasFlag("alley_done") && gs.HasFlag("asked_tony_eleanor"), "back on the main route in the alley");
         await ReloadCheckpoint("alley_standing");
         Check(game.Room is Rooms.Alley && game.Room.FindHotspot("street")?.Visible == true &&
             game.Room.FindActor("sal")?.Visible == false && game.Room.FindActor("bartender")?.Visible == false,

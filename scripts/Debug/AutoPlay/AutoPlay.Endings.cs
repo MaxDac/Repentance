@@ -295,16 +295,26 @@ public partial class AutoPlay
         // 1: giving up on the church steps, with the ring and Rose's call-back
         var steps = act3Flags.Where(f => f != "keep_going").ToArray();
         Seed(steps, act3Items.Where(i => i != "cross"), "Give up");
+        HeardLog = new List<string>();
         _ = game.ChangeRoom("church_exterior", "beaten");
         await Until(() => game.Room?.Name == "RoseHouse");
+        var drawn = HeardLog.Where(l => l.StartsWith("What am I doing?", StringComparison.Ordinal)).ToList();
+        HeardLog = null;
+        Check(drawn.Count == 1 && drawn[0].Contains("She stood up there like she belonged to them.") && !drawn[0].Contains("go home"),
+            "after the revolver on the stage, Eleanor never told Micah to go home, and the steps don't say she did");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
         Check(!gs.HasFlag("caleb_escape"), "ending 1: without Eleanor's refusals, no escape with Caleb");
 
         // 15: Rose's call-back alone is faith enough to give up, but without the ring she won't have the coffee
-        Seed(steps, act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        // ...and after "(Do nothing.)" on the stage, the steps remember Eleanor telling him to go home
+        Seed(steps.Append("eleanor_said_go_home"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        HeardLog = new List<string>();
         _ = game.ChangeRoom("church_exterior", "beaten");
         await Until(() => game.Room?.Name == "RoseHouse");
+        Check(HeardLog.Any(l => l.StartsWith("What am I doing? She told me to go home.", StringComparison.Ordinal)),
+            "after doing nothing on the stage, the steps remember Eleanor telling Micah to go home");
+        HeardLog = null;
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_15") && !gs.HasFlag("ending_1"),
             "ending 15: gave up on the steps without the ring");
         await TheEnd("ending_15 (steps)");
@@ -940,9 +950,10 @@ public partial class AutoPlay
         await Shot("ending_prison_caleb_tony");
         await TheEnd("ending_12 (church)");
 
-        // "not yet" at the confession: Caleb still offers the cross, and the storm thought remembers the promise
+        // "not yet" at the confession: Caleb still offers the cross, and the storm thought remembers the promise;
+        // refused once already on the Act 3 visit, he asks again rather than offering it as new
         int confessionOffers = _crossOffers;
-        Seed(killed.Where(f => f is not ("rose_wait" or "took_cross")), act3Items.Where(i => i != "cross"),
+        Seed(killed.Where(f => f is not ("rose_wait" or "took_cross")).Append("cross_refused"), act3Items.Where(i => i != "cross"),
             "Not yet", "(Accept the cross");
         HeardLog = new List<string>();
         _ = game.ChangeRoom("church_interior", "map");
@@ -953,6 +964,9 @@ public partial class AutoPlay
         Check(HeardLog.Any(l => l.Contains("I'm going, and I'm keeping it.")) &&
               !HeardLog.Any(l => l.Contains("Too late to turn round now.")),
             "the storm thought after the confession keeps Caleb's promise");
+        Check(HeardLog.Any(l => l.StartsWith("I asked you once already.", StringComparison.Ordinal)) &&
+              !HeardLog.Any(l => l.StartsWith("Take this cross", StringComparison.Ordinal)),
+            "after an Act 3 refusal, Caleb's confession offer is a second asking");
         HeardLog = null;
         await Until(() => !game.Busy, 30);
 
@@ -1067,12 +1081,20 @@ public partial class AutoPlay
         gs.SetFlag("micah_at_desk");
         gs.SetFlag("keep_going");
         gs.SetStoryAct(3);
-        await game.ChangeRoom("office", "act3");
+        var ringLeft = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); });
+        Check(ringLeft.Any(l => l.StartsWith("Before I go: my wedding ring, and Caleb's door.", StringComparison.Ordinal)),
+            "with the ring still on the desk, the Act 3 office reminds Micah of it");
         Check(game.Room?.Name == "Office" && !game.Busy, "Act 3 office waits for player input");
         Check(!gs.HasFlag("office_door_open") && game.Room?.GetNodeOrNull<Sprite2D>("DoorOpen")?.Visible == false,
             "the Act 3 office starts with the door shut");
         await game.Perform(Verb.Hand, "faith_ring");
         Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2"), "left ring can be recovered at the Act 3 office");
+        gs.SetFlag("took_faith_ring");
+        gs.SetFlag("micah_at_desk");
+        var ringTaken = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); });
+        Check(ringTaken.Any(l => l.StartsWith("Before I go: Caleb's door.", StringComparison.Ordinal)) &&
+              !ringTaken.Any(l => l.Contains("my wedding ring")),
+            "with the ring already in his pocket, the Act 3 office only reminds Micah of Caleb's door");
 
         gs.Restore(originalFlags, originalItems, 2);
         DialogueManager.Instance.LoadInk(originalInk);

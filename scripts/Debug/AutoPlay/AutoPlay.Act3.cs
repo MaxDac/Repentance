@@ -273,6 +273,7 @@ public partial class AutoPlay
         await stage;
         await WaitIdle(game);
         Check(_poseCounts.GetValueOrDefault("micah_masked_collapse") == 1, "masked collapse ran on the revolver branch");
+        Check(!gs.HasFlag("eleanor_said_go_home"), "on the revolver branch Eleanor never tells Micah to go home");
         Check(_poseCounts.GetValueOrDefault("brute_strike") == 1, "Bruno visibly strikes before Micah drops to his knees");
         Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
         Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");

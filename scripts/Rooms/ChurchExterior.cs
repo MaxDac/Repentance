@@ -54,7 +54,10 @@ public partial class ChurchExterior : Room
         // after his first line, his face from above, flat on the stones, while he argues with himself; gone before he gets up
         Game.Hud.ShowCloseUp(CloseUps.Beaten);
         await Think("My ribs are talking to each other. My mouth tastes like a penny.");
-        await Think("What am I doing? She told me to go home. She looked at me like a stranger who'd wandered onto the stage.");
+        // only the do-nothing choice on the stage has Eleanor tell him to go home
+        await Think(State.HasFlag("eleanor_said_go_home")
+            ? "What am I doing? She told me to go home. She looked at me like a stranger who'd wandered onto the stage."
+            : "What am I doing? She stood up there like she belonged to them. She looked at me like a stranger who'd wandered onto the stage.");
         await Think("Caleb's in there, a hundred feet away, praying for me. Rose is across town, not praying for anybody.");
         await Think("I keep calling it saving her. But it's her I want. Her voice. Her skin. Another night like that one.");
         await Think("Rose and Tommy ought to be in my heart. Eleanor's there instead. And God help me, I don't want to let her go.");

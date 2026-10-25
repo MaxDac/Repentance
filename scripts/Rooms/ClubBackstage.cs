@@ -144,7 +144,7 @@ public partial class ClubBackstage : Room
                 State.SetFlag("interlude_took_pin");
                 State.GiveItem("hairpin");
                 await Say("A hairpin, stuck through a crane's wing. Even the birds in here are pinned down.");
-                await Think("She could fly too. Out the stage door, past Bruno, into the snow in a pink gown. She would last a night. Two, maybe. And then where? Back here, on her knees, asking.");
+                await Think("She could fly too. Out the stage door, past Bruno, into the rain in a pink gown. She would last a night. Two, maybe. And then where? Back here, on her knees, asking.");
                 return true;
             case ("screens", Verb.Hand):
                 await Say("I've watched those cranes every night for a year. They never get anywhere either.");

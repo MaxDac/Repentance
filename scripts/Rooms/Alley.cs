@@ -132,7 +132,9 @@ public partial class Alley : Room
                 bouncer.FaceLeft(true);
             }
             await Wait(0.6);
-            await Think("Gravel in my palms, copper in my mouth. Sal's fists did the talking, his shoes had the last word. Now Tony wants his turn.");
+            await Think(State.HasFlag("asked_tony_eleanor")
+                ? "Gravel in my palms, copper in my mouth. Sal's fists did the talking, his shoes had the last word. Now Tony wants his turn."
+                : "Gravel in my palms, copper in my mouth. Sal's fists did the talking, his shoes had the last word. Now the bartender wants his turn.");
             await Talk("alley");
             // back inside through the club's back door
             if (FindActor("sal") is { } sal) _ = sal.MoveTo(new Vector2(322, 198), 50);

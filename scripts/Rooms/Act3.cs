@@ -64,7 +64,8 @@ public static class Act3
     }
 
     /// <summary>
-    /// Endings 8 and 9 come after Micah's coffee at Rose's door (the coda already played Eleanor's night): records the
+    /// Endings 8 and 9 come after Micah's coffee at Rose's door, or straight after the coda on the kill route (the coda
+    /// already played Eleanor's night): records the
     /// ending and moves on to Eleanor's own last scene.
     /// </summary>
     public static Task EleanorAfterRose()

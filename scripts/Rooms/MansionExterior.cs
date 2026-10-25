@@ -204,7 +204,8 @@ public partial class MansionExterior : Room
 
     /// <summary>
     /// The coda's last beat: Eleanor out of the kitchen door in the sheet, alone, and off down the road. Micah's journal
-    /// takes the night back at Rose's door, where <see cref="RoseHouse"/> resolves ending 8 or 9.
+    /// takes the night back at Rose's door, where <see cref="RoseHouse"/> resolves ending 8 or 9 (straight to Eleanor's
+    /// last scene on the kill route).
     /// </summary>
     private async Task EleanorLeaves()
     {
@@ -227,7 +228,7 @@ public partial class MansionExterior : Room
     /// <summary>Eleanor's fire reaches the house once she is out of it (ending 8 never sets <see cref="Endings.MansionExploded"/>).</summary>
     public const string EleanorBlaze = "eleanor_blaze";
 
-    /// <summary>Eleanor off down the road, and the night back at Rose's door. The gate runs it too, in case the coda stopped short.</summary>
+    /// <summary>Eleanor off down the road, and the night back at Rose's door, or straight on after a killing. The gate runs it too, in case the coda stopped short.</summary>
     private async Task DownTheRoad()
     {
         await Game.WalkTo(new Vector2(30, 236));

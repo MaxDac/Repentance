@@ -135,7 +135,7 @@ public partial class MansionBedroom : Room
         return false;
     }
 
-    /// <summary>Ending 1 for her: back under the sheet, the way she got out of it, and Micah's story goes on to Rose's.</summary>
+    /// <summary>Ending 1 or 15 for her (12 after a killing): back under the sheet, the way she got out of it, and Micah's ending follows (Rose's door, or prison after a killing).</summary>
     private async Task ReturnToBed()
     {
         await Game.WalkTo(EleanorRise);

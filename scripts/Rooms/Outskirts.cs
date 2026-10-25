@@ -6,13 +6,13 @@ namespace Repentance.Rooms;
 /// <summary>
 /// Past the city limits, where the bookkeeper's drive ended in Act 2. In Act 3 it's where Micah's car stops on the way out
 /// of Chicago: with Eleanor beside him (ending 2) or alone (ending 3). In ending 10 she gets out with him, then walks off down
-/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own. In ending 1 after an early give-up,
+/// the road on her own to look for her peace. In ending 8 it's Eleanor, on her own. In ending 1 or 15 after an early give-up,
 /// and in endings 13 and 14 after the alarm, when she held out, it's Eleanor with Caleb, who got her out. In ending 13
 /// Micah ran from the Harringtons' alarm without her, and he isn't stopping.
 /// </summary>
 public partial class Outskirts : Room
 {
-    /// <summary>Eleanor walks out of the city free in ending 8, or with Caleb (endings 1, 13, 14): the rain has stopped.</summary>
+    /// <summary>Eleanor walks out of the city free in ending 8, or with Caleb (endings 1, 13, 14, 15): the rain has stopped.</summary>
     protected override bool RainStopped => State.HasFlag("ending_8") || State.HasFlag("caleb_escape");
 
     public override void _Ready()
@@ -61,7 +61,7 @@ public partial class Outskirts : Room
     }
 
     /// <summary>
-    /// Eleanor's last scene when she held out and Micah never reached her (ending 1 after an early give-up, endings 13 and
+    /// Eleanor's last scene when she held out and Micah never reached her (ending 1 or 15 after an early give-up, endings 13 and
     /// 14 after the alarm): Caleb has got her out of the old man's house, and waits with her at the edge of the city for
     /// the truck that takes her downstate.
     /// </summary>

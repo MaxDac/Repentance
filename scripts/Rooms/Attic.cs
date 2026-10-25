@@ -227,7 +227,9 @@ public partial class Attic : Room
                 await Say("I'll file them later. In the recycling bin.");
                 return true;
             case ("tool_tin", Verb.Look or Verb.Hand):
-                await Say(State.HasFlag("got_crowbar") ? "The tin is empty now." : "A small locked tool tin. That little suitcase key might fit.");
+                await Say(State.HasFlag("got_crowbar") ? "The tin is empty now."
+                    : State.HasFlag("got_suitcase_key") ? "A small locked tool tin. That little suitcase key might fit."
+                    : "A small locked tool tin. A little padlock wants a little key.");
                 return true;
             case ("tool_tin", Verb.UseItem) when item == "suitcase_key" && !State.HasFlag("got_crowbar"):
                 Game.Sfx.Play(Sound.TinOpen);
