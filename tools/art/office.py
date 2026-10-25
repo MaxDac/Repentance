@@ -1094,12 +1094,13 @@ def reflection(glass, stage):
             _tube(d, _bez(start, mid, tip), r, 0.15)
 
     if stage == 1:
+        mx = cx + STORM_MICAH_REFLECTION_OFFSET  # the grip follows his painted reflection, not the real Micah
         # the far arm comes round his waist and across his chest, its claws spread over his heart
-        _tube(da, [(cx - 17, sy + 4), (cx - 21, sy + 16), (cx - 13, sy + 22), (cx - 6, sy + 20)], 2.6, 1.6)
-        claw(da, (cx - 6, sy + 20), [(cx + 3, sy + 13), (cx + 4, sy + 16), (cx + 4, sy + 19), (cx + 1, sy + 22)])
+        _tube(da, [(cx - 17, sy + 4), (mx - 21, sy + 16), (mx - 13, sy + 22), (mx - 6, sy + 20)], 2.6, 1.6)
+        claw(da, (mx - 6, sy + 20), [(mx + 3, sy + 13), (mx + 4, sy + 16), (mx + 4, sy + 19), (mx + 1, sy + 22)])
         # the near hand has come over his shoulder from behind, long fingers hooked down his collarbone
-        _ell(da, cx + 10, sy + 1, 2.4, 1.8)
-        claw(da, (cx + 10, sy + 1), [(cx + 3, sy + 7), (cx + 5, sy + 9), (cx + 8, sy + 10), (cx + 12, sy + 8)])
+        _ell(da, mx + 10, sy + 1, 2.4, 1.8)
+        claw(da, (mx + 10, sy + 1), [(mx + 3, sy + 7), (mx + 5, sy + 9), (mx + 8, sy + 10), (mx + 12, sy + 8)])
     else:
         # one hand clamped over his mouth, the other gripping the crown of his head
         _tube(da, [(cx - 17, sy + 4), (cx - 19, sy + 14), (cx - 11, top + 11), (cx - 5, top + 9)], 2.7, 1.7)
