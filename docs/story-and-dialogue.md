@@ -147,7 +147,7 @@ send the story the wrong way.
 | Act 2 -> 3 | `Attic.EndOfActTwo` | Stash, clear `masked`, `StoryAct = 3`, present-day bedroom |
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |
-| Eleanor's escape | `Act3.EleanorWithCaleb`, flags `caleb_escape`, `eleanor_epilogue` | Ending 1 after a give-up or walk-away when she held out: after Rose's coffee, Eleanor and Caleb at the outskirts |
+| Eleanor's escape | `Act3.EleanorWithCaleb`, flags `caleb_escape`, `eleanor_epilogue` | When she held out: ending 1 after a give-up or walk-away (after Rose's coffee), or endings 13 and 14 after the alarm; Eleanor and Caleb at the outskirts |
 
 `Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad is hidden, generic
 exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes and the coda
@@ -175,10 +175,11 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 
 Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). With it, a give-up on
 the steps or a walk-away from Tony is still ending 1, but `EleanorEscapesWithCaleb` adds her scene with Caleb at the
-outskirts after Rose's coffee. `EleanorFollows` is
+outskirts after Rose's coffee. After the alarm (13 or 14) it adds the same scene, with lines that know Micah ran or
+died, after his stop at the city's edge (13) or the cut to black in the kitchen (14). `EleanorFollows` is
 `eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
 a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
-1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 has the "The next morning" caption (`Act3.Finish`); the Joliet
+1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 (unless Eleanor's escape follows) has the "The next morning" caption (`Act3.Finish`); the Joliet
 visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`). `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
 `CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
 `ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive

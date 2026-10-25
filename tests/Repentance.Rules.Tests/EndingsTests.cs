@@ -169,7 +169,7 @@ public class EndingsTests
     }
 
     [Fact]
-    public void CalebGetsEleanorOutOnlyAfterAnEarlyGiveUpWhenSheHeldOut()
+    public void CalebGetsEleanorOutAfterAnEarlyGiveUpOrTheAlarmWhenSheHeldOut()
     {
         Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "gave_up_steps")));
         Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "walked_away")));
@@ -179,6 +179,12 @@ public class EndingsTests
         // the Our Father, with Eleanor back in bed in her coda, is ending 1 without the escape
         Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "spared_oldman")));
         Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "surrendered_tony", "killed_tony")));
+        // the alarm: Micah ran (13) or was shot in the kitchen (14), and Eleanor is still in the house for Caleb
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "warned_tony", "alarm_ran")));
+        Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "warned_tony", "alarm_stayed")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, "warned_tony", "alarm_ran")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Drugs, "warned_tony", "alarm_stayed")));
+        Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "mansion_exploded")));
     }
 
     [Fact]

@@ -22,6 +22,7 @@ namespace Repentance;
 ///                    the bell rang and he ran: alone, out of Chicago, and the journal ends with his suicide.
 ///  14  Mansion     - The same bell, but he stayed and walked into the kitchen: two of the Club's men shot him.
 ///                    Caleb finishes the journal.
+///                    In 13 and 14, if Eleanor held out, Caleb gets her out of the city afterwards.
 /// Eleanor's own endings need both interlude refusals; the refusals alone change nothing (a give-up is still 1).
 /// Repenting and the murder-suicide both end the night in the bedroom, so they decide before anything after it.
 /// Once Tony is dead there is no going home to Rose: the prayer that would give ending 1 gives 12 instead.
@@ -78,11 +79,16 @@ public static class Endings
     public static bool EleanorHeldOut(Func<string, bool> has) => has(RefusedAbbess) && has(RefusedDrugs);
 
     /// <summary>
-    /// Ending 1 from a give-up before the mansion (the church steps, or walking away from Tony) when Eleanor held out:
-    /// after Rose's coffee, Caleb has got Eleanor out of the city, and she plays one last scene with him at the outskirts.
+    /// When Eleanor held out and Micah never reached her, Caleb gets her out of the city, and she plays one last scene
+    /// with him at the outskirts: in ending 1 from a give-up before the mansion (the church steps, or walking away from
+    /// Tony), after Rose's coffee; and after the alarm, whether Micah ran (13) or was shot in the kitchen (14).
     /// </summary>
-    public static bool EleanorEscapesWithCaleb(Func<string, bool> has) =>
-        EleanorHeldOut(has) && (has(GaveUpSteps) || has(WalkedAway)) && Resolve(has) == 1;
+    public static bool EleanorEscapesWithCaleb(Func<string, bool> has)
+    {
+        if (!EleanorHeldOut(has)) return false;
+        int ending = Resolve(has);
+        return ending is 13 or 14 || (ending == 1 && (has(GaveUpSteps) || has(WalkedAway)));
+    }
 
     /// <summary>
     /// Eleanor's clothes once she is out of the mansion and free (endings 2, 4, 8, 10, 11), from the duffle she packed for

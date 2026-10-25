@@ -1679,9 +1679,14 @@ ELEANOR: Goodbye, Chicago.
 THOUGHT: She said it like she was closing a door. Softly. The way you close it on something that's finally asleep.
 -> END
 
-// Ending 1, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house.
+// Ending 1, after an early give-up, if Eleanor held out: Caleb has got her out of the old man's house. Endings 13 and 14
+// too, after the alarm: Micah ran from the bell (13) or was shot dead in the kitchen (14), and she heard it from upstairs.
 === ending_eleanor_caleb ===
-THOUGHT: Three nights after the Club. The edge of the city, past the last streetlight, and for once the rain had stopped.
+{has_flag("ending_13") || has_flag("ending_14"):
+    THOUGHT: A week after the bell rang in the old man's kitchen. The edge of the city, past the last streetlight, and for once the rain had stopped.
+- else:
+    THOUGHT: Three nights after the Club. The edge of the city, past the last streetlight, and for once the rain had stopped.
+}
 THOUGHT: She had slipped out of the old man's house before it woke, with the duffle she'd packed for running, and changed into the white dress and her pearls. The priest had been waiting at the corner with his collar turned up, like a man who had done it before.
 ELEANOR: It's one thing, Father, sneaking a girl or two out the back of the Club. Nobody misses a girl or two.
 ELEANOR: But I'm their star. They won't take this lying down. They'll come after you.
@@ -1695,14 +1700,38 @@ ELEANOR: An envelope. From the poor box, Father?
 CALEB: From the poor box. You're poor tonight.
 ELEANOR: You're his brother, aren't you? Micah's. You have his hands.
 CALEB: So people tell me.
-ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
-CALEB: I know. He went home instead. To Rose, and a cup of coffee.
-ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
+{
+- has_flag("ending_14"):
+    ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
+    CALEB: And then to the house.
+    ELEANOR: I heard the bell from upstairs. Then the shots. Two of them, and then nothing at all. The old man told me over breakfast whose they'd been.
+    CALEB: I buried him on Tuesday.
+    ELEANOR: He died on that kitchen floor for me. I never asked him to.
+    CALEB: No. He walked in all the same. Toward you, not away. I hold on to that.
+- has_flag("ending_13"):
+    ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
+    CALEB: And then to the house. The night the bell rang in the kitchen. That was him.
+    ELEANOR: I heard it from upstairs, and the Club's men go down the back stairs. They found nobody. Only the kitchen door, open on the rain.
+    CALEB: He ran. Out of Chicago, that same night. He hasn't written to Rose. Not to me either, yet.
+    ELEANOR: ...Good. One of us should get out of this city alive.
+- else:
+    ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
+    CALEB: I know. He went home instead. To Rose, and a cup of coffee.
+    ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
+}
 THOUGHT: Headlights came up the road out of the dark, slow, the way a man drives when he's carrying crates of cabbages and a secret.
 ELEANOR: That'll be Walt.
 ELEANOR: Thank you, Father. For not asking what I'd done before you'd help me.
 CALEB: I didn't need to. Go on. Before I change my mind about the poor box.
-ELEANOR: Say hi to Micah.
+{
+- has_flag("ending_14"):
+    ELEANOR: Light a candle for Micah, Father.
+    CALEB: Every Sunday.
+- has_flag("ending_13"):
+    ELEANOR: If he ever writes to you, tell him I got out too.
+- else:
+    ELEANOR: Say hi to Micah.
+}
 -> END
 
 // ---------------------------------------------------------------- PRESENT DAY: END OF ACT 2, ACT 3
@@ -1950,8 +1979,13 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_13"):
     DANIEL: "Omaha. A rented room over a feed store, with one window, and it looks east. I keep the blind down."
-    DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and she's still in that house. The Club's car still pulls up at that door, and I'm in Omaha."
-    DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to him in the spring, and told him, and asked him to pass it on, and he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    {has_flag("caleb_escape"):
+        DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and left her in that house. A week later my brother walked her out of it. A priest with a poor-box envelope did what I couldn't, and I'm in Omaha."
+        DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She told him the rest the night he got her out of Chicago, and asked him to pass it on, and he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    - else:
+        DANIEL: "I ran. The bell went off and the feet came down the stairs, and I ran, and she's still in that house. The Club's car still pulls up at that door, and I'm in Omaha."
+        DANIEL: "Caleb found me, the way he always does. He writes care of general delivery. She came to him in the spring, and told him, and asked him to pass it on, and he did. I've copied it into the pages before these. It's the only brave thing in this book, and none of it is mine."
+    }
     DANIEL: "I never wrote to Rose. Better she thinks I'm at the bottom of the lake. Better for Tommy."
     DANIEL: "The revolver's on the washstand. Six in the cylinder. I only ever needed the one."
     DANIEL: So he found out in the end. From his brother's letters, in a room in Omaha.
@@ -1959,10 +1993,18 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: ...Jesus, Micah.
 - has_flag("ending_14"):
     DANIEL: Wait. It isn't Micah's handwriting at all. It's signed... Father Caleb Jones.
-    DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, the spring after, on the church steps, and asked me to set it down."
+    {has_flag("caleb_escape"):
+        DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, at the edge of the city the night I got her out of Chicago, and asked me to set it down."
+    - else:
+        DANIEL: "These are my brother's last pages, and he could not write them, so I have. What happened to her before that night, she told me herself, the spring after, on the church steps, and asked me to set it down."
+    }
     DANIEL: "He went to the Harrington house past midnight, for her, with a key a bartender had told him of. There was a bell on the kitchen door that the bartender had not told him of. It rang, and he heard them coming, and he could have run."
     DANIEL: "He went in. Two of the Club's men were waiting in the dark at the cook's table. They shot him on the kitchen tiles before he could finish her name."
-    DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I see her at Mass on Sundays, and I can do nothing else, and God forgive me, it is not enough."
+    {has_flag("caleb_escape"):
+        DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. A week after I buried him, I put her on a produce truck before dawn, out of Chicago. I do not know where she is now, and I have stopped asking. It is the one thing I did right that winter, and it came too late for him."
+    - else:
+        DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I see her at Mass on Sundays, and I can do nothing else, and God forgive me, it is not enough."
+    }
     DANIEL: "He died walking toward her and not away. That is not repentance. But it was the right direction, and I hold on to it. I say Mass for him, and leave the rest to God's mercy."
     DANIEL: ...
     DANIEL: He never got to the end of the road. Caleb walked the last of it for him, on paper.

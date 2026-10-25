@@ -22,7 +22,8 @@ public static class Act3
     /// Resolves the ending, records it as <c>ending_N</c> and moves to its scene. Eleanor rides out with Micah in endings
     /// 2 and 10 (<c>eleanor_rides</c>) and visits him in prison in endings 4 and 11 (<c>eleanor_visits</c>). Ending 12
     /// (Micah killed Tony and gave himself up) is Caleb in the visiting room. Ending 13 (he ran from the alarm) is the
-    /// car alone at the city limits; ending 14 (he went in anyway) has already cut to black in the kitchen.
+    /// car alone at the city limits; ending 14 (he went in anyway) has already cut to black in the kitchen. After either,
+    /// if Eleanor held out, Caleb gets her out of the city (<see cref="EleanorWithCaleb"/>).
     /// </summary>
     public static Task End()
     {
@@ -33,6 +34,7 @@ public static class Act3
         if (ending is 4 or 11) State.SetFlag("eleanor_visits");
         if (ending is 5 or 9 or 12) State.SetFlag("caleb_visits");
         if (ending == 8) State.SetFlag("eleanor_epilogue");
+        if (ending == 14 && Endings.EleanorEscapesWithCaleb(State.HasFlag)) return EleanorWithCaleb();
         return ending switch
         {
             1 => Game.ChangeRoom("rose_house", "coffee"),
@@ -58,11 +60,15 @@ public static class Act3
     }
 
     /// <summary>
-    /// Ending 1 after an early give-up, when Eleanor held out: after Micah's coffee at Rose's door, the player is Eleanor
-    /// at the city's edge with Caleb, who got her out. The ending is already recorded; this is her last scene.
+    /// When Eleanor held out and Micah never reached her (ending 1 after an early give-up, after Micah's coffee at Rose's
+    /// door; endings 13 and 14 after the alarm), the player is Eleanor at the city's edge with Caleb, who got her out. The
+    /// ending is already recorded; this is her last scene. Micah's car from ending 13 is gone.
     /// </summary>
     public static Task EleanorWithCaleb()
     {
+        State.SetFlag("outskirts_car", false);
+        // ending 14 leaves Micah lying on the kitchen tiles; Eleanor arrives standing
+        Game.Player.SetPose(null);
         State.SetFlag("caleb_escape");
         State.SetFlag("eleanor_epilogue");
         return Game.ChangeRoom("outskirts", "eleanor_caleb");
