@@ -29,7 +29,7 @@ of a level clean; later runs in the same session can use `-NoClean` / `--no-clea
 | 1 Basic | `unit` | Rules, scene graph, story integrity, Ink walk, music synth; no Godot | `tools\run\test.ps1 -Suite unit` |
 | 2 Tooling | `launcher`, `art` | Run scripts and generated art; Python, no Godot | `tools\run\test.ps1 -Suite unit, launcher, art` |
 | 3 Interaction | `walk`, `settings`, `pause` | Movement in every room, menus, pause (a few minutes) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause` |
-| 4 Story | `playthrough`, `resume-act2`, `resume-act3` | Every ending, save/load, resume in a fresh launch (~12 min more) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause, playthrough, resume-act2, resume-act3` |
+| 4 Story | `playthrough`, `resume-act2`, `resume-act3` | Every ending, save/load, resume in a fresh launch (~18 min more) | `tools\run\test.ps1 -Suite unit, launcher, art, walk, settings, pause, playthrough, resume-act2, resume-act3` |
 | 5 Full | `autoplay` | Targeted regressions and screenshots: every suite, as CI | `tools\run\test.ps1` |
 
 Exports, packaging and Android are never run locally ([What only CI runs](#what-only-ci-runs)).
@@ -174,8 +174,10 @@ Named beats (`Beat(id, body)`) walk, look, use items, solve puzzles and pick cho
 `_route`, and `Playthrough.Endings.cs` holds each route's choices and "The End" checks. `Playthrough.cs` keeps the
 modes, the save/load round trip and the coverage gates.
 
-- Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7 1
-  1-oldman 1-steps 1-caleb 15 15-caleb 8 9 10 11 12 12-oldman 13 14`. No seeded state. `--ending=N` runs one route.
+- Acts 1-2 play once; at the Club vestibule the run saves, then reloads that save for every route: `2 3 4 5 6 7
+  7-alone 1 1-oldman 1-steps 1-steps-caleb 1-caleb 1-bed 15 15-caleb 15-steps 15-steps-caleb 15-oldman 15-bed 8
+  8-kill 9 9-kill 10 11 12 12-oldman 12-bed 13 13-caleb 14 14-caleb` (every ending, and every variant with its own
+  scenes). No seeded state. `--ending=N` runs one route.
 - After every beat: save, load, compare room, position, facing, act, flags, inventory, Ink state.
 - Fresh-launch checkpoints: the run also keeps two real saves in `user://autoplay_saves/checkpoints/` (end of Act One,
   Club vestibule) with the choices matched so far. `--resume=act2` / `--resume=act3` (suites `resume-act2`,
@@ -201,7 +203,7 @@ See [Rooms and scenes](rooms-and-scenes.md#invariants-checked-by-tests).
 
 The playthrough to watch, from the title to "The End": speed 1x-60x (`hyper` = 60x with the frame rate uncapped),
 ending `2` unless `--ending` is given. `--from=act1|interlude1|act2|interlude2|act3|ending` starts at a chapter
-(`ending` = the route's deciding scene; `act3` with `1-steps` is refused): the earlier story still plays for real,
+(`ending` = the route's deciding scene; `act3` with a `-steps` route is refused): the earlier story still plays for real,
 muted at 60x behind a black "Fast-forwarding" cover (`FilmCover`), so items and decisions are right; reaching
 `ending` takes about one route's time. Choices linger on screen so you can read them. `SpectatorFilter` ignores
 viewer input except Space (pause), F11 / Alt+Enter, and Esc (prints `FILM STOPPED`, exits 0). Uses real sound and
@@ -214,18 +216,40 @@ Speed is optional and defaults to 1x in both launchers; Bash no longer accepts p
 The launchers also take each ending by a case-insensitive title and pass Godot the number; the table is in
 `film.sh --help` and `Get-Help tools\run\film.ps1 -Parameter Ending`:
 
-| Number | Title | Number | Title |
-|---|---|---|---|
-| 1 | `walk-away` | 5 | `prison-caleb-visits` |
-| 1-oldman | `spare-the-old-man` | 6 | `turn-himself-in` |
-| 1-steps | `give-up` | 7 | `last-entry` |
-| 2 | `escape-together` | 8 | `eleanor-burns-the-house` |
-| 3 | `escape-alone` | 9 | `eleanor-confesses` |
-| 4 | `prison-eleanor-visits` | 10 | `she-leaves-by-the-car` |
-| 12 | `kill-tony-surrender` | 11 | `she-visits-once` |
-| 12-oldman | `kill-tony-pray` | 13 | `alarm-run` |
-| 14 | `alarm-ambush` | 1-caleb | `eleanor-escapes` |
-| 15 | `sunday-visits` | 15-caleb | `sundays-eleanor-escapes` |
+| Number | Title | Route |
+|---|---|---|
+| 1 | `walk-away` | Micah lowers the gun on Tony; coffee with Rose |
+| 1-oldman | `spare-the-old-man` | He prays the Our Father and spares the old man; coffee with Rose |
+| 1-steps | `give-up` | He gives up on the cathedral steps; coffee with Rose |
+| 1-steps-caleb | `give-up-eleanor-escapes` | As 1-steps, and Eleanor held out; Rose, then Eleanor and Caleb |
+| 1-caleb | `eleanor-escapes` | Eleanor held out, he lowers the gun on Tony; Rose, then Eleanor and Caleb |
+| 1-bed | `eleanor-back-to-bed` | Eleanor held out, he prays; she goes back to bed, he goes to Rose |
+| 2 | `escape-together` | Evidence or fire, Eleanor convinced; out of town with her |
+| 3 | `escape-alone` | Evidence or fire, Eleanor not convinced; out of town alone |
+| 4 | `prison-eleanor-visits` | Neither, Eleanor convinced; prison, Eleanor visits |
+| 5 | `prison-caleb-visits` | Neither, Eleanor not convinced; prison, Caleb visits |
+| 6 | `turn-himself-in` | He turns himself in; prison, Rose visits |
+| 7 | `last-entry` | He shoots Eleanor, then himself; Caleb writes the last entry |
+| 7-alone | `last-entry-alone` | Four turns without her, the footsteps; he shoots himself alone |
+| 8 | `eleanor-burns-the-house` | Eleanor strikes the old man and burns the cellar; Rose, then Eleanor alone |
+| 8-kill | `kill-tony-eleanor-burns` | As 12-oldman, Eleanor held out; she strikes him and burns the cellar |
+| 9 | `eleanor-confesses` | Eleanor strikes the old man; Rose, then she confesses to Caleb in prison |
+| 9-kill | `kill-tony-eleanor-confesses` | As 12-oldman, Eleanor held out; she strikes him and confesses to Caleb |
+| 10 | `she-leaves-by-the-car` | Eleanor follows after the shot, evidence or fire; she leaves him by the car |
+| 11 | `she-visits-once` | Eleanor follows after the shot, nothing taken; prison, she visits once |
+| 12 | `kill-tony-surrender` | He kills Tony, confesses to Caleb and turns himself in; prison, Caleb visits |
+| 12-oldman | `kill-tony-pray` | He kills Tony, confesses, spares the old man, then gives himself up |
+| 12-bed | `kill-tony-eleanor-back-to-bed` | As 12-oldman, Eleanor held out; she goes back to bed, he to the station |
+| 13 | `alarm-run` | A warning shot; the unseen alarm rings and he runs; out of Chicago, alone |
+| 13-caleb | `alarm-run-eleanor-escapes` | As 13, and Eleanor held out; then Eleanor and Caleb at the city's edge |
+| 14 | `alarm-ambush` | A warning shot; the unseen alarm rings and he goes in; shot in the kitchen |
+| 14-caleb | `alarm-ambush-eleanor-escapes` | As 14, and Eleanor held out; then Eleanor and Caleb at the city's edge |
+| 15 | `sunday-visits` | He walks away from Tony without having pressed Rose; she refuses the coffee |
+| 15-caleb | `sundays-eleanor-escapes` | As 15, and Eleanor held out; Rose's door, then Eleanor and Caleb |
+| 15-steps | `sundays-give-up` | As 1-steps without having pressed Rose; she refuses the coffee |
+| 15-steps-caleb | `sundays-give-up-eleanor-escapes` | As 15-steps, and Eleanor held out; Rose's door, then Eleanor and Caleb |
+| 15-oldman | `sundays-spare-the-old-man` | As 1-oldman without having pressed Rose; she refuses the coffee |
+| 15-bed | `sundays-eleanor-back-to-bed` | As 1-bed without having pressed Rose; she refuses the coffee |
 
 Numbers follow [Branches and endings](story-overview.md#branches-and-endings).
 ## Unit tests (`tests/*.Tests`)

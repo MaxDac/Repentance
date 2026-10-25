@@ -55,10 +55,11 @@ public sealed partial class Playthrough
         await Beat("second_interlude_oldman", async () =>
         {
             var oldman = Do(Verb.Talk, "harrington");
-            if (_route == "1-steps")
+            if (StepsRoute)
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 900);
                 Check(Gs.HasFlag(Endings.GaveUpSteps), "gave up on the church steps");
+                await RoseAndCaleb();
                 await TheEnd();
                 over = true;
                 return;
@@ -68,7 +69,7 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag(Endings.RefusedDrugs) == EleanorRoute, "Eleanor's answer to the old man follows the route");
             Check(Gs.HasFlag("keep_going") && !Gs.HasFlag("interlude2"), "Micah keeps going");
             Expect("Office", "Act 3 opens at Micah's desk");
-        }, roundTrip: _route != "1-steps");
+        }, roundTrip: !StepsRoute);
         if (over) return;
         await Beat("act_three_office", async () =>
         {
@@ -94,17 +95,7 @@ public sealed partial class Playthrough
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);
                 Check(Gs.HasFlag(Endings.WalkedAway), "walked away from Tony");
-                Check(Gs.HasFlag(Endings.RoseForgives) == !RoseRefuses,
-                    $"Rose {(RoseRefuses ? "refuses the coffee" : "takes the coffee")}");
-                if (EleanorRoute)
-                {
-                    int ending = RoseRefuses ? 15 : 1;
-                    await Until(() => _game.Room?.Name == "Outskirts", 600);
-                    Expect("Outskirts", "Eleanor and Caleb at the city's edge");
-                    Check(Gs.HasFlag("caleb_escape") && Gs.HasFlag($"ending_{ending}"), $"ending {ending}, with Eleanor's escape");
-                    Check(_game.Player.Character == "eleanor_white_play", "Eleanor in her white dress");
-                    Check(_game.Room?.FindActor("caleb")?.Visible == true, "Caleb beside her");
-                }
+                await RoseAndCaleb();
                 await TheEnd();
                 over = true;
                 return;
@@ -156,7 +147,7 @@ public sealed partial class Playthrough
                 return;
             }
             Expect("OfficeStorm", "Tony left bleeding: Micah walks out, back to the office, in the storm");
-        }, roundTrip: _route is not ("1" or "1-caleb" or "15" or "15-caleb" or "12"));
+        }, roundTrip: !(WalkAwayRoute || _route == "12"));
         if (over) return;
         await Beat("office_storm", async () =>
         {
@@ -179,8 +170,8 @@ public sealed partial class Playthrough
                 Check(!Gs.HasFlag("alarm_noticed"), "the door and lintel don't reveal Tony's omitted alarm");
                 await Do(Verb.Hand, "lintel");
                 Check(Gs.HasItem("kitchen_key") && !Gs.HasFlag("alarm_noticed"), "the key, and the bell still unseen");
-                var door = _route == "14" ? Do(Verb.UseItem, "door", "kitchen_key") : Do(Verb.Hand, "door");
-                if (_route == "13")
+                var door = _route.StartsWith("14", StringComparison.Ordinal) ? Do(Verb.UseItem, "door", "kitchen_key") : Do(Verb.Hand, "door");
+                if (_route.StartsWith("13", StringComparison.Ordinal))
                 {
                     await Until(() => _game.Room?.Name == "Outskirts", 300);
                     Expect("Outskirts", "Micah runs, and drives out of Chicago");
@@ -193,6 +184,7 @@ public sealed partial class Playthrough
                     Check(Gs.HasFlag(Endings.AlarmStayed) && _game.Room?.FindActor("gunman")?.Visible == true
                         && _game.Room?.FindActor("gunman_b")?.Visible == true, "the Club's two men wait at the cook's table");
                 }
+                if (EleanorRoute) await CalebEscape();
                 await TheEnd();
                 over = true;
                 return;
@@ -239,15 +231,16 @@ public sealed partial class Playthrough
                 over = true;
                 return;
             }
-            if (_route == "1-oldman")
+            if (OldManRoute)
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);
                 Check(Gs.HasFlag(Endings.SparedOldMan), "spared the old man");
+                Check(Gs.HasFlag(Endings.RoseForgives) == !RoseRefuses, $"Rose {(RoseRefuses ? "refuses the coffee" : "takes the coffee")}");
                 await TheEnd();
                 over = true;
                 return;
             }
-            if (_route is "6" or "7")
+            if (_route is "6" or "7" or "7-alone")
             {
                 if (_route == "6")
                 {
@@ -256,17 +249,19 @@ public sealed partial class Playthrough
                 }
                 await TheEnd();
                 Check(Gs.HasFlag("shot_oldman"), "Harrington shot");
-                string flag = _route == "6" ? Endings.Repented : Endings.ShotEleanor;
+                string flag = _route switch { "6" => Endings.Repented, "7" => Endings.ShotEleanor, _ => Endings.ShotHimself };
                 Check(Gs.HasFlag(flag), $"route {_route}: {flag}");
+                if (_route == "7-alone") Check(!Gs.HasFlag(Endings.ShotEleanor), "route 7-alone: Eleanor left alive");
                 over = true;
                 return;
             }
-            if (_route is "8" or "9")
+            if (CodaRoute)
             {
                 await confront;
                 await WaitIdle();
                 Expect("MansionBedroom", "after the prayer, the player is Eleanor");
-                Check(Gs.HasFlag("eleanor_coda") && _game.Player.Character == "eleanor_sheet_play", "Eleanor in the sheet");
+                Check(Gs.HasFlag(Endings.SparedOldMan) && Gs.HasFlag("eleanor_coda") && _game.Player.Character == "eleanor_sheet_play",
+                    "Micah spares the old man, and the player is Eleanor in the sheet");
                 return;
             }
             await confront;
@@ -276,9 +271,9 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag(Endings.EleanorWeary) == (_route is "10" or "11"), "worn out, Eleanor follows without persuasion only on her routes");
             Check(Endings.EleanorFollows(Gs.HasFlag) == (_route is "2" or "4" or "10" or "11"), "Eleanor comes to the kitchen only when she follows");
             Expect("MansionKitchen", "the escape through the kitchen");
-        }, roundTrip: _route is "2" or "3" or "4" or "5" or "8" or "9" or "10" or "11");
+        }, roundTrip: _route is "2" or "3" or "4" or "5" or "10" or "11" || CodaRoute);
         if (over) return;
-        if (_route is "8" or "9")
+        if (CodaRoute)
         {
             await EleanorCoda();
             return;

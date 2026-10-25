@@ -215,6 +215,14 @@ public partial class AutoPlay
         Check(prayer.Count(l => l.Contains("Our Father")) == 1, "Micah says \"Our Father...\" once, then goes on with the prayer");
         await TheEnd("ending_1 (old man)");
 
+        // 15: the same prayer without Rose's call-back; the cross and the ring are enough, but Rose refuses the coffee
+        Seed(act3Flags.Where(f => f != "rose_wait"), act3Items, "Our Father");
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() => game.Room?.Name == "RoseHouse", 180);
+        Check(gs.HasFlag(Endings.SparedOldMan) && gs.HasFlag("ending_15") && !gs.HasFlag("ending_1") && !gs.HasFlag(Endings.RoseForgives),
+            "ending 15: spared the old man, and Rose won't take Micah back without his insisting");
+        await TheEnd("ending_15 (old man)");
+
         // 6: shoots the old man, then repents and turns himself in; Rose visits him in jail
         Seed(act3Flags.Append(Endings.TookDocuments), act3Items.Append("documents"), "Shoot him", "turn yourself in");
         _ = game.ChangeRoom("mansion_bedroom", "start");
@@ -347,6 +355,17 @@ public partial class AutoPlay
             "ending 15: walking away from Tony with only the ring wins over both of Eleanor's refusals");
         await CalebEscape("ending 15 (Tony, Eleanor held out)");
         await TheEnd("ending_15 (Tony, Eleanor held out)");
+
+        // the same give-up on the steps without Rose's call-back: the ring alone lets Micah give up, Rose refuses the
+        // coffee, and Caleb still gets Eleanor out
+        Seed(steps.Concat(bothRefused).Where(f => f != "rose_wait"), act3Items.Where(i => i != "cross"), "Give up");
+        _ = game.ChangeRoom("church_exterior", "beaten");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_15") && !gs.HasFlag("ending_1") &&
+              !gs.HasFlag(Endings.RoseForgives) && !gs.HasFlag("eleanor_coda") && !gs.HasFlag(Endings.EleanorStruck),
+            "ending 15: giving up on the steps without Rose's call-back wins over both of Eleanor's refusals");
+        await CalebEscape("ending 15 (steps, Eleanor held out)");
+        await TheEnd("ending_15 (steps, Eleanor held out)");
     }
 
     /// <summary>When Eleanor held out and Micah never reached her, Eleanor and Caleb at the outskirts (endings 1, 13, 14, 15).</summary>
@@ -555,6 +574,19 @@ public partial class AutoPlay
             "ending 1: Eleanor goes back to bed, and Micah to Rose");
         Check(_poseCounts.GetValueOrDefault("eleanor_mansion_return") == returns + 1, "ending 1: her climb back into bed plays");
         await TheEnd("ending_1 (Eleanor's bed)");
+
+        // 15: back to bed too, but without Rose's call-back she refuses Micah's coffee
+        Seed(heldOut.Where(f => f != "rose_wait"), act3Items, "Our Father");
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
+        await WaitIdle(game);
+        _ = game.Perform(Verb.Hand, "bed");
+        await Until(() => game.Room?.Name == "RoseHouse", 120);
+        Check(gs.HasFlag("ending_15") && !gs.HasFlag("ending_1") && !gs.HasFlag(Endings.RoseForgives) &&
+              !gs.HasFlag(Endings.EleanorStruck) && !gs.HasFlag("eleanor_coda"),
+            "ending 15: Eleanor goes back to bed, and Rose refuses Micah's coffee");
+        await TheEnd("ending_15 (Eleanor's bed)");
+        Check(!gs.HasFlag("caleb_escape"), "ending 15: back in bed, Eleanor has no escape with Caleb");
         await TheEndReturnsToTitle(game);
     }
 
@@ -1018,6 +1050,33 @@ public partial class AutoPlay
         }, 240, 0.05);
         Check(!sawRose && gs.HasFlag("ending_9"), "ending 9 on the kill route: Micah's at the station, not at Rose's door");
         await TheEnd("ending_9 (Tony killed)");
+
+        // the candlestick and the cellar fire on the kill route: ending 8, still without the coffee at Rose's
+        Seed(heldOut.Append("cellar_lit"), act3Items, "Our Father");
+        _ = game.ChangeRoom("mansion_bedroom", "start");
+        await Until(() => game.Room is Rooms.MansionBedroom && game.Player.Character == "eleanor_sheet_play", 180);
+        await WaitIdle(game);
+        await game.Perform(Verb.Hand, "candlestick");
+        await WaitIdle(game);
+        await game.Perform(Verb.Walk, "door");
+        await WaitIdle(game);
+        await game.Perform(Verb.Walk, "bar_panel");
+        Check(game.Room?.Name == "MansionCellar", "ending 8 on the kill route: down the bootleggers' stair from the study");
+        await game.Perform(Verb.Hand, "barrel");
+        await game.Perform(Verb.Hand, "hung_lantern");
+        await game.Perform(Verb.UseItem, "barrel", "lantern_lit");
+        await WaitIdle(game);
+        Check(gs.HasFlag(Endings.EleanorBurned) && game.Room?.Name == "MansionKitchen",
+            "ending 8 on the kill route: the lantern in the Club's rye, and up to the kitchen");
+        sawRose = false;
+        _ = game.Perform(Verb.Walk, "back_door");
+        await Until(() =>
+        {
+            sawRose |= game.Room?.Name == "RoseHouse";
+            return game.Room?.Name == "Outskirts" && !game.Busy || game.Hud.CaptionText == "End of Act Three";
+        }, 240, 0.05);
+        Check(!sawRose && gs.HasFlag("ending_8"), "ending 8 on the kill route: Micah's at the station, not at Rose's door");
+        await TheEnd("ending_8 (Tony killed)");
     }
 
     /// <summary>Starts a seeded Act 3 run from the alley: its flags (edited), inventory and Ink state, and the choices to prefer.</summary>
