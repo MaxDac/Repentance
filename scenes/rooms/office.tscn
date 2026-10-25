@@ -123,10 +123,6 @@ metadata/facing = 1
 position = Vector2(160, 172)
 metadata/facing = 3
 
-[node name="from_caleb" type="Marker2D" parent="Entries"]
-position = Vector2(58, 172)
-metadata/facing = 1
-
 [node name="act3" type="Marker2D" parent="Entries"]
 position = Vector2(405, 168)
 metadata/facing = 2

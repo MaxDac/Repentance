@@ -938,9 +938,18 @@ MICAH: Nothing you owe me.
 MICAH: I'm not asking you to believe I've changed. I want to start showing you.
 MICAH: Would you have a cup of coffee with me? Sometime. Daylight. A table between us.
 ROSE: ...
-ROSE: Coffee.
-MICAH: Just coffee. You can bring Tommy, if he wants to see what his old man looks like.
-ROSE: ...Why not.
+{has_flag("rose_forgives"):
+    ROSE: Coffee.
+    MICAH: Just coffee. You can bring Tommy, if he wants to see what his old man looks like.
+    ROSE: ...Why not.
+- else:
+    ROSE: No, Micah.
+    ROSE: I've had a lot of cups of coffee with you. Every one of them had a promise in it. I can't drink another.
+    MICAH: ...That's fair.
+    ROSE: But Tommy asks about you. Every night, at the window.
+    ROSE: Sunday. Take him to Mass at your brother's, and to the park after. Bring him home by four.
+    MICAH: Sunday. I'll be there.
+}
 INSET: none
 -> END
 
@@ -1035,7 +1044,11 @@ CALEB: There's a way back for everybody. Even you.
     CALEB: Then remember what it means.
 + [(Refuse the cross pendant.)]
     MICAH: Keep it. I can't take it tonight.
-    CALEB: I'll ask again when you come back.
+    {has_flag("visit_caleb_act3"):
+        CALEB: Then I'll pray you don't need it.
+    - else:
+        CALEB: I'll ask again when you come back.
+    }
 - -> END
 
 === caleb_warn ===
@@ -1091,9 +1104,9 @@ NUN: You want answers? Go see Harrington senior.
 -> END
 
 === beaten_choice ===
-* [(Keep going. For Eleanor.)]
++ [(Keep going. For Eleanor.)]
     ~ set_flag("keep_going")
-* [(Give up.)]
++ {has_flag("can_give_up")} [(Give up.)]
 - -> END
 // ---------------------------------------------------------------- ACT 3: THE BLUE LANTERN, THE MANSION
 
@@ -1646,12 +1659,17 @@ ELEANOR: The Club's finished. They say the building's for sale.
 CALEB: I know. I read every word.
 THOUGHT: He didn't tell her how many years he had kept the same words behind his teeth. She knew it anyway. She said it was in his hands.
 ELEANOR: How is he? Micah.
-{has_flag("killed_tony"):
+{
+- has_flag("killed_tony"):
     CALEB: Here. The men's wing, across the yard. He turned himself in the morning after that night, for a bartender he killed.
     ELEANOR: ...
     ELEANOR: Then he stopped running. It's better this way.
-- else:
+- has_flag("rose_forgives"):
     CALEB: He's with his wife now.
+    ELEANOR: ...
+    ELEANOR: It's better this way.
+- else:
+    CALEB: He's alone. Rose wouldn't have him back. But he has his boy on Sundays.
     ELEANOR: ...
     ELEANOR: It's better this way.
 }
@@ -1714,9 +1732,13 @@ CALEB: So people tell me.
     ELEANOR: I heard it from upstairs, and the Club's men go down the back stairs. They found nobody. Only the kitchen door, open on the rain.
     CALEB: He ran. Out of Chicago, that same night. He hasn't written to Rose. Not to me either, yet.
     ELEANOR: ...Good. One of us should get out of this city alive.
-- else:
+- has_flag("rose_forgives"):
     ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
     CALEB: I know. He went home instead. To Rose, and a cup of coffee.
+    ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
+- else:
+    ELEANOR: He came for me too, you know. Into the Club, in one of their masks, and they carried him out.
+    CALEB: I know. He went home instead. Rose wouldn't have him back. But she's letting him see his boy.
     ELEANOR: ...Good. That's where he belongs. Not chasing me through other men's houses.
 }
 THOUGHT: Headlights came up the road out of the dark, slow, the way a man drives when he's carrying crates of cabbages and a secret.
@@ -1813,19 +1835,27 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     {
     - has_flag("killed_tony"):
         DANIEL: "A letter came to Joliet today, where I serve my time for Tony. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
-    - has_flag("shot_bartender"):
+    - has_flag("shot_bartender") && has_flag("rose_forgives"):
         DANIEL: "We left Chicago the week after that coffee. Tony knew my face, and the men he pours for never forget one. A man doesn't bring that to his wife's door."
         DANIEL: "A letter came today, sent on by Caleb to the house downstate. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
-    - else:
+    - has_flag("shot_bartender"):
+        DANIEL: "I left Chicago alone, the week after she said no to that coffee. Tony knew my face, and the men he pours for never forget one. Rose puts Tommy on the train to me once a month."
+        DANIEL: "A letter came today, sent on by Caleb to my room downstate. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    - has_flag("rose_forgives"):
         DANIEL: "A letter came to Rose's house today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
+    - else:
+        DANIEL: "A letter came to my room on Halsted Street today. No return address, a Chicago postmark, and inside it the rest of that night, in her hand."
     }
     DANIEL: "The motel, the Order's men, the old man's gin she wouldn't drink. And what she did with his candlestick after I'd gone. I've copied it all into the pages before these, in her words. I owed her that much."
     DANIEL: "The Harrington house burned to the cellar the night I left it. The papers said a gas main. Nobody ever asked me, and I never said."
     DANIEL: "A week later the Tribune printed the old man's Thursday book, page by page: the girls, the trains, the men who paid. She had mailed it to them on her way out of the city. The Club never opened on a Thursday again."
-    {has_flag("killed_tony"):
+    {
+    - has_flag("killed_tony"):
         DANIEL: "Rose knows. I passed her the letter across the visiting-room table. She read it twice, and folded it, and kept it."
-    - else:
+    - has_flag("rose_forgives"):
         DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
+    - else:
+        DANIEL: "Rose knows. I gave her the letter the next time I brought Tommy home. She read it on the doorstep, and folded it, and kept it."
     }
     DANIEL: ...So that's whose hand it was. Hers, copied out by his.
     DANIEL: Maybe Leo would like to read it some day.
@@ -1835,10 +1865,14 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     {
     - has_flag("killed_tony"):
         DANIEL: "My brother serves his own sentence at Joliet, for a bartender called Tony; he walked in and gave himself up the morning after. Eleanor Harrington serves hers across the yard. I visit them both, the same Sunday. I am not sure which of them is freer."
-    - has_flag("shot_bartender"):
+    - has_flag("shot_bartender") && has_flag("rose_forgives"):
         DANIEL: "Micah drinks coffee now, and goes to Mass with his wife, in a town downstate. The bartender he shot, Tony, knew his face, and the men Tony pours for looked for him all winter. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
-    - else:
+    - has_flag("shot_bartender"):
+        DANIEL: "Micah lives alone now, in a town downstate. The bartender he shot, Tony, knew his face, and the men Tony pours for looked for him all winter. Rose wouldn't have him back, but she puts their boy on the train to him once a month. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    - has_flag("rose_forgives"):
         DANIEL: "Micah drinks coffee now, and goes to Mass with his wife. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
+    - else:
+        DANIEL: "Micah lives alone now, in a room on Halsted Street. Rose wouldn't have him back, but every Sunday he brings their boy to Mass at my church. Eleanor Harrington serves her sentence at Joliet. I visit them both. I am not sure which of them is freer."
     }
     DANIEL: "At her trial she named the Club, and the girls, and the trains, in open court. The Club's Thursdays ended with her testimony. She did, in one afternoon, what I had not the courage to do in all my years of silence. My brother called me a hypocrite for it. He was right."
     DANIEL: "Whoever reads this: she said no, twice, when no was the hardest word in Chicago. Remember that about her, if you remember anything."
@@ -1895,6 +1929,27 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
     DANIEL: ...Huh. He made it. He actually made it.
+    DANIEL: Maybe Leo would like to read it some day.
+- has_flag("ending_15"):
+    {has_flag("shot_bartender"):
+        DANIEL: "I left Chicago alone, the week after she said no to that cup of coffee. Tony knew my face, and the men he pours for never forget one. A man doesn't bring that to his wife's door, even when she's shut it."
+        DANIEL: "Once a month Rose puts Tommy on the train downstate. I meet him on the platform, and on Sunday we go to Mass at St. Anne's, a wooden church with a bell that's always late. Caleb comes down at Easter."
+    - else:
+        DANIEL: "A year since she said no to that cup of coffee. Every Sunday I take Tommy to Mass at Caleb's church, and to the park after, and I bring him home by four."
+        DANIEL: "Rose opens the door. She looks at him, and then at me, to see if I'm sober. I always am. She closes it softly."
+    }
+    DANIEL: "She was right to say no. I'd have said no to me too. But she lets me have the boy, and the boy lets me have Sundays. He has her eyes and, God help him, my chin."
+    {has_flag("took_documents"):
+        DANIEL: "The old man's papers didn't stay in my coat. Caleb carried them into the Tribune himself, the morning after Rose's doorstep. He said he owed fourteen girls that walk."
+        DANIEL: "A grand jury sat in the spring. The Club on Hubbard Street is a furniture showroom now. No more Thursdays, and no more girls off the trains."
+    }
+    {has_flag("caleb_escape"):
+        DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, she told Caleb at the edge of the city, the night he got her out of Chicago, and asked him to let me know. He did, a week later, after Mass. What she told him, I wrote in, and the rest I guessed."
+    - else:
+        DANIEL: "One more thing, so the pages are honest. What happened to Eleanor after the motel, Caleb passed on to me, months later: she came to Holy Name and told him, on the rectory steps, and asked him to let me know. What she told him, I wrote in, and the rest I guessed."
+    }
+    DANIEL: ...So that's whose hand those pages were. Micah's, guessing.
+    DANIEL: ...She didn't take him back. But the kid got his father.
     DANIEL: Maybe Leo would like to read it some day.
 - has_flag("ending_2"):
     DANIEL: "She left again. The third time. Took the car, and what was left of the money."
@@ -2027,7 +2082,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     }
     DANIEL: A goodbye letter. To his wife and his kid. He never sent it.
 }
-{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11") && not has_flag("ending_12") && not has_flag("ending_13") && not has_flag("ending_14"):
+{not has_flag("ending_1") && not has_flag("ending_6") && not has_flag("ending_7") && not has_flag("ending_8") && not has_flag("ending_9") && not has_flag("ending_10") && not has_flag("ending_11") && not has_flag("ending_12") && not has_flag("ending_13") && not has_flag("ending_14") && not has_flag("ending_15"):
     DANIEL: That's enough of you for one lifetime, Micah Jones.
 }
 -> END

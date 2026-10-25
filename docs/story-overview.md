@@ -140,13 +140,13 @@ From here the story follows Walkthrough.md:
     "Noooo!"). Then Micah's journal goes on at the Club stage.
 27. **Club**: the close-up of Eleanor again; "Are you satisfied, now, mister Jones?" It closes before the choice: draw the revolver, don't, or start the Our Father (Harrington cuts him off at "hallowed be Thy name": "How childish..."); either way Bruno knocks Micah out.
 28. **Outside the cathedral**: a framed close-up of Micah, flat on his back under his hat, stays up while he admits it's Eleanor
-    he wants, not Rose; it closes as he gets up. Give up (ending 1), or keep going:
+    he wants, not Rose; it closes as he gets up. Give up (only if he carries the ring or pressed Rose; ending 1 or 15), or keep going:
 29. **The office**: lamp off, whiskey on the desk, Micah stares out of the window and works out who knows where the Club keeps its girls: Tony, at the Blue Lantern.
-    After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern; Caleb visits return to the
-    office and can repeat until the cross is accepted. Act Three visits also count toward the church-return requirement.
+    After standing he can collect the ring. Leaving offers Caleb or the Blue Lantern. Caleb's counsel and his offer of
+    the cross happen once; accepted or refused, Micah goes on from the church straight to the Blue Lantern's alley.
 30. **The alley**: break the street lamp, kick the trash cans in the dark to lure Sal out, knock him down with
-   the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the shoulder, or (only if Micah went
-   back to Caleb while hunting for Eleanor **and carries his wedding ring**) walk away (ending 1). Tony sends him to old Harrington's house. First, back at the office in a storm blackout,
+   the revolver, then knock on the back door. With Tony at gunpoint, shoot him in the shoulder, or (only if Micah carries the ring
+   **or** pressed Rose **or** carries Caleb's cross) walk away (ending 1 or 15). Tony sends him to old Harrington's house. First, back at the office in a storm blackout,
    the narrating voice follows his descent while lightning shows a demon shadow in the window; he leaves the bottle,
    takes the hat from the desk and goes.
 31. **The Harrington mansion**: the key on the lintel would ring an alarm bell wired to the kitchen door. Look at
@@ -161,19 +161,19 @@ From here the story follows Walkthrough.md:
    index. At the study desk, combine them and fit all five index holes on the account dots so BANK/JUDGE/CAPTAIN read as the note (flipped, turned 180, offset 6,9)
    to locate and take the signed payoff sheets, which also record the Club's payments for the girls. The register alone is not evidence. Entering the bedroom
    ends this opportunity; skipping remains possible and preserves the prison endings.
-33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah went back to Caleb *and* pressed
-   Rose at least three times **and carries both ring and cross**) choose "Our Father...": Micah says the prayer,
-   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1, or 12 if Tony was killed). Then talk Eleanor into leaving: four turns of four lines, each line
+33. **The bedroom**: old Harrington with Eleanor. Shoot him, or (only if Micah carries Caleb's cross **and** either the ring
+   or pressed Rose at least three times) choose "Our Father...": Micah says the prayer,
+   a verse at a time, backing to the door while the old man talks into every pause; its last lines play over black (ending 1 or 15, or 12 if Tony was killed). Then talk Eleanor into leaving: four turns of four lines, each line
    typed and weighted, and 10 points out of 16 convince her (see [Eleanor's persuasion](eleanor-persuasion.md)). On the first turn he can
    leave her and turn himself in (ending 6); from the third he can leave her; on the fourth he can shoot her, then
    himself (ending 7). After four failed turns, footsteps: shoot himself (ending 7), shoot her and himself, or leave.
    If Eleanor told Agatha the truth and refused the old man: after the Our Father the player is Eleanor in the sheet, with the
-   old man's back turned. Return to bed (ending 1, or 12 if Tony was killed), or take the candlestick off the nightstand and strike him, then
+   old man's back turned. Return to bed (ending 1 or 15, or 12 if Tony was killed), or take the candlestick off the nightstand and strike him, then
    leave by the kitchen door, optionally burning the house from the cellar first (Micah's lantern, then the barrel).
    If Micah shoots instead, she only says, worn out, "Let's get out of here, quick." and follows him: no persuasion.
 34. **The escape**: optionally go back down to the wine cellar (Eleanor, if she came, waits in the kitchen), open the
    whiskey barrel, take the lit lantern off its nail and use it on the whiskey; the house burns behind them.
-35. **Endings**: 1 coffee with Rose; 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
+35. **Endings**: 1 coffee with Rose (only with the ring and having pressed her; otherwise 15); 2 out of town with Eleanor (convinced, and signed evidence or fire); 3 out of town
    alone (not convinced, signed evidence or fire); 4 prison, Eleanor visits (convinced, neither signed evidence nor fire);
    5 prison, Caleb visits; 6 prison, Rose visits (turned himself in) and the journal ends "I returned to the faith...";
    7 murder and/or suicide in the bedroom, the last entry written by Caleb; 8 coffee with Rose (unless Tony is dead),
@@ -182,9 +182,10 @@ From here the story follows Walkthrough.md:
    10 out of town, where Eleanor (worn out, she followed without persuasion) leaves Micah by the car to look for her
    peace (signed evidence or fire); 11 prison, where she visits once to wish him his peace (neither); 12 prison, Caleb
    visits (Micah killed Tony and turned himself in); 13 out of Chicago alone, after the alarm; 14 shot in the kitchen,
-   the last pages written by Caleb. Every last entry says who wrote Eleanor's pages. Each ends Act Three; the next
+   the last pages written by Caleb; 15 Sunday visits: Rose refuses the coffee, but lets Micah take Tommy to Mass
+   on Sundays. Every last entry says who wrote Eleanor's pages. Each ends Act Three; the next
    morning (no caption after endings 7 and 14) Daniel keeps the journal for Leo if Micah returned to Rose or to the
-   faith (endings 1, 6 and 12), or in endings 8-11, saying "Maybe Leo would like to read it some day." After endings 7
+   faith (endings 1, 6, 12 and 15), or in endings 8-11, saying "Maybe Leo would like to read it some day." After endings 7
    and 14 he respects Caleb's last pages and puts it back. Otherwise, he puts it back in the trunk. *The End.*
 
 ## Branches and endings
@@ -193,17 +194,21 @@ The story branches on a handful of decisions, all but two of them in Act Three. 
 the interludes; their combined effect on ending selection begins once Micah reaches the old man's bedroom. Gates
 (`Endings.cs`):
 
-- **Church return**: Micah went back to Caleb while hunting for Eleanor (`church_before_office`,
-  `church_before_club` or `church_act3_return`).
 - **Pressed Rose**: he kept asking her for forgiveness on her doorstep (`rose_wait`).
+- **Faithful**: he carries the wedding ring (`faith_ring`) or pressed Rose. Visits to Caleb open no gate by themselves.
+- **Pendant**: he carries Caleb's cross (`cross`).
+- **Rose forgives**: he carries the ring *and* pressed Rose (`rose_forgives`, set with the gates before each
+  peaceful choice); otherwise every peaceful ending is 15 instead of 1.
 - **Held out**: Eleanor told Agatha the truth instead of seducing her (First Interlude, `eleanor_refused_abbess`) *and* the old
   man's gin and powder (Second Interlude, `eleanor_refused_drugs`). One refusal alone does not unlock Eleanor's alternative bedroom branches.
 
 ```mermaid
 flowchart TD
-    steps["Cathedral steps"] -- "Give up" --> E1["1: coffee with Rose<br/>(then Eleanor and Caleb at the city's edge<br/>if she held out and Micah gave up or walked away)"]
+    steps["Cathedral steps"] -- "Give up<br/>(faithful)" --> rose{"Ring + pressed Rose?"}
+    rose -- yes --> E1["1: coffee with Rose<br/>(then Eleanor and Caleb at the city's edge<br/>if she held out and Micah gave up or walked away)"]
+    rose -- no --> E15["15: Rose refuses; Sundays with Tommy<br/>(Eleanor and Caleb as in 1)"]
     steps -- "Keep going" --> tony["Tony at gunpoint"]
-    tony -- "Lower the gun<br/>(church return + ring)" --> E1
+    tony -- "Lower the gun<br/>(faithful or cross)" --> rose
     tony -- "Shoot him in the shoulder" --> finishTony{"Finish Tony?"}
     finishTony -- no --> mansion["Mansion: optional signed evidence"]
     finishTony -- yes --> nightMap["Night map: Tony dead"]
@@ -217,10 +222,10 @@ flowchart TD
     feet -- Run --> E13["13: out of Chicago, alone"]
     feet -- Stay --> E14["14: shot in the kitchen; Caleb writes"]
     mansion --> bedroom["Bedroom: old man and Eleanor"]
-    bedroom -- "Our Father<br/>(church return + pressed Rose + ring + cross;<br/>Tony dead also needs the confession)" --> prayer{"Eleanor held out?"}
+    bedroom -- "Our Father<br/>(cross + faithful;<br/>Tony dead also needs the confession)" --> prayer{"Eleanor held out?"}
     prayer -- no --> tonyDead{"Tony killed?"}
     tonyDead -- yes --> E12
-    tonyDead -- no --> E1
+    tonyDead -- no --> rose
     prayer -- yes --> coda["Coda: the player is Eleanor"]
     coda -- "Back to bed" --> tonyDead
     coda -- "Candlestick" --> out{"Burn the cellar on the way out?"}
@@ -245,8 +250,9 @@ flowchart TD
 
 How each decision is made:
 
-- **Give up** (cathedral steps, after Bruno knocks Micah out): always offered; sets `gave_up_steps`.
-- **Lower the gun** (Tony): only with the church return and the wedding ring in his pocket; sets `walked_away`.
+- **Give up** (cathedral steps, after Bruno knocks Micah out): only if he is faithful (`can_give_up`); sets
+  `gave_up_steps`.
+- **Lower the gun** (Tony): if he is faithful or carries the cross (`can_walk_away`); sets `walked_away`.
 - **Kill Tony** (the dialogue choice "Finish him" after the shoulder, else Micah leaves him and walks out): Tony
   knows who shot him, and he's the mob. A second
   bullet sets `killed_tony` and opens a night map with only the Blue Lantern, the church and the mansion. At the
@@ -261,10 +267,10 @@ How each decision is made:
   in Omaha with the revolver on the washstand) or **Stay** (`alarm_stayed`, ending 14: two Club men at the cook's
   table shoot him down; Caleb finishes the journal). If Eleanor held out, either is followed by her escape with Caleb
   at the city's edge, a week later (`caleb_escape`), in lines that know Micah ran or died.
-- **Our Father** (bedroom): the Tony gate plus pressed Rose and the cross, and the confession if Tony is dead; sets
-  `spared_oldman` (ending 12 instead of 1 after killing Tony). If Eleanor held
+- **Our Father** (bedroom): the cross and faith, and the confession if Tony is dead (`can_spare`); sets
+  `spared_oldman` (ending 12 instead of 1 or 15 after killing Tony). If Eleanor held
   out, she plays the coda (`eleanor_coda`): the old man stands between her and the door, and she can't walk past
-  him. She goes back to bed (ending 1, or 12 if Tony was killed), or takes the candlestick and strikes him (`eleanor_struck`), then leaves
+  him. She goes back to bed (ending 1 or 15, or 12 if Tony was killed), or takes the candlestick and strikes him (`eleanor_struck`), then leaves
   through the study, down to the kitchen and out of the back door. To burn the house she goes down to the cellar
   on the way (from the kitchen, or by the panel behind the study bar) and lights the Club's rye with Micah's lantern
   (`eleanor_burned`).
@@ -279,7 +285,7 @@ How each decision is made:
   leaving her from the third, shooting her on the fourth (`shot_eleanor`). After four turns without her, footsteps
   on the landing: shoot himself (`shot_himself`), shoot her and himself, or leave.
 - **Eleanor's escape outfits**: once out of the sheet she wears what she packed in her duffle. Held out
-  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11, and ending 1 with Caleb): a white dress with her pearls. Gave in (endings 2, 4): a black
+  (`Endings.EleanorFreeOutfit`, endings 8, 10, 11, and endings 1 and 15 with Caleb): a white dress with her pearls. Gave in (endings 2, 4): a black
   skirt suit cut above the knee, no pearls. In prison (ending 9) she wears the inmate grey.
 - **The escape**: the signed payoff sheets from the study (`took_documents`) or the cellar fire (`mansion_exploded`)
   give Micah something to bargain with and keep him out of prison.
@@ -292,7 +298,7 @@ How each decision is made:
 | 8 / 9 | Eleanor struck the old man; 8 if she burned the cellar | Eleanor alone (8) or in prison with Caleb (9); preceded by Micah's coffee with Rose only if Tony lives |
 | 10 / 11 | Eleanor followed, worn out, after the shot; 10 with evidence or fire | Out of town, she leaves him by the car (10), or prison, she visits once (11) |
 | 12 | Killed Tony and turned himself in, from the church or after the Our Father | Prison, Caleb visits |
-| 1 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed) | Coffee with Rose; after a give-up or walk-away, if Eleanor held out, then Eleanor and Caleb at the city's edge |
+| 1 / 15 | Gave up, walked away from Tony, or spared the old man (including Eleanor's return to bed); 1 if Rose forgives (ring and pressed Rose) | Coffee with Rose (1), or Rose refuses it and gives him Sundays with Tommy (15); after a give-up or walk-away, if Eleanor held out, then Eleanor and Caleb at the city's edge |
 | 6 | Turned himself in | Prison, Rose visits |
 | 7 | Shot Eleanor or himself | The bedroom; Caleb writes the last entry |
 | 2 / 3 | Evidence or fire; 2 if Eleanor was convinced | Out of town, with her (2) or alone (3) |
@@ -300,11 +306,11 @@ How each decision is made:
 
 The interludes play in every run: the First between Acts One and Two (Room 507, the Blue Lantern, the convent, the
 motel window), the Second at the start of Act Three (the motel, the Club's dressing room). Eleanor plays again only in
-the bedroom coda (back to bed is ending 1, or 12 if Tony was killed; striking him is 8 or 9), in the epilogue of
-ending 8, and, if she held out, after Micah's coffee when he gave up on the steps or walked away from Tony (still
-ending 1: Caleb has got her out of the city, `caleb_escape`), or after the alarm (endings 13 and 14, the same scene
-told after Micah ran or died). Daniel keeps the journal for Leo after endings
-1, 6, 8, 9, 10, 11 and 12.
+the bedroom coda (back to bed is ending 1 or 15, or 12 if Tony was killed; striking him is 8 or 9), in the epilogue of
+ending 8, and, if she held out, after Rose's door when he gave up on the steps or walked away from Tony (still
+ending 1 or 15: Caleb has got her out of the city, `caleb_escape`), or after the alarm (endings 13 and 14, the same
+scene told after Micah ran or died). Daniel keeps the journal for Leo after endings
+1, 6, 8, 9, 10, 11, 12 and 15.
 
 ### Weather
 
@@ -322,7 +328,7 @@ or he let something slip, without establishing either as fact.
 The Club runs a trafficking ring that supplies fresh girls for its Thursday spectacles. Caleb and the convent hide
 the girls who escape; Caleb keeps silent so the Club leaves the convent alone (Tony's "Nobody from that Club goes
 near those nuns"). Harrington's unmasking and Tony at gunpoint touch on the girls, and Caleb's later visits return to
-his silence. The traffic ends only where somebody exposes it: Micah's signed papers in endings 1, 6 and 10 (Caleb
+his silence. The traffic ends only where somebody exposes it: Micah's signed papers in endings 1, 6, 10 and 15 (Caleb
 carries them to the Tribune, they come out at Micah's trial, or Eleanor asks him to give them to the papers),
 Eleanor's testimony at her trial in ending 9, the old man's Thursday book she mails to the Tribune in ending 8,
 and Micah's papers handed in with his confession to the grand jury in ending 12.

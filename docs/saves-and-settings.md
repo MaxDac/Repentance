@@ -2,7 +2,7 @@
 
 ## Saves
 
-The current save format is version 12.
+The current save format is version 13.
 
 `SaveData` (Godot-free, JSON via `System.Text.Json`):
 

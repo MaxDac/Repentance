@@ -124,8 +124,9 @@ Room numbers on the service-lift note follow `LiftMaze.Width` (501 to 513); `Not
 Most story decisions are Ink choices that set a flag (`~ set_flag(...)`); the room script reads the flag after the
 knot ends and chooses where to go. Giving up on the steps is the exception: "(Give up.)" in `beaten_choice` sets
 nothing, and `ChurchExterior` sets `gave_up_steps` when `keep_going` is absent. Choices behind a gate read derived
-flags (`can_walk_away`, `can_spare`) that
-`Act3.UpdateGates` sets from `Endings` helpers just before the knot. For the bedroom branches, Eleanor's two refusals
+flags (`can_give_up`, `can_walk_away`, `can_spare`) that
+`Act3.UpdateGates` sets from `Endings` helpers just before the knot; it also sets `rose_forgives`, which picks ending
+1 or 15 and Rose's answer at the door. Visits to Caleb in Act Two and Three open no gate. For the bedroom branches, Eleanor's two refusals
 (`eleanor_refused_abbess`, `eleanor_refused_drugs`) are combined through `Endings.EleanorHeldOut`, which needs both.
 `ClubBackstage` also reads `eleanor_refused_drugs` directly, to play the blackout instead of the ordinary departure.
 The full branch map is in [Story overview](story-overview.md#branches-and-endings). Eleanor's persuasion is not a
@@ -147,7 +148,7 @@ send the story the wrong way.
 | Act 2 -> 3 | `Attic.EndOfActTwo` | Stash, clear `masked`, `StoryAct = 3`, present-day bedroom |
 | Second interlude | `Interlude.BeginSecond` / `Taken` / `EndSecond` | Flag `interlude2`, `motel_night` -> `club_backstage`; restores the Act 3 kit, sets `masked`, `club_stage` |
 | Eleanor's coda | flags `eleanor_coda`, `eleanor_epilogue` | Eleanor plays again after the old man's prayer |
-| Eleanor's escape | `Act3.EleanorWithCaleb`, flags `caleb_escape`, `eleanor_epilogue` | When she held out: ending 1 after a give-up or walk-away (after Rose's coffee), or endings 13 and 14 after the alarm; Eleanor and Caleb at the outskirts |
+| Eleanor's escape | `Act3.EleanorWithCaleb`, flags `caleb_escape`, `eleanor_epilogue` | When she held out: ending 1 or 15 after a give-up or walk-away (after Rose's door), or endings 13 and 14 after the alarm; Eleanor and Caleb at the outskirts |
 
 `Interlude.EleanorPlays` is true during any of the four flags: Eleanor's sheet is used, the notepad is hidden, generic
 exits are blocked, and `Interlude.DefaultLine` replaces generic lines. In the two interludes and the coda
@@ -167,27 +168,28 @@ Rooms visited in an interlude branch on these flags (e.g. `Speakeasy.InterludeIn
 | 1 | `eleanor_struck` | 8 if `eleanor_burned`, else 9 |
 | 2 | `eleanor_weary` | 10 if `StaysFree`, else 11 |
 | 3 | `surrendered_tony`, or `killed_tony` and `spared_oldman` | 12 (prison, Caleb, after Tony) |
-| 4 | `gave_up_steps`, `walked_away` or `spared_oldman` | 1 (Rose) |
+| 4 | `gave_up_steps`, `walked_away` or `spared_oldman` | 1 (Rose) if `rose_forgives`, else 15 (Sunday visits) |
 | 5 | `repented` | 6 |
 | 6 | `shot_eleanor` or `shot_himself` | 7 |
 | 7 | `StaysFree` | 2 if `eleanor_convinced`, else 3 (outskirts) |
 | 8 | otherwise | 4 if `eleanor_convinced`, else 5 (prison) |
 
 Endings 8-11 require `EleanorHeldOut` (`eleanor_refused_abbess` and `eleanor_refused_drugs`). With it, a give-up on
-the steps or a walk-away from Tony is still ending 1, but `EleanorEscapesWithCaleb` adds her scene with Caleb at the
-outskirts after Rose's coffee. After the alarm (13 or 14) it adds the same scene, with lines that know Micah ran or
+the steps or a walk-away from Tony is still ending 1 or 15, but `EleanorEscapesWithCaleb` adds her scene with Caleb at
+the outskirts after Rose's door. After the alarm (13 or 14) it adds the same scene, with lines that know Micah ran or
 died, after his stop at the city's edge (13) or the cut to black in the kitchen (14). `EleanorFollows` is
 `eleanor_convinced` or `eleanor_weary` (she comes to the kitchen); only a convinced Eleanor speaks on the way out,
 a weary one follows in silence ("Not one more word in this house"). `KeepsJournal`:
-1, 6, 8, 9, 10, 11, 12. Every ending but 7 and 14 (unless Eleanor's escape follows) has the "The next morning" caption (`Act3.Finish`); the Joliet
+1, 6, 8, 9, 10, 11, 12, 15. Every ending but 7 and 14 (unless Eleanor's escape follows) has the "The next morning" caption (`Act3.Finish`); the Joliet
 visits open on "Six months later", ending 12 on "A year later" (`Prison.OnEnter`). `Act3.End` resolves, sets `ending_N` and moves to the ending room. Gate helpers:
-`CanWalkAwayFromBartender`, `CanSpareOldMan` (after `killed_tony` it also needs `confessed_tony`), `CanOfferCross`,
-`ChurchReturned`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
+`Faithful` (the ring or `rose_wait`), `CanGiveUp` (faithful), `CanWalkAwayFromBartender` (faithful or the cross),
+`CanSpareOldMan` (the cross and faithful; after `killed_tony` it also needs `confessed_tony`), `RoseTakesHimBack`
+(the ring and `rose_wait`), `CanOfferCross`, `InsistedForgiveness`. `TonyWantsRevenge` (`shot_bartender` without `killed_tony`) is the Tony-alive
 case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves Tony unhurt, so no revenge; he gives the key but not
 the alarm. Looking at the door or lintel and taking the key do not reveal it; only inspecting the wire or bell does.
 Opening the keyed kitchen door without that inspection rings the bell (`alarm_footsteps`): run (`alarm_ran`)
 or stay (`alarm_stayed`).
-Every route must reach "The End" (`Playthrough` routes `1`-`14`, `1-oldman`, `1-steps`, `1-caleb`, `12-oldman`).
+Every route must reach "The End" (`Playthrough` routes `1`-`15`, `1-oldman`, `1-steps`, `1-caleb`, `15-caleb`, `12-oldman`).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
 click or refusal walks her past him to the door.
 

@@ -221,11 +221,7 @@ public partial class Office : Room
             await Game.ChangeRoom("church_interior", "act3");
             return;
         }
-        // tonight Sal and Tony are inside; Micah has the alley to himself
-        State.SetFlag("alley3");
-        State.SetFlag("alley3_sal_inside");
-        State.SetFlag("alley3_tony_inside");
-        await Game.ChangeRoom("alley", "act3");
+        await Act3.ToTheBlueLantern();
     }
 
     /// <summary>

@@ -18,12 +18,13 @@ public partial class AutoPlay
         string[] alleyReady = act3Flags.Where(f => f != "alley3_sal_inside")
             .Concat(new[] { "alley3_dark", "alley3_sal_out", "alley3_sal_down" }).ToArray();
 
-        // 5: no visits to Caleb, so no walking away; shoot, Eleanor stays, nothing to bargain with
-        var noChurch = alleyReady.Where(f => f is not ("church_before_office" or "church_before_club" or "church_act3_return")).Append("rose_wait");
-        Seed(noChurch, act3Items, Refuses.Append("(Leave her to them.)").Prepend("Shoot him").ToArray());
+        // 5: no ring, no call-back from Rose and no cross, so no walking away; shoot, Eleanor stays, nothing to bargain with
+        var faithless = alleyReady.Where(f => f != "rose_wait").ToArray();
+        var bare = act3Items.Where(i => i is not ("faith_ring" or "cross")).ToArray();
+        Seed(faithless, bare, Refuses.Append("(Leave her to them.)").Prepend("Shoot him").ToArray());
         await game.ChangeRoom("alley", "act3");
         await game.Perform(Verb.Talk, "back_door");
-        Check(!Offered("bartender_gun", "Lower the gun") && gs.HasFlag("shot_bartender"), "without Caleb, Micah can't walk away from Tony");
+        Check(!Offered("bartender_gun", "Lower the gun") && gs.HasFlag("shot_bartender"), "without the ring, Rose or the cross, Micah can't walk away from Tony");
         await game.ChangeRoom("mansion_study", "start");
         await game.Perform(Verb.Hand, "drawer_right");
         await game.Perform(Verb.Hand, "drawer_left");
@@ -31,7 +32,7 @@ public partial class AutoPlay
         Check(gs.HasItem("audit_folder") && gs.HasItem("audit_tracing") && !gs.HasFlag(Endings.TookDocuments),
             "cancelled room-use alignment retains clues but no evidence");
         await game.Perform(Verb.Walk, "door_right");
-        Check(!Offered("oldman_taunt", "Our Father") && gs.HasFlag("shot_oldman"), "without Caleb, Micah can't spare the old man");
+        Check(!Offered("oldman_taunt", "Our Father") && gs.HasFlag("shot_oldman"), "without the cross, Micah can't spare the old man");
         Check(!gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "Eleanor won't come");
         CheckPersuasionTurns();
         // Seeded endings follow the permanent epilogue lock; exercise the recipe without reopening its blocked HUD.
@@ -112,17 +113,25 @@ public partial class AutoPlay
             await TheEnd($"{ending} (documents only)");
         }
 
-        // Verify the actual Ink choices for each missing commitment, not only the helper predicates.
-        foreach (string missing in new[] { "faith_ring", "cross" })
+        // Verify the actual Ink choices for each missing commitment, not only the helper predicates: the Our Father needs
+        // the cross and faith (the ring or Rose's call-back); the call-back alone counts as faith.
+        foreach (var (flags, items, offered, label) in new[]
         {
-            Seed(act3Flags.Append("rose_wait"), act3Items.Where(i => i != missing), "Shoot him", "(Leave her.)");
+            (act3Flags, act3Items.Where(i => i != "cross").ToArray(), false, "the ring and Rose without the cross"),
+            (act3Flags.Where(f => f != "rose_wait").ToArray(), act3Items.Where(i => i != "faith_ring").ToArray(), false,
+                "the cross without the ring or Rose"),
+            (act3Flags, act3Items.Where(i => i != "faith_ring").ToArray(), true, "the cross and Rose without the ring"),
+        })
+        {
+            Seed(flags, items, "Shoot him", "(Leave her.)");
             await game.ChangeRoom("mansion_bedroom", "start");
-            Check(!Offered("oldman_taunt", "Our Father"), $"without {missing}, the final return is unavailable");
+            Check(Offered("oldman_taunt", "Our Father") == offered,
+                $"with {label}, the Our Father is {(offered ? "offered" : "unavailable")}");
         }
-        Seed(alleyReady, act3Items.Where(i => i != "faith_ring"), "Shoot him");
+        Seed(alleyReady.Where(f => f != "rose_wait"), act3Items.Where(i => i != "faith_ring"), "Shoot him");
         await game.ChangeRoom("alley", "act3");
         await game.Perform(Verb.Talk, "back_door");
-        Check(!Offered("bartender_gun", "Lower the gun"), "church return without ring doesn't allow walking away from Tony");
+        Check(Offered("bartender_gun", "Lower the gun"), "Caleb's cross alone is enough to walk away from Tony");
 
         // 1: walking away from Tony
         Check(act3Items.Contains("cloth"), "Act 3 seeds carry Eleanor's cloth");
@@ -153,6 +162,20 @@ public partial class AutoPlay
         await Until(() => game.Hud.ThoughtVisible && game.Hud.ThoughtText.Contains("Two small words"));
         Check(!game.Hud.InsetVisible, "Rose's close-up is gone before Micah's closing thought");
         await TheEnd("ending_1 (Tony)");
+
+        // 15: the cross alone gets Micah away from Tony, but without the ring and Rose's call-back she won't have coffee
+        Seed(alleyReady.Where(f => f != "rose_wait"), act3Items.Where(i => i != "faith_ring"), "Lower the gun");
+        await game.ChangeRoom("alley", "act3");
+        _ = game.Perform(Verb.Talk, "back_door");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_15") && !gs.HasFlag("ending_1") && !gs.HasFlag(Endings.RoseForgives),
+            "ending 15: walked away from Tony with only the cross, and Rose won't take him back");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("No, Micah.", StringComparison.Ordinal), 60);
+        Check(!gs.HasItem("cloth"), "ending 15: Micah throws Eleanor's cloth in the street before ringing");
+        await Until(() => game.Hud.SpeechVisible && game.Hud.SpeechText.StartsWith("Sunday.", StringComparison.Ordinal), 60);
+        Check(game.Hud.SpeechText.StartsWith("Sunday.", StringComparison.Ordinal), "ending 15: Rose refuses the coffee, but gives Micah Sundays with Tommy");
+        await Shot("rose_refuses");
+        await TheEnd("ending_15 (Tony)");
 
         // 1: sparing the old man, praying the Our Father verse by verse while backing to the door
         Seed(act3Flags.Append("rose_wait"), act3Items, "Our Father");
@@ -269,17 +292,34 @@ public partial class AutoPlay
             "one refusal (the gin only): the ordinary prison ending 4, not ending 11");
         await TheEnd("ending_4 (gin refused only)");
 
-        // 1: giving up on the church steps
-        Seed(act3Flags.Where(f => f != "keep_going"), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        // 1: giving up on the church steps, with the ring and Rose's call-back
+        var steps = act3Flags.Where(f => f != "keep_going").ToArray();
+        Seed(steps, act3Items.Where(i => i != "cross"), "Give up");
         _ = game.ChangeRoom("church_exterior", "beaten");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1"), "ending 1: gave up on the steps");
         await TheEnd("ending_1 (steps)");
         Check(!gs.HasFlag("caleb_escape"), "ending 1: without Eleanor's refusals, no escape with Caleb");
 
-        // Both of Eleanor's refusals give way to the give-ups, but after Rose's coffee Caleb gets Eleanor out of town.
+        // 15: Rose's call-back alone is faith enough to give up, but without the ring she won't have the coffee
+        Seed(steps, act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        _ = game.ChangeRoom("church_exterior", "beaten");
+        await Until(() => game.Room?.Name == "RoseHouse");
+        Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_15") && !gs.HasFlag("ending_1"),
+            "ending 15: gave up on the steps without the ring");
+        await TheEnd("ending_15 (steps)");
+
+        // neither the ring nor Rose's call-back: the cross isn't enough to give up, so Micah keeps going
+        Seed(steps.Where(f => f != "rose_wait"), act3Items.Where(i => i != "faith_ring"), "Give up");
+        _ = game.ChangeRoom("church_exterior", "beaten");
+        await Until(() => game.Room?.Name == "Office", 120);
+        Check(_offered.ContainsKey("beaten_choice") && !Offered("beaten_choice", "Give up") && gs.HasFlag("keep_going"),
+            "without the ring or Rose, \"(Give up.)\" is hidden on the steps and Micah keeps going");
+        await WaitIdle(game);
+
+        // Both of Eleanor's refusals give way to the give-ups, but after Rose's door Caleb gets Eleanor out of town.
         var bothRefused = new[] { Endings.RefusedAbbess, Endings.RefusedDrugs };
-        Seed(act3Flags.Where(f => f != "keep_going").Concat(bothRefused), act3Items.Where(i => i is not ("faith_ring" or "cross")), "Give up");
+        Seed(steps.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Give up");
         _ = game.ChangeRoom("church_exterior", "beaten");
         await Until(() => game.Room?.Name == "RoseHouse");
         Check(gs.HasFlag(Endings.GaveUpSteps) && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
@@ -288,18 +328,18 @@ public partial class AutoPlay
         await CalebEscape("ending 1 (steps, Eleanor held out)");
         await TheEnd("ending_1 (steps, Eleanor held out)");
 
-        Seed(alleyReady.Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
+        Seed(alleyReady.Where(f => f != "rose_wait").Concat(bothRefused), act3Items.Where(i => i != "cross"), "Lower the gun");
         await game.ChangeRoom("alley", "act3");
         _ = game.Perform(Verb.Talk, "back_door");
         await Until(() => game.Room?.Name == "RoseHouse");
-        Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_1") && !gs.HasFlag("eleanor_coda") &&
+        Check(gs.HasFlag("walked_away") && gs.HasFlag("ending_15") && !gs.HasFlag("eleanor_coda") &&
               !gs.HasFlag("eleanor_epilogue") && !gs.HasFlag(Endings.EleanorWeary),
-            "ending 1: walking away from Tony wins over both of Eleanor's refusals");
-        await CalebEscape("ending 1 (Tony, Eleanor held out)");
-        await TheEnd("ending_1 (Tony, Eleanor held out)");
+            "ending 15: walking away from Tony with only the ring wins over both of Eleanor's refusals");
+        await CalebEscape("ending 15 (Tony, Eleanor held out)");
+        await TheEnd("ending_15 (Tony, Eleanor held out)");
     }
 
-    /// <summary>When Eleanor held out and Micah never reached her, Eleanor and Caleb at the outskirts (endings 1, 13, 14).</summary>
+    /// <summary>When Eleanor held out and Micah never reached her, Eleanor and Caleb at the outskirts (endings 1, 13, 14, 15).</summary>
     private async Task CalebEscape(string label)
     {
         var gs = GameState.Instance;
