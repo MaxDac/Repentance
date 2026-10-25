@@ -57,7 +57,7 @@ public partial class HotelLinen : Room
             case ("rack", Verb.Hand) when !State.HasFlag("took_hanger"):
                 State.SetFlag("took_hanger");
                 State.GiveItem("hanger");
-                await Say("A spare wire hanger. The Aurelian won't miss one. It's barely missed a murder.");
+                await Say("A spare wire hanger. The Aurelian won't miss one. It's lost worse this week: a guest, for one.");
                 return true;
             case ("rack", Verb.Hand):
                 await Say("Uniforms for the morning shift. I'll leave the girls their hangers.");

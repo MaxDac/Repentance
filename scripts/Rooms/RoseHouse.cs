@@ -167,7 +167,7 @@ public partial class RoseHouse : Room
         }
         if (Endings.EleanorEscapesWithCaleb(State.HasFlag))
         {
-            // ending 1 when she held out: Caleb has got Eleanor out of the city, and she has one last scene
+            // ending 1 or 15 when she held out: Caleb has got Eleanor out of the city, and she has one last scene
             await Wait(1.0);
             await Game.Hud.Fade(1, 1.5);
             await Act3.EleanorWithCaleb();

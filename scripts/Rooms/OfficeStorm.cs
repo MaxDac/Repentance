@@ -67,7 +67,9 @@ public partial class OfficeStorm : Room
         await Reflection();
         await Wait(2.2);
 
-        await Think("Too late to turn round now. Eleanor's in that house. Whatever I am by morning, I'm going.");
+        await Think(State.HasFlag(Endings.ConfessedTony)
+            ? "Caleb will be on the station steps at sunrise. Eleanor's in that house tonight. No more blood, I said. I'm going, and I'm keeping it."
+            : "Too late to turn round now. Eleanor's in that house. Whatever I am by morning, I'm going.");
         State.SetFlag("storm_confessed");
         _lightning.Ambient = true;
     }

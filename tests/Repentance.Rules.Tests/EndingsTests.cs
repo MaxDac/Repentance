@@ -235,7 +235,7 @@ public class EndingsTests
     [Fact]
     public void ChurchVisitsOpenNoGate()
     {
-        var visits = Flags("church_before_office", "church_before_club", "church_act3_return", "visit_caleb_act3");
+        var visits = Flags("visit_caleb_act3", "caleb_met", "caleb_warned", "caleb_last_said");
         Assert.False(Endings.CanGiveUp(visits, Flags()));
         Assert.False(Endings.CanWalkAwayFromBartender(visits, Flags()));
         Assert.False(Endings.CanSpareOldMan(visits, Flags()));

@@ -45,7 +45,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
 - Micah arrives from State Street through the revolving door and walks into the lobby.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
-- Micah has to bribe the bellboy with $1 from his cash for his memory, then with
+- Micah has to bribe the bellboy with $1 from his cash for his memory (holding Eleanor's photograph out with it, so
+  the bellboy knows whom he means even if Micah never asked), then with
   another $1 to visit Eleanor's room: the second dollar lets him take the staff elevator up to the fifth-floor
   linen room next to Eleanor's room. Between the two dollars, Micah won't leave through the revolving door.
 - The bellboy's memory: on Tuesday night, having a smoke out back, he saw two big fellas (broken nose, cheap suit,
@@ -151,11 +152,12 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Once past Sal, he can speak with Tony the bartender. Once Tony says the gin was made in a bathtub, Micah
   can order one: "Bathtub? Swell. The dirtier the hooch, the better I like it. Set 'em up, pal." It costs $1,
   is offered once, and Micah lifts the tumbler off the counter and knocks it back (new drinking sprite); the
-  empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge, and when the conversation ends he
-  calls Micah back: "On second thought, I don't like you. Not one bit.", gestures to Sal (the bodyguard at
+  empty glass stays on the bar. Using the dollar on Tony orders it too. Tony won't budge on Eleanor. Once Micah has
+  asked about her, when the conversation ends he calls Micah back: "On second thought, I don't like you. Not one
+  bit.", gestures to Sal (the bodyguard at
   the entrance), and on to the next scene. Sal's "Out back, pal" fades to a black screen held for two seconds (the
   beating happens off screen), then the alley fades in slowly on Micah on his knees. Being thrown out goes through
-  the same blackout.
+  the same blackout. Leaving Tony before asking about Eleanor just ends the talk; Micah stays at the bar.
 
 #### Street behind the club (the alley)
 
@@ -170,7 +172,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue starts. The beating splits Micah's bottom lip: from here on his close-ups (the fire-escape two-portrait panel
   and the beaten panel) show a small dark-red cut across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
-  anything else.
+  anything else. If Sal threw Micah out before he asked Tony about Eleanor, Micah names her from the pavement first
+  ("All I came in for was a word about Eleanor Harrington."), so the name is on the table.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
   "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).
@@ -179,12 +182,13 @@ described here (other verbs, flavour lines) is left to the implementation.
 
 #### Convent
 
-- Micah arrives outside the neo-gothic convent at dusk, in the rain (the sidewalk and road wet and shining under the
+- Micah arrives outside the neo-gothic convent after dark, in the rain (the sidewalk and road wet and shining under the
   lamps, rain falling with its sound), with Eleanor absent. He thinks the beating is a day old and comments on its pointed arches, iron
   spikes and saints in the windows. The player must click the convent door to enter the corridor.
 - Inside are the convent corridor and Eleanor's cell, really dark, simple and tiny,
   with a bed, a lampstand, a book and a night stand.
-- In the corridor, Sister Agatha interrogates Micah: what he's doing here and what he wants with Eleanor.
+- In the corridor, Sister Agatha names herself ("I am Sister Agatha. This house is in my keeping.") and
+  interrogates Micah: what he's doing here and what he wants with Eleanor.
   She hints at Micah's biblical name as a prophet, quoting Douay-Rheims Micheas 6:8, and says "You would do better to end the search
   here, and have nothing more to do with that Jezebel." Micah asks what she means; she retreats, telling
   him that if he really wants, he can have a look at her room.
@@ -692,7 +696,10 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   to look at the girls on that stage if he goes.
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
   tell him not to go forward again. These later visits are optional, and no later choice depends on them: what
-  counts in Act 3 is whether Micah carries Caleb's cross pendant.
+  counts in Act 3 is whether Micah carries Caleb's cross pendant. Each warning plays in full once; going back
+  before the next step gets a short reminder instead ("I said my piece, Micah. Go to Rose. Go anywhere else." before
+  the office; "Still here? Go on, then. I'm already praying." before the masked Club visit), still with the cross
+  offer if it is open.
 
 #### Office of Harringhton father
 
@@ -939,6 +946,11 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   - **"Not yet. Eleanor's still in that house.":** `confessed_tony`; Micah promises to walk in on his own two feet
     after her, and goes on through the office in the storm to the mansion. With the confession, the Our Father is
     offered again on the usual terms, and after the prayer Micah keeps his promise: ending 12 instead of ending 1.
+    If Micah never took Caleb's cross, Caleb offers it now (the usual `caleb_cross` talk, which no longer promises a
+    later visit): the church is one-way after a killing, so this is the only chance to carry it to the bedroom. In the
+    storm, Micah's last thought keeps the promise ("No more blood, I said. I'm going, and I'm keeping it.") instead
+    of "Too late to turn round now". At the old man's taunt, if the Our Father still isn't open to him (no cross, or
+    not faithful), Micah thinks he can't find the words that would keep the promise.
 
 #### Office, the storm
 
@@ -983,7 +995,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       on the rain. He ran, and hasn't written to Rose or to Caleb yet. "...Good. One of us should get out of this
       city alive." Her last words: "If he ever writes to you, tell him I got out too."
     - The epilogue changes with it: in 14 Caleb's pages say she told him the night he got her out of Chicago, and
-      that he put her on a produce truck a week after the funeral (not "She is still in that house"); in 13 Micah
+      that he put her on a produce truck the week of the funeral (not "She is still in that house"); in 13 Micah
       writes that his brother walked her out of the house a week after he ran from it, and that she told Caleb the
       rest that night (not in the spring).
 - **Puzzle 9 - Alarm restraint:** the graphical close-up shows a spring-loaded hammer restrained by
@@ -1363,7 +1375,8 @@ or to his son (ending 15),
 or found his faith in prison (endings 6 and 12), or the journal ends on Eleanor's own way (endings 8 to 11), the father
 keeps the journal, saying "Maybe Leo would like to read it some day." In endings 7 and 14 he respects Caleb's last pages
 and puts the journal back, maybe for Leo in a couple of years. In all other endings (2 to 5 and 13), he throws the
-journal back in the trunk. Every ending but 7 and 14 has the "The next morning" caption.
+journal back in the trunk. Every ending but 7 and 14 has the "The next morning" caption. (Ending 14 does have it
+after Eleanor's escape with Caleb, whose scene at the city's edge comes between the cut to black and the attic.)
 
 Every last entry also says where the Second Interlude's pages came from, answering Daniel's "Not sure that's
 Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he never really knew."):
@@ -1381,8 +1394,8 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 | 10 | Micah: she told him on the road, before she got out of the car. |
 | 11 | Micah: she told him across the parlour table, the one time she came. |
 | 12 | Caleb's note: she told him months later and asked him to write it in. |
-| 13 | Micah: Caleb's letters pass on what she told him in the spring, at her asking. |
-| 14 | Caleb: she told him on the church steps the spring after Micah died, and asked him to set it down. |
+| 13 | Micah: Caleb's letters pass on what she told him in the spring, at her asking (after Eleanor's escape with Caleb: she told Caleb the night he got her out of Chicago). |
+| 14 | Caleb: she told him on the church steps the spring after Micah died, and asked him to set it down (after Eleanor's escape with Caleb: she told him the night he got her out of Chicago). |
 | 15 | As ending 1. |
 
 The First Interlude is always Micah's: she told him during the night at the motel.

@@ -107,6 +107,8 @@ public partial class Church : Room
             Player.Face(Facing.Right);
         }
         if (!State.HasFlag(Endings.ConfessedTony)) await Talk("caleb_tony");
+        // absolved and going on for Eleanor: the cross is still his for the asking, as on any Act 3 visit
+        if (!State.HasFlag(Endings.SurrenderedTony)) await OfferCross();
         if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
         if (State.HasFlag(Endings.SurrenderedTony))
         {
