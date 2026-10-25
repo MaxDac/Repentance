@@ -28,8 +28,11 @@ public static class Notes
         // ---------------------------------------------------------------- Act 1
         N("case", "The case", "teddy_briefed",
             L("Client: Theodore Harrington III."),
-            L("Wife Eleanor gone since Tuesday, after dinner at the Aurelian Hotel. Her coat went with her."),
-            L("No police. Twenty a day plus expenses.")),
+            L("Wife Eleanor, gone three days. He says start at the Aurelian Hotel."),
+            L("Tuesday, dinner at the Aurelian. He stepped away to the coat check; she and her coat were gone.",
+                "teddy_told_story"),
+            L("No police: they talk to the papers, and the papers to Father's shareholders.", "teddy_no_police"),
+            L("Twenty a day plus expenses.")),
         N("eleanor", "Eleanor Harrington", "teddy_briefed",
             L("From Teddy's photograph: pretty, poised, looking at the camera like it owed her money."),
             L("Sketched her here too - good enough to show around if the picture's not to hand.")),

@@ -38,8 +38,8 @@ Play the story yourself with `tools/run/game.sh` / `tools\run\game.ps1`. Watch i
    the password and Sal lets you in for free; otherwise bribe him with $10, leaving $10 after all the bribes
    (mock him or refuse and
    you're thrown straight out back). Ask Tony the bartender what he's got and Micah can order his bathtub gin for $1
-   and knock it back at the bar. Tony won't talk; when you're done he decides he doesn't
-   like you, and nods to Sal.
+   and knock it back at the bar. Tony won't talk; once you've asked about Eleanor, when you're done he decides he
+   doesn't like you, and nods to Sal.
 5. **The alley behind the club**: one flickering street lamp. Micah on his knees after the beating; Tony tells
    him Eleanor is "hot stuff" and that he sent her to the nuns. Micah stands, then the player clicks the street exit;
    "The next evening", the convent.
@@ -257,7 +257,7 @@ How each decision is made:
   knows who shot him, and he's the mob. A second
   bullet sets `killed_tony` and opens a night map with only the Blue Lantern, the church and the mansion. At the
   church Micah confesses to Caleb: he turns himself in (`surrendered_tony`, ending 12) or promises to after Eleanor
-  (`confessed_tony`). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
+  (`confessed_tony`; if he never took the cross, Caleb offers it then). Straight to the mansion, the Our Father is gone. Left alive, Tony's revenge follows Micah into
   the epilogues: out of town, or "Tony sends his regards" in the prison yard.
 - **Fire into the wall** (Tony, instead of the shoulder): `warned_tony`. Tony, unhurt, gives the house and the kitchen
   key but not the alarm (the shoulder shot gets that out of him too), and no blood means no revenge. At the mansion a

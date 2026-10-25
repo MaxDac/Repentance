@@ -18,7 +18,7 @@ public partial class ConventRoad : Room
             if (State.HasFlag("seen_convent_exterior")) return;
             await Game.Run(async () =>
             {
-                await Think("I slept the day off and came up the hill at dusk, in the rain. A day later, my ribs still remember every one of Sal's knuckles.");
+                await Think("I slept the day off and came up the hill after dark, in the rain. A day later, my ribs still remember every one of Sal's knuckles.");
                 await Say("Gothic arches, iron spikes and a saint in every window. They built the place to point toward heaven. From down here, it looks like a warning.");
                 State.SetFlag("seen_convent_exterior");
             });

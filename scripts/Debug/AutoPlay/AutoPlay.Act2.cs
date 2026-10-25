@@ -820,6 +820,9 @@ public partial class AutoPlay
         await Shot("map_tribune");
         var warning = await Listen(game, game.Perform(Verb.Walk, "church"));
         Check(warning.Any(l => l.Contains("Sister Agatha telephoned")) && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
+        var warnAgain = await Listen(game, game.Perform(Verb.Walk, "church"));
+        Check(game.Room?.Name == "ChicagoMap" && !warnAgain.Any(l => l.Contains("Sister Agatha telephoned")) &&
+            warnAgain.Any(l => l.Contains("I said my piece")), "a second church visit before the office is a short reminder");
 
         // ---- the Tribune morgue: a clipping torn through the address, paste, and a pin in the Loop
         await game.Perform(Verb.Walk, "tribune");

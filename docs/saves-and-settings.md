@@ -44,6 +44,8 @@ Tony to finish him (`Alley.OnInteract`).
 
 | Version | Change |
 |---|---|
+| 13 | Act 3's Caleb visit is one-way; Rose's coffee decides endings 1/15 (`rose_forgives`) |
+| 12 | Motel return after the Act 2 office, Room 507's interlude steps, the Thursday card |
 | 11 | Fire-escape conversation moved from Act One to after the First Interlude; version-10 Ink state may already have consumed its choices |
 | 10 | Endings 10/11 are Eleanor's weary follow (`eleanor_dismissed` removed); motel detour, motel night and storm-office room flow |
 | 9 | Acts Two and Three open with Eleanor's interludes (new rooms, entries, flags) |

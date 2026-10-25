@@ -264,6 +264,14 @@ public partial class AutoPlay
         Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
         Check(CashRules.Balance(gs.HasFlag) == 10 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves ten");
         await Shot("speakeasy_inside");
+        // Tony has Sal throw Micah out only once he has asked about Eleanor: leaving at once keeps him at the bar
+        var preferBefore = _prefer;
+        _prefer = new[] { "(Leave)" };
+        await game.Perform(Verb.Talk, "bartender");
+        await Until(() => !game.Busy);
+        _prefer = preferBefore;
+        Check(game.Room?.Name == "Speakeasy" && !gs.HasFlag("asked_tony_eleanor") && !gs.HasFlag("lantern_gin"),
+            "leaving Tony before asking about Eleanor keeps Micah inside, unbeaten");
         int barOffers = _offerLog.Count;
         var bar = game.Perform(Verb.Talk, "bartender");
         await Until(() => gs.HasFlag("lantern_gin_held"));

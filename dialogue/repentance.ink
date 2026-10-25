@@ -243,10 +243,12 @@ TEDDY: My wife, Eleanor, has... misplaced herself. Three days ago.
     TEDDY: A brief conversation with a charming young lady from the coat check. Purely business.
     MICAH: Uh-huh. Since when is the coat check a business meeting?
     TEDDY: When I returned, Eleanor was gone. So was her coat. Rather ironic, I suppose.
+    ~ set_flag("teddy_told_story")
     -> teddy.opts
 * [Why not go to the police?]
     TEDDY: The police talk to newspapers. Newspapers talk to Father's shareholders.
     TEDDY: Discretion, Mr. Jones. That's what I'm paying for.
+    ~ set_flag("teddy_no_police")
     -> teddy.opts
 * [Do you have a picture of her?]
     -> teddy.photo
@@ -445,6 +447,7 @@ BARTENDER: Glad you approve. Ain't many do.
 THOUGHT: It goes down like a lit match. For half a minute, the room is warm and nobody's missing.
 -> bartender.opts
 = photo
+~ set_flag("asked_tony_eleanor")
 BARTENDER: ...
 BARTENDER: Never heard of her. And I got a real bad memory for faces, pal. Especially faces that ask questions.
 THOUGHT: He went still a second too long at her name. Never heard of her, my eye.
@@ -474,6 +477,11 @@ MICAH: ...I've been worse. I just can't remember when.
 SAL: Want I should give him another, Tony?
 BARTENDER: Nah. He's listening now. Ain't you listening?
 MICAH: I'm all ears. The rest of me's on the pavement.
+{not has_flag("asked_tony_eleanor"):
+    BARTENDER: A gumshoe with a rich dame's picture in his pocket. Who you looking for, pal?
+    MICAH: Eleanor Harrington.
+    BARTENDER: Yeah. That's what I figured.
+}
 BARTENDER: The dame. Eleanor. She's hot stuff, see? Too hot for this joint, too hot for this town.
 BARTENDER: She come in here a few nights back, scared out of her mind. I sent her to the nuns. The convent up on the North Side.
 BARTENDER: That's it. That's all I know. I don't know nothin' else, and I don't wanna.
@@ -495,6 +503,7 @@ NUN: And what would you want with her?
     NUN: Men always say that. Usually just before they make a woman less safe.
 - NUN: What is your name?
 MICAH: Micah. Micah Jones.
+NUN: I am Sister Agatha. This house is in my keeping.
 NUN: Micah. Like the prophet. "I will shew thee, O man, what is good." Do you remember the rest?
 MICAH: My mother did. I stopped listening somewhere around "love mercy".
 NUN: Then listen now, Micah. You would do better to end the search here, and have nothing more to do with that Jezebel.
@@ -525,7 +534,7 @@ THOUGHT: Going on four days she'd been gone from that cell. Four days is a long 
 - (leads)
 * [(Go back to the Blue Lantern and lean on Tony.)]
     THOUGHT: Back to the Blue Lantern? Sure, and let Sal finish the job he started in the alley.
-    THOUGHT: Tony had said it plain: come back and they bury me. Moretti's boys don't bluff.
+    THOUGHT: Sal had said it plain: come back and they bury me. Moretti's boys don't bluff.
     -> leads
 * [(Go back to Harrington and ask what he left out.)]
     THOUGHT: Teddy Harrington. Hair oil and a handshake like a wet fish.
@@ -624,7 +633,7 @@ INSET: fire_escape
 MICAH: Eleanor Harrington. You wouldn't happen to know her?
 ELEANOR: That depends on who's asking.
 MICAH: Micah Jones. Private detective.
-ELEANOR: Tony's boys said a gumshoe came around asking for me, with a prophet's name.
+ELEANOR: Tony's boys said a gumshoe came around the Lantern asking for me.
 ELEANOR: They gave him a split lip to remember them by.
 ELEANOR: Why are you looking for me, Mr. Jones?
 MICAH: Your husband hired me to bring you home.
@@ -1024,7 +1033,7 @@ THOUGHT: Rose kept hers on long after I stopped coming home.
 === caleb_repeat ===
 CALEB: The sisters may have answers. That doesn't mean you have to keep chasing them.
 MICAH: I know what you said, Caleb.
-CALEB: Then remember what else I said. You still have a family.
+CALEB: Then remember this, too. You still have a family.
 -> END
 
 === caleb_act3_return ===
@@ -1044,7 +1053,7 @@ CALEB: There's a way back for everybody. Even you.
     CALEB: Then remember what it means.
 + [(Refuse the cross pendant.)]
     MICAH: Keep it. I can't take it tonight.
-    {has_flag("visit_caleb_act3"):
+    {has_flag("visit_caleb_act3") || has_flag("killed_tony"):
         CALEB: Then I'll pray you don't need it.
     - else:
         CALEB: I'll ask again when you come back.
@@ -1052,6 +1061,8 @@ CALEB: There's a way back for everybody. Even you.
 - -> END
 
 === caleb_warn ===
+{has_flag("caleb_warned"): -> caleb_warn.again}
+~ set_flag("caleb_warned")
 CALEB: Sister Agatha telephoned. She said a man with your face pointed a gun at her.
 MICAH: I asked nicely first.
 CALEB: Repentance means more than asking nicely. Put the gun away.
@@ -1061,14 +1072,22 @@ MICAH: You kept quiet about those girls for years, Caleb. Don't tell me where I'
 CALEB: ...That's fair. It's fair. But I'm still asking.
 MICAH: Good night, Caleb.
 -> END
+= again
+CALEB: I said my piece, Micah. Go to Rose. Go anywhere else.
+-> END
 
 === caleb_last ===
+{has_flag("caleb_last_said"): -> caleb_last.again}
+~ set_flag("caleb_last_said")
 CALEB: You've got that look. The one you had the night before you shipped out to France.
 MICAH: I'm going back to the Club tonight. Dressed for the occasion.
 CALEB: Then I can't stop you. I never could.
 CALEB: I've been praying on what you called me. You weren't wrong. If you go in there, look at the girls on that stage. Somebody ought to.
 CALEB: God doesn't turn away a contrite heart, Micah. You don't have to be whole to turn to Him.
 CALEB: I'll pray for you, brother. It's all you ever left me to do.
+-> END
+= again
+CALEB: Still here? Go on, then. I'm already praying.
 -> END
 
 === nun_club ===
@@ -1153,7 +1172,7 @@ BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
 THOUGHT: The Gold Coast. The kitchen door. The delivery boys' key.
-THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
+THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on State Street does. By tomorrow, so will everybody he pours for.
 THOUGHT: The gun's still warm in my hand, and the street's right there.
 * [(Leave him bleeding, and go.)]
     THOUGHT: I shot a man tonight. My hand doesn't shake. That's what scares me.
@@ -1248,6 +1267,9 @@ HARRINGTON: Or what? You'll shoot an old man in his dressing gown? You haven't g
 HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one, I grant you. But her place is here.
 ELEANOR: Micah...
 THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice somewhere far behind it.
+{has_flag("confessed_tony") && not has_flag("can_spare"):
+    THOUGHT: No more blood, I promised him on my knees. I can't find the words that would keep it. Not with her on that bed.
+}
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")
 * {has_flag("can_spare")} [Our Father...]
@@ -2056,7 +2078,7 @@ DANIEL: The last entry. The handwriting's different. Shakier.
     DANIEL: "He went to the Harrington house past midnight, for her, with a key a bartender had told him of. There was a bell on the kitchen door that the bartender had not told him of. It rang, and he heard them coming, and he could have run."
     DANIEL: "He went in. Two of the Club's men were waiting in the dark at the cook's table. They shot him on the kitchen tiles before he could finish her name."
     {has_flag("caleb_escape"):
-        DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. A week after I buried him, I put her on a produce truck before dawn, out of Chicago. I do not know where she is now, and I have stopped asking. It is the one thing I did right that winter, and it came too late for him."
+        DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. The week I buried him, I put her on a produce truck before dawn, out of Chicago. I do not know where she is now, and I have stopped asking. It is the one thing I did right that winter, and it came too late for him."
     - else:
         DANIEL: "The police wrote it down as a burglar, shot by the household. The old man's lawyers saw to that. She is still in that house. I see her at Mass on Sundays, and I can do nothing else, and God forgive me, it is not enough."
     }

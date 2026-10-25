@@ -211,12 +211,13 @@ public partial class Speakeasy : Room
     }
 
     /// <summary>
-    /// In 1927 the bartender won't budge on Eleanor. When the talk is over he calls Micah back, and nods at Sal.
-    /// (In Act 2, the old Club lead is already known and he just pours.)
+    /// In 1927 the bartender won't budge on Eleanor. Once Micah has asked about her, when the talk is over he calls
+    /// Micah back, and nods at Sal; until then Micah may drink and chat. (In Act 2, the old Club lead is already known
+    /// and he just pours.)
     /// </summary>
     private async Task BartenderDislikes()
     {
-        if (State.HasFlag("photo_shown")) return;
+        if (State.HasFlag("photo_shown") || !State.HasFlag("asked_tony_eleanor")) return;
         await Talk("bartender_dislike");
         await Think("He nods at the bouncer by the door. That's never a good nod.");
         if (FindActor("sal") is { } sal)

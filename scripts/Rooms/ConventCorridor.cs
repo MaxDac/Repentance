@@ -21,7 +21,7 @@ public partial class ConventCorridor : Room
             await Game.Run(async () =>
             {
                 await Wait(0.6);
-                await Think("Tony's sister's convent. Wax and cold stone, and somebody already waiting at the end of the corridor.");
+                await Think("The convent Tony sent me to. Wax and cold stone, and somebody already waiting at the end of the corridor.");
                 if (FindActor("nun") is { } nun)
                 {
                     await Game.WalkTo(nun.WalkTo);
