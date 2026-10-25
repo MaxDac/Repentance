@@ -46,7 +46,7 @@ public partial class ChurchExterior : Room
     /// <summary>Act 3 before the choice: the only way Micah is on these steps in Act 3 is beaten, Bruno's delivery.</summary>
     private bool LeftBeaten => State.StoryAct == 3 && !State.HasFlag("keep_going") && !State.HasFlag(Endings.GaveUpSteps);
 
-    /// <summary>Act 3: on the cathedral steps, beaten. Keep going for Eleanor, or give up and go to Rose.</summary>
+    /// <summary>Act 3: on the cathedral steps, beaten. Keep going for Eleanor, or (with the ring or Rose's appeals) give up and go to Rose.</summary>
     private async Task Beaten()
     {
         await Wait(1.5);
@@ -70,6 +70,7 @@ public partial class ChurchExterior : Room
         Player.SetPose(null);
         Player.Face(Facing.Down);
         await Wait(0.6);
+        Act3.UpdateGates();
         await Talk("beaten_choice");
         if (State.HasFlag("keep_going"))
         {

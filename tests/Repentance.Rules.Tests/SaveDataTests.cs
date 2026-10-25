@@ -44,7 +44,7 @@ public class SaveDataTests
     public void RecoveredRingAndAcceptedCrossPreserveOriginalChoice()
     {
         var data = Sample();
-        data.Flags.AddRange(new[] { "ring_left_act2", "took_faith_ring", "took_cross", "church_act3_return", "act2_office_done" });
+        data.Flags.AddRange(new[] { "ring_left_act2", "took_faith_ring", "took_cross", "visit_caleb_act3", "act2_office_done" });
         data.Inventory.AddRange(new[] { "faith_ring", "cross" });
         var back = SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data));
         Assert.NotNull(back);
@@ -78,9 +78,10 @@ public class SaveDataTests
     [InlineData(9)]
     [InlineData(10)]
     [InlineData(11)]
+    [InlineData(12)]
     public void IncompatibleOlderSavesAreRejected(int version)
     {
-        Assert.Equal(12, SaveData.CurrentVersion);
+        Assert.Equal(13, SaveData.CurrentVersion);
         var data = Sample();
         data.Version = version;
         Assert.Null(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(data)));

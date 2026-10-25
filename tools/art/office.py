@@ -1,6 +1,7 @@
 """Micah Jones' office: a cramped, lamp-lit detective office on a rainy night."""
 from PIL import Image, ImageDraw
 import math
+import random
 from .common import (W, H, TOP, tall, hx, mix, mul, vgrad, hgrad, noise, light, shadow, vignette, pixelize, palette_of,
                      text, city, save, floor_boards, sunburst, candlestick_phone)
 
@@ -50,11 +51,154 @@ DOOR = (32, 18, 84, 127)
 DOOR_BOX = (27, 13 + TOP, 90, 140 + TOP)
 
 
+def _grain(img, box, seed, vertical=True, k=0.8, step=(2, 4)):
+    """Darkened streaks of wood grain across a box, wandering a pixel now and then; the paint underneath shows
+    through, so the grain follows any gradient or light already there."""
+    rnd = random.Random(seed)
+    px = img.load()
+    x0, y0, x1, y1 = box
+    lo, hi = (x0, x1) if vertical else (y0, y1)
+    a, b = (y0, y1) if vertical else (x0, x1)
+    pos = lo + rnd.randint(0, 1)
+    while pos <= hi:
+        f, off = rnd.uniform(k, k + 0.08), 0
+        for t in range(a, b + 1):
+            if rnd.random() < 0.07:
+                off = max(-1, min(1, off + rnd.choice((-1, 1))))
+            u = pos + off
+            if lo <= u <= hi:
+                xy = (u, t) if vertical else (t, u)
+                px[xy] = mul(px[xy], f)
+        pos += rnd.randint(*step)
+
+
+def _casing(img, d):
+    """The moulded door casing: jambs and head with a bead and a groove, mitred corners, a crown cap above and
+    plinth blocks at the floor. Identical in every door state, so the ajar/open overlays line up."""
+    x0, y0, x1, y1 = DOOR
+    wood, wood_l, wood_d, edge, gap = hx("3a2416"), hx("6a4a2e"), hx("24140a"), hx("1a0e06"), hx("2e1c10")
+    d.rectangle([x0 - 5, y0 - 5, x0 - 1, y1], fill=wood)
+    d.rectangle([x1 + 1, y0 - 5, x1 + 5, y1], fill=wood)
+    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y0 - 1], fill=hx("4a3020"))
+    _grain(img, (x0 - 5, y0, x0 - 1, y1), 31, k=0.86)
+    _grain(img, (x1 + 1, y0, x1 + 5, y1), 32, k=0.86)
+    _grain(img, (x0 - 5, y0 - 5, x1 + 5, y0 - 1), 33, vertical=False, k=0.86)
+    d = ImageDraw.Draw(img)
+    for x, col in ((x0 - 5, edge), (x0 - 4, wood_l), (x0 - 2, wood_d), (x0 - 1, gap),
+                   (x1 + 1, gap), (x1 + 2, wood_d), (x1 + 4, hx("54382a")), (x1 + 5, edge)):
+        d.line([(x, y0 - 5 if x in (x0 - 5, x1 + 5) else y0), (x, y1)], fill=col)
+    d.line([(x0 - 4, y0 - 4), (x1 + 4, y0 - 4)], fill=hx("7a5434"))
+    d.line([(x0 - 2, y0 - 2), (x1 + 2, y0 - 2)], fill=wood_d)
+    d.line([(x0 - 1, y0 - 1), (x1 + 1, y0 - 1)], fill=gap)
+    # mitre joints where the head meets the jambs
+    d.line([(x0 - 5, y0 - 5), (x0 - 1, y0 - 1)], fill=edge)
+    d.line([(x1 + 5, y0 - 5), (x1 + 1, y0 - 1)], fill=edge)
+    # the crown cap, lit along its top, throwing a line of shadow on the head
+    d.rectangle([x0 - 7, y0 - 9, x1 + 7, y0 - 6], fill=hx("4a3020"))
+    d.line([(x0 - 7, y0 - 9), (x1 + 7, y0 - 9)], fill=hx("8a6440"))
+    d.line([(x0 - 7, y0 - 8), (x1 + 7, y0 - 8)], fill=hx("5e4028"))
+    d.line([(x0 - 7, y0 - 6), (x1 + 7, y0 - 6)], fill=edge)
+    for px_ in (x0 - 7, x1 + 7):
+        d.line([(px_, y0 - 9), (px_, y0 - 6)], fill=edge)
+    # plinth blocks the casing stands on
+    for bx0, bx1 in ((x0 - 6, x0 - 1), (x1 + 1, x1 + 6)):
+        d.rectangle([bx0, y1 - 12, bx1, y1], fill=hx("43291a"), outline=edge)
+        d.line([(bx0 + 1, y1 - 11), (bx1 - 1, y1 - 11)], fill=hx("6a4a2e"))
+        d.line([(bx0 + 1, y1 - 9), (bx1 - 1, y1 - 9)], fill=wood_d)
+
+
+def _hinges(d):
+    """Three brass butt hinges: only the knuckles show, in the gap on the hinge (left) side."""
+    x0, y0, x1, y1 = DOOR
+    for hy in (y0 + 6, y0 + 50, y1 - 15):
+        d.point((x0, hy - 1), fill=BRASS_D)
+        d.rectangle([x0 - 1, hy, x0 + 1, hy + 7], fill=BRASS_D)
+        d.line([(x0, hy), (x0, hy + 7)], fill=BRASS)
+        d.line([(x0 - 1, hy + 1), (x0 - 1, hy + 2)], fill=BRASS_L)
+        d.line([(x0 - 1, hy + 4), (x0 + 1, hy + 4)], fill=hx("3a2a14"))
+        d.point((x0, hy + 8), fill=BRASS_D)
+
+
+def _panel(img, box, seed, vertical=True):
+    """A raised panel: a shadowed recess, a bevel lit on top and left, and a grained field standing proud."""
+    d = ImageDraw.Draw(img)
+    a, b, c, e = box
+    d.rectangle(box, outline=hx("24140a"))
+    for i in (1, 2):
+        d.line([(a + i, b + i), (c - i, b + i)], fill=hx("6e4c30" if i == 1 else "60422a"))
+        d.line([(a + i, b + i), (a + i, e - i)], fill=hx("5a3c26"))
+        d.line([(a + i, e - i), (c - i, e - i)], fill=hx("2e1c0e"))
+        d.line([(c - i, b + i + 1), (c - i, e - i)], fill=hx("3a2414"))
+    field = (a + 3, b + 3, c - 3, e - 3)
+    if field[2] > field[0]:
+        vgrad(img, field, hx("5e3e24"), hx("4a2e1a"))
+        _grain(img, field, seed, vertical, k=0.78, step=(2, 3))
+        d = ImageDraw.Draw(img)
+        d.line([(field[0], field[1]), (field[2], field[1])], fill=hx("7a5838"))
+
+
+def _mail_slot(d, x0, x1, y):
+    d.rectangle([x0, y, x1, y + 3], fill=BRASS, outline=BRASS_D)
+    d.line([(x0 + 1, y), (x1 - 1, y)], fill=BRASS_L)
+    d.line([(x0 + 2, y + 2), (x1 - 2, y + 2)], fill=hx("1a1008"))
+    d.point((x0 + 1, y + 2), fill=BRASS_D)
+    d.point((x1 - 1, y + 2), fill=BRASS_D)
+
+
+def _lockset(d, kx0, kx1):
+    """The brass escutcheon plate with its keyhole, and the knob on it (kx0..kx1 is the knob's span)."""
+    px0, px1 = kx0 + 1, kx1 - 1
+    d.rectangle([px0, 79, px1, 91], fill=BRASS_D, outline=hx("3e2c14"))
+    d.line([(px0, 80), (px0, 90)], fill=BRASS)
+    d.point((px0, 80), fill=BRASS_L)
+    kc = (px0 + px1) // 2
+    d.point((kc, 88), fill=hx("1a1008"))
+    d.line([(kc, 89), (kc, 90)], fill=hx("1a1008"))
+    d.point((kx1 + 1, 87), fill=hx("1e1208"))
+    d.point((kx1, 88), fill=hx("1e1208"))
+    d.ellipse([kx0, 82, kx1, 87], fill=hx("c8a050"), outline=hx("3e2c14"))
+    d.point((kx0 + 1, 83), fill=hx("fff0b0"))
+    d.point((kx0 + 2, 83), fill=BRASS_L)
+
+
+def _frost(img, box, seed):
+    """Frosted glass: a fine grit, sparse brighter specks, and the shadow of the glazing bead along the top."""
+    import random as _r
+    noise(img, box, 7, 5)
+    rnd = random.Random(seed)
+    d = ImageDraw.Draw(img)
+    gx0, gy0, gx1, gy1 = box
+    for _ in range((gx1 - gx0) * (gy1 - gy0) // 40):
+        x, y = rnd.randint(gx0, gx1), rnd.randint(gy0, gy1)
+        d.point((x, y), fill=mix(img.getpixel((x, y)), hx("e8e2c0"), 0.5))
+    shadow(img, "rect", [gx0, gy0, gx1, gy0 + 1], 0.35, 0)
+
+
+def _glint(img, box):
+    """Two thin diagonal streaks of reflected light across the corners of the pane."""
+    gx0, gy0, gx1, gy1 = box
+    for s, w in ((9, 3), (14, 1)):
+        light(img, "polygon", [(gx0 + s, gy0), (gx0 + s + w, gy0), (gx0, gy0 + s + w), (gx0, gy0 + s)],
+              hx("fffbe8"), 0.3, 0)
+        light(img, "polygon", [(gx1 - s, gy1), (gx1 - s - w, gy1), (gx1, gy1 - s - w), (gx1, gy1 - s)],
+              hx("fffbe8"), 0.22, 0)
+
+
+def _bead(d, box):
+    gx0, gy0, gx1, gy1 = box
+    d.rectangle([gx0 - 1, gy0 - 1, gx1 + 1, gy1 + 1], outline=hx("6a4a2e"))
+    d.line([(gx0 - 1, gy1 + 1), (gx1 + 1, gy1 + 1)], fill=hx("2e1c0e"))
+    d.line([(gx1 + 1, gy0), (gx1 + 1, gy1 + 1)], fill=hx("3a2414"))
+    d.rectangle(box, outline=hx("2a180c"))
+
+
 def door(img, state="closed"):
     d = ImageDraw.Draw(img)
     x0, y0, x1, y1 = DOOR
     if state != "closed":
         d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1 + 8], fill=hx("3a2416"))
+        _casing(img, d)
+        d = ImageDraw.Draw(img)
         vgrad(img, (x0, y0, x1, y1), hx("6a6458"), hx("3a342c"))
         d.polygon([(x0 + 4, y1 - 10), (x1 - 4, y1 - 10), (x1 - 10, y1), (x0 + 10, y1)], fill=hx("5a4634"))
         d.ellipse([(x0 + x1) // 2 - 6, y0 + 8, (x0 + x1) // 2 + 6, y0 + 18], fill=hx("f8e8b0"))
@@ -63,43 +207,84 @@ def door(img, state="closed"):
             # hinged on the left; the knob edge swings in first, opening a gap on the right
             fx = x1 - 18
             d.polygon([(x0, y0), (fx, y0 - 2), (fx, y1 + 2), (x0, y1)], fill=hx("4e321c"))
-            vgrad(img, (x0 + 5, y0 + 6, fx - 5, 70), hx("c8c098"), hx("8a8a6a"))
-            noise(img, (x0 + 5, y0 + 6, fx - 5, 70), 6, 5)
-            d.rectangle([x0 + 5, y0 + 6, fx - 5, 70], outline=hx("2a180c"))
-            for py in (78, 102):
-                d.rectangle([x0 + 6, py, fx - 6, py + 18], outline=hx("2e1c0e"))
+            _grain(img, (x0 + 1, y0, fx - 1, y1), 41, k=0.82)
+            _grain(img, (x0 + 5, y0 + 1, fx - 5, y0 + 4), 42, vertical=False, k=0.84)
+            _grain(img, (x0 + 5, 72, fx - 5, 92), 43, vertical=False, k=0.84)
+            d = ImageDraw.Draw(img)
+            glass = (x0 + 5, y0 + 6, fx - 5, 70)
+            vgrad(img, glass, hx("c8c098"), hx("8a8a6a"))
+            _frost(img, glass, 44)
+            d = ImageDraw.Draw(img)
+            _bead(d, glass)
+            # the lettering slides out of view with the glass; only the gilt glint of the pane is left
+            _glint(img, glass)
+            # the panels foreshortened to ~2/3 of their width
+            _panel(img, (x0 + 6, 93, x0 + 16, 121), 45)
+            _panel(img, (x0 + 19, 93, fx - 5, 121), 46)
+            d = ImageDraw.Draw(img)
+            _mail_slot(d, x0 + 11, fx - 11, 75)
             d.line([(fx, y0 - 2), (fx, y1 + 2)], fill=hx("2a180c"))
+            d.line([(fx + 1, y0 - 1), (fx + 1, y1 + 1)], fill=hx("6a4a2e"))
             # the face is foreshortened to ~2/3 of its width, so the knob narrows with it
-            d.ellipse([fx - 8, 82, fx - 5, 87], fill=hx("c8a050"))
-            d.point((fx - 7, 83), fill=hx("fff0b0"))
+            _lockset(d, fx - 8, fx - 5)
         else:
             d.rectangle([x0, y0, x0 + 9, y1], fill=hx("4e321c"))
+            _grain(img, (x0, y0, x0 + 8, y1), 47, k=0.82, step=(2, 3))
+            d = ImageDraw.Draw(img)
             d.rectangle([x0 + 1, y0 + 8, x0 + 7, 66], fill=hx("c8c098"))
-            d.line([(x0 + 9, y0), (x0 + 9, y1)], fill=hx("2a180c"))
-            # swung wide open and seen almost edge-on: the knob is a thin sliver
+            noise(img, (x0 + 1, y0 + 8, x0 + 7, 66), 6, 5)
+            d = ImageDraw.Draw(img)
+            d.line([(x0 + 1, y0 + 8), (x0 + 1, 66)], fill=hx("8a8a6a"))
+            d.line([(x0 + 2, y0 + 10), (x0 + 5, y0 + 13)], fill=hx("f0ecd8"))
+            # swung wide open and seen almost edge-on: panels, slot and knob are thin slivers
+            for py0, py1 in ((93, 121),):
+                d.rectangle([x0 + 1, py0, x0 + 7, py1], outline=hx("2a180c"))
+                d.line([(x0 + 2, py0 + 1), (x0 + 6, py0 + 1)], fill=hx("6e4c30"))
+                d.line([(x0 + 4, py0 + 1), (x0 + 4, py1 - 1)], fill=hx("2a180c"))
+            d.rectangle([x0 + 3, 75, x0 + 5, 77], fill=BRASS_D)
+            d.point((x0 + 3, 75), fill=BRASS_L)
+            d.rectangle([x0 + 3, 79, x0 + 4, 91], fill=BRASS_D)
             d.rectangle([x0 + 3, 82, x0 + 4, 86], fill=hx("c8a050"))
             d.point((x0 + 3, 83), fill=hx("fff0b0"))
+            d.line([(x0 + 9, y0), (x0 + 9, y1)], fill=hx("2a180c"))
+        _hinges(d)
         d.line([(x0 + 1, y1), (x1 - 1, y1)], fill=hx("d8c080"))
         return
-    x0, y0, x1, y1 = DOOR
     d.rectangle([x0 - 5, y0 - 5, x1 + 5, y1], fill=hx("3a2416"))
-    d.rectangle([x0 - 5, y0 - 5, x1 + 5, y0 - 2], fill=hx("5a3a24"))
+    _casing(img, d)
+    # the slab: stiles grained upright, the rails across
     vgrad(img, (x0, y0, x1, y1), hx("5a3a22"), hx("3e2616"))
+    _grain(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), 51, k=0.8)
+    for ry0, ry1 in ((y0 + 1, y0 + 5), (72, 92), (122, y1 - 1)):
+        vgrad(img, (x0 + 7, ry0, x1 - 7, ry1), mix(hx("5a3a22"), hx("3e2616"), (ry0 - y0) / (y1 - y0)),
+              mix(hx("5a3a22"), hx("3e2616"), (ry1 - y0) / (y1 - y0)))
+        _grain(img, (x0 + 7, ry0, x1 - 7, ry1), 52 + ry0, vertical=False, k=0.8)
+    d = ImageDraw.Draw(img)
     d.rectangle([x0, y0, x1, y1], outline=hx("2a180c"))
-    # frosted glass with backlit corridor
-    vgrad(img, (x0 + 7, y0 + 7, x1 - 7, 70), hx("c8c098"), hx("8a8a6a"))
-    noise(img, (x0 + 7, y0 + 7, x1 - 7, 70), 6, 5)
-    d.rectangle([x0 + 7, y0 + 7, x1 - 7, 70], outline=hx("2a180c"))
+    d.line([(x0 + 1, y0 + 1), (x1 - 1, y0 + 1)], fill=hx("6a4a2e"))
+    d.line([(x1 - 1, y0 + 2), (x1 - 1, y1 - 1)], fill=hx("2e1c0e"))
+    # frosted glass with backlit corridor, the gilt-edged sign painted on it read backwards from inside
+    glass = (x0 + 7, y0 + 7, x1 - 7, 70)
+    vgrad(img, glass, hx("c8c098"), hx("8a8a6a"))
+    _frost(img, glass, 53)
+    d = ImageDraw.Draw(img)
+    _bead(d, glass)
     for t, y in (("MICAH", 34), ("JONES", 44), ("P.I.", 56)):
+        text(img, ((x0 + x1) // 2, y + 1), t, hx("a8782c"), size=8, mirror=True)
         text(img, ((x0 + x1) // 2, y), t, hx("1e1a14"), size=8, mirror=True)
     # silhouette of a waiting stranger? no - empty corridor bulb glow
     light(img, "ellipse", [x0 + 12, y0 + 10, x1 - 12, 50], hx("f8e8b0"), 0.35, 8)
-    # lower panels
-    for py in (78, 102):
-        d.rectangle([x0 + 8, py, x1 - 8, py + 18], outline=hx("2e1c0e"))
-        d.line([(x0 + 9, py + 1), (x1 - 9, py + 1)], fill=hx("6a4a2e"))
-    d.ellipse([x1 - 12, 82, x1 - 7, 87], fill=hx("c8a050"))
-    d.point((x1 - 11, 83), fill=hx("fff0b0"))
+    _glint(img, glass)
+    # the raised panels below the lock rail
+    _panel(img, (x0 + 7, 93, x0 + 23, 121), 54)
+    _panel(img, (x1 - 23, 93, x1 - 7, 121), 55)
+    d = ImageDraw.Draw(img)
+    _mail_slot(d, x0 + 17, x1 - 17, 75)
+    _lockset(d, x1 - 12, x1 - 7)
+    _hinges(d)
+    # scuffs on the bottom rail where shoes have pushed it shut
+    for sx, col in ((x0 + 12, "2e1c0e"), (x0 + 13, "2e1c0e"), (x1 - 15, "6a4a2e"), (x0 + 30, "2e1c0e")):
+        d.point((sx, 124), fill=hx(col))
     # light leaking under the door
     d.line([(x0 + 1, y1), (x1 - 1, y1)], fill=hx("d8c080"))
     light(img, "rect", [x0, y1, x1, y1 + 10], hx("806830"), 0.35, 4)

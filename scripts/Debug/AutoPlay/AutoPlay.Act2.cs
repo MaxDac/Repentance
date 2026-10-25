@@ -789,8 +789,8 @@ public partial class AutoPlay
         Check(gs.HasFlag("caleb_club") && game.Room?.Name == "ChicagoMap", "Caleb talked about the Club, then back to the map");
         Check(_offered.TryGetValue("caleb_club", out var calebLast) && calebLast.Length == 1 && calebLast[0].StartsWith("They have her, Caleb"),
             "Micah presses Caleb with both reasons before asking him outright");
-        await game.Perform(Verb.Walk, "church");
-        Check(game.Room?.Name == "ChicagoMap" && !gs.HasFlag("church_before_office"), "repeat church visit doesn't anticipate the sister's threat");
+        var repeat = await Listen(game, game.Perform(Verb.Walk, "church"));
+        Check(game.Room?.Name == "ChicagoMap" && !repeat.Any(l => l.Contains("Sister Agatha telephoned")), "repeat church visit doesn't anticipate the sister's threat");
         Check(!gs.HasItem("cross"), "taking the ring initially postpones the cross until Act 3");
         Check(game.Room?.FindHotspot("convent")?.Visible == true, "the convent is on the map");
         await game.Perform(Verb.Walk, "convent");
@@ -818,8 +818,8 @@ public partial class AutoPlay
             && game.Room?.FindHotspot("library")?.Visible == false
             && game.Room?.FindHotspot("office")?.Visible == true, "the Tribune before Harrington; office remains available for ring recovery");
         await Shot("map_tribune");
-        await game.Perform(Verb.Walk, "church");
-        Check(gs.HasFlag("church_before_office") && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
+        var warning = await Listen(game, game.Perform(Verb.Walk, "church"));
+        Check(warning.Any(l => l.Contains("Sister Agatha telephoned")) && game.Room?.Name == "ChicagoMap", "Caleb warns Micah before the office");
 
         // ---- the Tribune morgue: a clipping torn through the address, paste, and a pin in the Loop
         await game.Perform(Verb.Walk, "tribune");
@@ -933,8 +933,8 @@ public partial class AutoPlay
         await game.Perform(Verb.Walk, "window");
         Check(gs.HasFlag("harrington_done") && game.Room?.Name == "ChicagoMap", "out the window, back to the map");
         Check(game.Room?.FindHotspot("club")?.Visible == true && game.Room?.FindHotspot("harrington")?.Visible == false, "the Club is back on the map");
-        await game.Perform(Verb.Walk, "church");
-        Check(gs.HasFlag("church_before_club"), "Caleb's last warning before the Club");
+        var last = await Listen(game, game.Perform(Verb.Walk, "church"));
+        Check(last.Any(l => l.Contains("shipped out to France")), "Caleb's last warning before the Club");
     }
 
     /// <summary>Whether a walk from <paramref name="from"/> along <paramref name="path"/> steps inside <paramref name="box"/>.</summary>

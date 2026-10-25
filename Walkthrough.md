@@ -196,7 +196,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Use the mirror on the lamp, then combine the cloth and mirror in either order. Micah wipes away the wax,
   revealing a Celtic triquetra (trinity knot). He means to put the cloth back on the bed but can't bring himself
   to: "I oughta put this rag back on her bed, see... but, for some reason, I just can't." He keeps Eleanor's
-  perfumed cloth until the end; only giving up on her (ending 1) makes him throw it away.
+  perfumed cloth until the end; only giving up on her (endings 1 and 15, and the coffee before endings 8 and 9)
+  makes him throw it away.
   The symbol is shown full screen with Micah's remark over it; a click ends the remark and the next click
   closes the picture. It can then be inspected again from the inventory.
 - Micah keeps the revealed mirror; the comb stays in the drawer.
@@ -690,8 +691,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   him on it again; before the masked Club visit he says he has been praying on what Micah told him, and asks Micah
   to look at the girls on that stage if he goes.
 - The only way forward will be the office of Harringhton, but Micah can go to the church, where the brother can
-  tell him not to go forward again.
-  You have to save as a state of the game whether, at this point, Micah will return to the church at least once.
+  tell him not to go forward again. These later visits are optional, and no later choice depends on them: what
+  counts in Act 3 is whether Micah carries Caleb's cross pendant.
 
 #### Office of Harringhton father
 
@@ -846,10 +847,13 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   And God help me, I don't want to let her go." His motive is lust, conflicting with repentance and returning home.
 - He sits up and pushes himself to standing before the choice, with the same staged recovery as the street.
 - Again, his thoughts will appear as narrating voice, saying what is he doing.
-- At this point, the player can have two choices: keep going for Eleanor, or giving up.
+- At this point, the player can have two choices: keep going for Eleanor, or giving up. Giving up is offered only if
+  Micah carries his wedding ring or insisted for forgiveness with Rose (at least three appeals, `rose_wait`);
+  otherwise he can only keep going.
 - If the player decides to give up, the next location will be again in front of his wife's house, where he will ask her
-  whether she would be available some time for a cup of coffe, his ex wife answering why not, and the game jumps
-  to the end of act 3 (caption "End of Act Three"); if Eleanor held out, her escape with Caleb comes first (ending 1).
+  whether she would be available some time for a cup of coffe, and the game jumps to the end of act 3 (caption "End
+  of Act Three"); if Eleanor held out, her escape with Caleb comes first. Rose answers why not only if Micah carries
+  the ring **and** insisted with her (ending 1); otherwise she refuses, but lets him see Tommy (ending 15).
 - If the player decide to keep pushing, keep to the next.
 
 #### Office
@@ -868,9 +872,10 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Keep the reminder: "Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed
   to be coming home to."
 - Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
-- Act 3 church visits include Caleb's counsel and the cross offer (regardless of the original ring decision), unless
-  already accepted. They count as a church return and lead back to the office without replaying the desk scene.
-  Micah can return again after refusing. No new recovery route is available after choosing the Blue Lantern.
+- The Act 3 church visit includes Caleb's counsel and the cross offer (regardless of the original ring decision), unless
+  already accepted. It is one-way: whether Micah accepts or refuses, he goes straight on from the church to the Blue
+  Lantern alley, without returning to the office. On a refusal Caleb doesn't promise to ask again ("Then I'll pray
+  you don't need it."). No new recovery route is available after choosing the Blue Lantern.
 
 #### Behind Blue Lantern, previous location from Act 1
 
@@ -888,8 +893,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   crates of oranges, and nobody asks), and he'd be better off with a bullet in his skull.
 - At this point, the player must choose between firing the revolver into his shoulder, firing it into the wall by his
   head (the warning shot), or walking away, because it's not worth it.
-  The option to walk away is available only if Micah carries his wedding ring and returned to Caleb before Harrington's
-  office, before the masked Club visit, or through the Act 3 office route. The cross is not required here.
+  The option to walk away is available only if Micah carries his wedding ring, insisted for forgiveness with Rose
+  (`rose_wait`), or carries Caleb's cross pendant. Any one of the three is enough.
 - If the player walks out, Tony remains standing outside while Micah automatically leaves for his wife's house
   (caption *End of Act Three*).
 - If he fires, Tony is hit in the shoulder: he clutches it, his legs fold straight down under him and he ends up on
@@ -1065,21 +1070,22 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       cellar's doing the job for me.").
     - During the escape the way back is shut: the baize door gets "Not back in there. Somebody's on the stairs by
       now." and so does the bootleggers' stair in the cellar, so the bedroom confrontation can't be replayed.
-  - The choice not to shot the old man is accessible at this point only if Micah insisted for forgiveness with his wife,
-    **and** made a qualifying church return, **and** carries both the wedding ring and cross pendant. Insisting means
-    at least three forgiveness appeals. If Micah killed Tony, it also needs his confession to Caleb (`confessed_tony`).
+  - The choice not to shot the old man is accessible at this point only if Micah carries the cross pendant **and**
+    either carries the wedding ring or insisted for forgiveness with his wife (at least three forgiveness appeals).
+    If Micah killed Tony, it also needs his confession to Caleb (`confessed_tony`).
     If this is the case, the option reads "Our Father..." and Micah starts the
     prayer straight away. He says it a verse at a time ("Our Father... who art in heaven..." through "deliver us from
     evil"), walking backwards towards the door and lowering the gun gradually with each verse, while the old man talks
     into every pause to distract him (mockery, Caleb, Eleanor, money, "Nobody forgives a man like you"). Micah reaches
     the door and walks out without the "Amen". The screen fades to black and the end of the prayer appears one line at
     a time, a second apart: "For Thine is the Kingdom, the Power and the Glory.", "Forever and ever.", "Amen.".
-    Then the scene skips to *End of Act 3* (ending 1; ending 12 if Micah killed Tony, who keeps his promise to Caleb).
+    Then the scene skips to *End of Act 3* (ending 1, or 15 if Rose refuses him; ending 12 if Micah killed Tony, who
+    keeps his promise to Caleb).
   - **Eleanor's coda.** If Eleanor told the Mother Superior the truth and refused the old man's gin and powder, the prayer
     doesn't end the act. After the last line the bedroom comes back with the player as Eleanor in the sheet and
     Harrington standing at the foot of the bed with his back to her, facing the door Micah left by and listening
     for his car. Two choices:
-    - **Return to bed** (her rise played backwards): ending 1, as above (12 on the kill route).
+    - **Return to bed** (her rise played backwards): ending 1 or 15, as above (12 on the kill route).
     - **The candlestick** on the nightstand, a step from where she stands: she takes it while he mutters at the door
       ("There. A Ford. Of course it's a Ford."), steps up behind him and strikes, without crossing the room (new
       sprites: her swing, his fall forward, no wound). She leaves through the study (she had only ever seen it from the doorway), taking the old man's
@@ -1090,7 +1096,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
       spigot, and the lantern used on the running whiskey sets the cellar alight. The kitchen door leads outside, a
       short beat in her voice, without Micah's escape; if she set the fire, the house goes up behind her (*CRASH*,
       the windows orange one by one). Then Micah's coffee scene at Rose's (as in
-      ending 1), followed by ending 8 (she burned the house) or ending 9 (she didn't). On the kill route there is no
+      ending 1, or Rose's refusal as in ending 15), followed by ending 8 (she burned the house) or ending 9 (she
+      didn't). On the kill route there is no
       coffee scene: Micah has gone to the station, and the endings tell it from Joliet.
 
 ### End of Act 3
@@ -1101,11 +1108,14 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 - Previously used location
 - This ending is accessible if Micah refuses to go forward at any point, either outside of the Church, or if he refuses
-  to shoot the bartender, or the old man.
-- The Act 2 forgiveness visit and Act 3 church-steps return stay unrestricted. Only the later return choices gain the
-  progressively stricter requirements above; the other endings are unchanged.
+  to shoot the bartender, or the old man, **and** he carries the wedding ring **and** insisted for forgiveness with
+  Rose (`rose_wait`). Without both, the same scene ends with Rose's refusal (ending 15).
+- The Act 2 forgiveness visit stays unrestricted. The three later return choices have progressively stricter
+  requirements: giving up on the church steps needs the ring or the appeals; walking away from Tony needs the ring,
+  the appeals or the cross; the Our Father needs the cross and either the ring or the appeals (plus the confession
+  if Tony was killed). How often Micah visited the church never matters; the other endings are unchanged.
 - Before ringing, Micah throws Eleanor's perfumed cloth into the street ("Into the gutter with it. No more chasin'
-  that dame."). In every other ending he still has it.
+  that dame."). He throws it at Rose's door in endings 1, 8, 9 and 15; in every other ending he still has it.
 - Micah is outside, rings the bell, and asks his wife whether she would accept his previous invitation ot take a coffee with him.
 - He offers coffee without claiming she owes him forgiveness or reconciliation. The promises said again in the journal
   happen later, after he has begun showing change rather than merely promising it.
@@ -1137,10 +1147,12 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
     on to St. Louis; he gives her an envelope with a little money.
   - Eleanor knows Caleb for Micah's brother by his hands, and tells him Micah came for her into the Club, masked,
     and was carried out.
-  - Eleanor learns that Micah went home to his wife, and is glad of it. Her last words, as the truck's lights come
+  - Eleanor learns that Micah went home to his wife, and is glad of it (in ending 15: that Rose wouldn't take him
+    back, but lets him see his boy). Her last words, as the truck's lights come
     up the road: "Say hi to Micah."
   - Then *End of Act Three*. The journal's last entry is ending 1's, but the Second Interlude's source changes: Caleb
-    passed on what she told him the night he got her out of Chicago, at her asking.
+    passed on what she told him the night he got her out of Chicago, at her asking. The same escape plays after
+    Rose's refusal, before ending 15.
   - The same scene, with its own lines, follows endings 13 and 14 when she held out (see the alarm, above).
 
 #### Option 2 - Outskirts, with Eleanor
@@ -1221,19 +1233,20 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 
 These need Eleanor to have held out **both** times: telling the Mother Superior the truth instead of seducing her
 (First Interlude) and refusing the old man's gin and powder
-(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1 (with Eleanor's escape
-with Caleb after the coffee, see Option 1), and so does Eleanor
+(Second Interlude). The refusals alone change nothing: an early give-up still gives ending 1 or 15 (with Eleanor's
+escape with Caleb after Rose's door, see Option 1), and so does Eleanor
 returning to bed in her coda. Endings 2-7 need her to have given in at least once.
 
 #### Option 8 - Outskirts, Eleanor alone, after the fire
 
 - Eleanor's coda: she strikes Harrington and burns the house. Micah's coffee scene at Rose's comes first, as in
-  ending 1.
+  ending 1 (or Rose's refusal, as in ending 15).
 - Then the outskirts at night: Eleanor alone, in a white dress with her pearls (from the duffle she had packed for
   running, still in the Club's car at the gate), walking out of the city. No car, no Micah, no
   newspaper.
 - Micah keeps the journal; the last entry is his, copied from a letter she sent him at Rose's, without a return
-  address. Before leaving the city she mailed the old man's Thursday book to the Tribune; the letter says the paper
+  address (if Rose refused him, to his room on Halsted Street; he shows it to Rose on a Sunday, bringing Tommy home).
+  Before leaving the city she mailed the old man's Thursday book to the Tribune; the letter says the paper
   printed it, and the Club's Thursdays ended.
 
 #### Option 9 - Prison - Eleanor confesses
@@ -1241,7 +1254,8 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
 - Eleanor's coda: she strikes Harrington and leaves without burning the house. Micah's coffee scene at Rose's comes
   first.
 - The prison parlour: Eleanor in an inmate's jumpsuit, seated where Micah sits (new sprite), Caleb across the
-  table. She confesses her life's crimes and asks for Micah: "He's with his wife now." "It's better this way."
+  table. She confesses her life's crimes and asks for Micah: "He's with his wife now." (if Rose refused him: "He's
+  alone. Rose wouldn't have him back. But he has his boy on Sundays.") "It's better this way."
   She was afraid of him and wanted him dead, and can't tell which held the candlestick; Caleb tells her to be sorry
   for every part of her that wanted him dead, she is, for all of it, and he absolves her (see [Theology](docs/theology.md)). At her
   own trial she named the Club and the girls in open court; she tells Caleb so, which keeps the exposure public
@@ -1301,6 +1315,23 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   him to set it down. He sees her at Mass and can do nothing else. The police wrote it down as a burglar shot by the household. "He died walking toward her and not away. That is not repentance. But
   it was the right direction." Caleb says Mass for him. Daniel puts the journal back; no "That's enough of you".
 
+#### Option 15 - Outside Micah's wife - Sunday visits
+
+- Every route to ending 1 (giving up on the steps, walking away from Tony, the Our Father without killing Tony) when
+  Micah doesn't carry the wedding ring **and** insisted with Rose: one of the two is missing.
+- The same scene as ending 1 at Rose's door (the cloth into the gutter, the bell, "Nothing you owe me.", the Act 2
+  close-up of the two of them), up to the invitation. Then Rose refuses: she has had too many cups of coffee with
+  promises in them. But Tommy asks after his father every night: Micah can take him to Mass on Sunday, and to the
+  park after, and bring him home by four. Micah: "Sunday. I'll be there." His closing thought: "Not a door opening.
+  But not shut, either."
+- Tommy is never seen; the journal tells the visits.
+- If Eleanor held out, her escape with Caleb plays after the refusal, as in ending 1.
+- The last entry is Micah's, a year on: alone, and repentant. Every Sunday he takes Tommy to Mass at Caleb's church
+  and to the park after, and Rose closes the door softly (if he shot Tony, he lives downstate, and Rose puts Tommy on
+  the train to him once a month). She was right to say no; a man who's sorry has to stay sorry long after nobody's
+  asking. With the signed papers, Caleb carried them to the Tribune, as in ending 1. The Second Interlude's source is
+  ending 1's. Daniel: "She didn't take him back. But the kid got his father." He keeps the journal for Leo.
+
 #### Tony's revenge
 
 Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah carries him:
@@ -1316,6 +1347,11 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 10 | Micah looks for his peace far from Chicago. | Nobody's come for him; he hears every car that slows down. |
 | 11 | Tony sends his regards in the yard. | Tried for Tony too. |
 | 12 | Not possible. | The letters to Tony's mother. |
+| 15 | Micah leaves Chicago alone; Rose puts Tommy on the train downstate once a month. | Not possible. |
+
+In endings 8 and 9 after Rose's refusal, "his wife" becomes his room and his Sundays with Tommy: the letter reaches
+his room in Chicago (or downstate, sent on by Caleb, if Tony survived), and Caleb writes that Micah takes his son to
+Mass.
 
 After the warning shot (endings 13 and 14, and any other ending reached by spotting the alarm) Tony wasn't hurt, so
 none of the revenge lines play.
@@ -1323,6 +1359,7 @@ none of the revenge lines play.
 ### Present
 
 The story ends with the father reading the last entry and commenting briefly. If Micah returned to his wife (ending 1)
+or to his son (ending 15),
 or found his faith in prison (endings 6 and 12), or the journal ends on Eleanor's own way (endings 8 to 11), the father
 keeps the journal, saying "Maybe Leo would like to read it some day." In endings 7 and 14 he respects Caleb's last pages
 and puts the journal back, maybe for Leo in a couple of years. In all other endings (2 to 5 and 13), he throws the
@@ -1346,6 +1383,7 @@ Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he 
 | 12 | Caleb's note: she told him months later and asked him to write it in. |
 | 13 | Micah: Caleb's letters pass on what she told him in the spring, at her asking. |
 | 14 | Caleb: she told him on the church steps the spring after Micah died, and asked him to set it down. |
+| 15 | As ending 1. |
 
 The First Interlude is always Micah's: she told him during the night at the motel.
 
@@ -1367,7 +1405,8 @@ motel map and burial survey are not part of the completed Act 3.
 All the puzzles are untimed, have repeatable clues and unlimited retries, and preserve useful items.
 Close-ups offer reset and close; Escape closes them. Unsubmitted settings reset on reopening.
 The satchel has pages so every collected item remains accessible. The current save format
-is version 12 (`SaveData.CurrentVersion`); earlier versions are incompatible with the Thursday Club night, the motel
+is version 13 (`SaveData.CurrentVersion`); earlier versions are incompatible with the peaceful-choice gates and
+ending 15, the one-way Act 3 church visit, the Thursday Club night, the motel
 return after the Act 2 office, Room 507's new interlude steps, the fire-escape conversation moving after the First Interlude, Eleanor's weary follow in endings
 10 and 11, the motel detour and storm-office room flow, the Eleanor interludes, the bluing moving into the
 brass box, the removed State Street hub, the convent arrival, the five added locations and the rerouted lift,
@@ -1384,7 +1423,7 @@ His prodigal-son account paraphrases [Luke 15:17-20](https://drbo.org/chapter/49
 reminders; Rose's response is her own choice. Tragic endings are not declarations that repentance is impossible.
 
 The adventure remains a compact, single-case indie point-and-click: seventeen puzzles for Micah and two for Eleanor, the alley encounter, optional
-dialogue, two playable Eleanor interludes and fourteen ending outcomes. The five collect-and-combine locations each sit on a route the story already
+dialogue, two playable Eleanor interludes and fifteen ending outcomes. The five collect-and-combine locations each sit on a route the story already
 took (the hotel stairs, the speakeasy door, the Harrington lead, the masked Club and the mansion entrance)
 rather than opening side quests.
 Its single-case investigation is closer in scope to [The Blackwell Legacy](https://store.steampowered.com/app/80330/)

@@ -32,7 +32,6 @@ public class StoryIntegrityTests
     {
         ["bartender_gun"] = "Alley: Tony at gunpoint, once; afterwards he is shot or Micah has left, and later talks use other lines",
         ["bartender_shot"] = "Alley: once, right after the shoulder shot; Micah then kills Tony or walks out, and never hears it again",
-        ["beaten_choice"] = "ChurchExterior: the church steps cutscene, played once on the way out of the Club",
         ["caleb_club"] = "Church: Act 2 Club talk, guarded by caleb_club; later visits use other knots",
         ["caleb_tony"] = "Church: the confession after killing Tony, once; surrender ends Act 3 and confessed_tony skips it on return",
         ["club_caught"] = "ClubStage: the unmasking cutscene, once",
@@ -317,8 +316,8 @@ public class StoryIntegrityTests
     {
         string Flat(string doc) => Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, doc)), @"\s+", " ");
         var theology = Flat("docs/theology.md");
-        Assert.Contains("Ending 1 ends it if Micah took the papers (Caleb carries them to the Tribune)", theology);
-        Assert.Contains("ending 1 with the papers (the Tribune)", theology);
+        Assert.Contains("Endings 1 and 15 end it if Micah took the papers (Caleb carries them to the Tribune)", theology);
+        Assert.Contains("endings 1 and 15 with the papers (the Tribune)", theology);
         Assert.Contains("\"the day it won't bury the girls we hid\"", theology);
         Assert.Contains("the day it won't bury the girls we hid", InkText);
         Assert.DoesNotContain("won't cost the girls", theology);
@@ -332,7 +331,7 @@ public class StoryIntegrityTests
         Assert.Contains("Three nights after the Club, Caleb got her out", walkthrough);
         var overview = Flat("docs/story-overview.md");
         Assert.Contains("Micah's papers handed in with his confession to the grand jury in ending 12", overview);
-        Assert.Contains("endings 8, 10, 11, and ending 1 with Caleb", overview);
+        Assert.Contains("endings 8, 10, 11, and endings 1 and 15 with Caleb", overview);
         var persuasion = Flat("docs/eleanor-persuasion.md");
         Assert.Contains("it reads neither `eleanor_refused` nor the score", persuasion);
         Assert.DoesNotContain("only reads the flags `eleanor_convinced` / `eleanor_refused`", persuasion);
@@ -408,8 +407,8 @@ public class StoryIntegrityTests
         var nodes = Regex.Matches(overview, @"\bE(\d+)\[""\1:").Select(m => int.Parse(m.Groups[1].Value)).Order().ToList();
         Assert.Equal(Enumerable.Range(1, Endings.Count), nodes);
         var walkthrough = Regex.Replace(File.ReadAllText(Path.Combine(Root.Value, "Walkthrough.md")), @"\s+", " ");
-        Assert.Contains("fourteen ending outcomes", walkthrough);
-        Assert.Equal(14, Endings.Count);
+        Assert.Contains("fifteen ending outcomes", walkthrough);
+        Assert.Equal(15, Endings.Count);
         Assert.Contains("Every ending but 7 and 14 has the \"The next morning\" caption.", walkthrough);
     }
 

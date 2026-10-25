@@ -53,8 +53,8 @@ public partial class Church : Room
     });
 
     /// <summary>
-    /// Act 2, from the map: after the Club, Micah presses Caleb about it; later visits only get warnings, and whether
-    /// Micah came back before Harrington's office and before the Club is remembered.
+    /// Act 2, from the map: after the Club, Micah presses Caleb about it; later visits only get warnings. None of them
+    /// is required: in Act 3 only the cross Caleb offers counts.
     /// </summary>
     private async Task FromMap()
     {
@@ -73,12 +73,10 @@ public partial class Church : Room
         }
         else if (State.HasFlag("harrington_done"))
         {
-            State.SetFlag("church_before_club");
             await Talk("caleb_last");
         }
         else if (State.HasFlag("nun_threatened"))
         {
-            State.SetFlag("church_before_office");
             await Talk("caleb_warn");
         }
         else
@@ -119,6 +117,10 @@ public partial class Church : Room
         await Game.ChangeRoom("office_storm", "window");
     }
 
+    /// <summary>
+    /// Act 3, on the way from the office: Caleb's counsel and the cross, then straight on to the Blue Lantern. There is
+    /// no going back to the office, so the visit is a one-time chance.
+    /// </summary>
     private async Task Act3Return()
     {
         if (FindActor("caleb") is { } caleb)
@@ -126,7 +128,6 @@ public partial class Church : Room
             await Game.WalkTo(caleb.WalkTo);
             Player.Face(Facing.Right);
         }
-        State.SetFlag("church_act3_return");
         await Talk("caleb_act3_return");
         if (!State.HasFlag("thought_church_act3"))
         {
@@ -135,7 +136,7 @@ public partial class Church : Room
         }
         await OfferCross();
         if (FindHotspot("doors") is { } doors) await Game.WalkTo(doors.WalkTo);
-        await Game.ChangeRoom("office", "from_caleb");
+        await Act3.ToTheBlueLantern();
     }
 
     private async Task LeaveToMap()
@@ -152,7 +153,7 @@ public partial class Church : Room
                 await TonyConfession();
                 return true;
             case ("doors", Verb.Walk or Verb.Hand) when State.StoryAct == 3:
-                await Game.ChangeRoom("office", "from_caleb");
+                await Act3.ToTheBlueLantern();
                 return true;
             case ("doors", Verb.Walk or Verb.Hand) when State.HasFlag("club_out"):
                 await Game.ChangeRoom("chicago_map", "start");

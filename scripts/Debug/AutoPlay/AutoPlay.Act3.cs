@@ -276,30 +276,40 @@ public partial class AutoPlay
         Check(_poseCounts.GetValueOrDefault("brute_strike") == 1, "Bruno visibly strikes before Micah drops to his knees");
         Check(!game.Player.Poses.Active, "recovery restored the walking sprite before returning control");
         Check(game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"), "Act 3 office returns player control");
-        _prefer = new[] { "Visit Caleb", "Refuse the cross" };
+        // every way out of the Act 3 office is one-way, so each is tried from the same office save
+        var office = game.CaptureSave();
         int offers = _crossOffers;
+        _prefer = new[] { "Go to the Blue Lantern" };
         await game.Perform(Verb.Walk, "door");
-        Check(game.Room?.Name == "Office" && gs.HasFlag("church_act3_return") && !gs.HasItem("cross") && _crossOffers == offers + 1,
-            "Act 3 Caleb visit offers cross, refusal returns to office");
-        await game.Perform(Verb.Walk, "door");
-        Check(_crossOffers == offers + 2 && !gs.HasItem("cross"), "Caleb offers again after refusal");
+        Check(game.Room?.Name == "Alley" && gs.HasFlag("alley3") && !gs.HasItem("cross") && _crossOffers == offers,
+            "straight from the office to the Blue Lantern: no church, no pendant offer");
+        await game.LoadGame(office);
+        await WaitIdle(game);
+        Check(game.Room is Rooms.Office && !gs.HasFlag("micah_at_desk"), "the office save loads without replaying the desk");
+        _prefer = new[] { "Visit Caleb", "Refuse the cross" };
+        var refused = await Spoken(async () => { await game.Perform(Verb.Walk, "door"); await WaitIdle(game); });
+        Check(game.Room?.Name == "Alley" && gs.HasFlag("alley3") && !gs.HasItem("cross") && _crossOffers == offers + 1,
+            "the Act 3 Caleb visit offers the cross once; refusing it goes straight on to the Blue Lantern");
+        Check(refused.Contains("Then I'll pray you don't need it.") && !refused.Any(l => l.Contains("when you come back")),
+            "Caleb's Act 3 refusal line doesn't promise another offer");
+        await game.LoadGame(office);
+        await WaitIdle(game);
         _prefer = new[] { "Visit Caleb", "Accept the cross" };
         await game.Perform(Verb.Walk, "door");
-        Check(gs.HasItem("cross") && gs.HasFlag("took_cross") && gs.Inventory.Count(i => i == "cross") == 1,
+        await WaitIdle(game);
+        Check(gs.HasItem("cross") && gs.HasFlag("took_cross") && gs.Inventory.Count(i => i == "cross") == 1 && _crossOffers == offers + 2,
             "accepted pendant is recorded and given once");
-        await game.Perform(Verb.Walk, "door");
-        Check(_crossOffers == offers + 3 && game.Room?.Name == "Office" && !gs.HasFlag("micah_at_desk"),
-            "accepted cross isn't offered again, desk scene isn't replayed");
+        Check(game.Room?.Name == "Alley" && gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3")
+              && gs.HasFlag("alley3_sal_inside") && gs.HasFlag("alley3_tony_inside"),
+            "Micah keeps going: from Caleb's church straight to the Blue Lantern, never back to the office");
         var savedCommitments = game.CaptureSave();
         Check(SaveSerializer.TryDeserialize(SaveSerializer.Serialize(savedCommitments))?.Inventory.Contains("cross") == true,
             "accepted pendant survives save serialization");
         gs.TakeItem("cross");
         await game.LoadGame(savedCommitments);
-        Check(gs.HasItem("cross") && gs.HasItem("faith_ring") && gs.HasFlag("ring_taken_act2") && game.Room is Rooms.Office,
-            "load restores ring, pendant and initial decision without replaying the desk");
-        _prefer = new[] { "Go to the Blue Lantern" };
-        await game.Perform(Verb.Walk, "door");
-        Check(gs.HasFlag("keep_going") && !gs.HasFlag("masked") && gs.HasFlag("alley3"), "Micah keeps going: from his desk to the Blue Lantern");
+        await WaitIdle(game);
+        Check(gs.HasItem("cross") && gs.HasItem("faith_ring") && gs.HasFlag("ring_taken_act2") && game.Room is Rooms.Alley,
+            "load restores ring, pendant and initial decision in the alley");
         // the seeded endings add Eleanor's refusals themselves
         var act3Flags = _act3Flags = gs.Flags.Where(f => f is not (Endings.RefusedAbbess or Endings.RefusedDrugs)).ToArray();
         var act3Items = _act3Items = gs.Inventory.ToArray();
@@ -361,7 +371,7 @@ public partial class AutoPlay
         Check(_poseCounts.GetValueOrDefault("micah_holster") == tonyHolsters + 1 && game.Player.PoseName == null,
             "after the shot, Micah holsters the revolver");
         await WaitIdle(game);
-        Check(Offered("bartender_gun", "Lower the gun"), "Caleb's counsel lets Micah walk away from Tony");
+        Check(Offered("bartender_gun", "Lower the gun"), "the ring, Rose's call-back and the cross let Micah walk away from Tony");
         Check(Offered("bartender_shot", "(Finish him. He knows my name.)") && !gs.HasFlag(Endings.KilledTony),
             "the shoulder shot ends on the choice: finish Tony, or leave him bleeding");
         Check(gs.HasFlag("shot_bartender") && game.Room?.Name == "OfficeStorm",
@@ -496,7 +506,7 @@ public partial class AutoPlay
         await Shot("mansion_bedroom_gun");
         await confront;
         await WaitIdle(game);
-        Check(Offered("oldman_taunt", "Our Father") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows Caleb, Rose, ring and cross");
+        Check(Offered("oldman_taunt", "Our Father") == Endings.CanSpareOldMan(gs.HasFlag, gs.HasItem), "sparing the old man follows the cross, ring and Rose");
         Check(gs.HasFlag("shot_oldman") && gs.HasFlag("eleanor_convinced") && game.Room?.Name == "MansionKitchen", "shot the old man; Eleanor comes along, convinced by enough points");
         await Shot("mansion_kitchen_escape");
         await game.Perform(Verb.Walk, "baize_door");

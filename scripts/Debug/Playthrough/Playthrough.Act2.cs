@@ -168,7 +168,7 @@ public sealed partial class Playthrough
             Expect("RoseHouse", "thrown out of the Club, to Rose's");
             await Do(Verb.Hand, "bell");
             await WaitIdle();
-            Check(Gs.HasFlag("rose_wait"), "Rose calls Micah back");
+            Check(Gs.HasFlag("rose_wait") == !(RoseRefuses && _film), "Rose calls Micah back, unless he says good night at once");
             Expect("ChicagoMap", "from Rose's door to the map");
         });
         await Beat("church_and_convent", async () =>
@@ -191,8 +191,8 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag("nun_threatened"), "the sister names Harrington");
             Check(confession.Any(l => l.Contains("I failed her")) && !confession.Any(l => l.Contains("Jezebel")),
                 "told the truth, Agatha confesses she failed her and never calls her a Jezebel");
-            await Do(Verb.Walk, "church");
-            Check(Gs.HasFlag("church_before_office"), "Caleb's warning");
+            var warning = await Spoken(() => Do(Verb.Walk, "church"));
+            Check(warning.Any(l => l.Contains("Sister Agatha telephoned")), "Caleb's warning");
             Expect("ChicagoMap", "back to the map");
         });
         await Beat("tribune_morgue", async () =>
@@ -235,8 +235,8 @@ public sealed partial class Playthrough
             Check(Gs.HasItem("mask") && Gs.HasItem("cloak") && Gs.HasItem("invitation"), "mask, cloak and invitation");
             await Do(Verb.Walk, "window");
             Expect("ChicagoMap", "out of the window");
-            await Do(Verb.Walk, "church");
-            Check(Gs.HasFlag("church_before_club"), "Caleb's last warning");
+            var last = await Spoken(() => Do(Verb.Walk, "church"));
+            Check(last.Any(l => l.Contains("shipped out to France")), "Caleb's last warning");
         });
         await Beat("club_vestibule", async () =>
         {

@@ -253,12 +253,18 @@ public class InkWalkTests
 
     /// <summary>
     /// Lines that depend on decision flags: Rose's coffee remembers the forgiveness plea only when Micah insisted at
-    /// her door (rose_wait), not when he gave up (rose_done alone); after killing Tony, Eleanor's farewell (ending 8)
+    /// her door (rose_wait), not when he gave up (rose_done alone), and she takes the coffee only when she forgives him
+    /// (rose_forgives, ending 1; otherwise ending 15); after killing Tony, Eleanor's farewell (ending 8)
     /// and Micah's Joliet page (ending 6) speak to the killing.
     /// </summary>
     [Theory]
     [InlineData("rose_coffee", "rose_done", "ROSE: What do you want?\n", "Last time you were here")]
     [InlineData("rose_coffee", "rose_done,rose_wait", "Last time you were here, you wanted me to forgive you.", null)]
+    [InlineData("rose_coffee", "rose_done,rose_wait,rose_forgives", "ROSE: ...Why not.", "No, Micah.")]
+    [InlineData("rose_coffee", "rose_done,rose_wait", "ROSE: No, Micah.", "Why not.")]
+    [InlineData("epilogue", "ending_15", "Every Sunday I take Tommy to Mass at Caleb's church", "said our promises again")]
+    [InlineData("epilogue", "ending_15,shot_bartender", "Once a month Rose puts Tommy on the train downstate.", "said our promises again")]
+    [InlineData("epilogue", "ending_15,caleb_escape", "the night he got her out of Chicago", "rectory steps")]
     [InlineData("ending_eleanor_alone", "killed_tony,shot_bartender", "ELEANOR: Find your peace, Micah Jones.", "Go home to your wife")]
     [InlineData("ending_eleanor_alone", "", "Go home to your wife, Micah Jones.", "Find your peace")]
     [InlineData("epilogue", "ending_6,killed_tony,shot_bartender", "Two men dead by my hand: Tony, so he couldn't name me, and then Harrington.", null)]

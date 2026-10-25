@@ -2,7 +2,7 @@
 
 Repentance is a story about sin, turning back and grace. This page checks the game's theologically loaded lines
 against the two traditions its characters live in, marks where Catholic and Protestant teaching differ, and reads
-the fourteen endings in that light. It is a writer's reference, not a verdict on anybody's soul: the endings show
+the fifteen endings in that light. It is a writer's reference, not a verdict on anybody's soul: the endings show
 what people did, and none of them claims to know how God judged them.
 
 Spoilers throughout. Story spec: [Walkthrough](../Walkthrough.md); recap: [Story overview](story-overview.md);
@@ -26,7 +26,7 @@ Catechism (1992) is noted only where it differs.
   His one grave fault is a prudential silence: he hides the girls who run from the Club, and in exchange keeps quiet
   about the Club. He confesses that silence every week, and means to break it "the day it won't bury the girls we
   hid": a purpose of amendment bound to a prudential judgment. Whether the silence is still licit material cooperation
-  is a question of proportion, not something the game settles. Ending 1 ends it if Micah took the papers (Caleb carries them to the Tribune); in ending 9, Eleanor does it for him.
+  is a question of proportion, not something the game settles. Endings 1 and 15 end it if Micah took the papers (Caleb carries them to the Tribune); in ending 9, Eleanor does it for him.
 - **Micah Jones** is a Catholic, born and raised, who practises irregularly. His *theology* leans Protestant: grace over
   works, sin as a power that lives in a man (Romans 7), doubt that he needs a priest between him and God. When he
   does turn to God he does it as a Catholic: "Bless me, Father", Mass, holding back from Communion when he isn't in a
@@ -188,8 +188,8 @@ lines in the game, and the verdict.
   operantis Ecclesiae*), and treating them as charms is superstition.
 - **Protestant:** wary of objects; the Lutherans keep crucifixes, the Reformed do not.
 - **Lines:** Caleb: "Take this cross, brother. Not as a bargain with God. As a reminder."
-- **Verdict:** sound for both: Caleb warns against the superstition both sides fear. The Our Father gate (ring, cross,
-  the return to the church, pressing Rose) is a narrative sign that Micah is ready, not merit that buys grace.
+- **Verdict:** sound for both: Caleb warns against the superstition both sides fear. The Our Father gate (the cross, with
+  the ring or pressing Rose) is a narrative sign that Micah is ready, not merit that buys grace.
 
 ### Marriage
 
@@ -199,6 +199,8 @@ lines in the game, and the verdict.
 - **Bears on:** Rose in every ending. Under Westminster she could leave Micah; nothing in either tradition frees
   Micah. Ending 1's promises "said again", at Caleb's church or at St. Anne's, Caleb blessing them, are a private renewal (there was no
   rite for it in 1927) in a Catholic church (CIC c. 1258 forbids a priest taking part in non-Catholic worship).
+  In ending 15 Rose refuses him and keeps her distance, which both traditions allow; the bond is untouched, and she
+  still gives the boy his father on Sundays.
 
 ### Smaller points
 
@@ -232,6 +234,7 @@ lets a reader see God's judgment.
 | 12 | Micah killed Tony and turned himself in; Caleb visits | Repentance | Confession and absolution (`caleb_tony`), restitution (letters to Tony's mother), satisfaction | Repentance and civil justice; the letters as fruit, not price |
 | 13 | He runs from the alarm; Omaha, the revolver on the washstand | Unresolved, despair | Despair, no sign of turning; the death only implied, so final impenitence is *not* shown | Same; assurance absent, judgment unknown |
 | 14 | He goes in for her and is shot in the kitchen | Unresolved | "Not repentance, but the right direction": no contrition shown, last-moment contrition possible; Caleb says Mass for him | Both traditions require repentance and faith, so not softer; the direction is not conversion |
+| 15 | The same turning as 1, but Rose refuses the coffee; a year of Sundays taking Tommy to Mass | Repentance | Conversion and the sacraments as in 1; forgiveness by God does not oblige Rose to restore the common life, and he accepts it ("She was right to say no") | Repentance shown in fruit without reward; the marriage not restored, the father given back to the son |
 
 Further points the endings raise:
 
@@ -248,7 +251,7 @@ Further points the endings raise:
 - **Satisfaction versus fruit.** In 1, 6, 9 and 12 the same deeds (prison, restitution, testimony) are satisfaction
   and temporal punishment for a Catholic, and the fruit of repentance for a Protestant. The game words them so that
   both readings stand ("Tony's mother doesn't, and I don't ask her to").
-- **Caleb's own turning.** His silence is the one sin the story lets him carry; ending 1 with the papers (the Tribune) and ending 9
+- **Caleb's own turning.** His silence is the one sin the story lets him carry; endings 1 and 15 with the papers (the Tribune) and ending 9
   (Eleanor's testimony, "She did, in one afternoon, what I had not the courage to do") are his reckoning.
 
 ## Fix log

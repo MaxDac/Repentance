@@ -176,7 +176,7 @@ public partial class AutoPlay
                         : lines.Contains("the whore.", StringComparison.Ordinal) && lines.Contains("Jezebel she is.", StringComparison.Ordinal),
                     $"nun_threat2: Agatha's confession matches Eleanor's night choice (truth={truth})");
             }
-            // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10, 12), Eleanor's Thursday
+            // The Club's traffic ends only where somebody exposes it: Micah's papers (1, 6, 10, 12, 15), Eleanor's Thursday
             // book (8) or her testimony (9). Endings 2 and 3 keep the papers private.
             foreach (bool documents in new[] { false, true })
             for (int ending = 1; ending <= Endings.Count; ending++)
@@ -186,7 +186,7 @@ public partial class AutoPlay
                 GameState.Instance.SetFlag(Endings.TookDocuments, documents);
                 story.ChoosePathString("epilogue");
                 string lines = story.ContinueMaximally();
-                bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10 or 12);
+                bool exposed = ending is 8 or 9 || (documents && ending is 1 or 6 or 10 or 12 or 15);
                 Check(lines.Contains("Thursday", StringComparison.Ordinal) == exposed,
                     $"epilogue {ending}: the end of the Club's traffic is told only where it is exposed (documents={documents})");
                 // The seal of confession follows the sacrament, not the room: Caleb never sources Eleanor's story

@@ -316,6 +316,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
             ("she-leaves-by-the-car", "10"), ("SHE-VISITS-ONCE", "11"), ("1-oldman", "1-oldman"), ("10", "10"),
             ("kill-tony-surrender", "12"), ("Kill-Tony-Pray", "12-oldman"), ("12-oldman", "12-oldman"),
             ("alarm-run", "13"), ("Alarm-Ambush", "14"), ("14", "14"),
+            ("Sunday-Visits", "15"), ("15", "15"), ("sundays-eleanor-escapes", "15-caleb"), ("15-caleb", "15-caleb"),
         ):
             with self.subTest(ending=ending):
                 result = self.run_launcher("film.sh", "--ending", ending, "--no-clean")
@@ -340,6 +341,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
         self.assertIn("11        she-visits-once", result.stdout)
         self.assertIn("12-oldman kill-tony-pray", result.stdout)
         self.assertIn("14        alarm-ambush", result.stdout)
+        self.assertIn("15-caleb  sundays-eleanor-escapes", result.stdout)
         self.assertNotIn("source ", result.stdout)
 
     def test_bash_named_film_speeds(self):

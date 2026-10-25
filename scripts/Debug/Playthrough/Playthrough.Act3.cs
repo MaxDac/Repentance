@@ -12,6 +12,9 @@ public sealed partial class Playthrough
     private async Task ActThree()
     {
         bool over = false;
+        // film mode said good night to Rose at once in Act 2; the test and --resume share one vestibule save with her
+        // call-back, so the ending 15 routes forget it here
+        if (RoseRefuses && !_film) Gs.SetFlag("rose_wait", false);
         await Beat("club_stage", async () =>
         {
             var rite = Do(Verb.UseItem, "slot", "sealed_invitation");
@@ -69,11 +72,13 @@ public sealed partial class Playthrough
         if (over) return;
         await Beat("act_three_office", async () =>
         {
-            await Do(Verb.Walk, "door");
-            Check(Gs.HasItem("cross") && Gs.HasFlag("church_act3_return"), "Caleb's cross");
-            Expect("Office", "back from the church");
-            await Do(Verb.Walk, "door");
-            Expect("Alley", "to the Blue Lantern's alley");
+            Check(Gs.HasItem("faith_ring") && Gs.HasFlag("rose_wait") == !RoseRefuses,
+                $"route {_route}: the ring in Micah's pocket, and Rose's call-back {(RoseRefuses ? "forgotten" : "remembered")}");
+            var spoken = await Spoken(() => Do(Verb.Walk, "door"));
+            await WaitIdle();
+            Check(Gs.HasItem("cross") && spoken.Any(l => l.Contains("Rose and Tommy are still there")), "Caleb's counsel and his cross");
+            Expect("Alley", "from the church straight on to the Blue Lantern's alley");
+            Check(Gs.HasFlag("alley3_sal_inside") && Gs.HasFlag("alley3_tony_inside"), "the alley set for tonight");
         });
         await Beat("alley_act_three", async () =>
         {
@@ -85,15 +90,18 @@ public sealed partial class Playthrough
                 sal.Position.X - _game.Player.Position.X is >= 24 and <= 32,
                 "Micah steps close behind Sal for the short downward revolver-butt blow");
             var tony = Do(Verb.Talk, "back_door");
-            if (_route is "1" or "1-caleb")
+            if (WalkAwayRoute)
             {
                 await Until(() => _game.Room?.Name == "RoseHouse", 300);
                 Check(Gs.HasFlag(Endings.WalkedAway), "walked away from Tony");
-                if (_route == "1-caleb")
+                Check(Gs.HasFlag(Endings.RoseForgives) == !RoseRefuses,
+                    $"Rose {(RoseRefuses ? "refuses the coffee" : "takes the coffee")}");
+                if (EleanorRoute)
                 {
+                    int ending = RoseRefuses ? 15 : 1;
                     await Until(() => _game.Room?.Name == "Outskirts", 600);
                     Expect("Outskirts", "Eleanor and Caleb at the city's edge");
-                    Check(Gs.HasFlag("caleb_escape") && Gs.HasFlag("ending_1"), "ending 1, with Eleanor's escape");
+                    Check(Gs.HasFlag("caleb_escape") && Gs.HasFlag($"ending_{ending}"), $"ending {ending}, with Eleanor's escape");
                     Check(_game.Player.Character == "eleanor_white_play", "Eleanor in her white dress");
                     Check(_game.Room?.FindActor("caleb")?.Visible == true, "Caleb beside her");
                 }
@@ -148,7 +156,7 @@ public sealed partial class Playthrough
                 return;
             }
             Expect("OfficeStorm", "Tony left bleeding: Micah walks out, back to the office, in the storm");
-        }, roundTrip: _route is not ("1" or "1-caleb" or "12"));
+        }, roundTrip: _route is not ("1" or "1-caleb" or "15" or "15-caleb" or "12"));
         if (over) return;
         await Beat("office_storm", async () =>
         {

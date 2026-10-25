@@ -11,11 +11,28 @@ public static class Act3
     private static Game Game => Game.Instance;
     private static GameState State => GameState.Instance;
 
-    /// <summary>Sets the derived gate flags the Ink choices read (<c>can_walk_away</c>, <c>can_spare</c>).</summary>
+    /// <summary>
+    /// Sets the derived gate flags the Ink choices read (<c>can_give_up</c>, <c>can_walk_away</c>, <c>can_spare</c>) and
+    /// whether Rose would take the coffee (<c>rose_forgives</c>), which decides between endings 1 and 15.
+    /// </summary>
     public static void UpdateGates()
     {
+        State.SetFlag("can_give_up", Endings.CanGiveUp(State.HasFlag, State.HasItem));
         State.SetFlag("can_walk_away", Endings.CanWalkAwayFromBartender(State.HasFlag, State.HasItem));
         State.SetFlag("can_spare", Endings.CanSpareOldMan(State.HasFlag, State.HasItem));
+        State.SetFlag(Endings.RoseForgives, Endings.RoseTakesHimBack(State.HasFlag, State.HasItem));
+    }
+
+    /// <summary>
+    /// From the office, or straight on from Caleb's church, to the Blue Lantern's back alley. Tonight Sal and Tony are
+    /// inside; Micah has the alley to himself.
+    /// </summary>
+    public static Task ToTheBlueLantern()
+    {
+        State.SetFlag("alley3");
+        State.SetFlag("alley3_sal_inside");
+        State.SetFlag("alley3_tony_inside");
+        return Game.ChangeRoom("alley", "act3");
     }
 
     /// <summary>
@@ -37,7 +54,7 @@ public static class Act3
         if (ending == 14 && Endings.EleanorEscapesWithCaleb(State.HasFlag)) return EleanorWithCaleb();
         return ending switch
         {
-            1 => Game.ChangeRoom("rose_house", "coffee"),
+            1 or 15 => Game.ChangeRoom("rose_house", "coffee"),
             2 or 3 or 10 or 13 => Game.ChangeRoom("outskirts", "ending"),
             7 or 14 => Finish(nextMorning: false),
             8 => Game.ChangeRoom("outskirts", "eleanor_alone"),
@@ -60,8 +77,8 @@ public static class Act3
     }
 
     /// <summary>
-    /// When Eleanor held out and Micah never reached her (ending 1 after an early give-up, after Micah's coffee at Rose's
-    /// door; endings 13 and 14 after the alarm), the player is Eleanor at the city's edge with Caleb, who got her out. The
+    /// When Eleanor held out and Micah never reached her (ending 1 or 15 after an early give-up, after Rose's door;
+    /// endings 13 and 14 after the alarm), the player is Eleanor at the city's edge with Caleb, who got her out. The
     /// ending is already recorded; this is her last scene. Micah's car from ending 13 is gone.
     /// </summary>
     public static Task EleanorWithCaleb()

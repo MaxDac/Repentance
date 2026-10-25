@@ -12,7 +12,7 @@ public sealed partial class Playthrough
     /// <summary>Waits for "End of Act Three", then Daniel's epilogue in the attic and "The End".</summary>
     private async Task TheEnd()
     {
-        int ending = _route is "1" or "1-oldman" or "1-steps" or "1-caleb" ? 1 : KillRoute ? 12 : int.Parse(_route);
+        int ending = _route is "1" or "1-oldman" or "1-steps" or "1-caleb" ? 1 : RoseRefuses ? 15 : KillRoute ? 12 : int.Parse(_route);
         await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", 300);
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         bool sawVows = false;
@@ -29,20 +29,25 @@ public sealed partial class Playthrough
         Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
         // the final stash records what Micah still carried: giving up on Eleanor throws her cloth away, and so does
         // leaving her in the mansion (endings 8 and 9 go through his coffee with Rose)
-        bool thrown = ending is 1 or 8 or 9;
+        bool thrown = ending is 1 or 8 or 9 or 15;
         Check(Gs.HasFlag("stash_cloth") == !thrown,
             $"route {_route}: Eleanor's cloth {(thrown ? "thrown in the street" : "still in Micah's pocket")}");
         Check(!Story.Interlude.EleanorPlays(Gs.HasFlag), $"route {_route}: no Eleanor flag survives into the epilogue");
         // Choose() falls back to the first option, so a renamed or wrongly gated choice would otherwise pass silently.
-        // By now the cross is taken, so Wants() names the Blue Lantern; Caleb was asked for on the first visit. Giving up
-        // on the steps ends the story before Act 3's office, so that route only answers the stage.
-        var required = _route == "1-steps" ? new[] { "Give up" } : Wants().Append("Visit Caleb").Distinct();
+        // Giving up on the steps ends the story before Act 3's office, so that route only answers the stage.
+        var required = _route == "1-steps" ? new[] { "Give up" } : Wants();
         foreach (var want in required)
             Check(_matchedWants.Contains(want), $"route {_route}: the choice \"{want}\" was offered and taken");
     }
 
     /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-11.</summary>
-    private bool EleanorRoute => _route is "8" or "9" or "10" or "11" or "1-caleb";
+    private bool EleanorRoute => _route is "8" or "9" or "10" or "11" or "1-caleb" or "15-caleb";
+
+    /// <summary>Routes where Micah walks away from Tony and goes home to Rose (ending 1, or 15 when she refuses him).</summary>
+    private bool WalkAwayRoute => _route is "1" or "1-caleb" or "15" or "15-caleb";
+
+    /// <summary>Routes where Micah said good night to Rose at once in Act 2, so she refuses his coffee (ending 15).</summary>
+    private bool RoseRefuses => _route is "15" or "15-caleb";
 
     /// <summary>Routes where Micah goes back to Tony with the revolver and kills him, ending in prison (ending 12).</summary>
     private bool KillRoute => _route is "12" or "12-oldman";
@@ -128,13 +133,17 @@ public sealed partial class Playthrough
     {
         yield return "(Tell her the truth.";
         yield return EleanorRoute ? "(Push it away.)" : "(Take the glass";
+        // film mode plays Act 2 per route; the test's shared vestibule save forgets Rose's call-back instead
+        if (RoseRefuses && _film) yield return "Good night, Rose.";
         yield return "Accept the cross";
-        yield return Gs.HasFlag("took_cross") ? "Go to the Blue Lantern" : "Visit Caleb";
+        yield return "Visit Caleb";
         yield return _route == "1-steps" ? "Give up" : "Keep going";
         switch (_route)
         {
             case "1":
             case "1-caleb":
+            case "15":
+            case "15-caleb":
                 yield return "Lower the gun. It's not worth it";
                 break;
             case "1-oldman":

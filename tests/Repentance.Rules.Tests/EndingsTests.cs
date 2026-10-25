@@ -12,9 +12,22 @@ public class EndingsTests
     [InlineData("spared_oldman")]
     public void GivingUpAnywhereLeadsBackToRose(string flag)
     {
-        Assert.Equal(1, Endings.Resolve(Flags(flag)));
-        Assert.Equal(1, Endings.Resolve(Flags(flag, "eleanor_convinced", "mansion_exploded")));
+        Assert.Equal(1, Endings.Resolve(Flags(flag, "rose_forgives")));
+        Assert.Equal(1, Endings.Resolve(Flags(flag, "rose_forgives", "eleanor_convinced", "mansion_exploded")));
     }
+
+    [Theory]
+    [InlineData("gave_up_steps")]
+    [InlineData("walked_away")]
+    [InlineData("spared_oldman")]
+    public void WithoutRoseForgivingHimEveryGiveUpIsSundayVisits(string flag)
+    {
+        Assert.Equal(15, Endings.Resolve(Flags(flag)));
+        Assert.Equal(15, Endings.Resolve(Flags(flag, "eleanor_convinced", "mansion_exploded", "rose_wait")));
+    }
+
+    [Fact]
+    public void ThereAreFifteenEndings() => Assert.Equal(15, Endings.Count);
 
     [Theory]
     [InlineData(true, true, false, 2)]
@@ -49,7 +62,8 @@ public class EndingsTests
     {
         Assert.Equal(6, Endings.Resolve(Flags("repented")));
         Assert.Equal(6, Endings.Resolve(Flags("repented", "mansion_exploded", "took_documents")));
-        Assert.Equal(1, Endings.Resolve(Flags("spared_oldman", "repented")));
+        Assert.Equal(1, Endings.Resolve(Flags("spared_oldman", "repented", "rose_forgives")));
+        Assert.Equal(15, Endings.Resolve(Flags("spared_oldman", "repented")));
     }
 
     [Fact]
@@ -79,6 +93,7 @@ public class EndingsTests
     [InlineData(12, true)]
     [InlineData(13, false)]
     [InlineData(14, false)]
+    [InlineData(15, true)]
     public void OnlyTheRepentantEndingsKeepTheJournal(int ending, bool keeps) =>
         Assert.Equal(keeps, Endings.KeepsJournal(ending));
 
@@ -96,7 +111,8 @@ public class EndingsTests
     [InlineData(5, "killed_tony", "shot_oldman")]
     [InlineData(6, "killed_tony", "confessed_tony", "repented")]
     // Tony left alive changes no outcome
-    [InlineData(1, "shot_bartender", "spared_oldman")]
+    [InlineData(1, "shot_bartender", "spared_oldman", "rose_forgives")]
+    [InlineData(15, "shot_bartender", "spared_oldman")]
     public void KillingTonyEndsInPrisonWhenMicahRepents(int ending, params string[] flags) =>
         Assert.Equal(ending, Endings.Resolve(Flags(flags)));
 
@@ -104,12 +120,12 @@ public class EndingsTests
     public void AfterKillingTonyTheOurFatherAlsoNeedsTheConfession()
     {
         var items = Flags("faith_ring", "cross");
-        string[] gates = { "rose_wait", "church_before_office" };
+        string[] gates = { "rose_wait" };
         Assert.True(Endings.CanSpareOldMan(Flags(gates), items));
         Assert.False(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony"]), items));
         Assert.True(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony", "confessed_tony"]), items));
         // the confession doesn't replace the other gates
-        Assert.False(Endings.CanSpareOldMan(Flags("church_before_office", "killed_tony", "confessed_tony"), items));
+        Assert.False(Endings.CanSpareOldMan(Flags("killed_tony", "confessed_tony"), Flags("cross")));
         Assert.False(Endings.CanSpareOldMan(Flags([.. gates, "killed_tony", "confessed_tony"]), Flags("faith_ring")));
     }
 
@@ -126,10 +142,10 @@ public class EndingsTests
     [InlineData(13, "warned_tony", "alarm_ran")]
     [InlineData(14, "warned_tony", "alarm_stayed")]
     // the bell stops the night at the kitchen door: nothing Micah could have set before it changes that
-    [InlineData(13, "warned_tony", "alarm_ran", Abbess, Drugs, "church_act3_return", "rose_wait")]
+    [InlineData(13, "warned_tony", "alarm_ran", Abbess, Drugs, "rose_forgives", "rose_wait")]
     [InlineData(14, "warned_tony", "alarm_stayed", Abbess, Drugs, "eleanor_convinced")]
     // a warning shot with the alarm found in time changes no outcome
-    [InlineData(1, "warned_tony", "spared_oldman")]
+    [InlineData(1, "warned_tony", "spared_oldman", "rose_forgives")]
     [InlineData(5, "warned_tony", "shot_oldman")]
     [InlineData(8, "warned_tony", Abbess, Drugs, "spared_oldman", "eleanor_struck", "eleanor_burned")]
     public void TheAlarmDecidesBeforeEverythingElse(int ending, params string[] flags) =>
@@ -145,10 +161,11 @@ public class EndingsTests
     [InlineData(10, Abbess, Drugs, "shot_oldman", "eleanor_weary", "took_documents")]
     [InlineData(11, Abbess, Drugs, "shot_oldman", "eleanor_weary")]
     // the refusals alone never change an outcome
-    [InlineData(1, Abbess, Drugs, "gave_up_steps")]
-    [InlineData(1, Abbess, Drugs, "walked_away")]
-    [InlineData(1, Abbess, Drugs, "spared_oldman")]
-    [InlineData(1, Abbess, "gave_up_steps")]
+    [InlineData(1, Abbess, Drugs, "gave_up_steps", "rose_forgives")]
+    [InlineData(1, Abbess, Drugs, "walked_away", "rose_forgives")]
+    [InlineData(1, Abbess, Drugs, "spared_oldman", "rose_forgives")]
+    [InlineData(1, Abbess, "gave_up_steps", "rose_forgives")]
+    [InlineData(15, Abbess, Drugs, "walked_away")]
     [InlineData(5, Drugs, "shot_oldman")]
     [InlineData(2, Abbess, "eleanor_convinced", "mansion_exploded")]
     [InlineData(7, Drugs, "shot_eleanor")]
@@ -173,7 +190,9 @@ public class EndingsTests
     {
         Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "gave_up_steps")));
         Assert.True(Endings.EleanorEscapesWithCaleb(Flags(Abbess, Drugs, "walked_away")));
-        Assert.Equal(1, Endings.Resolve(Flags(Abbess, Drugs, "walked_away")));
+        Assert.Equal(1, Endings.Resolve(Flags(Abbess, Drugs, "walked_away", "rose_forgives")));
+        // without Rose taking him back it is ending 15, and Caleb still gets Eleanor out
+        Assert.Equal(15, Endings.Resolve(Flags(Abbess, Drugs, "walked_away")));
         Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Abbess, "gave_up_steps")));
         Assert.False(Endings.EleanorEscapesWithCaleb(Flags(Drugs, "walked_away")));
         // the Our Father, with Eleanor back in bed in her coda, is ending 1 without the escape
@@ -205,40 +224,39 @@ public class EndingsTests
     }
 
     [Fact]
-    public void WalkingAwayNeedsAChurchReturn()
+    public void FaithIsTheRingOrRosesCallBack()
     {
-        Assert.False(Endings.CanWalkAwayFromBartender(Flags(), Flags("faith_ring")));
-        foreach (string visit in new[] { "church_before_office", "church_before_club", "church_act3_return" })
-        {
-            Assert.True(Endings.CanWalkAwayFromBartender(Flags(visit), Flags("faith_ring")));
-            Assert.False(Endings.CanWalkAwayFromBartender(Flags(visit), Flags("cross")));
-        }
+        Assert.False(Endings.Faithful(Flags(), Flags()));
+        Assert.False(Endings.Faithful(Flags(), Flags("cross")));
+        Assert.True(Endings.Faithful(Flags(), Flags("faith_ring")));
+        Assert.True(Endings.Faithful(Flags("rose_wait"), Flags()));
     }
 
     [Fact]
-    public void SparingTheOldManNeedsChurchAndInsistingWithRose()
+    public void ChurchVisitsOpenNoGate()
     {
-        var both = Flags("faith_ring", "cross");
-        Assert.False(Endings.CanSpareOldMan(Flags("church_before_club"), both));
-        Assert.False(Endings.CanSpareOldMan(Flags("rose_wait"), both));
-        Assert.True(Endings.CanSpareOldMan(Flags("rose_wait", "church_before_office"), both));
+        var visits = Flags("church_before_office", "church_before_club", "church_act3_return", "visit_caleb_act3");
+        Assert.False(Endings.CanGiveUp(visits, Flags()));
+        Assert.False(Endings.CanWalkAwayFromBartender(visits, Flags()));
+        Assert.False(Endings.CanSpareOldMan(visits, Flags()));
     }
 
     [Fact]
-    public void ProgressiveGatesCoverEveryFlagAndItemCombination()
+    public void PeacefulGatesCoverEveryFlagAndItemCombination()
     {
-        for (int mask = 0; mask < 64; mask++)
+        string[] candidates = { "rose_wait", "faith_ring", "cross", "killed_tony", "confessed_tony" };
+        for (int mask = 0; mask < 1 << candidates.Length; mask++)
         {
-            string[] candidates = { "church_before_office", "church_before_club", "church_act3_return", "rose_wait", "faith_ring", "cross" };
             var selected = candidates.Where((_, bit) => (mask & (1 << bit)) != 0).ToArray();
             var flags = Flags(selected.Where(f => f is not ("faith_ring" or "cross")).ToArray());
             var items = Flags(selected.Where(f => f is "faith_ring" or "cross").ToArray());
-            bool church = (mask & 7) != 0;
-            bool middle = church && (mask & 16) != 0;
-            bool late = middle && (mask & 8) != 0 && (mask & 32) != 0;
-            Assert.Equal(middle, Endings.CanWalkAwayFromBartender(flags, items));
-            Assert.Equal(late, Endings.CanSpareOldMan(flags, items));
-            Assert.Equal(1, Endings.Resolve(Flags("gave_up_steps")));
+            bool wait = (mask & 1) != 0, ring = (mask & 2) != 0, cross = (mask & 4) != 0;
+            bool killed = (mask & 8) != 0, confessed = (mask & 16) != 0;
+            bool faithful = ring || wait;
+            Assert.Equal(faithful, Endings.CanGiveUp(flags, items));
+            Assert.Equal(faithful || cross, Endings.CanWalkAwayFromBartender(flags, items));
+            Assert.Equal(cross && faithful && (!killed || confessed), Endings.CanSpareOldMan(flags, items));
+            Assert.Equal(ring && wait, Endings.RoseTakesHimBack(flags, items));
         }
     }
 
