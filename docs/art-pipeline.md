@@ -93,7 +93,8 @@ in-between, kneeling and final prone frame.
   the scene's window entry. Keep their window crop origins fixed and their layer behind the player, so his figure
   partially obscures the apparition while its horns and shoulders remain visible. Scale the apparition to 92% around
   that centerline and the sill, lift it four pixels to keep its eyes visible above Micah's head, and composite it at
-  45% opacity so the window remains visible through the fleeting image.
+  45% opacity so the window remains visible through the fleeting image. In the first flash only, offset Micah's
+  painted reflection left inside the apparition so his reflected face is not hidden by his real figure.
 - The mansion alarm's tie uses the fixed `BELL_TIE_BOX` crop at `(337, 69)`, matching its scene node even when the
   knot or tails shrink. Keep the gong at 18-20 pixels wide and the hanging tie ends within a six-pixel span;
   regenerate every exterior state together so the smaller alarm and its palette agree.

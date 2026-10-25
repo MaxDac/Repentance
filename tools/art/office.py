@@ -877,6 +877,7 @@ STORM_REFLECTION_X = 392    # aligned with the real Micah at the scene's window 
 STORM_REFLECTION_SCALE = 0.92
 STORM_REFLECTION_OPACITY = 0.45
 STORM_REFLECTION_RISE = 4   # keep the eyes just above the real Micah's head
+STORM_MICAH_REFLECTION_OFFSET = -16
 
 
 def fedora(d, x, y):
@@ -1045,6 +1046,8 @@ def reflection(glass, stage):
     a[..., 3] = np.where(a[..., 3] > 90, 225 if stage == 1 else 120, 0)
     bust = Image.fromarray(a.clip(0, 255).astype("uint8"))
     bx, by = cx - bust.width // 2, sill - bust.height
+    if stage == 1:
+        bx += STORM_MICAH_REFLECTION_OFFSET
     top = by  # his head's top
 
     # --- the demon, painted 4x and brought down ---------------------------------------------------------------------

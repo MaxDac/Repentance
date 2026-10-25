@@ -14,6 +14,29 @@ from art import office
 
 
 class OfficeStormTests(unittest.TestCase):
+    def test_only_first_flash_moves_micahs_painted_reflection_left(self):
+        with Image.open(ROOT / "assets" / "art" / "rooms" / "office_storm_lit.png") as background:
+            glass = background.convert("RGB").crop(office.STORM_GLASS_BOX)
+        for stage in (1, 2):
+            with self.subTest(stage=stage):
+                shifted = np.array(office.reflection(glass, stage))
+                with patch.object(office, "STORM_MICAH_REFLECTION_OFFSET", 0):
+                    centered = np.array(office.reflection(glass, stage))
+                if stage == 1:
+                    changed = np.any(shifted != centered, axis=2)
+                    self.assertGreater(np.count_nonzero(changed), 100)
+                    _, xs = np.where(changed)
+                    self.assertLess(xs.mean(), office.STORM_REFLECTION_X - office.STORM_GLASS_BOX[0])
+                    # Moving Micah's painted bust must not move the demon's eyes.
+                    eye_masks = []
+                    for image in (shifted, centered):
+                        pixels = image.astype(int)
+                        eyes = (pixels[..., 0] > pixels[..., 1] + 30) & (pixels[..., 0] > pixels[..., 2] + 20)
+                        eye_masks.append(eyes)
+                    np.testing.assert_array_equal(*eye_masks)
+                else:
+                    np.testing.assert_array_equal(shifted, centered)
+
     def test_apparition_is_smaller_and_translucent_in_both_flashes(self):
         with Image.open(ROOT / "assets" / "art" / "rooms" / "office_storm_lit.png") as background:
             glass = background.convert("RGB").crop(office.STORM_GLASS_BOX)
