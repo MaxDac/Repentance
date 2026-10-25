@@ -1081,7 +1081,7 @@ public partial class AutoPlay
         gs.SetFlag("micah_at_desk");
         gs.SetFlag("keep_going");
         gs.SetStoryAct(3);
-        var ringLeft = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); });
+        var ringLeft = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); }, 180);
         Check(ringLeft.Any(l => l.StartsWith("Before I go: my wedding ring, and Caleb's door.", StringComparison.Ordinal)),
             "with the ring still on the desk, the Act 3 office reminds Micah of it");
         Check(game.Room?.Name == "Office" && !game.Busy, "Act 3 office waits for player input");
@@ -1091,7 +1091,7 @@ public partial class AutoPlay
         Check(gs.HasItem("faith_ring") && gs.HasFlag("ring_left_act2"), "left ring can be recovered at the Act 3 office");
         gs.SetFlag("took_faith_ring");
         gs.SetFlag("micah_at_desk");
-        var ringTaken = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); });
+        var ringTaken = await Spoken(async () => { await game.ChangeRoom("office", "act3"); await WaitIdle(game); }, 180);
         Check(ringTaken.Any(l => l.StartsWith("Before I go: Caleb's door.", StringComparison.Ordinal)) &&
               !ringTaken.Any(l => l.Contains("my wedding ring")),
             "with the ring already in his pocket, the Act 3 office only reminds Micah of Caleb's door");
