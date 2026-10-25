@@ -873,6 +873,10 @@ STORM_HAT_BOX = (238, 87 + TOP, 264, 103 + TOP)
 STORM_BOTTLE_BOX = (212, 78 + TOP, 225, 105 + TOP)
 # the glass below the blinds, where the lightning shows the reflection (screen coordinates)
 STORM_GLASS_BOX = (348, 46 + TOP, 474, 102 + TOP)
+STORM_REFLECTION_X = 392    # aligned with the real Micah at the scene's window entry
+STORM_REFLECTION_SCALE = 0.92
+STORM_REFLECTION_OPACITY = 0.45
+STORM_REFLECTION_RISE = 4   # keep the eyes just above the real Micah's head
 
 
 def fedora(d, x, y):
@@ -1028,7 +1032,7 @@ def reflection(glass, stage):
     base = glass.convert("RGBA")
     w, h = base.size
     sill = h - 5          # the glass ends on the sill (art y 98)
-    cx = 92               # centred in the right pane
+    cx = STORM_REFLECTION_X - STORM_GLASS_BOX[0]
     # Micah's reflection: faced towards the room, cut off at the waist, cold and translucent
     fig = figure(MICAH_HATLESS, pose(8), FW, FH)
     fig = fig.crop(fig.getbbox())
@@ -1131,7 +1135,7 @@ def reflection(glass, stage):
         return mask * (1 - up), mask * (1 - left) * (1 - (mask * (1 - up)))
 
     shade = (9, 7, 14)
-    out = base.copy()
+    out = Image.new("RGBA", base.size)
     out.alpha_composite(layer(m_body, shade))
     out.alpha_composite(layer(m_body * m_det, (30, 28, 44)))
     r_top, r_side = rim(m_body)
@@ -1154,9 +1158,17 @@ def reflection(glass, stage):
     for i in range(-2, 3):
         px.point((round(hx_) + i, round(hy + 5 + (i % 2))), fill=(118, 110, 104, 255) if stage == 2 or i % 2 else
                  (70, 64, 62, 255))
+    # Shrink around Micah's centerline and the sill, fading only the apparition, not the window behind it.
+    inverse = 1 / STORM_REFLECTION_SCALE
+    out = out.transform(out.size, Image.Transform.AFFINE,
+                        (inverse, 0, cx * (1 - inverse), 0, inverse,
+                         sill * (1 - inverse) + STORM_REFLECTION_RISE * inverse),
+                        Image.Resampling.NEAREST)
+    out.putalpha(out.getchannel("A").point(lambda alpha: round(alpha * STORM_REFLECTION_OPACITY)))
+    base.alpha_composite(out)
     # the reflection is in the glass: the window's mullion, bar and sill stay in front of it
     g = np.array(glass.convert("RGBA"))
-    o = np.array(out)
+    o = np.array(base)
     for (x0, y0, x1, y1) in ((410 - 348, 0, 413 - 348, h), (0, 55 - 46, w, 58 - 46), (0, sill, w, h)):
         o[y0:y1, x0:x1] = g[y0:y1, x0:x1]
     return Image.fromarray(o).convert("RGB")
