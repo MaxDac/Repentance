@@ -317,6 +317,17 @@ sys.exit(int(os.environ["GAME_EXIT"]))
             ("kill-tony-surrender", "12"), ("Kill-Tony-Pray", "12-oldman"), ("12-oldman", "12-oldman"),
             ("alarm-run", "13"), ("Alarm-Ambush", "14"), ("14", "14"),
             ("Sunday-Visits", "15"), ("15", "15"), ("sundays-eleanor-escapes", "15-caleb"), ("15-caleb", "15-caleb"),
+            ("give-up-eleanor-escapes", "1-steps-caleb"), ("1-steps-caleb", "1-steps-caleb"),
+            ("Eleanor-Back-To-Bed", "1-bed"), ("1-bed", "1-bed"), ("last-entry-alone", "7-alone"), ("7-alone", "7-alone"),
+            ("kill-tony-eleanor-burns", "8-kill"), ("8-kill", "8-kill"),
+            ("kill-tony-eleanor-confesses", "9-kill"), ("9-kill", "9-kill"),
+            ("kill-tony-eleanor-back-to-bed", "12-bed"), ("12-bed", "12-bed"),
+            ("alarm-run-eleanor-escapes", "13-caleb"), ("13-caleb", "13-caleb"),
+            ("Alarm-Ambush-Eleanor-Escapes", "14-caleb"), ("14-caleb", "14-caleb"),
+            ("sundays-give-up", "15-steps"), ("15-steps", "15-steps"),
+            ("sundays-give-up-eleanor-escapes", "15-steps-caleb"), ("15-steps-caleb", "15-steps-caleb"),
+            ("sundays-spare-the-old-man", "15-oldman"), ("15-oldman", "15-oldman"),
+            ("sundays-eleanor-back-to-bed", "15-bed"), ("15-bed", "15-bed"),
         ):
             with self.subTest(ending=ending):
                 result = self.run_launcher("film.sh", "--ending", ending, "--no-clean")
@@ -327,21 +338,26 @@ sys.exit(int(os.environ["GAME_EXIT"]))
                 )
 
     def test_film_rejects_give_up_from_act3(self):
-        result = self.run_launcher("film.sh", "--ending", "give-up", "--from", "act3", "--no-clean")
-        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-        self.assertFalse(self.trace.exists() and "--film" in self.trace.read_text())
+        for ending in ("give-up", "1-steps-caleb", "sundays-give-up", "15-steps-caleb"):
+            with self.subTest(ending=ending):
+                result = self.run_launcher("film.sh", "--ending", ending, "--from", "act3", "--no-clean")
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertFalse(self.trace.exists() and "--film" in self.trace.read_text())
 
     def test_bash_film_help_lists_ending_titles(self):
         if self.shell != "bash":
             self.skipTest("Bash help")
         result = self.run_launcher("film.sh", "--help")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("1-steps   give-up", result.stdout)
-        self.assertIn("1-caleb   eleanor-escapes", result.stdout)
-        self.assertIn("11        she-visits-once", result.stdout)
-        self.assertIn("12-oldman kill-tony-pray", result.stdout)
-        self.assertIn("14        alarm-ambush", result.stdout)
-        self.assertIn("15-caleb  sundays-eleanor-escapes", result.stdout)
+        self.assertIn("1-steps        give-up ", result.stdout)
+        self.assertIn("1-caleb        eleanor-escapes ", result.stdout)
+        self.assertIn("11             she-visits-once ", result.stdout)
+        self.assertIn("12-oldman      kill-tony-pray ", result.stdout)
+        self.assertIn("14             alarm-ambush ", result.stdout)
+        self.assertIn("15-caleb       sundays-eleanor-escapes ", result.stdout)
+        self.assertIn("15-steps-caleb sundays-give-up-eleanor-escapes ", result.stdout)
+        self.assertIn("15-bed         sundays-eleanor-back-to-bed ", result.stdout)
+        self.assertIn("7-alone        last-entry-alone ", result.stdout)
         self.assertNotIn("source ", result.stdout)
 
     def test_bash_named_film_speeds(self):
@@ -374,6 +390,7 @@ sys.exit(int(os.environ["GAME_EXIT"]))
             ("--ending",), ("--from",), ("--godot",),
             ("--ending", "all"), ("--ending", "the-end"), ("--from", "bad"),
             ("--from", "act3", "--ending", "1-steps"), ("--from", "act3", "--ending", "give-up"),
+            ("--from", "act3", "--ending", "15-steps-caleb"), ("--from", "act3", "--ending", "sundays-give-up"),
         ):
             with self.subTest(args=args):
                 result = self.run_launcher("film.sh", *args)

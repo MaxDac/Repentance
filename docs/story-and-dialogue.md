@@ -189,7 +189,8 @@ case the epilogues tell. `warned_tony` (the warning shot into the wall) leaves T
 the alarm. Looking at the door or lintel and taking the key do not reveal it; only inspecting the wire or bell does.
 Opening the keyed kitchen door without that inspection rings the bell (`alarm_footsteps`): run (`alarm_ran`)
 or stay (`alarm_stayed`).
-Every route must reach "The End" (`Playthrough` routes `1`-`15`, `1-oldman`, `1-steps`, `1-caleb`, `15-caleb`, `12-oldman`).
+Every route must reach "The End" (`Playthrough` routes `1`-`15` and every variant with its own scenes; the list is in
+[Testing](testing.md#playthrough---playthrough---film)).
 In Eleanor's coda, `MansionBedroom.ClampWalkTarget` keeps her on the bed side of the old man until she strikes, so no
 click or refusal walks her past him to the door.
 

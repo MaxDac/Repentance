@@ -22,22 +22,31 @@ namespace Repentance;
 /// the vestibule), so state a save forgets cannot hide in memory. Prints "RESUME OK".</item>
 /// </list>
 /// Routes: 2, 3, 4, 5 (by Eleanor's answer and whether the evidence/fire set Micah free), 6 (prays on the stage,
-/// then turns himself in after the shot), 7 (shoots Eleanor, then himself), and the three ways to ending 1:
+/// then turns himself in after the shot), 7 (shoots Eleanor, then himself), 7-alone (loses her, and at the footsteps
+/// shoots himself alone), and the ways to ending 1:
 /// 1 (walk away from Tony), 1-oldman (spare Harrington, praying back to the door), 1-steps (give up on the church steps),
-/// and 1-caleb (walk away from Tony after Eleanor refused the gin too: Rose, then Eleanor and Caleb at the outskirts).
-/// Ending 15 is route 1 (15) or 1-caleb (15-caleb) after Micah said good night to Rose at once in Act 2, so she refuses
-/// the coffee.
+/// 1-caleb and 1-steps-caleb (walk away from Tony, or give up on the steps, after Eleanor refused the gin too: Rose, then
+/// Eleanor and Caleb at the outskirts) and 1-bed (spare Harrington, and Eleanor, who held out, goes back to bed).
+/// Ending 15 is route 1 (15), 1-caleb (15-caleb), 1-steps (15-steps), 1-steps-caleb (15-steps-caleb), 1-oldman
+/// (15-oldman) or 1-bed (15-bed) after Micah said good night to Rose at once in Act 2, so she refuses the coffee.
 /// Act 2's First Interlude always refuses the Mother Superior; Act 3's Second Interlude takes the old man's gin except on
 /// Eleanor's routes: 8 (after the prayer she strikes him and burns the house), 9 (strikes him only), 10 (Micah shoots,
 /// she follows him worn out, and the fire and documents take them out of town) and 11 (the same, but nothing taken: prison).
 /// Ending 12 kills Tony in the alley: 12 (confesses to Caleb and turns himself in at the church) and 12-oldman (confesses,
-/// goes on to the mansion for the papers and prays his way out past the old man).
+/// goes on to the mansion for the papers and prays his way out past the old man); after Eleanor held out, the same prayer
+/// leads to her coda: 12-bed (back to bed), 9-kill (strikes him) and 8-kill (strikes him and burns the house).
 /// Endings 13 and 14 fire the warning shot by Tony's head: Tony leaves the alarm out, the kitchen door rings it, and
-/// Micah runs out of Chicago (13) or goes in to the Club's two men (14).
+/// Micah runs out of Chicago (13) or goes in to the Club's two men (14); 13-caleb and 14-caleb add Eleanor's escape with
+/// Caleb after she held out.
 /// </summary>
 public sealed partial class Playthrough : Harness
 {
-    public static readonly string[] Routes = { "2", "3", "4", "5", "6", "7", "1", "1-oldman", "1-steps", "1-caleb", "15", "15-caleb", "8", "9", "10", "11", "12", "12-oldman", "13", "14" };
+    public static readonly string[] Routes =
+    {
+        "2", "3", "4", "5", "6", "7", "7-alone", "1", "1-oldman", "1-steps", "1-steps-caleb", "1-caleb", "1-bed",
+        "15", "15-caleb", "15-steps", "15-steps-caleb", "15-oldman", "15-bed", "8", "8-kill", "9", "9-kill", "10", "11",
+        "12", "12-oldman", "12-bed", "13", "13-caleb", "14", "14-caleb",
+    };
 
     /// <summary>
     /// Sounds the canonical routes never play. Every other <see cref="Sound"/> must be heard at least once.
@@ -60,11 +69,11 @@ public sealed partial class Playthrough : Harness
         "interlude1" => "first_interlude_aurelian",
         "act2" => "act_two_opening",
         "interlude2" => "second_interlude_taken",
-        "act3" => route == "1-steps" ? throw new ArgumentException("ending 1-steps ends in the Second Interlude, before Act 3") : "act_three_office",
+        "act3" => IsSteps(route) ? throw new ArgumentException($"ending {route} ends in the Second Interlude, before Act 3") : "act_three_office",
         "ending" => route switch
         {
-            "1" or "1-caleb" or "15" or "15-caleb" or "12" or "12-oldman" or "13" or "14" => "alley_act_three",
-            "1-steps" => "second_interlude_oldman",
+            _ when IsWalkAway(route) || IsKill(route) || IsAlarm(route) => "alley_act_three",
+            _ when IsSteps(route) => "second_interlude_oldman",
             _ => "mansion_study",
         },
         _ => throw new ArgumentException($"unknown chapter {chapter} (use {string.Join(", ", Chapters)})"),

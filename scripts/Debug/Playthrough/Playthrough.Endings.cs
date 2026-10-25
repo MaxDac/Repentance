@@ -12,7 +12,7 @@ public sealed partial class Playthrough
     /// <summary>Waits for "End of Act Three", then Daniel's epilogue in the attic and "The End".</summary>
     private async Task TheEnd()
     {
-        int ending = _route is "1" or "1-oldman" or "1-steps" or "1-caleb" ? 1 : RoseRefuses ? 15 : KillRoute ? 12 : int.Parse(_route);
+        int ending = EndingOf(_route);
         await Until(() => _game.Hud.CaptionVisible && _game.Hud.CaptionText == "End of Act Three", 300);
         Check(_game.Hud.CaptionText == "End of Act Three", $"route {_route}: End of Act Three");
         bool sawVows = false;
@@ -27,40 +27,106 @@ public sealed partial class Playthrough
             Check(Gs.HasFlag($"ending_{n}") == (n == ending), $"route {_route}: ending_{n} {(n == ending ? "set" : "not set")}");
         bool keeps = Endings.KeepsJournal(ending);
         Check(Gs.HasItem("journal") == keeps, $"route {_route}: Daniel {(keeps ? "keeps the journal for Leo" : "puts the journal back")}");
-        // the final stash records what Micah still carried: giving up on Eleanor throws her cloth away, and so does
-        // leaving her in the mansion (endings 8 and 9 go through his coffee with Rose)
-        bool thrown = ending is 1 or 8 or 9 or 15;
+        // the final stash records what Micah still carried: he throws Eleanor's cloth away at Rose's door, so giving up
+        // on her drops it, and so does leaving her in the mansion (endings 8 and 9 go through his coffee with Rose,
+        // except after killing Tony, when he never goes to Rose's)
+        bool thrown = ending is 1 or 15 || (ending is 8 or 9 && !KillRoute);
         Check(Gs.HasFlag("stash_cloth") == !thrown,
             $"route {_route}: Eleanor's cloth {(thrown ? "thrown in the street" : "still in Micah's pocket")}");
         Check(!Story.Interlude.EleanorPlays(Gs.HasFlag), $"route {_route}: no Eleanor flag survives into the epilogue");
         // Choose() falls back to the first option, so a renamed or wrongly gated choice would otherwise pass silently.
-        // Giving up on the steps ends the story before Act 3's office, so that route only answers the stage.
-        var required = _route == "1-steps" ? new[] { "Give up" } : Wants();
+        // Giving up on the steps ends the story before Act 3's office, where Caleb's visit and cross are answered.
+        var required = StepsRoute ? Wants().Where(w => w is not ("Accept the cross" or "Visit Caleb")) : Wants();
         foreach (var want in required)
             Check(_matchedWants.Contains(want), $"route {_route}: the choice \"{want}\" was offered and taken");
     }
 
-    /// <summary>Routes where Eleanor refuses the old man's gin too, opening her endings 8-11.</summary>
-    private bool EleanorRoute => _route is "8" or "9" or "10" or "11" or "1-caleb" or "15-caleb";
+    /// <summary>The ending a route plays: its leading number (15-steps-caleb is ending 15).</summary>
+    public static int EndingOf(string route) => int.Parse(route.Split('-')[0]);
+
+    /// <summary>Routes that give up on the church steps after the Club, before Act 3 (ending 1, or 15 without Rose's call-back).</summary>
+    private static bool IsSteps(string route) => route is "1-steps" or "1-steps-caleb" or "15-steps" or "15-steps-caleb";
 
     /// <summary>Routes where Micah walks away from Tony and goes home to Rose (ending 1, or 15 when she refuses him).</summary>
-    private bool WalkAwayRoute => _route is "1" or "1-caleb" or "15" or "15-caleb";
+    private static bool IsWalkAway(string route) => route is "1" or "1-caleb" or "15" or "15-caleb";
 
-    /// <summary>Routes where Micah said good night to Rose at once in Act 2, so she refuses his coffee (ending 15).</summary>
-    private bool RoseRefuses => _route is "15" or "15-caleb";
-
-    /// <summary>Routes where Micah goes back to Tony with the revolver and kills him, ending in prison (ending 12).</summary>
-    private bool KillRoute => _route is "12" or "12-oldman";
+    /// <summary>Routes where Micah goes back to Tony with the revolver and kills him.</summary>
+    private static bool IsKill(string route) => route is "12" or "12-oldman" or "12-bed" or "8-kill" or "9-kill";
 
     /// <summary>Routes where Micah's shot misses Tony on purpose and the unseen alarm rings at the mansion (13 runs, 14 stays).</summary>
-    private bool AlarmRoute => _route is "13" or "14";
+    private static bool IsAlarm(string route) => route is "13" or "14" or "13-caleb" or "14-caleb";
+
+    /// <summary>Routes where Eleanor refuses the old man's gin too (both refusals), opening her endings and Caleb's escape.</summary>
+    private bool EleanorRoute => _route is "8" or "9" or "10" or "11" or "1-caleb" or "15-caleb" or "1-steps-caleb"
+        or "15-steps-caleb" or "1-bed" or "15-bed" or "12-bed" or "8-kill" or "9-kill" or "13-caleb" or "14-caleb";
+
+    private bool StepsRoute => IsSteps(_route);
+
+    private bool WalkAwayRoute => IsWalkAway(_route);
+
+    /// <summary>Routes where Micah said good night to Rose at once in Act 2, so she refuses his coffee (ending 15).</summary>
+    private bool RoseRefuses => EndingOf(_route) == 15;
+
+    private bool KillRoute => IsKill(_route);
+
+    private bool AlarmRoute => IsAlarm(_route);
+
+    /// <summary>Routes where Micah prays the Our Father and spares the old man, then goes home to Rose.</summary>
+    private bool OldManRoute => _route is "1-oldman" or "15-oldman";
+
+    /// <summary>Routes where Micah prays and Eleanor, who held out, plays her coda in the mansion.</summary>
+    private bool CodaRoute => _route is "8" or "9" or "1-bed" or "15-bed" or "12-bed" or "8-kill" or "9-kill";
+
+    /// <summary>Coda routes where Eleanor goes back to bed instead of striking the old man.</summary>
+    private bool BedRoute => _route.EndsWith("-bed", StringComparison.Ordinal);
+
+    /// <summary>Coda routes where Eleanor sets the cellar alight on her way out.</summary>
+    private bool Burns => EndingOf(_route) == 8;
 
     /// <summary>
-    /// Eleanor's coda in the mansion, after Micah's prayer: the candlestick, then out through the study and the kitchen
-    /// (route 8 sets the cellar alight first), to Micah's coffee with Rose and her own last scene.
+    /// Eleanor held out and Micah never reached her (a give-up before the mansion, or the alarm): Caleb gets her out of
+    /// the city, and her last scene is with him at the outskirts.
+    /// </summary>
+    private async Task CalebEscape()
+    {
+        int ending = EndingOf(_route);
+        await Until(() => _game.Room?.Name == "Outskirts" && Gs.HasFlag("caleb_escape") &&
+            _game.Player.Character == "eleanor_white_play", 600);
+        Expect("Outskirts", "Eleanor and Caleb at the city's edge");
+        Check(Gs.HasFlag("caleb_escape") && Gs.HasFlag($"ending_{ending}"), $"ending {ending}, with Eleanor's escape");
+        Check(_game.Player.Character == "eleanor_white_play", "Eleanor in her white dress");
+        Check(_game.Room?.FindActor("caleb")?.Visible == true, "Caleb beside her");
+    }
+
+    /// <summary>Micah at Rose's door after giving up: the coffee, or her refusal; then Eleanor's escape if she held out.</summary>
+    private async Task RoseAndCaleb()
+    {
+        Check(Gs.HasFlag(Endings.RoseForgives) == !RoseRefuses, $"Rose {(RoseRefuses ? "refuses the coffee" : "takes the coffee")}");
+        if (EleanorRoute) await CalebEscape();
+    }
+
+    /// <summary>
+    /// Eleanor's coda in the mansion, after Micah's prayer: back to bed (the -bed routes), or the candlestick, then out
+    /// through the study and the kitchen (ending 8 sets the cellar alight first), to Micah's coffee with Rose (unless he
+    /// killed Tony) and her own last scene.
     /// </summary>
     private async Task EleanorCoda()
     {
+        if (BedRoute)
+        {
+            await Beat("eleanor_coda_bed", async () =>
+            {
+                string next = KillRoute ? "Prison" : "RoseHouse";
+                _ = Do(Verb.Hand, "bed");
+                await Until(() => _game.Room?.Name == next, 300);
+                Expect(next, KillRoute ? "Eleanor back to bed, Micah on to the station" : "Eleanor back to bed, Micah on to Rose");
+                Check(!Gs.HasFlag(Endings.EleanorStruck) && !Gs.HasFlag("eleanor_coda"), "Eleanor goes back to bed without striking him");
+                if (!KillRoute)
+                    Check(Gs.HasFlag(Endings.RoseForgives) == !RoseRefuses, $"Rose {(RoseRefuses ? "refuses the coffee" : "takes the coffee")}");
+                await TheEnd();
+            }, roundTrip: false);
+            return;
+        }
         await Beat("eleanor_coda_strike", async () =>
         {
             var harrington = _game.Room?.FindActor("harrington");
@@ -84,7 +150,7 @@ public sealed partial class Playthrough
             await WaitIdle();
             Expect("MansionKitchen", "down to the kitchen");
         });
-        if (_route == "8")
+        if (Burns)
             await Beat("eleanor_coda_fire", async () =>
             {
                 await Do(Verb.Walk, "cellar_door");
@@ -102,29 +168,26 @@ public sealed partial class Playthrough
             });
         await Beat("eleanor_coda_escape", async () =>
         {
-            bool blaze = false;
+            // after killing Tony, Micah promised Caleb the station steps: no coffee at Rose's door
+            string last = Burns ? "Outskirts" : "Prison";
+            bool blaze = false, atRose = false, sawRose = false;
             _ = Do(Verb.Walk, "back_door");
             await Until(() =>
             {
                 blaze |= _game.Room?.Name == "MansionExterior" &&
                     _game.Room.GetNodeOrNull<CanvasItem>("EleanorFire")?.Visible == true;
-                return _game.Room?.Name == "RoseHouse";
-            }, 300, 0.05);
-            Check(_game.Room?.Name == "RoseHouse", "Micah's coffee with Rose");
-            Check(blaze == (_route == "8"), $"the house {(_route == "8" ? "burns" : "stays dark")} behind her outside");
-            Check(!Gs.HasItem("lantern_lit") && !Gs.Flags.Any(f => f.StartsWith("coda_stash_")),
-                "Micah's things back with him, and nothing of Eleanor's");
-            string last = _route == "8" ? "Outskirts" : "Prison";
-            bool sawRose = false;
-            await Until(() =>
-            {
+                atRose |= _game.Room?.Name == "RoseHouse";
                 sawRose |= _game.Room?.Name == "RoseHouse" && _game.Hud.CurrentCloseUp == CloseUps.Rose;
                 return _game.Room?.Name == last;
-            }, 600);
-            Check(sawRose, "Rose's close-up frames Micah's coffee invitation");
-            Expect(last, _route == "8" ? "Eleanor alone at the city's edge" : "Eleanor confesses to Caleb");
+            }, 900, 0.05);
+            Check(blaze == Burns, $"the house {(Burns ? "burns" : "stays dark")} behind her outside");
+            Check(!Gs.HasItem("lantern_lit") && !Gs.Flags.Any(f => f.StartsWith("coda_stash_")),
+                "Micah's things back with him, and nothing of Eleanor's");
+            Check(atRose == !KillRoute, KillRoute ? "Micah's at the station, not at Rose's door" : "Micah's coffee with Rose");
+            Check(sawRose == !KillRoute, KillRoute ? "no Rose close-up after killing Tony" : "Rose's close-up frames Micah's coffee invitation");
+            Expect(last, Burns ? "Eleanor alone at the city's edge" : "Eleanor confesses to Caleb");
             await TheEnd();
-            Check(Gs.HasFlag(Endings.EleanorBurned) == (_route == "8"), "the house burns only in ending 8");
+            Check(Gs.HasFlag(Endings.EleanorBurned) == Burns, "the house burns only in ending 8");
         }, roundTrip: false);
     }
 
@@ -137,7 +200,7 @@ public sealed partial class Playthrough
         if (RoseRefuses && _film) yield return "Good night, Rose.";
         yield return "Accept the cross";
         yield return "Visit Caleb";
-        yield return _route == "1-steps" ? "Give up" : "Keep going";
+        yield return StepsRoute ? "Give up" : "Keep going";
         switch (_route)
         {
             case "1":
@@ -147,6 +210,9 @@ public sealed partial class Playthrough
                 yield return "Lower the gun. It's not worth it";
                 break;
             case "1-oldman":
+            case "15-oldman":
+            case "1-bed":
+            case "15-bed":
             case "8":
             case "9":
                 yield return "Shoot him in the shoulder";
@@ -162,16 +228,21 @@ public sealed partial class Playthrough
                 yield return "(Turn yourself in.)";
                 break;
             case "12-oldman":
+            case "12-bed":
+            case "8-kill":
+            case "9-kill":
                 yield return "Shoot him in the shoulder";
                 yield return "Finish him";
                 yield return "Not yet";
                 yield return "Our Father";
                 break;
             case "13":
+            case "13-caleb":
                 yield return "Fire into the wall";
                 yield return "(Run.)";
                 break;
             case "14":
+            case "14-caleb":
                 yield return "Fire into the wall";
                 yield return "(Stay.";
                 break;
@@ -193,13 +264,15 @@ public sealed partial class Playthrough
                 yield return "(Leave her.)";
                 break;
             case "5":
-                // three clumsy lines lose her (4 + 0 + 0 + 0): the footsteps on the landing, and Micah leaves her to them
+            case "7-alone":
+                // three clumsy lines lose her (4 + 0 + 0 + 0): the footsteps on the landing, and Micah leaves her to
+                // them (5) or turns the gun on himself (7-alone)
                 yield return "Shoot him";
                 yield return "I didn't come all this way";
                 yield return "Theodore's a coward";
                 yield return "A singer";
                 yield return "finishing the job";
-                yield return "(Leave her to them.)";
+                yield return _route == "5" ? "(Leave her to them.)" : "(Pull the trigger on myself.)";
                 break;
             case "6":
                 // "Shoot him" first: the old man's taunt offers both, the club only the prayer
