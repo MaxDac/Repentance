@@ -13,6 +13,7 @@ described here (other verbs, flavour lines) is left to the implementation.
 - In the suitcase there is a key, but it can't open the large steamer trunk.
 - **Puzzle 1 - Tool tin:** the tin is too heavy to hide under loose papers. Searching the boxes again opens the
   MISC box; inside is a locked tool tin with a little brass padlock, which Daniel sets on top of the box below. Use the suitcase key on the tin to take the crowbar. Only that crowbar opens the trunk.
+  Looking at the tin only guesses at the suitcase key once Daniel has found it.
 - In the trunk Daniel finds Micah Jones's journal and starts reading it (hand on the journal in the satchel).
   The caption "Chicago, 1927." leads to Micah's office.
 
@@ -52,6 +53,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - The bellboy's memory: on Tuesday night, having a smoke out back, he saw two big fellas (broken nose, cheap suit,
   expensive cigar) escort Eleanor out of the service door and away down the alley in a car with no lights,
   without anybody seeing. He doesn't mention the Blue Lantern; the matchbook in the brass box makes that connection.
+  Nobody has said she had a room, so Micah only guesses at it: "If she had a room here, I want a look." The bellboy
+  names room 507 only after the second dollar.
 - Before the bellboy's memory, Micah won't leave through the revolving door either: somebody in the lobby saw
   her go.
 - **Puzzle 2 - Service lift maze:** after the bribe, the bellboy explains that the staff cage runs a maze of
@@ -128,6 +131,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   the inventory with Eleanor's vial of Mrs. Stewart's Bluing from the brass box to dye the carnation blue (the
   vial is used up). The sidewalk shelf only holds pots and a watering can. Use the blue carnation on the grille: the hatch opens and Micah is let
   through the cold room into the speakeasy. Afterwards the door opens for him directly.
+- The notepad page for the front is *Rizzo's Flowers*; it names the Blue Lantern only once the brass box (and its
+  matchbook) is open.
 - **Puzzle 16 - Water flower (optional):** use Eleanor's water flower on the white carnations' bucket. It
   swells and opens into a pink paper flower with **MOONSHINE** written along the petals: the Blue Lantern's
   password (flag `knows_password`; the flower stays in the bucket). Used anywhere else, Micah notes that it wants
@@ -145,7 +150,9 @@ described here (other verbs, flavour lines) is left to the implementation.
   bribe. Playthrough and film mode take the password; AutoPlay covers the bribe.
   Micah starts with $22, enough for the bellboy's two $1 payments and Sal's $10. The cash remains in his inventory:
   $21 after the bellboy's first dollar, $20 after the second and $10 after Sal (still $20 with the password). Repeated conversations never charge either bribe again.
-  If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene.
+  If he doesn't cooperate, or makes fun of Sal, he is thrown out and moves directly to the next scene. Micah hasn't
+  heard the bartender's name then, so the alley thought says "Now the bartender wants his turn." ("Now Tony wants
+  his turn." once Micah has asked Tony about Eleanor).
 - Until Sal lets him in, Micah can still try to walk past him to the bar: when he crosses the curtain line Sal
   steps in front of him and the password conversation starts. Talking to Sal directly starts it as well. If
   Micah leaves the conversation without paying, Sal walks him back to the door.
@@ -349,7 +356,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
    Tribune morgue shows the call was made). Sal stays out of her way: the doorman's interception is off.
 3. **Convent corridor, arrival.** Sister Agatha (the Mother Superior) first takes her for another of the girls who
    come to the door at night; then she knows the face and the perfume and calls her "a Jezebel from that
-   hideous Club". Eleanor's replies (the Club, the old man, what she wants) are remembered for the night.
+   hideous Club". Eleanor's reply (she is here to hide, "Jezebel was a queen", or silence with lowered eyes) is
+   remembered for the night: Agatha brings it up on her night visit.
 4. **Convent cell, that night.** She walks in and sets her bag down in front of the nightstand
    (`interlude_bag_left`). Hand on the bag (the `bag` hotspot, shown once it is down): she opens it, takes out her
    comb and little mirror and combs her hair (`eleanor_comb`); Hand on the bed or the nightstand only points her to
@@ -605,7 +613,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
 - On repeat visits, Caleb offers Micah a cross pendant if he originally left the wedding ring in the office.
   If he originally took the ring, Caleb does not offer the cross until Act 3. Later ring pickup does not change this timing.
 - Micah can accept or refuse; acceptance is saved and gives him the pendant. Caleb offers it again on every eligible
-  return after refusal, but never during the first confession or after acceptance.
+  return after refusal, but never during the first confession or after acceptance. After a refusal (`cross_refused`)
+  the offer opens with "I asked you once already. I'm asking again, brother." instead of repeating itself.
 - Micah will have to ask his brother about the Club. The brother will be reluctant, and Micah will have to press.
   Micah has a concrete lead on his brother from Eleanor's story at the motel: Tony told her Father Caleb drives
   girls up to the convent after dark, and that's the one door the Club won't knock on. Caleb first brushes it off
@@ -853,7 +862,9 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
   Another night like that one." Then: "Rose and Tommy ought to be in my heart. Eleanor's there instead.
   And God help me, I don't want to let her go." His motive is lust, conflicting with repentance and returning home.
 - He sits up and pushes himself to standing before the choice, with the same staged recovery as the street.
-- Again, his thoughts will appear as narrating voice, saying what is he doing.
+- Again, his thoughts will appear as narrating voice, saying what is he doing. "She told me to go home" only if he
+  did nothing on the stage (`eleanor_said_go_home`), the one choice where Eleanor says it; otherwise "She stood up
+  there like she belonged to them."
 - At this point, the player can have two choices: keep going for Eleanor, or giving up. Giving up is offered only if
   Micah carries his wedding ring or insisted for forgiveness with Rose (at least three appeals, `rose_wait`);
   otherwise he can only keep going.
@@ -877,7 +888,8 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Keep the original dismissal: "The convent's done with me. Caleb would sooner pray than talk.
   The cops are on somebody's payroll."
 - Keep the reminder: "Before I go: my wedding ring, and Caleb's door. Last chances to remember who I'm supposed
-  to be coming home to."
+  to be coming home to." If he already took the ring in Act 2, only Caleb's door is left: "Before I go: Caleb's
+  door. Last chance to remember who I'm supposed to be coming home to."
 - Leaving the office offers a choice: visit Caleb or continue to the Blue Lantern.
 - The Act 3 church visit includes Caleb's counsel and the cross offer (regardless of the original ring decision), unless
   already accepted. It is one-way: whether Micah accepts or refuses, he goes straight on from the church to the Blue
@@ -1204,6 +1216,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 - Micah and Eleanor seat at a table, one in front of the other, they talk, and Micah says that he maintained her out of
   jail, and she answers that she's grateful, but she has to move forward, and that she will return to Harrington son.
 - In this case, the journal ends with Micah hanging himself, the last entry is a goodbye letter for his wife and son.
+  Eleanor came only that once, before going back to Theodore; she told him the rest across the parlour table.
 
 #### Option 5 - Prison - With brother
 
@@ -1379,14 +1392,15 @@ journal back in the trunk. Every ending but 7 and 14 has the "The next morning" 
 after Eleanor's escape with Caleb, whose scene at the city's edge comes between the cut to black and the attic.)
 
 Every last entry also says where the Second Interlude's pages came from, answering Daniel's "Not sure that's
-Micah's hand", and Daniel closes on it ("So that's whose hand it was." / "So he never really knew."):
+Micah's hand". Daniel usually closes on it ("So that's whose hand it was." / "So he never really knew."); in
+endings 2 and 4 Micah's own words say it, and endings 13 and 14 use their own variants:
 
 | Ending | Who wrote the Second Interlude, and from what |
 |---|---|
 | 1 | Micah: Caleb passed it on; she came to Holy Name months later and asked him to (after Eleanor's escape with Caleb: she told Caleb the night he got her out, and asked him to pass it on). |
 | 2 | Micah: she told him on the road. |
 | 3 | Micah: what the Club's men said in court (she never testified, whether she lived or not). |
-| 4 | Micah: she told him across the parlour table. |
+| 4 | Micah: she told him across the parlour table, the one time she came. |
 | 5, 6 | Caleb's note: he heard it from her after the trial. |
 | 7 | Caleb: what the Club's men said in court; or, if Micah shot only himself, she told him after the funeral. |
 | 8 | Micah: a letter from her, no return address: at Rose's house if Tony was never shot, sent on downstate by Caleb if Tony survived the shoulder shot, or to Joliet if Micah killed Tony. |

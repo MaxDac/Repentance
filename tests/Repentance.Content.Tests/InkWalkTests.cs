@@ -299,20 +299,83 @@ public class InkWalkTests
     [InlineData("alley", "asked_tony_eleanor", "She's hot stuff", "All I came in for")]
     [InlineData("caleb_warn", "caleb_warned", "I said my piece, Micah.", "Sister Agatha telephoned")]
     [InlineData("caleb_last", "caleb_last_said", "I'm already praying.", "France")]
+    [InlineData("caleb_cross", "", "CALEB: Take this cross, brother.", "asked you once")]
+    [InlineData("caleb_cross", "cross_refused", "CALEB: I asked you once already. I'm asking again, brother.", "Take this cross")]
+    [InlineData("epilogue", "ending_4", "Eleanor came once, before she went back to him.", "comes on Sundays")]
+    [InlineData("epilogue", "ending_8", "A letter came to my room on Halsted Street today.", "downstate")]
+    [InlineData("epilogue", "ending_8,rose_forgives", "A letter came to Rose's house today.", "Halsted Street")]
+    [InlineData("epilogue", "ending_8,shot_bartender,rose_forgives", "sent on by Caleb to the house downstate", "Rose's house")]
+    [InlineData("epilogue", "ending_8,shot_bartender", "I left Chicago alone", "Halsted Street")]
+    [InlineData("epilogue", "ending_8,killed_tony,shot_bartender", "A letter came to Joliet today, where I serve my time for Tony.", "downstate")]
+    [InlineData("epilogue", "ending_9", "Micah lives alone now, in a room on Halsted Street.", "downstate")]
+    [InlineData("epilogue", "ending_9,rose_forgives", "goes to Mass with his wife. Eleanor", "Halsted Street")]
+    [InlineData("epilogue", "ending_9,shot_bartender,rose_forgives", "goes to Mass with his wife, in a town downstate", "Halsted Street")]
+    [InlineData("epilogue", "ending_9,shot_bartender", "Micah lives alone now, in a town downstate.", "Halsted Street")]
+    [InlineData("epilogue", "ending_9,killed_tony,shot_bartender", "he walked in and gave himself up the morning after", "downstate")]
     public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)
     {
+        var (text, walk) = Play(knot, flags, "", "");
+        Assert.Empty(walk.Errors);
+        Assert.Contains(expected, text);
+        if (unexpected != null) Assert.DoesNotContain(unexpected, text);
+    }
+
+    /// <summary>
+    /// Lines and flags that follow a chosen answer: only "(Do nothing.)" on the Club stage has Eleanor tell Micah to go
+    /// home (the church steps thought remembers it), a refused cross is re-offered as a second asking, and the bellboy's
+    /// first dollar doesn't let Micah know Eleanor had a room.
+    /// </summary>
+    [Theory]
+    [InlineData("club_caught", "", "", "(Do nothing.)", "Go home, Mr. Jones.", null, "eleanor_said_go_home", null)]
+    [InlineData("club_caught", "", "", "(Draw the revolver.)", "I am where I belong", "Go home", null, "eleanor_said_go_home")]
+    [InlineData("club_caught", "", "", "Our Father...", "This is ruining the mood.", "Go home", null, "eleanor_said_go_home")]
+    [InlineData("caleb_cross", "", "", "(Refuse the cross pendant.)", "I'll ask again when you come back.", null, "cross_refused", "took_cross")]
+    [InlineData("caleb_cross", "visit_caleb_act3", "", "(Refuse the cross pendant.)", "Then I'll pray you don't need it.", null, "cross_refused", "took_cross")]
+    [InlineData("caleb_cross", "cross_refused,killed_tony", "", "(Accept the cross pendant.)", "I'm asking again", "Take this cross", "took_cross", null)]
+    [InlineData("bellboy_tip", "", "dollar", "", "If she had a room here, I want a look.", "The one she had Tuesday", "knows_lantern", null)]
+    public void ChosenLinesFollowTheDecisions(string knot, string flags, string items, string prefer, string expected, string? unexpected,
+        string? setFlag, string? unsetFlag)
+    {
+        var (text, walk) = Play(knot, flags, items, prefer);
+        Assert.Empty(walk.Errors);
+        Assert.Contains(expected, text);
+        if (unexpected != null) Assert.DoesNotContain(unexpected, text);
+        if (setFlag != null) Assert.Contains(setFlag, walk.World.Flags);
+        if (unsetFlag != null) Assert.DoesNotContain(unsetFlag, walk.World.Flags);
+    }
+
+    /// <summary>The Club door: asking about the bonfires first, the MOC doesn't call Micah by a name he hasn't given yet.</summary>
+    [Fact]
+    public void Moc_LearnsMicahsNameBeforeUsingIt()
+    {
+        var (text, walk) = Play("moc", "", "", "Do the bonfires burn here too?|A library book.");
+        Assert.Empty(walk.Errors);
+        int named = text.IndexOf("MICAH: Jones. Micah Jones.", StringComparison.Ordinal);
+        Assert.True(named >= 0, "Micah never gives his name");
+        Assert.True(text.IndexOf("Mr. Jones", StringComparison.Ordinal) > named, "the MOC says \"Mr. Jones\" before Micah gives his name");
+    }
+
+    /// <summary>
+    /// Runs a knot to its end under fixed flags and items, taking the first offered choice that starts with one of the
+    /// '|'-separated preferences (in order), else the first choice.
+    /// </summary>
+    private static (string Text, Walk Walk) Play(string knot, string flags, string items, string prefer)
+    {
         var set = flags.Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
-        var walk = new Walk { World = new World { Name = "fixed", Flag = set.Contains, Item = _ => false } };
+        var world = new World { Name = "fixed", Flag = set.Contains, Item = _ => false };
+        world.Items.UnionWith(items.Split(',', StringSplitOptions.RemoveEmptyEntries));
+        var preferred = prefer.Split('|', StringSplitOptions.RemoveEmptyEntries);
+        var walk = new Walk { World = world };
         walk.Story.ChoosePathString(knot);
         var text = new System.Text.StringBuilder();
         for (int guard = 0; guard < 50; guard++)
         {
             while (walk.Story.canContinue) text.Append(walk.Story.Continue());
-            if (walk.Story.currentChoices.Count == 0) break;
-            walk.Story.ChooseChoiceIndex(0);
+            var choices = walk.Story.currentChoices;
+            if (choices.Count == 0) break;
+            int pick = preferred.Select(p => choices.FindIndex(c => c.text.StartsWith(p, StringComparison.Ordinal))).FirstOrDefault(i => i >= 0, 0);
+            walk.Story.ChooseChoiceIndex(pick);
         }
-        Assert.Empty(walk.Errors);
-        Assert.Contains(expected, text.ToString());
-        if (unexpected != null) Assert.DoesNotContain(unexpected, text.ToString());
+        return (text.ToString(), walk);
     }
 }

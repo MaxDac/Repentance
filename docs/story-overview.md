@@ -184,7 +184,7 @@ From here the story follows Walkthrough.md:
    visits (Micah killed Tony and turned himself in); 13 out of Chicago alone, after the alarm; 14 shot in the kitchen,
    the last pages written by Caleb; 15 Sunday visits: Rose refuses the coffee, but lets Micah take Tommy to Mass
    on Sundays. Every last entry says who wrote Eleanor's pages. Each ends Act Three; the next
-   morning (no caption after endings 7 and 14) Daniel keeps the journal for Leo if Micah returned to Rose or to the
+   morning (no caption after ending 7, or after ending 14 unless Eleanor's escape with Caleb follows) Daniel keeps the journal for Leo if Micah returned to Rose or to the
    faith (endings 1, 6, 12 and 15), or in endings 8-11, saying "Maybe Leo would like to read it some day." After endings 7
    and 14 he respects Caleb's last pages and puts it back. Otherwise, he puts it back in the trunk. *The End.*
 

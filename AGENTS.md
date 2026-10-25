@@ -22,8 +22,8 @@ Godot 4.7 .NET / C# / Ink. Shared rules for Copilot and Claude Code (`CLAUDE.md`
    implementation (choices `0 None (Recommended)` to `5 Full`, each with its suites; a typed list of groups or
    suites, e.g. `Basic, Story`, runs only those). Record the answer in the plan and run it before the PR; that
    answer is the explicit request.
-2. A planning session that implements its plan ends with a PR, unasked: commit, push, watch checks and fix until
-   `ci-ok` is green (`pr-and-ci`). Diagnose failures from the CI logs and artifacts, filtered to the failing lines;
+2. Every session that changes the repository ends with a PR, unasked, whether or not it planned first: commit, push,
+   open the PR, watch checks and fix until `ci-ok` is green (`pr-and-ci`). Diagnose failures from the CI logs and artifacts, filtered to the failing lines;
    do not reproduce them locally unless asked. Never merge; never call work done with red, pending or missing checks.
 3. Before opening a PR, list the open PRs. If any title does not start with `[NoStack]`, stack on them: rebase onto
    the top of that stack and target its branch, not `main`. Then register it in the native GitHub stack with `gh api`

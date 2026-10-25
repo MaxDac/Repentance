@@ -160,15 +160,6 @@ public partial class Church : Room
             case ("doors", Verb.Walk or Verb.Hand) when State.HasFlag("club_out"):
                 await Game.ChangeRoom("chicago_map", "start");
                 return true;
-            case ("caleb", Verb.Talk):
-                await Talk("caleb");
-                return true;
-            case ("caleb", Verb.UseItem) when Shows(item, "photo", "eleanor"):
-                await Say("caleb", "Eleanor. She sat in that pew for two nights before she said a word. Is she safe?");
-                return true;
-            case ("caleb", Verb.Hand):
-                await Say("The last time I touched my brother it was with a fist. Not tonight.");
-                return true;
             case ("confessional", Verb.Walk or Verb.Hand):
                 await Say("Not tonight. It'd take more than one Saturday to get through my list.");
                 return true;
