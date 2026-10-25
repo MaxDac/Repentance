@@ -96,7 +96,10 @@ class OfficeStormTests(unittest.TestCase):
                 self.assertGreater(np.count_nonzero(changed & ~covered), 100)
                 pixels = np.array(expected).astype(int)
                 eyes = (pixels[..., 0] > pixels[..., 1] + 30) & (pixels[..., 0] > pixels[..., 2] + 20)
-                self.assertGreaterEqual(np.count_nonzero(eyes & ~covered), 4)
+                # Both eyes clear Micah's head: uncovered red pixels on two sides of a gap.
+                _, eye_xs = np.where(eyes & ~covered)
+                self.assertGreaterEqual(eye_xs.size, 2)
+                self.assertGreaterEqual(np.ptp(eye_xs), 3)
                 # Frame, sash and sill are still in front of the painted apparition.
                 for box in ((62, 0, 65, glass.height), (0, 9, glass.width, 12),
                             (0, glass.height - 5, glass.width, glass.height)):
