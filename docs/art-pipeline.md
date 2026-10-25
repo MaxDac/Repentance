@@ -89,6 +89,13 @@ in-between, kneeling and final prone frame.
 - After changing a room painter, regenerate its state overlays and check the printed crop origins against the node
   positions in the scene. Moving a crop without its node misaligns the object.
 - Locked crops (attic bulb, library clock, motel curtain, Harrington road window) must not move.
+- The office storm's two demonic reflections are painted around `STORM_REFLECTION_X`, aligned with real Micah at
+  the scene's window entry. Keep their window crop origins fixed and their layer behind the player, so his figure
+  partially obscures the apparition while its horns and shoulders remain visible. Scale the apparition to 92% around
+  that centerline and the sill, lift it four pixels to keep its eyes visible above Micah's head, and composite it at
+  45% opacity so the window remains visible through the fleeting image. In the first flash only, offset Micah's
+  painted reflection left inside the apparition so his reflected face is not hidden by his real figure; the demon's
+  arm and shoulder claw move with it so they still grip him, while its head and eyes stay put.
 - The mansion alarm's tie uses the fixed `BELL_TIE_BOX` crop at `(337, 69)`, matching its scene node even when the
   knot or tails shrink. Keep the gong at 18-20 pixels wide and the hanging tie ends within a six-pixel span;
   regenerate every exterior state together so the smaller alarm and its palette agree.
