@@ -1172,7 +1172,7 @@ BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
 THOUGHT: The Gold Coast. The kitchen door. The delivery boys' key.
-THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on State Street does. By tomorrow, so will everybody he pours for.
+THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
 THOUGHT: The gun's still warm in my hand, and the street's right there.
 * [(Leave him bleeding, and go.)]
     THOUGHT: I shot a man tonight. My hand doesn't shake. That's what scares me.
