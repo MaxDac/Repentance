@@ -161,7 +161,9 @@ public partial class Speakeasy : Room
                 await Say("Testing... one, two... It's not plugged in. Thank God.");
                 return true;
             case ("shelves", Verb.Hand):
-                await Say("Tony would break my arm. Then charge me for the bottle.");
+                await Say(State.HasFlag("alley_done")
+                    ? "Tony would break my arm. Then charge me for the bottle."
+                    : "The bartender would break my arm. Then charge me for the bottle.");
                 return true;
             case ("crates", Verb.Hand or Verb.Kick):
                 await Say("Nailed shut. 'Maple syrup', my foot. That's Canadian whisky.");

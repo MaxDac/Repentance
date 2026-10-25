@@ -101,7 +101,7 @@ Also offered: "(Leave her.)": Micah escapes alone (endings 3 or 5).
 |---|---|---|
 | Positive | "Nothing. Come or stay, it's yours to decide. But decide it yourself, for once." | "Nobody ever asked me. Not once. Not him, not Theodore, not the nuns." |
 | Clumsy | "Theodore paid me to find you. I'm only finishing the job." | "So I'm a job. Twenty dollars a day, and expenses." |
-| Rational | "Every time I've seen you, you've said you can't go back there. Now you don't have to." | "I did say it. I say a lot of things, to a lot of men. That one I meant." |
+| Rational | "The first night I met you, you said you couldn't go back there. Now you don't have to." | "I did say it. I say a lot of things, to a lot of men. That one I meant." |
 | Possessive | "You. I've wanted you since the first time I saw your photograph." | "There it is. No speeches. Just wanting." / "At least you're honest about it. They never were." |
 
 Also offered: "(Leave her.)" and "(Shoot Eleanor.)" (`shot_eleanor`, ending 7).

@@ -317,7 +317,8 @@ scene told after Micah ran or died). Daniel keeps the journal for Leo after endi
 It rains on every 1927 exterior and behind every window, building from a steady rain in Act One to a downpour in
 Act Three (`RainWeather`). The present day (attic, bedroom) and the library's sunny midday are dry, and so are the
 saving moments: Rose's street (always), the convent cell once Eleanor refuses Agatha, the prison when Micah turned
-himself in (6) or Eleanor confesses (9), and the city's edge where Eleanor walks free (8). Rooms opt out with
+himself in (6, 12) or Eleanor confesses (9), and the city's edge where Eleanor walks free (8, and with Caleb after
+her escape). Rooms opt out with
 `Room.RainStopped`; `RainTests` lists every dry room with its reason.
 
 ## Story notes

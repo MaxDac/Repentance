@@ -302,6 +302,10 @@ public class StoryIntegrityTests
     [InlineData("coal door", "the mansion has only a coal hatch, too small for anyone over nine")]
     [InlineData("Drake's", "the hotel with the service cage is the Aurelian")]
     [InlineData("renewed our vows", "there was no 1927 rite for renewing vows; Rose and Micah say their promises again, with Caleb's blessing")]
+    [InlineData("North Shore", "the Harrington house is on the Gold Coast")]
+    [InlineData("Club crowd", "Micah first hears of the Club from Tony in Act Two; the Act One safe thought says the society crowd")]
+    [InlineData("Every time I've seen you", "Eleanor said she couldn't go back there once, on the fire escape; at the Club she says she is where she belongs")]
+    [InlineData("Eleanor's photograph to a room full of masks", "the photograph is never in the Act Two or Three kit; the Club lounge line answers the notepad sketch")]
     public void TimelineWordingStaysConsistent(string stale, string reason)
     {
         var scenes = Directory.EnumerateFiles(Path.Combine(Root.Value, "scenes"), "*.tscn", SearchOption.AllDirectories)
@@ -329,12 +333,20 @@ public class StoryIntegrityTests
         Assert.DoesNotContain("If Micah killed Tony, the \"Amen.\" is left off", walkthrough);
         Assert.DoesNotContain("two pasted halves aren't needed", walkthrough);
         Assert.Contains("Three nights after the Club, Caleb got her out", walkthrough);
+        Assert.DoesNotContain("Through the front tonight", walkthrough);
+        Assert.Contains("Not back out. Not tonight. Eleanor is somewhere past that inner door.", walkthrough);
+        Assert.DoesNotContain("dreesed", walkthrough);
+        Assert.Contains("sent on by Caleb to the house downstate if Tony survived the shoulder shot and Rose forgave him", walkthrough);
+        Assert.Contains("Rose wouldn't have him back. But she puts their boy on the train to him once a month.", walkthrough);
         var overview = Flat("docs/story-overview.md");
         Assert.Contains("Micah's papers handed in with his confession to the grand jury in ending 12", overview);
         Assert.Contains("endings 8, 10, 11, and endings 1 and 15 with Caleb", overview);
+        Assert.Contains("himself in (6, 12) or Eleanor confesses (9)", overview);
         var persuasion = Flat("docs/eleanor-persuasion.md");
         Assert.Contains("it reads neither `eleanor_refused` nor the score", persuasion);
         Assert.DoesNotContain("only reads the flags `eleanor_convinced` / `eleanor_refused`", persuasion);
+        Assert.Contains("The first night I met you, you said you couldn't go back there. Now you don't have to.", persuasion);
+        Assert.Contains("The first night I met you, you said you couldn't go back there. Now you don't have to.", InkText);
     }
 
     [Fact]

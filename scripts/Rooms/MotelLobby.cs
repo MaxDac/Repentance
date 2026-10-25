@@ -59,7 +59,9 @@ public partial class MotelLobby : Room
                 await Think("He looked at the photograph for half a second, then he looked at the stairs. That was answer enough.");
                 return true;
             case ("clerk", Verb.UseItem) when item == "revolver":
-                await Say("Pull a gun in a joint that pays Moretti, and I'll be in the river by Friday. Him too.");
+                await Say(State.HasFlag("clerk_talked")
+                    ? "Pull a gun in a joint that pays Moretti, and I'll be in the river by Friday. Him too."
+                    : "Pull a gun on a night clerk for a look upstairs? That's how a man ends up in the morning paper.");
                 return true;
             case ("clerk", Verb.Kick):
                 await Say("He's a scared little man behind a counter. Kicking him won't make him braver.");

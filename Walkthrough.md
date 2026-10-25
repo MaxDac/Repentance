@@ -743,7 +743,8 @@ Micah's things are stashed and come back when the interlude ends, and none of he
   and you'll have to save to the state of the game whether the player will decide to go to the Church and talk
   with Micah's brother once more.
 - Choosing the Club puts Micah, masked, in the Club vestibule; there is no going back to the map from there. The
-  back door on the street is refused too ("Through the front tonight, with the procession.").
+  vestibule's street door is refused ("Not back out. Not tonight. Eleanor is somewhere past that inner door."), and
+  so is the hall's ("I didn't climb a fire escape to stop at the hat check.").
 
 #### Club vestibule
 
@@ -828,7 +829,7 @@ satchel for what she finds there, no **N**, Micah's things stashed until the int
 #### Club
 
 - Same scene as the end of Act 2, with the close-up panel of Eleanor framed over the stage again.
-- The stag-masked leader turns to Micah, dreesed as himsel "Are you satisfied, now, mister Jones?"
+- The stag-masked leader turns to Micah, still in the Club's mask and cloak: "Are you satisfied, now, mister Jones?"
 - At this point, everyone turns to him.
 - The close-up panel is removed. Before anything else happens, the stag takes his mask off and pushes back his cowl
   in front of everyone: he is Harrington senior, the old man whose portrait Micah saw in the LaSalle Street office
@@ -1270,7 +1271,9 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   running, still in the Club's car at the gate), walking out of the city. No car, no Micah, no
   newspaper.
 - Micah keeps the journal; the last entry is his, copied from a letter she sent him at Rose's, without a return
-  address (if Rose refused him, to his room on Halsted Street; he shows it to Rose on a Sunday, bringing Tommy home).
+  address (if Rose refused him, to his room on Halsted Street; he shows it to Rose on a Sunday, bringing Tommy home;
+  if he also shot Tony and left him alive, Caleb sends it on to his room downstate, and Micah sends it up to Rose in
+  Tommy's coat pocket on the train; she writes back that she read it and kept it).
   Before leaving the city she mailed the old man's Thursday book to the Tribune; the letter says the paper
   printed it, and the Club's Thursdays ended.
 
@@ -1280,7 +1283,9 @@ returning to bed in her coda. Endings 2-7 need her to have given in at least onc
   first.
 - The prison parlour: Eleanor in an inmate's jumpsuit, seated where Micah sits (new sprite), Caleb across the
   table. She confesses her life's crimes and asks for Micah: "He's with his wife now." (if Rose refused him: "He's
-  alone. Rose wouldn't have him back. But he has his boy on Sundays.") "It's better this way."
+  alone. Rose wouldn't have him back. But he has his boy on Sundays."; if she refused him and he shot Tony: "He's
+  alone, downstate. Rose wouldn't have him back. But she puts their boy on the train to him once a month.") "It's
+  better this way."
   She was afraid of him and wanted him dead, and can't tell which held the candlestick; Caleb tells her to be sorry
   for every part of her that wanted him dead, she is, for all of it, and he absolves her (see [Theology](docs/theology.md)). At her
   own trial she named the Club and the girls in open court; she tells Caleb so, which keeps the exposure public
@@ -1375,8 +1380,9 @@ Tony knows who shot him, and he's the mob. Alive, he follows Micah; dead, Micah 
 | 15 | Micah leaves Chicago alone; Rose puts Tommy on the train downstate once a month. | Not possible. |
 
 In endings 8 and 9 after Rose's refusal, "his wife" becomes his room and his Sundays with Tommy: the letter reaches
-his room in Chicago (or downstate, sent on by Caleb, if Tony survived), and Caleb writes that Micah takes his son to
-Mass.
+his room in Chicago (or downstate, sent on by Caleb, if Tony survived the shoulder shot), and Caleb writes that Micah
+takes his son to Mass. Downstate, Rose puts Tommy on the train to him once a month, and in ending 8 Micah sends the
+letter up to her with Tommy.
 
 After the warning shot (endings 13 and 14, and any other ending reached by spotting the alarm) Tony wasn't hurt, so
 none of the revenge lines play.
@@ -1403,7 +1409,7 @@ endings 2 and 4 Micah's own words say it, and endings 13 and 14 use their own va
 | 4 | Micah: she told him across the parlour table, the one time she came. |
 | 5, 6 | Caleb's note: he heard it from her after the trial. |
 | 7 | Caleb: what the Club's men said in court; or, if Micah shot only himself, she told him after the funeral. |
-| 8 | Micah: a letter from her, no return address: at Rose's house if Tony was never shot, sent on downstate by Caleb if Tony survived the shoulder shot, or to Joliet if Micah killed Tony. |
+| 8 | Micah: a letter from her, no return address: to Joliet if Micah killed Tony; sent on by Caleb to the house downstate if Tony survived the shoulder shot and Rose forgave him, or to his room downstate if Tony survived the shoulder shot and she refused; at Rose's house if she forgave him and Tony was never shot; otherwise to his room on Halsted Street. |
 | 9 | Caleb: what she told the court, and told him again plainly afterwards, at her asking (never the confession itself). |
 | 10 | Micah: she told him on the road, before she got out of the car. |
 | 11 | Micah: she told him across the parlour table, the one time she came. |
