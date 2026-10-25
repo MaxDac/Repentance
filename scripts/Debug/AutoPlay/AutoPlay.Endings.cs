@@ -1194,7 +1194,7 @@ public partial class AutoPlay
 
     /// <summary>Clumsy, possessive, possessive, rational: exactly 10, the one clumsy line forgiven.</summary>
     private static readonly string[] OneClumsyForgiven =
-        { "They'll pin it on you", "Forget Theodore", "Then be mine instead", "can't go back there" };
+        { "They'll pin it on you", "Forget Theodore", "Then be mine instead", "couldn't go back there" };
 
     /// <summary>Clumsy, clumsy, possessive, possessive: 8, two clumsy lines are too many.</summary>
     private static readonly string[] TwoClumsy =

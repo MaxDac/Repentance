@@ -312,6 +312,14 @@ public class InkWalkTests
     [InlineData("epilogue", "ending_9,shot_bartender,rose_forgives", "goes to Mass with his wife, in a town downstate", "Halsted Street")]
     [InlineData("epilogue", "ending_9,shot_bartender", "Micah lives alone now, in a town downstate.", "Halsted Street")]
     [InlineData("epilogue", "ending_9,killed_tony,shot_bartender", "he walked in and gave himself up the morning after", "downstate")]
+    [InlineData("epilogue", "ending_8,shot_bartender", "I sent the letter up to her with Tommy on the train", "brought Tommy home")]
+    [InlineData("epilogue", "ending_8", "I gave her the letter the next time I brought Tommy home.", "on the train")]
+    [InlineData("prison_eleanor_caleb", "ending_9,shot_bartender", "But she puts their boy on the train to him once a month.", "on Sundays")]
+    [InlineData("prison_eleanor_caleb", "ending_9", "But he has his boy on Sundays.", "downstate")]
+    [InlineData("prison_eleanor_caleb", "ending_9,shot_bartender,rose_forgives", "CALEB: He's with his wife now.", "once a month")]
+    [InlineData("caleb_tony", "killed_tony,shot_bartender,visit_caleb_act3", "CALEB: Micah? Back again, and past midnight.", null)]
+    [InlineData("caleb_tony", "killed_tony,shot_bartender", "CALEB: Micah? It's past midnight.", "Back again")]
+    [InlineData("ending_eleanor_alone", "", "The sky over the Gold Coast still glowed orange", "North Shore")]
     public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)
     {
         var (text, walk) = Play(knot, flags, "", "");

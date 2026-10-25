@@ -65,7 +65,9 @@ public partial class MotelAlley : Room
                 await HookLadder();
                 return true;
             case ("drop_ladder" or "fire_escape", Verb.UseItem) when item == "revolver":
-                await Say("Shoot a fire escape in a mob joint at midnight. That'd make me real popular.");
+                await Say(State.HasFlag("clerk_talked")
+                    ? "Shoot a fire escape in a mob joint at midnight. That'd make me real popular."
+                    : "Shoot a fire escape at midnight. That'd make me real popular.");
                 return true;
             case ("drop_ladder", Verb.Hand or Verb.Walk):
             case ("fire_escape", Verb.Hand or Verb.Walk):
@@ -83,7 +85,9 @@ public partial class MotelAlley : Room
                 await Say("Wet newspapers and fish heads. Nothing worth the smell.");
                 return true;
             case ("trash_cans", Verb.Kick):
-                await Say("And have the clerk come out to see who's rattling his cans? He's scared enough already.");
+                await Say(State.HasFlag("clerk_talked")
+                    ? "And have the clerk come out to see who's rattling his cans? He's scared enough already."
+                    : "And bring the whole flophouse to the window to see who's rattling the cans? No thanks.");
                 return true;
             case ("window", Verb.Hand or Verb.Walk):
                 await Say("A first floor window. From down here it may as well be the moon.");

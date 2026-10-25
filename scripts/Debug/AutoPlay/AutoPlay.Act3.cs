@@ -201,6 +201,10 @@ public partial class AutoPlay
         await Until(() => game.Music.Playing);
         Check(game.Music.Playing, "the strings are sounding in the lounge");
         await Shot("club_lounge");
+        var masks = await Spoken(async () => { await game.Perform(Verb.UseItem, "guest", Notes.ItemId); await WaitIdle(game); });
+        Check(masks.Any(l => l.StartsWith("Show Eleanor's face around a room full of masks?")) && !masks.Any(l => l.Contains("photograph")) &&
+            game.Room?.Name == "ClubLounge" && gs.HasFlag("masked"),
+            "the notepad sketch on a guest: no photograph Micah isn't carrying, and he stays masked in the lounge");
         var stage = game.Perform(Verb.Walk, "stage_exit");
         await Until(() => game.Room?.Name == "ClubStage");
         await Until(() => game.Hud.InsetVisible);

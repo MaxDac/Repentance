@@ -177,9 +177,11 @@ public partial class AutoPlay
         int safeOpens = game.Sfx.Count(Sound.SafeOpen);
         await CancelPuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe, "safe_open", "safe_dial");
         Check(game.Sfx.Count(Sound.SafeOpen) == safeOpens, "a dial left unsolved stays quiet");
-        await SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
-            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 4), ("n2", 7) }, "safe_dial");
+        var safeLines = await Spoken(() => SolvePuzzle(() => game.Perform(Verb.UseItem, "safe", "combination"), PuzzleKind.Safe,
+            new[] { ("t0", 1), ("n0", 2), ("d1", 1), ("t1", 4), ("n2", 7) }, "safe_dial"));
         Check(gs.HasFlag("safe_open") && game.Sfx.Count(Sound.SafeOpen) == safeOpens + 1, "opened the safe, heard it open");
+        Check(safeLines.Any(l => l.Contains("runs with the society crowd")) && !safeLines.Any(l => l.Contains("Club")),
+            "in Act One the safe thought doesn't name the Club, which Micah has yet to hear of");
         await Shot("eleanor_safe");
         await game.Perform(Verb.Hand, "brass_box");
         Check(gs.HasItem("brass_box"), "took the brass box");
@@ -267,6 +269,9 @@ public partial class AutoPlay
         Check(game.Room?.Name == "Speakeasy" && gs.HasFlag("sal_passed"), "talking to Sal directly still works once inside");
         Check(CashRules.Balance(gs.HasFlag) == 10 && gs.HasItem("dollar"), "Sal costs ten dollars and leaves ten");
         await Shot("speakeasy_inside");
+        var shelves = await Spoken(async () => { await game.Perform(Verb.Hand, "shelves"); await WaitIdle(game); });
+        Check(shelves.Any(l => l.Contains("The bartender would break my arm.")) && !shelves.Any(l => l.Contains("Tony")),
+            "before the alley nobody has named Tony: the bottle shelves say the bartender");
         // Tony has Sal throw Micah out only once he has asked about Eleanor: leaving at once keeps him at the bar
         var preferBefore = _prefer;
         _prefer = new[] { "(Leave)" };
@@ -531,6 +536,11 @@ public partial class AutoPlay
         await Shot("motel_alley");
         await ReloadCheckpoint("motel_alley");
         Check(game.Room is Rooms.MotelAlley && !game.Hud.SpeechVisible, "loading the alley does not replay the dead end");
+        var cans = await Spoken(async () => { await game.Perform(Verb.Kick, "trash_cans"); await WaitIdle(game); });
+        var shootLadder = await Spoken(async () => { await game.Perform(Verb.UseItem, "fire_escape", "revolver"); await WaitIdle(game); });
+        Check(cans.Any(l => l.Contains("the whole flophouse")) && !cans.Any(l => l.Contains("clerk")) &&
+            shootLadder.Any(l => l.StartsWith("Shoot a fire escape at midnight.")) && !shootLadder.Any(l => l.Contains("mob")),
+            "before the lobby the alley knows nothing of the clerk or whose joint this is");
 
         await game.Perform(Verb.UseItem, "drop_ladder", "dollar");
         await game.Perform(Verb.Hand, "drop_ladder");
@@ -543,6 +553,9 @@ public partial class AutoPlay
         Check(!gs.HasItem("umbrella"), "Micah won't take the clerk's umbrella before talking to him");
         await game.Perform(Verb.Walk, "stairs");
         Check(game.Room is Rooms.MotelLobby, "the clerk keeps Micah off the stairs");
+        var gunFirst = await Spoken(async () => { await game.Perform(Verb.UseItem, "clerk", "revolver"); await WaitIdle(game); });
+        Check(gunFirst.Any(l => l.Contains("on a night clerk")) && !gunFirst.Any(l => l.Contains("Moretti")),
+            "before the clerk talks, the gun line doesn't know the motel pays Moretti");
         var photoFirst = await Spoken(() => game.Perform(Verb.UseItem, "clerk", "photo"));
         Check(photoFirst.Contains("Never saw her.") && !photoFirst.Contains("I told you. I never saw nobody.") && !gs.HasFlag("clerk_talked"),
             "the photo before talking gets a first denial, not a repeat");
@@ -553,6 +566,8 @@ public partial class AutoPlay
         await clerkTalk;
         Check(game.Player.PoseName == null, "the photo goes back inside Micah's coat");
         Check(gs.HasFlag("clerk_talked") && game.Room is Rooms.MotelLobby, "the clerk refuses to let Micah upstairs");
+        var gunAfter = await Spoken(async () => { await game.Perform(Verb.UseItem, "clerk", "revolver"); await WaitIdle(game); });
+        Check(gunAfter.Any(l => l.Contains("a joint that pays Moretti")), "once the clerk has talked, Micah knows whose joint it is");
         await game.Perform(Verb.Hand, "umbrella");
         Check(gs.HasItem("umbrella") && gs.HasFlag("took_umbrella") && game.Room?.FindHotspot("umbrella")?.Active != true,
             "the clerk lets Micah take his umbrella");

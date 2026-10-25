@@ -1187,7 +1187,12 @@ THOUGHT: Nobody saw. Nobody but God, Caleb would say. Tonight that's one too man
 // urge it, never impose it), he asks him to walk to the police with him. Going on to the mansion first is the promise
 // the Our Father needs (Endings.CanSpareOldMan). See docs/theology.md.
 === caleb_tony ===
-CALEB: Micah? It's past midnight. What... There's blood on your cuff.
+{
+- has_flag("visit_caleb_act3"):
+    CALEB: Micah? Back again, and past midnight. What... There's blood on your cuff.
+- else:
+    CALEB: Micah? It's past midnight. What... There's blood on your cuff.
+}
 MICAH: It's Tony's. The bartender at the Blue Lantern. I shot him, Caleb. Twice.
 MICAH: The second time he was on his back in the rain, and he'd already told me everything. He knew my face. I told myself he'd send them after Rose and Tommy.
 CALEB: ...
@@ -1385,7 +1390,7 @@ ELEANOR: Leaving? To go where? There's no place in this city they can't find me.
 * [Theodore paid me to find you. I'm only finishing the job.]
     ~ persuade_score += PERSUADE_CLUMSY
     ELEANOR: So I'm a job. Twenty dollars a day, and expenses.
-* [Every time I've seen you, you've said you can't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
+* [The first night I met you, you said you couldn't go back there. Now you don't have to. #short: You said you can't go back there. Now you don't have to.]
     ~ persuade_score += PERSUADE_RATIONAL
     ELEANOR: I did say it. I say a lot of things, to a lot of men. That one I meant.
 * [You. I've wanted you since the first time I saw your photograph.]
@@ -1673,6 +1678,10 @@ ELEANOR: How is he? Micah.
     CALEB: He's with his wife now.
     ELEANOR: ...
     ELEANOR: It's better this way.
+- has_flag("shot_bartender"):
+    CALEB: He's alone, downstate. Rose wouldn't have him back. But she puts their boy on the train to him once a month.
+    ELEANOR: ...
+    ELEANOR: It's better this way.
 - else:
     CALEB: He's alone. Rose wouldn't have him back. But he has his boy on Sundays.
     ELEANOR: ...
@@ -1689,7 +1698,7 @@ THOUGHT: She said it was the first time anybody had raised a hand over her witho
 
 // Ending 8: Eleanor alone at the edge of the city, leaving it.
 === ending_eleanor_alone ===
-THOUGHT: The same night. The sky over the North Shore still glowed orange behind her, and the fire bells hadn't stopped.
+THOUGHT: The same night. The sky over the Gold Coast still glowed orange behind her, and the fire bells hadn't stopped.
 THOUGHT: At the gate stood the Club's car, the duffle she'd packed for running still on the back seat. In the dark she put on a white dress and her pearls, and left the sheet and the cook's coat in the ditch.
 ELEANOR: So this is where Chicago ends. Just runs out of streetlights.
 THOUGHT: The old man's Thursday book was in a brown envelope under her arm, addressed to the city desk of the Tribune. The first mailbox past the city limits would do.
@@ -1859,6 +1868,8 @@ DANIEL: The last entry. The handwriting's different. Shakier.
         DANIEL: "Rose knows. I passed her the letter across the visiting-room table. She read it twice, and folded it, and kept it."
     - has_flag("rose_forgives"):
         DANIEL: "Rose knows. She read the letter at the kitchen table, and folded it, and put the kettle on."
+    - has_flag("shot_bartender"):
+        DANIEL: "Rose knows. I sent the letter up to her with Tommy on the train, in his coat pocket. She wrote back two lines: she'd read it, and she'd kept it."
     - else:
         DANIEL: "Rose knows. I gave her the letter the next time I brought Tommy home. She read it on the doorstep, and folded it, and kept it."
     }

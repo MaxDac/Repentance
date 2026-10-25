@@ -132,7 +132,7 @@ public partial class EleanorRoom : Room
                 Game.Sfx.Play(Sound.SafeOpen);
                 State.SetFlag("safe_open");
                 await Say("Twelve apostles, forty days in the desert, and seven days of creation. The tumblers fell like dominoes.");
-                await Think("Now ain't that a pip. A swell doll who runs with the Club crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
+                await Think("Now ain't that a pip. A swell doll who runs with the society crowd, and she locks her secrets up with the Good Book. Strange, a dame like her bringin' Christ into it.");
                 await Say("Somebody's been at the dial since. Scratched it raw and never got the door open.");
                 return true;
             case ("safe", Verb.Hand):
