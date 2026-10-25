@@ -339,7 +339,9 @@ BELLBOY: Back door, Tuesday night, two big fellas either side of her. Nobody saw
     -> END
 }
 BELLBOY: Now you're speaking my language, mister.
-MICAH: One dollar. For your memory.
+CUE: show_photo
+MICAH: One dollar. For your memory of this lady.
+CUE: pocket_photo
 BELLBOY: The dame in the picture? Tuesday night. Late. I was out back having a smoke I ain't allowed to have.
 BELLBOY: Service door opens, and out she comes. Big fella either side of her. Broken nose, cheap suit, expensive cigar.
 BELLBOY: Not dragging her, mister. Escorting her. Like she was the guest of honour and the party didn't want her to leave.
@@ -478,9 +480,8 @@ SAL: Want I should give him another, Tony?
 BARTENDER: Nah. He's listening now. Ain't you listening?
 MICAH: I'm all ears. The rest of me's on the pavement.
 {not has_flag("asked_tony_eleanor"):
-    BARTENDER: A gumshoe with a rich dame's picture in his pocket. Who you looking for, pal?
-    MICAH: Eleanor Harrington.
-    BARTENDER: Yeah. That's what I figured.
+    MICAH: All I came in for was a word about Eleanor Harrington.
+    BARTENDER: Eleanor. Course it was.
 }
 BARTENDER: The dame. Eleanor. She's hot stuff, see? Too hot for this joint, too hot for this town.
 BARTENDER: She come in here a few nights back, scared out of her mind. I sent her to the nuns. The convent up on the North Side.
@@ -646,7 +647,7 @@ INSET: none_now
 - ELEANOR: You're bleeding. Hold still.
 THOUGHT: Her fingers on my split lip, cool as rain. Rose used to do that, a long time ago.
 MICAH: You do this for every man who comes looking for you?
-ELEANOR: Only the ones who get beaten on my account. It's a short list. You're at the top of it.
+ELEANOR: Only the ones who come looking for me bleeding. It's a short list. You're at the top of it.
 MICAH: The sister called you a Jezebel.
 ELEANOR: And what do you call me, Mr. Jones?
 MICAH: I haven't decided yet. I'm not sure I want to.
@@ -1172,7 +1173,7 @@ BARTENDER: That's everything, I swear it! On my mother!
 MICAH: Keep pressing on that shoulder, Tony, and get it looked at. Tell them you slipped.
 BARTENDER: Slipped. Sure. And when they ask me who I slipped on, Jones? I pour for these people. They'll ask.
 THOUGHT: The Gold Coast. The kitchen door. The delivery boys' key.
-THOUGHT: He knows my name. He knows my office, and Rose's street. Everybody on Halsted does. By tomorrow, so will everybody he pours for.
+THOUGHT: He knows my name. He knows my office, and Rose's street. By tomorrow, so will everybody he pours for.
 THOUGHT: The gun's still warm in my hand, and the street's right there.
 * [(Leave him bleeding, and go.)]
     THOUGHT: I shot a man tonight. My hand doesn't shake. That's what scares me.
@@ -1268,7 +1269,7 @@ HARRINGTON: And for whom? Look at her. She's a whore, Mr. Jones. A beautiful one
 ELEANOR: Micah...
 THOUGHT: One old man in a silk gown. My finger on the trigger, and Caleb's voice somewhere far behind it.
 {has_flag("confessed_tony") && not has_flag("can_spare"):
-    THOUGHT: No more blood, I promised him on my knees. I can't find the words that would keep it. Not with her on that bed.
+    THOUGHT: No more blood, I promised him on my knees. I can't find the words that would keep it. Not with her still in his keeping.
 }
 * [(Shoot him.)]
     ~ set_flag("shot_oldman")

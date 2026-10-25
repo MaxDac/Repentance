@@ -293,6 +293,12 @@ public class InkWalkTests
     [InlineData("epilogue", "ending_12,took_documents", "The grand jury read every name.", null)]
     [InlineData("epilogue", "ending_1,took_documents", "Caleb carried them into the Tribune himself", null)]
     [InlineData("epilogue", "ending_7,killed_tony,confessed_tony,shot_himself", "What else I know of it, I may not write.", "police")]
+    [InlineData("oldman_taunt", "confessed_tony", "I can't find the words that would keep it.", null)]
+    [InlineData("oldman_taunt", "confessed_tony,can_spare", "One old man in a silk gown.", "I can't find the words")]
+    [InlineData("alley", "", "All I came in for was a word about Eleanor Harrington.", null)]
+    [InlineData("alley", "asked_tony_eleanor", "She's hot stuff", "All I came in for")]
+    [InlineData("caleb_warn", "caleb_warned", "I said my piece, Micah.", "Sister Agatha telephoned")]
+    [InlineData("caleb_last", "caleb_last_said", "I'm already praying.", "France")]
     public void FlaggedLinesFollowTheDecisions(string knot, string flags, string expected, string? unexpected)
     {
         var set = flags.Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();

@@ -45,7 +45,8 @@ described here (other verbs, flavour lines) is left to the implementation.
 - Micah's goal is to get into the room Eleanor was staying in before she disappeared.
 - Micah arrives from State Street through the revolving door and walks into the lobby.
 - The conversations with the concierge and the bellboy stay as they were: the concierge has seen nothing.
-- Micah has to bribe the bellboy with $1 from his cash for his memory, then with
+- Micah has to bribe the bellboy with $1 from his cash for his memory (holding Eleanor's photograph out with it, so
+  the bellboy knows whom he means even if Micah never asked), then with
   another $1 to visit Eleanor's room: the second dollar lets him take the staff elevator up to the fifth-floor
   linen room next to Eleanor's room. Between the two dollars, Micah won't leave through the revolving door.
 - The bellboy's memory: on Tuesday night, having a smoke out back, he saw two big fellas (broken nose, cheap suit,
@@ -171,8 +172,8 @@ described here (other verbs, flavour lines) is left to the implementation.
   Sal and a doubled-up sprite for Micah, a thud on each kick), then steps back and the dialogue starts. The beating splits Micah's bottom lip: from here on his close-ups (the fire-escape two-portrait panel
   and the beaten panel) show a small dark-red cut across it.
 - Tony tells him that Eleanor is "hot stuff", that he sent her to a convent of nuns, and that he doesn't know
-  anything else. If Sal threw Micah out before he asked Tony about Eleanor, Tony first asks who he's looking for
-  ("A gumshoe with a rich dame's picture in his pocket."), so the name is on the table.
+  anything else. If Sal threw Micah out before he asked Tony about Eleanor, Micah names her from the pavement first
+  ("All I came in for was a word about Eleanor Harrington."), so the name is on the table.
 - Before leaving, Micah pushes up from his knees and forearms through a supported crouch to standing.
 - The player regains control in the alley and clicks the street exit to travel to the convent. A black caption,
   "The next evening", covers the jump: Micah sleeps off the beating and goes up the next evening (Saturday).

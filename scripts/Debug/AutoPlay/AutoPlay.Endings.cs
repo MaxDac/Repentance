@@ -940,6 +940,22 @@ public partial class AutoPlay
         await Shot("ending_prison_caleb_tony");
         await TheEnd("ending_12 (church)");
 
+        // "not yet" at the confession: Caleb still offers the cross, and the storm thought remembers the promise
+        int confessionOffers = _crossOffers;
+        Seed(killed.Where(f => f is not ("rose_wait" or "took_cross")), act3Items.Where(i => i != "cross"),
+            "Not yet", "(Accept the cross");
+        HeardLog = new List<string>();
+        _ = game.ChangeRoom("church_interior", "map");
+        await Until(() => gs.HasFlag("storm_confessed"), 300, 0.05);
+        Check(gs.HasFlag(Endings.ConfessedTony) && !gs.HasFlag(Endings.SurrenderedTony) && gs.HasItem("cross") &&
+              _crossOffers == confessionOffers + 1,
+            "confessed but not surrendered: Caleb offers the cross once more before Micah goes on");
+        Check(HeardLog.Any(l => l.Contains("I'm going, and I'm keeping it.")) &&
+              !HeardLog.Any(l => l.Contains("Too late to turn round now.")),
+            "the storm thought after the confession keeps Caleb's promise");
+        HeardLog = null;
+        await Until(() => !game.Busy, 30);
+
         // confessed, he may still pray his way past the old man; Caleb is waiting at the station, so ending 12 again
         var confessed = killed.Append(Endings.ConfessedTony).ToArray();
         Seed(confessed, act3Items, "Our Father");
