@@ -341,8 +341,8 @@ BELLBOY: Back door, Tuesday night, two big fellas either side of her. Nobody saw
 BELLBOY: Now you're speaking my language, mister.
 CUE: show_photo
 MICAH: One dollar. For your memory of this lady.
-CUE: pocket_photo
 BELLBOY: The dame in the picture? Tuesday night. Late. I was out back having a smoke I ain't allowed to have.
+CUE: pocket_photo
 BELLBOY: Service door opens, and out she comes. Big fella either side of her. Broken nose, cheap suit, expensive cigar.
 BELLBOY: Not dragging her, mister. Escorting her. Like she was the guest of honour and the party didn't want her to leave.
 MICAH: Who were they?
