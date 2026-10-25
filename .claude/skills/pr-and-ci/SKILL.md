@@ -1,6 +1,6 @@
 ---
 name: pr-and-ci
-description: Finish a Repentance change - commit, push, open the pull request, watch CI and fix failures until the ci-ok check is green. Use at the end of any implementation, or when asked to open a PR or fix CI.
+description: Finish a Repentance change - commit, push, open the pull request, watch CI and fix failures until the ci-ok check is green. Use at the end of every session that changes the repository (unasked), or when asked to open a PR or fix CI.
 ---
 
 # PR and CI
